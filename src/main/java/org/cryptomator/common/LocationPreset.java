@@ -19,22 +19,12 @@ public enum LocationPreset {
 
 	LOCAL("local");
 
-	final String name;
-	final List<Path> candidates;
+	private final String name;
+	private final List<Path> candidates;
 
 	LocationPreset(String name, String... candidates) {
 		this.name = name;
-
-		String userHome = System.getProperty("user.home");
-		this.candidates = Arrays.stream(candidates).map(c -> LocationPreset.resolveHomePath(userHome, c)).map(Path::of).toList();
-	}
-
-	private static String resolveHomePath(String home, String path) {
-		if (path.startsWith("~/")) {
-			return home + path.substring(1);
-		} else {
-			return path;
-		}
+		this.candidates = Arrays.stream(candidates).map(UserHome::resolve).map(Path::of).toList();
 	}
 
 	/**
@@ -46,9 +36,28 @@ public enum LocationPreset {
 		return candidates.stream().filter(Files::isDirectory).findFirst().orElse(null);
 	}
 
+	public String getDisplayName() {
+		return name;
+	}
+
 	@Override
 	public String toString() {
-		return name;
+		return getDisplayName();
+	}
+
+	//this contruct is needed, since static members are initialized after every enum member is initialized
+	//TODO: refactor this to normal class and use this also in different parts of the project
+	private static class UserHome {
+
+		private static final String USER_HOME = System.getProperty("user.home");
+
+		private static String resolve(String path) {
+			if (path.startsWith("~/")) {
+				return UserHome.USER_HOME + path.substring(1);
+			} else {
+				return path;
+			}
+		}
 	}
 
 }
