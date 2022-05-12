@@ -1,5 +1,15 @@
-# check parameters
-$clean = $args[0] -eq "fresh"
+Param(
+	[Parameter(Mandatory, HelpMessage="Please provide a name for the app")][string] $AppName,
+	[Parameter(Mandatory, HelpMessage="Please provide the glob pattern to identify the main jar")][string] $MainJarGlob,
+	[Parameter(Mandatory, HelpMessage="Please provide the module- and main class path to start the app")][string] $ModuleAndMainClass,
+	[Parameter(Mandatory, HelpMessage="Please provide the windows upgrade uuid for the installer")][string] $UpgradeUUID,
+	[Parameter(Mandatory, HelpMessage="Please provide the name of the vendor")][string] $Vendor,
+	[Parameter(Mandatory, HelpMessage="Please provide the starting year for the copyright notice")][int] $CopyrightStartYear,
+	[Parameter(Mandatory, HelpMessage="Please provide a help url")][string] $HelpUrl,
+	[Parameter(Mandatory, HelpMessage="Please provide an update url")][string] $UpdateUrl,
+	[Parameter(Mandatory, HelpMessage="Please provide an about url")][string] $AboutUrl,
+	[bool] $clean
+)
 
 # check preconditions
 if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
@@ -24,12 +34,11 @@ Write-Output "`$revisionNo=$revisionNo"
 Write-Output "`$buildDir=$buildDir"
 Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
-$vendor = "Skymatic GmbH"
-$copyright = "(C) 2016 - 2022 Skymatic GmbH"
+$copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
 &mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
-Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\..\target\mods"
+Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
 $runtimeImagePath = '.\runtime'
@@ -48,7 +57,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	--strip-debug `
 	--compress=1
 
-$appPath = '.\Cryptomator'
+$appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
 }
@@ -60,27 +69,27 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--runtime-image runtime `
 	--input ../../target/libs `
 	--module-path ../../target/mods `
-	--module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator `
+	--module $ModuleAndMainClass `
 	--dest . `
-	--name Cryptomator `
-	--vendor $vendor `
+	--name $AppName `
+	--vendor $Vendor `
 	--copyright $copyright `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
 	--app-version "$semVerNo.$revisionNo" `
 	--java-options "-Dfile.encoding=`"utf-8`"" `
-	--java-options "-Dcryptomator.logDir=`"~/AppData/Roaming/Cryptomator`"" `
-	--java-options "-Dcryptomator.pluginDir=`"~/AppData/Roaming/Cryptomator/Plugins`"" `
-	--java-options "-Dcryptomator.settingsPath=`"~/AppData/Roaming/Cryptomator/settings.json`"" `
-	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/Cryptomator/ipc.socket`"" `
-	--java-options "-Dcryptomator.keychainPath=`"~/AppData/Roaming/Cryptomator/keychain.json`"" `
-	--java-options "-Dcryptomator.mountPointsDir=`"~/Cryptomator`"" `
-	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"Cryptomator`"" `
+	--java-options "-Dcryptomator.logDir=`"~/AppData/Roaming/$AppName`"" `
+	--java-options "-Dcryptomator.pluginDir=`"~/AppData/Roaming/$AppName/Plugins`"" `
+	--java-options "-Dcryptomator.settingsPath=`"~/AppData/Roaming/$AppName/settings.json`"" `
+	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/$AppName/ipc.socket`"" `
+	--java-options "-Dcryptomator.keychainPath=`"~/AppData/Roaming/$AppName/keychain.json`"" `
+	--java-options "-Dcryptomator.mountPointsDir=`"~/$AppName`"" `
+	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
-	--icon resources/Cryptomator.ico
+	--icon resources/$AppName.ico
 
 #Create RTF license for msi
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party `
@@ -93,33 +102,29 @@ if ($clean -and (Test-Path -Path $appPath)) {
  "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # patch app dir
-Copy-Item "contrib\*" -Destination "Cryptomator"
-attrib -r "Cryptomator\Cryptomator.exe"
-
-$aboutUrl="https://cryptomator.org"
-$updateUrl="https://cryptomator.org/downloads/"
-$helpUrl="https://cryptomator.org/contact/"
+Copy-Item "contrib\*" -Destination "$AppName"
+attrib -r "$AppName\$AppName.exe"
 
 # create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
 	--type msi `
-	--win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775 `
-	--app-image Cryptomator `
+	--win-upgrade-uuid $UpgradeUUID `
+	--app-image $AppName `
 	--dest installer `
-	--name Cryptomator `
-	--vendor $vendor `
+	--name $AppName `
+	--vendor $Vendor `
 	--copyright $copyright `
 	--app-version "$semVerNo" `
 	--win-menu `
 	--win-dir-chooser `
 	--win-shortcut-prompt `
-	--win-update-url $updateUrl `
-	--win-menu-group Cryptomator `
+	--win-menu-group $AppName `
 	--resource-dir resources `
-	--about-url $aboutUrl `
 	--license-file resources/license.rtf `
+	--win-update-url $UpdateUrl `
+	--about-url $AboutUrl `
 	--file-associations resources/FAvaultFile.properties
 
 #Create RTF license for bundle
@@ -140,14 +145,14 @@ Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 
 # copy MSI to bundle resources
-Copy-Item ".\installer\Cryptomator-*.msi" -Destination ".\bundle\resources\Cryptomator.msi"
+Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi"
 
 # create bundle including winfsp
 & "$env:WIX\bin\candle.exe" .\bundle\bundleWithWinfsp.wxs -ext WixBalExtension -out bundle\ `
 	-dBundleVersion="$semVerNo.$revisionNo" `
-	-dBundleVendor="$vendor" `
+	-dBundleVendor="$Vendor" `
 	-dBundleCopyright="$copyright" `
-	-dAboutUrl="$aboutUrl" `
-	-dHelpUrl="$helpUrl" `
-	-dUpdateUrl="$updateUrl"
-& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\Cryptomator-Installer.exe
+	-dAboutUrl="$AboutUrl" `
+	-dHelpUrl="$HelpUrl" `
+	-dUpdateUrl="$UpdateUrl"
+& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\$AppName-Installer.exe
