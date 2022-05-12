@@ -26,7 +26,7 @@ public class ObservedLocationPresets {
 
 	@Inject
 	public ObservedLocationPresets() {
-		this.iclouddriveLocation = new SimpleObjectProperty<>(LocationPreset.ICLOUD.existingPath());
+		this.iclouddriveLocation = new SimpleObjectProperty<>(LocationPreset.ICLOUDDRIVE.existingPath());
 		this.dropboxLocation = new SimpleObjectProperty<>(LocationPreset.DROPBOX.existingPath());
 		this.gdriveLocation = new SimpleObjectProperty<>(LocationPreset.GDRIVE.existingPath());
 		this.onedriveLocation = new SimpleObjectProperty<>(LocationPreset.ONEDRIVE.existingPath());

@@ -11,7 +11,7 @@ import java.util.List;
 public enum LocationPreset {
 
 	DROPBOX("Dropbox", "~/Dropbox"),
-	ICLOUD("iCloud Drive", "~/Library/Mobile Documents/com~apple~CloudDocs", "~/iCloudDrive"),
+	ICLOUDDRIVE("iCloud Drive", "~/Library/Mobile Documents/com~apple~CloudDocs", "~/iCloudDrive"),
 	GDRIVE("Google Drive", "~/Google Drive/My Drive", "~/Google Drive"),
 	MEGA("MEGA", "~/MEGA"),
 	ONEDRIVE("OneDrive", "~/OneDrive"),
@@ -43,12 +43,7 @@ public enum LocationPreset {
 	 * @return the first existing path or null, if none exists.
 	 */
 	public Path existingPath() {
-		for (Path candidate : candidates) {
-			if (Files.isDirectory(candidate)) {
-				return candidate;
-			}
-		}
-		return null;
+		return candidates.stream().filter(Files::isDirectory).findFirst().orElse(null);
 	}
 
 	@Override
