@@ -1,6 +1,7 @@
 Param(
 	[Parameter(Mandatory, HelpMessage="Please provide a name for the app")][string] $AppName,
 	[Parameter(Mandatory, HelpMessage="Please provide the glob pattern to identify the main jar")][string] $MainJarGlob,
+	[Parameter(Mandatory, HelpMessage="Please provide the module- and main class path to start the app")][string] $ModuleAndMainClass,
 	[Parameter(Mandatory, HelpMessage="Please provide the windows upgrade uuid for the installer")][string] $UpgradeUUID,
 	[Parameter(Mandatory, HelpMessage="Please provide the name of the vendor")][string] $Vendor,
 	[Parameter(Mandatory, HelpMessage="Please provide the starting year for the copyright notice")][int] $CopyrightStartYear,
@@ -68,7 +69,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--runtime-image runtime `
 	--input ../../target/libs `
 	--module-path ../../target/mods `
-	--module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator `
+	--module $ModuleAndMainClass `
 	--dest . `
 	--name $AppName `
 	--vendor $Vendor `
@@ -109,7 +110,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
 	--type msi `
-	--win-upgrade-uuid  $UpgradeUUID `
+	--win-upgrade-uuid $UpgradeUUID `
 	--app-image $AppName `
 	--dest installer `
 	--name $AppName `
