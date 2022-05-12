@@ -1,23 +1,15 @@
 package org.cryptomator.ui.addvaultwizard;
 
+import org.cryptomator.common.LocationPreset;
+
 import javax.inject.Inject;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @AddVaultWizardScoped
-public class LocationPresets {
-
-	private static final String USER_HOME = System.getProperty("user.home");
-	private static final String[] ICLOUDDRIVE_LOCATIONS = {"~/Library/Mobile Documents/iCloud~com~setolabs~Cryptomator/Documents", "~/iCloudDrive/iCloud~com~setolabs~Cryptomator"};
-	private static final String[] DROPBOX_LOCATIONS = {"~/Dropbox"};
-	private static final String[] GDRIVE_LOCATIONS = {"~/Google Drive/My Drive", "~/Google Drive"};
-	private static final String[] ONEDRIVE_LOCATIONS = {"~/OneDrive"};
-	private static final String[] MEGA_LOCATIONS = {"~/MEGA"};
-	private static final String[] PCLOUD_LOCATIONS = {"~/pCloudDrive"};
+public class ObservedLocationPresets {
 
 	private final ReadOnlyObjectProperty<Path> iclouddriveLocation;
 	private final ReadOnlyObjectProperty<Path> dropboxLocation;
@@ -33,37 +25,19 @@ public class LocationPresets {
 	private final BooleanBinding foundPcloud;
 
 	@Inject
-	public LocationPresets() {
-		this.iclouddriveLocation = new SimpleObjectProperty<>(existingWritablePath(ICLOUDDRIVE_LOCATIONS));
-		this.dropboxLocation = new SimpleObjectProperty<>(existingWritablePath(DROPBOX_LOCATIONS));
-		this.gdriveLocation = new SimpleObjectProperty<>(existingWritablePath(GDRIVE_LOCATIONS));
-		this.onedriveLocation = new SimpleObjectProperty<>(existingWritablePath(ONEDRIVE_LOCATIONS));
-		this.megaLocation = new SimpleObjectProperty<>(existingWritablePath(MEGA_LOCATIONS));
-		this.pcloudLocation = new SimpleObjectProperty<>(existingWritablePath(PCLOUD_LOCATIONS));
+	public ObservedLocationPresets() {
+		this.iclouddriveLocation = new SimpleObjectProperty<>(LocationPreset.ICLOUD.existingPath());
+		this.dropboxLocation = new SimpleObjectProperty<>(LocationPreset.DROPBOX.existingPath());
+		this.gdriveLocation = new SimpleObjectProperty<>(LocationPreset.GDRIVE.existingPath());
+		this.onedriveLocation = new SimpleObjectProperty<>(LocationPreset.ONEDRIVE.existingPath());
+		this.megaLocation = new SimpleObjectProperty<>(LocationPreset.MEGA.existingPath());
+		this.pcloudLocation = new SimpleObjectProperty<>(LocationPreset.PCLOUD.existingPath());
 		this.foundIclouddrive = iclouddriveLocation.isNotNull();
 		this.foundDropbox = dropboxLocation.isNotNull();
 		this.foundGdrive = gdriveLocation.isNotNull();
 		this.foundOnedrive = onedriveLocation.isNotNull();
 		this.foundMega = megaLocation.isNotNull();
 		this.foundPcloud = pcloudLocation.isNotNull();
-	}
-
-	private static Path existingWritablePath(String... candidates) {
-		for (String candidate : candidates) {
-			Path path = Paths.get(resolveHomePath(candidate));
-			if (Files.isDirectory(path)) {
-				return path;
-			}
-		}
-		return null;
-	}
-
-	private static String resolveHomePath(String path) {
-		if (path.startsWith("~/")) {
-			return USER_HOME + path.substring(1);
-		} else {
-			return path;
-		}
 	}
 
 	/* Observables */
