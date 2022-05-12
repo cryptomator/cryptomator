@@ -1,6 +1,7 @@
 Param(
 	[Parameter(Mandatory, HelpMessage="Please provide a name for the app")][string] $AppName,
-	[Parameter(Mandatory, HelpMessage="Please provide the windows upgrade uuid for the app")][string] $UpgradeUUID,
+	[Parameter(Mandatory, HelpMessage="Please provide the glob pattern to identify the main jar")][string] $MainJarGlob,
+	[Parameter(Mandatory, HelpMessage="Please provide the windows upgrade uuid for the installer")][string] $UpgradeUUID,
 	[Parameter(Mandatory, HelpMessage="Please provide the name of the vendor")][string] $Vendor,
 	[Parameter(Mandatory, HelpMessage="Please provide the starting year for the copyright notice")][int] $CopyrightStartYear,
 	[Parameter(Mandatory, HelpMessage="Please provide a help url")][string] $HelpUrl,
@@ -36,7 +37,7 @@ $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
 &mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
-Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\..\target\mods"
+Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
 $runtimeImagePath = '.\runtime'
