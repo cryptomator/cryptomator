@@ -86,7 +86,7 @@
     <!-- Non-Opening ProgID -->
     <DirectoryRef Id="INSTALLDIR">
         <Component Win64="yes" Id="nonStartingProgID" >
-          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.JpAppName)-Vault.ico" Name="$(var.JpAppName)-Vault.ico"></File>
+          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileC9rC9s)" Name="$(var.IconFileC9rC9s)"></File>
           <ProgId Id="$(var.JpAppName).Encrypted.1" Description="$(var.JpAppName) Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
             <Extension Id="c9r" Advertise="no" ContentType="$(var.ProgIdContentType)">
               <MIME ContentType="$(var.ProgIdContentType)" Default="yes"></MIME>

@@ -31,6 +31,7 @@ Default value is `yes`.
 -->
 
 <!-- Non-opening ProgID settings-->
+<?define IconFileC9rC9s= "Cryptomator-Vault.ico" ?>
 <?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
 
 <!-- Close Application util -->
