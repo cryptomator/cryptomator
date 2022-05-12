@@ -13,6 +13,8 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.ResourceBundle;
 
+import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+
 @MainWindowScoped
 public class VaultDetailMissingVaultController implements FxController {
 
@@ -45,7 +47,7 @@ public class VaultDetailMissingVaultController implements FxController {
 		// copied from ChooseExistingVaultController class
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(resourceBundle.getString("addvaultwizard.existing.filePickerMimeDesc"), CRYPTOMATOR_FILENAME_GLOB));
 		File masterkeyFile = fileChooser.showOpenDialog(window);
 		if (masterkeyFile != null) {
 			vault.get().getVaultSettings().path().setValue(masterkeyFile.toPath().toAbsolutePath().getParent());
