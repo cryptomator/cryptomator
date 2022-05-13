@@ -12,9 +12,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.keychain.KeychainModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
-import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.frontend.webdav.WebDavServer;
@@ -25,16 +23,13 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
-import javafx.collections.ObservableList;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -93,7 +88,7 @@ public abstract class CommonsModule {
 	@Singleton
 	static ScheduledExecutorService provideScheduledExecutorService(ShutdownHook shutdownHook) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
-		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_SCHEDULER_THREADS, r -> {
+		ScheduledExecutorService executorService = new CatchingExecutors.CatchingScheduledThreadPoolExecutor(NUM_SCHEDULER_THREADS, r -> {
 			String name = String.format("App Scheduled Executor %02d", threadNumber.getAndIncrement());
 			Thread t = new Thread(r);
 			t.setName(name);
@@ -110,7 +105,7 @@ public abstract class CommonsModule {
 	@Singleton
 	static ExecutorService provideExecutorService(ShutdownHook shutdownHook) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
-		ExecutorService executorService = new ThreadPoolExecutor(NUM_CORE_BG_THREADS, Integer.MAX_VALUE, BG_THREAD_KEEPALIVE_SECONDS, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
+		ExecutorService executorService = new CatchingExecutors.CatchingThreadPoolExecutor(NUM_CORE_BG_THREADS, Integer.MAX_VALUE, BG_THREAD_KEEPALIVE_SECONDS, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
 			String name = String.format("App Background Thread %03d", threadNumber.getAndIncrement());
 			Thread t = new Thread(r);
 			t.setName(name);
