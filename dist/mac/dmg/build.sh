@@ -75,6 +75,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/${APP_NAME}/Plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/${APP_NAME}/settings.json\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/${APP_NAME}/ipc.socket\"" \
+    --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"${APP_NAME}\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \
