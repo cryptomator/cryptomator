@@ -1,6 +1,6 @@
 #Requires -RunAsAdministrator
 Param(
-	[Parameter(Mandatory, HelpMessage="Please provide an alias for 127.0.0.1")][string] $LoopbackAlias,
+	[Parameter(Mandatory, HelpMessage="Please provide an alias for 127.0.0.1")][string] $LoopbackAlias
 )
 
 # Adds an alias for 127.0.0.1 to the hosts file
@@ -55,7 +55,7 @@ function Edit-ProviderOrder {
 }
 
 
-Add-AliasToHost $LoopbackAlias,
+Add-AliasToHost $LoopbackAlias
 Write-Output 'Ensured alias exists in hosts file'
 
 Set-WebDAVFileSizeLimit
