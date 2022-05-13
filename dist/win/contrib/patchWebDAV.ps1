@@ -1,10 +1,16 @@
 #Requires -RunAsAdministrator
+Param(
+	[Parameter(Mandatory, HelpMessage="Please provide an alias for 127.0.0.1")][string] $LoopbackAlias,
+)
 
-# Adds for address 127.0.0.1 the 'cryptomator-vault' alias to the hosts file
+# Adds an alias for 127.0.0.1 to the hosts file
 function Add-AliasToHost {
+    param (
+        [string]$LoopbackAlias
+    )
     $sysdir = [Environment]::SystemDirectory
     $hostsFile = "$sysdir\drivers\etc\hosts"
-    $aliasLine = '127.0.0.1 cryptomator-vault'
+    $aliasLine = "127.0.0.1 $LoopbackAlias"
 
     foreach ($line in Get-Content $hostsFile) {
         if ($line -eq $aliasLine){
@@ -49,7 +55,7 @@ function Edit-ProviderOrder {
 }
 
 
-Add-AliasToHost
+Add-AliasToHost $LoopbackAlias,
 Write-Output 'Ensured alias exists in hosts file'
 
 Set-WebDAVFileSizeLimit
