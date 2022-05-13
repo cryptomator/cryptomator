@@ -1,0 +1,63 @@
+name: Report Download Stats
+
+on:
+  schedule:
+    - cron: '0/15 * * * *' # run every 15 min - don't forget to adjust the "interval" in the json sent to the metrics endpoint
+
+jobs:
+  report-download-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get download count of latest releases
+        id: get-stats
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const query = `query($owner:String!, $name:String!) {
+              repository(owner:$owner, name:$name){
+                releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC}) {
+                  nodes {
+                    isPrerelease
+                    tagName
+                    releaseAssets(first: 20) {
+                      nodes {
+                        name
+                        downloadCount
+                      }
+                    }
+                  }
+                }
+              }
+            }`;
+            const variables = {
+              owner: context.repo.owner,
+              name: context.repo.repo
+            }
+            return await github.graphql(query, variables)
+      - name: Transform Results
+        id: transform-stats
+        run: |
+          TIME=$(($(date +%s) / $INTERVAL * $INTERVAL))
+          echo ${JSON_DATA} | jq --arg TIME "$TIME" --arg INTERVAL "$INTERVAL" -c '.repository.releases.nodes[] | select(.isPrerelease == false) | .tagName as $tagName | .releaseAssets.nodes[] | {filename: .name, downloads: .downloadCount, release: $tagName, time: ($TIME|tonumber), interval: ($INTERVAL|tonumber)}' > input.json
+
+          jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("_amd64.deb")) | {name: "github.releases.downloads", tags: ["file=deb", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-x64.msi")) | {name: "github.releases.downloads", tags: ["file=msi", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-x64.exe")) | {name: "github.releases.downloads", tags: ["file=exe", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-arm64.dmg")) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith(".dmg")) | select(.filename|endswith("-arm64.dmg")|not) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+
+          RESULT=$(jq -s -c "." output.json)
+          echo "::set-output name=result::${RESULT}"
+        env:
+          INTERVAL: 900
+          JSON_DATA: ${{ steps.get-stats.outputs.result }}
+      - name: Upload Results
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://graphite-us-central1.grafana.net/metrics'
+          method: 'POST'
+          contentType: 'application/json'
+          bearerToken: ${{ secrets.GRAFANA_GRAPHITE_TOKEN }}
+          data: ${{ steps.transform-stats.outputs.result }}
+        continue-on-error: true # currently there seems to be a problem with the metrics endpoint, failing every now and then
