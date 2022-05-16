@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
+import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+
 @ChooseMasterkeyFileScoped
 public class ChooseMasterkeyFileController implements FxController {
 
@@ -46,7 +48,7 @@ public class ChooseMasterkeyFileController implements FxController {
 		LOG.trace("proceed()");
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("unlock.chooseMasterkey.filePickerTitle"));
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(resourceBundle.getString("unlock.chooseMasterkey.filePickerMimeDesc"), CRYPTOMATOR_FILENAME_GLOB));
 		File masterkeyFile = fileChooser.showOpenDialog(window);
 		if (masterkeyFile != null) {
 			LOG.debug("Chose masterkey file: {}", masterkeyFile);

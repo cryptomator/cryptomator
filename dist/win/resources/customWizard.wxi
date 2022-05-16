@@ -91,7 +91,7 @@
                     <Condition Action="show">FOUNDRUNNINGAPP</Condition>
                 </Control>
                 <Control Id="DescriptionReason2" Type="Text" X="135" Y="170" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Hidden="yes" >
-					<Text>Cryptomator was still running during installation.</Text>
+					<Text>Application to update was still running during installation.</Text>
                     <Condition Action="show">FOUNDRUNNINGAPP</Condition>
                 </Control>
             </Dialog>

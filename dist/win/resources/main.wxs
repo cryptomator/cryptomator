@@ -86,12 +86,12 @@
     <!-- Non-Opening ProgID -->
     <DirectoryRef Id="INSTALLDIR">
         <Component Win64="yes" Id="nonStartingProgID" >
-          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\Cryptomator-Vault.ico" Name="Cryptomator-Vault.ico"></File>
-          <ProgId Id="Cryptomator.Encrypted.1" Description="Cryptomator Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
-            <Extension Id="c9r" Advertise="no" ContentType="application/vnd.cryptomator.encrypted">
-              <MIME ContentType="application/vnd.cryptomator.encrypted" Default="yes"></MIME>
+          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileC9rC9s)" Name="$(var.IconFileC9rC9s)"></File>
+          <ProgId Id="$(var.JpAppName).Encrypted.1" Description="$(var.JpAppName) Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
+            <Extension Id="c9r" Advertise="no" ContentType="$(var.ProgIdContentType)">
+              <MIME ContentType="$(var.ProgIdContentType)" Default="yes"></MIME>
             </Extension>
-            <Extension Id="c9s" Advertise="no" ContentType="application/vnd.cryptomator.encrypted"/>
+            <Extension Id="c9s" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
           </ProgId>
         </Component>
     </DirectoryRef>
@@ -130,12 +130,12 @@
     <!-- Running App detection and exit -->
     <Property Id="FOUNDRUNNINGAPP" Admin="yes"/>
     <util:CloseApplication
-      Id="CloseCryptomator"
-      Target="cryptomator.exe"
+      Target="$(var.CloseApplicationTarget)"
+      Id="Close$(var.JpAppName)"
       CloseMessage="no"
       RebootPrompt="no"
       PromptToContinue="yes"
-      Description="A running instance of Cryptomator is found. Please close it to continue."
+      Description="A running instance of $(var.JpAppName) is found. Please close it to continue."
       Property="FOUNDRUNNINGAPP"
       >
     </util:CloseApplication>

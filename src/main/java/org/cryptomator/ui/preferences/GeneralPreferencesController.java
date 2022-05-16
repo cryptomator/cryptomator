@@ -19,8 +19,8 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -32,7 +32,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Optional<AutoStartProvider> autoStartProvider;
 	private final Application application;
 	private final Environment environment;
-	private final Set<KeychainAccessProvider> keychainAccessProviders;
+	private final List<KeychainAccessProvider> keychainAccessProviders;
 	private final FxApplicationWindows appWindows;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
@@ -41,7 +41,7 @@ public class GeneralPreferencesController implements FxController {
 	public ToggleGroup nodeOrientation;
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, Application application, Environment environment, FxApplicationWindows appWindows) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, Application application, Environment environment, FxApplicationWindows appWindows) {
 		this.window = window;
 		this.settings = settings;
 		this.autoStartProvider = autoStartProvider;
@@ -115,9 +115,9 @@ public class GeneralPreferencesController implements FxController {
 
 	private static class KeychainProviderClassNameConverter extends StringConverter<KeychainAccessProvider> {
 
-		private final Set<KeychainAccessProvider> keychainAccessProviders;
+		private final List<KeychainAccessProvider> keychainAccessProviders;
 
-		public KeychainProviderClassNameConverter(Set<KeychainAccessProvider> keychainAccessProviders) {
+		public KeychainProviderClassNameConverter(List<KeychainAccessProvider> keychainAccessProviders) {
 			this.keychainAccessProviders = keychainAccessProviders;
 		}
 

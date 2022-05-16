@@ -66,6 +66,8 @@
 	</content_rating>
 
 	<releases>
+		<release date="2022-05-03" version="1.6.10"/>
+		<release date="2022-04-27" version="1.6.9"/>
 		<release date="2022-03-30" version="1.6.8"/>
 		<release date="2021-12-16" version="1.6.5"/>
 	</releases>

@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
+import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+
 @AddVaultWizardScoped
 public class ChooseExistingVaultController implements FxController {
 
@@ -73,7 +75,7 @@ public class ChooseExistingVaultController implements FxController {
 	public void chooseFileAndNext() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Vault", "*.cryptomator"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(resourceBundle.getString("addvaultwizard.existing.filePickerMimeDesc"), CRYPTOMATOR_FILENAME_GLOB));
 		File masterkeyFile = fileChooser.showOpenDialog(window);
 		if (masterkeyFile != null) {
 			vaultPath.setValue(masterkeyFile.toPath().toAbsolutePath().getParent());

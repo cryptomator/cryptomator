@@ -46,7 +46,7 @@ public class CreateNewVaultLocationController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
 	private final Lazy<Scene> choosePasswordScene;
-	private final LocationPresets locationPresets;
+	private final ObservedLocationPresets locationPresets;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
 	private final ResourceBundle resourceBundle;
@@ -71,7 +71,7 @@ public class CreateNewVaultLocationController implements FxController {
 	public FontAwesome5IconView badLocation;
 
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, ObservedLocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
 		this.choosePasswordScene = choosePasswordScene;
@@ -197,7 +197,7 @@ public class CreateNewVaultLocationController implements FxController {
 		return validVaultPath.get();
 	}
 
-	public LocationPresets getLocationPresets() {
+	public ObservedLocationPresets getObservedLocationPresets() {
 		return locationPresets;
 	}
 
