@@ -94,10 +94,10 @@ public class VaultListManager {
 
 	private Vault create(VaultSettings vaultSettings) {
 		VaultComponent.Builder compBuilder = vaultComponentBuilder.vaultSettings(vaultSettings);
+		VaultConfigCache wrapper = new VaultConfigCache(vaultSettings);
+		compBuilder.vaultConfigCache(wrapper); //first set the wrapper in the builder, THEN try to load config
 		try {
 			VaultState.Value vaultState = determineVaultState(vaultSettings.path().get());
-			VaultConfigCache wrapper = new VaultConfigCache(vaultSettings);
-			compBuilder.vaultConfigCache(wrapper); //first set the wrapper in the builder, THEN try to load config
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 			}
