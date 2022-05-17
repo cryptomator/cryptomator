@@ -16,7 +16,7 @@ shift "$((OPTIND-1))"
 
 # prepare working dir
 cd $(dirname $0)
-rm -rf runtime dmg
+rm -rf runtime dmg *.app *.dmg
 
 # set variables
 APP_NAME="Cryptomator"
