@@ -19,22 +19,13 @@ public interface VaultComponent {
 
 	Vault vault();
 
-	@Subcomponent.Builder
-	interface Builder {
+	@Subcomponent.Factory
+	interface Factory {
 
-		@BindsInstance
-		Builder vaultSettings(VaultSettings vaultSettings);
+		VaultComponent create(@BindsInstance VaultSettings vaultSettings, //
+							  @BindsInstance VaultConfigCache configCache, //
+							  @BindsInstance VaultState.Value vaultState, //
+							  @BindsInstance @Nullable @Named("lastKnownException") Exception initialErrorCause);
 
-		@BindsInstance
-		Builder vaultConfigCache(VaultConfigCache configCache);
-
-		@BindsInstance
-		Builder initialVaultState(VaultState.Value vaultState);
-
-		@BindsInstance
-		Builder initialErrorCause(@Nullable @Named("lastKnownException") Exception initialErrorCause);
-
-		VaultComponent build();
 	}
-
 }
