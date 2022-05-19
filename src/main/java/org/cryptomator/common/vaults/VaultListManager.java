@@ -38,15 +38,15 @@ public class VaultListManager {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 
 	private final AutoLocker autoLocker;
-	private final VaultComponent.Builder vaultComponentBuilder;
+	private final VaultComponent.Factory vaultComponentFactory;
 	private final ObservableList<Vault> vaultList;
 	private final String defaultVaultName;
 
 	@Inject
-	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Builder vaultComponentBuilder, ResourceBundle resourceBundle, Settings settings) {
+	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Factory vaultComponentFactory, ResourceBundle resourceBundle, Settings settings) {
 		this.vaultList = vaultList;
 		this.autoLocker = autoLocker;
-		this.vaultComponentBuilder = vaultComponentBuilder;
+		this.vaultComponentFactory = vaultComponentFactory;
 		this.defaultVaultName = resourceBundle.getString("defaults.vault.vaultName");
 
 		addAll(settings.getDirectories());
@@ -93,21 +93,17 @@ public class VaultListManager {
 	}
 
 	private Vault create(VaultSettings vaultSettings) {
-		VaultComponent.Builder compBuilder = vaultComponentBuilder.vaultSettings(vaultSettings);
-		VaultConfigCache wrapper = new VaultConfigCache(vaultSettings);
-		compBuilder.vaultConfigCache(wrapper); //first set the wrapper in the builder, THEN try to load config
+		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
-			VaultState.Value vaultState = determineVaultState(vaultSettings.path().get());
+			var vaultState = determineVaultState(vaultSettings.path().get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 			}
-			compBuilder.initialVaultState(vaultState);
+			return vaultComponentFactory.create(vaultSettings, wrapper, vaultState, null).vault();
 		} catch (IOException e) {
 			LOG.warn("Failed to determine vault state for " + vaultSettings.path().get(), e);
-			compBuilder.initialVaultState(ERROR);
-			compBuilder.initialErrorCause(e);
+			return vaultComponentFactory.create(vaultSettings, wrapper, ERROR, e).vault();
 		}
-		return compBuilder.build().vault();
 	}
 
 	public static VaultState.Value redetermineVaultState(Vault vault) {

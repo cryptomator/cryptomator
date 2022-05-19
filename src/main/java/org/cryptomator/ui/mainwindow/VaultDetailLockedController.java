@@ -21,13 +21,13 @@ public class VaultDetailLockedController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final FxApplicationWindows appWindows;
-	private final VaultOptionsComponent.Builder vaultOptionsWindow;
+	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final KeychainManager keychain;
 	private final Stage mainWindow;
 	private final BooleanExpression passwordSaved;
 
 	@Inject
-	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows,  VaultOptionsComponent.Builder vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
+	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultOptionsComponent.Factory vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.vaultOptionsWindow = vaultOptionsWindow;
@@ -47,12 +47,12 @@ public class VaultDetailLockedController implements FxController {
 
 	@FXML
 	public void showVaultOptions() {
-		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
+		vaultOptionsWindow.create(vault.get()).showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
 	}
 
 	@FXML
 	public void showKeyVaultOptions() {
-		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow(SelectedVaultOptionsTab.KEY);
+		vaultOptionsWindow.create(vault.get()).showVaultOptionsWindow(SelectedVaultOptionsTab.KEY);
 	}
 
 	/* Getter/Setter */
