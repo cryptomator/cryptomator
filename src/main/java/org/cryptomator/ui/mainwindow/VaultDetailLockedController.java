@@ -21,7 +21,7 @@ public class VaultDetailLockedController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final FxApplicationWindows appWindows;
-	private final VaultOptionsComponent.Factory vaultOptionsWindow; //TODO: use Factory
+	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final KeychainManager keychain;
 	private final Stage mainWindow;
 	private final BooleanExpression passwordSaved;
