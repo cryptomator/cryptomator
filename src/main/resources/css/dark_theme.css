@@ -42,6 +42,8 @@
 	GRAY_8: #D3DCE1;
 	GRAY_9: #EDF3F7;
 
+	GREEN_3: PRIMARY_D1;
+	GREEN_5: PRIMARY;
 	RED_5: #E74C3C;
 	ORANGE_5: #E67E22;
 	YELLOW_5: #F1C40F;
@@ -393,7 +395,6 @@
 	-fx-background-color: MUTED_BG;
 }
 
-
 /* Note: These values below are kinda random such that it looks ok. I'm pretty sure there is room for improvement. Additionally, fx-text-fill does not work*/
 .badge-debug {
 	-fx-font-family: 'Open Sans Bold';
@@ -427,11 +428,11 @@
 }
 
 .password-strength-indicator.strength-3 .segment.active {
-	-fx-background-color: PRIMARY;
+	-fx-background-color: GREEN_5;
 }
 
 .password-strength-indicator.strength-4 .segment.active {
-	-fx-background-color: PRIMARY_D1;
+	-fx-background-color: GREEN_3;
 }
 
 /*******************************************************************************
