@@ -832,22 +832,12 @@
 	-fx-background-color: PROGRESS_BAR_BG;
 	-fx-background-radius: 4px;
 }
+
 /*******************************************************************************
  *                                                                             *
  * I/O Statistics                                                              *
  *                                                                             *
  ******************************************************************************/
-.chart {
-	-fx-padding: 10px;
-}
-
-.chart-plot-background {
-	-fx-background-color: MAIN_BG;
-	-fx-padding: 20px;
-}
-
-/* content */
-
 
 .cache-arc-background {
 	-fx-fill: transparent;
@@ -893,6 +883,7 @@
 .default-color0.chart-series-area-line {
 	-fx-stroke: PRIMARY;
 }
+
 .default-color0.chart-series-area-fill {
 	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
 	-fx-stroke: transparent;

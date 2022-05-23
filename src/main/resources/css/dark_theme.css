@@ -834,6 +834,7 @@
 	-fx-background-color: PROGRESS_BAR_BG;
 	-fx-background-radius: 4px;
 }
+
 /*******************************************************************************
  *                                                                             *
  * I/O Statistics                                                              *
@@ -884,6 +885,7 @@
 .default-color0.chart-series-area-line {
 	-fx-stroke: PRIMARY;
 }
+
 .default-color0.chart-series-area-fill {
 	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
 	-fx-stroke: transparent;
