@@ -7,6 +7,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:id="titleBar"
@@ -20,7 +22,9 @@
 		<Insets bottom="6" left="12" right="12" top="6"/>
 	</padding>
 	<children>
-		<Label text="CRYPTOMATOR"/>
+		<ImageView HBox.hgrow="ALWAYS" fitHeight="14" preserveRatio="true" cache="true">
+			<Image url="@../img/title-logo.png"/>
+		</ImageView>
 
 		<Region HBox.hgrow="ALWAYS"/>
 

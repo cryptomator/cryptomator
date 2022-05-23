@@ -16,10 +16,6 @@
 	src: url('opensans-bold.ttf');
 }
 
-@font-face {
-	src: url('quicksand-bold.ttf');
-}
-
 /*******************************************************************************
  *                                                                             *
  * Root Styling & Colors                                                       *
@@ -176,14 +172,6 @@
 
 .main-window .title {
 	-fx-background-color: TITLE_BG;
-}
-
-.main-window .title .label {
-	-fx-font-family: 'Quicksand';
-	-fx-font-size: 16px;
-	-fx-font-style: normal;
-	-fx-font-weight: 700;
-	-fx-text-fill: TITLE_TEXT_FILL;
 }
 
 .main-window .title .button {
