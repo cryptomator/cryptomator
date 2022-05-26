@@ -49,16 +49,12 @@ public final class CatchingExecutors {
 	}
 
 	private static void afterExecute0(Runnable runnable, Throwable throwable) {
-		if (throwable == null) {
-			if (runnable instanceof Task<?>) {
-				afterExecuteTask(Thread.currentThread(), (Task<?>) runnable);
-				return;
-			}
-			throwable = getThrowable(runnable);
-		}
-
 		if (throwable != null) {
 			callHandler(Thread.currentThread(), throwable);
+		} else if (runnable instanceof Task<?> t) {
+			afterExecuteTask(Thread.currentThread(), t);
+		} else if (runnable instanceof Future<?> f) {
+			afterExecuteFuture(f);
 		}
 		//Errors in this method are delegated to the UncaughtExceptionHandler of the current thread
 	}
@@ -79,21 +75,17 @@ public final class CatchingExecutors {
 		});
 	}
 
-	private static Throwable getThrowable(Runnable runnable) {
-		assert !(runnable instanceof Task<?>);
-
-		if (runnable instanceof Future<?> && ((Future<?>) runnable).isDone()) {
-			try {
-				((Future<?>) runnable).get();
-			} catch (CancellationException ce) {
-				return ce;
-			} catch (ExecutionException ee) {
-				return ee.getCause();
-			} catch (InterruptedException ie) {
-				//Ignore/Reset
-				Thread.currentThread().interrupt();
-			}
+	private static void afterExecuteFuture(Future<?> future) {
+		assert future.isDone();
+		try {
+			future.get();
+		} catch (CancellationException ce) {
+			callHandler(Thread.currentThread(), ce);
+		} catch (ExecutionException ee) {
+			callHandler(Thread.currentThread(), ee.getCause());
+		} catch (InterruptedException ie) {
+			//Ignore/Reset
+			Thread.currentThread().interrupt();
 		}
-		return null;
 	}
 }
