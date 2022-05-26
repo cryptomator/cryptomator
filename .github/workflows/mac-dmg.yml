@@ -189,7 +189,7 @@ jobs:
         env:
           VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
       - name: Notarize .dmg
-        #if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: cocoalibs/xcode-notarization-action@v1
         with:
           app-path: 'Cryptomator-*.dmg'
