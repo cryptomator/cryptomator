@@ -31,7 +31,7 @@ public final class CatchingExecutors {
 		@Override
 		protected void afterExecute(Runnable runnable, Throwable throwable) {
 			super.afterExecute(runnable, throwable);
-			afterExecute0(runnable, throwable);
+			afterExecuteInternal(runnable, throwable);
 		}
 	}
 
@@ -44,15 +44,15 @@ public final class CatchingExecutors {
 		@Override
 		protected void afterExecute(Runnable runnable, Throwable throwable) {
 			super.afterExecute(runnable, throwable);
-			afterExecute0(runnable, throwable);
+			afterExecuteInternal(runnable, throwable);
 		}
 	}
 
-	private static void afterExecute0(Runnable runnable, Throwable throwable) {
+	private static void afterExecuteInternal(Runnable runnable, Throwable throwable) {
 		if (throwable != null) {
 			callHandler(Thread.currentThread(), throwable);
 		} else if (runnable instanceof Task<?> t) {
-			afterExecuteTask(Thread.currentThread(), t);
+			afterExecuteTask(t);
 		} else if (runnable instanceof Future<?> f) {
 			afterExecuteFuture(f);
 		}
@@ -67,7 +67,8 @@ public final class CatchingExecutors {
 		return (thread, throwable) -> LOG.error("FALLBACK: Uncaught exception in " + thread.getName(), throwable);
 	}
 
-	private static void afterExecuteTask(Thread caller, Task<?> task) {
+	private static void afterExecuteTask(Task<?> task) {
+		var caller = Thread.currentThread();
 		Platform.runLater(() -> {
 			if (task.getOnFailed() == null) {
 				callHandler(caller, task.getException());
