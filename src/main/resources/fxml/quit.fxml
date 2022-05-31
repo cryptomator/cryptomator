@@ -10,7 +10,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<?import javafx.scene.control.CheckBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.quit.QuitController"
@@ -27,10 +26,7 @@
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
 			</StackPane>
-			<VBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-				<Label text="%quit.prompt" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
-				<CheckBox text="%quit.prompt.rememberAlwaysLockAndQuitCheckbox" fx:id="rememberAlwaysLockAndQuitCheckbox"/>
-			</VBox>
+			<Label text="%quit.prompt" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
 		</HBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">

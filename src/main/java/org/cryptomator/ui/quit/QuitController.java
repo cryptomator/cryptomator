@@ -12,7 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import java.awt.desktop.QuitResponse;
@@ -32,10 +31,9 @@ public class QuitController implements FxController {
 	private final ExecutorService executorService;
 	private final VaultService vaultService;
 	private final AtomicReference<QuitResponse> quitResponse = new AtomicReference<>();
-	private final Settings settings;
+
 	/* FXML */
 	public Button lockAndQuitButton;
-	public CheckBox rememberAlwaysLockAndQuitCheckbox;
 
 	@Inject
 	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, Settings settings) {
@@ -43,13 +41,7 @@ public class QuitController implements FxController {
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.executorService = executorService;
 		this.vaultService = vaultService;
-		this.settings = settings;
 		window.setOnCloseRequest(windowEvent -> cancel());
-	}
-
-	@FXML
-	public void initialize() {
-		rememberAlwaysLockAndQuitCheckbox.selectedProperty().bindBidirectional(settings.autoCloseVaults());
 	}
 
 	public void updateQuitRequest(QuitResponse newResponse) {
