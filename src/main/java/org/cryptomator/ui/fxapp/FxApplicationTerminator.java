@@ -2,6 +2,7 @@ package org.cryptomator.ui.fxapp;
 
 import com.google.common.base.Preconditions;
 import org.cryptomator.common.ShutdownHook;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -33,12 +34,14 @@ public class FxApplicationTerminator {
 	private final ShutdownHook shutdownHook;
 	private final FxApplicationWindows appWindows;
 	private final AtomicBoolean allowQuitWithoutPrompt = new AtomicBoolean();
+	private final Settings settings;
 
 	@Inject
-	public FxApplicationTerminator(ObservableList<Vault> vaults, ShutdownHook shutdownHook, FxApplicationWindows appWindows) {
+	public FxApplicationTerminator(ObservableList<Vault> vaults, ShutdownHook shutdownHook, FxApplicationWindows appWindows, Settings settings) {
 		this.vaults = vaults;
 		this.shutdownHook = shutdownHook;
 		this.appWindows = appWindows;
+		this.settings = settings;
 	}
 
 	public void initialize() {
@@ -92,7 +95,7 @@ public class FxApplicationTerminator {
 	 */
 	private void handleQuitRequest(@SuppressWarnings("unused") @Nullable EventObject e, QuitResponse response) {
 		var exitingResponse = new ExitingQuitResponse(response);
-		if (allowQuitWithoutPrompt.get()) {
+		if (allowQuitWithoutPrompt.get() || settings.autoCloseVaults().get()) {
 			exitingResponse.performQuit();
 		} else {
 			appWindows.showQuitWindow(exitingResponse);

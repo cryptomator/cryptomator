@@ -41,6 +41,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("askedForUpdateCheck").value(value.askedForUpdateCheck().get());
 		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
 		out.name("startHidden").value(value.startHidden().get());
+		out.name("autoCloseVaults").value(value.autoCloseVaults().get());
 		out.name("port").value(value.port().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
@@ -82,6 +83,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "askedForUpdateCheck" -> settings.askedForUpdateCheck().set(in.nextBoolean());
 				case "checkForUpdatesEnabled" -> settings.checkForUpdates().set(in.nextBoolean());
 				case "startHidden" -> settings.startHidden().set(in.nextBoolean());
+				case "autoCloseVaults" -> settings.autoCloseVaults().set(in.nextBoolean());
 				case "port" -> settings.port().set(in.nextInt());
 				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
 				case "preferredGvfsScheme" -> settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
