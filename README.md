@@ -80,7 +80,6 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 * JDK 17 (e.g. temurin)
 * Maven 3
-* Optional: OS-dependent build tools for native packaging (see [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Linux](https://github.com/cryptomator/builder-containers))
 
 ### Run Maven
 
