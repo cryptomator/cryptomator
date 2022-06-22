@@ -16,10 +16,6 @@
 	src: url('opensans-bold.ttf');
 }
 
-@font-face {
-	src: url('quicksand-bold.ttf');
-}
-
 /*******************************************************************************
  *                                                                             *
  * Root Styling & Colors                                                       *
@@ -46,6 +42,8 @@
 	GRAY_8: #D3DCE1;
 	GRAY_9: #EDF3F7;
 
+	GREEN_3: PRIMARY_D1;
+	GREEN_5: PRIMARY;
 	RED_5: #E74C3C;
 	ORANGE_5: #E67E22;
 	YELLOW_5: #F1C40F;
@@ -177,14 +175,6 @@
 .main-window .title {
 	-fx-background-color: CONTROL_BORDER_NORMAL, TITLE_BG;
 	-fx-background-insets: 0, 0 0 1px 0;
-}
-
-.main-window .title .label {
-	-fx-font-family: 'Quicksand';
-	-fx-font-size: 16px;
-	-fx-font-style: normal;
-	-fx-font-weight: 700;
-	-fx-text-fill: TITLE_TEXT_FILL;
 }
 
 .main-window .title .button {
@@ -405,7 +395,6 @@
 	-fx-background-color: MUTED_BG;
 }
 
-
 /* Note: These values below are kinda random such that it looks ok. I'm pretty sure there is room for improvement. Additionally, fx-text-fill does not work*/
 .badge-debug {
 	-fx-font-family: 'Open Sans Bold';
@@ -439,11 +428,11 @@
 }
 
 .password-strength-indicator.strength-3 .segment.active {
-	-fx-background-color: PRIMARY;
+	-fx-background-color: GREEN_5;
 }
 
 .password-strength-indicator.strength-4 .segment.active {
-	-fx-background-color: PRIMARY_D1;
+	-fx-background-color: GREEN_3;
 }
 
 /*******************************************************************************
@@ -834,6 +823,7 @@
 	-fx-background-color: PROGRESS_BAR_BG;
 	-fx-background-radius: 4px;
 }
+
 /*******************************************************************************
  *                                                                             *
  * I/O Statistics                                                              *
@@ -884,6 +874,7 @@
 .default-color0.chart-series-area-line {
 	-fx-stroke: PRIMARY;
 }
+
 .default-color0.chart-series-area-fill {
 	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
 	-fx-stroke: transparent;

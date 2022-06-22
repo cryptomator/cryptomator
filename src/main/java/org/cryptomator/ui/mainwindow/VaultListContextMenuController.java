@@ -31,7 +31,7 @@ public class VaultListContextMenuController implements FxController {
 	private final VaultService vaultService;
 	private final KeychainManager keychain;
 	private final RemoveVaultComponent.Builder removeVault;
-	private final VaultOptionsComponent.Builder vaultOptionsWindow;
+	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final OptionalBinding<VaultState.Value> selectedVaultState;
 	private final Binding<Boolean> selectedVaultPassphraseStored;
 	private final Binding<Boolean> selectedVaultRemovable;
@@ -39,7 +39,7 @@ public class VaultListContextMenuController implements FxController {
 	private final Binding<Boolean> selectedVaultLockable;
 
 	@Inject
-	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, @MainWindow Stage mainWindow, FxApplicationWindows appWindows, VaultService vaultService, KeychainManager keychain, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Builder vaultOptionsWindow) {
+	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, @MainWindow Stage mainWindow, FxApplicationWindows appWindows, VaultService vaultService, KeychainManager keychain, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Factory vaultOptionsWindow) {
 		this.selectedVault = EasyBind.wrapNullable(selectedVault);
 		this.mainWindow = mainWindow;
 		this.appWindows = appWindows;
@@ -69,7 +69,7 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickShowVaultOptions() {
 		selectedVault.ifValuePresent(v -> {
-			vaultOptionsWindow.vault(v).build().showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
+			vaultOptionsWindow.create(v).showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
 		});
 	}
 

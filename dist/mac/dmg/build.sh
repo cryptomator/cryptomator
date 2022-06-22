@@ -14,9 +14,17 @@ while getopts ":s:" o; do
 done
 shift "$((OPTIND-1))"
 
-# prepare working dir and variables
+# prepare working dir
 cd $(dirname $0)
-rm -rf runtime dmg
+rm -rf runtime dmg *.app *.dmg
+
+# set variables
+APP_NAME="Cryptomator"
+VENDOR="Skymatic GmbH"
+COPYRIGHT_YEARS="2016 - 2022"
+PACKAGE_IDENTIFIER="org.cryptomator"
+MAIN_JAR_GLOB="cryptomator-*.jar"
+MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
 REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 
@@ -31,7 +39,7 @@ fi
 
 # compile
 mvn -B -f../../../pom.xml clean package -DskipTests -Pmac
-cp ../../../target/cryptomator-*.jar ../../../target/mods
+cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 
 # add runtime
 ${JAVA_HOME}/bin/jlink \
@@ -51,11 +59,11 @@ ${JAVA_HOME}/bin/jpackage \
     --runtime-image runtime \
     --input ../../../target/libs \
     --module-path ../../../target/mods \
-    --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator \
+    --module ${MODULE_AND_MAIN_CLASS} \
     --dest . \
-    --name Cryptomator \
-    --vendor "Skymatic GmbH" \
-    --copyright "(C) 2016 - 2022 Skymatic GmbH" \
+    --name ${APP_NAME} \
+    --vendor "${VENDOR}" \
+    --copyright "(C) ${COPYRIGHT_YEARS} ${VENDOR}" \
     --app-version "${VERSION_NO}" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
@@ -63,20 +71,21 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dapple.awt.enableTemplateImages=true" \
     --java-options "-Dsun.java2d.metal=true" \
     --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
-    --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\"" \
-    --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\"" \
-    --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\"" \
-    --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/Cryptomator/key.p12\"" \
-    --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\"" \
+    --java-options "-Dcryptomator.logDir=\"~/Library/Logs/${APP_NAME}\"" \
+    --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/${APP_NAME}/Plugins\"" \
+    --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/${APP_NAME}/settings.json\"" \
+    --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/${APP_NAME}/ipc.socket\"" \
+    --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/${APP_NAME}/key.p12\"" \
+    --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"${APP_NAME}\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
-    --mac-package-identifier org.cryptomator \
+    --mac-package-identifier ${PACKAGE_IDENTIFIER} \
     --resource-dir ../resources
 
 # transform app dir
-cp ../resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
-sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
-sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
+cp ../resources/${APP_NAME}-Vault.icns ${APP_NAME}.app/Contents/Resources/
+sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
+sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 
 # generate license
 mvn -B -f../../../pom.xml license:add-third-party \
@@ -90,8 +99,8 @@ mvn -B -f../../../pom.xml license:add-third-party \
 
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ]; then
-    find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-    for JAR_PATH in `find Cryptomator.app -name "*.jar"`; do
+    find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+    for JAR_PATH in `find ${APP_NAME}.app -name "*.jar"`; do
     if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
         JAR_FILENAME=$(basename ${JAR_PATH})
         OUTPUT_PATH=${JAR_PATH%.*}
@@ -106,25 +115,25 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
         rm -r ${OUTPUT_PATH}
     fi
     done
-    echo "Codesigning Cryptomator.app..."
-    codesign --force --deep --entitlements ../Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
+    echo "Codesigning ${APP_NAME}.app..."
+    codesign --force --deep --entitlements ../${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
 fi
 
 # prepare dmg contents
 mkdir dmg
-mv Cryptomator.app dmg
+mv ${APP_NAME}.app dmg
 cp resources/macFUSE.webloc dmg
 
 # create dmg
 create-dmg \
-    --volname Cryptomator \
-    --volicon "resources/Cryptomator-Volume.icns" \
-    --background "resources/Cryptomator-background.tiff" \
+    --volname ${APP_NAME} \
+    --volicon "resources/${APP_NAME}-Volume.icns" \
+    --background "resources/${APP_NAME}-background.tiff" \
     --window-pos 400 100 \
     --window-size 640 694 \
     --icon-size 128 \
-    --icon "Cryptomator.app" 128 245 \
-    --hide-extension "Cryptomator.app" \
+    --icon "${APP_NAME}.app" 128 245 \
+    --hide-extension "${APP_NAME}.app" \
     --icon "macFUSE.webloc" 320 501 \
     --hide-extension "macFUSE.webloc" \
     --app-drop-link 512 245 \
@@ -132,4 +141,4 @@ create-dmg \
     --icon ".background" 128 758 \
     --icon ".fseventsd" 320 758 \
     --icon ".VolumeIcon.icns" 512 758 \
-    Cryptomator-${VERSION_NO}.dmg dmg
+    ${APP_NAME}-${VERSION_NO}.dmg dmg

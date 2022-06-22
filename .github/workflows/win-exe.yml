@@ -98,6 +98,7 @@ jobs:
           --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ steps.versions.outputs.revNum }}\""
+          --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
       - name: Patch Application Directory
@@ -188,6 +189,19 @@ jobs:
       semVerNum: ${{ steps.versions.outputs.semVerNum }}
       semVerStr: ${{ steps.versions.outputs.semVerStr }}
       revNum: ${{ steps.versions.outputs.revNum }}
+
+  publish-winget:
+    name: Publish on winget repo
+    runs-on: windows-latest
+    needs: [build-msi]
+    steps:
+      - name: Submit package to Windows Package Manager Community Repository
+        run: |
+          iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          $github = Get-Content '${{ github.event_path }}' | ConvertFrom-Json
+          $installerUrl = $github.release.assets | Where-Object -Property name -match 'Cryptomator-*.msi' | Select -ExpandProperty browser_download_url -First 1
+          .\wingetcreate.exe update Cryptomator.Cryptomator -s -v $github.release.tag_name -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+        shell: pwsh
 
   build-exe:
     name: Build .exe installer

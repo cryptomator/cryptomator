@@ -16,10 +16,6 @@
 	src: url('opensans-bold.ttf');
 }
 
-@font-face {
-	src: url('quicksand-bold.ttf');
-}
-
 /*******************************************************************************
  *                                                                             *
  * Root Styling & Colors                                                       *
@@ -46,6 +42,8 @@
 	GRAY_8: #E1E1E1;
 	GRAY_9: #F7F7F7;
 
+	GREEN_3: PRIMARY_D1;
+	GREEN_5: PRIMARY;
 	RED_5: #E74C3C;
 	ORANGE_5: #E67E22;
 	YELLOW_5: #F1C40F;
@@ -176,14 +174,6 @@
 
 .main-window .title {
 	-fx-background-color: TITLE_BG;
-}
-
-.main-window .title .label {
-	-fx-font-family: 'Quicksand';
-	-fx-font-size: 16px;
-	-fx-font-style: normal;
-	-fx-font-weight: 700;
-	-fx-text-fill: TITLE_TEXT_FILL;
 }
 
 .main-window .title .button {
@@ -437,11 +427,11 @@
 }
 
 .password-strength-indicator.strength-3 .segment.active {
-	-fx-background-color: PRIMARY;
+	-fx-background-color: GREEN_5;
 }
 
 .password-strength-indicator.strength-4 .segment.active {
-	-fx-background-color: PRIMARY_D1;
+	-fx-background-color: GREEN_3;
 }
 
 /*******************************************************************************
@@ -832,22 +822,12 @@
 	-fx-background-color: PROGRESS_BAR_BG;
 	-fx-background-radius: 4px;
 }
+
 /*******************************************************************************
  *                                                                             *
  * I/O Statistics                                                              *
  *                                                                             *
  ******************************************************************************/
-.chart {
-	-fx-padding: 10px;
-}
-
-.chart-plot-background {
-	-fx-background-color: MAIN_BG;
-	-fx-padding: 20px;
-}
-
-/* content */
-
 
 .cache-arc-background {
 	-fx-fill: transparent;
@@ -893,6 +873,7 @@
 .default-color0.chart-series-area-line {
 	-fx-stroke: PRIMARY;
 }
+
 .default-color0.chart-series-area-fill {
 	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
 	-fx-stroke: transparent;
