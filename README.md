@@ -36,8 +36,6 @@ Cryptomator is provided free of charge as an open-source project despite the hig
   </tbody>
 </table>
 
-- [Jameson Lopp](https://www.lopp.net/)
-
 ---
 
 ## Introduction
