@@ -30,7 +30,7 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel styleClass="label-large" format="%generic.error.title" arg1="${controller.errorCode}"/>
+				<FormattedLabel styleClass="label-extra-large" format="%generic.error.title" arg1="${controller.errorCode}"/>
 				<Label text="%generic.error.instruction" wrapText="true"/>
 				<Hyperlink styleClass="hyperlink-underline" text="%generic.error.hyperlink.lookup" onAction="#searchError" contentDisplay="LEFT">
 					<graphic>

@@ -9,7 +9,7 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
 	  spacing="6">
-	<Label fx:id="detailHeader" styleClass="label-large" text="${controller.checkName}" contentDisplay="LEFT">
+	<Label fx:id="detailHeader" styleClass="label-extra-large" text="${controller.checkName}" contentDisplay="LEFT">
 		<graphic>
 			<HBox alignment="CENTER" minWidth="25" maxWidth="25">
 				<CheckStateIconView fx:id="checkStateIconView" check="${controller.check}" glyphSize="20"/>

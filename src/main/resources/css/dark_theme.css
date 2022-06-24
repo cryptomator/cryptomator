@@ -98,7 +98,7 @@
 	-fx-text-fill: TEXT_FILL_MUTED;
 }
 
-.label-large {
+.label-extra-large {
 	-fx-font-family: 'Open Sans SemiBold';
 	-fx-font-size: 1.5em;
 }
