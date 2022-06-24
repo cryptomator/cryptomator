@@ -5,10 +5,10 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 
@@ -32,8 +32,9 @@ abstract class QuitModule {
 	@Provides
 	@QuitWindow
 	@QuitScoped
-	static Stage provideStage(StageFactory factory) {
+	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
+		stage.setTitle(resourceBundle.getString("quit.windowTitle"));
 		stage.setMinWidth(300);
 		stage.setMinHeight(100);
 		stage.initModality(Modality.APPLICATION_MODAL);

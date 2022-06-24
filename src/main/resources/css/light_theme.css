@@ -103,6 +103,11 @@
 	-fx-font-size: 1.5em;
 }
 
+.label-large {
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 1.2em;
+}
+
 .label-small {
 	-fx-font-size: 0.8em;
 }
