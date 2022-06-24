@@ -1,5 +1,6 @@
 package org.cryptomator.ui.vaultoptions;
 
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class VaultOptionsController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultOptionsController.class);
 
 	private final Stage window;
+	private final Vault vault;
 	private final ObjectProperty<SelectedVaultOptionsTab> selectedTabProperty;
 	public TabPane tabPane;
 	public Tab generalTab;
@@ -25,8 +27,9 @@ public class VaultOptionsController implements FxController {
 	public Tab keyTab;
 
 	@Inject
-	VaultOptionsController(@VaultOptionsWindow Stage window, ObjectProperty<SelectedVaultOptionsTab> selectedTabProperty) {
+	VaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ObjectProperty<SelectedVaultOptionsTab> selectedTabProperty) {
 		this.window = window;
+		this.vault = vault;
 		this.selectedTabProperty = selectedTabProperty;
 	}
 
@@ -35,6 +38,9 @@ public class VaultOptionsController implements FxController {
 		window.setOnShowing(this::windowWillAppear);
 		selectedTabProperty.addListener(observable -> this.selectChosenTab());
 		tabPane.getSelectionModel().selectedItemProperty().addListener(observable -> this.selectedTabChanged());
+		if(!vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme().equals("masterkeyfile")){
+			tabPane.getTabs().remove(keyTab);
+		}
 	}
 
 	private void selectChosenTab() {
