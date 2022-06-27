@@ -10,30 +10,40 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<VBox xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.Region?>
+<HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.lock.LockForcedController"
 	  minWidth="400"
-	  maxWidth="400"
+	  maxWidth="500"
 	  minHeight="145"
-	  spacing="12">
+	  spacing="12"
+	  alignment="TOP_LEFT">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+		<Group>
+			<StackPane>
+				<padding>
+					<Insets topRightBottomLeft="6"/>
+				</padding>
 				<Circle styleClass="glyph-icon-orange" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
-			<VBox spacing="6">
-				<Label styleClass="label-large" text="%lock.forced.heading"/>
-				<FormattedLabel format="%lock.forced.message" arg1="${controller.vaultName}" wrapText="true"/>
-			</VBox>
-		</HBox>
+		</Group>
+		<VBox HBox.hgrow="ALWAYS">
+			<!-- TODO: migrate translations -->
+			<Label styleClass="label-large" text="%lock.forced.title" wrapText="true" textAlignment="LEFT">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
+			<FormattedLabel format="%lock.forced.description" arg1="${controller.vaultName}" wrapText="true"/>
 
-		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
-			<ButtonBar buttonMinWidth="100" buttonOrder="+CIU">
+			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
+			<ButtonBar buttonMinWidth="120" buttonOrder="U+CI">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" cancelButton="true" onAction="#cancel"/>
 					<Button text="%lock.forced.retryBtn" ButtonBar.buttonData="FINISH" onAction="#retry"/>
@@ -42,4 +52,4 @@
 			</ButtonBar>
 		</VBox>
 	</children>
-</VBox>
+</HBox>
