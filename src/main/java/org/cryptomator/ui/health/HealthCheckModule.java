@@ -81,7 +81,7 @@ abstract class HealthCheckModule {
 		Stage stage = factory.create();
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(window);
-		stage.setTitle(String.format(resourceBundle.getString("unlock.title"), vault.getDisplayName()));
+		stage.setTitle(String.format(resourceBundle.getString("unlock.windowTitle"), vault.getDisplayName()));
 		stage.setResizable(false);
 		return stage;
 	}

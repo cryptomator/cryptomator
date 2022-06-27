@@ -61,6 +61,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 
 	@Override
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
+		window.setTitle(resourceBundle.getString("unlock.windowTitle").formatted(vault.getDisplayName()));
 		Preconditions.checkArgument(SCHEME.equalsIgnoreCase(keyId.getScheme()), "Only supports keys with scheme " + SCHEME);
 		try {
 			Path filePath = vault.getPath().resolve(keyId.getSchemeSpecificPart());
@@ -124,7 +125,6 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		var comp = masterkeyFileChoice.build();
 		Platform.runLater(() -> {
 			window.setScene(comp.chooseMasterkeyScene());
-			window.setTitle(resourceBundle.getString("unlock.chooseMasterkey.title").formatted(vault.getDisplayName()));
 			window.show();
 			Window owner = window.getOwner();
 			if (owner != null) {
@@ -147,7 +147,6 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		var comp = passphraseEntry.savedPassword(passphrase).build();
 		Platform.runLater(() -> {
 			window.setScene(comp.passphraseEntryScene());
-			window.setTitle(resourceBundle.getString("unlock.title").formatted(vault.getDisplayName()));
 			window.show();
 			Window owner = window.getOwner();
 			if (owner != null) {
