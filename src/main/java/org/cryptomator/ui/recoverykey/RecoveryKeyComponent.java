@@ -18,7 +18,7 @@ public interface RecoveryKeyComponent {
 	@RecoveryKeyWindow
 	Stage window();
 
-	@FxmlScene(FxmlFile.RECOVERYKEY_CREATE)
+	@FxmlScene(FxmlFile.RECOVERYKEY_AUTHENTICATE)
 	Lazy<Scene> creationScene();
 
 	@FxmlScene(FxmlFile.RECOVERYKEY_RECOVER)

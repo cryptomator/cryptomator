@@ -72,10 +72,10 @@ abstract class RecoveryKeyModule {
 	// ------------------
 
 	@Provides
-	@FxmlScene(FxmlFile.RECOVERYKEY_CREATE)
+	@FxmlScene(FxmlFile.RECOVERYKEY_AUTHENTICATE)
 	@RecoveryKeyScoped
 	static Scene provideRecoveryKeyCreationScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_CREATE);
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_AUTHENTICATE);
 	}
 
 	@Provides
