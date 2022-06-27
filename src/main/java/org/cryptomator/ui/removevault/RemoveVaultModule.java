@@ -34,9 +34,9 @@ abstract class RemoveVaultModule {
 	@Provides
 	@RemoveVaultWindow
 	@RemoveVaultScoped
-	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, @RemoveVaultWindow Vault v) {
+	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, @RemoveVaultWindow Vault v, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle(v.getDisplayName());
+		stage.setTitle(String.format(resourceBundle.getString("removeVault.windowTitle"),v.getDisplayName()));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(primaryStage);
