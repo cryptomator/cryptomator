@@ -36,7 +36,7 @@ public class QuitController implements FxController {
 	public Button lockAndQuitButton;
 
 	@Inject
-	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, Settings settings) {
+	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService) {
 		this.window = window;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.executorService = executorService;
