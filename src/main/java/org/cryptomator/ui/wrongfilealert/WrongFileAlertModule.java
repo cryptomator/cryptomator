@@ -35,7 +35,7 @@ abstract class WrongFileAlertModule {
 	@WrongFileAlertScoped
 	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("wrongFileAlert.title"));
+		stage.setTitle(resourceBundle.getString("wrongFileAlert.windowTitle"));
 		stage.setResizable(false);
 		stage.initOwner(primaryStage);
 		stage.initModality(Modality.WINDOW_MODAL);
