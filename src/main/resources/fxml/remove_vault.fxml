@@ -39,7 +39,7 @@
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="%removeVault.description" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
+			<Label text="%removeVault.description" wrapText="true" textAlignment="LEFT" />
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">

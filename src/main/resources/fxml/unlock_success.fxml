@@ -43,7 +43,7 @@
 				</padding>
 			</Label>
 
-			<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayName}" wrapText="true" HBox.hgrow="ALWAYS"/>
+			<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayName}" wrapText="true"/>
 
 			<CheckBox text="%unlock.success.rememberChoice" fx:id="rememberChoiceCheckbox">
 				<padding>
@@ -52,7 +52,6 @@
 			</CheckBox>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
-
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
 					<Button text="%generic.button.done" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
