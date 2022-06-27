@@ -4,6 +4,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -33,9 +34,9 @@ abstract class RemoveVaultModule {
 	@Provides
 	@RemoveVaultWindow
 	@RemoveVaultScoped
-	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, ResourceBundle resourceBundle) {
+	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, @RemoveVaultWindow Vault v) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("removeVault.title"));
+		stage.setTitle(v.getDisplayName());
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(primaryStage);
