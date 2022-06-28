@@ -35,13 +35,12 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%recoveryKey.authenticate.title" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%recoveryKey.create.title" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<!-- TODO: migrate translations -->
-			<FormattedLabel format="%recoveryKey.authenticate.prompt" arg1="${controller.vault.displayName}" wrapText="true">
+			<FormattedLabel format="%recoveryKey.enterPassword.prompt" arg1="${controller.vault.displayName}" wrapText="true">
 				<padding>
 					<Insets bottom="6"/>
 				</padding>

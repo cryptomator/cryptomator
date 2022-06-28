@@ -23,7 +23,7 @@ public enum FxmlFile {
 	MIGRATION_SUCCESS("/fxml/migration_success.fxml"), //
 	PREFERENCES("/fxml/preferences.fxml"), //
 	QUIT("/fxml/quit.fxml"), //
-	RECOVERYKEY_AUTHENTICATE("/fxml/recoverykey_authenticate.fxml"), //
+	RECOVERYKEY_CREATE("/fxml/recoverykey_create.fxml"), //
 	RECOVERYKEY_RECOVER("/fxml/recoverykey_recover.fxml"), //
 	RECOVERYKEY_RESET_PASSWORD("/fxml/recoverykey_reset_password.fxml"), //
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
