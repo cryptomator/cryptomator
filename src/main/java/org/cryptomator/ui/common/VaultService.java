@@ -86,7 +86,8 @@ public class VaultService {
 	}
 
 	/**
-	 * Creates but doesn't start a lock-all task.
+	 * Creates a lock-all task.
+	 * This task itself is _not started_, but its subtasks locking each vault will be already executed.
 	 *
 	 * @param vaults The list of vaults to be locked
 	 * @param forced Whether to attempt a forced lock

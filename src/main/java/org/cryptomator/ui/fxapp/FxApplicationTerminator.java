@@ -7,6 +7,7 @@ import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.ui.common.VaultService;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,20 +29,24 @@ import static org.cryptomator.common.vaults.VaultState.Value.*;
 public class FxApplicationTerminator {
 
 	private static final Set<VaultState.Value> STATES_ALLOWING_TERMINATION = EnumSet.of(LOCKED, NEEDS_MIGRATION, MISSING, ERROR);
+	private static final Set<VaultState.Value> STATES_PREVENT_TERMINATION = EnumSet.of(PROCESSING);
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplicationTerminator.class);
 
 	private final ObservableList<Vault> vaults;
 	private final ShutdownHook shutdownHook;
 	private final FxApplicationWindows appWindows;
 	private final AtomicBoolean allowQuitWithoutPrompt = new AtomicBoolean();
+	private final AtomicBoolean preventQuitWithGracefulLock = new AtomicBoolean();
 	private final Settings settings;
+	private final VaultService vaultService;
 
 	@Inject
-	public FxApplicationTerminator(ObservableList<Vault> vaults, ShutdownHook shutdownHook, FxApplicationWindows appWindows, Settings settings) {
+	public FxApplicationTerminator(ObservableList<Vault> vaults, ShutdownHook shutdownHook, FxApplicationWindows appWindows, Settings settings, VaultService vaultService) {
 		this.vaults = vaults;
 		this.shutdownHook = shutdownHook;
 		this.appWindows = appWindows;
 		this.settings = settings;
+		this.vaultService = vaultService;
 	}
 
 	public void initialize() {
@@ -75,6 +80,10 @@ public class FxApplicationTerminator {
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		boolean allowSuddenTermination = vaults.stream().map(Vault::getState).allMatch(STATES_ALLOWING_TERMINATION::contains);
 		boolean stateChanged = allowQuitWithoutPrompt.compareAndSet(!allowSuddenTermination, allowSuddenTermination);
+
+		boolean preventGracefulTermination = vaults.stream().map(Vault::getState).anyMatch(STATES_PREVENT_TERMINATION::contains);
+		preventQuitWithGracefulLock.set(preventGracefulTermination);
+
 		Desktop desktop = Desktop.getDesktop();
 		if (stateChanged && desktop.isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
 			if (allowSuddenTermination) {
@@ -95,8 +104,21 @@ public class FxApplicationTerminator {
 	 */
 	private void handleQuitRequest(@SuppressWarnings("unused") @Nullable EventObject e, QuitResponse response) {
 		var exitingResponse = new ExitingQuitResponse(response);
-		if (allowQuitWithoutPrompt.get() || settings.autoCloseVaults().get()) {
+
+		if (allowQuitWithoutPrompt.get()) {
 			exitingResponse.performQuit();
+		} else if (settings.autoCloseVaults().get() && !preventQuitWithGracefulLock.get()) {
+			var lockAllTask = vaultService.createLockAllTask(vaults.filtered(Vault::isUnlocked), false);
+			lockAllTask.setOnSucceeded(event -> {
+				LOG.info("Locked remaining vaults was succesful.");
+				exitingResponse.performQuit();
+			});
+			lockAllTask.setOnFailed(event -> {
+				LOG.warn("Unable to lock all vaults.");
+				exitingResponse.cancelQuit();
+				//TODO: notify user!?!
+			});
+			lockAllTask.run();
 		} else {
 			appWindows.showQuitWindow(exitingResponse);
 		}
@@ -118,7 +140,7 @@ public class FxApplicationTerminator {
 
 	/**
 	 * A dummy QuitResponse that ignores the response.
-	 *
+	 * <p>
 	 * To be used with {@link #handleQuitRequest(EventObject, QuitResponse)} if the invoking method is not interested in the response.
 	 */
 	private static class NoopQuitResponse implements QuitResponse {

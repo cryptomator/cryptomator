@@ -1,6 +1,5 @@
 package org.cryptomator.ui.quit;
 
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
