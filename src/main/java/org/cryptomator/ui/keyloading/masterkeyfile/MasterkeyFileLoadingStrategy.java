@@ -61,7 +61,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 
 	@Override
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
-		window.setTitle(resourceBundle.getString("unlock.windowTitle").formatted(vault.getDisplayName()));
+		window.setTitle(resourceBundle.getString("unlock.title").formatted(vault.getDisplayName()));
 		Preconditions.checkArgument(SCHEME.equalsIgnoreCase(keyId.getScheme()), "Only supports keys with scheme " + SCHEME);
 		try {
 			Path filePath = vault.getPath().resolve(keyId.getSchemeSpecificPart());
