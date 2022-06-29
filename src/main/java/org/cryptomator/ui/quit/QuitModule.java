@@ -34,7 +34,7 @@ abstract class QuitModule {
 	@QuitScoped
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("quit.windowTitle"));
+		stage.setTitle(resourceBundle.getString("quit.title"));
 		stage.setMinWidth(300);
 		stage.setMinHeight(100);
 		stage.initModality(Modality.APPLICATION_MODAL);

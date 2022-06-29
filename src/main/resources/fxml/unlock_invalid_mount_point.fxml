@@ -34,7 +34,7 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%unlock.error.title" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%unlock.error.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>

@@ -37,13 +37,13 @@
 		</Group>
 
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%unlock.success.title" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%unlock.success.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
 
-			<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayName}" wrapText="true"/>
+			<FormattedLabel format="%unlock.success.description" arg1="${controller.vault.displayName}" wrapText="true"/>
 
 			<CheckBox text="%unlock.success.rememberChoice" fx:id="rememberChoiceCheckbox">
 				<padding>

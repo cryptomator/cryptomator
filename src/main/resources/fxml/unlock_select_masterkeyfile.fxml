@@ -34,8 +34,7 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<!-- TODO: migrate translations -->
-			<Label styleClass="label-large" text="%unlock.chooseMasterkey.title" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%unlock.chooseMasterkey.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
@@ -46,7 +45,7 @@
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
-					<Button text="%unlock.chooseMasterkey.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
+					<Button text="%generic.button.choose" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

@@ -38,8 +38,7 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<!-- TODO: migrate translations -->
-			<Label styleClass="label-large" text="%wrongFileAlert.title" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%wrongFileAlert.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
