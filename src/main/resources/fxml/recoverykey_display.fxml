@@ -16,7 +16,7 @@
 	  spacing="12"
 	  alignment="TOP_LEFT">
 	<children>
-		<FormattedLabel format="%recoveryKey.display.message" arg1="${controller.vaultName}" wrapText="true"/>
+		<FormattedLabel format="%recoveryKey.display.description" arg1="${controller.vaultName}" wrapText="true"/>
 
 		<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true" prefRowCount="4" fx:id="textarea"/>
 		<ButtonBar buttonMinWidth="120" buttonOrder="+R">
