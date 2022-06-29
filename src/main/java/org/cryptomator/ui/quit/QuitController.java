@@ -3,6 +3,7 @@ package org.cryptomator.ui.quit;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,16 +31,17 @@ public class QuitController implements FxController {
 	private final ExecutorService executorService;
 	private final VaultService vaultService;
 	private final AtomicReference<QuitResponse> quitResponse = new AtomicReference<>();
-
+	private final FxApplicationWindows appWindows;
 	/* FXML */
 	public Button lockAndQuitButton;
 
 	@Inject
-	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService) {
+	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, FxApplicationWindows appWindows) {
 		this.window = window;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.executorService = executorService;
 		this.vaultService = vaultService;
+		this.appWindows = appWindows;
 		window.setOnCloseRequest(windowEvent -> cancel());
 	}
 
@@ -81,9 +83,8 @@ public class QuitController implements FxController {
 			LOG.warn("Locking failed", lockAllTask.getException());
 			lockAndQuitButton.setDisable(false);
 			lockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
-			// TODO: show force lock or force quit scene (and DO NOT cancelQuit() here!) (see https://github.com/cryptomator/cryptomator/pull/1416)
+			appWindows.showQuitForcedWindow(quitResponse.get());
 			window.close();
-			respondToQuitRequest(QuitResponse::cancelQuit);
 		});
 		executorService.execute(lockAllTask);
 	}
