@@ -14,6 +14,7 @@ import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.quit.QuitComponent;
+import org.cryptomator.ui.quitforced.QuitForcedComponent;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 
@@ -25,7 +26,7 @@ import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class})
+@Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, QuitForcedComponent.class, ErrorComponent.class})
 abstract class FxApplicationModule {
 
 	private static Image createImageFromResource(String resourceName) throws IOException {
@@ -55,6 +56,12 @@ abstract class FxApplicationModule {
 	@Provides
 	@FxApplicationScoped
 	static QuitComponent provideQuitComponent(QuitComponent.Builder builder) {
+		return builder.build();
+	}
+
+	@Provides
+	@FxApplicationScoped
+	static QuitForcedComponent provideQuitForcedComponent(QuitForcedComponent.Builder builder) {
 		return builder.build();
 	}
 }

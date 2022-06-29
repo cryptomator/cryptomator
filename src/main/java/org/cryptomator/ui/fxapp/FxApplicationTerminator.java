@@ -115,8 +115,7 @@ public class FxApplicationTerminator {
 			});
 			lockAllTask.setOnFailed(event -> {
 				LOG.warn("Unable to lock all vaults.");
-				exitingResponse.cancelQuit();
-				//TODO: notify user!?!
+				appWindows.showQuitForcedWindow(exitingResponse);
 			});
 			lockAllTask.run();
 		} else {
