@@ -13,6 +13,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
@@ -25,7 +26,7 @@ import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {ChangePasswordComponent.class, RecoveryKeyComponent.class})
+@Module(subcomponents = {ChangePasswordComponent.class, RecoveryKeyComponent.class, ForgetPasswordComponent.class})
 abstract class VaultOptionsModule {
 
 	@Provides

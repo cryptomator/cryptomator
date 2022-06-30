@@ -20,6 +20,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 @RecoveryKeyScoped
@@ -37,8 +38,9 @@ public class RecoveryKeyCreationController implements FxController {
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public RecoveryKeyCreationController(@RecoveryKeyWindow Stage window, @FxmlScene(FxmlFile.RECOVERYKEY_SUCCESS) Lazy<Scene> successScene, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, FxApplicationWindows appWindows) {
+	public RecoveryKeyCreationController(@RecoveryKeyWindow Stage window, @FxmlScene(FxmlFile.RECOVERYKEY_SUCCESS) Lazy<Scene> successScene, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
 		this.window = window;
+		window.setTitle(resourceBundle.getString("recoveryKey.display.title"));
 		this.successScene = successScene;
 		this.vault = vault;
 		this.executor = executor;
