@@ -37,7 +37,7 @@ public class Settings {
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final WebDavUrlScheme DEFAULT_GVFS_SCHEME = WebDavUrlScheme.DAV;
 	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = SystemUtils.IS_OS_WINDOWS ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
+	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = VolumeImpl.FUSE;
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	@Deprecated // to be changed to "whatever is available" eventually
 	public static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
