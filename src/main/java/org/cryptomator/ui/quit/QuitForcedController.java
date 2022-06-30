@@ -1,4 +1,4 @@
-package org.cryptomator.ui.quitforced;
+package org.cryptomator.ui.quit;
 
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-@QuitForcedScoped
 public class QuitForcedController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(QuitForcedController.class);
@@ -35,7 +34,7 @@ public class QuitForcedController implements FxController {
 	public Button forceLockAndQuitButton;
 
 	@Inject
-	QuitForcedController(@QuitForcedWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService) {
+	QuitForcedController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService) {
 		this.window = window;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.executorService = executorService;

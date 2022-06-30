@@ -48,11 +48,24 @@ abstract class QuitModule {
 		return fxmlLoaders.createScene(FxmlFile.QUIT);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.QUIT_FORCED)
+	@QuitScoped
+	static Scene provideQuitForcedScene(@QuitWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.QUIT_FORCED);
+	}
+
+
 	// ------------------
 
 	@Binds
 	@IntoMap
 	@FxControllerKey(QuitController.class)
 	abstract FxController bindQuitController(QuitController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(QuitForcedController.class)
+	abstract FxController bindQuitForcedController(QuitForcedController controller);
 
 }

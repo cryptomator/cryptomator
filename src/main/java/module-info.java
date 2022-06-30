@@ -51,7 +51,6 @@ module org.cryptomator.desktop {
 	opens org.cryptomator.ui.migration to javafx.fxml;
 	opens org.cryptomator.ui.preferences to javafx.fxml;
 	opens org.cryptomator.ui.quit to javafx.fxml;
-	opens org.cryptomator.ui.quitforced to javafx.fxml;
 	opens org.cryptomator.ui.recoverykey to javafx.fxml;
 	opens org.cryptomator.ui.removevault to javafx.fxml;
 	opens org.cryptomator.ui.stats to javafx.fxml;

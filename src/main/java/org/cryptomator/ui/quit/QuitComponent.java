@@ -22,23 +22,33 @@ public interface QuitComponent {
 	Stage window();
 
 	@FxmlScene(FxmlFile.QUIT)
-	Lazy<Scene> scene();
+	Lazy<Scene> quitScene();
 
-	QuitController controller();
+	@FxmlScene(FxmlFile.QUIT_FORCED)
+	Lazy<Scene> quitForcedScene();
 
-	default Stage showQuitWindow(QuitResponse response) {
-		controller().updateQuitRequest(response);
+	QuitController quitController();
+	QuitForcedController quitForcedController();
+
+	default void showQuitWindow(QuitResponse response, boolean forced) {
 		Stage stage = window();
-		stage.setScene(scene().get());
+		if(forced){
+			quitForcedController().updateQuitRequest(response);
+			stage.setScene(quitForcedScene().get());
+		} else{
+			quitController().updateQuitRequest(response);
+			stage.setScene(quitScene().get());
+		}
+		stage.sizeToScene();
 		stage.show();
-		stage.requestFocus();
-		return stage;
 	}
 
 	@Subcomponent.Builder
 	interface Builder {
 
 		QuitComponent build();
+
+
 	}
 
 }

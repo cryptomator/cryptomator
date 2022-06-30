@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.Region?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.quitforced.QuitForcedController"
+	  fx:controller="org.cryptomator.ui.quit.QuitForcedController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"

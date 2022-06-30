@@ -83,7 +83,7 @@ public class QuitController implements FxController {
 			LOG.warn("Locking failed", lockAllTask.getException());
 			lockAndQuitButton.setDisable(false);
 			lockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
-			appWindows.showQuitForcedWindow(quitResponse.get());
+			appWindows.showQuitWindow(quitResponse.get(),true);
 			window.close();
 		});
 		executorService.execute(lockAllTask);
