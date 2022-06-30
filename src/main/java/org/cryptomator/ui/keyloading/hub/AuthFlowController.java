@@ -38,7 +38,6 @@ public class AuthFlowController implements FxController {
 	private final CompletableFuture<JWEObject> result;
 	private final Lazy<Scene> receiveKeyScene;
 	private final ObjectProperty<URI> authUri;
-	private final StringBinding authHost;
 	private AuthFlowTask task;
 
 	@Inject
@@ -52,7 +51,6 @@ public class AuthFlowController implements FxController {
 		this.result = result;
 		this.receiveKeyScene = receiveKeyScene;
 		this.authUri = new SimpleObjectProperty<>();
-		this.authHost = Bindings.createStringBinding(this::getAuthHost, authUri);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 	}
 
@@ -98,21 +96,6 @@ public class AuthFlowController implements FxController {
 		window.requestFocus();
 		var exception = workerStateEvent.getSource().getException();
 		result.completeExceptionally(exception);
-	}
-
-	/* Getter/Setter */
-
-	public StringBinding authHostProperty() {
-		return authHost;
-	}
-
-	public String getAuthHost() {
-		var uri = authUri.get();
-		if (uri == null) {
-			return "";
-		} else {
-			return uri.getAuthority().toString();
-		}
 	}
 
 }
