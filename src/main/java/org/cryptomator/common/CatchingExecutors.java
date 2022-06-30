@@ -53,7 +53,7 @@ public final class CatchingExecutors {
 			callHandler(Thread.currentThread(), throwable);
 		} else if (runnable instanceof Task<?> t) {
 			afterExecuteTask(t);
-		} else if (runnable instanceof Future<?> f) {
+		} else if (runnable instanceof Future<?> f && f.isDone()) {
 			afterExecuteFuture(f);
 		}
 		//Errors in this method are delegated to the UncaughtExceptionHandler of the current thread
