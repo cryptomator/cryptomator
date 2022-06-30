@@ -9,34 +9,45 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<VBox xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.Region?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.masterkeyfile.ChooseMasterkeyFileController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
-	  spacing="12">
+	  spacing="12"
+	  alignment="TOP_LEFT">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+		<Group>
+			<StackPane>
+				<padding>
+					<Insets topRightBottomLeft="6"/>
+				</padding>
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="FILE" glyphSize="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="SEARCH" glyphSize="24"/>
 			</StackPane>
-			<VBox spacing="6">
-				<Label text="%unlock.chooseMasterkey.prompt" wrapText="true" HBox.hgrow="ALWAYS"/>
-			</VBox>
-		</HBox>
+		</Group>
+		<VBox HBox.hgrow="ALWAYS">
+			<Label styleClass="label-large" text="%unlock.chooseMasterkey.message" wrapText="true" textAlignment="LEFT">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
+			<FormattedLabel format="%unlock.chooseMasterkey.description" arg1="${controller.displayName}" wrapText="true"/>
 
-		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
-					<Button text="%unlock.chooseMasterkey.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
+					<Button text="%generic.button.choose" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>
 	</children>
-</VBox>
+</HBox>

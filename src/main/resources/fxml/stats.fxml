@@ -29,7 +29,7 @@
 				<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDegrees}"/>
 			</Group>
 			<VBox StackPane.alignment="CENTER" alignment="CENTER">
-				<FormattedLabel styleClass="label-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
+				<FormattedLabel styleClass="label-extra-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
 				<Label text="%stats.cacheHitRate"/>
 			</VBox>
 		</StackPane>

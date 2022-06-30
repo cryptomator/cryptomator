@@ -37,7 +37,7 @@ abstract class QuitForcedModule {
 		stage.setMinWidth(300);
 		stage.setMinHeight(100);
 		stage.initModality(Modality.APPLICATION_MODAL);
-		stage.setTitle(resourceBundle.getString("forcedQuit.title"));
+		stage.setTitle(resourceBundle.getString("quit.title"));
 		return stage;
 	}
 

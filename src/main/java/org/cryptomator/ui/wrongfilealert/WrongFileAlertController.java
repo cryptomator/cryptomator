@@ -30,6 +30,7 @@ public class WrongFileAlertController implements FxController {
 
 	@FXML
 	public void initialize() {
+		//TODO: add dark-mode screens
 		final String resource = SystemUtils.IS_OS_MAC ? "/img/vault-volume-mac.png" : "/img/vault-volume-win.png";
 		try (InputStream in = getClass().getResourceAsStream(resource)) {
 			this.screenshot = new Image(in);

@@ -35,19 +35,19 @@
 		</Group>
 
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%forcedQuit.message" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%quit.forced.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
 
-			<Label text="%forcedQuit.description" wrapText="true" textAlignment="LEFT"/>
+			<Label text="%quit.forced.description" wrapText="true" textAlignment="LEFT"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" cancelButton="true" onAction="#cancel"/>
-					<Button fx:id="forceLockAndQuitButton" text="%forcedQuit.forceLockAndQuitBtn" ButtonBar.buttonData="FINISH" onAction="#forceLockAndQuit" contentDisplay="TEXT_ONLY">
+					<Button fx:id="forceLockAndQuitButton" text="%quit.forced.forceAndQuitBtn" ButtonBar.buttonData="FINISH" onAction="#forceLockAndQuit" contentDisplay="TEXT_ONLY">
 						<graphic>
 							<FontAwesome5Spinner glyphSize="12"/>
 						</graphic>
