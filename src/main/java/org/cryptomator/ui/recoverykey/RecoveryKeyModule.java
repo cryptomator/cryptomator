@@ -53,9 +53,8 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@RecoveryKeyWindow
 	@RecoveryKeyScoped
-	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @Named("keyRecoveryOwner") Stage owner) {
+	static Stage provideStage(StageFactory factory, @Named("keyRecoveryOwner") Stage owner) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("recoveryKey.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);

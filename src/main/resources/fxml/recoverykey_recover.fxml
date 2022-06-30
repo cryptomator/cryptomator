@@ -25,6 +25,7 @@
 
 		<TextArea wrapText="true" prefRowCount="4" fx:id="textarea" textFormatter="${controller.recoveryKeyTextFormatter}" onKeyPressed="#onKeyPressed"/>
 
+		<!-- TODO: add Label when the recovery key is not valid -->
 		<Label text="%recoveryKey.recover.validKey" graphicTextGap="6" contentDisplay="LEFT" visible="${controller.validRecoveryKey}">
 			<graphic>
 				<FontAwesome5IconView glyph="CHECK"/>

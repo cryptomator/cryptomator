@@ -43,9 +43,11 @@ public class ForgetPasswordController implements FxController {
 				LOG.debug("Forgot password for vault {}.", vault.getDisplayName());
 				confirmedResult.setValue(true);
 			} catch (KeychainAccessException e) {
-				LOG.error("Failed to remove entry from system keychain.", e);
+				LOG.error("Failed to delete passphrase from system keychain.", e);
 				confirmedResult.setValue(false);
 			}
+		} else {
+			LOG.warn("Keychain not supported. Doing nothing.");
 		}
 		window.close();
 	}
