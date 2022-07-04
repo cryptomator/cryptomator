@@ -2,6 +2,8 @@ package org.cryptomator.ui.keyloading.hub;
 
 import com.google.gson.JsonParser;
 import io.github.coffeelibs.tinyoauth2client.AuthFlow;
+import io.github.coffeelibs.tinyoauth2client.TinyOAuth2;
+import io.github.coffeelibs.tinyoauth2client.http.response.Response;
 
 import javafx.concurrent.Task;
 import java.io.IOException;
@@ -28,13 +30,24 @@ class AuthFlowTask extends Task<String> {
 
 	@Override
 	protected String call() throws IOException, InterruptedException {
-		var response = AuthFlow.asClient(hubConfig.clientId) //
-				.withSuccessRedirect(URI.create(hubConfig.authSuccessUrl + "&device=" + authFlowContext.deviceId())) //
-				.withErrorRedirect(URI.create(hubConfig.authErrorUrl + "&device=" + authFlowContext.deviceId())) //
-				.authorize(URI.create(hubConfig.authEndpoint), redirectUriConsumer) //
-				.getAccessToken(URI.create(hubConfig.tokenEndpoint));
-		var json = JsonParser.parseString(response);
+		var response = TinyOAuth2.client(hubConfig.clientId) //
+				.withTokenEndpoint(URI.create(hubConfig.tokenEndpoint)) //
+				.authFlow(URI.create(hubConfig.authEndpoint)) //
+				.setSuccessResponse(Response.redirect(URI.create(hubConfig.authSuccessUrl + "&device=" + authFlowContext.deviceId()))) //
+				.setErrorResponse(Response.redirect(URI.create(hubConfig.authErrorUrl + "&device=" + authFlowContext.deviceId()))) //
+				.authorize(redirectUriConsumer);
+		if (response.statusCode() != 200) {
+			throw new NotOkResponseException("Authorization returned status code " + response.statusCode());
+		}
+		var json = JsonParser.parseString(response.body());
 		return json.getAsJsonObject().get("access_token").getAsString();
+	}
+
+	public static class NotOkResponseException extends RuntimeException {
+
+		NotOkResponseException(String msg) {
+			super(msg);
+		}
 	}
 
 }
