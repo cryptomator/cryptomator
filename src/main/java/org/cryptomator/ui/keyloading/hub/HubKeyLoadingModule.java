@@ -45,6 +45,14 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
+	@Named("windowTitle")
+	static String provideWindowTitle(@KeyLoading Vault vault, ResourceBundle resourceBundle) {
+		return String.format(resourceBundle.getString("unlock.title"), vault.getDisplayName());
+	}
+
+
+	@Provides
+	@KeyLoadingScoped
 	@Named("deviceId")
 	static String provideDeviceId(DeviceKey deviceKey) {
 		var publicKey = Objects.requireNonNull(deviceKey.get()).getPublic().getEncoded();
