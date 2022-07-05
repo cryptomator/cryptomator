@@ -107,6 +107,13 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS)
+	@KeyLoadingScoped
+	static Scene provideHubRegisterSuccessScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_SUCCESS);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE)
 	@KeyLoadingScoped
 	static Scene provideHubUnauthorizedDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
@@ -134,6 +141,11 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(RegisterDeviceController.class)
 	abstract FxController bindRegisterDeviceController(RegisterDeviceController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RegisterSuccessController.class)
+	abstract FxController bindRegisterSuccessController(RegisterSuccessController controller);
 
 	@Binds
 	@IntoMap
