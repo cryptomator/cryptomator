@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @KeyLoadingScoped
 public class ReceiveKeyController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ReceiveKeyController.class);
 	private static final String SCHEME_PREFIX = "hub+";
 
 	private final Stage window;
