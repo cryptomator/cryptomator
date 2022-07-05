@@ -49,13 +49,6 @@ public class QuitController implements FxController {
 		window.setOnCloseRequest(windowEvent -> cancel());
 	}
 
-	public void updateQuitRequest(QuitResponse newResponse) {
-		var oldResponse = quitResponse.getAndSet(newResponse);
-		if (oldResponse != null) {
-			oldResponse.cancelQuit();
-		}
-	}
-
 	private void respondToQuitRequest(Consumer<QuitResponse> action) {
 		var response = quitResponse.getAndSet(null);
 		if (response != null) {
@@ -85,8 +78,6 @@ public class QuitController implements FxController {
 		});
 		lockAllTask.setOnFailed(evt -> {
 			LOG.warn("Locking failed", lockAllTask.getException());
-			lockAndQuitButton.setDisable(false);
-			lockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
 			window.setScene(quitForcedScene.get());
 		});
 		executorService.execute(lockAllTask);
