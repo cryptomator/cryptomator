@@ -36,6 +36,7 @@ public class GeneralPreferencesController implements FxController {
 	private final FxApplicationWindows appWindows;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
+	public CheckBox autoCloseVaultsCheckbox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
 	public ToggleGroup nodeOrientation;
@@ -54,9 +55,8 @@ public class GeneralPreferencesController implements FxController {
 	@FXML
 	public void initialize() {
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
-
+		autoCloseVaultsCheckbox.selectedProperty().bindBidirectional(settings.autoCloseVaults());
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
-
 		autoStartProvider.ifPresent(autoStart -> autoStartCheckbox.setSelected(autoStart.isEnabled()));
 
 		var keychainSettingsConverter = new KeychainProviderClassNameConverter(keychainAccessProviders);

@@ -24,6 +24,8 @@
 
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" />
 
+		<CheckBox fx:id="autoCloseVaultsCheckbox" text="%preferences.general.autoCloseVaults" />
+
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.general.keychainBackend"/>
 			<ChoiceBox fx:id="keychainBackendChoiceBox"/>

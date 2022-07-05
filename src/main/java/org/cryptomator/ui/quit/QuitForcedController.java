@@ -1,10 +1,7 @@
 package org.cryptomator.ui.quit;
 
-import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +10,6 @@ import javax.inject.Inject;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
@@ -24,27 +20,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-@QuitScoped
-public class QuitController implements FxController {
+public class QuitForcedController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(QuitController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(QuitForcedController.class);
 
 	private final Stage window;
 	private final ObservableList<Vault> unlockedVaults;
 	private final ExecutorService executorService;
 	private final VaultService vaultService;
 	private final AtomicReference<QuitResponse> quitResponse;
-	private final Lazy<Scene> quitForcedScene;
+
 	/* FXML */
-	public Button lockAndQuitButton;
+	public Button forceLockAndQuitButton;
 
 	@Inject
-	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, @FxmlScene(FxmlFile.QUIT_FORCED) Lazy<Scene> quitForcedScene, @QuitWindow AtomicReference<QuitResponse> quitResponse) {
+	QuitForcedController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, @QuitWindow AtomicReference<QuitResponse> quitResponse) {
 		this.window = window;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.executorService = executorService;
 		this.vaultService = vaultService;
-		this.quitForcedScene = quitForcedScene;
 		this.quitResponse = quitResponse;
 		window.setOnCloseRequest(windowEvent -> cancel());
 	}
@@ -58,17 +52,17 @@ public class QuitController implements FxController {
 
 	@FXML
 	public void cancel() {
-		LOG.info("Quitting application canceled by user.");
+		LOG.info("Quitting application forced canceled by user.");
 		window.close();
 		respondToQuitRequest(QuitResponse::cancelQuit);
 	}
 
 	@FXML
-	public void lockAndQuit() {
-		lockAndQuitButton.setDisable(true);
-		lockAndQuitButton.setContentDisplay(ContentDisplay.LEFT);
+	public void forceLockAndQuit() {
+		forceLockAndQuitButton.setDisable(true);
+		forceLockAndQuitButton.setContentDisplay(ContentDisplay.LEFT);
 
-		Task<Collection<Vault>> lockAllTask = vaultService.createLockAllTask(unlockedVaults, false);
+		Task<Collection<Vault>> lockAllTask = vaultService.createLockAllTask(unlockedVaults, true); // forced set to true
 		lockAllTask.setOnSucceeded(evt -> {
 			LOG.info("Locked {}", lockAllTask.getValue().stream().map(Vault::getDisplayName).collect(Collectors.joining(", ")));
 			if (unlockedVaults.isEmpty()) {
@@ -77,9 +71,16 @@ public class QuitController implements FxController {
 			}
 		});
 		lockAllTask.setOnFailed(evt -> {
-			LOG.warn("Locking failed", lockAllTask.getException());
-			window.setScene(quitForcedScene.get());
+			//TODO: what will happen if force lock and quit app fails?
+
+			LOG.error("Forced locking failed", lockAllTask.getException());
+			forceLockAndQuitButton.setDisable(false);
+			forceLockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
+
+			window.close();
+			respondToQuitRequest(QuitResponse::cancelQuit);
 		});
 		executorService.execute(lockAllTask);
 	}
+
 }
