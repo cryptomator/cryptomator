@@ -16,8 +16,10 @@ import javax.inject.Provider;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.awt.desktop.QuitResponse;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Module
 abstract class QuitModule {
@@ -40,6 +42,14 @@ abstract class QuitModule {
 		stage.initModality(Modality.APPLICATION_MODAL);
 		return stage;
 	}
+
+	@Provides
+	@QuitWindow
+	@QuitScoped
+	static AtomicReference<QuitResponse> provideQuitResponse() {
+		return new AtomicReference<QuitResponse>();
+	}
+
 
 	@Provides
 	@FxmlScene(FxmlFile.QUIT)

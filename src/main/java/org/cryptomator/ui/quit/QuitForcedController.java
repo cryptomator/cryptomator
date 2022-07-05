@@ -28,17 +28,18 @@ public class QuitForcedController implements FxController {
 	private final ObservableList<Vault> unlockedVaults;
 	private final ExecutorService executorService;
 	private final VaultService vaultService;
-	private final AtomicReference<QuitResponse> quitResponse = new AtomicReference<>();
+	private final AtomicReference<QuitResponse> quitResponse;
 
 	/* FXML */
 	public Button forceLockAndQuitButton;
 
 	@Inject
-	QuitForcedController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService) {
+	QuitForcedController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, @QuitWindow AtomicReference<QuitResponse> quitResponse) {
 		this.window = window;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.executorService = executorService;
 		this.vaultService = vaultService;
+		this.quitResponse = quitResponse;
 		window.setOnCloseRequest(windowEvent -> cancel());
 	}
 
@@ -58,7 +59,7 @@ public class QuitForcedController implements FxController {
 
 	@FXML
 	public void cancel() {
-		LOG.info("Quitting application canceled by user.");
+		LOG.info("Quitting application forced canceled by user.");
 		window.close();
 		respondToQuitRequest(QuitResponse::cancelQuit);
 	}

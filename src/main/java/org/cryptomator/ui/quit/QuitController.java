@@ -1,9 +1,11 @@
 package org.cryptomator.ui.quit;
 
+import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,7 @@ import javax.inject.Inject;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
@@ -30,18 +33,20 @@ public class QuitController implements FxController {
 	private final ObservableList<Vault> unlockedVaults;
 	private final ExecutorService executorService;
 	private final VaultService vaultService;
-	private final AtomicReference<QuitResponse> quitResponse = new AtomicReference<>();
-	private final FxApplicationWindows appWindows;
+	private final AtomicReference<QuitResponse> quitResponse;
 	/* FXML */
 	public Button lockAndQuitButton;
 
+	private final Lazy<Scene> quitForcedScene;
+
 	@Inject
-	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, FxApplicationWindows appWindows) {
+	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, @FxmlScene(FxmlFile.QUIT_FORCED) Lazy<Scene> quitForcedScene, @QuitWindow AtomicReference<QuitResponse> quitResponse) {
 		this.window = window;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.executorService = executorService;
 		this.vaultService = vaultService;
-		this.appWindows = appWindows;
+		this.quitForcedScene = quitForcedScene;
+		this.quitResponse = quitResponse;
 		window.setOnCloseRequest(windowEvent -> cancel());
 	}
 
@@ -83,10 +88,8 @@ public class QuitController implements FxController {
 			LOG.warn("Locking failed", lockAllTask.getException());
 			lockAndQuitButton.setDisable(false);
 			lockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
-			appWindows.showQuitWindow(quitResponse.get(),true);
-			window.close();
+			window.setScene(quitForcedScene.get());
 		});
 		executorService.execute(lockAllTask);
 	}
-
 }

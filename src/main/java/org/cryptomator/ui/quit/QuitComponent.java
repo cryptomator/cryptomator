@@ -13,6 +13,7 @@ import org.cryptomator.ui.common.FxmlScene;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.awt.desktop.QuitResponse;
+import java.util.concurrent.atomic.AtomicReference;
 
 @QuitScoped
 @Subcomponent(modules = {QuitModule.class})
@@ -27,16 +28,15 @@ public interface QuitComponent {
 	@FxmlScene(FxmlFile.QUIT_FORCED)
 	Lazy<Scene> quitForcedScene();
 
-	QuitController quitController();
-	QuitForcedController quitForcedController();
+	@QuitWindow
+	AtomicReference<QuitResponse> quitResponse();
 
 	default void showQuitWindow(QuitResponse response, boolean forced) {
 		Stage stage = window();
+		quitResponse().set(response);
 		if(forced){
-			quitForcedController().updateQuitRequest(response);
 			stage.setScene(quitForcedScene().get());
 		} else{
-			quitController().updateQuitRequest(response);
 			stage.setScene(quitScene().get());
 		}
 		stage.sizeToScene();
@@ -45,10 +45,6 @@ public interface QuitComponent {
 
 	@Subcomponent.Builder
 	interface Builder {
-
 		QuitComponent build();
-
-
 	}
-
 }
