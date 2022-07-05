@@ -45,6 +45,7 @@ public class RegisterDeviceController implements FxController {
 	private final HubConfig hubConfig;
 	private final String bearerToken;
 	private final Lazy<Scene> registerSuccessScene;
+	private final Lazy<Scene> registerFailedScene;
 	private final String deviceId;
 	private final P384KeyPair keyPair;
 	private final CompletableFuture<JWEObject> result;
@@ -54,7 +55,7 @@ public class RegisterDeviceController implements FxController {
 	public TextField deviceNameField;
 
 	@Inject
-	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<JWEObject> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene) {
+	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<JWEObject> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
@@ -62,6 +63,7 @@ public class RegisterDeviceController implements FxController {
 		this.result = result;
 		this.bearerToken = Objects.requireNonNull(bearerToken.get());
 		this.registerSuccessScene = registerSuccessScene;
+		this.registerFailedScene = registerFailedScene;
 		this.jwt = JWT.decode(this.bearerToken);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().executor(executor).build();
@@ -81,8 +83,14 @@ public class RegisterDeviceController implements FxController {
 				.header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding()) //
-				.thenAcceptAsync(this::registrationSucceeded, Platform::runLater) //
-				.exceptionally(this::registrationFailed);
+				.handleAsync((response, throwable) -> {
+					if( response != null) {
+						this.registrationSucceeded(response);
+					} else {
+						this.registrationFailed(throwable);
+					}
+					return null;
+				}, Platform::runLater);
 	}
 
 	private void registrationSucceeded(HttpResponse<Void> voidHttpResponse) {
@@ -90,9 +98,10 @@ public class RegisterDeviceController implements FxController {
 		window.setScene(registerSuccessScene.get());
 	}
 
-	private Void registrationFailed(Throwable cause) {
+	private void registrationFailed(Throwable cause) {
+		LOG.warn("Device registration failed.", cause);
+		window.setScene(registerFailedScene.get());
 		result.completeExceptionally(cause);
-		return null;
 	}
 
 	@FXML
