@@ -55,11 +55,8 @@ public class GeneralPreferencesController implements FxController {
 	@FXML
 	public void initialize() {
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
-
 		autoCloseVaultsCheckbox.selectedProperty().bindBidirectional(settings.autoCloseVaults());
-
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
-
 		autoStartProvider.ifPresent(autoStart -> autoStartCheckbox.setSelected(autoStart.isEnabled()));
 
 		var keychainSettingsConverter = new KeychainProviderClassNameConverter(keychainAccessProviders);

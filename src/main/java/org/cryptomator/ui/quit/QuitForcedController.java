@@ -43,13 +43,6 @@ public class QuitForcedController implements FxController {
 		window.setOnCloseRequest(windowEvent -> cancel());
 	}
 
-	public void updateQuitRequest(QuitResponse newResponse) {
-		var oldResponse = quitResponse.getAndSet(newResponse);
-		if (oldResponse != null) {
-			oldResponse.cancelQuit();
-		}
-	}
-
 	private void respondToQuitRequest(Consumer<QuitResponse> action) {
 		var response = quitResponse.getAndSet(null);
 		if (response != null) {

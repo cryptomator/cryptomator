@@ -34,10 +34,9 @@ public class QuitController implements FxController {
 	private final ExecutorService executorService;
 	private final VaultService vaultService;
 	private final AtomicReference<QuitResponse> quitResponse;
+	private final Lazy<Scene> quitForcedScene;
 	/* FXML */
 	public Button lockAndQuitButton;
-
-	private final Lazy<Scene> quitForcedScene;
 
 	@Inject
 	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, @FxmlScene(FxmlFile.QUIT_FORCED) Lazy<Scene> quitForcedScene, @QuitWindow AtomicReference<QuitResponse> quitResponse) {

@@ -11,7 +11,6 @@ import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.quit.QuitComponent;
-
 import org.cryptomator.ui.unlock.UnlockComponent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -41,10 +40,7 @@ public class FxApplicationWindows {
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
-
-
 	private final QuitComponent.Builder quitWindowBuilder;
-
 	private final UnlockComponent.Factory unlockWorkflowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
@@ -57,7 +53,6 @@ public class FxApplicationWindows {
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
-
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
 		this.lockWorkflowFactory = lockWorkflowFactory;
@@ -112,7 +107,6 @@ public class FxApplicationWindows {
 	public void showQuitWindow(QuitResponse response, boolean forced) {
 			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
 	}
-
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {
