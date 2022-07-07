@@ -25,6 +25,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -33,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoadingScoped
@@ -69,6 +73,18 @@ public class RegisterDeviceController implements FxController {
 		this.httpClient = HttpClient.newBuilder().executor(executor).build();
 	}
 
+	public void initialize() {
+		deviceNameField.setText(System.getProperty("user.name") + "-" + determineHostname());
+	}
+
+	private String determineHostname() {
+		try {
+			return new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec("hostname").getInputStream())).readLine();
+		} catch (IOException e) {
+			return String.valueOf(ThreadLocalRandom.current().nextInt());
+		}
+	}
+
 	@FXML
 	public void register() {
 		var keyUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
@@ -84,7 +100,7 @@ public class RegisterDeviceController implements FxController {
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding()) //
 				.handleAsync((response, throwable) -> {
-					if( response != null) {
+					if (response != null) {
 						this.registrationSucceeded(response);
 					} else {
 						this.registrationFailed(throwable);
