@@ -49,8 +49,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	}
 
 	@FXML
-	public void back() {
-		window.setScene(recoverScene.get());
+	public void close() {
+		window.close();
 	}
 
 	@FXML
