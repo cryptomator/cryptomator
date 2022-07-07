@@ -6,9 +6,12 @@ import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nimbusds.jose.JWEObject;
+import dagger.Lazy;
 import org.cryptomator.common.settings.DeviceKey;
 import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.slf4j.Logger;
@@ -18,9 +21,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -40,6 +46,8 @@ public class RegisterDeviceController implements FxController {
 	private final Stage window;
 	private final HubConfig hubConfig;
 	private final String bearerToken;
+	private final Lazy<Scene> registerSuccessScene;
+	private final Lazy<Scene> registerFailedScene;
 	private final String deviceId;
 	private final P384KeyPair keyPair;
 	private final CompletableFuture<JWEObject> result;
@@ -49,16 +57,31 @@ public class RegisterDeviceController implements FxController {
 	public TextField deviceNameField;
 
 	@Inject
-	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<JWEObject> result, @Named("bearerToken") AtomicReference<String> bearerToken) {
+	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<JWEObject> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
 		this.keyPair = Objects.requireNonNull(deviceKey.get());
 		this.result = result;
 		this.bearerToken = Objects.requireNonNull(bearerToken.get());
+		this.registerSuccessScene = registerSuccessScene;
+		this.registerFailedScene = registerFailedScene;
 		this.jwt = JWT.decode(this.bearerToken);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().executor(executor).build();
+	}
+
+	public void initialize() {
+		deviceNameField.setText(determineHostname());
+	}
+
+	private String determineHostname() {
+		try {
+			var hostName = InetAddress.getLocalHost().getHostName();
+			return Objects.requireNonNullElse(hostName, "");
+		} catch (IOException e) {
+			return "";
+		}
 	}
 
 	@FXML
@@ -75,18 +98,25 @@ public class RegisterDeviceController implements FxController {
 				.header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding()) //
-				.thenAcceptAsync(this::registrationSucceeded, Platform::runLater) //
-				.exceptionally(this::registrationFailed);
+				.handleAsync((response, throwable) -> {
+					if (response != null) {
+						this.registrationSucceeded(response);
+					} else {
+						this.registrationFailed(throwable);
+					}
+					return null;
+				}, Platform::runLater);
 	}
 
 	private void registrationSucceeded(HttpResponse<Void> voidHttpResponse) {
-		LOG.info("Registered!");
-		window.close(); // TODO: show visual feedback "please wait for device authorization"
+		LOG.debug("Device registration for hub instance {} successful.", hubConfig.authSuccessUrl);
+		window.setScene(registerSuccessScene.get());
 	}
 
-	private Void registrationFailed(Throwable cause) {
+	private void registrationFailed(Throwable cause) {
+		LOG.warn("Device registration failed.", cause);
+		window.setScene(registerFailedScene.get());
 		result.completeExceptionally(cause);
-		return null;
 	}
 
 	@FXML

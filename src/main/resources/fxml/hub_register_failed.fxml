@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Circle?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.hub.UnauthorizedDeviceController"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.RegisterFailedController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
@@ -29,23 +29,21 @@
 					<Insets topRightBottomLeft="6"/>
 				</padding>
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="BAN" glyphSize="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%hub.unauthorized.message" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%hub.registerFailed.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="%hub.unauthorized.description" wrapText="true"/>
+			<Label text="%hub.registerFailed.description" wrapText="true"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
 				<buttons>
 					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" onAction="#close"/>
-					<!-- TODO: add request access button -->
-					<!--Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" onAction="#close"/-->
 				</buttons>
 			</ButtonBar>
 		</VBox>

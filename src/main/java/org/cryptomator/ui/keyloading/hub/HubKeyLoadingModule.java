@@ -45,6 +45,14 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
+	@Named("windowTitle")
+	static String provideWindowTitle(@KeyLoading Vault vault, ResourceBundle resourceBundle) {
+		return String.format(resourceBundle.getString("unlock.title"), vault.getDisplayName());
+	}
+
+
+	@Provides
+	@KeyLoadingScoped
 	@Named("deviceId")
 	static String provideDeviceId(DeviceKey deviceKey) {
 		var publicKey = Objects.requireNonNull(deviceKey.get()).getPublic().getEncoded();
@@ -99,6 +107,20 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS)
+	@KeyLoadingScoped
+	static Scene provideHubRegisterSuccessScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_SUCCESS);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.HUB_REGISTER_FAILED)
+	@KeyLoadingScoped
+	static Scene provideHubRegisterFailedScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_FAILED);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE)
 	@KeyLoadingScoped
 	static Scene provideHubUnauthorizedDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
@@ -126,6 +148,16 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(RegisterDeviceController.class)
 	abstract FxController bindRegisterDeviceController(RegisterDeviceController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RegisterSuccessController.class)
+	abstract FxController bindRegisterSuccessController(RegisterSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RegisterFailedController.class)
+	abstract FxController bindRegisterFailedController(RegisterFailedController controller);
 
 	@Binds
 	@IntoMap

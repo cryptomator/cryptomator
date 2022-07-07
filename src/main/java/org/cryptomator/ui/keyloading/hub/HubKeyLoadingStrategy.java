@@ -13,6 +13,7 @@ import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.unlock.UnlockCancelledException;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -35,8 +36,9 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	private final DeviceKey deviceKey;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, CompletableFuture<JWEObject> result, DeviceKey deviceKey) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, CompletableFuture<JWEObject> result, DeviceKey deviceKey, @Named("windowTitle") String windowTitle) {
 		this.window = window;
+		window.setTitle(windowTitle);
 		this.authFlowScene = authFlowScene;
 		this.result = result;
 		this.deviceKey = deviceKey;
