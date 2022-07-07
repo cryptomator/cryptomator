@@ -78,8 +78,10 @@ public class RegisterDeviceController implements FxController {
 	}
 
 	private String determineHostname() {
-		try {
-			return new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec("hostname").getInputStream())).readLine();
+		try (var inputStream = Runtime.getRuntime().exec("hostname").getInputStream(); //
+			 var streamReader = new InputStreamReader(inputStream); //
+			 var bufferedReader = new BufferedReader(streamReader)) {
+			return bufferedReader.readLine();
 		} catch (IOException e) {
 			return String.valueOf(ThreadLocalRandom.current().nextInt());
 		}
