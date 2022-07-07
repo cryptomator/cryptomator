@@ -25,9 +25,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -36,7 +35,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoadingScoped
@@ -74,16 +72,15 @@ public class RegisterDeviceController implements FxController {
 	}
 
 	public void initialize() {
-		deviceNameField.setText(System.getProperty("user.name") + "-" + determineHostname());
+		deviceNameField.setText(determineHostname());
 	}
 
 	private String determineHostname() {
-		try (var inputStream = Runtime.getRuntime().exec("hostname").getInputStream(); //
-			 var streamReader = new InputStreamReader(inputStream); //
-			 var bufferedReader = new BufferedReader(streamReader)) {
-			return bufferedReader.readLine();
+		try {
+			var hostName = InetAddress.getLocalHost().getHostName();
+			return Objects.requireNonNullElse(hostName, "");
 		} catch (IOException e) {
-			return String.valueOf(ThreadLocalRandom.current().nextInt());
+			return "";
 		}
 	}
 
