@@ -1,0 +1,52 @@
+name: Update Error Database
+
+on:
+  discussion:
+    types: [created, edited, category_changed, answered, unanswered]
+  discussion_comment:
+    types: [created, edited, deleted]
+
+jobs:
+  update-error-db:
+    runs-on: ubuntu-latest
+    if: github.event.discussion.category.name == 'Errors'
+    steps:
+      - name: Query Discussion Data
+        id: query-data
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const query = `query ($owner: String!, $name: String!, $discussionNumber: Int!) {
+              repository(owner: $owner, name: $name) {
+                discussion(number: $discussionNumber) {
+                  title
+                  bodyHTML
+                  url
+                  answer {
+                    bodyHTML
+                    url
+                  }
+                  comments {
+                    totalCount
+                  }
+                }
+              }
+            }`;
+            const variables = {
+              owner: context.repo.owner,
+              name: context.repo.repo,
+              discussionNumber: context.payload.discussion.number
+            }
+            return await github.graphql(query, variables)
+      - name: Transform JSON
+        id: transform-json
+        run: |
+          RESULT=$(echo ${JSON_DATA} | jq -s -c ".repository.discussion")
+          echo "::set-output name=result::${RESULT}"
+        env:
+          JSON_DATA: ${{ steps.query-data.outputs.result }}
+      - name: Update Database
+        run: |
+          echo TODO
+        env:
+          JSON_DATA: ${{ steps.transform-json.outputs.result }}
