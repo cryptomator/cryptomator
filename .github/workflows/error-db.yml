@@ -41,7 +41,7 @@ jobs:
       - name: Transform JSON
         id: transform-json
         run: |
-          RESULT=$(echo ${JSON_DATA} | jq -s -c ".repository.discussion")
+          RESULT=$(echo ${JSON_DATA} | jq -c '.repository.discussion | .comments = .comments.totalCount')
           echo "::set-output name=result::${RESULT}"
         env:
           JSON_DATA: ${{ steps.query-data.outputs.result }}
