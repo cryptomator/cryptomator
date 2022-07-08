@@ -19,10 +19,13 @@ jobs:
             const query = `query ($owner: String!, $name: String!, $discussionNumber: Int!) {
               repository(owner: $owner, name: $name) {
                 discussion(number: $discussionNumber) {
+                  id
+                  upvoteCount
                   title
                   url
                   answer {
                     url
+                    upvoteCount
                   }
                   comments {
                     totalCount
@@ -48,8 +51,8 @@ jobs:
       - name: Merge Error Code Data
         run: |
           jq -c '.' ${{ steps.get-gist.outputs.file }} > original.json
-          echo $DISCUSSION | jq -c '.repository.discussion | .comments = .comments.totalCount' | .answer = .answer.url | {(.title|tostring) : .}' > new.json
-          jq -s '.[0] * .[1]' new.json original.json > merged.json
+          echo $DISCUSSION | jq -c '.repository.discussion | .comments = .comments.totalCount | {(.id|tostring) : .}' > new.json
+          jq -s '.[0] * .[1]' original.json new.json > merged.json
         env:
           DISCUSSION: ${{ steps.query-data.outputs.result }}
       - name: Patch Gist
