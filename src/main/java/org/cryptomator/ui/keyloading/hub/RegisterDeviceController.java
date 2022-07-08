@@ -20,8 +20,12 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -32,6 +36,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +47,7 @@ public class RegisterDeviceController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RegisterDeviceController.class);
 	private static final Gson GSON = new GsonBuilder().setLenient().create();
+	private static final List<Integer> EXPECTED_RESPONSE_CODES = List.of(201, 409);
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -53,8 +59,10 @@ public class RegisterDeviceController implements FxController {
 	private final CompletableFuture<JWEObject> result;
 	private final DecodedJWT jwt;
 	private final HttpClient httpClient;
+	private final BooleanProperty deviceNameAlreadyExists = new SimpleBooleanProperty(false);
 
 	public TextField deviceNameField;
+	public Button registerBtn;
 
 	@Inject
 	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<JWEObject> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene) {
@@ -86,6 +94,10 @@ public class RegisterDeviceController implements FxController {
 
 	@FXML
 	public void register() {
+		deviceNameAlreadyExists.set(false);
+		registerBtn.setContentDisplay(ContentDisplay.LEFT);
+		registerBtn.setDisable(true);
+
 		var keyUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
 		var deviceKey = keyPair.getPublic().getEncoded();
 		var dto = new CreateDeviceDto();
@@ -98,9 +110,15 @@ public class RegisterDeviceController implements FxController {
 				.header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding()) //
-				.handleAsync((response, throwable) -> {
+				.thenApply(response -> {
+					if (EXPECTED_RESPONSE_CODES.contains(response.statusCode())) {
+						return response;
+					} else {
+						throw new RuntimeException("Server answered with unexpected status code " + response.statusCode());
+					}
+				}).handleAsync((response, throwable) -> {
 					if (response != null) {
-						this.registrationSucceeded(response);
+						this.handleResponse(response);
 					} else {
 						this.registrationFailed(throwable);
 					}
@@ -108,9 +126,17 @@ public class RegisterDeviceController implements FxController {
 				}, Platform::runLater);
 	}
 
-	private void registrationSucceeded(HttpResponse<Void> voidHttpResponse) {
-		LOG.debug("Device registration for hub instance {} successful.", hubConfig.authSuccessUrl);
-		window.setScene(registerSuccessScene.get());
+	private void handleResponse(HttpResponse<Void> voidHttpResponse) {
+		assert EXPECTED_RESPONSE_CODES.contains(voidHttpResponse.statusCode());
+
+		if (voidHttpResponse.statusCode() == 409) {
+			deviceNameAlreadyExists.set(true);
+			registerBtn.setContentDisplay(ContentDisplay.TEXT_ONLY);
+			registerBtn.setDisable(false);
+		} else {
+			LOG.debug("Device registration for hub instance {} successful.", hubConfig.authSuccessUrl);
+			window.setScene(registerSuccessScene.get());
+		}
 	}
 
 	private void registrationFailed(Throwable cause) {
@@ -132,6 +158,17 @@ public class RegisterDeviceController implements FxController {
 
 	public String getUserName() {
 		return jwt.getClaim("email").asString();
+	}
+
+
+	//--- Getters & Setters
+
+	public BooleanProperty deviceNameAlreadyExistsProperty() {
+		return deviceNameAlreadyExists;
+	}
+
+	public boolean getDeviceNameAlreadyExists() {
+		return deviceNameAlreadyExists.get();
 	}
 
 
