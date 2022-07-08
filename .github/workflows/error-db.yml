@@ -38,18 +38,20 @@ jobs:
             return await github.graphql(query, variables)
       - name: Get Gist
         id: get-gist
-        uses: sergeysova/gist-read-action@v1
+        uses: andymckay/get-gist-action@master
         with:
-          gist_id: accba9fb9555e7192271b85606f97230
-          file_name: errorcodes.json
+          gistURL: https://gist.github.com/cryptobot/accba9fb9555e7192271b85606f97230
+      - name: Show Gist contents
+        id: run
+        run: |
+          cat ${{ steps.get-gist.outputs.file }}
       - name: Merge Error Code Data
         run: |
-          echo $GIST_DATA | jq -c '.' > original.json
+          jq -c '.' ${{ steps.get-gist.outputs.file }} > original.json
           echo $DISCUSSION | jq -c '.repository.discussion | .comments = .comments.totalCount' | .answer = .answer.url | {(.title|tostring) : .}' > new.json
           jq -s '.[0] * .[1]' new.json original.json > merged.json
         env:
           DISCUSSION: ${{ steps.query-data.outputs.result }}
-          GIST_DATA: ${{ steps.get-gist.outputs.content }}
       - name: Patch Gist
         uses: exuanbo/actions-deploy-gist@v1
         with:
