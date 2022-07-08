@@ -20,10 +20,8 @@ jobs:
               repository(owner: $owner, name: $name) {
                 discussion(number: $discussionNumber) {
                   title
-                  bodyHTML
                   url
                   answer {
-                    bodyHTML
                     url
                   }
                   comments {
@@ -38,15 +36,24 @@ jobs:
               discussionNumber: context.payload.discussion.number
             }
             return await github.graphql(query, variables)
-      - name: Transform JSON
-        id: transform-json
+      - name: Get Gist
+        id: get-gist
+        uses: sergeysova/gist-read-action@v1
+        with:
+          gist_id: accba9fb9555e7192271b85606f97230
+          file_name: errorcodes.json
+      - name: Merge Error Code Data
         run: |
-          RESULT=$(echo ${JSON_DATA} | jq -c '.repository.discussion | .comments = .comments.totalCount')
-          echo "::set-output name=result::${RESULT}"
+          echo $GIST_DATA | jq -c '.' > original.json
+          echo $DISCUSSION | jq -c '.repository.discussion | .comments = .comments.totalCount' | .answer = .answer.url | {(.title|tostring) : .}' > new.json
+          jq -s '.[0] * .[1]' new.json original.json > merged.json
         env:
-          JSON_DATA: ${{ steps.query-data.outputs.result }}
-      - name: Update Database
-        run: |
-          echo TODO
-        env:
-          JSON_DATA: ${{ steps.transform-json.outputs.result }}
+          DISCUSSION: ${{ steps.query-data.outputs.result }}
+          GIST_DATA: ${{ steps.get-gist.outputs.content }}
+      - name: Patch Gist
+        uses: exuanbo/actions-deploy-gist@v1
+        with:
+          token: ${{ secrets.CRYPTOBOT_GIST_TOKEN }}
+          gist_id: accba9fb9555e7192271b85606f97230
+          gist_file_name: errorcodes.json
+          file_path: merged.json
