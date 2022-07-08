@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.hub.RegisterDeviceController"
@@ -48,12 +49,26 @@
 				<Label text="%hub.register.nameLabel" labelFor="$deviceNameField"/>
 				<TextField fx:id="deviceNameField" HBox.hgrow="ALWAYS"/>
 			</HBox>
+			<HBox alignment="TOP_RIGHT">
+				<Label text="%hub.register.occupiedMsg" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.deviceNameAlreadyExists}" graphicTextGap="6">
+					<padding>
+						<Insets top="6"/>
+					</padding>
+					<graphic>
+						<FontAwesome5IconView glyph="TIMES" styleClass="glyph-icon-red"/>
+					</graphic>
+				</Label>
+			</HBox>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CU">
 				<buttons>
-					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
-					<Button text="%hub.register.registerBtn" ButtonBar.buttonData="OTHER" defaultButton="true" onAction="#register"/>
+					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
+					<Button fx:id="registerBtn" text="%hub.register.registerBtn" ButtonBar.buttonData="OTHER" defaultButton="true" onAction="#register" contentDisplay="TEXT_ONLY" >
+						<graphic>
+							<FontAwesome5Spinner glyphSize="12" />
+						</graphic>
+					</Button>
 				</buttons>
 			</ButtonBar>
 		</VBox>
