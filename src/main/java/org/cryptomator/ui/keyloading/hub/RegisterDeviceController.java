@@ -81,6 +81,7 @@ public class RegisterDeviceController implements FxController {
 
 	public void initialize() {
 		deviceNameField.setText(determineHostname());
+		deviceNameField.textProperty().addListener(observable -> deviceNameAlreadyExists.set(false));
 	}
 
 	private String determineHostname() {
