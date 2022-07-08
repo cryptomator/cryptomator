@@ -44,10 +44,6 @@ jobs:
         uses: andymckay/get-gist-action@master
         with:
           gistURL: https://gist.github.com/cryptobot/accba9fb9555e7192271b85606f97230
-      - name: Show Gist contents
-        id: run
-        run: |
-          cat ${{ steps.get-gist.outputs.file }}
       - name: Merge Error Code Data
         run: |
           jq -c '.' ${{ steps.get-gist.outputs.file }} > original.json
