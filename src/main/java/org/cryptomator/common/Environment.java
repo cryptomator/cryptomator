@@ -47,7 +47,7 @@ public class Environment {
 		LOG.debug("{}: {}", KEYCHAIN_PATHS_PROP_NAME, System.getProperty(KEYCHAIN_PATHS_PROP_NAME));
 		LOG.debug("{}: {}", LOG_DIR_PROP_NAME, System.getProperty(LOG_DIR_PROP_NAME));
 		LOG.debug("{}: {}", PLUGIN_DIR_PROP_NAME, System.getProperty(PLUGIN_DIR_PROP_NAME));
-		LOG.debug("{} {}", MOUNTPOINT_DIR_PROP_NAME, System.getProperty(MOUNTPOINT_DIR_PROP_NAME));
+		LOG.debug("{}: {}", MOUNTPOINT_DIR_PROP_NAME, System.getProperty(MOUNTPOINT_DIR_PROP_NAME));
 		LOG.debug("{}: {}", MIN_PW_LENGTH_PROP_NAME, System.getProperty(MIN_PW_LENGTH_PROP_NAME));
 		LOG.debug("{}: {}", APP_VERSION_PROP_NAME, System.getProperty(APP_VERSION_PROP_NAME));
 		LOG.debug("{}: {}", BUILD_NUMBER_PROP_NAME, System.getProperty(BUILD_NUMBER_PROP_NAME));
