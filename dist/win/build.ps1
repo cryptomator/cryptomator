@@ -83,9 +83,9 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.pluginDir=`"~/AppData/Roaming/$AppName/Plugins`"" `
 	--java-options "-Dcryptomator.settingsPath=`"~/AppData/Roaming/$AppName/settings.json`"" `
 	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/$AppName/ipc.socket`"" `
-	--java-options "-Dcryptomator.keychainPath=`"~/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.mountPointsDir=`"~/$AppName`"" `
 	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
+	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
