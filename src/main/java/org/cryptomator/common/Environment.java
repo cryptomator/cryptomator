@@ -24,6 +24,16 @@ public class Environment {
 	private static final Path RELATIVE_HOME_DIR = Paths.get("~");
 	private static final char PATH_LIST_SEP = ':';
 	private static final int DEFAULT_MIN_PW_LENGTH = 8;
+	private static final String SETTINGS_PATH_PROP_NAME = "cryptomator.settingsPath";
+	private static final String IPC_SOCKET_PATH_PROP_NAME = "cryptomator.ipcSocketPath";
+	private static final String KEYCHAIN_PATHS_PROP_NAME = "cryptomator.integrationsWin.keychainPaths";
+	private static final String LOG_DIR_PROP_NAME = "cryptomator.logDir";
+	private static final String MOUNTPOINT_DIR_PROP_NAME = "cryptomator.mountPointsDir";
+	private static final String MIN_PW_LENGTH_PROP_NAME = "cryptomator.minPwLength";
+	private static final String APP_VERSION_PROP_NAME = "cryptomator.appVersion";
+	private static final String BUILD_NUMBER_PROP_NAME = "cryptomator.buildNumber";
+	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
+	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 
 	@Inject
 	public Environment() {
@@ -32,16 +42,16 @@ public class Environment {
 		LOG.debug("user.language: {}", System.getProperty("user.language"));
 		LOG.debug("user.region: {}", System.getProperty("user.region"));
 		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
-		LOG.debug("cryptomator.settingsPath: {}", System.getProperty("cryptomator.settingsPath"));
-		LOG.debug("cryptomator.ipcSocketPath: {}", System.getProperty("cryptomator.ipcSocketPath"));
-		LOG.debug("cryptomator.integrationsWin.keychainPaths: {}", System.getProperty("cryptomator.integrationsWin.keychainPaths"));
-		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
-		LOG.debug("cryptomator.pluginDir: {}", System.getProperty("cryptomator.pluginDir"));
-		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
-		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
-		LOG.debug("cryptomator.appVersion: {}", System.getProperty("cryptomator.appVersion"));
-		LOG.debug("cryptomator.buildNumber: {}", System.getProperty("cryptomator.buildNumber"));
-		LOG.debug("cryptomator.showTrayIcon: {}", System.getProperty("cryptomator.showTrayIcon"));
+		LOG.debug("{}: {}", SETTINGS_PATH_PROP_NAME, System.getProperty(SETTINGS_PATH_PROP_NAME));
+		LOG.debug("{}: {}", IPC_SOCKET_PATH_PROP_NAME, System.getProperty(IPC_SOCKET_PATH_PROP_NAME));
+		LOG.debug("{}: {}", KEYCHAIN_PATHS_PROP_NAME, System.getProperty(KEYCHAIN_PATHS_PROP_NAME));
+		LOG.debug("{}: {}", LOG_DIR_PROP_NAME, System.getProperty(LOG_DIR_PROP_NAME));
+		LOG.debug("{}: {}", PLUGIN_DIR_PROP_NAME, System.getProperty(PLUGIN_DIR_PROP_NAME));
+		LOG.debug("{} {}", MOUNTPOINT_DIR_PROP_NAME, System.getProperty(MOUNTPOINT_DIR_PROP_NAME));
+		LOG.debug("{}: {}", MIN_PW_LENGTH_PROP_NAME, System.getProperty(MIN_PW_LENGTH_PROP_NAME));
+		LOG.debug("{}: {}", APP_VERSION_PROP_NAME, System.getProperty(APP_VERSION_PROP_NAME));
+		LOG.debug("{}: {}", BUILD_NUMBER_PROP_NAME, System.getProperty(BUILD_NUMBER_PROP_NAME));
+		LOG.debug("{}: {}", TRAY_ICON_PROP_NAME, System.getProperty(TRAY_ICON_PROP_NAME));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -49,43 +59,43 @@ public class Environment {
 	}
 
 	public Stream<Path> getSettingsPath() {
-		return getPaths("cryptomator.settingsPath");
+		return getPaths(SETTINGS_PATH_PROP_NAME);
 	}
 
 	public Stream<Path> ipcSocketPath() {
-		return getPaths("cryptomator.ipcSocketPath");
+		return getPaths(IPC_SOCKET_PATH_PROP_NAME);
 	}
 
 	public Stream<Path> getKeychainPath() {
-		return getPaths("cryptomator.integrationsWin.keychainPaths");
+		return getPaths(KEYCHAIN_PATHS_PROP_NAME);
 	}
 
 	public Optional<Path> getLogDir() {
-		return getPath("cryptomator.logDir").map(this::replaceHomeDir);
+		return getPath(LOG_DIR_PROP_NAME).map(this::replaceHomeDir);
 	}
 
 	public Optional<Path> getPluginDir() {
-		return getPath("cryptomator.pluginDir").map(this::replaceHomeDir);
+		return getPath(PLUGIN_DIR_PROP_NAME).map(this::replaceHomeDir);
 	}
 
 	public Optional<Path> getMountPointsDir() {
-		return getPath("cryptomator.mountPointsDir").map(this::replaceHomeDir);
+		return getPath(MOUNTPOINT_DIR_PROP_NAME).map(this::replaceHomeDir);
 	}
 
 	public Optional<String> getAppVersion() {
-		return Optional.ofNullable(System.getProperty("cryptomator.appVersion"));
+		return Optional.ofNullable(System.getProperty(APP_VERSION_PROP_NAME));
 	}
 
 	public Optional<String> getBuildNumber() {
-		return Optional.ofNullable(System.getProperty("cryptomator.buildNumber"));
+		return Optional.ofNullable(System.getProperty(BUILD_NUMBER_PROP_NAME));
 	}
 
 	public int getMinPwLength() {
-		return getInt("cryptomator.minPwLength", DEFAULT_MIN_PW_LENGTH);
+		return getInt(MIN_PW_LENGTH_PROP_NAME, DEFAULT_MIN_PW_LENGTH);
 	}
 
 	public boolean showTrayIcon() {
-		return Boolean.getBoolean("cryptomator.showTrayIcon");
+		return Boolean.getBoolean(TRAY_ICON_PROP_NAME);
 	}
 
 	private int getInt(String propertyName, int defaultValue) {
