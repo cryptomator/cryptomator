@@ -34,7 +34,7 @@
 		<cryptomator.integrations.linux.version>1.1.0</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>1.3.4</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.3.3</cryptomator.dokany.version>
-		<cryptomator.webdav.version>1.2.7</cryptomator.webdav.version>
+		<cryptomator.webdav.version>1.2.8</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<javafx.version>18.0.1</javafx.version>
