@@ -9,6 +9,4 @@ public interface Constants {
 	String CRYPTOMATOR_FILENAME_GLOB = "*.cryptomator";
 	byte[] PEPPER = new byte[0];
 
-	//TODO: DOC base URL hier hinzufügen und dann abhängig von der Version verlinken (version gibts aus environment)
-
 }
