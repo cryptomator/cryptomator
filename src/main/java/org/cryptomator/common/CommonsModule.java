@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Comparator;
@@ -53,6 +54,14 @@ public abstract class CommonsModule {
 				gwcBIlJr6kUw7NKzeJt7r2rrsOyQoOG2nWc/Of/NBqA3mIZRHk5Aq1YupFdD26QE\
 				r0DzRyj4ixPIt38CQB8=\
 				""";
+	}
+
+	@Provides
+	@Singleton
+	@Named("docUri")
+	static URI provideDocURL(Environment env) {
+		var versionPath = env.getAppVersion().map(version -> version.substring(0, version.indexOf('.', 2))).orElse("latest");
+		return Constants.DOC_BASE_URL.resolve("en/" + versionPath + "/");
 	}
 
 	@Provides
