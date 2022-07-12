@@ -4,6 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
@@ -11,21 +12,24 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URI;
 
 @WrongFileAlertScoped
 public class WrongFileAlertController implements FxController {
 
-	private static final String DOCUMENTATION_URI = "https://docs.cryptomator.org/en/1.6/desktop/accessing-vaults/";
+	private static final String HELP_PATH = "desktop/accessing-vaults/";
 
 	private final Application app;
+	private final URI helpUri;
 	private final Stage window;
 
 	private Image screenshot;
 
 	@Inject
-	public WrongFileAlertController(@WrongFileAlertWindow Stage window, Application app) {
+	public WrongFileAlertController(@WrongFileAlertWindow Stage window, Application app, @Named("docUri") URI docUri) {
 		this.window = window;
 		this.app = app;
+		this.helpUri = docUri.resolve(HELP_PATH);
 	}
 
 	@FXML
@@ -46,7 +50,7 @@ public class WrongFileAlertController implements FxController {
 
 	@FXML
 	public void openDocumentation() {
-		app.getHostServices().showDocument(DOCUMENTATION_URI);
+		app.getHostServices().showDocument(helpUri.toString());
 	}
 
 	/* Getter */
