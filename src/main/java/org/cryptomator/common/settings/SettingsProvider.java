@@ -118,7 +118,7 @@ public class SettingsProvider implements Supplier<Settings> {
 		try {
 			Files.createDirectories(settingsPath.getParent());
 			Path tmpPath = settingsPath.resolveSibling(settingsPath.getFileName().toString() + ".tmp");
-			try (OutputStream out = Files.newOutputStream(tmpPath, StandardOpenOption.CREATE_NEW); //
+			try (OutputStream out = Files.newOutputStream(tmpPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE); //
 				 Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
 				gson.toJson(settings, writer);
 			}
