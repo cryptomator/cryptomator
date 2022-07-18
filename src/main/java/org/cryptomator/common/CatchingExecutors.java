@@ -77,11 +77,10 @@ public final class CatchingExecutors {
 	}
 
 	private static void afterExecuteFuture(Future<?> future) {
-		assert future.isDone();
 		try {
 			future.get();
 		} catch (CancellationException ce) {
-			callHandler(Thread.currentThread(), ce);
+			//Ignore
 		} catch (ExecutionException ee) {
 			callHandler(Thread.currentThread(), ee.getCause());
 		} catch (InterruptedException ie) {
