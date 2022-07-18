@@ -16,7 +16,6 @@ on:
 
 env:
   JAVA_VERSION: 17
-  WINFSP_MSI: https://github.com/winfsp/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi
 
 defaults:
   run:
@@ -238,8 +237,10 @@ jobs:
           "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
         shell: pwsh
       - name: Download WinFsp
-        run:
-          curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
+        run: |
+          $winfspUrl= (Select-String -Path ".\dist\win\bundle\resources\winfsp-download.url" -Pattern 'https:.*').Matches.Value
+          curl --output dist/win/bundle/resources/winfsp.msi -L $winfspUrl
+        shell: pwsh
       - name: Compile to wixObj file
         run: >
           "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
