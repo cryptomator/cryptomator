@@ -50,7 +50,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods" `
-	--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
@@ -83,6 +83,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.pluginDir=`"~/AppData/Roaming/$AppName/Plugins`"" `
 	--java-options "-Dcryptomator.settingsPath=`"~/AppData/Roaming/$AppName/settings.json`"" `
 	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/$AppName/ipc.socket`"" `
+	--java-options "-Dcryptomator.p12Path=`"~/AppData/Roaming/$AppName/key.p12`"" `
 	--java-options "-Dcryptomator.mountPointsDir=`"~/$AppName`"" `
 	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `

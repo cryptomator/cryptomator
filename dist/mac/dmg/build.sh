@@ -45,7 +45,7 @@ cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
@@ -75,6 +75,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/${APP_NAME}/Plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/${APP_NAME}/settings.json\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/${APP_NAME}/ipc.socket\"" \
+    --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/${APP_NAME}/key.p12\"" \
     --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"${APP_NAME}\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \

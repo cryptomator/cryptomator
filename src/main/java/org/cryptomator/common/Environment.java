@@ -27,6 +27,7 @@ public class Environment {
 	private static final String SETTINGS_PATH_PROP_NAME = "cryptomator.settingsPath";
 	private static final String IPC_SOCKET_PATH_PROP_NAME = "cryptomator.ipcSocketPath";
 	private static final String KEYCHAIN_PATHS_PROP_NAME = "cryptomator.integrationsWin.keychainPaths";
+	private static final String P12_PATH_PROP_NAME = "cryptomator.p12Path";
 	private static final String LOG_DIR_PROP_NAME = "cryptomator.logDir";
 	private static final String MOUNTPOINT_DIR_PROP_NAME = "cryptomator.mountPointsDir";
 	private static final String MIN_PW_LENGTH_PROP_NAME = "cryptomator.minPwLength";
@@ -52,6 +53,7 @@ public class Environment {
 		LOG.debug("{}: {}", APP_VERSION_PROP_NAME, System.getProperty(APP_VERSION_PROP_NAME));
 		LOG.debug("{}: {}", BUILD_NUMBER_PROP_NAME, System.getProperty(BUILD_NUMBER_PROP_NAME));
 		LOG.debug("{}: {}", TRAY_ICON_PROP_NAME, System.getProperty(TRAY_ICON_PROP_NAME));
+		LOG.debug("{}: {}", P12_PATH_PROP_NAME, System.getProperty(P12_PATH_PROP_NAME));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -60,6 +62,10 @@ public class Environment {
 
 	public Stream<Path> getSettingsPath() {
 		return getPaths(SETTINGS_PATH_PROP_NAME);
+	}
+
+	public Stream<Path> getP12Path() {
+		return getPaths(P12_PATH_PROP_NAME);
 	}
 
 	public Stream<Path> ipcSocketPath() {
