@@ -1,7 +1,10 @@
 package org.cryptomator.ui.quit;
 
+import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +13,7 @@ import javax.inject.Inject;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
@@ -29,25 +33,20 @@ public class QuitController implements FxController {
 	private final ObservableList<Vault> unlockedVaults;
 	private final ExecutorService executorService;
 	private final VaultService vaultService;
-	private final AtomicReference<QuitResponse> quitResponse = new AtomicReference<>();
-
+	private final AtomicReference<QuitResponse> quitResponse;
+	private final Lazy<Scene> quitForcedScene;
 	/* FXML */
 	public Button lockAndQuitButton;
 
 	@Inject
-	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService) {
+	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService, @FxmlScene(FxmlFile.QUIT_FORCED) Lazy<Scene> quitForcedScene, @QuitWindow AtomicReference<QuitResponse> quitResponse) {
 		this.window = window;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.executorService = executorService;
 		this.vaultService = vaultService;
+		this.quitForcedScene = quitForcedScene;
+		this.quitResponse = quitResponse;
 		window.setOnCloseRequest(windowEvent -> cancel());
-	}
-
-	public void updateQuitRequest(QuitResponse newResponse) {
-		var oldResponse = quitResponse.getAndSet(newResponse);
-		if (oldResponse != null) {
-			oldResponse.cancelQuit();
-		}
 	}
 
 	private void respondToQuitRequest(Consumer<QuitResponse> action) {
@@ -79,13 +78,8 @@ public class QuitController implements FxController {
 		});
 		lockAllTask.setOnFailed(evt -> {
 			LOG.warn("Locking failed", lockAllTask.getException());
-			lockAndQuitButton.setDisable(false);
-			lockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
-			// TODO: show force lock or force quit scene (and DO NOT cancelQuit() here!) (see https://github.com/cryptomator/cryptomator/pull/1416)
-			window.close();
-			respondToQuitRequest(QuitResponse::cancelQuit);
+			window.setScene(quitForcedScene.get());
 		});
 		executorService.execute(lockAllTask);
 	}
-
 }

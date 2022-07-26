@@ -5,25 +5,9 @@
 *.war
 *.ear
 
-# Eclipse Settings Files #
-.settings
-.project
-.classpath
-
 # Maven #
 target/
 pom.xml.versionsBackup
 
-# IntelliJ Settings Files (https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems) #
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/shelf
-.idea/dictionaries/**
-!.idea/dictionaries/dict_*
-.idea/compiler.xml
-.idea/jarRepositories.xml
-.idea/uiDesigner.xml
-.idea/**/libraries/
-*.iml
-
+# Java Crash Logs
 hs_err_pid*.log

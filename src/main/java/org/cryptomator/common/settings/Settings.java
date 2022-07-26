@@ -32,11 +32,12 @@ public class Settings {
 	public static final boolean DEFAULT_ASKED_FOR_UPDATE_CHECK = false;
 	public static final boolean DEFAULT_CHECK_FOR_UPDATES = false;
 	public static final boolean DEFAULT_START_HIDDEN = false;
+	public static final boolean DEFAULT_AUTO_CLOSE_VAULTS = false;
 	public static final int DEFAULT_PORT = 42427;
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final WebDavUrlScheme DEFAULT_GVFS_SCHEME = WebDavUrlScheme.DAV;
 	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = SystemUtils.IS_OS_WINDOWS ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
+	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = VolumeImpl.FUSE;
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	@Deprecated // to be changed to "whatever is available" eventually
 	public static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
@@ -51,6 +52,7 @@ public class Settings {
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UPDATES);
 	private final BooleanProperty startHidden = new SimpleBooleanProperty(DEFAULT_START_HIDDEN);
+	private final BooleanProperty autoCloseVaults = new SimpleBooleanProperty(DEFAULT_AUTO_CLOSE_VAULTS);
 	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
 	private final ObjectProperty<WebDavUrlScheme> preferredGvfsScheme = new SimpleObjectProperty<>(DEFAULT_GVFS_SCHEME);
@@ -82,6 +84,7 @@ public class Settings {
 		askedForUpdateCheck.addListener(this::somethingChanged);
 		checkForUpdates.addListener(this::somethingChanged);
 		startHidden.addListener(this::somethingChanged);
+		autoCloseVaults.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
 		numTrayNotifications.addListener(this::somethingChanged);
 		preferredGvfsScheme.addListener(this::somethingChanged);
@@ -131,6 +134,10 @@ public class Settings {
 
 	public BooleanProperty startHidden() {
 		return startHidden;
+	}
+
+	public BooleanProperty autoCloseVaults() {
+		return autoCloseVaults;
 	}
 
 	public IntegerProperty port() {

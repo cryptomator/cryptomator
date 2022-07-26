@@ -11,29 +11,47 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<VBox xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockSuccessController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
-	  spacing="12">
+	  spacing="12"
+	  alignment="TOP_LEFT">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+		<Group>
+			<StackPane>
+				<padding>
+					<Insets topRightBottomLeft="6"/>
+				</padding>
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="24"/>
 			</StackPane>
-			<VBox spacing="6">
-				<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayName}" wrapText="true" HBox.hgrow="ALWAYS"/>
-				<CheckBox text="%unlock.success.rememberChoice" fx:id="rememberChoiceCheckbox"/>
-			</VBox>
-		</HBox>
+		</Group>
 
-		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+		<VBox HBox.hgrow="ALWAYS">
+			<Label styleClass="label-large" text="%unlock.success.message" wrapText="true" textAlignment="LEFT">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
+
+			<FormattedLabel format="%unlock.success.description" arg1="${controller.vault.displayName}" wrapText="true"/>
+
+			<CheckBox text="%unlock.success.rememberChoice" fx:id="rememberChoiceCheckbox">
+				<padding>
+					<Insets top="18"/>
+				</padding>
+			</CheckBox>
+
+			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
 					<Button text="%generic.button.done" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
@@ -46,4 +64,4 @@
 			</ButtonBar>
 		</VBox>
 	</children>
-</VBox>
+</HBox>

@@ -30,41 +30,40 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final ExecutorService executor;
 	private final StringProperty recoveryKey;
-	private final Lazy<Scene> recoverScene;
+	private final Lazy<Scene> recoverResetPasswordSuccessScene;
 	private final FxApplicationWindows appWindows;
 
 	public NewPasswordController newPasswordController;
 
 	@Inject
-	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, FxApplicationWindows appWindows) {
+	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS) Lazy<Scene> recoverResetPasswordSuccessScene, FxApplicationWindows appWindows) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.executor = executor;
 		this.recoveryKey = recoveryKey;
-		this.recoverScene = recoverScene;
+		this.recoverResetPasswordSuccessScene = recoverResetPasswordSuccessScene;
 		this.appWindows = appWindows;
 	}
 
 	@FXML
-	public void back() {
-		window.setScene(recoverScene.get());
+	public void close() {
+		window.close();
 	}
 
 	@FXML
-	public void done() {
+	public void resetPassword() {
 		Task<Void> task = new ResetPasswordTask();
 		task.setOnScheduled(event -> {
 			LOG.debug("Using recovery key to reset password for {}.", vault.getDisplayablePath());
 		});
 		task.setOnSucceeded(event -> {
 			LOG.info("Used recovery key to reset password for {}.", vault.getDisplayablePath());
-			// TODO show success screen
-			window.close();
+			window.setScene(recoverResetPasswordSuccessScene.get());
 		});
 		task.setOnFailed(event -> {
 			LOG.error("Resetting password failed.", task.getException());
-			appWindows.showErrorWindow(task.getException(), window, recoverScene.get());
+			appWindows.showErrorWindow(task.getException(), window, null);
 		});
 		executor.submit(task);
 	}
@@ -85,11 +84,11 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 	/* Getter/Setter */
 
-	public ReadOnlyBooleanProperty validPasswordProperty() {
+	public ReadOnlyBooleanProperty passwordSufficientAndMatchingProperty() {
 		return newPasswordController.goodPasswordProperty();
 	}
 
-	public boolean isValidPassword() {
+	public boolean isPasswordSufficientAndMatching() {
 		return newPasswordController.isGoodPassword();
 	}
 

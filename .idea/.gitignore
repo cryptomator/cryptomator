@@ -1,0 +1,13 @@
+# see https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems
+
+# Default ignored files
+/shelf/
+/workspace.xml
+/usage.statistics.xml
+/dictionaries/
+
+# generated from Maven
+/jarRepositories.xml
+/modules.xml
+/*.iml
+/libraries/*.xml

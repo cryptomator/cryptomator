@@ -60,7 +60,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -89,7 +89,9 @@ jobs:
           --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
+          --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ steps.versions.outputs.revNum }}\""
           --mac-package-identifier org.cryptomator
@@ -187,33 +189,14 @@ jobs:
           Cryptomator-${VERSION_NO}.dmg dmg
         env:
           VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
-      - name: Install notarization credentials
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          # create temporary keychain
-          KEYCHAIN_PATH=$RUNNER_TEMP/notarization.keychain-db
-          security create-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
-          security set-keychain-settings -lut 900 ${KEYCHAIN_PATH}
-          security unlock-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
-
-          # import credentials from secrets
-          sudo xcode-select -s /Applications/Xcode_13.0.app
-          xcrun notarytool store-credentials "${NOTARIZATION_KEYCHAIN_PROFILE}" --apple-id "${NOTARIZATION_APPLE_ID}" --password "${NOTARIZATION_PW}" --team-id "${NOTARIZATION_TEAM_ID}" --keychain "${KEYCHAIN_PATH}"
-        env:
-          NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
-          NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
-          NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
-          NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
-          NOTARIZATION_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_NOTARIZATION_TMP_KEYCHAIN_PW }}
       - name: Notarize .dmg
         if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          KEYCHAIN_PATH=$RUNNER_TEMP/notarization.keychain-db
-          sudo xcode-select -s /Applications/Xcode_13.0.app
-          xcrun notarytool submit Cryptomator-*.dmg --keychain-profile "${NOTARIZATION_KEYCHAIN_PROFILE}" --keychain "${KEYCHAIN_PATH}" --wait
-          xcrun stapler staple Cryptomator-*.dmg
-        env:
-          NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
+        uses: cocoalibs/xcode-notarization-action@v1
+        with:
+          app-path: 'Cryptomator-*.dmg'
+          apple-id: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          password: ${{ secrets.MACOS_NOTARIZATION_PW }}
+          team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
       - name: Add possible alpha/beta tags to installer name
         run: mv Cryptomator-*.dmg Cryptomator-${{ steps.versions.outputs.semVerStr }}.dmg
       - name: Create detached GPG signature with key 615D449FE6E6A235
@@ -226,10 +209,6 @@ jobs:
       - name: Clean up codesign certificate
         if: ${{ always() }}
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
-        continue-on-error: true
-      - name: Clean up notarization credentials
-        if: ${{ always() }}
-        run: security delete-keychain $RUNNER_TEMP/notarization.keychain-db
         continue-on-error: true
       - name: Upload artifacts
         uses: actions/upload-artifact@v3

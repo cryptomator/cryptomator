@@ -48,9 +48,9 @@ public class EnvironmentTest {
 	}
 
 	@Test
-	@DisplayName("cryptomator.keychainPath=~/AppData/Roaming/Cryptomator/keychain.json")
+	@DisplayName("cryptomator.integrationsWin.keychainPaths=~/AppData/Roaming/Cryptomator/keychain.json")
 	public void testKeychainPath() {
-		System.setProperty("cryptomator.keychainPath", "~/AppData/Roaming/Cryptomator/keychain.json");
+		System.setProperty("cryptomator.integrationsWin.keychainPaths", "~/AppData/Roaming/Cryptomator/keychain.json");
 
 		List<Path> result = env.getKeychainPath().toList();
 		MatcherAssert.assertThat(result, Matchers.hasSize(1));

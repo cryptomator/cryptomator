@@ -4,35 +4,45 @@ import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 module org.cryptomator.desktop {
 	requires static org.jetbrains.annotations;
 
+	requires org.cryptomator.cryptolib;
+
 	requires org.cryptomator.cryptofs;
 	requires org.cryptomator.frontend.dokany;
 	requires org.cryptomator.frontend.fuse;
 	requires org.cryptomator.frontend.webdav;
 	requires org.cryptomator.integrations.api;
+	// jdk:
 	requires java.desktop;
 	requires java.net.http;
 	requires javafx.base;
 	requires javafx.graphics;
 	requires javafx.controls;
 	requires javafx.fxml;
-	requires com.tobiasdiez.easybind;
+	requires jdk.crypto.ec;
+	// 3rd party:
+	requires com.auth0.jwt;
 	requires com.google.common;
 	requires com.google.gson;
 	requires com.nulabinc.zxcvbn;
+	requires com.tobiasdiez.easybind;
+	requires dagger;
+	requires io.github.coffeelibs.tinyoauth2client;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
-	requires dagger;
-	requires com.auth0.jwt;
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
 	requires logback.classic;
 	requires logback.core;
+	requires com.nimbusds.jose.jwt;
 
 	exports org.cryptomator.ui.traymenu to org.cryptomator.integrations.api;
 	provides TrayMenuController with AwtTrayMenuController;
 
+	exports org.cryptomator.ui.keyloading.hub to com.fasterxml.jackson.databind;
+
 	opens org.cryptomator.common.settings to com.google.gson;
+	opens org.cryptomator.ui.keyloading.hub to com.google.gson, javafx.fxml;
 
 	opens org.cryptomator.launcher to javafx.graphics;
 

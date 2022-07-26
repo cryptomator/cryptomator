@@ -1,10 +1,10 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import org.cryptomator.common.Nullable;
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.common.Passphrase;
 import org.cryptomator.ui.common.WeakBindings;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;

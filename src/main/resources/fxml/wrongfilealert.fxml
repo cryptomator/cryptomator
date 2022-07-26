@@ -13,51 +13,59 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
-<VBox xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.Region?>
+<HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.wrongfilealert.WrongFileAlertController"
 	  prefWidth="600"
 	  maxWidth="-Infinity"
 	  minWidth="-Infinity"
 	  minHeight="-Infinity"
-	  spacing="24"
-	  alignment="CENTER">
+	  spacing="12"
+	  alignment="TOP_LEFT">
 	<padding>
-		<Insets topRightBottomLeft="24"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+		<Group>
+			<StackPane>
+				<padding>
+					<Insets topRightBottomLeft="6"/>
+				</padding>
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="INFO" glyphSize="24"/>
 			</StackPane>
-			<VBox spacing="6" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-				<Label styleClass="label-large" text="%wrongFileAlert.header.title" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
-				<Label text="%wrongFileAlert.header.lead" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
-			</VBox>
-		</HBox>
-
-		<ImageView VBox.vgrow="ALWAYS" fitWidth="550" preserveRatio="true" smooth="true" cache="true" image="${controller.screenshot}"/>
-
-		<VBox spacing="6" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-			<Label text="%wrongFileAlert.instruction.0" wrapText="true"/>
-			<VBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS" spacing="6">
+		</Group>
+		<VBox HBox.hgrow="ALWAYS">
+			<Label styleClass="label-large" text="%wrongFileAlert.message" wrapText="true" textAlignment="LEFT">
 				<padding>
-					<Insets left="12"/>
+					<Insets bottom="6" top="6"/>
 				</padding>
-				<Label text="%wrongFileAlert.instruction.1" wrapText="true"/>
-				<Label text="%wrongFileAlert.instruction.2" wrapText="true"/>
-				<Label text="%wrongFileAlert.instruction.3" wrapText="true"/>
-			</VBox>
-			<TextFlow styleClass="text-flow">
-				<Text text="%wrongFileAlert.link"/>
-				<Text text=" "/>
-				<Hyperlink styleClass="hyperlink-underline" text="docs.cryptomator.org" onAction="#openDocumentation"/>
-				<Text text="."/>
-			</TextFlow>
-		</VBox>
+			</Label>
+			<Label text="%wrongFileAlert.description" wrapText="true" textAlignment="LEFT" />
 
-		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<ImageView fitWidth="500" preserveRatio="true" smooth="true" cache="true" image="${controller.screenshot}"/>
+
+			<VBox spacing="6" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
+				<Label text="%wrongFileAlert.instruction.0" wrapText="true"/>
+				<VBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS" spacing="6">
+					<padding>
+						<Insets left="12"/>
+					</padding>
+					<Label text="%wrongFileAlert.instruction.1" wrapText="true"/>
+					<Label text="%wrongFileAlert.instruction.2" wrapText="true"/>
+					<Label text="%wrongFileAlert.instruction.3" wrapText="true"/>
+				</VBox>
+				<TextFlow styleClass="text-flow">
+					<Text text="%wrongFileAlert.link"/>
+					<Text text=" "/>
+					<Hyperlink styleClass="hyperlink-underline" text="docs.cryptomator.org" onAction="#openDocumentation"/>
+					<Text text="."/>
+				</TextFlow>
+			</VBox>
+
+			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
 				<buttons>
 					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" cancelButton="true" onAction="#close"/>
@@ -65,4 +73,4 @@
 			</ButtonBar>
 		</VBox>
 	</children>
-</VBox>
+</HBox>

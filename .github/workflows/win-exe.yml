@@ -8,10 +8,14 @@ on:
       version:
         description: 'Version'
         required: false
+      winget-release:
+        description: 'Release artifacts to winget'
+        required: true
+        type: boolean
+        default: false
 
 env:
   JAVA_VERSION: 17
-  WINFSP_MSI: https://github.com/winfsp/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi
 
 defaults:
   run:
@@ -65,7 +69,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -92,11 +96,13 @@ jobs:
           --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"~/AppData/Roaming/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.p12Path=\"~/AppData/Roaming/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"~/AppData/Roaming/Cryptomator/ipc.socket\""
-          --java-options "-Dcryptomator.keychainPath=\"~/AppData/Roaming/Cryptomator/keychain.json\""
           --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ steps.versions.outputs.revNum }}\""
+          --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
+          --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"~/AppData/Roaming/Cryptomator/keychain.json\""
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
       - name: Patch Application Directory
@@ -110,7 +116,7 @@ jobs:
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
-          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          certificatesha1: 5FC94CE149E5B511E621F53A060AC67CBD446B3A
           description: Cryptomator
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
@@ -153,7 +159,7 @@ jobs:
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
-          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          certificatesha1: 5FC94CE149E5B511E621F53A060AC67CBD446B3A
           description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
@@ -188,6 +194,20 @@ jobs:
       semVerStr: ${{ steps.versions.outputs.semVerStr }}
       revNum: ${{ steps.versions.outputs.revNum }}
 
+  publish-winget:
+    name: Publish on winget repo
+    runs-on: windows-latest
+    needs: [build-msi]
+    if: github.event.action == 'release' || inputs.winget-release
+    steps:
+      - name: Submit package to Windows Package Manager Community Repository
+        run: |
+          iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          $github = Get-Content '${{ github.event_path }}' | ConvertFrom-Json
+          $installerUrl = $github.release.assets | Where-Object -Property name -match 'Cryptomator-*.msi' | Select -ExpandProperty browser_download_url -First 1
+          .\wingetcreate.exe update Cryptomator.Cryptomator -s -v $github.release.tag_name -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+        shell: pwsh
+
   build-exe:
     name: Build .exe installer
     runs-on: windows-latest
@@ -218,8 +238,10 @@ jobs:
           "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
         shell: pwsh
       - name: Download WinFsp
-        run:
-          curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
+        run: |
+          $winfspUrl= (Select-String -Path ".\dist\win\bundle\resources\winfsp-download.url" -Pattern 'https:.*').Matches.Value
+          curl --output dist/win/bundle/resources/winfsp.msi -L $winfspUrl
+        shell: pwsh
       - name: Compile to wixObj file
         run: >
           "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
@@ -246,7 +268,7 @@ jobs:
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
-          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          certificatesha1: 5FC94CE149E5B511E621F53A060AC67CBD446B3A
           description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: tmp
@@ -260,7 +282,7 @@ jobs:
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
-          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          certificatesha1: 5FC94CE149E5B511E621F53A060AC67CBD446B3A
           description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer

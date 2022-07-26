@@ -26,6 +26,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 @RecoveryKeyScoped
 public class RecoveryKeyRecoverController implements FxController {
@@ -45,8 +46,9 @@ public class RecoveryKeyRecoverController implements FxController {
 	public TextArea textarea;
 
 	@Inject
-	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig unverifiedVaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene) {
+	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig unverifiedVaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene, ResourceBundle resourceBundle) {
 		this.window = window;
+		window.setTitle(resourceBundle.getString("recoveryKey.recover.title"));
 		this.vault = vault;
 		this.unverifiedVaultConfig = unverifiedVaultConfig;
 		this.recoveryKey = recoveryKey;

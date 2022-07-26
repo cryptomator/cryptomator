@@ -36,8 +36,6 @@ Cryptomator is provided free of charge as an open-source project despite the hig
   </tbody>
 </table>
 
-- [Jameson Lopp](https://www.lopp.net/)
-
 ---
 
 ## Introduction
@@ -82,7 +80,6 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 * JDK 17 (e.g. temurin)
 * Maven 3
-* Optional: OS-dependent build tools for native packaging (see [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Linux](https://github.com/cryptomator/builder-containers))
 
 ### Run Maven
 

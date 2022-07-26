@@ -10,6 +10,7 @@ package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Volume.VolumeException;
@@ -125,6 +126,7 @@ public class Vault {
 				.withKeyLoader(keyLoader) //
 				.withFlags(flags) //
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength().get()) //
+				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}

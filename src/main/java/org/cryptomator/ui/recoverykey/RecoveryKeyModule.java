@@ -53,9 +53,8 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@RecoveryKeyWindow
 	@RecoveryKeyScoped
-	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @Named("keyRecoveryOwner") Stage owner) {
+	static Stage provideStage(StageFactory factory, @Named("keyRecoveryOwner") Stage owner) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("recoveryKey.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
@@ -99,6 +98,14 @@ abstract class RecoveryKeyModule {
 		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyResetPasswordSuccessScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS);
+	}
+
+
 	// ------------------
 
 	@Binds
@@ -127,6 +134,11 @@ abstract class RecoveryKeyModule {
 	@IntoMap
 	@FxControllerKey(RecoveryKeyResetPasswordController.class)
 	abstract FxController bindRecoveryKeyResetPasswordController(RecoveryKeyResetPasswordController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyResetPasswordSuccessController.class)
+	abstract FxController bindRecoveryKeyResetPasswordSuccessController(RecoveryKeyResetPasswordSuccessController controller);
 
 	@Provides
 	@IntoMap

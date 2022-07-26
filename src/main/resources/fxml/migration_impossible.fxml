@@ -30,7 +30,7 @@
 			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="TIMES" glyphSize="24"/>
 		</StackPane>
 		<VBox spacing="6">
-			<Label styleClass="label-large" text="%migration.impossible.heading"/>
+			<Label styleClass="label-extra-large" text="%migration.impossible.heading"/>
 			<Label text="%migration.impossible.reason" wrapText="true" HBox.hgrow="ALWAYS"/>
 			<TextFlow>
 				<Text text="%migration.impossible.moreInfo"/>

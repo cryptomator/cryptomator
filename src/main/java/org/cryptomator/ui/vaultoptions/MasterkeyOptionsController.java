@@ -5,6 +5,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +26,18 @@ public class MasterkeyOptionsController implements FxController {
 	private final Stage window;
 	private final ChangePasswordComponent.Builder changePasswordWindow;
 	private final RecoveryKeyComponent.Builder recoveryKeyWindow;
+	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
 	private final KeychainManager keychain;
 	private final BooleanExpression passwordSaved;
 
 
 	@Inject
-	MasterkeyOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Builder recoveryKeyWindow, KeychainManager keychain) {
+	MasterkeyOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Builder recoveryKeyWindow, ForgetPasswordComponent.Builder forgetPasswordWindow, KeychainManager keychain) {
 		this.vault = vault;
 		this.window = window;
 		this.changePasswordWindow = changePasswordWindow;
 		this.recoveryKeyWindow = recoveryKeyWindow;
+		this.forgetPasswordWindow = forgetPasswordWindow;
 		this.keychain = keychain;
 		if (keychain.isSupported() && !keychain.isLocked()) {
 			this.passwordSaved = Bindings.createBooleanBinding(this::isPasswordSaved, keychain.getPassphraseStoredProperty(vault.getId()));
@@ -54,19 +57,14 @@ public class MasterkeyOptionsController implements FxController {
 	}
 
 	@FXML
-	public void showRecoverVaultDialogue() {
+	public void showRecoverVaultDialog() {
 		recoveryKeyWindow.vault(vault).owner(window).build().showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML
-	public void removePasswordFromKeychain() {
+	public void showForgetPasswordDialog() {
 		assert keychain.isSupported();
-		try {
-			keychain.deletePassphrase(vault.getId());
-		} catch (KeychainAccessException e) {
-			LOG.error("Failed to delete passphrase from system keychain.", e);
-		}
-		window.close();
+		forgetPasswordWindow.vault(vault).owner(window).build().showForgetPassword();
 	}
 
 	public BooleanExpression passwordSavedProperty() {

@@ -21,7 +21,7 @@
 					<FontAwesome5IconView glyph="KEY"/>
 				</graphic>
 			</Button>
-			<Button text="%vaultOptions.masterkey.forgetSavedPasswordBtn" onAction="#removePasswordFromKeychain" contentDisplay="LEFT" maxWidth="Infinity" visible="${controller.passwordSaved}"
+			<Button text="%vaultOptions.masterkey.forgetSavedPasswordBtn" onAction="#showForgetPasswordDialog" contentDisplay="LEFT" maxWidth="Infinity" visible="${controller.passwordSaved}"
 					managed="${controller.passwordSaved}">
 				<graphic>
 					<FontAwesome5IconView glyph="UNLINK"/>
@@ -36,7 +36,7 @@
 					<FontAwesome5IconView glyph="EYE"/>
 				</graphic>
 			</Button>
-			<Button text="%vaultOptions.masterkey.recoverPasswordBtn" onAction="#showRecoverVaultDialogue" contentDisplay="LEFT" maxWidth="Infinity">
+			<Button text="%vaultOptions.masterkey.recoverPasswordBtn" onAction="#showRecoverVaultDialog" contentDisplay="LEFT" maxWidth="Infinity">
 				<graphic>
 					<FontAwesome5IconView glyph="SYNC"/>
 				</graphic>

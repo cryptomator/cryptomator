@@ -116,7 +116,7 @@ public class MainWindowTitleController implements FxController {
 	}
 
 	@FXML
-	public void showDonationKeyPreferences() {
+	public void showContributePreferences() {
 		appWindows.showPreferencesWindow(SelectedPreferencesTab.CONTRIBUTE);
 	}
 

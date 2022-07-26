@@ -30,14 +30,14 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel styleClass="label-large" format="%generic.error.title" arg1="${controller.errorCode}"/>
-				<Label text="%generic.error.instruction" wrapText="true"/>
-				<Hyperlink styleClass="hyperlink-underline" text="%generic.error.hyperlink.lookup" onAction="#searchError" contentDisplay="LEFT">
+				<FormattedLabel styleClass="label-extra-large" format="%error.message" arg1="${controller.errorCode}"/>
+				<Label text="%error.description" wrapText="true"/>
+				<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.lookup" onAction="#searchError" contentDisplay="LEFT">
 					<graphic>
 						<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
 					</graphic>
 				</Hyperlink>
-				<Hyperlink styleClass="hyperlink-underline" text="%generic.error.hyperlink.report" onAction="#reportError" contentDisplay="LEFT">
+				<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.report" onAction="#reportError" contentDisplay="LEFT">
 					<graphic>
 						<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
 					</graphic>
@@ -47,7 +47,7 @@
 
 		<VBox spacing="6" VBox.vgrow="ALWAYS">
 			<HBox>
-				<Label text="%generic.error.technicalDetails"/>
+				<Label text="%error.technicalDetails"/>
 				<Region HBox.hgrow="ALWAYS"/>
 				<Hyperlink styleClass="hyperlink-underline" text="%generic.button.copy" onAction="#copyDetails" contentDisplay="LEFT" visible="${!controller.copiedDetails}" managed="${!controller.copiedDetails}">
 					<graphic>
