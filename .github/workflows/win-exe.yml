@@ -198,7 +198,7 @@ jobs:
     name: Publish on winget repo
     runs-on: windows-latest
     needs: [build-msi]
-    if: github.event.action == 'release' || inputs.winget-release
+    if: github.event.action == 'published' || inputs.winget-release
     steps:
       - name: Submit package to Windows Package Manager Community Repository
         run: |
