@@ -43,17 +43,21 @@ public class Environment {
 		LOG.debug("user.language: {}", System.getProperty("user.language"));
 		LOG.debug("user.region: {}", System.getProperty("user.region"));
 		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
-		LOG.debug("{}: {}", SETTINGS_PATH_PROP_NAME, System.getProperty(SETTINGS_PATH_PROP_NAME));
-		LOG.debug("{}: {}", IPC_SOCKET_PATH_PROP_NAME, System.getProperty(IPC_SOCKET_PATH_PROP_NAME));
-		LOG.debug("{}: {}", KEYCHAIN_PATHS_PROP_NAME, System.getProperty(KEYCHAIN_PATHS_PROP_NAME));
-		LOG.debug("{}: {}", LOG_DIR_PROP_NAME, System.getProperty(LOG_DIR_PROP_NAME));
-		LOG.debug("{}: {}", PLUGIN_DIR_PROP_NAME, System.getProperty(PLUGIN_DIR_PROP_NAME));
-		LOG.debug("{}: {}", MOUNTPOINT_DIR_PROP_NAME, System.getProperty(MOUNTPOINT_DIR_PROP_NAME));
-		LOG.debug("{}: {}", MIN_PW_LENGTH_PROP_NAME, System.getProperty(MIN_PW_LENGTH_PROP_NAME));
-		LOG.debug("{}: {}", APP_VERSION_PROP_NAME, System.getProperty(APP_VERSION_PROP_NAME));
-		LOG.debug("{}: {}", BUILD_NUMBER_PROP_NAME, System.getProperty(BUILD_NUMBER_PROP_NAME));
-		LOG.debug("{}: {}", TRAY_ICON_PROP_NAME, System.getProperty(TRAY_ICON_PROP_NAME));
-		LOG.debug("{}: {}", P12_PATH_PROP_NAME, System.getProperty(P12_PATH_PROP_NAME));
+		logCryptomatorSystemProperty(SETTINGS_PATH_PROP_NAME);
+		logCryptomatorSystemProperty(IPC_SOCKET_PATH_PROP_NAME);
+		logCryptomatorSystemProperty(KEYCHAIN_PATHS_PROP_NAME);
+		logCryptomatorSystemProperty(LOG_DIR_PROP_NAME);
+		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
+		logCryptomatorSystemProperty(MOUNTPOINT_DIR_PROP_NAME);
+		logCryptomatorSystemProperty(MIN_PW_LENGTH_PROP_NAME);
+		logCryptomatorSystemProperty(APP_VERSION_PROP_NAME);
+		logCryptomatorSystemProperty(BUILD_NUMBER_PROP_NAME);
+		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
+		logCryptomatorSystemProperty(P12_PATH_PROP_NAME);
+	}
+
+	private void logCryptomatorSystemProperty(String propertyName) {
+		LOG.debug("{}: {}", propertyName, System.getProperty(propertyName));
 	}
 
 	public boolean useCustomLogbackConfig() {
