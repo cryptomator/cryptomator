@@ -77,7 +77,7 @@ public class ErrorController implements FxController {
 		var enhancedTemplate = String.format(REPORT_BODY_TEMPLATE, //
 				System.getProperty("os.name"), //
 				System.getProperty("os.version"), //
-				environment.getAppVersion().orElse("undefined"), //
+				environment.getAppVersion(), //
 				environment.getBuildNumber().orElse("undefined"));
 		var body = URLEncoder.encode(enhancedTemplate, StandardCharsets.UTF_8);
 		application.getHostServices().showDocument(REPORT_URL_FORMAT.formatted(title, body));

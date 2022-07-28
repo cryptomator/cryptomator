@@ -92,8 +92,12 @@ public class Environment {
 		return getPath(MOUNTPOINT_DIR_PROP_NAME).map(this::replaceHomeDir);
 	}
 
-	public Optional<String> getAppVersion() {
-		return Optional.ofNullable(System.getProperty(APP_VERSION_PROP_NAME));
+	/**
+	 * Returns the app version defined in the {@value APP_VERSION_PROP_NAME} property or returns "SNAPSHOT".
+	 * @return App version or "SNAPSHOT", if undefined
+	 */
+	public String getAppVersion() {
+		return System.getProperty(APP_VERSION_PROP_NAME, "SNAPSHOT");
 	}
 
 	public Optional<String> getBuildNumber() {

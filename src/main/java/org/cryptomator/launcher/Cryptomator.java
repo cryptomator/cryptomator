@@ -81,7 +81,7 @@ public class Cryptomator {
 	private int run(String[] args) {
 		logConfig.init();
 		LOG.debug("Dagger graph initialized after {}ms", System.currentTimeMillis() - STARTUP_TIME);
-		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion().orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
+		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion(), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 		debugMode.initialize();
 		supportedLanguages.applyPreferred();
 

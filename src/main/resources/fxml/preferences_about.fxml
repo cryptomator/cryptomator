@@ -21,7 +21,7 @@
 				<Image url="@../img/logo.png"/>
 			</ImageView>
 			<VBox spacing="3" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-				<FormattedLabel styleClass="label-extra-large" format="Cryptomator %s" arg1="${controller.applicationVersion}"/>
+				<FormattedLabel styleClass="label-extra-large" format="Cryptomator %s" arg1="${controller.fullApplicationVersion}"/>
 				<Label text="© 2016 – 2022 Skymatic GmbH"/>
 			</VBox>
 		</HBox>
