@@ -19,7 +19,7 @@ fi
 export LD_PRELOAD=lib/app/libjffi.so
 
 if [ "$GTK2_PRESENT" -eq 0 ] && [ "$GTK3_PRESENT" -ne 0 ]; then
-	bin/Cryptomator-gtk2
+	bin/Cryptomator-gtk2 $@
 else
-	bin/Cryptomator
+	bin/Cryptomator $@
 fi
