@@ -75,7 +75,7 @@ public class ReceiveKeyController implements FxController {
 		try {
 			switch (response.statusCode()) {
 				case 200 -> retrievalSucceeded(response);
-				case 402 -> hubLicenseExceeded();
+				case 402 -> licenseExceeded();
 				case 403 -> accessNotGranted();
 				case 404 -> needsDeviceRegistration();
 				default -> throw new IOException("Unexpected response " + response.statusCode());
@@ -95,7 +95,7 @@ public class ReceiveKeyController implements FxController {
 		}
 	}
 
-	private void hubLicenseExceeded() {
+	private void licenseExceeded() {
 		window.setScene(licenseExceededScene.get());
 	}
 
