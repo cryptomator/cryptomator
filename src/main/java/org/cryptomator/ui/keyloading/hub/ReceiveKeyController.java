@@ -8,8 +8,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,10 +42,11 @@ public class ReceiveKeyController implements FxController {
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
 	private final URI vaultBaseUri;
+	private final Lazy<Scene> licenseExceededScene;
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<JWEObject> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<JWEObject> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_LICENSE_EXCEEDED) Lazy<Scene> licenseExceededScene) {
 		this.window = window;
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
@@ -55,6 +54,7 @@ public class ReceiveKeyController implements FxController {
 		this.registerDeviceScene = registerDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
 		this.vaultBaseUri = getVaultBaseUri(vault);
+		this.licenseExceededScene = licenseExceededScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().executor(executor).build();
 	}
@@ -75,6 +75,7 @@ public class ReceiveKeyController implements FxController {
 		try {
 			switch (response.statusCode()) {
 				case 200 -> retrievalSucceeded(response);
+				case 402 -> licenseExceeded();
 				case 403 -> accessNotGranted();
 				case 404 -> needsDeviceRegistration();
 				default -> throw new IOException("Unexpected response " + response.statusCode());
@@ -92,6 +93,10 @@ public class ReceiveKeyController implements FxController {
 		} catch (ParseException e) {
 			throw new IOException("Failed to parse JWE", e);
 		}
+	}
+
+	private void licenseExceeded() {
+		window.setScene(licenseExceededScene.get());
 	}
 
 	private void needsDeviceRegistration() {
