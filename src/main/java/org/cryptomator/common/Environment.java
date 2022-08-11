@@ -5,8 +5,6 @@ import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,7 +15,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-@Singleton
 public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
@@ -36,7 +33,6 @@ public class Environment {
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 
-	@Inject
 	public Environment() {
 		LOG.debug("user.home: {}", System.getProperty("user.home"));
 		LOG.debug("java.library.path: {}", System.getProperty("java.library.path"));
@@ -54,6 +50,13 @@ public class Environment {
 		logCryptomatorSystemProperty(BUILD_NUMBER_PROP_NAME);
 		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
 		logCryptomatorSystemProperty(P12_PATH_PROP_NAME);
+	}
+
+	public static Environment getInstance() {
+		final class Holder {
+			private static final Environment INSTANCE = new Environment();
+		}
+		return Holder.INSTANCE;
 	}
 
 	private void logCryptomatorSystemProperty(String propertyName) {
