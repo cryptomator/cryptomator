@@ -1,4 +1,6 @@
+import ch.qos.logback.classic.spi.Configurator;
 import org.cryptomator.integrations.tray.TrayMenuController;
+import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 open module org.cryptomator.desktop {
@@ -38,6 +40,7 @@ open module org.cryptomator.desktop {
 
 	exports org.cryptomator.ui.traymenu to org.cryptomator.integrations.api;
 	provides TrayMenuController with AwtTrayMenuController;
+	provides Configurator with LogbackConfiguratorFactory;
 
 	exports org.cryptomator.ui.keyloading.hub to com.fasterxml.jackson.databind;
 }

@@ -33,12 +33,14 @@ public class Environment {
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 
-	public Environment() {
-		LOG.debug("user.home: {}", System.getProperty("user.home"));
-		LOG.debug("java.library.path: {}", System.getProperty("java.library.path"));
-		LOG.debug("user.language: {}", System.getProperty("user.language"));
-		LOG.debug("user.region: {}", System.getProperty("user.region"));
-		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
+	private Environment() {}
+
+	public void log() {
+		LOG.info("user.home: {}", System.getProperty("user.home"));
+		LOG.info("java.library.path: {}", System.getProperty("java.library.path"));
+		LOG.info("user.language: {}", System.getProperty("user.language"));
+		LOG.info("user.region: {}", System.getProperty("user.region"));
+		LOG.info("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
 		logCryptomatorSystemProperty(SETTINGS_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(IPC_SOCKET_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(KEYCHAIN_PATHS_PROP_NAME);
@@ -54,13 +56,14 @@ public class Environment {
 
 	public static Environment getInstance() {
 		final class Holder {
+
 			private static final Environment INSTANCE = new Environment();
 		}
 		return Holder.INSTANCE;
 	}
 
 	private void logCryptomatorSystemProperty(String propertyName) {
-		LOG.debug("{}: {}", propertyName, System.getProperty(propertyName));
+		LOG.info("{}: {}", propertyName, System.getProperty(propertyName));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -97,6 +100,7 @@ public class Environment {
 
 	/**
 	 * Returns the app version defined in the {@value APP_VERSION_PROP_NAME} property or returns "SNAPSHOT".
+	 *
 	 * @return App version or "SNAPSHOT", if undefined
 	 */
 	public String getAppVersion() {
