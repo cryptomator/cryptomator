@@ -20,6 +20,8 @@ module org.cryptomator.desktop {
 	requires javafx.fxml;
 	requires jdk.crypto.ec;
 	// 3rd party:
+	requires ch.qos.logback.classic;
+	requires ch.qos.logback.core;
 	requires com.auth0.jwt;
 	requires com.google.common;
 	requires com.google.gson;
@@ -32,8 +34,6 @@ module org.cryptomator.desktop {
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
-	requires logback.classic;
-	requires logback.core;
 	requires com.nimbusds.jose.jwt;
 
 	exports org.cryptomator.ui.traymenu to org.cryptomator.integrations.api;
