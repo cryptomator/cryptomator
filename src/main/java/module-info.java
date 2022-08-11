@@ -1,7 +1,7 @@
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
-module org.cryptomator.desktop {
+open module org.cryptomator.desktop {
 	requires static org.jetbrains.annotations;
 
 	requires org.cryptomator.cryptolib;
@@ -40,31 +40,4 @@ module org.cryptomator.desktop {
 	provides TrayMenuController with AwtTrayMenuController;
 
 	exports org.cryptomator.ui.keyloading.hub to com.fasterxml.jackson.databind;
-
-	opens org.cryptomator.common.settings to com.google.gson;
-	opens org.cryptomator.ui.keyloading.hub to com.google.gson, javafx.fxml;
-
-	opens org.cryptomator.launcher to javafx.graphics;
-
-	opens org.cryptomator.common to javafx.fxml;
-	opens org.cryptomator.common.vaults to javafx.fxml;
-	opens org.cryptomator.ui.addvaultwizard to javafx.fxml;
-	opens org.cryptomator.ui.changepassword to javafx.fxml;
-	opens org.cryptomator.ui.common to javafx.fxml;
-	opens org.cryptomator.ui.controls to javafx.fxml;
-	opens org.cryptomator.ui.forgetPassword to javafx.fxml;
-	opens org.cryptomator.ui.fxapp to javafx.fxml;
-	opens org.cryptomator.ui.health to javafx.fxml;
-	opens org.cryptomator.ui.keyloading.masterkeyfile to javafx.fxml;
-	opens org.cryptomator.ui.lock to javafx.fxml;
-	opens org.cryptomator.ui.mainwindow to javafx.fxml;
-	opens org.cryptomator.ui.migration to javafx.fxml;
-	opens org.cryptomator.ui.preferences to javafx.fxml;
-	opens org.cryptomator.ui.quit to javafx.fxml;
-	opens org.cryptomator.ui.recoverykey to javafx.fxml;
-	opens org.cryptomator.ui.removevault to javafx.fxml;
-	opens org.cryptomator.ui.stats to javafx.fxml;
-	opens org.cryptomator.ui.unlock to javafx.fxml;
-	opens org.cryptomator.ui.vaultoptions to javafx.fxml;
-	opens org.cryptomator.ui.wrongfilealert to javafx.fxml;
 }
