@@ -62,8 +62,6 @@ public class LogbackConfigurator extends ContextAwareBase implements Configurato
 		if (useCustomCfg) {
 			addInfo("Using external logback configuration file.");
 		} else {
-			context.reset();
-
 			// configure appenders:
 			var stdout = stdOutAppender(context);
 			var noop = noopAppender(context);
