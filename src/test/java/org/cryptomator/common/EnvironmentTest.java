@@ -21,7 +21,7 @@ public class EnvironmentTest {
 
 	@BeforeEach
 	public void init() {
-		env = Mockito.spy(new Environment());
+		env = Mockito.spy(Environment.getInstance());
 		Mockito.when(env.getHomeDir()).thenReturn(Path.of("/home/testuser"));
 	}
 

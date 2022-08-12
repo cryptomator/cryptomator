@@ -41,6 +41,12 @@ public abstract class CommonsModule {
 	private static final int NUM_CORE_BG_THREADS = 6;
 	private static final long BG_THREAD_KEEPALIVE_SECONDS = 60l;
 
+	@Provides
+	@Singleton
+	static Environment provideEnvironment() {
+		return Environment.getInstance();
+	}
+
 	@SuppressWarnings("SpellCheckingInspection")
 	@Provides
 	@Singleton

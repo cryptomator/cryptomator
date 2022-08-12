@@ -5,8 +5,6 @@ import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,7 +15,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-@Singleton
 public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
@@ -36,13 +33,14 @@ public class Environment {
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 
-	@Inject
-	public Environment() {
-		LOG.debug("user.home: {}", System.getProperty("user.home"));
-		LOG.debug("java.library.path: {}", System.getProperty("java.library.path"));
-		LOG.debug("user.language: {}", System.getProperty("user.language"));
-		LOG.debug("user.region: {}", System.getProperty("user.region"));
-		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
+	private Environment() {}
+
+	public void log() {
+		LOG.info("user.home: {}", System.getProperty("user.home"));
+		LOG.info("java.library.path: {}", System.getProperty("java.library.path"));
+		LOG.info("user.language: {}", System.getProperty("user.language"));
+		LOG.info("user.region: {}", System.getProperty("user.region"));
+		LOG.info("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
 		logCryptomatorSystemProperty(SETTINGS_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(IPC_SOCKET_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(KEYCHAIN_PATHS_PROP_NAME);
@@ -56,8 +54,16 @@ public class Environment {
 		logCryptomatorSystemProperty(P12_PATH_PROP_NAME);
 	}
 
+	public static Environment getInstance() {
+		final class Holder {
+
+			private static final Environment INSTANCE = new Environment();
+		}
+		return Holder.INSTANCE;
+	}
+
 	private void logCryptomatorSystemProperty(String propertyName) {
-		LOG.debug("{}: {}", propertyName, System.getProperty(propertyName));
+		LOG.info("{}: {}", propertyName, System.getProperty(propertyName));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -94,6 +100,7 @@ public class Environment {
 
 	/**
 	 * Returns the app version defined in the {@value APP_VERSION_PROP_NAME} property or returns "SNAPSHOT".
+	 *
 	 * @return App version or "SNAPSHOT", if undefined
 	 */
 	public String getAppVersion() {
