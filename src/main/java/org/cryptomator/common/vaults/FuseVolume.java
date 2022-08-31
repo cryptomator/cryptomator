@@ -13,8 +13,6 @@ import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
 import org.cryptomator.frontend.fuse.mount.FuseNotSupportedException;
 import org.cryptomator.frontend.fuse.mount.Mount;
 import org.cryptomator.frontend.fuse.mount.Mounter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,7 +24,6 @@ import java.util.regex.Pattern;
 
 public class FuseVolume extends AbstractVolume {
 
-	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
 	private static final Pattern NON_WHITESPACE_OR_QUOTED = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'"); // Thanks to https://stackoverflow.com/a/366532
 
 	private final VaultSettings vaultSettings;

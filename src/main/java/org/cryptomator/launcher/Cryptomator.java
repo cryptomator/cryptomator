@@ -12,7 +12,6 @@ import org.cryptomator.common.Environment;
 import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
-import org.cryptomator.logging.LoggerConfiguration;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,6 @@ public class Cryptomator {
 	private static final CryptomatorComponent CRYPTOMATOR_COMPONENT = DaggerCryptomatorComponent.factory().create(STARTUP_TIME);
 	private static final Logger LOG = LoggerFactory.getLogger(Cryptomator.class);
 
-	private final LoggerConfiguration logConfig;
 	private final DebugMode debugMode;
 	private final SupportedLanguages supportedLanguages;
 	private final Environment env;
@@ -43,8 +41,7 @@ public class Cryptomator {
 	private final ShutdownHook shutdownHook;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, SupportedLanguages supportedLanguages, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook) {
-		this.logConfig = logConfig;
+	Cryptomator(DebugMode debugMode, SupportedLanguages supportedLanguages, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook) {
 		this.debugMode = debugMode;
 		this.supportedLanguages = supportedLanguages;
 		this.env = env;
@@ -79,9 +76,9 @@ public class Cryptomator {
 	 * @return Nonzero exit code in case of an error.
 	 */
 	private int run(String[] args) {
-		logConfig.init();
+		env.log();
 		LOG.debug("Dagger graph initialized after {}ms", System.currentTimeMillis() - STARTUP_TIME);
-		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion().orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
+		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion(), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 		debugMode.initialize();
 		supportedLanguages.applyPreferred();
 

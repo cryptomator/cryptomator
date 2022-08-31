@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -26,6 +27,18 @@ public final class CatchingExecutors {
 
 		public CatchingScheduledThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory) {
 			super(corePoolSize, threadFactory);
+		}
+
+		@Override
+		public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+			Runnable oneShot = () -> this.execute(command);
+			return super.scheduleAtFixedRate(oneShot, initialDelay, period, unit);
+		}
+
+		@Override
+		public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+			Runnable oneShot = () -> this.execute(command);
+			return super.scheduleWithFixedDelay(oneShot, initialDelay, delay, unit);
 		}
 
 		@Override
@@ -77,6 +90,12 @@ public final class CatchingExecutors {
 	}
 
 	private static void afterExecuteFuture(Future<?> future) {
+		if (future instanceof ScheduledFuture<?> && !future.isDone()) {
+			//we assume that this must be a repeated ScheduledFutureTask, where the done-status is only set when not executed anymore
+			//see also https://github.com/cryptomator/cryptomator/pull/2422
+			return;
+		}
+
 		try {
 			future.get();
 		} catch (CancellationException ce) {

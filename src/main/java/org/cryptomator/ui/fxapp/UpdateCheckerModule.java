@@ -56,7 +56,7 @@ public abstract class UpdateCheckerModule {
 	@FxApplicationScoped
 	static HttpRequest provideCheckForUpdatesRequest(Environment env) {
 		String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", //
-				env.getAppVersion().orElse("SNAPSHOT"), //
+				env.getAppVersion(), //
 				SystemUtils.OS_NAME, //
 				SystemUtils.OS_VERSION, //
 				SystemUtils.OS_ARCH); //

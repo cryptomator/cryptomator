@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.6.13</version>
+	<version>1.6.14</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -46,8 +46,8 @@
 		<javafx.version>18.0.1</javafx.version>
 		<jwt.version>4.0.0</jwt.version>
 		<nimbus-jose.version>9.23</nimbus-jose.version>
-		<logback.version>1.2.11</logback.version>
-		<slf4j.version>1.7.36</slf4j.version>
+		<logback.version>1.4.0</logback.version>
+		<slf4j.version>2.0.0</slf4j.version>
 		<tinyoauth2.version>0.5.1</tinyoauth2.version>
 		<zxcvbn.version>1.7.0</zxcvbn.version>
 

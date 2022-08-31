@@ -103,7 +103,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "language" -> settings.languageProperty().set(in.nextString());
 
 				default -> {
-					LOG.warn("Unsupported vault setting found in JSON: " + name);
+					LOG.warn("Unsupported vault setting found in JSON: {}", name);
 					in.skipValue();
 				}
 			}

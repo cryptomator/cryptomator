@@ -24,7 +24,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final UpdateChecker updateChecker;
 	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
 	private final ReadOnlyStringProperty latestVersion;
-	private final ReadOnlyStringProperty currentVersion;
+	private final String currentVersion;
 	private final BooleanBinding updateAvailable;
 
 	/* FXML */
@@ -38,7 +38,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.latestVersion = updateChecker.latestVersionProperty();
 		this.updateAvailable = latestVersion.isNotNull();
-		this.currentVersion = updateChecker.currentVersionProperty();
+		this.currentVersion = updateChecker.getCurrentVersion();
 	}
 
 	public void initialize() {
@@ -73,12 +73,8 @@ public class UpdatesPreferencesController implements FxController {
 		return latestVersion.get();
 	}
 
-	public ReadOnlyStringProperty currentVersionProperty() {
-		return currentVersion;
-	}
-
 	public String getCurrentVersion() {
-		return currentVersion.get();
+		return currentVersion;
 	}
 
 	public BooleanBinding updateAvailableProperty() {

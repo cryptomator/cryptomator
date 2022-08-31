@@ -93,6 +93,13 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_LICENSE_EXCEEDED)
+	@KeyLoadingScoped
+	static Scene provideLicenseExceededScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_LICENSE_EXCEEDED);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_RECEIVE_KEY)
 	@KeyLoadingScoped
 	static Scene provideHubReceiveKeyScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
@@ -138,6 +145,11 @@ public abstract class HubKeyLoadingModule {
 	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
 		return new NewPasswordController(resourceBundle, strengthRater);
 	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(LicenseExceededController.class)
+	abstract FxController bindLicenseExceededController(LicenseExceededController controller);
 
 	@Binds
 	@IntoMap

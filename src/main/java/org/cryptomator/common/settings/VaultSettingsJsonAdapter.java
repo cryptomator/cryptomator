@@ -73,7 +73,7 @@ class VaultSettingsJsonAdapter {
 				case "autoLockWhenIdle" -> autoLockWhenIdle = in.nextBoolean();
 				case "autoLockIdleSeconds" -> autoLockIdleSeconds = in.nextInt();
 				default -> {
-					LOG.warn("Unsupported vault setting found in JSON: " + name);
+					LOG.warn("Unsupported vault setting found in JSON: {}", name);
 					in.skipValue();
 				}
 			}

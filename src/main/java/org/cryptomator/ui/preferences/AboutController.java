@@ -18,14 +18,14 @@ public class AboutController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(AboutController.class);
 
 	private final String thirdPartyLicenseText;
-	private final String applicationVersion;
+	private final String fullApplicationVersion;
 
 	@Inject
 	AboutController(UpdateChecker updateChecker, Environment environment) {
 		this.thirdPartyLicenseText = loadThirdPartyLicenseFile();
-		StringBuilder sb = new StringBuilder(updateChecker.currentVersionProperty().get());
+		StringBuilder sb = new StringBuilder(environment.getAppVersion());
 		environment.getBuildNumber().ifPresent(s -> sb.append(" (").append(s).append(')'));
-		this.applicationVersion = sb.toString();
+		this.fullApplicationVersion = sb.toString();
 	}
 
 	private static String loadThirdPartyLicenseFile() {
@@ -43,7 +43,7 @@ public class AboutController implements FxController {
 		return thirdPartyLicenseText;
 	}
 
-	public String getApplicationVersion() {
-		return applicationVersion;
+	public String getFullApplicationVersion() {
+		return fullApplicationVersion;
 	}
 }

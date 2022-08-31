@@ -12,15 +12,15 @@ import javafx.beans.value.ObservableValue;
  * <p>
  * During creation the consumer can optionally define actions to be executed everytime before the animation starts and after it stops.
  */
-public class AutoAnimator<T extends Animation> {
+public class AutoAnimator {
 
-	private final T animation;
+	private final Animation animation;
 	private final ObservableValue<Boolean> condition;
 	private final Runnable beforeStart;
 	private final Runnable afterStop;
 	private final Subscription sub;
 
-	AutoAnimator(T animation, ObservableValue<Boolean> condition, Runnable beforeStart, Runnable afterStop) {
+	AutoAnimator(Animation animation, ObservableValue<Boolean> condition, Runnable beforeStart, Runnable afterStop) {
 		this.animation = animation;
 		this.condition = condition;
 		this.beforeStart = beforeStart;
@@ -52,7 +52,7 @@ public class AutoAnimator<T extends Animation> {
 
 	public static class Builder {
 
-		private Animation animation;
+		private final Animation animation;
 		private ObservableValue<Boolean> condition = new SimpleBooleanProperty(true);
 		private Runnable beforeStart = () -> {};
 		private Runnable afterStop = () -> {};

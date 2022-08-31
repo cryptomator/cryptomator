@@ -5,8 +5,6 @@ import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,7 +15,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-@Singleton
 public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
@@ -36,24 +33,37 @@ public class Environment {
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 
-	@Inject
-	public Environment() {
-		LOG.debug("user.home: {}", System.getProperty("user.home"));
-		LOG.debug("java.library.path: {}", System.getProperty("java.library.path"));
-		LOG.debug("user.language: {}", System.getProperty("user.language"));
-		LOG.debug("user.region: {}", System.getProperty("user.region"));
-		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
-		LOG.debug("{}: {}", SETTINGS_PATH_PROP_NAME, System.getProperty(SETTINGS_PATH_PROP_NAME));
-		LOG.debug("{}: {}", IPC_SOCKET_PATH_PROP_NAME, System.getProperty(IPC_SOCKET_PATH_PROP_NAME));
-		LOG.debug("{}: {}", KEYCHAIN_PATHS_PROP_NAME, System.getProperty(KEYCHAIN_PATHS_PROP_NAME));
-		LOG.debug("{}: {}", LOG_DIR_PROP_NAME, System.getProperty(LOG_DIR_PROP_NAME));
-		LOG.debug("{}: {}", PLUGIN_DIR_PROP_NAME, System.getProperty(PLUGIN_DIR_PROP_NAME));
-		LOG.debug("{}: {}", MOUNTPOINT_DIR_PROP_NAME, System.getProperty(MOUNTPOINT_DIR_PROP_NAME));
-		LOG.debug("{}: {}", MIN_PW_LENGTH_PROP_NAME, System.getProperty(MIN_PW_LENGTH_PROP_NAME));
-		LOG.debug("{}: {}", APP_VERSION_PROP_NAME, System.getProperty(APP_VERSION_PROP_NAME));
-		LOG.debug("{}: {}", BUILD_NUMBER_PROP_NAME, System.getProperty(BUILD_NUMBER_PROP_NAME));
-		LOG.debug("{}: {}", TRAY_ICON_PROP_NAME, System.getProperty(TRAY_ICON_PROP_NAME));
-		LOG.debug("{}: {}", P12_PATH_PROP_NAME, System.getProperty(P12_PATH_PROP_NAME));
+	private Environment() {}
+
+	public void log() {
+		LOG.info("user.home: {}", System.getProperty("user.home"));
+		LOG.info("java.library.path: {}", System.getProperty("java.library.path"));
+		LOG.info("user.language: {}", System.getProperty("user.language"));
+		LOG.info("user.region: {}", System.getProperty("user.region"));
+		LOG.info("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
+		logCryptomatorSystemProperty(SETTINGS_PATH_PROP_NAME);
+		logCryptomatorSystemProperty(IPC_SOCKET_PATH_PROP_NAME);
+		logCryptomatorSystemProperty(KEYCHAIN_PATHS_PROP_NAME);
+		logCryptomatorSystemProperty(LOG_DIR_PROP_NAME);
+		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
+		logCryptomatorSystemProperty(MOUNTPOINT_DIR_PROP_NAME);
+		logCryptomatorSystemProperty(MIN_PW_LENGTH_PROP_NAME);
+		logCryptomatorSystemProperty(APP_VERSION_PROP_NAME);
+		logCryptomatorSystemProperty(BUILD_NUMBER_PROP_NAME);
+		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
+		logCryptomatorSystemProperty(P12_PATH_PROP_NAME);
+	}
+
+	public static Environment getInstance() {
+		final class Holder {
+
+			private static final Environment INSTANCE = new Environment();
+		}
+		return Holder.INSTANCE;
+	}
+
+	private void logCryptomatorSystemProperty(String propertyName) {
+		LOG.info("{}: {}", propertyName, System.getProperty(propertyName));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -88,8 +98,13 @@ public class Environment {
 		return getPath(MOUNTPOINT_DIR_PROP_NAME).map(this::replaceHomeDir);
 	}
 
-	public Optional<String> getAppVersion() {
-		return Optional.ofNullable(System.getProperty(APP_VERSION_PROP_NAME));
+	/**
+	 * Returns the app version defined in the {@value APP_VERSION_PROP_NAME} property or returns "SNAPSHOT".
+	 *
+	 * @return App version or "SNAPSHOT", if undefined
+	 */
+	public String getAppVersion() {
+		return System.getProperty(APP_VERSION_PROP_NAME, "SNAPSHOT");
 	}
 
 	public Optional<String> getBuildNumber() {

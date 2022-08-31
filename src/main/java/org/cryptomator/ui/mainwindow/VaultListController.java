@@ -69,11 +69,15 @@ public class VaultListController implements FxController {
 			}
 		});
 		vaultList.addEventFilter(MouseEvent.MOUSE_RELEASED, this::deselect);
+
+		//don't show context menu when no vault selected
 		vaultList.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, request -> {
 			if (selectedVault.get() == null) {
 				request.consume();
 			}
 		});
+
+		//show removeVaultDialog on certain key press
 		vaultList.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
 			if (keyEvent.getCode() == KeyCode.DELETE) {
 				pressedShortcutToRemoveVault();
