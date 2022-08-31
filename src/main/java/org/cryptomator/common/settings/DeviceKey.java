@@ -2,7 +2,6 @@ package org.cryptomator.common.settings;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
-import com.google.common.io.BaseEncoding;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.cryptolib.common.P384KeyPair;
@@ -16,6 +15,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.UUID;
@@ -26,6 +26,7 @@ public class DeviceKey {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DeviceKey.class);
 	private static final String KEYCHAIN_KEY = "cryptomator-device-p12";
+	private static final String KEYCHAIN_DISPLAY_NAME = "Cryptomator Device Keypair .p12 Passphrase";
 
 	private final KeychainManager keychainManager;
 	private final Environment env;
@@ -46,15 +47,16 @@ public class DeviceKey {
 	}
 
 	private P384KeyPair loadOrCreate() throws DeviceKeyRetrievalException {
+		Path p12File = env.getP12Path().findFirst().orElseThrow(() -> new DeviceKeyRetrievalException("No path for .p12 file configured"));
 		char[] passphrase = null;
 		try {
 			passphrase = keychainManager.loadPassphrase(KEYCHAIN_KEY);
-			if (passphrase != null) {
-				return loadExistingKeyPair(passphrase);
-			} else {
+			if (passphrase != null && Files.isRegularFile(p12File)) {
+				return loadExistingKeyPair(passphrase, p12File);
+			} else { // (re)generate new key pair if either file or password got lost
 				passphrase = randomPassword();
-				keychainManager.storePassphrase(KEYCHAIN_KEY, CharBuffer.wrap(passphrase));
-				return createAndStoreNewKeyPair(passphrase);
+				keychainManager.storePassphrase(KEYCHAIN_KEY, KEYCHAIN_DISPLAY_NAME, CharBuffer.wrap(passphrase));
+				return createAndStoreNewKeyPair(passphrase, p12File);
 			}
 		} catch (KeychainAccessException e) {
 			throw new DeviceKeyRetrievalException("Failed to access system keychain", e);
@@ -67,19 +69,12 @@ public class DeviceKey {
 		}
 	}
 
-	private P384KeyPair loadExistingKeyPair(char[] passphrase) throws IOException {
-		var p12File = env.getP12Path() //
-				.filter(Files::isRegularFile) //
-				.findFirst() //
-				.orElseThrow(() -> new DeviceKeyRetrievalException("Missing .p12 file"));
+	private P384KeyPair loadExistingKeyPair(char[] passphrase, Path p12File) throws IOException {
 		LOG.debug("Loading existing device key from {}", p12File);
 		return P384KeyPair.load(p12File, passphrase);
 	}
 
-	private P384KeyPair createAndStoreNewKeyPair(char[] passphrase) throws IOException {
-		var p12File = env.getP12Path() //
-				.findFirst() //
-				.orElseThrow(() -> new DeviceKeyRetrievalException("No path for .p12 file configured"));
+	private P384KeyPair createAndStoreNewKeyPair(char[] passphrase, Path p12File) throws IOException {
 		var keyPair = P384KeyPair.generate();
 		LOG.debug("Store new device key to {}", p12File);
 		keyPair.store(p12File, passphrase);
