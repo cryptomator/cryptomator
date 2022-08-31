@@ -28,7 +28,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -92,9 +91,9 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static ScheduledExecutorService provideScheduledExecutorService(ShutdownHook shutdownHook) {
+	static OneShotScheduledExecutorService provideScheduledExecutorService(ShutdownHook shutdownHook) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
-		ScheduledExecutorService executorService = new CatchingExecutors.CatchingScheduledThreadPoolExecutor(NUM_SCHEDULER_THREADS, r -> {
+		OneShotScheduledExecutorService executorService = new CatchingExecutors.CatchingScheduledThreadPoolExecutor(NUM_SCHEDULER_THREADS, r -> {
 			String name = String.format("App Scheduled Executor %02d", threadNumber.getAndIncrement());
 			Thread t = new Thread(r);
 			t.setName(name);

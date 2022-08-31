@@ -7,25 +7,34 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javafx.collections.ObservableList;
 import java.time.Instant;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
 
 @Singleton
 public class AutoLocker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AutoLocker.class);
 
-	private final ScheduledExecutorService scheduler;
+	private final ExecutorService executor;
+	private final Timer timer;
 	private final ObservableList<Vault> vaultList;
 
 	@Inject
-	public AutoLocker(ScheduledExecutorService scheduler, ObservableList<Vault> vaultList) {
-		this.scheduler = scheduler;
+	public AutoLocker(ExecutorService executor, ObservableList<Vault> vaultList) {
+		this.executor = executor;
+		this.timer = new Timer("AutoLocker.SubmitTickTimer", true);
 		this.vaultList = vaultList;
 	}
 
 	public void init() {
-		scheduler.scheduleAtFixedRate(this::tick, 0, 1, TimeUnit.MINUTES);
+		TimerTask submitTask = new TimerTask() {
+			@Override
+			public void run() {
+				executor.submit(AutoLocker.this::tick);
+			}
+		};
+		timer.scheduleAtFixedRate(submitTask, 0, 1000);
 	}
 
 	private void tick() {
@@ -46,7 +55,6 @@ public class AutoLocker {
 
 	private boolean exceedsIdleTime(Vault vault) {
 		assert vault.isUnlocked();
-		// TODO: shouldn't we read these properties from within FX Application Thread?
 		if (vault.getVaultSettings().autoLockWhenIdle().get()) {
 			int maxIdleSeconds = vault.getVaultSettings().autoLockIdleSeconds().get();
 			var deadline = vault.getStats().getLastActivity().plusSeconds(maxIdleSeconds);

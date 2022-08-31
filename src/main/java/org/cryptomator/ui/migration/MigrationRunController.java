@@ -38,10 +38,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
@@ -55,7 +54,6 @@ public class MigrationRunController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final ExecutorService executor;
-	private final ScheduledExecutorService scheduler;
 	private final KeychainManager keychain;
 	private final ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability;
 	private final FxApplicationWindows appWindows;
@@ -73,11 +71,10 @@ public class MigrationRunController implements FxController {
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, KeychainManager keychain, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, @FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE) Lazy<Scene> impossibleScene, FxApplicationWindows appWindows) {
+	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, KeychainManager keychain, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, @FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE) Lazy<Scene> impossibleScene, FxApplicationWindows appWindows) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
-		this.scheduler = scheduler;
 		this.keychain = keychain;
 		this.missingCapability = missingCapability;
 		this.appWindows = appWindows;
@@ -113,11 +110,13 @@ public class MigrationRunController implements FxController {
 		CharSequence password = passwordField.getCharacters();
 		vault.stateProperty().transition(VaultState.Value.NEEDS_MIGRATION, VaultState.Value.PROCESSING);
 		passwordField.setDisable(true);
-		ScheduledFuture<?> progressSyncTask = scheduler.scheduleAtFixedRate(() -> {
-			Platform.runLater(() -> {
-				migrationProgress.set(volatileMigrationProgress);
-			});
-		}, 0, MIGRATION_PROGRESS_UPDATE_MILLIS, TimeUnit.MILLISECONDS);
+		Timer timer = new Timer("Migration Timer", true);
+		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				Platform.runLater(() -> migrationProgress.set(volatileMigrationProgress));
+			}
+		}, 0, MIGRATION_PROGRESS_UPDATE_MILLIS);
 		Tasks.create(() -> {
 			Migrators migrators = Migrators.get();
 			migrators.migrate(vault.getPath(), VAULTCONFIG_FILENAME, MASTERKEY_FILENAME, password, this::migrationProgressChanged, this::migrationRequiresInput);
@@ -154,7 +153,7 @@ public class MigrationRunController implements FxController {
 			appWindows.showErrorWindow(e, window, startScene.get());
 		}).andFinally(() -> {
 			passwordField.setDisable(false);
-			progressSyncTask.cancel(true);
+			timer.cancel();
 		}).runOnce(executor);
 	}
 

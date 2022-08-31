@@ -15,6 +15,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.OneShotScheduledExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,11 +50,11 @@ public class SettingsProvider implements Supplier<Settings> {
 	private final AtomicReference<ScheduledFuture<?>> scheduledSaveCmd = new AtomicReference<>();
 	private final Supplier<Settings> settings = Suppliers.memoize(this::load);
 	private final Environment env;
-	private final ScheduledExecutorService scheduler;
+	private final OneShotScheduledExecutorService scheduler;
 	private final Gson gson;
 
 	@Inject
-	public SettingsProvider(SettingsJsonAdapter settingsJsonAdapter, Environment env, ScheduledExecutorService scheduler) {
+	public SettingsProvider(SettingsJsonAdapter settingsJsonAdapter, Environment env, OneShotScheduledExecutorService scheduler) {
 		this.env = env;
 		this.scheduler = scheduler;
 		this.gson = new GsonBuilder() //

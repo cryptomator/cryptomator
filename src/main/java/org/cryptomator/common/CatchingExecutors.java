@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,11 +23,27 @@ public final class CatchingExecutors {
 
 	private CatchingExecutors() { /* NO-OP */ }
 
-	public static class CatchingScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor {
+	/**
+	 * Executor suitable for scheduled, <em>one-shot</em> Tasks.
+	 * <p>
+	 * This executor does not support repeated execution, see {@link OneShotScheduledExecutorService}
+	 */
+	public static class CatchingScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor implements OneShotScheduledExecutorService {
 
 		public CatchingScheduledThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory) {
 			super(corePoolSize, threadFactory);
 		}
+
+		@Override
+		public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initalDelay, long period, TimeUnit unit) {
+			throw new UnsupportedOperationException("This is an one-shot executor service!");
+		}
+
+		@Override
+		public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initalDelay, long delay, TimeUnit unit) {
+			throw new UnsupportedOperationException("This is an one-shot executor service!");
+		}
+
 
 		@Override
 		protected void afterExecute(Runnable runnable, Throwable throwable) {
@@ -77,6 +94,7 @@ public final class CatchingExecutors {
 	}
 
 	private static void afterExecuteFuture(Future<?> future) {
+		assert future.isDone(): "Future must be in Done state to extract possible exception";
 		try {
 			future.get();
 		} catch (CancellationException ce) {
