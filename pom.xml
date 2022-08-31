@@ -46,8 +46,8 @@
 		<javafx.version>18.0.1</javafx.version>
 		<jwt.version>4.0.0</jwt.version>
 		<nimbus-jose.version>9.23</nimbus-jose.version>
-		<logback.version>1.3.0-beta0</logback.version>
-		<slf4j.version>2.0.0-beta1</slf4j.version>
+		<logback.version>1.4.0</logback.version>
+		<slf4j.version>2.0.0</slf4j.version>
 		<tinyoauth2.version>0.5.1</tinyoauth2.version>
 		<zxcvbn.version>1.7.0</zxcvbn.version>
 

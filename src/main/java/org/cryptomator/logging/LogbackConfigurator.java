@@ -55,7 +55,7 @@ public class LogbackConfigurator extends ContextAwareBase implements Configurato
 	}
 
 	@Override
-	public void configure(LoggerContext context) {
+	public ExecutionStatus configure(LoggerContext context) {
 		var useCustomCfg = Environment.getInstance().useCustomLogbackConfig();
 		var logDir = Environment.getInstance().getLogDir().orElse(null);
 
@@ -85,6 +85,7 @@ public class LogbackConfigurator extends ContextAwareBase implements Configurato
 			upgrades.addAppender(file);
 			upgrades.setAdditive(false);
 		}
+		return ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY;
 	}
 
 	private Appender<ILoggingEvent> noopAppender(LoggerContext context) {
