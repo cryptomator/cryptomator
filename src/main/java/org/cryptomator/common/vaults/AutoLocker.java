@@ -46,7 +46,6 @@ public class AutoLocker {
 
 	private boolean exceedsIdleTime(Vault vault) {
 		assert vault.isUnlocked();
-		// TODO: shouldn't we read these properties from within FX Application Thread?
 		if (vault.getVaultSettings().autoLockWhenIdle().get()) {
 			int maxIdleSeconds = vault.getVaultSettings().autoLockIdleSeconds().get();
 			var deadline = vault.getStats().getLastActivity().plusSeconds(maxIdleSeconds);
