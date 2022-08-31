@@ -7,7 +7,6 @@ open module org.cryptomator.desktop {
 	requires static org.jetbrains.annotations;
 
 	requires org.cryptomator.cryptolib;
-
 	requires org.cryptomator.cryptofs;
 	requires org.cryptomator.frontend.dokany;
 	requires org.cryptomator.frontend.fuse;
@@ -27,6 +26,7 @@ open module org.cryptomator.desktop {
 	requires com.auth0.jwt;
 	requires com.google.common;
 	requires com.google.gson;
+	requires com.nimbusds.jose.jwt;
 	requires com.nulabinc.zxcvbn;
 	requires com.tobiasdiez.easybind;
 	requires dagger;
@@ -36,11 +36,7 @@ open module org.cryptomator.desktop {
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
-	requires com.nimbusds.jose.jwt;
 
-	exports org.cryptomator.ui.traymenu to org.cryptomator.integrations.api;
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
-
-	exports org.cryptomator.ui.keyloading.hub to com.fasterxml.jackson.databind;
 }
