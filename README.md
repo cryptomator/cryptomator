@@ -86,7 +86,7 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ```
 mvn clean install
-# or mvn clean install -Pwindows
+# or mvn clean install -Pwin
 # or mvn clean install -Pmac
 # or mvn clean install -Plinux
 ```
