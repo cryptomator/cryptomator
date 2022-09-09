@@ -15,7 +15,7 @@ env:
 jobs:
   build:
     name: Build Cryptomator.app
-    runs-on: macos-11
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -25,6 +25,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
+          architecture: aarch64
           cache: 'maven'
       - id: versions 
         name: Apply version information
@@ -186,7 +187,7 @@ jobs:
           --icon ".background" 128 758
           --icon ".fseventsd" 320 758
           --icon ".VolumeIcon.icns" 512 758
-          Cryptomator-${VERSION_NO}.dmg dmg
+          Cryptomator-${VERSION_NO}-arm64.dmg dmg
         env:
           VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
       - name: Notarize .dmg
@@ -198,7 +199,7 @@ jobs:
           password: ${{ secrets.MACOS_NOTARIZATION_PW }}
           team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
       - name: Add possible alpha/beta tags to installer name
-        run: mv Cryptomator-*.dmg Cryptomator-${{ steps.versions.outputs.semVerStr }}.dmg
+        run: mv Cryptomator-*.dmg Cryptomator-${{ steps.versions.outputs.semVerStr }}-arm64.dmg
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
