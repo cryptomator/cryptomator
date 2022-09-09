@@ -21,7 +21,9 @@ jobs:
       matrix:
         include:
         - os: macos-11
+          architecture: x64
         - os: [self-hosted, macOS, ARM64]
+          architecture: aarch64
           dmg-suffix: -arm64
     steps:
       - uses: actions/checkout@v2
@@ -32,6 +34,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
+          architecture: ${{ matrix.architecture }}
           cache: 'maven'
       - id: versions 
         name: Apply version information
