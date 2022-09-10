@@ -33,6 +33,7 @@ class VaultSettingsJsonAdapter {
 		out.name("actionAfterUnlock").value(value.actionAfterUnlock().get().name());
 		out.name("autoLockWhenIdle").value(value.autoLockWhenIdle().get());
 		out.name("autoLockIdleSeconds").value(value.autoLockIdleSeconds().get());
+		out.name("disableAllKeyrings").value(value.disableAllKeyrings().get());
 		out.endObject();
 	}
 
@@ -52,6 +53,7 @@ class VaultSettingsJsonAdapter {
 		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
 		boolean autoLockWhenIdle = VaultSettings.DEFAULT_AUTOLOCK_WHEN_IDLE;
 		int autoLockIdleSeconds = VaultSettings.DEFAULT_AUTOLOCK_IDLE_SECONDS;
+		boolean disableAllKeyrings = VaultSettings.DEFAULT_DISABLE_ALL_KEYRINGS;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -72,6 +74,7 @@ class VaultSettingsJsonAdapter {
 				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
 				case "autoLockWhenIdle" -> autoLockWhenIdle = in.nextBoolean();
 				case "autoLockIdleSeconds" -> autoLockIdleSeconds = in.nextInt();
+				case "disableAllKeyrings" -> disableAllKeyrings = in.nextBoolean();
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: {}", name);
 					in.skipValue();
@@ -98,6 +101,7 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.actionAfterUnlock().set(actionAfterUnlock);
 		vaultSettings.autoLockWhenIdle().set(autoLockWhenIdle);
 		vaultSettings.autoLockIdleSeconds().set(autoLockIdleSeconds);
+		vaultSettings.disableAllKeyrings().set(disableAllKeyrings);
 		return vaultSettings;
 	}
 
