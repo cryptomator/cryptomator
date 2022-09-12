@@ -29,6 +29,7 @@
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.general.keychainBackend"/>
 			<ChoiceBox fx:id="keychainBackendChoiceBox"/>
+			<CheckBox text="%preferences.general.disableAllKeyrings" fx:id="disableAllKeyringsCheckbox"/>
 		</HBox>
 
 		<Region VBox.vgrow="ALWAYS"/>
