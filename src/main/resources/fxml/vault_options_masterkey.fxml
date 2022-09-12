@@ -6,7 +6,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.CheckBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.MasterkeyOptionsController"
@@ -29,9 +28,6 @@
 				</graphic>
 			</Button>
 		</VBox>
-
-		<CheckBox text="%vaultOptions.masterkey.disableAllKeyrings" fx:id="disableAllKeyringsCheckbox"/>
-
 		<Region VBox.vgrow="ALWAYS"/>
 		<Label maxWidth="-Infinity" text="%vaultOptions.masterkey.recoveryKeyExplanation" wrapText="true"/>
 		<VBox spacing="6" alignment="CENTER">

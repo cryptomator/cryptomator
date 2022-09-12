@@ -2,28 +2,31 @@ package org.cryptomator.ui.vaultoptions;
 
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 
 @VaultOptionsScoped
 public class MasterkeyOptionsController implements FxController {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyOptionsController.class);
 
 	private final Vault vault;
 	private final Stage window;
 	private final ChangePasswordComponent.Builder changePasswordWindow;
 	private final RecoveryKeyComponent.Builder recoveryKeyWindow;
 	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
-	public CheckBox disableAllKeyringsCheckbox;
 	private final KeychainManager keychain;
 	private final BooleanExpression passwordSaved;
 
@@ -41,11 +44,6 @@ public class MasterkeyOptionsController implements FxController {
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
 		}
-	}
-
-	@FXML
-	public void initialize() {
-		this.disableAllKeyringsCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().disableAllKeyrings());
 	}
 
 	@FXML

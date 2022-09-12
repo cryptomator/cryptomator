@@ -32,7 +32,6 @@ public class VaultSettings {
 
 	public static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
 	public static final boolean DEFAULT_REVEAL_AFTER_MOUNT = true;
-	public static final boolean DEFAULT_DISABLE_ALL_KEYRINGS = false;
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
@@ -49,7 +48,6 @@ public class VaultSettings {
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REVEAL_AFTER_MOUNT);
-	private final BooleanProperty disableAllKeyrings = new SimpleBooleanProperty(DEFAULT_DISABLE_ALL_KEYRINGS);
 	private final BooleanProperty useCustomMountPath = new SimpleBooleanProperty(DEFAULT_USES_INDIVIDUAL_MOUNTPATH);
 	private final StringProperty customMountPath = new SimpleStringProperty();
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
@@ -66,7 +64,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, disableAllKeyrings, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, maxCleartextFilenameLength, actionAfterUnlock, autoLockWhenIdle, autoLockIdleSeconds};
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, maxCleartextFilenameLength, actionAfterUnlock, autoLockWhenIdle, autoLockIdleSeconds};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -130,8 +128,6 @@ public class VaultSettings {
 	public BooleanProperty revealAfterMount() {
 		return revealAfterMount;
 	}
-
-	public BooleanProperty disableAllKeyrings() {return disableAllKeyrings; }
 
 	public BooleanProperty useCustomMountPath() {
 		return useCustomMountPath;
