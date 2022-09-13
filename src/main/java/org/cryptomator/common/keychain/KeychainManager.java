@@ -3,6 +3,7 @@ package org.cryptomator.common.keychain;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
@@ -20,10 +21,12 @@ public class KeychainManager implements KeychainAccessProvider {
 
 	private final ObjectExpression<KeychainAccessProvider> keychain;
 	private final LoadingCache<String, BooleanProperty> passphraseStoredProperties;
+	private final Settings settings;
 
 	@Inject
-	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain) {
+	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain, Settings settings) {
 		this.keychain = selectedKeychain;
+		this.settings = settings;
 		this.passphraseStoredProperties = CacheBuilder.newBuilder() //
 				.weakValues() //
 				.build(CacheLoader.from(this::createStoredPassphraseProperty));
@@ -72,7 +75,7 @@ public class KeychainManager implements KeychainAccessProvider {
 
 	@Override
 	public boolean isSupported() {
-		return keychain.getValue() != null;
+		return keychain.getValue() != null && !settings.disableAllKeyrings().get();
 	}
 
 	@Override

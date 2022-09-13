@@ -66,6 +66,7 @@ public class GeneralPreferencesController implements FxController {
 		keychainBackendChoiceBox.setConverter(new KeychainProviderDisplayNameConverter());
 		Bindings.bindBidirectional(settings.keychainProvider(), keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 		disableAllKeyringsCheckbox.selectedProperty().bindBidirectional(settings.disableAllKeyrings());
+		keychainBackendChoiceBox.disableProperty().bindBidirectional(settings.disableAllKeyrings());
 	}
 
 	public boolean isAutoStartSupported() {

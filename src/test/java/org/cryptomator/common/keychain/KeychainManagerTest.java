@@ -1,12 +1,14 @@
 package org.cryptomator.common.keychain;
 
 
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -19,9 +21,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KeychainManagerTest {
 
+	private static final Settings settings = Mockito.mock(Settings.class);
 	@Test
 	public void testStoreAndLoad() throws KeychainAccessException {
-		KeychainManager keychainManager = new KeychainManager(new SimpleObjectProperty<>(new MapKeychainAccess()));
+		KeychainManager keychainManager = new KeychainManager(new SimpleObjectProperty<>(new MapKeychainAccess()), settings);
 		keychainManager.storePassphrase("test", "Test", "asd");
 		Assertions.assertArrayEquals("asd".toCharArray(), keychainManager.loadPassphrase("test"));
 	}
@@ -39,7 +42,7 @@ public class KeychainManagerTest {
 
 		@Test
 		public void testPropertyChangesWhenStoringPassword() throws KeychainAccessException, InterruptedException {
-			KeychainManager keychainManager = new KeychainManager(new SimpleObjectProperty<>(new MapKeychainAccess()));
+			KeychainManager keychainManager = new KeychainManager(new SimpleObjectProperty<>(new MapKeychainAccess()), settings);
 			ReadOnlyBooleanProperty property = keychainManager.getPassphraseStoredProperty("test");
 			Assertions.assertFalse(property.get());
 
