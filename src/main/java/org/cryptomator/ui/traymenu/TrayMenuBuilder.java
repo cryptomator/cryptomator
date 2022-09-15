@@ -31,8 +31,8 @@ import java.util.ResourceBundle;
 public class TrayMenuBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuBuilder.class);
-	private static final String TRAY_ICON_MAC = "/img/tray_icon_mac.png";
-	private static final String TRAY_ICON = "/img/tray_icon.png";
+	private static final String TRAY_ICON_MAC = "/img/tray_icon_mac@2x.png";
+	private static final String TRAY_ICON = "/img/window_icon_32.png";
 
 	private final ResourceBundle resourceBundle;
 	private final VaultService vaultService;
