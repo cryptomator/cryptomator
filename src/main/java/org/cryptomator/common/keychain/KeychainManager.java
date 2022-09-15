@@ -93,6 +93,8 @@ public class KeychainManager implements KeychainAccessProvider {
 	 * @throws KeychainAccessException
 	 */
 	public boolean isPassphraseStored(String key) throws KeychainAccessException {
+		// check if keyrings are disabled; in this case we don't need to ask the backend
+		if (settings.disableAllKeyrings().get()) return false;
 		char[] storedPw = null;
 		try {
 			storedPw = getKeychainOrFail().loadPassphrase(key);
