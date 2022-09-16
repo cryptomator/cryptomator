@@ -33,7 +33,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Application application;
 	private final Environment environment;
 	private final List<KeychainAccessProvider> keychainAccessProviders;
-	public CheckBox disableAllKeyringsCheckbox;
+	public CheckBox allowAllKeyringsCheckbox;
 	private final FxApplicationWindows appWindows;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
@@ -65,8 +65,8 @@ public class GeneralPreferencesController implements FxController {
 		keychainBackendChoiceBox.setValue(keychainSettingsConverter.fromString(settings.keychainProvider().get()));
 		keychainBackendChoiceBox.setConverter(new KeychainProviderDisplayNameConverter());
 		Bindings.bindBidirectional(settings.keychainProvider(), keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
-		disableAllKeyringsCheckbox.selectedProperty().bindBidirectional(settings.disableAllKeyrings());
-		keychainBackendChoiceBox.disableProperty().bindBidirectional(settings.disableAllKeyrings());
+		allowAllKeyringsCheckbox.selectedProperty().bindBidirectional(settings.allowAllKeyrings());
+		keychainBackendChoiceBox.disableProperty().bind(allowAllKeyringsCheckbox.selectedProperty().not());
 	}
 
 	public boolean isAutoStartSupported() {

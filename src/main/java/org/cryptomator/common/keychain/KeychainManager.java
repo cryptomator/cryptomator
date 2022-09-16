@@ -75,7 +75,7 @@ public class KeychainManager implements KeychainAccessProvider {
 
 	@Override
 	public boolean isSupported() {
-		return keychain.getValue() != null && !settings.disableAllKeyrings().get();
+		return keychain.getValue() != null && settings.allowAllKeyrings().get();
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class KeychainManager implements KeychainAccessProvider {
 	 */
 	public boolean isPassphraseStored(String key) throws KeychainAccessException {
 		// check if keyrings are disabled; in this case we don't need to ask the backend
-		if (settings.disableAllKeyrings().get()) return false;
+		if ( !settings.allowAllKeyrings().get() ) return false;
 		char[] storedPw = null;
 		try {
 			storedPw = getKeychainOrFail().loadPassphrase(key);
