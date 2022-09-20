@@ -50,7 +50,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("theme").value(value.theme().get().name());
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
 		out.name("keychainProvider").value(value.keychainProvider().get());
-		out.name("allowAllKeyrings").value(value.allowAllKeyrings().get());
+		out.name("useKeychain").value(value.useKeychain().get());
 		out.name("licenseKey").value(value.licenseKey().get());
 		out.name("showMinimizeButton").value(value.showMinimizeButton().get());
 		out.name("showTrayIcon").value(value.showTrayIcon().get());
@@ -93,7 +93,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
 				case "keychainProvider" -> settings.keychainProvider().set(in.nextString());
-				case "allowAllKeyrings" -> settings.allowAllKeyrings().set(in.nextBoolean());
+				case "useKeychain" -> settings.useKeychain().set(in.nextBoolean());
 				case "licenseKey" -> settings.licenseKey().set(in.nextString());
 				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
 				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
