@@ -3,7 +3,6 @@ package org.cryptomator.common.keychain;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
@@ -21,12 +20,10 @@ public class KeychainManager implements KeychainAccessProvider {
 
 	private final ObjectExpression<KeychainAccessProvider> keychain;
 	private final LoadingCache<String, BooleanProperty> passphraseStoredProperties;
-	private final Settings settings;
 
 	@Inject
-	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain, Settings settings) {
+	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain) {
 		this.keychain = selectedKeychain;
-		this.settings = settings;
 		this.passphraseStoredProperties = CacheBuilder.newBuilder() //
 				.weakValues() //
 				.build(CacheLoader.from(this::createStoredPassphraseProperty));
@@ -74,9 +71,7 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	@Override
-	public boolean isSupported() {
-		return keychain.getValue() != null && settings.useKeychain().get();
-	}
+	public boolean isSupported() { return keychain.getValue() != null; }
 
 	@Override
 	public boolean isLocked() {
@@ -93,8 +88,6 @@ public class KeychainManager implements KeychainAccessProvider {
 	 * @throws KeychainAccessException
 	 */
 	public boolean isPassphraseStored(String key) throws KeychainAccessException {
-		// check if keyrings are disabled; in this case we don't need to ask the backend
-		if ( !settings.useKeychain().get() ) return false;
 		char[] storedPw = null;
 		try {
 			storedPw = getKeychainOrFail().loadPassphrase(key);
