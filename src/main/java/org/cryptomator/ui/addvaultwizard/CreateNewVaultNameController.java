@@ -40,17 +40,13 @@ public class CreateNewVaultNameController implements FxController {
 		this.chooseLocationScene = chooseLocationScene;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
-		this.validVaultName = Bindings.createBooleanBinding(this::isValidVaultNameInternal, vaultName);
+		this.validVaultName = Bindings.createBooleanBinding(this::isValidVaultName, vaultName);
 	}
 
 	@FXML
 	public void initialize() {
 		vaultName.bind(textField.textProperty());
 		vaultName.addListener(this::vaultNameChanged);
-	}
-
-	private boolean isValidVaultNameInternal() {
-		return vaultName.get() != null && VALID_NAME_PATTERN.matcher(vaultName.get().trim()).matches();
 	}
 
 	private void vaultNameChanged(@SuppressWarnings("unused") Observable observable) {
@@ -79,7 +75,15 @@ public class CreateNewVaultNameController implements FxController {
 	}
 
 	public boolean isValidVaultName() {
-		return validVaultName.get();
+		return vaultName.get() != null && VALID_NAME_PATTERN.matcher(vaultName.get().trim()).matches();
+		//return validVaultName.get();
 	}
+	/*
+	* Issue with next button:
+	* In the "addvault_new_location.fxml" class's method "buttonMinWidth," the next button was referring to an inValidVaultPath function which does not exist...
+	* I changed it to "!controller.validVaultName" and that worked
+	*
+	* Other "issue" I noticed is that closing the application window does not stop the program. Unsure if this is a major issue.
+	* */
 
 }
