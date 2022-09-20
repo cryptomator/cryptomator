@@ -76,14 +76,6 @@ public class CreateNewVaultNameController implements FxController {
 
 	public boolean isValidVaultName() {
 		return vaultName.get() != null && VALID_NAME_PATTERN.matcher(vaultName.get().trim()).matches();
-		//return validVaultName.get();
 	}
-	/*
-	* Issue with next button:
-	* In the "addvault_new_location.fxml" class's method "buttonMinWidth," the next button was referring to an inValidVaultPath function which does not exist...
-	* I changed it to "!controller.validVaultName" and that worked
-	*
-	* Other "issue" I noticed is that closing the application window does not stop the program. Unsure if this is a major issue.
-	* */
 
 }
