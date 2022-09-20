@@ -71,7 +71,9 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	@Override
-	public boolean isSupported() { return keychain.getValue() != null; }
+	public boolean isSupported() {
+		return keychain.getValue() != null;
+	}
 
 	@Override
 	public boolean isLocked() {
