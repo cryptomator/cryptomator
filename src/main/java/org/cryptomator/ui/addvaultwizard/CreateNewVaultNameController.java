@@ -66,6 +66,7 @@ public class CreateNewVaultNameController implements FxController {
 	@FXML
 	public void next() {
 		window.setScene(chooseLocationScene.get());
+		vaultName.get().trim();
 	}
 
 	/* Getter/Setter */
