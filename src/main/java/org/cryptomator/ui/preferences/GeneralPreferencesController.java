@@ -33,8 +33,8 @@ public class GeneralPreferencesController implements FxController {
 	private final Application application;
 	private final Environment environment;
 	private final List<KeychainAccessProvider> keychainAccessProviders;
-	public CheckBox useKeychainCheckbox;
 	private final FxApplicationWindows appWindows;
+	public CheckBox useKeychainCheckbox;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox autoCloseVaultsCheckbox;
