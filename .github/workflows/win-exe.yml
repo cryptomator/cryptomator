@@ -16,6 +16,8 @@ on:
 
 env:
   JAVA_VERSION: 19
+  JAVA_DIST: 'zulu'
+  JAVA_CACHE: 'maven'
 
 defaults:
   run:
@@ -32,9 +34,9 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
-          distribution: 'zulu'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: 'maven'
+          cache: ${{ env.JAVA_CACHE }}
       - id: versions 
         name: Apply version information
         run: |
@@ -223,9 +225,9 @@ jobs:
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
       - uses: actions/setup-java@v2
         with:
-          distribution: 'temurin'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: 'maven'
+          cache: ${{ env.JAVA_CACHE }}
       - name: Generate license for exe
         run: >
           mvn -B license:add-third-party
