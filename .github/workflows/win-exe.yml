@@ -15,7 +15,7 @@ on:
         default: false
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 19
 
 defaults:
   run:
@@ -32,7 +32,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
       - id: versions 

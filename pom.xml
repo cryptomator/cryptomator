@@ -21,7 +21,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>17</project.jdk.version>
+		<project.jdk.version>19</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
@@ -52,14 +52,14 @@
 		<zxcvbn.version>1.7.0</zxcvbn.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.8.1</junit.jupiter.version>
-		<mockito.version>4.4.0</mockito.version>
+		<junit.jupiter.version>5.9.1</junit.jupiter.version>
+		<mockito.version>4.8.0</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>23.0.0</jetbrains.annotations.version>
-		<dependency-check.version>7.1.0</dependency-check.version>
-		<jacoco.version>0.8.7</jacoco.version>
+		<dependency-check.version>7.2.1</dependency-check.version>
+		<jacoco.version>0.8.8</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -263,7 +263,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -273,7 +273,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M5</version>
+					<version>3.0.0-M7</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -283,7 +283,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.2</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
