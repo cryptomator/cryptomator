@@ -5,15 +5,15 @@
  ******************************************************************************/
 
 @font-face {
-	src: url('opensans-regular.ttf');
+	src: url('opensans_regular.ttf');
 }
 
 @font-face {
-	src: url('opensans-semibold.ttf');
+	src: url('opensans_semibold.ttf');
 }
 
 @font-face {
-	src: url('opensans-bold.ttf');
+	src: url('opensans_bold.ttf');
 }
 
 /*******************************************************************************
