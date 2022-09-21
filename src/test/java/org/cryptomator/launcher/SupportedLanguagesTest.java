@@ -18,7 +18,7 @@ public class SupportedLanguagesTest {
 		var locale = Locale.forLanguageTag(tag);
 		Assertions.assertNotEquals("und", locale.toLanguageTag(), "Undefined language tag");
 
-		var bundle = Assertions.assertDoesNotThrow(() -> ResourceBundle.getBundle("/i18n/strings", locale));
+		var bundle = Assertions.assertDoesNotThrow(() -> ResourceBundle.getBundle("i18n.strings", locale));
 
 		Assertions.assertEquals(locale, bundle.getLocale());
 		Assertions.assertFalse(bundle.keySet().isEmpty());
