@@ -34,6 +34,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Environment environment;
 	private final List<KeychainAccessProvider> keychainAccessProviders;
 	private final FxApplicationWindows appWindows;
+	public CheckBox useKeychainCheckbox;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox autoCloseVaultsCheckbox;
@@ -64,6 +65,8 @@ public class GeneralPreferencesController implements FxController {
 		keychainBackendChoiceBox.setValue(keychainSettingsConverter.fromString(settings.keychainProvider().get()));
 		keychainBackendChoiceBox.setConverter(new KeychainProviderDisplayNameConverter());
 		Bindings.bindBidirectional(settings.keychainProvider(), keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
+		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain());
+		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
 	}
 
 	public boolean isAutoStartSupported() {
