@@ -45,7 +45,7 @@ public class CreateNewVaultNameController implements FxController {
 
 	@FXML
 	public void initialize() {
-		vaultName.bind(textField.textProperty());
+		vaultName.bindBidirectional(textField.textProperty());
 		vaultName.addListener(this::vaultNameChanged);
 	}
 
@@ -66,7 +66,7 @@ public class CreateNewVaultNameController implements FxController {
 	@FXML
 	public void next() {
 		window.setScene(chooseLocationScene.get());
-		vaultName.get().trim();
+		vaultName.set(vaultName.get().trim());
 	}
 
 	/* Getter/Setter */
