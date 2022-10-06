@@ -56,7 +56,7 @@ public class ReceiveKeyController implements FxController {
 		this.vaultBaseUri = getVaultBaseUri(vault);
 		this.licenseExceededScene = licenseExceededScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
-		this.httpClient = HttpClient.newBuilder().executor(executor).build();
+		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
 	}
 
 	@FXML
