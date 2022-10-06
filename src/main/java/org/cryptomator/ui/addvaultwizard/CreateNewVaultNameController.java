@@ -40,17 +40,13 @@ public class CreateNewVaultNameController implements FxController {
 		this.chooseLocationScene = chooseLocationScene;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
-		this.validVaultName = Bindings.createBooleanBinding(this::isValidVaultNameInternal, vaultName);
+		this.validVaultName = Bindings.createBooleanBinding(this::isValidVaultName, vaultName);
 	}
 
 	@FXML
 	public void initialize() {
-		vaultName.bind(textField.textProperty());
+		vaultName.bindBidirectional(textField.textProperty());
 		vaultName.addListener(this::vaultNameChanged);
-	}
-
-	private boolean isValidVaultNameInternal() {
-		return vaultName.get() != null && VALID_NAME_PATTERN.matcher(vaultName.get().trim()).matches();
 	}
 
 	private void vaultNameChanged(@SuppressWarnings("unused") Observable observable) {
@@ -70,6 +66,7 @@ public class CreateNewVaultNameController implements FxController {
 	@FXML
 	public void next() {
 		window.setScene(chooseLocationScene.get());
+		vaultName.set(vaultName.get().trim());
 	}
 
 	/* Getter/Setter */
@@ -79,7 +76,7 @@ public class CreateNewVaultNameController implements FxController {
 	}
 
 	public boolean isValidVaultName() {
-		return validVaultName.get();
+		return vaultName.get() != null && VALID_NAME_PATTERN.matcher(vaultName.get().trim()).matches();
 	}
 
 }

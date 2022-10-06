@@ -1,7 +1,6 @@
 package org.cryptomator.common.mountpoint;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.vaults.MountPointRequirement;
@@ -19,7 +18,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 
 class CustomMountPointChooser implements MountPointChooser {
@@ -118,12 +116,31 @@ class CustomMountPointChooser implements MountPointChooser {
 		if (caller.getMountPointRequirement() == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
 			Path hideaway = getHideaway(mountPoint);
 			try {
+				waitForMountpointRestoration(mountPoint);
 				Files.move(hideaway, mountPoint);
 				if (SystemUtils.IS_OS_WINDOWS) {
 					Files.setAttribute(mountPoint, WIN_HIDDEN, false);
 				}
 			} catch (IOException e) {
 				LOG.error("Unable to clean up mountpoint {} for Winfsp mounting.", mountPoint, e);
+			}
+		}
+	}
+
+	//on Windows removing the mountpoint takes some time, so we poll for at most 3 seconds
+	private void waitForMountpointRestoration(Path mountPoint) throws FileAlreadyExistsException {
+		int attempts = 0;
+		while (!Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
+			attempts++;
+			if (attempts >= 10) {
+				throw new FileAlreadyExistsException("Timeout waiting for mountpoint cleanup for " + mountPoint + " .");
+			}
+
+			try {
+				Thread.sleep(300);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new FileAlreadyExistsException("Interrupted before mountpoint " + mountPoint + " was cleared");
 			}
 		}
 	}
