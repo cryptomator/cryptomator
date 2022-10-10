@@ -20,6 +20,7 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tooltip;
 import javafx.util.Duration;
@@ -38,7 +39,7 @@ public class ResultListCellController implements FxController {
 	private final Logger LOG = LoggerFactory.getLogger(ResultListCellController.class);
 
 	private final ObjectProperty<Result> result;
-	private final ObservableObjectValue<DiagnosticResult.Severity> severity;
+	private final ObservableValue<DiagnosticResult.Severity> severity;
 	private final Binding<String> description;
 	private final ResultFixApplier fixApplier;
 	private final ObservableObjectValue<Result.FixState> fixState;
@@ -62,7 +63,7 @@ public class ResultListCellController implements FxController {
 	@Inject
 	public ResultListCellController(ResultFixApplier fixApplier, ResourceBundle resourceBundle) {
 		this.result = new SimpleObjectProperty<>(null);
-		this.severity = EasyBind.wrapNullable(result).map(r -> r.diagnosis().getSeverity()).asOrdinary();
+		this.severity = result.map(Result::diagnosis).map(DiagnosticResult::getSeverity);
 		this.description = EasyBind.wrapNullable(result).map(Result::getDescription).orElse("");
 		this.fixApplier = fixApplier;
 		this.fixState = EasyBind.wrapNullable(result).mapObservable(Result::fixState).asOrdinary();
@@ -83,10 +84,10 @@ public class ResultListCellController implements FxController {
 	@FXML
 	public void initialize() {
 		// see getGlyph() for relevant glyphs:
-		subscriptions.addAll(List.of(EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", Bindings.equal(severity, DiagnosticResult.Severity.INFO)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", Bindings.equal(severity, DiagnosticResult.Severity.GOOD)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", Bindings.equal(severity, DiagnosticResult.Severity.WARN)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-red", Bindings.equal(severity, DiagnosticResult.Severity.CRITICAL)) //
+		subscriptions.addAll(List.of(EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", severity.map(DiagnosticResult.Severity.INFO::equals).orElse(false)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", severity.map(DiagnosticResult.Severity.GOOD::equals).orElse(false)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", severity.map(DiagnosticResult.Severity.WARN::equals).orElse(false)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-red", severity.map(DiagnosticResult.Severity.CRITICAL::equals).orElse(false)) //
 		));
 		var animation = Animations.createDiscrete360Rotation(fixView);
 		this.fixRunningRotator = AutoAnimator.animate(animation) //

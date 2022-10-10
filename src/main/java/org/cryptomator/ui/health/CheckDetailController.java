@@ -3,12 +3,12 @@ package org.cryptomator.ui.health;
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.EasyObservableList;
 import com.tobiasdiez.easybind.Subscription;
-import com.tobiasdiez.easybind.optional.OptionalBinding;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -22,15 +22,15 @@ public class CheckDetailController implements FxController {
 
 	private final EasyObservableList<Result> results;
 	private final ObjectProperty<Check> check;
-	private final OptionalBinding<Check.CheckState> checkState;
-	private final Binding<String> checkName;
-	private final Binding<Boolean> checkRunning;
-	private final Binding<Boolean> checkScheduled;
-	private final Binding<Boolean> checkFinished;
-	private final Binding<Boolean> checkSkipped;
-	private final Binding<Boolean> checkSucceeded;
-	private final Binding<Boolean> checkFailed;
-	private final Binding<Boolean> checkCancelled;
+	private final ObservableValue<Check.CheckState> checkState;
+	private final ObservableValue<String> checkName;
+	private final BooleanExpression checkRunning;
+	private final BooleanExpression checkScheduled;
+	private final BooleanExpression checkFinished;
+	private final BooleanExpression checkSkipped;
+	private final BooleanExpression checkSucceeded;
+	private final BooleanExpression checkFailed;
+	private final BooleanExpression checkCancelled;
 	private final Binding<Number> countOfWarnSeverity;
 	private final Binding<Number> countOfCritSeverity;
 	private final Binding<Boolean> warnOrCritsExist;
@@ -44,15 +44,15 @@ public class CheckDetailController implements FxController {
 		this.resultListCellFactory = resultListCellFactory;
 		this.results = EasyBind.wrapList(FXCollections.observableArrayList());
 		this.check = selectedTask;
-		this.checkState = EasyBind.wrapNullable(selectedTask).mapObservable(Check::stateProperty);
-		this.checkName = EasyBind.wrapNullable(selectedTask).map(Check::getName).orElse("");
-		this.checkRunning = checkState.map(Check.CheckState.RUNNING::equals).orElse(false);
-		this.checkScheduled = checkState.map(Check.CheckState.SCHEDULED::equals).orElse(false);
-		this.checkSkipped = checkState.map(Check.CheckState.SKIPPED::equals).orElse(false);
-		this.checkSucceeded = checkState.map(Check.CheckState.SUCCEEDED::equals).orElse(false);
-		this.checkFailed = checkState.map(Check.CheckState.ERROR::equals).orElse(false);
-		this.checkCancelled = checkState.map(Check.CheckState.CANCELLED::equals).orElse(false);
-		this.checkFinished = EasyBind.combine(checkSucceeded, checkFailed, checkCancelled, (a, b, c) -> a || b || c);
+		this.checkState = selectedTask.flatMap(Check::stateProperty);
+		this.checkName = selectedTask.map(Check::getName).orElse("");
+		this.checkRunning = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.RUNNING::equals).orElse(false));
+		this.checkScheduled = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.SCHEDULED::equals).orElse(false));
+		this.checkSkipped =BooleanExpression.booleanExpression(checkState.map(Check.CheckState.SKIPPED::equals).orElse(false));
+		this.checkSucceeded = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.SUCCEEDED::equals).orElse(false));
+		this.checkFailed = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.ERROR::equals).orElse(false));
+		this.checkCancelled = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.CANCELLED::equals).orElse(false));
+		this.checkFinished = checkSucceeded.or(checkFailed).or(checkCancelled);
 		this.countOfWarnSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.WARN));
 		this.countOfCritSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.CRITICAL));
 		this.warnOrCritsExist = EasyBind.combine(checkSucceeded, countOfWarnSeverity, countOfCritSeverity, (suceeded, warns, crits) -> suceeded && (warns.longValue() > 0 || crits.longValue() > 0) );
@@ -84,7 +84,7 @@ public class CheckDetailController implements FxController {
 		return checkName.getValue();
 	}
 
-	public Binding<String> checkNameProperty() {
+	public ObservableValue<String> checkNameProperty() {
 		return checkName;
 	}
 
@@ -108,7 +108,7 @@ public class CheckDetailController implements FxController {
 		return checkRunning.getValue();
 	}
 
-	public Binding<Boolean> checkRunningProperty() {
+	public BooleanExpression checkRunningProperty() {
 		return checkRunning;
 	}
 
@@ -116,7 +116,7 @@ public class CheckDetailController implements FxController {
 		return checkFinished.getValue();
 	}
 
-	public Binding<Boolean> checkFinishedProperty() {
+	public BooleanExpression checkFinishedProperty() {
 		return checkFinished;
 	}
 
@@ -124,7 +124,7 @@ public class CheckDetailController implements FxController {
 		return checkScheduled.getValue();
 	}
 
-	public Binding<Boolean> checkScheduledProperty() {
+	public BooleanExpression checkScheduledProperty() {
 		return checkScheduled;
 	}
 
@@ -132,7 +132,7 @@ public class CheckDetailController implements FxController {
 		return checkSkipped.getValue();
 	}
 
-	public Binding<Boolean> checkSkippedProperty() {
+	public BooleanExpression checkSkippedProperty() {
 		return checkSkipped;
 	}
 
@@ -140,7 +140,7 @@ public class CheckDetailController implements FxController {
 		return checkSucceeded.getValue();
 	}
 
-	public Binding<Boolean> checkSucceededProperty() {
+	public BooleanExpression checkSucceededProperty() {
 		return checkSucceeded;
 	}
 
@@ -148,7 +148,7 @@ public class CheckDetailController implements FxController {
 		return checkFailed.getValue();
 	}
 
-	public Binding<Boolean> checkFailedProperty() {
+	public BooleanExpression checkFailedProperty() {
 		return checkFailed;
 	}
 
@@ -164,7 +164,7 @@ public class CheckDetailController implements FxController {
 		return warnOrCritsExist.getValue();
 	}
 
-	public Binding<Boolean> checkCancelledProperty() {
+	public BooleanExpression checkCancelledProperty() {
 		return checkCancelled;
 	}
 

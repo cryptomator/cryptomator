@@ -1,6 +1,5 @@
 package org.cryptomator.ui.mainwindow;
 
-import com.tobiasdiez.easybind.EasyBind;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
@@ -34,7 +33,8 @@ public class VaultDetailLockedController implements FxController {
 		this.keychain = keychain;
 		this.mainWindow = mainWindow;
 		if (keychain.isSupported() && !keychain.isLocked()) {
-			this.passwordSaved = BooleanExpression.booleanExpression(EasyBind.select(vault).selectObject(v -> keychain.getPassphraseStoredProperty(v.getId())));
+			var stored = vault.flatMap(v -> keychain.getPassphraseStoredProperty(v.getId())).orElse(false);
+			this.passwordSaved = BooleanExpression.booleanExpression(stored);
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
 		}

@@ -1,6 +1,5 @@
 package org.cryptomator.ui.mainwindow;
 
-import com.tobiasdiez.easybind.EasyBind;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.Animations;
@@ -11,10 +10,10 @@ import org.cryptomator.ui.controls.FontAwesome5IconView;
 
 import javax.inject.Inject;
 import javafx.application.Application;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 
 @MainWindowScoped
@@ -22,7 +21,7 @@ public class VaultDetailController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final Application application;
-	private final Binding<FontAwesome5Icon> glyph;
+	private final ObservableValue<FontAwesome5Icon> glyph;
 	private final BooleanBinding anyVaultSelected;
 
 	private AutoAnimator spinAnimation;
@@ -35,15 +34,13 @@ public class VaultDetailController implements FxController {
 	VaultDetailController(ObjectProperty<Vault> vault, Application application) {
 		this.vault = vault;
 		this.application = application;
-		this.glyph = EasyBind.select(vault) //
-				.selectObject(Vault::stateProperty) //
-				.map(this::getGlyphForVaultState);
+		this.glyph = vault.flatMap(Vault::stateProperty).map(this::getGlyphForVaultState);
 		this.anyVaultSelected = vault.isNotNull();
 	}
 
 	public void initialize() {
 		this.spinAnimation = AutoAnimator.animate(Animations.createDiscrete360Rotation(vaultStateView)) //
-				.onCondition(EasyBind.select(vault).selectObject(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals)) //
+				.onCondition(vault.flatMap(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals).orElse(false)) //
 				.afterStop(() -> vaultStateView.setRotate(0)) //
 				.build();
 	}
@@ -77,7 +74,7 @@ public class VaultDetailController implements FxController {
 		return vault.get();
 	}
 
-	public Binding<FontAwesome5Icon> glyphProperty() {
+	public ObservableValue<FontAwesome5Icon> glyphProperty() {
 		return glyph;
 	}
 
