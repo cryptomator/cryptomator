@@ -39,6 +39,8 @@ jobs:
               tag: "${{ inputs.releaseTag }}"
             }
             return await github.graphql(query, variables)
+      - name: Show query result
+        run: echo ${{ steps.get-release-assets.outputs.result }}
       - name: Submit package to Windows Package Manager Community Repository
         id: submit-winget
         run: |
