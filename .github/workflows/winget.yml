@@ -1,6 +1,7 @@
 name: Release Build artifacts to winget
 
 on:
+  push:
   workflow_call:
     inputs:
       releaseTag:
@@ -15,6 +16,7 @@ on:
 
 jobs:
   publish-winget:
+    if: github.repository == 'octo-org/octo-repo-prod'
     name: Publish on winget repo
     runs-on: windows-latest
     needs: [build-msi]
