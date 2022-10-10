@@ -24,8 +24,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const query =`query($owner:String!, $name:String!, $tag:String!) {
-              repository(owner:$owner, name:$name){
+            const query =`query($tag:String!) {
+              repository(owner:"cryptomator", name:"cryptomator"){
                 release(tagName: $tag) {
                     releaseAssets(first:20) {
                       nodes {
@@ -37,8 +37,6 @@ jobs:
               }
             }`;
             const variables = {
-              owner: context.repo.owner,
-              name: context.repo.repo
               tag: {{ inputs.releaseTag }}
             }
             return await github.graphql(query, variables)
