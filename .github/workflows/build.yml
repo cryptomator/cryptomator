@@ -43,6 +43,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Validate POM version
+        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/hotfix/') || startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          if [[ $GITHUB_REF =~ refs/heads/(hotfix|release)/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+          elif [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+          else
+            echo "Failed to parse version"
+            exit 1
+          fi
+
+          if ![[ SEM_VER_STR = `mvn help:evaluate -Dexpression=project.version -q -DforceStdout` ]]; then
+            echo "Version not set in POM"
+            exit 1
+          fi
+      - name: Validate release in org.cryptomator.Cryptomator.metainfo.xml file
+        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/hotfix/') || startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          if ![[ grep "<release date=\".*\" version=\"${SEM_VER_STR}\"/>" dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml ]]; then
+            echo "Release not set in dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml"
+            exit 1
+          fi
       - name: Sign source tarball with key 615D449FE6E6A235
         if: startsWith(github.ref, 'refs/tags/')
         run: |
