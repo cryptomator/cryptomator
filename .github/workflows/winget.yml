@@ -39,6 +39,12 @@ jobs:
               tag: "${{ inputs.releaseTag }}"
             }
             return await github.graphql(query, variables)
+      - name: Debug Powershell
+        run: |
+          echo '$env:RELEASE_ASSETS'
+          echo '${{ steps.get-release-assets.outputs.result }}'
+        env:
+          RELEASE_ASSETS: steps.get-release-assets.outputs.result
       - name: Submit package to Windows Package Manager Community Repository
         id: submit-winget
         run: |
