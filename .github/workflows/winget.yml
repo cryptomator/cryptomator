@@ -36,7 +36,7 @@ jobs:
               }
             }`;
             const variables = {
-              tag: {{ inputs.releaseTag }}
+              tag: ${{ inputs.releaseTag }}
             }
             return await github.graphql(query, variables)
       - name: Submit package to Windows Package Manager Community Repository
