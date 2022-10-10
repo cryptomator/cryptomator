@@ -1,4 +1,4 @@
-name: Release Build artifacts to winget
+name: Release to Winget
 
 on:
   workflow_call:
