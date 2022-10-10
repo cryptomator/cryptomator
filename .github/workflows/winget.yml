@@ -39,20 +39,11 @@ jobs:
               tag: "${{ inputs.releaseTag }}"
             }
             return await github.graphql(query, variables)
-      - name: Debug Powershell
-        run: |
-          echo '$env:RELEASE_ASSETS'
-          echo '${{ steps.get-release-assets.outputs.result }}'
-        env:
-          RELEASE_ASSETS: steps.get-release-assets.outputs.result
       - name: Submit package to Windows Package Manager Community Repository
         id: submit-winget
         run: |
           iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-          $releaseAssets = (ConvertFrom-Json '$env:RELEASE_ASSETS').data.repository.release.releaseAssets.nodes
+          $releaseAssets = (ConvertFrom-Json ${{ steps.get-release-assets.outputs.result }}).data.repository.release.releaseAssets.nodes
           $installerUrl = $releaseAssets | Where-Object -Property name -match '^Cryptomator-.*\.msi$' | Select -ExpandProperty downloadUrl -First 1
-          .\wingetcreate.exe update Cryptomator.Cryptomator -s -v $env:RELEASE_TAG -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+          .\wingetcreate.exe update Cryptomator.Cryptomator -s -v ${{ inputs.releaseTag }} -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
         shell: pwsh
-        env:
-          RELEASE_ASSETS: steps.get-release-assets.outputs.result
-          RELEASE_TAG: inputs.releaseTag
