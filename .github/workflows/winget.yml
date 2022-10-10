@@ -17,7 +17,6 @@ jobs:
   publish-winget:
     name: Publish on winget repo
     runs-on: windows-latest
-    needs: [build-msi]
     steps:
       - name: Get download url for msi artifacts
         id: get-release-assets
