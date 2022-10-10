@@ -51,5 +51,5 @@ jobs:
           .\wingetcreate.exe update Cryptomator.Cryptomator -s -v $env:RELEASE_TAG -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
         shell: pwsh
         env:
-          RELEASE_ASSETS: steps.get-download-url.outputs.result
+          RELEASE_ASSETS: steps.get-release-assets.outputs.result
           RELEASE_TAG: inputs.releaseTag
