@@ -45,7 +45,7 @@ jobs:
         id: submit-winget
         run: |
           iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-          $releaseAssets = (ConvertFrom-Json $env:RELEASE_ASSETS).data.repository.release.releaseAssets.nodes
+          $releaseAssets = (ConvertFrom-Json '$env:RELEASE_ASSETS').data.repository.release.releaseAssets.nodes
           $installerUrl = $releaseAssets | Where-Object -Property name -match '^Cryptomator-.*\.msi$' | Select -ExpandProperty downloadUrl -First 1
           .\wingetcreate.exe update Cryptomator.Cryptomator -s -v $env:RELEASE_TAG -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
         shell: pwsh
