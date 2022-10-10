@@ -83,7 +83,7 @@ public class MigrationRunController implements FxController {
 		this.appWindows = appWindows;
 		this.startScene = startScene;
 		this.successScene = successScene;
-		this.migrateButtonContentDisplay = Bindings.createObjectBinding(this::getMigrateButtonContentDisplay, vault.stateProperty());
+		this.migrateButtonContentDisplay = Bindings.when(vault.processingProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.capabilityErrorScene = capabilityErrorScene;
 		this.migrationButtonDisabled = new SimpleBooleanProperty();
 		this.migrationProgress = new SimpleDoubleProperty(volatileMigrationProgress);
@@ -211,10 +211,7 @@ public class MigrationRunController implements FxController {
 	}
 
 	public ContentDisplay getMigrateButtonContentDisplay() {
-		return switch (vault.getState()) {
-			case PROCESSING -> ContentDisplay.LEFT;
-			default -> ContentDisplay.TEXT_ONLY;
-		};
+		return migrateButtonContentDisplay.get();
 	}
 
 	public ReadOnlyDoubleProperty migrationProgressProperty() {

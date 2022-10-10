@@ -8,10 +8,10 @@ import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
 import javax.inject.Inject;
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
@@ -23,7 +23,7 @@ public class VaultDetailLockedController implements FxController {
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final KeychainManager keychain;
 	private final Stage mainWindow;
-	private final BooleanExpression passwordSaved;
+	private final ObservableValue<Boolean> passwordSaved;
 
 	@Inject
 	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultOptionsComponent.Factory vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
@@ -33,8 +33,7 @@ public class VaultDetailLockedController implements FxController {
 		this.keychain = keychain;
 		this.mainWindow = mainWindow;
 		if (keychain.isSupported() && !keychain.isLocked()) {
-			var stored = vault.flatMap(v -> keychain.getPassphraseStoredProperty(v.getId())).orElse(false);
-			this.passwordSaved = BooleanExpression.booleanExpression(stored);
+			this.passwordSaved = vault.flatMap(v -> keychain.getPassphraseStoredProperty(v.getId())).orElse(false);
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
 		}
@@ -65,13 +64,11 @@ public class VaultDetailLockedController implements FxController {
 		return vault.get();
 	}
 
-	public BooleanExpression passwordSavedProperty() {
+	public ObservableValue<Boolean> passwordSavedProperty() {
 		return passwordSaved;
 	}
 
 	public boolean isPasswordSaved() {
-		if (keychain.isSupported() && vault.get() != null) {
-			return keychain.getPassphraseStoredProperty(vault.get().getId()).get();
-		} else return false;
+		return passwordSaved.getValue();
 	}
 }
