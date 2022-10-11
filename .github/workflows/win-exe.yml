@@ -8,11 +8,6 @@ on:
       version:
         description: 'Version'
         required: false
-      winget-release:
-        description: 'Release artifacts to winget'
-        required: true
-        type: boolean
-        default: false
 
 env:
   JAVA_VERSION: 17
@@ -194,19 +189,13 @@ jobs:
       semVerStr: ${{ steps.versions.outputs.semVerStr }}
       revNum: ${{ steps.versions.outputs.revNum }}
 
-  publish-winget:
-    name: Publish on winget repo
-    runs-on: windows-latest
+  call-winget-flow:
     needs: [build-msi]
-    if: github.event.action == 'published' || inputs.winget-release
-    steps:
-      - name: Submit package to Windows Package Manager Community Repository
-        run: |
-          iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-          $github = Get-Content '${{ github.event_path }}' | ConvertFrom-Json
-          $installerUrl = $github.release.assets | Where-Object -Property name -match '^Cryptomator-.*\.msi' | Select -ExpandProperty browser_download_url -First 1
-          .\wingetcreate.exe update Cryptomator.Cryptomator -s -v $github.release.tag_name -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
-        shell: pwsh
+    if: github.event.action == 'published'
+    uses: ./.github/workflows/winget.yml
+    with:
+      releaseTag: ${{ github.event.release.tag_name }}
+
 
   build-exe:
     name: Build .exe installer
