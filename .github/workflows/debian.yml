@@ -29,7 +29,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:coffeelibs/openjdk
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dput java-19-coffeelibs
+          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-19
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
