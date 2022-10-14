@@ -17,17 +17,19 @@ jobs:
     name: Build Cryptomator.app for ${{ matrix.output-suffix }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
         - os: macos-11
           architecture: x64
           output-suffix: x64
+          xcode-path: '/Applications/Xcode_13.2.1.app'
         - os: [self-hosted, macOS, ARM64]
           architecture: aarch64
           output-suffix: arm64
+          xcode-path: '/Applications/Xcode_13.2.1.app'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Setup Java
@@ -37,7 +39,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           architecture: ${{ matrix.architecture }}
           cache: 'maven'
-      - id: versions 
+      - id: versions
         name: Apply version information
         run: |
           if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
@@ -208,6 +210,7 @@ jobs:
           apple-id: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
           password: ${{ secrets.MACOS_NOTARIZATION_PW }}
           team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          xcode-path: ${{ matrix.xcode-path }}
       - name: Add possible alpha/beta tags to installer name
         run: mv Cryptomator-*.dmg Cryptomator-${{ steps.versions.outputs.semVerStr }}-${{ matrix.output-suffix }}.dmg
       - name: Create detached GPG signature with key 615D449FE6E6A235
