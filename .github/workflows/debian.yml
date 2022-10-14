@@ -27,8 +27,9 @@ jobs:
           fetch-depth: 0
       - name: Install build tools
         run: |
+          sudo add-apt-repository ppa:coffeelibs/openjdk
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dput
+          sudo apt-get install debhelper devscripts dput java-19-coffeelibs
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
