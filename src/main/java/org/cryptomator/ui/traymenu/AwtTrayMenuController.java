@@ -19,6 +19,8 @@ import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 @CheckAvailability
@@ -56,6 +58,19 @@ public class AwtTrayMenuController implements TrayMenuController {
 	public void updateTrayMenu(List<TrayMenuItem> items) {
 		menu.removeAll();
 		addChildren(menu, items);
+	}
+
+
+	@Override
+	public void onBeforeShow(Runnable listener) {
+		SystemTray systemTray = SystemTray.getSystemTray();
+		TrayIcon trayIcon = systemTray.getTrayIcons()[0];
+		trayIcon.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				listener.run();
+			}
+		});
 	}
 
 	private void addChildren(Menu menu, List<TrayMenuItem> items) {

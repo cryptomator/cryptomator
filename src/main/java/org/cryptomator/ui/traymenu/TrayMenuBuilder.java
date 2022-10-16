@@ -70,32 +70,9 @@ public class TrayMenuBuilder {
 			trayMenu.showTrayIcon(image.readAllBytes(), this::showMainWindow, "Cryptomator");
 			SystemTray tray = SystemTray.getSystemTray();
 			TrayIcon trayIcon = tray.getTrayIcons()[0];
-			trayIcon.addMouseListener(new MouseListener() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					for (Vault vault : vaults) {
-						VaultListManager.redetermineVaultState(vault);
-					}
-				}
-
-				@Override
-				public void mousePressed(MouseEvent e) {
-
-				}
-
-				@Override
-				public void mouseReleased(MouseEvent e) {
-
-				}
-
-				@Override
-				public void mouseEntered(MouseEvent e) {
-
-				}
-
-				@Override
-				public void mouseExited(MouseEvent e) {
-
+			trayMenu.onBeforeShow(() -> {
+				for (Vault vault : vaults) {
+					VaultListManager.redetermineVaultState(vault);
 				}
 			});
 			rebuildMenu();
