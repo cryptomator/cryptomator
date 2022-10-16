@@ -3,6 +3,7 @@ package org.cryptomator.ui.traymenu;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.integrations.tray.ActionItem;
 import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
@@ -20,6 +21,10 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -63,6 +68,36 @@ public class TrayMenuBuilder {
 
 		try (var image = getClass().getResourceAsStream(SystemUtils.IS_OS_MAC_OSX ? TRAY_ICON_MAC : TRAY_ICON)) {
 			trayMenu.showTrayIcon(image.readAllBytes(), this::showMainWindow, "Cryptomator");
+			SystemTray tray = SystemTray.getSystemTray();
+			TrayIcon trayIcon = tray.getTrayIcons()[0];
+			trayIcon.addMouseListener(new MouseListener() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					for (Vault vault : vaults) {
+						VaultListManager.redetermineVaultState(vault);
+					}
+				}
+
+				@Override
+				public void mousePressed(MouseEvent e) {
+
+				}
+
+				@Override
+				public void mouseReleased(MouseEvent e) {
+
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent e) {
+
+				}
+
+				@Override
+				public void mouseExited(MouseEvent e) {
+
+				}
+			});
 			rebuildMenu();
 			initialized = true;
 		} catch (IOException e) {
