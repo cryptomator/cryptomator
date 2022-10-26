@@ -8,11 +8,6 @@ on:
       version:
         description: 'Version'
         required: false
-      winget-release:
-        description: 'Release artifacts to winget'
-        required: true
-        type: boolean
-        default: false
 
 env:
   JAVA_VERSION: 17
@@ -26,11 +21,11 @@ jobs:
     name: Build .msi Installer
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
@@ -194,34 +189,28 @@ jobs:
       semVerStr: ${{ steps.versions.outputs.semVerStr }}
       revNum: ${{ steps.versions.outputs.revNum }}
 
-  publish-winget:
-    name: Publish on winget repo
-    runs-on: windows-latest
+  call-winget-flow:
     needs: [build-msi]
-    if: github.event.action == 'published' || inputs.winget-release
-    steps:
-      - name: Submit package to Windows Package Manager Community Repository
-        run: |
-          iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-          $github = Get-Content '${{ github.event_path }}' | ConvertFrom-Json
-          $installerUrl = $github.release.assets | Where-Object -Property name -match '^Cryptomator-.*\.msi' | Select -ExpandProperty browser_download_url -First 1
-          .\wingetcreate.exe update Cryptomator.Cryptomator -s -v $github.release.tag_name -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
-        shell: pwsh
+    if: github.event.action == 'published'
+    uses: ./.github/workflows/winget.yml
+    with:
+      releaseTag: ${{ github.event.release.tag_name }}
+
 
   build-exe:
     name: Build .exe installer
     runs-on: windows-latest
     needs: [build-msi]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Download .msi
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: msi
           path: dist/win/bundle/resources
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}

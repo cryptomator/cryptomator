@@ -12,20 +12,54 @@ defaults:
   run:
     shell: bash
 
-jobs: 
-  test:
-    name: Compile and Test
+jobs:
+  release-check-precondition:
+    name: Validate pushed commit to release/hotfix branch or pushed tag
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    if: "(startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/hotfix/') || startsWith(github.ref, 'refs/heads/release/'))
+      && !(contains(github.event.head_commit.message, '[ci skip]') || contains(github.event.head_commit.message, '[skip ci]'))"
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2
+      - id: validate-pom-version
+        name: Validate POM version
+        run: |
+          if [[ $GITHUB_REF =~ refs/heads/(hotfix|release)/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+          elif [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+          else
+            echo "Failed to parse version"
+            exit 1
+          fi
+
+          if [[ ${SEM_VER_STR} == `mvn help:evaluate -Dexpression=project.version -q -DforceStdout` ]]; then
+            echo "::set-output name=semVerStr::${SEM_VER_STR}"
+          else
+            echo "Version not set in POM"
+            exit 1
+          fi
+      - name: Validate release in org.cryptomator.Cryptomator.metainfo.xml file
+        run: |
+          if ! grep -q "<release date=\".*\" version=\"${{ steps.validate-pom-version.outputs.semVerStr }}\"/>" dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml; then
+            echo "Release not set in dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml"
+            exit 1
+          fi
+  test:
+    name: Compile and Test
+    needs: release-check-precondition
+    runs-on: ubuntu-latest
+    if: "always()
+      && (needs.release-check-precondition.result=='success' || needs.release-check-precondition.result=='skipped')
+      && !(contains(github.event.head_commit.message, '[ci skip]') || contains(github.event.head_commit.message, '[skip ci]'))"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
       - name: Cache SonarCloud packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
