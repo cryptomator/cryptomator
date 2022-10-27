@@ -56,8 +56,10 @@ public abstract class HubKeyLoadingModule {
 	@Named("deviceId")
 	static String provideDeviceId(DeviceKey deviceKey) {
 		var publicKey = Objects.requireNonNull(deviceKey.get()).getPublic().getEncoded();
-		var hashedKey = MessageDigestSupplier.SHA256.get().digest(publicKey);
-		return BaseEncoding.base16().encode(hashedKey);
+		try (var instance = MessageDigestSupplier.SHA256.instance()) {
+			var hashedKey = instance.get().digest(publicKey);
+			return BaseEncoding.base16().encode(hashedKey);
+		}
 	}
 
 	@Provides
