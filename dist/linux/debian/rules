@@ -4,6 +4,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+JAVA_HOME = /usr/lib/jvm/java-19-coffeelibs
+
 %:
 	dh $@
 
@@ -16,7 +18,7 @@ override_dh_auto_clean:
 override_dh_auto_build:
 	mkdir resources
 	ln -s ../common/org.cryptomator.Cryptomator512.png resources/cryptomator.png
-	jlink \
+	$(JAVA_HOME)/bin/jlink \
 		--output runtime \
 		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
 		--strip-native-commands \
@@ -24,7 +26,7 @@ override_dh_auto_build:
 		--no-man-pages \
 		--strip-debug \
 		--compress=2
-	jpackage \
+	$(JAVA_HOME)/bin/jpackage \
 		--type app-image \
 		--runtime-image runtime \
 		--input libs \

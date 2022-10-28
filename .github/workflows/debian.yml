@@ -15,24 +15,25 @@ on:
         required: false
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 19
 
 jobs:
   build:
     name: Build Debian Package
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Install build tools
         run: |
+          sudo add-apt-repository ppa:coffeelibs/openjdk
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dput
+          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-19
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
       - id: versions 

@@ -10,7 +10,7 @@ on:
         required: false
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 19
 
 jobs:
   build:
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
       - id: versions 
