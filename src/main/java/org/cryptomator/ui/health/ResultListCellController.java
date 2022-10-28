@@ -13,13 +13,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tooltip;
 import javafx.util.Duration;
@@ -38,10 +37,10 @@ public class ResultListCellController implements FxController {
 	private final Logger LOG = LoggerFactory.getLogger(ResultListCellController.class);
 
 	private final ObjectProperty<Result> result;
-	private final ObservableObjectValue<DiagnosticResult.Severity> severity;
-	private final Binding<String> description;
+	private final ObservableValue<DiagnosticResult.Severity> severity;
+	private final ObservableValue<String> description;
 	private final ResultFixApplier fixApplier;
-	private final ObservableObjectValue<Result.FixState> fixState;
+	private final ObservableValue<Result.FixState> fixState;
 	private final ObjectBinding<FontAwesome5Icon> severityGlyph;
 	private final ObjectBinding<FontAwesome5Icon> fixGlyph;
 	private final BooleanBinding fixable;
@@ -62,10 +61,10 @@ public class ResultListCellController implements FxController {
 	@Inject
 	public ResultListCellController(ResultFixApplier fixApplier, ResourceBundle resourceBundle) {
 		this.result = new SimpleObjectProperty<>(null);
-		this.severity = EasyBind.wrapNullable(result).map(r -> r.diagnosis().getSeverity()).asOrdinary();
-		this.description = EasyBind.wrapNullable(result).map(Result::getDescription).orElse("");
+		this.severity = result.map(Result::diagnosis).map(DiagnosticResult::getSeverity);
+		this.description = result.map(Result::getDescription).orElse("");
 		this.fixApplier = fixApplier;
-		this.fixState = EasyBind.wrapNullable(result).mapObservable(Result::fixState).asOrdinary();
+		this.fixState = result.flatMap(Result::fixState);
 		this.severityGlyph = Bindings.createObjectBinding(this::getSeverityGlyph, result);
 		this.fixGlyph = Bindings.createObjectBinding(this::getFixGlyph, fixState);
 		this.fixable = Bindings.createBooleanBinding(this::isFixable, fixState);
@@ -83,14 +82,15 @@ public class ResultListCellController implements FxController {
 	@FXML
 	public void initialize() {
 		// see getGlyph() for relevant glyphs:
-		subscriptions.addAll(List.of(EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", Bindings.equal(severity, DiagnosticResult.Severity.INFO)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", Bindings.equal(severity, DiagnosticResult.Severity.GOOD)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", Bindings.equal(severity, DiagnosticResult.Severity.WARN)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-red", Bindings.equal(severity, DiagnosticResult.Severity.CRITICAL)) //
+		subscriptions.addAll(List.of(EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", severity.map(DiagnosticResult.Severity.INFO::equals).orElse(false)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", severity.map(DiagnosticResult.Severity.GOOD::equals).orElse(false)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", severity.map(DiagnosticResult.Severity.WARN::equals).orElse(false)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-red", severity.map(DiagnosticResult.Severity.CRITICAL::equals).orElse(false)) //
 		));
+
 		var animation = Animations.createDiscrete360Rotation(fixView);
 		this.fixRunningRotator = AutoAnimator.animate(animation) //
-				.onCondition(Bindings.equal(fixState, Result.FixState.FIXING)) //
+				.onCondition(fixing) //
 				.afterStop(() -> fixView.setRotate(0)) //
 				.build();
 	}
@@ -127,7 +127,7 @@ public class ResultListCellController implements FxController {
 		return result;
 	}
 
-	public Binding<String> descriptionProperty() {
+	public ObservableValue<String> descriptionProperty() {
 		return description;
 	}
 
@@ -173,7 +173,7 @@ public class ResultListCellController implements FxController {
 	}
 
 	public boolean isFixable() {
-		return Result.FixState.FIXABLE.equals(fixState.get());
+		return Result.FixState.FIXABLE.equals(fixState.getValue());
 	}
 
 	public BooleanBinding fixingProperty() {
@@ -181,7 +181,7 @@ public class ResultListCellController implements FxController {
 	}
 
 	public boolean isFixing() {
-		return Result.FixState.FIXING.equals(fixState.get());
+		return Result.FixState.FIXING.equals(fixState.getValue());
 	}
 
 	public BooleanBinding fixedProperty() {
@@ -189,7 +189,7 @@ public class ResultListCellController implements FxController {
 	}
 
 	public boolean isFixed() {
-		return Result.FixState.FIXED.equals(fixState.get());
+		return Result.FixState.FIXED.equals(fixState.getValue());
 	}
 
 	public BooleanBinding fixFailedProperty() {
@@ -197,7 +197,7 @@ public class ResultListCellController implements FxController {
 	}
 
 	public Boolean isFixFailed() {
-		return Result.FixState.FIX_FAILED.equals(fixState.get());
+		return Result.FixState.FIX_FAILED.equals(fixState.getValue());
 	}
 
 	public BooleanBinding fixRunningOrDoneProperty() {

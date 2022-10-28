@@ -46,7 +46,7 @@ public class ResizeController implements FxController {
 	ResizeController(@MainWindow Stage window, Settings settings) {
 		this.window = window;
 		this.settings = settings;
-		this.showResizingArrows = Bindings.createBooleanBinding(this::isShowResizingArrows, window.fullScreenProperty());
+		this.showResizingArrows = window.fullScreenProperty().not();
 	}
 
 	@FXML
@@ -181,8 +181,7 @@ public class ResizeController implements FxController {
 	}
 
 	public boolean isShowResizingArrows() {
-		//If in fullscreen resizing is not be possible;
-		return !window.isFullScreen();
+		return showResizingArrows.get();
 	}
 
 }

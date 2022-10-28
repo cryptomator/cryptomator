@@ -1,21 +1,20 @@
 package org.cryptomator.ui.health;
 
-import com.tobiasdiez.easybind.EasyBind;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
 
 public class CheckListCellController implements FxController {
 
 
 	private final ObjectProperty<Check> check;
-	private final Binding<String> checkName;
-	private final Binding<Boolean> checkRunnable;
+	private final ObservableValue<Boolean> checkRunnable;
+	private final ObservableValue<String> checkName;
 
 	/* FXML */
 	public CheckBox checkbox;
@@ -23,8 +22,8 @@ public class CheckListCellController implements FxController {
 	@Inject
 	public CheckListCellController() {
 		check = new SimpleObjectProperty<>();
-		checkRunnable = EasyBind.wrapNullable(check).mapObservable(Check::stateProperty).map(Check.CheckState.RUNNABLE::equals).orElse(false);
-		checkName = EasyBind.wrapNullable(check).map(Check::getName).orElse("");
+		checkRunnable = check.flatMap(Check::stateProperty).map(Check.CheckState.RUNNABLE::equals).orElse(false);
+		checkName = check.map(Check::getName).orElse("");
 	}
 
 	public void initialize() {
@@ -50,7 +49,7 @@ public class CheckListCellController implements FxController {
 		check.set(c);
 	}
 
-	public Binding<String> checkNameProperty() {
+	public ObservableValue<String> checkNameProperty() {
 		return checkName;
 	}
 
@@ -58,7 +57,7 @@ public class CheckListCellController implements FxController {
 		return checkName.getValue();
 	}
 
-	public Binding<Boolean> checkRunnableProperty() {
+	public ObservableValue<Boolean> checkRunnableProperty() {
 		return checkRunnable;
 	}
 
