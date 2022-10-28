@@ -45,7 +45,11 @@ public class ChooseExistingVaultController implements FxController {
 	private Image screenshot;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows appWindows, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle, Settings settings) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window,
+			@FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene,
+			@FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows appWindows,
+			ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault,
+			VaultListManager vaultListManager, ResourceBundle resourceBundle, Settings settings) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;
@@ -60,7 +64,11 @@ public class ChooseExistingVaultController implements FxController {
 	@FXML
 	public void initialize() {
 		if (SystemUtils.IS_OS_MAC) {
-			this.screenshot = new Image(getClass().getResource("/img/select-masterkey-mac"+(UiTheme.LIGHT == settings.theme().get()? "":"-dark")+".png").toString());
+			this.screenshot = new Image(
+					getClass()
+							.getResource("/img/select-masterkey-mac"
+									+ (UiTheme.LIGHT == settings.theme().get() ? "-light" : "-dark") + ".png")
+							.toString());
 		} else {
 			this.screenshot = new Image(getClass().getResource("/img/select-masterkey-win.png").toString());
 		}
@@ -75,7 +83,8 @@ public class ChooseExistingVaultController implements FxController {
 	public void chooseFileAndNext() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(resourceBundle.getString("addvaultwizard.existing.filePickerMimeDesc"), CRYPTOMATOR_FILENAME_GLOB));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+				resourceBundle.getString("addvaultwizard.existing.filePickerMimeDesc"), CRYPTOMATOR_FILENAME_GLOB));
 		File masterkeyFile = fileChooser.showOpenDialog(window);
 		if (masterkeyFile != null) {
 			vaultPath.setValue(masterkeyFile.toPath().toAbsolutePath().getParent());
