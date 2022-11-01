@@ -68,7 +68,7 @@ public class TrayMenuBuilder {
 
 		try (var image = getClass().getResourceAsStream(SystemUtils.IS_OS_MAC_OSX ? TRAY_ICON_MAC : TRAY_ICON)) {
 			trayMenu.showTrayIcon(image.readAllBytes(), this::showMainWindow, "Cryptomator");
-			trayMenu.onBeforeShow(() -> {
+			trayMenu.onBeforeOpenMenu(() -> {
 				for (Vault vault : vaults) {
 					VaultListManager.redetermineVaultState(vault);
 				}

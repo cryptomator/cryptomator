@@ -30,6 +30,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 	private static final Logger LOG = LoggerFactory.getLogger(AwtTrayMenuController.class);
 
 	private final PopupMenu menu = new PopupMenu();
+	private TrayIcon trayIcon;
 
 	@CheckAvailability
 	public static boolean isAvailable() {
@@ -39,7 +40,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 	@Override
 	public void showTrayIcon(byte[] rawImageData, Runnable defaultAction, String tooltip) throws TrayMenuException {
 		var image = Toolkit.getDefaultToolkit().createImage(rawImageData);
-		var trayIcon = new TrayIcon(image, tooltip, menu);
+		trayIcon = new TrayIcon(image, tooltip, menu);
 
 		trayIcon.setImageAutoSize(true);
 		if (SystemUtils.IS_OS_WINDOWS) {
@@ -62,15 +63,18 @@ public class AwtTrayMenuController implements TrayMenuController {
 
 
 	@Override
-	public void onBeforeShow(Runnable listener) {
-		SystemTray systemTray = SystemTray.getSystemTray();
-		TrayIcon trayIcon = systemTray.getTrayIcons()[0];
-		trayIcon.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				listener.run();
-			}
-		});
+	public void onBeforeOpenMenu(Runnable listener) {
+		try {
+			this.trayIcon.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					listener.run();
+				}
+			});
+		} catch (Exception e) {
+			throw new IllegalStateException("Tray icon not found.", e);
+		}
+
 	}
 
 	private void addChildren(Menu menu, List<TrayMenuItem> items) {
