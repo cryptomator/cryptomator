@@ -1,17 +1,15 @@
 package org.cryptomator.ui.vaultoptions;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.WindowsDriveLetters;
+import org.cryptomator.common.mount.WindowsDriveLetters;
+import org.cryptomator.integrations.mount.MountCapability;
+import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -35,9 +33,14 @@ public class MountOptionsController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final VolumeImpl usedVolumeImpl;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
+
+	private final ObservableValue<Boolean> mountpointDirSupported;
+	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
+	private final ObservableValue<Boolean> mountpointParentSupported; //TODO: use it in GUI
+	private final ObservableValue<Boolean> readOnlySupported;
+	private final ObservableValue<Boolean> mountFlagsSupported;
 
 	public CheckBox readOnlyCheckbox;
 	public CheckBox customMountFlagsCheckbox;
@@ -49,34 +52,26 @@ public class MountOptionsController implements FxController {
 	public ChoiceBox<String> driveLetterSelection;
 
 	@Inject
-	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
+	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ObservableValue<MountService> mountService, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
 		this.window = window;
 		this.vault = vault;
-		this.usedVolumeImpl = settings.preferredVolumeImpl().get();
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
+		this.mountpointDirSupported = mountService.map(s -> s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR));
+		this.mountpointDriveLetterSupported = mountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
+		this.mountpointParentSupported = mountService.map(s -> s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
+		this.mountFlagsSupported = mountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
+		this.readOnlySupported = mountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 	}
 
 	@FXML
 	public void initialize() {
-
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
-		//TODO: support this feature on Windows
-		if (usedVolumeImpl == VolumeImpl.FUSE && isOsWindows()) {
-			readOnlyCheckbox.setSelected(false); // to prevent invalid states
-			readOnlyCheckbox.setDisable(true);
-		}
 
 		// custom mount flags:
 		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
 		customMountFlagsCheckbox.setSelected(vault.isHavingCustomMountFlags());
-		if (vault.isHavingCustomMountFlags()) {
-			mountFlags.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
-			readOnlyCheckbox.setSelected(false); // to prevent invalid states
-		} else {
-			mountFlags.textProperty().bind(vault.defaultMountFlagsProperty());
-		}
 
 		// mount point options:
 		mountPoint.selectedToggleProperty().addListener(this::toggleMountPoint);
@@ -105,7 +100,7 @@ public class MountOptionsController implements FxController {
 		if (customMountFlagsCheckbox.isSelected()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 			mountFlags.textProperty().unbind();
-			vault.setCustomMountFlags(vault.defaultMountFlagsProperty().get());
+			vault.setCustomMountFlags(vault.defaultMountFlagsProperty().getValue());
 			mountFlags.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
 		} else {
 			mountFlags.textProperty().unbindBidirectional(vault.getVaultSettings().mountFlags());
@@ -125,7 +120,7 @@ public class MountOptionsController implements FxController {
 		try {
 			var initialDir = Path.of(vault.getVaultSettings().getCustomMountPath().orElse(System.getProperty("user.home")));
 
-			if(Files.exists(initialDir)) {
+			if (Files.exists(initialDir)) {
 				directoryChooser.setInitialDirectory(initialDir.toFile());
 			}
 		} catch (InvalidPathException e) {
@@ -178,25 +173,46 @@ public class MountOptionsController implements FxController {
 
 	// Getter & Setter
 
-	public boolean isOsWindows() {
-		return SystemUtils.IS_OS_WINDOWS;
+	public ObservableValue<Boolean> mountFlagsSupportedProperty() {
+		return mountFlagsSupported;
 	}
 
-	public boolean isCustomMountPointSupported() {
-		return !(usedVolumeImpl == VolumeImpl.WEBDAV && isOsWindows());
+	public boolean isMountFlagsSupported() {
+		return mountFlagsSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> mountpointDirSupportedProperty() {
+		return mountpointDirSupported;
+	}
+
+	public boolean isMountpointDirSupported() {
+		return mountpointDirSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> mountpointParentSupportedProperty() {
+		return mountpointParentSupported;
+	}
+
+	public boolean isMountpointParentSupported() {
+		return mountpointParentSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> mountpointDriveLetterSupportedProperty() {
+		return mountpointDriveLetterSupported;
+	}
+
+	public boolean isMountpointDriveLetterSupported() {
+		return mountpointDriveLetterSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> readOnlySupportedProperty() {
+		return mountpointDriveLetterSupported;
 	}
 
 	public boolean isReadOnlySupported() {
-		return !(usedVolumeImpl == VolumeImpl.FUSE && isOsWindows());
+		return readOnlySupported.getValue();
 	}
 
-	public StringProperty customMountPathProperty() {
-		return vault.getVaultSettings().customMountPath();
-	}
-
-	public boolean isCustomMountOptionsSupported() {
-		return usedVolumeImpl != VolumeImpl.WEBDAV;
-	}
 
 	public String getCustomMountPath() {
 		return vault.getVaultSettings().customMountPath().get();

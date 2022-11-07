@@ -1,7 +1,6 @@
 package org.cryptomator.ui.common;
 
 import dagger.Lazy;
-import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 
 import javax.inject.Inject;
@@ -9,7 +8,7 @@ import javafx.application.Application;
 import java.nio.file.Path;
 
 @FxApplicationScoped
-public class HostServiceRevealer implements Volume.Revealer {
+public class HostServiceRevealer {
 
 	private final Lazy<Application> application;
 
@@ -18,8 +17,7 @@ public class HostServiceRevealer implements Volume.Revealer {
 		this.application = application;
 	}
 
-	@Override
-	public void reveal(Path p) throws Volume.VolumeException {
+	public void reveal(Path p) {
 		application.get().getHostServices().showDocument(p.toUri().toString());
 	}
 }

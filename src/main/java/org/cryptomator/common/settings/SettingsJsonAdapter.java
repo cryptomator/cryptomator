@@ -46,7 +46,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
 		out.name("debugMode").value(value.debugMode().get());
-		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
 		out.name("theme").value(value.theme().get().name());
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
 		out.name("keychainProvider").value(value.keychainProvider().get());
@@ -60,7 +59,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("windowHeight").value((value.windowHeightProperty().get()));
 		out.name("displayConfiguration").value((value.displayConfigurationProperty().get()));
 		out.name("language").value((value.languageProperty().get()));
-
+		out.name("mountService").value(value.mountService().get());
 		out.endObject();
 	}
 
@@ -89,7 +88,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
 				case "preferredGvfsScheme" -> settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
 				case "debugMode" -> settings.debugMode().set(in.nextBoolean());
-				case "preferredVolumeImpl" -> settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
 				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
 				case "keychainProvider" -> settings.keychainProvider().set(in.nextString());
@@ -103,6 +101,12 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "windowHeight" -> settings.windowHeightProperty().set(in.nextInt());
 				case "displayConfiguration" -> settings.displayConfigurationProperty().set(in.nextString());
 				case "language" -> settings.languageProperty().set(in.nextString());
+				case "mountService" -> {
+					var token = in.peek();
+					if (JsonToken.STRING == token) {
+						settings.mountService().set(in.nextString());
+					}
+				}
 
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: {}", name);
@@ -113,15 +117,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		in.endObject();
 
 		return settings;
-	}
-
-	private VolumeImpl parsePreferredVolumeImplName(String nioAdapterName) {
-		try {
-			return VolumeImpl.valueOf(nioAdapterName.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid volume type {}. Defaulting to {}.", nioAdapterName, Settings.DEFAULT_PREFERRED_VOLUME_IMPL);
-			return Settings.DEFAULT_PREFERRED_VOLUME_IMPL;
-		}
 	}
 
 	private WebDavUrlScheme parseWebDavUrlSchemePrefix(String webDavUrlSchemeName) {

@@ -1,9 +1,8 @@
 package org.cryptomator.ui.common;
 
-import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -43,7 +43,7 @@ public class VaultService {
 	 * @param vault The vault to reveal
 	 */
 	public Task<Vault> createRevealTask(Vault vault) {
-		Task<Vault> task = new RevealVaultTask(vault, vaultRevealer);
+		Task<Vault> task = new RevealVaultTask(vault);
 		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
 		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;
@@ -106,22 +106,20 @@ public class VaultService {
 	private static class RevealVaultTask extends Task<Vault> {
 
 		private final Vault vault;
-		private final Volume.Revealer revealer;
 
 		/**
 		 * @param vault The vault to lock
-		 * @param revealer The object to use to show the vault content to the user.
 		 */
-		public RevealVaultTask(Vault vault, Volume.Revealer revealer) {
+		public RevealVaultTask(Vault vault) {
 			this.vault = vault;
-			this.revealer = revealer;
 
 			setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), getException()));
 		}
 
 		@Override
-		protected Vault call() throws Volume.VolumeException {
-			vault.reveal(revealer);
+		protected Vault call() {
+			//vault.reveal(revealer); //TODO: just call hostApplication service
+			//application.get().getHostServices().showDocument(p.toUri().toString());
 			return vault;
 		}
 	}
@@ -180,7 +178,7 @@ public class VaultService {
 		}
 
 		@Override
-		protected Vault call() throws Volume.VolumeException, LockNotCompletedException {
+		protected Vault call() throws UnmountFailedException, IOException {
 			vault.lock(forced);
 			return vault;
 		}

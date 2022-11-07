@@ -11,7 +11,6 @@ import com.google.common.io.BaseEncoding;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -21,7 +20,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,10 +57,19 @@ public class VaultSettings {
 	private final BooleanProperty autoLockWhenIdle = new SimpleBooleanProperty(DEFAULT_AUTOLOCK_WHEN_IDLE);
 	private final IntegerProperty autoLockIdleSeconds = new SimpleIntegerProperty(DEFAULT_AUTOLOCK_IDLE_SECONDS);
 	private final StringExpression mountName;
+	private final ObjectProperty<Path> mountPoint = new SimpleObjectProperty<>();
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
-		this.mountName = StringExpression.stringExpression(displayName.map(VaultSettings::normalizeDisplayName).orElse(""));
+		this.mountName = StringExpression.stringExpression(Bindings.createStringBinding(() -> {
+			final String name;
+			if (displayName.isEmpty().get()) {
+				name = path.get().getFileName().toString();
+			} else {
+				name = displayName.get();
+			}
+			return normalizeDisplayName(name);
+		}, displayName, path));
 	}
 
 	Observable[] observables() {
@@ -190,4 +197,11 @@ public class VaultSettings {
 		}
 	}
 
+	public Path getMountPoint() {
+		return mountPoint.get();
+	}
+
+	public ObjectProperty<Path> mountPointProperty() {
+		return mountPoint;
+	}
 }

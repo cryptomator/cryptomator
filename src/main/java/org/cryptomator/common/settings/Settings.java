@@ -74,6 +74,9 @@ public class Settings {
 	private final StringProperty language = new SimpleStringProperty(DEFAULT_LANGUAGE);
 
 
+	private final StringProperty mountService = new SimpleStringProperty();
+
+
 	private Consumer<Settings> saveCmd;
 
 	/**
@@ -105,6 +108,7 @@ public class Settings {
 		windowHeight.addListener(this::somethingChanged);
 		displayConfiguration.addListener(this::somethingChanged);
 		language.addListener(this::somethingChanged);
+		mountService.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -165,6 +169,10 @@ public class Settings {
 		return preferredVolumeImpl;
 	}
 
+	public StringProperty mountService() {
+		return mountService;
+	}
+
 	public ObjectProperty<UiTheme> theme() {
 		return theme;
 	}
@@ -210,4 +218,5 @@ public class Settings {
 	public StringProperty languageProperty() {
 		return language;
 	}
+
 }

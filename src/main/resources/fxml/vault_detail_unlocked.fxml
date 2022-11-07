@@ -18,14 +18,15 @@
 				<FontAwesome5IconView glyph="HDD" glyphSize="24"/>
 				<VBox spacing="4" alignment="CENTER_LEFT">
 					<Label text="%main.vaultDetail.revealBtn"/>
-					<Label styleClass="label-extra-small" text="${controller.vault.accessPoint}" textOverrun="CENTER_ELLIPSIS"
-						   visible="${controller.vault.accessPointPresent}" managed="${controller.vault.accessPointPresent}"/>
+					<!-- TODO -->
+					<!--Label styleClass="label-extra-small" text="${controller.vault.accessPoint}" textOverrun="CENTER_ELLIPSIS"
+						   visible="${controller.vault.accessPoint.empty}" managed="${controller.vault.accessPoint.empty}"/-->
 				</VBox>
 			</HBox>
 		</graphic>
-		<tooltip>
+		<!--tooltip>
 			<Tooltip text="${controller.vault.accessPoint}"/>
-		</tooltip>
+		</tooltip -->
 	</Button>
 	<Button text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
 		<graphic>

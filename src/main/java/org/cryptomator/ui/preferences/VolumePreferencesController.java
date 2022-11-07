@@ -4,7 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.WebDavUrlScheme;
-import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import java.util.List;
 
 /**
  * TODO: if WebDAV is selected under Windows, show warning that specific mount options (like selecting a directory as mount point) are _not_ supported
@@ -25,25 +26,25 @@ public class VolumePreferencesController implements FxController {
 	private final Settings settings;
 	private final BooleanBinding showWebDavSettings;
 	private final BooleanBinding showWebDavScheme;
-	public ChoiceBox<VolumeImpl> volumeTypeChoiceBox;
+	private final List<MountService> mountProviders;
+	public ChoiceBox<MountService> volumeTypeChoiceBox;
 	public TextField webDavPortField;
 	public Button changeWebDavPortButton;
 	public ChoiceBox<WebDavUrlScheme> webDavUrlSchemeChoiceBox;
 
 	@Inject
-	VolumePreferencesController(Settings settings) {
+	VolumePreferencesController(Settings settings, List<MountService> mountProviders) {
 		this.settings = settings;
+		this.mountProviders = mountProviders;
 		this.showWebDavSettings = Bindings.equal(settings.preferredVolumeImpl(), VolumeImpl.WEBDAV);
 		this.showWebDavScheme = showWebDavSettings.and(new SimpleBooleanProperty(SystemUtils.IS_OS_LINUX)); //TODO: remove SystemUtils
 	}
 
 	public void initialize() {
-		volumeTypeChoiceBox.getItems().addAll(Volume.getCurrentSupportedAdapters());
-		if (!volumeTypeChoiceBox.getItems().contains(settings.preferredVolumeImpl().get())) {
-			settings.preferredVolumeImpl().set(VolumeImpl.WEBDAV);
-		}
-		volumeTypeChoiceBox.valueProperty().bindBidirectional(settings.preferredVolumeImpl());
-		volumeTypeChoiceBox.setConverter(new VolumeImplConverter());
+		volumeTypeChoiceBox.getItems().addAll(mountProviders);
+		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
+		volumeTypeChoiceBox.getSelectionModel().selectFirst(); //TODO
+		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvide, newProvider) -> settings.mountService().set(newProvider.getClass().getName()));
 
 		webDavPortField.setText(String.valueOf(settings.port().get()));
 		changeWebDavPortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(webDavPortField.textProperty()));
@@ -101,15 +102,15 @@ public class VolumePreferencesController implements FxController {
 		}
 	}
 
-	private static class VolumeImplConverter extends StringConverter<VolumeImpl> {
+	private static class MountServiceConverter extends StringConverter<MountService> {
 
 		@Override
-		public String toString(VolumeImpl impl) {
-			return impl.getDisplayName();
+		public String toString(MountService provider) {
+			return provider== null? "None" : provider.displayName(); //TODO: adjust message
 		}
 
 		@Override
-		public VolumeImpl fromString(String string) {
+		public MountService fromString(String string) {
 			throw new UnsupportedOperationException();
 		}
 	}
