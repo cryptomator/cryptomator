@@ -31,7 +31,7 @@ public class SettingsJsonAdapterTest {
 					"checkForUpdatesEnabled": true,
 					"port": 8080,
 					"language": "de-DE",
-					"numTrayNotifications": 42,
+					"numTrayNotifications": 42
 				}
 				""";
 
