@@ -161,11 +161,14 @@ public class Vault {
 			}
 		}
 
-		if (mountServiceImpl.hasCapability(MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH) && vaultSettings.getMountPoint() == null) {
-			return builder;
-		} else {
-			return builder.setMountpoint(vaultSettings.getMountPoint());
+		if (mountServiceImpl.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) //
+				|| mountServiceImpl.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT) //
+				|| mountServiceImpl.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER)) {
+			builder.setMountpoint(vaultSettings.getMountPoint());
 		}
+
+		return builder;
+
 	}
 
 	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, MountFailedException {
@@ -296,7 +299,7 @@ public class Vault {
 
 	public String getAccessPoint() {
 		var mountPoint = mount.get().mount.getMountpoint();
-		if( mountPoint instanceof Mountpoint.WithPath m) {
+		if (mountPoint instanceof Mountpoint.WithPath m) {
 			return m.path().toString();
 		} else {
 			return mountPoint.uri().toString();
