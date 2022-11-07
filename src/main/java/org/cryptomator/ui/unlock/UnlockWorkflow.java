@@ -5,6 +5,7 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
@@ -50,7 +51,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean call() throws InterruptedException, IOException, CryptoException {
+	protected Boolean call() throws InterruptedException, IOException, CryptoException, MountFailedException {
 		try {
 			attemptUnlock();
 			return true;
@@ -60,12 +61,13 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private void attemptUnlock() throws IOException, CryptoException {
+	private void attemptUnlock() throws IOException, CryptoException, MountFailedException {
 		try {
 			keyLoadingStrategy.use(vault::unlock);
 		} catch (Exception e) {
 			Throwables.propagateIfPossible(e, IOException.class);
 			Throwables.propagateIfPossible(e, CryptoException.class);
+			Throwables.propagateIfPossible(e, MountFailedException.class);
 			throw new IllegalStateException("unexpected exception type", e);
 		}
 	}

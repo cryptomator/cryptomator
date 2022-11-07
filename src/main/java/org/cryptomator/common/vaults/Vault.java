@@ -8,9 +8,11 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
@@ -44,12 +46,18 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.cryptomator.integrations.mount.MountCapability.MOUNT_AS_DRIVE_LETTER;
+import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_EXISTING_DIR;
+import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH;
+import static org.cryptomator.integrations.mount.MountCapability.MOUNT_WITHIN_EXISTING_PARENT;
 
 @PerVault
 public class Vault {
@@ -58,6 +66,7 @@ public class Vault {
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
+	private final Environment env;
 	private final Settings settings;
 	private final VaultSettings vaultSettings;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
@@ -80,7 +89,8 @@ public class Vault {
 	private AtomicReference<MountHandle> mount = new AtomicReference<>(null);
 
 	@Inject
-	Vault(Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<MountService> mountService, VaultStats stats) {
+	Vault(Environment env, Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<MountService> mountService, VaultStats stats) {
+		this.env = env;
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
@@ -147,28 +157,41 @@ public class Vault {
 		}
 	}
 
-	private MountBuilder prepareMount(Path cryptoRoot) {
-		var mountServiceImpl = mountService.getValue();
-		var builder = mountServiceImpl.forFileSystem(cryptoRoot);
+	private MountBuilder prepareMount(Path cryptoRoot) throws IOException {
+		var mountProvider = mountService.getValue();
+		var builder = mountProvider.forFileSystem(cryptoRoot);
 
-		for (var capabiltiy : mountServiceImpl.capabilities()) {
-			switch (capabiltiy) {
+		for (var capability : mountProvider.capabilities()) {
+			switch (capability) {
 				case LOOPBACK_PORT -> builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings?
 				case LOOPBACK_HOST_NAME -> builder.setLoopbackHostName("cryptomator-vault"); //TODO: Read from system property
 				case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
-				case MOUNT_FLAGS -> builder.setMountFlags(mountServiceImpl.getDefaultMountFlags(vaultSettings.mountName().get())); //TODO: currently not adjustable
+				case MOUNT_FLAGS -> builder.setMountFlags(mountProvider.getDefaultMountFlags(vaultSettings.mountName().get())); //TODO: currently not adjustable
 				case VOLUME_ID -> builder.setVolumeId(vaultSettings.mountName().get());
 			}
 		}
 
-		if (mountServiceImpl.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) //
-				|| mountServiceImpl.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT) //
-				|| mountServiceImpl.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER)) {
-			builder.setMountpoint(vaultSettings.getMountPoint());
+		var userChosenMountPoint = vaultSettings.getMountPoint();
+		var defaultMountPointBase = env.getMountPointsDir().orElseThrow();
+		if (userChosenMountPoint == null) {
+			if (mountProvider.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
+				// no need to set a mount point
+			} else if (mountProvider.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
+				// TODO find any free drive letter?
+			} else if (mountProvider.hasCapability(MOUNT_WITHIN_EXISTING_PARENT)) {
+				Files.createDirectories(defaultMountPointBase);
+				builder.setMountpoint(defaultMountPointBase);
+			} else if (mountProvider.hasCapability(MOUNT_TO_EXISTING_DIR) ) {
+				var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName().get());
+				Files.createDirectories(mountPoint);
+				builder.setMountpoint(mountPoint);
+			}
+		} else if (mountProvider.hasCapability(MOUNT_TO_EXISTING_DIR) || mountProvider.hasCapability(MOUNT_WITHIN_EXISTING_PARENT) || mountProvider.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
+			// TODO: move the mount point away in case of MOUNT_WITHIN_EXISTING_PARENT?
+			builder.setMountpoint(userChosenMountPoint);
 		}
 
 		return builder;
-
 	}
 
 	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, MountFailedException {
