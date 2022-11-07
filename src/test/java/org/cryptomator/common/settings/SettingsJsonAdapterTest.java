@@ -32,7 +32,6 @@ public class SettingsJsonAdapterTest {
 					"port": 8080,
 					"language": "de-DE",
 					"numTrayNotifications": 42,
-					"preferredVolumeImpl": "FUSE"
 				}
 				""";
 
@@ -44,8 +43,6 @@ public class SettingsJsonAdapterTest {
 		Assertions.assertEquals(true, settings.autoCloseVaults().get());
 		Assertions.assertEquals("de-DE", settings.languageProperty().get());
 		Assertions.assertEquals(42, settings.numTrayNotifications().get());
-		Assertions.assertEquals(WebDavUrlScheme.DAV, settings.preferredGvfsScheme().get());
-		Assertions.assertEquals(VolumeImpl.FUSE, settings.preferredVolumeImpl().get());
 	}
 
 	@SuppressWarnings("SpellCheckingInspection")

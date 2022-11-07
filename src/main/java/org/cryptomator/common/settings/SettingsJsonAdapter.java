@@ -44,7 +44,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("autoCloseVaults").value(value.autoCloseVaults().get());
 		out.name("port").value(value.port().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
-		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
 		out.name("debugMode").value(value.debugMode().get());
 		out.name("theme").value(value.theme().get().name());
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
@@ -86,7 +85,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "autoCloseVaults" -> settings.autoCloseVaults().set(in.nextBoolean());
 				case "port" -> settings.port().set(in.nextInt());
 				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
-				case "preferredGvfsScheme" -> settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
 				case "debugMode" -> settings.debugMode().set(in.nextBoolean());
 				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
@@ -117,15 +115,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		in.endObject();
 
 		return settings;
-	}
-
-	private WebDavUrlScheme parseWebDavUrlSchemePrefix(String webDavUrlSchemeName) {
-		try {
-			return WebDavUrlScheme.valueOf(webDavUrlSchemeName.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid WebDAV url scheme {}. Defaulting to {}.", webDavUrlSchemeName, Settings.DEFAULT_GVFS_SCHEME);
-			return Settings.DEFAULT_GVFS_SCHEME;
-		}
 	}
 
 	private UiTheme parseUiTheme(String uiThemeName) {
