@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
@@ -25,6 +26,7 @@ public class VolumePreferencesController implements FxController {
 
 	private final Settings settings;
 	private final BooleanBinding showWebDavSettings;
+	private final ObservableValue<MountService> selectedMountService;
 	private final BooleanBinding showWebDavScheme;
 	private final List<MountService> mountProviders;
 	public ChoiceBox<MountService> volumeTypeChoiceBox;
@@ -33,17 +35,18 @@ public class VolumePreferencesController implements FxController {
 	public ChoiceBox<WebDavUrlScheme> webDavUrlSchemeChoiceBox;
 
 	@Inject
-	VolumePreferencesController(Settings settings, List<MountService> mountProviders) {
+	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ObservableValue<MountService> selectedMountService) {
 		this.settings = settings;
 		this.mountProviders = mountProviders;
 		this.showWebDavSettings = Bindings.equal(settings.preferredVolumeImpl(), VolumeImpl.WEBDAV);
+		this.selectedMountService = selectedMountService;
 		this.showWebDavScheme = showWebDavSettings.and(new SimpleBooleanProperty(SystemUtils.IS_OS_LINUX)); //TODO: remove SystemUtils
 	}
 
 	public void initialize() {
 		volumeTypeChoiceBox.getItems().addAll(mountProviders);
 		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
-		volumeTypeChoiceBox.getSelectionModel().selectFirst(); //TODO
+		volumeTypeChoiceBox.getSelectionModel().select(selectedMountService.getValue());
 		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvide, newProvider) -> settings.mountService().set(newProvider.getClass().getName()));
 
 		webDavPortField.setText(String.valueOf(settings.port().get()));
