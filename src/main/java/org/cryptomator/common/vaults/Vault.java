@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
@@ -38,7 +37,6 @@ import javax.inject.Named;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.ObjectExpression;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -86,7 +84,7 @@ public class Vault {
 	private final StringBinding accessPoint;
 	private final BooleanProperty showingStats;
 
-	private AtomicReference<MountHandle> mount = new AtomicReference<>(null);
+	private AtomicReference<MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
 	Vault(Environment env, Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<MountService> mountService, VaultStats stats) {
@@ -205,7 +203,7 @@ public class Vault {
 			var rootPath = fs.getRootDirectories().iterator().next();
 			var supportsForcedUnmount = mountService.getValue().hasCapability(MountCapability.UNMOUNT_FORCED);
 			var mountHandle = new MountHandle(prepareMount(rootPath).mount(), supportsForcedUnmount);
-			success = mount.compareAndSet(null, mountHandle);
+			success = this.mountHandle.compareAndSet(null, mountHandle);
 		} finally {
 			if (!success) {
 				destroyCryptoFileSystem();
@@ -215,7 +213,7 @@ public class Vault {
 
 
 	public synchronized void lock(boolean forced) throws UnmountFailedException, IOException {
-		var mountHandle = mount.get();
+		var mountHandle = this.mountHandle.get();
 		if (mountHandle == null) {
 			//TODO: noop or InvalidStateException?
 			return;
@@ -233,6 +231,7 @@ public class Vault {
 			destroyCryptoFileSystem();
 		}
 
+		this.mountHandle.set(null);
 		LOG.info("Locked vault '{}'", getDisplayName());
 	}
 
@@ -321,7 +320,7 @@ public class Vault {
 	}
 
 	public String getAccessPoint() {
-		var mountPoint = mount.get().mount.getMountpoint();
+		var mountPoint = mountHandle.get().mount.getMountpoint();
 		if (mountPoint instanceof Mountpoint.WithPath m) {
 			return m.path().toString();
 		} else {
@@ -349,7 +348,7 @@ public class Vault {
 	}
 
 	public boolean isShowingStats() {
-		return mount.get() != null;
+		return mountHandle.get() != null;
 	}
 
 
