@@ -165,7 +165,7 @@ public class Vault {
 				case LOOPBACK_HOST_NAME -> builder.setLoopbackHostName("cryptomator-vault"); //TODO: Read from system property
 				case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
 				case MOUNT_FLAGS -> builder.setMountFlags(mountProvider.getDefaultMountFlags(vaultSettings.mountName().get())); //TODO: currently not adjustable
-				case VOLUME_ID -> builder.setVolumeId(vaultSettings.mountName().get());
+				case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
 			}
 		}
 
