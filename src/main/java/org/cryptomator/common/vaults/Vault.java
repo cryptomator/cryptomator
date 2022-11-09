@@ -96,7 +96,7 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.mountService = mountService;
-		this.defaultMountFlags = Bindings.createStringBinding(() -> mountService.getValue().getDefaultMountFlags(vaultSettings.mountName().get()), vaultSettings.mountName(), mountService).orElse(""); //TODO: logic correct?
+		this.defaultMountFlags = mountService.map(MountService::getDefaultMountFlags);
 		this.stats = stats;
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
@@ -161,11 +161,13 @@ public class Vault {
 
 		for (var capability : mountProvider.capabilities()) {
 			switch (capability) {
+				case FILE_SYSTEM_NAME -> builder.setFileSystemName("crypto");
 				case LOOPBACK_PORT -> builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings?
 				case LOOPBACK_HOST_NAME -> builder.setLoopbackHostName("cryptomator-vault"); //TODO: Read from system property
 				case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
-				case MOUNT_FLAGS -> builder.setMountFlags(mountProvider.getDefaultMountFlags(vaultSettings.mountName().get())); //TODO: currently not adjustable
+				case MOUNT_FLAGS -> builder.setMountFlags(defaultMountFlags.getValue()); // TODO use custom mount flags (pre-populated with default mount flags)
 				case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
+				case VOLUME_NAME -> builder.setVolumeName(vaultSettings.mountName().get());
 			}
 		}
 
