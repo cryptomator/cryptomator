@@ -12,21 +12,26 @@
 	  alignment="TOP_CENTER"
 	  spacing="9">
 	<Label text="%main.vaultDetail.accessLocation"/>
-	<Button styleClass="button-large" contentDisplay="GRAPHIC_ONLY" minWidth="120" onAction="#revealAccessLocation" defaultButton="${controller.vault.unlocked}">
+	<Button styleClass="button-large" contentDisplay="GRAPHIC_ONLY" minWidth="120" onAction="#revealAccessLocation" defaultButton="${controller.accessibleViaPath}" visible="${controller.accessibleViaPath}" managed="${controller.accessibleViaPath}">
 		<graphic>
 			<HBox spacing="12" alignment="CENTER">
 				<FontAwesome5IconView glyph="HDD" glyphSize="24"/>
 				<VBox spacing="4" alignment="CENTER_LEFT">
 					<Label text="%main.vaultDetail.revealBtn"/>
-					<!-- TODO -->
-					<!--Label styleClass="label-extra-small" text="${controller.vault.accessPoint}" textOverrun="CENTER_ELLIPSIS"
-						   visible="${controller.vault.accessPoint.empty}" managed="${controller.vault.accessPoint.empty}"/-->
 				</VBox>
 			</HBox>
 		</graphic>
-		<!--tooltip>
-			<Tooltip text="${controller.vault.accessPoint}"/>
-		</tooltip -->
+	</Button>
+	<Button styleClass="button-large" contentDisplay="GRAPHIC_ONLY" minWidth="120" onAction="#copyMountUri" defaultButton="${controller.accessibleViaUri}" visible="${controller.accessibleViaUri}" managed="${controller.accessibleViaUri}">
+		<graphic>
+			<HBox spacing="12" alignment="CENTER">
+				<FontAwesome5IconView glyph="LINK" glyphSize="24"/>
+				<VBox spacing="4" alignment="CENTER_LEFT">
+					<Label text="%generic.button.copy"/> <!-- TODO -->
+					<Label styleClass="label-extra-small" text="${controller.mountUri}" textOverrun="CENTER_ELLIPSIS"/>
+				</VBox>
+			</HBox>
+		</graphic>
 	</Button>
 	<Button text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
 		<graphic>

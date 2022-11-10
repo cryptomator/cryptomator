@@ -45,7 +45,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="cryptomator" options="-Adagger.fastInit=enabled -Adagger.formatGeneratedSource=enabled" />
+      <module name="cryptomator" options="-Adagger.fastInit=enabled -Adagger.formatGeneratedSource=enabled --enable-preview" />
     </option>
   </component>
 </project>

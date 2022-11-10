@@ -37,6 +37,7 @@ import javax.inject.Named;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -81,7 +82,7 @@ public class Vault {
 	private final BooleanBinding missing;
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
-	private final StringBinding accessPoint;
+	private final ObjectBinding<Mountpoint> mountPoint;
 	private final BooleanProperty showingStats;
 
 	private AtomicReference<MountHandle> mountHandle = new AtomicReference<>(null);
@@ -105,7 +106,7 @@ public class Vault {
 		this.missing = Bindings.createBooleanBinding(this::isMissing, state);
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
-		this.accessPoint = Bindings.createStringBinding(this::getAccessPoint, state);
+		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.showingStats = new SimpleBooleanProperty(false);
 	}
 
@@ -317,17 +318,13 @@ public class Vault {
 		return vaultSettings.displayName().get();
 	}
 
-	public StringBinding accessPointProperty() {
-		return accessPoint;
+	public ObjectBinding<Mountpoint> mountPointProperty() {
+		return mountPoint;
 	}
 
-	public String getAccessPoint() {
-		var mountPoint = mountHandle.get().mount.getMountpoint();
-		if (mountPoint instanceof Mountpoint.WithPath m) {
-			return m.path().toString();
-		} else {
-			return mountPoint.uri().toString();
-		}
+	public Mountpoint getMountPoint() {
+		var handle = mountHandle.get();
+		return handle == null ? null : handle.mount.getMountpoint();
 	}
 
 	public StringBinding displayablePathProperty() {

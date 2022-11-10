@@ -313,6 +313,7 @@
 					<compilerArgs>
 						<arg>-Adagger.fastInit=enabled</arg>
 						<arg>-Adagger.formatGeneratedSource=enabled</arg>
+						<arg>--enable-preview</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>
