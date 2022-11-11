@@ -6,7 +6,6 @@
 package org.cryptomator.common.settings;
 
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 
 import javafx.beans.Observable;
@@ -22,7 +21,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -32,7 +30,6 @@ public class VaultSettings {
 
 	public static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
 	public static final boolean DEFAULT_REVEAL_AFTER_MOUNT = true;
-	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
 	public static final int DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH = -1;
@@ -45,11 +42,8 @@ public class VaultSettings {
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
 	private final StringProperty displayName = new SimpleStringProperty();
-	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REVEAL_AFTER_MOUNT);
-	private final BooleanProperty useCustomMountPath = new SimpleBooleanProperty(DEFAULT_USES_INDIVIDUAL_MOUNTPATH);
-	private final StringProperty customMountPath = new SimpleStringProperty();
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
 	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS);
 	private final IntegerProperty maxCleartextFilenameLength = new SimpleIntegerProperty(DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH);
@@ -73,7 +67,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, maxCleartextFilenameLength, actionAfterUnlock, autoLockWhenIdle, autoLockIdleSeconds};
+		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -117,18 +111,6 @@ public class VaultSettings {
 		return mountName;
 	}
 
-	public StringProperty winDriveLetter() {
-		return winDriveLetter;
-	}
-
-	public Optional<String> getWinDriveLetter() {
-		String current = this.winDriveLetter.get();
-		if (!Strings.isNullOrEmpty(current)) {
-			return Optional.of(current);
-		}
-		return Optional.empty();
-	}
-
 	public BooleanProperty unlockAfterStartup() {
 		return unlockAfterStartup;
 	}
@@ -137,20 +119,12 @@ public class VaultSettings {
 		return revealAfterMount;
 	}
 
-	public BooleanProperty useCustomMountPath() {
-		return useCustomMountPath;
+	public Path getMountPoint() {
+		return mountPoint.get();
 	}
 
-	public StringProperty customMountPath() {
-		return customMountPath;
-	}
-
-	public Optional<String> getCustomMountPath() {
-		if (useCustomMountPath.get()) {
-			return Optional.ofNullable(Strings.emptyToNull(customMountPath.get()));
-		} else {
-			return Optional.empty();
-		}
+	public ObjectProperty<Path> mountPoint() {
+		return mountPoint;
 	}
 
 	public BooleanProperty usesReadOnlyMode() {
@@ -195,13 +169,5 @@ public class VaultSettings {
 		} else {
 			return false;
 		}
-	}
-
-	public Path getMountPoint() {
-		return mountPoint.get();
-	}
-
-	public ObjectProperty<Path> mountPointProperty() {
-		return mountPoint;
 	}
 }

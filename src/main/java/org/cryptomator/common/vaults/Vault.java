@@ -12,6 +12,7 @@ import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
@@ -83,12 +84,13 @@ public class Vault {
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
 	private final ObjectBinding<Mountpoint> mountPoint;
+	private final WindowsDriveLetters windowsDriveLetters;
 	private final BooleanProperty showingStats;
 
 	private AtomicReference<MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(Environment env, Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<MountService> mountService, VaultStats stats) {
+	Vault(Environment env, Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<MountService> mountService, VaultStats stats, WindowsDriveLetters windowsDriveLetters) {
 		this.env = env;
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
@@ -107,6 +109,7 @@ public class Vault {
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
+		this.windowsDriveLetters = windowsDriveLetters;
 		this.showingStats = new SimpleBooleanProperty(false);
 	}
 
@@ -178,7 +181,7 @@ public class Vault {
 			if (mountProvider.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
 				// no need to set a mount point
 			} else if (mountProvider.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
-				// TODO find any free drive letter?
+				builder.setMountpoint(windowsDriveLetters.getFirstDesiredAvailable().orElseThrow());
 			} else if (mountProvider.hasCapability(MOUNT_WITHIN_EXISTING_PARENT)) {
 				Files.createDirectories(defaultMountPointBase);
 				builder.setMountpoint(defaultMountPointBase);
