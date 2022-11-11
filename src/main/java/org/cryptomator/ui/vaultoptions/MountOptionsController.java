@@ -44,11 +44,11 @@ public class MountOptionsController implements FxController {
 
 	public CheckBox readOnlyCheckbox;
 	public CheckBox customMountFlagsCheckbox;
-	public TextField mountFlags;
-	public ToggleGroup mountPoint;
-	public RadioButton mountPointAuto;
-	public RadioButton mountPointWinDriveLetter;
-	public RadioButton mountPointCustomDir;
+	public TextField mountFlagsField;
+	public ToggleGroup mountPointToggleGroup;
+	public RadioButton mountPointAutoBtn;
+	public RadioButton mountPointDriveLetterBtn;
+	public RadioButton mountPointDirBtn;
 	public ChoiceBox<String> driveLetterSelection;
 
 	@Inject
@@ -70,26 +70,26 @@ public class MountOptionsController implements FxController {
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
 
 		// custom mount flags:
-		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
+		mountFlagsField.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
 		customMountFlagsCheckbox.setSelected(vault.isHavingCustomMountFlags());
 
 		// mount point options:
-		mountPoint.selectedToggleProperty().addListener(this::toggleMountPoint);
+		mountPointToggleGroup.selectedToggleProperty().addListener(this::toggleMountPoint);
 		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAllDriveLetters());
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
 		if (vault.getVaultSettings().useCustomMountPath().get() && vault.getVaultSettings().getCustomMountPath().isPresent()) {
-			mountPoint.selectToggle(mountPointCustomDir);
+			mountPointToggleGroup.selectToggle(mountPointDirBtn);
 		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
-			mountPoint.selectToggle(mountPointWinDriveLetter);
+			mountPointToggleGroup.selectToggle(mountPointDriveLetterBtn);
 		} else {
-			mountPoint.selectToggle(mountPointAuto);
+			mountPointToggleGroup.selectToggle(mountPointAutoBtn);
 		}
 
-		vault.getVaultSettings().useCustomMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
+		vault.getVaultSettings().useCustomMountPath().bind(mountPointToggleGroup.selectedToggleProperty().isEqualTo(mountPointDirBtn));
 		vault.getVaultSettings().winDriveLetter().bind( //
-				Bindings.when(mountPoint.selectedToggleProperty().isEqualTo(mountPointWinDriveLetter)) //
+				Bindings.when(mountPointToggleGroup.selectedToggleProperty().isEqualTo(mountPointDriveLetterBtn)) //
 						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
 						.otherwise((String) null) //
 		);
@@ -99,19 +99,19 @@ public class MountOptionsController implements FxController {
 	public void toggleUseCustomMountFlags() {
 		if (customMountFlagsCheckbox.isSelected()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
-			mountFlags.textProperty().unbind();
+			mountFlagsField.textProperty().unbind();
 			vault.setCustomMountFlags(vault.defaultMountFlagsProperty().getValue());
-			mountFlags.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
+			mountFlagsField.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
 		} else {
-			mountFlags.textProperty().unbindBidirectional(vault.getVaultSettings().mountFlags());
+			mountFlagsField.textProperty().unbindBidirectional(vault.getVaultSettings().mountFlags());
 			vault.setCustomMountFlags(null);
-			mountFlags.textProperty().bind(vault.defaultMountFlagsProperty());
+			mountFlagsField.textProperty().bind(vault.defaultMountFlagsProperty());
 		}
 	}
 
 	@FXML
 	public void chooseCustomMountPoint() {
-		chooseCustomMountPointOrReset(mountPointCustomDir);
+		chooseCustomMountPointOrReset(mountPointDirBtn);
 	}
 
 	private void chooseCustomMountPointOrReset(Toggle previousMountToggle) {
@@ -130,12 +130,12 @@ public class MountOptionsController implements FxController {
 		if (file != null) {
 			vault.getVaultSettings().customMountPath().set(file.getAbsolutePath());
 		} else {
-			mountPoint.selectToggle(previousMountToggle);
+			mountPointToggleGroup.selectToggle(previousMountToggle);
 		}
 	}
 
 	private void toggleMountPoint(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
-		if (mountPointCustomDir.equals(newValue) && Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())) {
+		if (mountPointDirBtn.equals(newValue) && Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())) {
 			chooseCustomMountPointOrReset(oldValue);
 		}
 	}
