@@ -1,5 +1,6 @@
 package org.cryptomator.ui.traymenu;
 
+import dagger.internal.Preconditions;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.integrations.common.CheckAvailability;
 import org.cryptomator.integrations.common.Priority;
@@ -64,17 +65,13 @@ public class AwtTrayMenuController implements TrayMenuController {
 
 	@Override
 	public void onBeforeOpenMenu(Runnable listener) {
-		try {
-			this.trayIcon.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					listener.run();
-				}
-			});
-		} catch (Exception e) {
-			throw new IllegalStateException("Tray icon not found.", e);
-		}
-
+		Preconditions.checkNotNull(this.trayIcon);
+		this.trayIcon.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				listener.run();
+			}
+		});
 	}
 
 	private void addChildren(Menu menu, List<TrayMenuItem> items) {
