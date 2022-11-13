@@ -1,6 +1,6 @@
 package org.cryptomator.ui.traymenu;
 
-import dagger.internal.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.integrations.common.CheckAvailability;
 import org.cryptomator.integrations.common.Priority;
