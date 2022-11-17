@@ -15,7 +15,6 @@ defaults:
 jobs:
   test:
     name: Compile and Test
-    needs: release-check-precondition
     runs-on: ubuntu-latest
     if: "always()
       && (needs.release-check-precondition.result=='success' || needs.release-check-precondition.result=='skipped')
