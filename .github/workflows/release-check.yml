@@ -24,8 +24,6 @@ jobs:
         run: |
           if [[ $GITHUB_REF =~ refs/heads/(hotfix|release)/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
             SEM_VER_STR=${GITHUB_REF##*/}
-          elif [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR=${GITHUB_REF##*/}
           else
             echo "Failed to parse version"
             exit 1
