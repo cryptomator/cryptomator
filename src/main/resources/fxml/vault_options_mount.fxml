@@ -16,41 +16,46 @@
 	  fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
 	  spacing="6">
 	<fx:define>
-		<ToggleGroup fx:id="mountPoint"/>
+		<ToggleGroup fx:id="mountPointToggleGroup"/>
 	</fx:define>
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly"/>
+		<Label text="Options depend on the selected volume provider in the general preferences"/>
+		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly" visible="${controller.readOnlySupported}" managed="${controller.readOnlySupported}"/>
 
-		<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags" visible="${controller.customMountOptionsSupported}" managed="${controller.customMountOptionsSupported}"/>
-
-		<TextField fx:id="mountFlags" HBox.hgrow="ALWAYS" maxWidth="Infinity">
-			<VBox.margin>
-				<Insets left="24"/>
-			</VBox.margin>
-		</TextField>
+		<VBox visible="${controller.mountFlagsSupported}" managed="${controller.mountFlagsSupported}">
+			<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags"/>
+			<TextField fx:id="mountFlagsField" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+				<VBox.margin>
+					<Insets left="24"/>
+				</VBox.margin>
+			</TextField>
+		</VBox>
 
 		<Label text="%vaultOptions.mount.mountPoint">
 			<VBox.margin>
 				<Insets top="9"/>
 			</VBox.margin>
 		</Label>
-		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointAuto" text="%vaultOptions.mount.mountPoint.auto"/>
-		<HBox spacing="6" visible="${controller.osWindows}" managed="${controller.osWindows}">
-			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointWinDriveLetter" text="%vaultOptions.mount.mountPoint.driveLetter"/>
-			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointWinDriveLetter.selected}"/>
+
+		<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointAutoBtn" text="%vaultOptions.mount.mountPoint.auto"/>
+
+		<HBox spacing="6" visible="${controller.mountpointDriveLetterSupported}" managed="${controller.mountpointDriveLetterSupported}">
+			<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDriveLetterBtn" text="%vaultOptions.mount.mountPoint.driveLetter"/>
+			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointDriveLetterBtn.selected}" value="${controller.driveLetter}"/>
 		</HBox>
-		<HBox fx:id="customMountPointRadioBtn" spacing="6" alignment="CENTER_LEFT" visible="${controller.customMountOptionsSupported}" managed="${controller.customMountOptionsSupported}">
-			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="%vaultOptions.mount.mountPoint.custom" />
-			<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointCustomDir.selected}">
+
+		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.mountpointDirSupported}" managed="${controller.mountpointDirSupported}">
+			<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDirBtn" text="%vaultOptions.mount.mountPoint.custom"/>
+			<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointDirBtn.selected}">
 				<graphic>
 					<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
 				</graphic>
 			</Button>
 		</HBox>
-		<TextField text="${controller.customMountPath}" visible="${mountPointCustomDir.selected}" maxWidth="Infinity" disable="true" managed="${customMountPointRadioBtn.managed}">
+		<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false" >
 			<VBox.margin>
 				<Insets left="24"/>
 			</VBox.margin>

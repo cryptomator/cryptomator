@@ -53,7 +53,7 @@ public class LockForcedController implements FxController {
 	}
 
 	public boolean isForceSupported() {
-		return vault.supportsForcedUnmount();
+		return false;//vault.supportsForcedUnmount(); TODO
 	}
 
 }

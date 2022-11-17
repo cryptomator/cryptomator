@@ -36,9 +36,7 @@ public class Settings {
 	public static final boolean DEFAULT_USE_KEYCHAIN = true;
 	public static final int DEFAULT_PORT = 42427;
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
-	public static final WebDavUrlScheme DEFAULT_GVFS_SCHEME = WebDavUrlScheme.DAV;
 	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = VolumeImpl.FUSE;
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	@Deprecated // to be changed to "whatever is available" eventually
 	public static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
@@ -57,9 +55,7 @@ public class Settings {
 	private final BooleanProperty useKeychain = new SimpleBooleanProperty(DEFAULT_USE_KEYCHAIN);
 	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
-	private final ObjectProperty<WebDavUrlScheme> preferredGvfsScheme = new SimpleObjectProperty<>(DEFAULT_GVFS_SCHEME);
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
-	private final ObjectProperty<VolumeImpl> preferredVolumeImpl = new SimpleObjectProperty<>(DEFAULT_PREFERRED_VOLUME_IMPL);
 	private final ObjectProperty<UiTheme> theme = new SimpleObjectProperty<>(DEFAULT_THEME);
 	private final ObjectProperty<String> keychainProvider = new SimpleObjectProperty<>(DEFAULT_KEYCHAIN_PROVIDER);
 	private final ObjectProperty<NodeOrientation> userInterfaceOrientation = new SimpleObjectProperty<>(DEFAULT_USER_INTERFACE_ORIENTATION);
@@ -72,6 +68,9 @@ public class Settings {
 	private final IntegerProperty windowHeight = new SimpleIntegerProperty();
 	private final ObjectProperty<String> displayConfiguration = new SimpleObjectProperty<>(DEFAULT_DISPLAY_CONFIGURATION);
 	private final StringProperty language = new SimpleStringProperty(DEFAULT_LANGUAGE);
+
+
+	private final StringProperty mountService = new SimpleStringProperty();
 
 
 	private Consumer<Settings> saveCmd;
@@ -90,9 +89,7 @@ public class Settings {
 		useKeychain.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
 		numTrayNotifications.addListener(this::somethingChanged);
-		preferredGvfsScheme.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
-		preferredVolumeImpl.addListener(this::somethingChanged);
 		theme.addListener(this::somethingChanged);
 		keychainProvider.addListener(this::somethingChanged);
 		userInterfaceOrientation.addListener(this::somethingChanged);
@@ -105,6 +102,7 @@ public class Settings {
 		windowHeight.addListener(this::somethingChanged);
 		displayConfiguration.addListener(this::somethingChanged);
 		language.addListener(this::somethingChanged);
+		mountService.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -153,16 +151,12 @@ public class Settings {
 		return numTrayNotifications;
 	}
 
-	public ObjectProperty<WebDavUrlScheme> preferredGvfsScheme() {
-		return preferredGvfsScheme;
-	}
-
 	public BooleanProperty debugMode() {
 		return debugMode;
 	}
 
-	public ObjectProperty<VolumeImpl> preferredVolumeImpl() {
-		return preferredVolumeImpl;
+	public StringProperty mountService() {
+		return mountService;
 	}
 
 	public ObjectProperty<UiTheme> theme() {
@@ -210,4 +204,5 @@ public class Settings {
 	public StringProperty languageProperty() {
 		return language;
 	}
+
 }

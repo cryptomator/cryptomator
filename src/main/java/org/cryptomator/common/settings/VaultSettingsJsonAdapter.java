@@ -6,11 +6,14 @@
 package org.cryptomator.common.settings;
 
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 class VaultSettingsJsonAdapter {
@@ -22,11 +25,10 @@ class VaultSettingsJsonAdapter {
 		out.name("id").value(value.getId());
 		out.name("path").value(value.path().get().toString());
 		out.name("displayName").value(value.displayName().get());
-		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
-		out.name("useCustomMountPath").value(value.useCustomMountPath().get());
-		out.name("customMountPath").value(value.customMountPath().get());
+		var mountPoint = value.mountPoint().get();
+		out.name("mountPoint").value(mountPoint != null ? mountPoint.toAbsolutePath().toString() : null);
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
 		out.name("mountFlags").value(value.mountFlags().get());
 		out.name("maxCleartextFilenameLength").value(value.maxCleartextFilenameLength().get());
@@ -36,18 +38,18 @@ class VaultSettingsJsonAdapter {
 		out.endObject();
 	}
 
+	//TODO: usesCustomMountPath, customMountPath and winDriveLetter removed
+	//	-> migration required
 	public VaultSettings read(JsonReader in) throws IOException {
 		String id = null;
 		String path = null;
 		String mountName = null; //see https://github.com/cryptomator/cryptomator/pull/1318
 		String displayName = null;
-		String customMountPath = null;
-		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
 		boolean revealAfterMount = VaultSettings.DEFAULT_REVEAL_AFTER_MOUNT;
-		boolean useCustomMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
+		Path mountPoint = null;
 		int maxCleartextFilenameLength = VaultSettings.DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH;
 		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
 		boolean autoLockWhenIdle = VaultSettings.DEFAULT_AUTOLOCK_WHEN_IDLE;
@@ -61,13 +63,17 @@ class VaultSettingsJsonAdapter {
 				case "path" -> path = in.nextString();
 				case "mountName" -> mountName = in.nextString(); //see https://github.com/cryptomator/cryptomator/pull/1318
 				case "displayName" -> displayName = in.nextString();
-				case "winDriveLetter" -> winDriveLetter = in.nextString();
 				case "unlockAfterStartup" -> unlockAfterStartup = in.nextBoolean();
 				case "revealAfterMount" -> revealAfterMount = in.nextBoolean();
-				case "usesIndividualMountPath", "useCustomMountPath" -> useCustomMountPath = in.nextBoolean();
-				case "individualMountPath", "customMountPath" -> customMountPath = in.nextString();
 				case "usesReadOnlyMode" -> usesReadOnlyMode = in.nextBoolean();
 				case "mountFlags" -> mountFlags = in.nextString();
+				case "mountPoint" -> {
+					if (JsonToken.NULL == in.peek()) {
+						in.nextNull();
+					} else {
+						mountPoint = parseMountPoint(in.nextString());
+					}
+				}
 				case "maxCleartextFilenameLength" -> maxCleartextFilenameLength = in.nextInt();
 				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
 				case "autoLockWhenIdle" -> autoLockWhenIdle = in.nextBoolean();
@@ -87,18 +93,25 @@ class VaultSettingsJsonAdapter {
 			vaultSettings.displayName().set(mountName);
 		}
 		vaultSettings.path().set(Paths.get(path));
-		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
-		vaultSettings.useCustomMountPath().set(useCustomMountPath);
-		vaultSettings.customMountPath().set(customMountPath);
 		vaultSettings.usesReadOnlyMode().set(usesReadOnlyMode);
 		vaultSettings.mountFlags().set(mountFlags);
 		vaultSettings.maxCleartextFilenameLength().set(maxCleartextFilenameLength);
 		vaultSettings.actionAfterUnlock().set(actionAfterUnlock);
 		vaultSettings.autoLockWhenIdle().set(autoLockWhenIdle);
 		vaultSettings.autoLockIdleSeconds().set(autoLockIdleSeconds);
+		vaultSettings.mountPoint().set(mountPoint);
 		return vaultSettings;
+	}
+
+	private Path parseMountPoint(String mountPoint) {
+		try {
+			return Path.of(mountPoint);
+		} catch (InvalidPathException e) {
+			LOG.warn("Invalid string as mount point. Defaulting to null.");
+			return null;
+		}
 	}
 
 	private WhenUnlocked parseActionAfterUnlock(String actionAfterUnlockName) {

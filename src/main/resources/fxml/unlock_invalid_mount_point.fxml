@@ -39,9 +39,6 @@
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<FormattedLabel visible="${controller.notExisting}" managed="${controller.notExisting}" format="%unlock.error.invalidMountPoint.notExisting" arg1="${controller.mountPoint}" wrapText="true"/>
-			<FormattedLabel visible="${controller.existing}" managed="${controller.existing}" format="%unlock.error.invalidMountPoint.existing" arg1="${controller.mountPoint}" wrapText="true"/>
-			<FormattedLabel visible="${controller.driveLetterOccupied}" managed="${controller.driveLetterOccupied}" format="%unlock.error.invalidMountPoint.driveLetterOccupied" arg1="${controller.mountPoint}" wrapText="true"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">

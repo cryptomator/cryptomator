@@ -1,20 +1,19 @@
 package org.cryptomator.ui.preferences;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.VolumeImpl;
-import org.cryptomator.common.settings.WebDavUrlScheme;
-import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.integrations.mount.MountCapability;
+import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import java.util.List;
 
 /**
  * TODO: if WebDAV is selected under Windows, show warning that specific mount options (like selecting a directory as mount point) are _not_ supported
@@ -23,40 +22,36 @@ import javafx.util.StringConverter;
 public class VolumePreferencesController implements FxController {
 
 	private final Settings settings;
-	private final BooleanBinding showWebDavSettings;
-	private final BooleanBinding showWebDavScheme;
-	public ChoiceBox<VolumeImpl> volumeTypeChoiceBox;
-	public TextField webDavPortField;
-	public Button changeWebDavPortButton;
-	public ChoiceBox<WebDavUrlScheme> webDavUrlSchemeChoiceBox;
+	private final ObservableValue<MountService> selectedMountService;
+	private final BooleanExpression loopbackPortSupported;
+	private final List<MountService> mountProviders;
+	public ChoiceBox<MountService> volumeTypeChoiceBox;
+	public TextField loopbackPortField;
+	public Button loopbackPortApplyButton;
 
 	@Inject
-	VolumePreferencesController(Settings settings) {
+	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ObservableValue<MountService> selectedMountService) {
 		this.settings = settings;
-		this.showWebDavSettings = Bindings.equal(settings.preferredVolumeImpl(), VolumeImpl.WEBDAV);
-		this.showWebDavScheme = showWebDavSettings.and(new SimpleBooleanProperty(SystemUtils.IS_OS_LINUX)); //TODO: remove SystemUtils
+		this.mountProviders = mountProviders;
+		this.selectedMountService = selectedMountService;
+		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
 	}
 
 	public void initialize() {
-		volumeTypeChoiceBox.getItems().addAll(Volume.getCurrentSupportedAdapters());
-		if (!volumeTypeChoiceBox.getItems().contains(settings.preferredVolumeImpl().get())) {
-			settings.preferredVolumeImpl().set(VolumeImpl.WEBDAV);
-		}
-		volumeTypeChoiceBox.valueProperty().bindBidirectional(settings.preferredVolumeImpl());
-		volumeTypeChoiceBox.setConverter(new VolumeImplConverter());
+		volumeTypeChoiceBox.getItems().addAll(mountProviders);
+		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
+		volumeTypeChoiceBox.getSelectionModel().select(selectedMountService.getValue());
+		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvide, newProvider) -> settings.mountService().set(newProvider.getClass().getName()));
 
-		webDavPortField.setText(String.valueOf(settings.port().get()));
-		changeWebDavPortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(webDavPortField.textProperty()));
-		changeWebDavPortButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateWebDavPort, webDavPortField.textProperty()).not());
+		loopbackPortField.setText(String.valueOf(settings.port().get()));
+		loopbackPortApplyButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(loopbackPortField.textProperty()));
+		loopbackPortApplyButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateLoopbackPort, loopbackPortField.textProperty()).not());
 
-		webDavUrlSchemeChoiceBox.getItems().addAll(WebDavUrlScheme.values());
-		webDavUrlSchemeChoiceBox.valueProperty().bindBidirectional(settings.preferredGvfsScheme());
-		webDavUrlSchemeChoiceBox.setConverter(new WebDavUrlSchemeConverter());
 	}
 
-	private boolean validateWebDavPort() {
+	private boolean validateLoopbackPort() {
 		try {
-			int port = Integer.parseInt(webDavPortField.getText());
+			int port = Integer.parseInt(loopbackPortField.getText());
 			return port == 0 // choose port automatically
 					|| port >= Settings.MIN_PORT && port <= Settings.MAX_PORT; // port within range
 		} catch (NumberFormatException e) {
@@ -64,54 +59,36 @@ public class VolumePreferencesController implements FxController {
 		}
 	}
 
-	public void doChangeWebDavPort() {
-		settings.port().set(Integer.parseInt(webDavPortField.getText()));
+	public void doChangeLoopbackPort() {
+		if (validateLoopbackPort()) {
+			settings.port().set(Integer.parseInt(loopbackPortField.getText()));
+		}
 	}
 
 	/* Property Getters */
 
-	public BooleanBinding showWebDavSettingsProperty() {
-		return showWebDavSettings;
+	public BooleanExpression loopbackPortSupportedProperty() {
+		return loopbackPortSupported;
 	}
 
-	public Boolean getShowWebDavSettings() {
-		return showWebDavSettings.get();
+	public boolean isLoopbackPortSupported() {
+		return loopbackPortSupported.get();
 	}
 
-	public BooleanBinding showWebDavSchemeProperty() {
-		return showWebDavScheme;
-	}
+	/* Helpers */
 
-	public Boolean getShowWebDavScheme() {
-		return showWebDavScheme.get();
-	}
-
-	/* Helper classes */
-
-	private static class WebDavUrlSchemeConverter extends StringConverter<WebDavUrlScheme> {
+	private static class MountServiceConverter extends StringConverter<MountService> {
 
 		@Override
-		public String toString(WebDavUrlScheme scheme) {
-			return scheme.getDisplayName();
+		public String toString(MountService provider) {
+			return provider== null? "None" : provider.displayName(); //TODO: adjust message
 		}
 
 		@Override
-		public WebDavUrlScheme fromString(String string) {
+		public MountService fromString(String string) {
 			throw new UnsupportedOperationException();
 		}
 	}
 
-	private static class VolumeImplConverter extends StringConverter<VolumeImpl> {
-
-		@Override
-		public String toString(VolumeImpl impl) {
-			return impl.getDisplayName();
-		}
-
-		@Override
-		public VolumeImpl fromString(String string) {
-			throw new UnsupportedOperationException();
-		}
-	}
 
 }

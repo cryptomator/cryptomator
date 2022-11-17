@@ -58,6 +58,11 @@ public class AwtTrayMenuController implements TrayMenuController {
 		addChildren(menu, items);
 	}
 
+	@Override
+	public void onBeforeOpenMenu(Runnable runnable) {
+
+	}
+
 	private void addChildren(Menu menu, List<TrayMenuItem> items) {
 		for (var item : items) {
 			// TODO: use Pattern Matching for switch, once available

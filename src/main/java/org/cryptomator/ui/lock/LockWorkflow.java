@@ -1,10 +1,9 @@
 package org.cryptomator.ui.lock;
 
 import dagger.Lazy;
-import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
@@ -17,6 +16,7 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import java.io.IOException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -53,21 +53,21 @@ public class LockWorkflow extends Task<Void> {
 	}
 
 	@Override
-	protected Void call() throws Volume.VolumeException, InterruptedException, LockNotCompletedException, ExecutionException {
+	protected Void call() throws InterruptedException, ExecutionException, IOException {
 		lock(false);
 		return null;
 	}
 
-	private void lock(boolean forced) throws InterruptedException, ExecutionException {
+	private void lock(boolean forced) throws InterruptedException, ExecutionException, IOException { //TODO: catch or rethrow IOException?
 		try {
 			vault.lock(forced);
-		} catch (Volume.VolumeException | LockNotCompletedException e) {
+		} catch (UnmountFailedException e) {
 			LOG.info("Locking {} failed (forced: {}).", vault.getDisplayName(), forced, e);
 			retryOrCancel();
 		}
 	}
 
-	private void retryOrCancel() throws ExecutionException, InterruptedException {
+	private void retryOrCancel() throws ExecutionException, InterruptedException, IOException {
 		try {
 			boolean forced = askWhetherToUseTheForce().get();
 			lock(forced);
@@ -105,7 +105,7 @@ public class LockWorkflow extends Task<Void> {
 		final var throwable = super.getException();
 		LOG.warn("Lock of {} failed.", vault.getDisplayName(), throwable);
 		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
-		if (throwable instanceof Volume.VolumeException) {
+		if (throwable instanceof UnmountFailedException) { //TODO: check if correct exception caught
 			lockWindow.setScene(lockFailedScene.get());
 			lockWindow.show();
 		} else {
