@@ -16,9 +16,6 @@ jobs:
   test:
     name: Compile and Test
     runs-on: ubuntu-latest
-    if: "always()
-      && (needs.release-check-precondition.result=='success' || needs.release-check-precondition.result=='skipped')
-      && !(contains(github.event.head_commit.message, '[ci skip]') || contains(github.event.head_commit.message, '[skip ci]'))"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
