@@ -1,0 +1,43 @@
+name: Release Check
+
+on:
+  push:
+    branches:
+      - 'release/**'
+      - 'hotfix/**'
+
+env:
+  JAVA_VERSION: 19
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release-check-precondition:
+    name: Validate commits pushed to release/hotfix branch to fulfill release requirements
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: validate-pom-version
+        name: Validate POM version
+        run: |
+          if [[ $GITHUB_REF =~ refs/heads/(hotfix|release)/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+          else
+            echo "Failed to parse version"
+            exit 1
+          fi
+
+          if [[ ${SEM_VER_STR} == `mvn help:evaluate -Dexpression=project.version -q -DforceStdout` ]]; then
+            echo "::set-output name=semVerStr::${SEM_VER_STR}"
+          else
+            echo "Version not set in POM"
+            exit 1
+          fi
+      - name: Validate release in org.cryptomator.Cryptomator.metainfo.xml file
+        run: |
+          if ! grep -q "<release date=\".*\" version=\"${{ steps.validate-pom-version.outputs.semVerStr }}\"/>" dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml; then
+            echo "Release not set in dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml"
+            exit 1
+          fi
