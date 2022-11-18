@@ -35,6 +35,7 @@ Write-Output "`$buildDir=$buildDir"
 Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
+$loopbackAlias = 'cryptomator-vault'
 
 # compile
 &mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
@@ -85,6 +86,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/$AppName/ipc.socket`"" `
 	--java-options "-Dcryptomator.p12Path=`"~/AppData/Roaming/$AppName/key.p12`"" `
 	--java-options "-Dcryptomator.mountPointsDir=`"~/$AppName`"" `
+	--java-options "-Dcryptomator.loopbackAlias=`"$loopbackAlias`"" `
 	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
@@ -107,9 +109,8 @@ Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
 # patch batch script to set hostfile
 $webDAVPatcher = "$AppName\patchWebDAV.bat"
-$alias = 'cryptomator-vault'
 try {
-	(Get-Content $webDAVPatcher ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"$alias`"" | Set-Content $webDAVPatcher
+	(Get-Content $webDAVPatcher ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"$loopbackAlias`"" | Set-Content $webDAVPatcher
 } catch {
    Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
    exit 1
