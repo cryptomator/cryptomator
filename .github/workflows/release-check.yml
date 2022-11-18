@@ -15,7 +15,7 @@ defaults:
 
 jobs:
   release-check-precondition:
-    name: Validate pushed commit to release/hotfix branch or pushed tag
+    name: Validate commits pushed to release/hotfix branch to fulfill release requirements
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
