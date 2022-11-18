@@ -112,7 +112,7 @@ jobs:
         run: |
           $patchScript = "appdir\Cryptomator\patchWebDAV.bat"
           try {
-            (Get-Content $patchScript ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"${{ evn.LOOPBACK_ALIAS}}`"" | Set-Content $patchScript
+            (Get-Content $patchScript ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"${{ env.LOOPBACK_ALIAS}}`"" | Set-Content $patchScript
           } catch {
             Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
             exit 1
