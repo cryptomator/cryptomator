@@ -36,4 +36,8 @@ Default value is `yes`.
 
 <!-- Close Application util -->
 <?define CloseApplicationTarget= "cryptomator.exe" ?>
+
+<!-- SkipCryptomatorLegacyCheck
+Should be defined to disable checking for the inno setup installation of Cryptomator and undefined, to enable it.
+ -->
 <Include/>

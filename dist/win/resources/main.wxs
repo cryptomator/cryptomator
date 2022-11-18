@@ -65,16 +65,16 @@
     <CustomAction Id="JpDisallowDowngrade" Error="!(loc.DowngradeErrorMessage)" />
     <?endif?>
 
-
-    <!-- Looking for legacy Cryptomator versions-->
-    <Property Id="OLDEXEINSTALLER">
-      <RegistrySearch Id="InnoSetupInstallation" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Cryptomator_is1" Type="raw" Name="DisplayName" />
-    </Property>
-    <!-- Block installation if innosetup entry of Cryptomator is found -->
-    <!-- TODO: localize -->
-    <Condition Message="A lower version of [ProductName] is already installed. Uninstall it first and then start the setup again. Setup will now exit.">
-        <![CDATA[Installed OR NOT OLDEXEINSTALLER]]>
-    </Condition>
+    <?ifndef SkipCryptomatorLegacyCheck ?>
+      <!-- Block installation if innosetup entry of Cryptomator is found -->
+      <Property Id="OLDEXEINSTALLER">
+        <RegistrySearch Id="InnoSetupInstallation" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Cryptomator_is1" Type="raw" Name="DisplayName" />
+      </Property>
+      <!-- TODO: localize -->
+      <Condition Message="A lower version of [ProductName] is already installed. Uninstall it first and then start the setup again. Setup will now exit.">
+          <![CDATA[Installed OR NOT OLDEXEINSTALLER]]>
+      </Condition>
+    <?endif?>
     <!-- Cryptomator uses UNIX Sockets, which are supported starting with Windows 10 v1803-->
     <Property Id="WINDOWSBUILDNUMBER" Secure="yes">
       <RegistrySearch Id="BuildNumberSearch" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion" Name="CurrentBuildNumber" Type="raw" />
