@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Stub by design -->
 
-<!--
+<!-- jPackage Section
 overrides.wxi is a placeholder to set/alter WiX variables referenced from default
 main.wxs file.
 
@@ -30,14 +30,21 @@ Should be defined to enable upgrades and undefined to disable upgrades.
 Default value is `yes`.
 -->
 
-<!-- Non-opening ProgID settings-->
-<?define IconFileC9rC9s= "Cryptomator-Vault.ico" ?>
-<?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
+<!-- Cryptomator Section
 
-<!-- Close Application util -->
-<?define CloseApplicationTarget= "cryptomator.exe" ?>
+Non-opening ProgID settings:
+- IconFileEncryptedData
+Full file name of icon file used for encrypted data files. Default is "Cryptomator-Vault.ico"
 
-<!-- SkipCryptomatorLegacyCheck
+- ProgIdContentType
+Media Type of the encrypted data files. Default is "application/vnd.cryptomator.encrypted"
+
+Close Application settings:
+- CloseApplicationTarget
+Full name of executable to be checkd in the close application util. Default is "cryptomator.exe"
+
+Legacy Installation settings:
+- SkipCryptomatorLegacyCheck
 Should be defined to disable checking for the inno setup installation of Cryptomator and undefined, to enable it.
  -->
 <Include/>

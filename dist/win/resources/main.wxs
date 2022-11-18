@@ -23,6 +23,11 @@
     <?define JpUpgradeVersionOnlyDetectDowngrade="yes"?>
   <?endif?>
 
+  <!-- Cryptomator defaults -->
+  <?define IconFileEncryptedData= "Cryptomator-Vault.ico" ?>
+  <?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
+  <?define CloseApplicationTarget= "cryptomator.exe" ?>
+
   <?include $(var.JpConfigDir)/overrides.wxi ?>
 
   <Product
@@ -86,7 +91,7 @@
     <!-- Non-Opening ProgID -->
     <DirectoryRef Id="INSTALLDIR">
         <Component Win64="yes" Id="nonStartingProgID" >
-          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileC9rC9s)" Name="$(var.IconFileC9rC9s)"></File>
+          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileEncryptedData)" Name="$(var.IconFileEncryptedData)"></File>
           <ProgId Id="$(var.JpAppName).Encrypted.1" Description="$(var.JpAppName) Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
             <Extension Id="c9r" Advertise="no" ContentType="$(var.ProgIdContentType)">
               <MIME ContentType="$(var.ProgIdContentType)" Default="yes"></MIME>
