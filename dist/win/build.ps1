@@ -105,6 +105,15 @@ if ($clean -and (Test-Path -Path $appPath)) {
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
+# patch batch script to set hostfile
+$webDAVPatcher = "$AppName\patchWebDAV.bat"
+$alias = 'cryptomator-vault'
+try {
+	(Get-Content $webDAVPatcher ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"$alias`"" | Set-Content $webDAVPatcher
+} catch {
+   Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
+   exit 1
+}
 
 # create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
