@@ -23,6 +23,11 @@
     <?define JpUpgradeVersionOnlyDetectDowngrade="yes"?>
   <?endif?>
 
+  <!-- Cryptomator defaults -->
+  <?define IconFileEncryptedData= "Cryptomator-Vault.ico" ?>
+  <?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
+  <?define CloseApplicationTarget= "cryptomator.exe" ?>
+
   <?include $(var.JpConfigDir)/overrides.wxi ?>
 
   <Product
@@ -65,16 +70,16 @@
     <CustomAction Id="JpDisallowDowngrade" Error="!(loc.DowngradeErrorMessage)" />
     <?endif?>
 
-
-    <!-- Looking for legacy Cryptomator versions-->
-    <Property Id="OLDEXEINSTALLER">
-      <RegistrySearch Id="InnoSetupInstallation" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Cryptomator_is1" Type="raw" Name="DisplayName" />
-    </Property>
-    <!-- Block installation if innosetup entry of Cryptomator is found -->
-    <!-- TODO: localize -->
-    <Condition Message="A lower version of [ProductName] is already installed. Uninstall it first and then start the setup again. Setup will now exit.">
-        <![CDATA[Installed OR NOT OLDEXEINSTALLER]]>
-    </Condition>
+    <?ifndef SkipCryptomatorLegacyCheck ?>
+      <!-- Block installation if innosetup entry of Cryptomator is found -->
+      <Property Id="OLDEXEINSTALLER">
+        <RegistrySearch Id="InnoSetupInstallation" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Cryptomator_is1" Type="raw" Name="DisplayName" />
+      </Property>
+      <!-- TODO: localize -->
+      <Condition Message="A lower version of [ProductName] is already installed. Uninstall it first and then start the setup again. Setup will now exit.">
+          <![CDATA[Installed OR NOT OLDEXEINSTALLER]]>
+      </Condition>
+    <?endif?>
     <!-- Cryptomator uses UNIX Sockets, which are supported starting with Windows 10 v1803-->
     <Property Id="WINDOWSBUILDNUMBER" Secure="yes">
       <RegistrySearch Id="BuildNumberSearch" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion" Name="CurrentBuildNumber" Type="raw" />
@@ -86,7 +91,7 @@
     <!-- Non-Opening ProgID -->
     <DirectoryRef Id="INSTALLDIR">
         <Component Win64="yes" Id="nonStartingProgID" >
-          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileC9rC9s)" Name="$(var.IconFileC9rC9s)"></File>
+          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileEncryptedData)" Name="$(var.IconFileEncryptedData)"></File>
           <ProgId Id="$(var.JpAppName).Encrypted.1" Description="$(var.JpAppName) Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
             <Extension Id="c9r" Advertise="no" ContentType="$(var.ProgIdContentType)">
               <MIME ContentType="$(var.ProgIdContentType)" Default="yes"></MIME>

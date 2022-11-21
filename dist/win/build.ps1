@@ -8,6 +8,7 @@ Param(
 	[Parameter(Mandatory, HelpMessage="Please provide a help url")][string] $HelpUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an update url")][string] $UpdateUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an about url")][string] $AboutUrl,
+	[Parameter(Mandatory, HelpMessage="Please provide an alias for localhost")][string] $LoopbackAlias,
 	[bool] $clean
 )
 
@@ -85,6 +86,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/$AppName/ipc.socket`"" `
 	--java-options "-Dcryptomator.p12Path=`"~/AppData/Roaming/$AppName/key.p12`"" `
 	--java-options "-Dcryptomator.mountPointsDir=`"~/$AppName`"" `
+	--java-options "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`"" `
 	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
@@ -105,6 +107,14 @@ if ($clean -and (Test-Path -Path $appPath)) {
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
+# patch batch script to set hostfile
+$webDAVPatcher = "$AppName\patchWebDAV.bat"
+try {
+	(Get-Content $webDAVPatcher ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"$LoopbackAlias`"" | Set-Content $webDAVPatcher
+} catch {
+   Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
+   exit 1
+}
 
 # create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"

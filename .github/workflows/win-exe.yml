@@ -22,6 +22,8 @@ jobs:
   build-msi:
     name: Build .msi Installer
     runs-on: windows-latest
+    env:
+      LOOPBACK_ALIAS: 'cryptomator-vault'
     steps:
       - uses: actions/checkout@v3
         with:
@@ -96,6 +98,7 @@ jobs:
           --java-options "-Dcryptomator.p12Path=\"~/AppData/Roaming/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"~/AppData/Roaming/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
+          --java-options "-Dcryptomator.loopbackAlias=\"${{ env.LOOPBACK_ALIAS }}\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ steps.versions.outputs.revNum }}\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
@@ -105,6 +108,16 @@ jobs:
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
+      - name: Set LOOPBACK_ALIAS in patchWebDAV.bat
+        shell: pwsh
+        run: |
+          $patchScript = "appdir\Cryptomator\patchWebDAV.bat"
+          try {
+            (Get-Content $patchScript ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"${{ env.LOOPBACK_ALIAS}}`"" | Set-Content $patchScript
+          } catch {
+            Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
+            exit 1
+          }
       - name: Fix permissions
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
