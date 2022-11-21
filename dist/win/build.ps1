@@ -35,7 +35,7 @@ Write-Output "`$buildDir=$buildDir"
 Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
-$loopbackAlias = 'cryptomator-vault'
+$loopbackAlias = "$AppName-vault"
 
 # compile
 &mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
