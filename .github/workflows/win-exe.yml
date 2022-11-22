@@ -197,7 +197,7 @@ jobs:
   build-exe:
     name: Build .exe installer
     runs-on: windows-latest
-    needs: [version, build-msi]
+    needs: [get-version, build-msi]
     steps:
       - uses: actions/checkout@v3
       - name: Download .msi
