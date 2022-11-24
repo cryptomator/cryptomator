@@ -49,10 +49,11 @@ class ResultFixApplier {
 	}
 
 	public void fix(DiagnosticResult diagnosis) {
-		Preconditions.checkArgument(diagnosis.getSeverity() == DiagnosticResult.Severity.WARN, "Unfixable result");
 		try (var masterkeyClone = masterkey.copy(); //
 			 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
-			diagnosis.fix(vaultPath, vaultConfig, masterkeyClone, cryptor);
+			diagnosis.getFix(vaultPath, vaultConfig, masterkeyClone, cryptor)
+					.orElseThrow(() -> new IllegalStateException("No fix for diagnosis "+diagnosis.getClass().getName() +" implemented."))
+					.apply();
 		} catch (Exception e) {
 			throw new FixFailedException(e);
 		}
