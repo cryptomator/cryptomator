@@ -75,6 +75,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--vendor $Vendor `
 	--copyright $copyright `
 	--java-options "--enable-preview" `
+	--java-options "--enable-native-access=org.cryptomator.jfuse.win" `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `

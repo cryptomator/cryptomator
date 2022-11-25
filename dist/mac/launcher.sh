@@ -9,4 +9,6 @@ java \
 	-Dcryptomator.mountPointsDir="/Volumes" \
 	-Xss20m \
 	-Xmx512m \
+	--enable-preview \
+	--enable-native-access=org.cryptomator.jfuse.mac \
 	-m org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
