@@ -10,4 +10,6 @@ java \
 	-Djdk.gtk.version=2 \
 	-Xss2m \
 	-Xmx512m \
+	--enable-preview \
+	--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64 \
 	-m org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator

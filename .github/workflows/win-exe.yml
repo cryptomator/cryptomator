@@ -86,6 +86,8 @@ jobs:
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2022 Skymatic GmbH"
           --app-version "${{ steps.versions.outputs.semVerNum }}.${{ steps.versions.outputs.revNum }}"
+          --java-options "--enable-preview"
+          --java-options "--enable-native-access=org.cryptomator.jfuse.win"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
