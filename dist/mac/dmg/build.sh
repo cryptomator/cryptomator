@@ -65,6 +65,7 @@ ${JAVA_HOME}/bin/jpackage \
     --vendor "${VENDOR}" \
     --copyright "(C) ${COPYRIGHT_YEARS} ${VENDOR}" \
     --app-version "${VERSION_NO}" \
+    --java-options "--enable-preview" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \

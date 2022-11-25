@@ -39,6 +39,7 @@ ${JAVA_HOME}/bin/jpackage \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
     --copyright "(C) 2016 - 2022 Skymatic GmbH" \
+    --java-options "--enable-preview" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \

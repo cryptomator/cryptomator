@@ -74,6 +74,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--name $AppName `
 	--vendor $Vendor `
 	--copyright $copyright `
+	--java-options "--enable-preview" `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `

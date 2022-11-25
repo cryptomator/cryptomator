@@ -36,6 +36,7 @@ override_dh_auto_build:
 		--name cryptomator \
 		--vendor "Skymatic GmbH" \
 		--copyright "(C) 2016 - 2022 Skymatic GmbH" \
+		--java-options "--enable-preview" \
 		--java-options "-Xss5m" \
 		--java-options "-Xmx256m" \
 		--java-options "-Dfile.encoding=\"utf-8\"" \
