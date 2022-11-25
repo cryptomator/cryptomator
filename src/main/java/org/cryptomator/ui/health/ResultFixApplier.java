@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @HealthCheckScoped
 class ResultFixApplier {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ResultFixApplier.class);
+
 	private final Path vaultPath;
 	private final SecureRandom csprng;
 	private final Masterkey masterkey;
@@ -40,19 +42,26 @@ class ResultFixApplier {
 
 	public CompletionStage<Void> fix(Result result) {
 		Preconditions.checkArgument(result.getState() == Result.FixState.FIXABLE);
-		result.setState(Result.FixState.FIXING);
-		return CompletableFuture.runAsync(() -> fix(result.diagnosis()), sequentialExecutor)
+		return CompletableFuture.runAsync(() -> result.setState(Result.FixState.FIXING), Platform::runLater) //
+				.thenRunAsync(() -> fix(result.diagnosis()), sequentialExecutor) //
 				.whenCompleteAsync((unused, throwable) -> {
-					var fixed = throwable == null ? Result.FixState.FIXED : Result.FixState.FIX_FAILED;
-					result.setState(fixed);
+					final Result.FixState s;
+					if (throwable == null) {
+						LOG.debug("Fix for {} applied successful.", result.diagnosis().getClass().getName());
+						s = Result.FixState.FIXED;
+					} else {
+						LOG.error("Failed to apply fix for {}", result.diagnosis().getClass().getName(), throwable);
+						s = Result.FixState.FIX_FAILED;
+					}
+					result.setState(s);
 				}, Platform::runLater);
 	}
 
-	public void fix(DiagnosticResult diagnosis) {
+	private void fix(DiagnosticResult diagnosis) {
 		try (var masterkeyClone = masterkey.copy(); //
 			 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
-			diagnosis.getFix(vaultPath, vaultConfig, masterkeyClone, cryptor)
-					.orElseThrow(() -> new IllegalStateException("No fix for diagnosis "+diagnosis.getClass().getName() +" implemented."))
+			diagnosis.getFix(vaultPath, vaultConfig, masterkeyClone, cryptor) //
+					.orElseThrow(() -> new IllegalStateException("No fix for diagnosis " + diagnosis.getClass().getName() + " implemented.")) //
 					.apply();
 		} catch (Exception e) {
 			throw new FixFailedException(e);
@@ -60,6 +69,7 @@ class ResultFixApplier {
 	}
 
 	public static class FixFailedException extends CompletionException {
+
 		private FixFailedException(Throwable cause) {
 			super(cause);
 		}

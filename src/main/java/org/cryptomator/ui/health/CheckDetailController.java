@@ -8,8 +8,12 @@ import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -35,28 +39,40 @@ public class CheckDetailController implements FxController {
 	private final Binding<Number> countOfCritSeverity;
 	private final Binding<Boolean> warnOrCritsExist;
 	private final ResultListCellFactory resultListCellFactory;
+	private final ResultFixApplier resultFixApplier;
+
+	private final BooleanProperty fixAllInfoResultsExecuted;
+	private final BooleanBinding fixAllInfoResultsPossible;
 
 	public ListView<Result> resultsListView;
 	private Subscription resultSubscription;
 
 	@Inject
-	public CheckDetailController(ObjectProperty<Check> selectedTask, ResultListCellFactory resultListCellFactory) {
+	public CheckDetailController(ObjectProperty<Check> selectedTask, ResultListCellFactory resultListCellFactory, ResultFixApplier resultFixApplier) {
 		this.resultListCellFactory = resultListCellFactory;
+		this.resultFixApplier = resultFixApplier;
 		this.results = EasyBind.wrapList(FXCollections.observableArrayList());
 		this.check = selectedTask;
 		this.checkState = selectedTask.flatMap(Check::stateProperty);
 		this.checkName = selectedTask.map(Check::getName).orElse("");
 		this.checkRunning = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.RUNNING::equals).orElse(false));
 		this.checkScheduled = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.SCHEDULED::equals).orElse(false));
-		this.checkSkipped =BooleanExpression.booleanExpression(checkState.map(Check.CheckState.SKIPPED::equals).orElse(false));
+		this.checkSkipped = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.SKIPPED::equals).orElse(false));
 		this.checkSucceeded = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.SUCCEEDED::equals).orElse(false));
 		this.checkFailed = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.ERROR::equals).orElse(false));
 		this.checkCancelled = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.CANCELLED::equals).orElse(false));
 		this.checkFinished = checkSucceeded.or(checkFailed).or(checkCancelled);
 		this.countOfWarnSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.WARN));
 		this.countOfCritSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.CRITICAL));
-		this.warnOrCritsExist = EasyBind.combine(checkSucceeded, countOfWarnSeverity, countOfCritSeverity, (suceeded, warns, crits) -> suceeded && (warns.longValue() > 0 || crits.longValue() > 0) );
+		this.warnOrCritsExist = EasyBind.combine(checkSucceeded, countOfWarnSeverity, countOfCritSeverity, (suceeded, warns, crits) -> suceeded && (warns.longValue() > 0 || crits.longValue() > 0));
+		this.fixAllInfoResultsExecuted = new SimpleBooleanProperty(false);
+		this.fixAllInfoResultsPossible = Bindings.createBooleanBinding(() -> results.stream().anyMatch(this::isFixableInfoResult), results) //
+				.and(fixAllInfoResultsExecuted.not());
 		selectedTask.addListener(this::selectedTaskChanged);
+	}
+
+	private boolean isFixableInfoResult(Result r) {
+		return r.diagnosis().getSeverity() == DiagnosticResult.Severity.INFO && r.getState() == Result.FixState.FIXABLE;
 	}
 
 	private void selectedTaskChanged(ObservableValue<? extends Check> observable, Check oldValue, Check newValue) {
@@ -77,6 +93,13 @@ public class CheckDetailController implements FxController {
 		resultsListView.setItems(results);
 		resultsListView.setCellFactory(resultListCellFactory);
 	}
+
+	@FXML
+	public void fixAllInfoResults() {
+		fixAllInfoResultsExecuted.setValue(true);
+		results.stream().filter(this::isFixableInfoResult).forEach(resultFixApplier::fix);
+	}
+
 
 	/* Getter/Setter */
 
@@ -175,4 +198,13 @@ public class CheckDetailController implements FxController {
 	public Check getCheck() {
 		return check.get();
 	}
+
+	public ObservableValue<Boolean> fixAllInfoResultsPossibleProperty() {
+		return fixAllInfoResultsPossible;
+	}
+
+	public boolean getFixAllInfoResultsPossible() {
+		return fixAllInfoResultsPossible.getValue();
+	}
+
 }

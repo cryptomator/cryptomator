@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -49,8 +48,8 @@ public class ResultListCellController implements FxController {
 	private final BooleanBinding fixFailed;
 	private final BooleanBinding fixRunningOrDone;
 	private final List<Subscription> subscriptions;
-	private final Tooltip fixSuccess;
-	private final Tooltip fixFail;
+	private final Tooltip fixSuccessTip;
+	private final Tooltip fixFailTip;
 
 	private AutoAnimator fixRunningRotator;
 
@@ -73,10 +72,10 @@ public class ResultListCellController implements FxController {
 		this.fixFailed = Bindings.createBooleanBinding(this::isFixFailed, fixState);
 		this.fixRunningOrDone = fixing.or(fixed).or(fixFailed);
 		this.subscriptions = new ArrayList<>();
-		this.fixSuccess = new Tooltip(resourceBundle.getString("health.fix.successTip"));
-		this.fixFail = new Tooltip(resourceBundle.getString("health.fix.failTip"));
-		fixSuccess.setShowDelay(Duration.millis(100));
-		fixFail.setShowDelay(Duration.millis(100));
+		this.fixSuccessTip = new Tooltip(resourceBundle.getString("health.fix.successTip"));
+		this.fixFailTip = new Tooltip(resourceBundle.getString("health.fix.failTip"));
+		fixSuccessTip.setShowDelay(Duration.millis(100));
+		fixFailTip.setShowDelay(Duration.millis(100));
 	}
 
 	@FXML
@@ -93,22 +92,20 @@ public class ResultListCellController implements FxController {
 				.onCondition(fixing) //
 				.afterStop(() -> fixView.setRotate(0)) //
 				.build();
+		fixState.addListener(((observable, oldValue, newValue) -> {
+			if (newValue == Result.FixState.FIXED) {
+				Tooltip.install(fixView, fixSuccessTip);
+			} else if (newValue == Result.FixState.FIX_FAILED) {
+				Tooltip.install(fixView, fixFailTip);
+			}
+		}));
 	}
 
 	@FXML
 	public void fix() {
 		Result r = result.get();
 		if (r != null) {
-			fixApplier.fix(r).whenCompleteAsync(this::fixFinished, Platform::runLater);
-		}
-	}
-
-	private void fixFinished(Void unused, Throwable exception) {
-		if (exception != null) {
-			LOG.error("Failed to apply fix", exception);
-			Tooltip.install(fixView, fixFail);
-		} else {
-			Tooltip.install(fixView, fixSuccess);
+			fixApplier.fix(r);
 		}
 	}
 
