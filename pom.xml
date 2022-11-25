@@ -371,6 +371,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
+					<!-- sort jars into two buckets (classpath and modulepath). exclude openjfx, which gets jlinked separately -->
 					<execution>
 						<id>copy-mods</id>
 						<phase>prepare-package</phase>
@@ -380,7 +381,7 @@
 						<configuration>
 							<includeScope>runtime</includeScope>
 							<outputDirectory>${project.build.directory}/mods</outputDirectory>
-							<excludeGroupIds>${nonModularGroupIds}</excludeGroupIds>
+							<excludeGroupIds>org.openjfx,${nonModularGroupIds}</excludeGroupIds>
 						</configuration>
 					</execution>
 					<execution>
