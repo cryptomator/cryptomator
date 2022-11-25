@@ -77,7 +77,7 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2022 Skymatic GmbH"
-          --app-version "${{ needs.get-version.outputs.semVerNum }}
+          --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""

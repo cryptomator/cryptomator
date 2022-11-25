@@ -18,9 +18,15 @@ env:
   JAVA_VERSION: 19
 
 jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ github.event.inputs.version }}
+
   build:
     name: Build Debian Package
     runs-on: ubuntu-20.04
+    needs: [get-version]
     steps:
       - uses: actions/checkout@v3
       - name: Install build tools
@@ -40,10 +46,6 @@ jobs:
         env:
           SEM_VER_STR: ${{ needs.get-version.outputs.semVerStr }}
           REVCOUNT: ${{ needs.get-version.outputs.revNum }}
-      - name: Validate Version
-        uses: skymatic/semver-validation-action@v1
-        with:
-          version: ${{ steps.versions.outputs.semVerStr }}
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,linux -DskipTests
       - name: Create orig.tar.gz with common/ libs/ mods/
@@ -61,7 +63,7 @@ jobs:
           envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${{ steps.versions.outputs.ppaVerStr }}
+          mv pkgdir cryptomator_${PPA_VERSION}
         env:
           SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
           VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
