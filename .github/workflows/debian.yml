@@ -63,7 +63,7 @@ jobs:
           envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${PPA_VERSION}
+          mv pkgdir cryptomator_${{ steps.versions.outputs.ppaVerStr }}
         env:
           SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
           VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
