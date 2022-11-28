@@ -42,7 +42,7 @@ jobs:
           cache: 'maven'
       - id: versions
         name: Create PPA version string
-        run: echo "::set-output name=ppaVerStr::${SEM_VER_STR/-/\~}-${REVCOUNT}"
+        run: echo "ppaVerStr=${SEM_VER_STR/-/\~}-${REVCOUNT}" >> $GITHUB_OUTPUT
         env:
           SEM_VER_STR: ${{ needs.get-version.outputs.semVerStr }}
           REVCOUNT: ${{ needs.get-version.outputs.revNum }}

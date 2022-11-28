@@ -30,7 +30,7 @@ jobs:
           fi
 
           if [[ ${SEM_VER_STR} == `mvn help:evaluate -Dexpression=project.version -q -DforceStdout` ]]; then
-            echo "::set-output name=semVerStr::${SEM_VER_STR}"
+            echo "semVerStr=${SEM_VER_STR}" >> $GITHUB_OUTPUT
           else
             echo "Version not set in POM"
             exit 1

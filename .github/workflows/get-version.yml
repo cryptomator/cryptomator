@@ -67,10 +67,10 @@ jobs:
           elif [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+-rc[1-9] ]]; then
             TYPE="rc"
           fi
-          echo "::set-output name=semVerStr::${SEM_VER_STR}"
-          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
-          echo "::set-output name=revNum::${REVCOUNT}"
-          echo "::set-output name=type::${TYPE}"
+          echo "semVerStr=${SEM_VER_STR}" >> $GITHUB_OUTPUT
+          echo "semVerNum=${SEM_VER_NUM}" >> $GITHUB_OUTPUT
+          echo "revNum=${REVCOUNT}" >> $GITHUB_OUTPUT
+          echo "type=${TYPE}" >> $GITHUB_OUTPUT
       - name: Validate Version
         uses: skymatic/semver-validation-action@v1
         with:

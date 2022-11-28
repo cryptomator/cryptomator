@@ -48,7 +48,7 @@ jobs:
           jq -c 'select(.filename|endswith(".dmg")) | select(.filename|endswith("-arm64.dmg")|not) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
 
           RESULT=$(jq -s -c "." output.json)
-          echo "::set-output name=result::${RESULT}"
+          echo "result=${RESULT}" >> $GITHUB_OUTPUT
         env:
           INTERVAL: 900
           JSON_DATA: ${{ steps.get-stats.outputs.result }}
