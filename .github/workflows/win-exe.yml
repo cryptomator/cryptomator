@@ -107,7 +107,7 @@ jobs:
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
       - name: Codesign
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v2
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -150,7 +150,7 @@ jobs:
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
       - name: Codesign MSI
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v2
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -250,7 +250,7 @@ jobs:
           -ib installer/unsigned/Cryptomator-Installer.exe
           -o tmp/engine.exe
       - name: Codesign burn engine
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v2
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -264,7 +264,7 @@ jobs:
           -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
           -o installer/Cryptomator-Installer.exe
       - name: Codesign EXE
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v2
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
