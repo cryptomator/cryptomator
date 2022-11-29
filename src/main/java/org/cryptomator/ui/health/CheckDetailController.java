@@ -20,6 +20,8 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.util.StringConverter;
 import java.util.Arrays;
 import java.util.function.Function;
@@ -135,6 +137,16 @@ public class CheckDetailController implements FxController {
 		results.stream().filter(this::isFixableInfoResult).forEach(resultFixApplier::fix);
 	}
 
+
+	@FXML
+	public void copyResultDetails() {
+		var result = resultsListView.getSelectionModel().getSelectedItem();
+		if (result != null) {
+			ClipboardContent clipboardContent = new ClipboardContent();
+			clipboardContent.putString(result.diagnosis().toString());
+			Clipboard.getSystemClipboard().setContent(clipboardContent);
+		}
+	}
 
 	/* Getter/Setter */
 

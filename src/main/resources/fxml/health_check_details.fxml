@@ -9,6 +9,8 @@
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
@@ -51,6 +53,14 @@
 			<Label text="Fix state" labelFor="${fixStateChoiceBox}"/>
 			<ChoiceBox fx:id="fixStateChoiceBox" />
 		</HBox>
-		<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25"/>
+		<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25">
+			<contextMenu>
+				<ContextMenu>
+					<items>
+						<MenuItem text="%generic.button.copy" onAction="#copyResultDetails"/>
+					</items>
+				</ContextMenu>
+			</contextMenu>
+		</ListView>
 	</VBox>
 </VBox>
