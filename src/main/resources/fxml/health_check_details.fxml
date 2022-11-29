@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Button?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.ChoiceBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
@@ -37,6 +38,19 @@
 		</Button>
 
 	</HBox>
-
-	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25"/>
+	<VBox spacing="3">
+		<HBox alignment="CENTER_LEFT" spacing="6">
+			<Label fx:id="filterLbl" text="Filters">
+				<graphic>
+					<FontAwesome5IconView glyph="FUNNEL" glyphSize="${filterLbl.height}" styleClass="glyph-icon-muted"/>
+				</graphic>
+			</Label>
+			<Region HBox.hgrow="ALWAYS" />
+			<Label text="Severity" labelFor="${severityChoiceBox}"/>
+			<ChoiceBox fx:id="severityChoiceBox" />
+			<Label text="Fix state" labelFor="${fixStateChoiceBox}"/>
+			<ChoiceBox fx:id="fixStateChoiceBox" />
+		</HBox>
+		<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25"/>
+	</VBox>
 </VBox>

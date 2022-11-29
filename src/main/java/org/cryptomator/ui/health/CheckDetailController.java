@@ -14,12 +14,24 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListView;
+import javafx.util.StringConverter;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static org.cryptomator.cryptofs.health.api.DiagnosticResult.Severity;
+import static org.cryptomator.ui.health.Result.FixState.FIXABLE;
+import static org.cryptomator.ui.health.Result.FixState.FIXED;
+import static org.cryptomator.ui.health.Result.FixState.FIXING;
+import static org.cryptomator.ui.health.Result.FixState.FIX_FAILED;
+import static org.cryptomator.ui.health.Result.FixState.NOT_FIXABLE;
 
 @HealthCheckScoped
 public class CheckDetailController implements FxController {
@@ -43,8 +55,11 @@ public class CheckDetailController implements FxController {
 
 	private final BooleanProperty fixAllInfoResultsExecuted;
 	private final BooleanBinding fixAllInfoResultsPossible;
+	private final ObjectProperty<Predicate<Result>> resultsFilter;
 
 	public ListView<Result> resultsListView;
+	public ChoiceBox<DiagnosticResult.Severity> severityChoiceBox;
+	public ChoiceBox<Result.FixState> fixStateChoiceBox;
 	private Subscription resultSubscription;
 
 	@Inject
@@ -62,17 +77,18 @@ public class CheckDetailController implements FxController {
 		this.checkFailed = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.ERROR::equals).orElse(false));
 		this.checkCancelled = BooleanExpression.booleanExpression(checkState.map(Check.CheckState.CANCELLED::equals).orElse(false));
 		this.checkFinished = checkSucceeded.or(checkFailed).or(checkCancelled);
-		this.countOfWarnSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.WARN));
-		this.countOfCritSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.CRITICAL));
+		this.countOfWarnSeverity = results.reduce(countSeverity(Severity.WARN));
+		this.countOfCritSeverity = results.reduce(countSeverity(Severity.CRITICAL));
 		this.warnOrCritsExist = EasyBind.combine(checkSucceeded, countOfWarnSeverity, countOfCritSeverity, (suceeded, warns, crits) -> suceeded && (warns.longValue() > 0 || crits.longValue() > 0));
 		this.fixAllInfoResultsExecuted = new SimpleBooleanProperty(false);
 		this.fixAllInfoResultsPossible = Bindings.createBooleanBinding(() -> results.stream().anyMatch(this::isFixableInfoResult), results) //
 				.and(fixAllInfoResultsExecuted.not());
+		this.resultsFilter = new SimpleObjectProperty<>(r -> true);
 		selectedTask.addListener(this::selectedTaskChanged);
 	}
 
 	private boolean isFixableInfoResult(Result r) {
-		return r.diagnosis().getSeverity() == DiagnosticResult.Severity.INFO && r.getState() == Result.FixState.FIXABLE;
+		return r.diagnosis().getSeverity() == Severity.INFO && r.getState() == FIXABLE;
 	}
 
 	private void selectedTaskChanged(ObservableValue<? extends Check> observable, Check oldValue, Check newValue) {
@@ -82,6 +98,8 @@ public class CheckDetailController implements FxController {
 		if (newValue != null) {
 			resultSubscription = EasyBind.bindContent(results, newValue.getResults());
 		}
+		severityChoiceBox.setValue(null);
+		fixStateChoiceBox.setValue(null);
 	}
 
 	private Function<Stream<? extends Result>, Long> countSeverity(DiagnosticResult.Severity severity) {
@@ -90,8 +108,25 @@ public class CheckDetailController implements FxController {
 
 	@FXML
 	public void initialize() {
-		resultsListView.setItems(results);
+		resultsListView.setItems(results.filtered(resultsFilter));
 		resultsListView.setCellFactory(resultListCellFactory);
+
+		severityChoiceBox.getItems().add(null);
+		severityChoiceBox.getItems().addAll(Arrays.stream(DiagnosticResult.Severity.values()).toList());
+		//severityFilter.setConverter(new SeverityStringifier());
+		severityChoiceBox.setValue(null);
+
+		fixStateChoiceBox.getItems().add(null);
+		fixStateChoiceBox.getItems().addAll(Arrays.stream(Result.FixState.values()).toList());
+		fixStateChoiceBox.setValue(null);
+
+		resultsFilter.bind(Bindings.createObjectBinding(() -> this::filterResults, severityChoiceBox.valueProperty(), fixStateChoiceBox.valueProperty()));
+	}
+
+	private boolean filterResults(Result r) {
+		var desiredFixState = fixStateChoiceBox.getValue();
+		var desiredSeverity = severityChoiceBox.getValue();
+		return (desiredFixState == null || r.getState() == desiredFixState) && (desiredSeverity == null || r.diagnosis().getSeverity() == desiredSeverity);
 	}
 
 	@FXML
