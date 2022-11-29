@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -25,6 +24,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
@@ -42,9 +42,7 @@ public class ChooseExistingVaultController implements FxController {
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
-	private final FxApplicationStyle applicationStyle;
-
-	private final ObjectProperty<Image> screenshot = new SimpleObjectProperty<>();
+	private final ObservableValue<Image> screenshot;
 
 	@Inject
 	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows appWindows, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle, FxApplicationStyle applicationStyle) {
@@ -56,28 +54,20 @@ public class ChooseExistingVaultController implements FxController {
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
-		this.applicationStyle = applicationStyle;
+		this.screenshot = applicationStyle.appliedThemeProperty().map(this::selectScreenshot);
 	}
 
-	@FXML
-	public void initialize() {
+	private Image selectScreenshot(Theme theme) {
+		String imageResourcePath;
 		if (SystemUtils.IS_OS_MAC) {
-			applicationStyle.appliedThemeProperty().addListener(this::appliedThemeChanged);
-			setMacScreenshot(applicationStyle.appliedThemeProperty().get());
+			imageResourcePath = switch (theme) {
+				case LIGHT -> "/img/select-masterkey-mac.png";
+				case DARK -> "/img/select-masterkey-mac-dark.png";
+			};
 		} else {
-			this.screenshot.set(new Image(getClass().getResource("/img/select-masterkey-win.png").toString()));
+			imageResourcePath = "/img/select-masterkey-win.png";
 		}
-	}
-
-	private void appliedThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends Theme> observable, @SuppressWarnings("unused") Theme oldValue, Theme newValue) {
-		setMacScreenshot(newValue);
-	}
-
-	private void setMacScreenshot(Theme theme) {
-		switch (theme) {
-			case LIGHT -> this.screenshot.set(new Image(getClass().getResource("/img/select-masterkey-mac.png").toString()));
-			case DARK -> this.screenshot.set(new Image(getClass().getResource("/img/select-masterkey-mac-dark.png").toString()));
-		}
+		return new Image((Objects.requireNonNull(getClass().getResource(imageResourcePath)).toString()));
 	}
 
 	@FXML
@@ -106,12 +96,12 @@ public class ChooseExistingVaultController implements FxController {
 
 	/* Getter */
 
-	public ObjectProperty<Image> screenshotProperty() {
+	public ObservableValue<Image> screenshotProperty() {
 		return screenshot;
 	}
 
 	public Image getScreenshot() {
-		return screenshot.get();
+		return screenshot.getValue();
 	}
 
 
