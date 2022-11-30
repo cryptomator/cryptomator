@@ -102,7 +102,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.processing = new SimpleBooleanProperty();
 		this.readyToCreateVault = new SimpleBooleanProperty();
-		this.createVaultButtonState = Bindings.createObjectBinding(this::getCreateVaultButtonState, processing);
+		this.createVaultButtonState = Bindings.when(processing).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 	}
 
 	@FXML
@@ -231,6 +231,6 @@ public class CreateNewVaultPasswordController implements FxController {
 	}
 
 	public ContentDisplay getCreateVaultButtonState() {
-		return processing.get() ? ContentDisplay.LEFT : ContentDisplay.TEXT_ONLY;
+		return createVaultButtonState.get();
 	}
 }

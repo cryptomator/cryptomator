@@ -21,14 +21,14 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>17</project.jdk.version>
+		<project.jdk.version>19</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptolib.version>2.1.0-rc1</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>2.4.4</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.4.5</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.2.0-beta1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.1.2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.1.2</cryptomator.integrations.mac.version>
@@ -43,8 +43,8 @@
 		<easybind.version>2.2</easybind.version>
 		<guava.version>31.1-jre</guava.version>
 		<gson.version>2.9.1</gson.version>
-		<javafx.version>18.0.2</javafx.version>
-		<jwt.version>4.0.0</jwt.version>
+		<javafx.version>19</javafx.version>
+		<jwt.version>4.2.1</jwt.version>
 		<nimbus-jose.version>9.25.4</nimbus-jose.version>
 		<logback.version>1.4.4</logback.version>
 		<slf4j.version>2.0.3</slf4j.version>

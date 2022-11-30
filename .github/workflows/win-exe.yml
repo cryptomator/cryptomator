@@ -10,47 +10,36 @@ on:
         required: false
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 19
+  JAVA_DIST: 'zulu'
+  JAVA_CACHE: 'maven'
 
 defaults:
   run:
     shell: bash
 
 jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ github.event.inputs.version }}
+
   build-msi:
     name: Build .msi Installer
     runs-on: windows-latest
+    needs: [get-version]
+    env:
+      LOOPBACK_ALIAS: 'cryptomator-vault'
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: 'maven'
-      - id: versions 
-        name: Apply version information
-        run: |
-          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR=${GITHUB_REF##*/}
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR="${{ github.event.inputs.version }}"
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          else
-            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
-          fi
-          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-          REVCOUNT=`git rev-list --count HEAD`
-          echo "::set-output name=semVerStr::${SEM_VER_STR}"
-          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
-          echo "::set-output name=revNum::${REVCOUNT}"
-      - name: Validate Version
-        uses: skymatic/semver-validation-action@v1
-        with:
-          version: ${{ steps.versions.outputs.semVerStr }}
+          cache: ${{ env.JAVA_CACHE }}
+      - name: Set version
+        run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,win -DskipTests
       - name: Patch target dir
@@ -83,10 +72,10 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2022 Skymatic GmbH"
-          --app-version "${{ steps.versions.outputs.semVerNum }}.${{ steps.versions.outputs.revNum }}"
+          --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
-          --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"~/AppData/Roaming/Cryptomator/Plugins\""
@@ -94,8 +83,9 @@ jobs:
           --java-options "-Dcryptomator.p12Path=\"~/AppData/Roaming/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"~/AppData/Roaming/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
+          --java-options "-Dcryptomator.loopbackAlias=\"${{ env.LOOPBACK_ALIAS }}\""
           --java-options "-Dcryptomator.showTrayIcon=true"
-          --java-options "-Dcryptomator.buildNumber=\"msi-${{ steps.versions.outputs.revNum }}\""
+          --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"~/AppData/Roaming/Cryptomator/keychain.json\""
           --resource-dir dist/win/resources
@@ -103,11 +93,21 @@ jobs:
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
+      - name: Set LOOPBACK_ALIAS in patchWebDAV.bat
+        shell: pwsh
+        run: |
+          $patchScript = "appdir\Cryptomator\patchWebDAV.bat"
+          try {
+            (Get-Content $patchScript ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"${{ env.LOOPBACK_ALIAS}}`"" | Set-Content $patchScript
+          } catch {
+            Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
+            exit 1
+          }
       - name: Fix permissions
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
       - name: Codesign
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v2
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -138,7 +138,7 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2022 Skymatic GmbH"
-          --app-version "${{ steps.versions.outputs.semVerNum }}"
+          --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --win-menu
           --win-dir-chooser
           --win-shortcut-prompt
@@ -150,7 +150,7 @@ jobs:
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
       - name: Codesign MSI
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v2
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -159,7 +159,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-*.msi Cryptomator-${{ steps.versions.outputs.semVerStr }}-x64.msi
+        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -184,23 +184,20 @@ jobs:
           files: |
             *.msi
             *.asc
-    outputs:
-      semVerNum: ${{ steps.versions.outputs.semVerNum }}
-      semVerStr: ${{ steps.versions.outputs.semVerStr }}
-      revNum: ${{ steps.versions.outputs.revNum }}
 
   call-winget-flow:
-    needs: [build-msi]
-    if: github.event.action == 'published'
+    needs: [get-version, build-msi]
+    if: github.event.action == 'published' && needs.get-version.outputs.type == 'stable'
     uses: ./.github/workflows/winget.yml
     with:
       releaseTag: ${{ github.event.release.tag_name }}
+    secrets: inherit
 
 
   build-exe:
     name: Build .exe installer
     runs-on: windows-latest
-    needs: [build-msi]
+    needs: [get-version, build-msi]
     steps:
       - uses: actions/checkout@v3
       - name: Download .msi
@@ -212,9 +209,9 @@ jobs:
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: 'maven'
+          cache: ${{ env.JAVA_CACHE }}
       - name: Generate license for exe
         run: >
           mvn -B license:add-third-party
@@ -236,7 +233,7 @@ jobs:
           "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
           -ext WixBalExtension
           -out dist/win/bundle/
-          -dBundleVersion="${{ needs.build-msi.outputs.semVerNum }}.${{ needs.build-msi.outputs.revNum }}"
+          -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           -dBundleVendor="Skymatic GmbH"
           -dBundleCopyright="(C) 2016 - 2022 Skymatic GmbH"
           -dAboutUrl="https://cryptomator.org"
@@ -253,7 +250,7 @@ jobs:
           -ib installer/unsigned/Cryptomator-Installer.exe
           -o tmp/engine.exe
       - name: Codesign burn engine
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v2
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -267,7 +264,7 @@ jobs:
           -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
           -o installer/Cryptomator-Installer.exe
       - name: Codesign EXE
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v2
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -276,7 +273,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.build-msi.outputs.semVerStr }}-x64.exe
+        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import

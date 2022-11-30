@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import java.util.Optional;
 
@@ -24,9 +26,10 @@ public class FxApplicationStyle {
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final LicenseHolder licenseHolder;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
+	private final ObjectProperty<Theme> appliedTheme = new SimpleObjectProperty<>(Theme.LIGHT);
 
 	@Inject
-	public FxApplicationStyle(Settings settings, Optional<UiAppearanceProvider> appearanceProvider, LicenseHolder licenseHolder){
+	public FxApplicationStyle(Settings settings, Optional<UiAppearanceProvider> appearanceProvider, LicenseHolder licenseHolder) {
 		this.settings = settings;
 		this.appearanceProvider = appearanceProvider;
 		this.licenseHolder = licenseHolder;
@@ -91,6 +94,7 @@ public class FxApplicationStyle {
 		} else {
 			Application.setUserAgentStylesheet(stylesheet.toString());
 			appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.LIGHT));
+			appliedTheme.set(Theme.LIGHT);
 		}
 	}
 
@@ -103,6 +107,11 @@ public class FxApplicationStyle {
 		} else {
 			Application.setUserAgentStylesheet(stylesheet.toString());
 			appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.DARK));
+			appliedTheme.set(Theme.DARK);
 		}
+	}
+
+	public ObjectProperty<Theme> appliedThemeProperty() {
+		return appliedTheme;
 	}
 }

@@ -12,6 +12,7 @@ import com.google.common.io.BaseEncoding;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -20,6 +21,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,11 +58,11 @@ public class VaultSettings {
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
 	private final BooleanProperty autoLockWhenIdle = new SimpleBooleanProperty(DEFAULT_AUTOLOCK_WHEN_IDLE);
 	private final IntegerProperty autoLockIdleSeconds = new SimpleIntegerProperty(DEFAULT_AUTOLOCK_IDLE_SECONDS);
-	private final StringBinding mountName;
+	private final StringExpression mountName;
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
-		this.mountName = Bindings.createStringBinding(this::normalizeDisplayName, displayName);
+		this.mountName = StringExpression.stringExpression(displayName.map(VaultSettings::normalizeDisplayName).orElse(""));
 	}
 
 	Observable[] observables() {
@@ -78,8 +80,7 @@ public class VaultSettings {
 	}
 
 	//visible for testing
-	String normalizeDisplayName() {
-		var original = displayName.getValueSafe();
+	static String normalizeDisplayName(String original) {
 		if (original.isBlank() || ".".equals(original) || "..".equals(original)) {
 			return "_";
 		}
@@ -105,7 +106,7 @@ public class VaultSettings {
 		return displayName;
 	}
 
-	public StringBinding mountName() {
+	public StringExpression mountName() {
 		return mountName;
 	}
 
