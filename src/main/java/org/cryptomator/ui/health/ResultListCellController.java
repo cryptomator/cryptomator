@@ -48,10 +48,10 @@ public class ResultListCellController implements FxController {
 	private final BooleanBinding fixFailed;
 	private final BooleanBinding fixRunningOrDone;
 	private final List<Subscription> subscriptions;
-	private final Tooltip fixSuccessTip;
-	private final Tooltip fixFailTip;
-
+	private final Tooltip fixStateTip;
+	private final Tooltip severityTip;
 	private AutoAnimator fixRunningRotator;
+	private final ResourceBundle resourceBundle;
 
 	/* FXML */
 	public FontAwesome5IconView severityView;
@@ -59,6 +59,7 @@ public class ResultListCellController implements FxController {
 
 	@Inject
 	public ResultListCellController(ResultFixApplier fixApplier, ResourceBundle resourceBundle) {
+		this.resourceBundle = resourceBundle;
 		this.result = new SimpleObjectProperty<>(null);
 		this.severity = result.map(Result::diagnosis).map(DiagnosticResult::getSeverity);
 		this.description = result.map(Result::getDescription).orElse("");
@@ -72,10 +73,31 @@ public class ResultListCellController implements FxController {
 		this.fixFailed = Bindings.createBooleanBinding(this::isFixFailed, fixState);
 		this.fixRunningOrDone = fixing.or(fixed).or(fixFailed);
 		this.subscriptions = new ArrayList<>();
-		this.fixSuccessTip = new Tooltip(resourceBundle.getString("health.fix.successTip"));
-		this.fixFailTip = new Tooltip(resourceBundle.getString("health.fix.failTip"));
-		fixSuccessTip.setShowDelay(Duration.millis(100));
-		fixFailTip.setShowDelay(Duration.millis(100));
+
+		this.fixStateTip = new Tooltip();
+		fixStateTip.textProperty().bind(fixState.map(this::getFixStateDescription));
+		fixStateTip.setShowDelay(Duration.millis(100));
+
+		this.severityTip = new Tooltip();
+		severityTip.textProperty().bind(severity.map(this::getSeverityDescription));
+		severityTip.setShowDelay(Duration.millis(150));
+	}
+
+	private String getFixStateDescription(Result.FixState fixState) {
+		return switch (fixState) {
+			case FIXED -> resourceBundle.getString("health.fix.successTip");
+			case FIX_FAILED -> resourceBundle.getString("health.fix.failTip");
+			default -> "";
+		};
+	}
+
+	private String getSeverityDescription(DiagnosticResult.Severity severity) {
+		return resourceBundle.getString(switch (severity) {
+			case GOOD -> "health.result.severityTip.good";
+			case INFO -> "health.result.severityTip.info";
+			case WARN -> "health.result.severityTip.warn";
+			case CRITICAL -> "health.result.severityTip.critical";
+		});
 	}
 
 	@FXML
@@ -93,12 +115,11 @@ public class ResultListCellController implements FxController {
 				.afterStop(() -> fixView.setRotate(0)) //
 				.build();
 		fixState.addListener(((observable, oldValue, newValue) -> {
-			if (newValue == Result.FixState.FIXED) {
-				Tooltip.install(fixView, fixSuccessTip);
-			} else if (newValue == Result.FixState.FIX_FAILED) {
-				Tooltip.install(fixView, fixFailTip);
+			if (newValue == Result.FixState.FIXED || newValue == Result.FixState.FIX_FAILED) {
+				Tooltip.install(fixView, fixStateTip);
 			}
 		}));
+		Tooltip.install(severityView, severityTip);
 	}
 
 	@FXML
