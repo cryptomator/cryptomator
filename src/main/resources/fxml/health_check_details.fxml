@@ -42,15 +42,15 @@
 	</HBox>
 	<VBox spacing="3" VBox.vgrow="ALWAYS">
 		<HBox alignment="CENTER" spacing="6">
-			<Label fx:id="filterLbl" text="Filters">
+			<Label fx:id="filterLbl" text="%health.check.detail.listFilters.label">
 				<graphic>
 					<FontAwesome5IconView glyph="FUNNEL" glyphSize="${filterLbl.height}" styleClass="glyph-icon-muted"/>
 				</graphic>
 			</Label>
 			<Region minWidth="12" />
-			<Label text="Severity" labelFor="${severityChoiceBox}"/>
+			<Label text="%health.check.detail.listFilters.severity" labelFor="${severityChoiceBox}"/>
 			<ChoiceBox fx:id="severityChoiceBox" />
-			<Label text="Fix state" labelFor="${fixStateChoiceBox}"/>
+			<Label text="%health.check.detail.listFilters.fixState" labelFor="${fixStateChoiceBox}"/>
 			<ChoiceBox fx:id="fixStateChoiceBox" />
 		</HBox>
 		<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25">
