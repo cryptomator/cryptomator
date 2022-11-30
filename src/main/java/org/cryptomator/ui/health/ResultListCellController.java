@@ -33,7 +33,6 @@ public class ResultListCellController implements FxController {
 	private static final FontAwesome5Icon WARN_ICON = FontAwesome5Icon.EXCLAMATION_TRIANGLE;
 	private static final FontAwesome5Icon CRIT_ICON = FontAwesome5Icon.TIMES;
 
-	private final Logger LOG = LoggerFactory.getLogger(ResultListCellController.class);
 
 	private final ObjectProperty<Result> result;
 	private final ObservableValue<DiagnosticResult.Severity> severity;
@@ -41,12 +40,12 @@ public class ResultListCellController implements FxController {
 	private final ResultFixApplier fixApplier;
 	private final ObservableValue<Result.FixState> fixState;
 	private final ObjectBinding<FontAwesome5Icon> severityGlyph;
-	private final ObjectBinding<FontAwesome5Icon> fixGlyph;
 	private final BooleanBinding fixable;
 	private final BooleanBinding fixing;
 	private final BooleanBinding fixed;
 	private final BooleanBinding fixFailed;
 	private final BooleanBinding fixRunningOrDone;
+	private final ObservableValue<FontAwesome5Icon> fixGlyph;
 	private final List<Subscription> subscriptions;
 	private final Tooltip fixStateTip;
 	private final Tooltip severityTip;
@@ -66,12 +65,12 @@ public class ResultListCellController implements FxController {
 		this.fixApplier = fixApplier;
 		this.fixState = result.flatMap(Result::fixState);
 		this.severityGlyph = Bindings.createObjectBinding(this::getSeverityGlyph, result);
-		this.fixGlyph = Bindings.createObjectBinding(this::getFixGlyph, fixState);
 		this.fixable = Bindings.createBooleanBinding(this::isFixable, fixState);
 		this.fixing = Bindings.createBooleanBinding(this::isFixing, fixState);
 		this.fixed = Bindings.createBooleanBinding(this::isFixed, fixState);
 		this.fixFailed = Bindings.createBooleanBinding(this::isFixFailed, fixState);
 		this.fixRunningOrDone = fixing.or(fixed).or(fixFailed);
+		this.fixGlyph = fixState.map(this::getFixGlyph);
 		this.subscriptions = new ArrayList<>();
 
 		this.fixStateTip = new Tooltip();
@@ -81,6 +80,15 @@ public class ResultListCellController implements FxController {
 		this.severityTip = new Tooltip();
 		severityTip.textProperty().bind(severity.map(this::getSeverityDescription));
 		severityTip.setShowDelay(Duration.millis(150));
+	}
+
+	public FontAwesome5Icon getFixGlyph(Result.FixState state) {
+		return switch (state) {
+			case FIXING -> FontAwesome5Icon.SPINNER;
+			case FIXED -> FontAwesome5Icon.CHECK;
+			case FIX_FAILED -> FontAwesome5Icon.TIMES;
+			default -> null;
+		};
 	}
 
 	private String getFixStateDescription(Result.FixState fixState) {
@@ -170,20 +178,8 @@ public class ResultListCellController implements FxController {
 		};
 	}
 
-	public ObjectBinding<FontAwesome5Icon> fixGlyphProperty() {
+	public ObservableValue<FontAwesome5Icon> fixGlyphProperty() {
 		return fixGlyph;
-	}
-
-	public FontAwesome5Icon getFixGlyph() {
-		if (fixState.getValue() == null) {
-			return null;
-		}
-		return switch (fixState.getValue()) {
-			case NOT_FIXABLE, FIXABLE -> null;
-			case FIXING -> FontAwesome5Icon.SPINNER;
-			case FIXED -> FontAwesome5Icon.CHECK;
-			case FIX_FAILED -> FontAwesome5Icon.TIMES;
-		};
 	}
 
 	public BooleanBinding fixableProperty() {
