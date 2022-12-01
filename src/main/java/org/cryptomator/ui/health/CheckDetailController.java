@@ -123,6 +123,7 @@ public class CheckDetailController implements FxController {
 
 		fixStateChoiceBox.getItems().add(null);
 		fixStateChoiceBox.getItems().addAll(Arrays.stream(Result.FixState.values()).toList());
+		fixStateChoiceBox.setConverter(new FixStateStringifier());
 		fixStateChoiceBox.setValue(null);
 
 		resultsFilter.bind(Bindings.createObjectBinding(() -> this::filterResults, severityChoiceBox.valueProperty(), fixStateChoiceBox.valueProperty()));
@@ -158,7 +159,7 @@ public class CheckDetailController implements FxController {
 		@Override
 		public String toString(Severity object) {
 			if (object == null) {
-				return resourceBundle.getString("health.result.severityFilter.none");
+				return resourceBundle.getString("health.result.severityFilter.all");
 			}
 			return switch (object) {
 				case GOOD -> resourceBundle.getString("health.result.severityFilter.good");
@@ -178,6 +179,40 @@ public class CheckDetailController implements FxController {
 				return Severity.WARN;
 			} else if (resourceBundle.getString("health.result.severityFilter.crit").equals(string)) {
 				return Severity.CRITICAL;
+			} else {
+				return null;
+			}
+		}
+	}
+
+	class FixStateStringifier extends StringConverter<Result.FixState> {
+
+		@Override
+		public String toString(Result.FixState object) {
+			if (object == null) {
+				return resourceBundle.getString("health.result.fixStateFilter.all");
+			}
+			return switch (object) {
+				case FIXABLE -> resourceBundle.getString("health.result.fixStateFilter.fixable");
+				case NOT_FIXABLE -> resourceBundle.getString("health.result.fixStateFilter.notFixable");
+				case FIXING -> resourceBundle.getString("health.result.fixStateFilter.fixing");
+				case FIXED -> resourceBundle.getString("health.result.fixStateFilter.fixed");
+				case FIX_FAILED -> resourceBundle.getString("health.result.fixStateFilter.fixFailed");
+			};
+		}
+
+		@Override
+		public Result.FixState fromString(String string) {
+			if (resourceBundle.getString("health.result.fixStateFilter.fixable").equals(string)) {
+				return FIXABLE;
+			} else if (resourceBundle.getString("health.result.fixStateFilter.notFixable").equals(string)) {
+				return NOT_FIXABLE;
+			} else if (resourceBundle.getString("health.result.fixStateFilter.fixing").equals(string)) {
+				return FIXING;
+			} else if (resourceBundle.getString("health.result.fixStateFilter.fixed").equals(string)) {
+				return FIXED;
+			} else if (resourceBundle.getString("health.result.fixStateFilter.fixFailed").equals(string)) {
+				return FIX_FAILED;
 			} else {
 				return null;
 			}
@@ -289,5 +324,4 @@ public class CheckDetailController implements FxController {
 	public boolean getFixAllInfoResultsPossible() {
 		return fixAllInfoResultsPossible.getValue();
 	}
-
 }
