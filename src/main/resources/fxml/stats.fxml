@@ -74,7 +74,7 @@
 	</VBox>
 	<!-- Access -->
 	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
-		<FormattedLabel styleClass="label-large" format="%stats.access.accessCount" arg1="${controller.filesAccessed}"/>
+		<FormattedLabel styleClass="label-large" format="%stats.access.current" arg1="${controller.filesAccessed}"/>
 		<AreaChart fx:id="accessChart" styleClass="io-stats" createSymbols="false" animated="false">
 			<xAxis>
 				<NumberAxis fx:id="accessChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
@@ -86,7 +86,7 @@
 				<Cursor fx:constant="DEFAULT"/>
 			</cursor>
 		</AreaChart>
-		<FormattedLabel format="%stats.access.totalAccessCount" arg1="${controller.totalFilesAccessed}"/>
+		<FormattedLabel format="%stats.access.total" arg1="${controller.totalFilesAccessed}"/>
 		<Label/> <!-- to align with other graphs -->
 		<Label/> <!-- to align with other graphs -->
 	</VBox>
