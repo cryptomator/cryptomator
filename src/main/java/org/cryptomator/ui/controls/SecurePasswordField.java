@@ -71,9 +71,11 @@ public class SecurePasswordField extends TextField {
 	}
 
 	public void cut() {
+		//not implemented by design
 	}
 
 	public void copy() {
+		//not implemented by design
 	}
 
 	public Object queryAccessibleAttribute(AccessibleAttribute attribute, Object... parameters) {

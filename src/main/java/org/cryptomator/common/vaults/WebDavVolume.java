@@ -2,6 +2,7 @@ package org.cryptomator.common.vaults;
 
 
 import com.google.common.base.CharMatcher;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
@@ -22,12 +23,11 @@ import java.util.function.Supplier;
 
 public class WebDavVolume implements Volume {
 
-	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
-
 	private final Provider<WebDavServer> serverProvider;
 	private final VaultSettings vaultSettings;
 	private final Settings settings;
 	private final WindowsDriveLetters windowsDriveLetters;
+	private final Environment environment;
 
 	private WebDavServer server;
 	private WebDavServletController servlet;
@@ -35,11 +35,12 @@ public class WebDavVolume implements Volume {
 	private Consumer<Throwable> onExitAction;
 
 	@Inject
-	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings, WindowsDriveLetters windowsDriveLetters) {
+	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings, WindowsDriveLetters windowsDriveLetters, Environment environment) {
 		this.serverProvider = serverProvider;
 		this.vaultSettings = vaultSettings;
 		this.settings = settings;
 		this.windowsDriveLetters = windowsDriveLetters;
+		this.environment = environment;
 	}
 
 	@Override
@@ -129,16 +130,17 @@ public class WebDavVolume implements Volume {
 	}
 
 	private String getLocalhostAliasOrNull() {
-		try {
-			InetAddress alias = InetAddress.getByName(LOCALHOST_ALIAS);
-			if (alias.getHostAddress().equals("127.0.0.1")) {
-				return LOCALHOST_ALIAS;
-			} else {
-				return null;
+		return environment.getLoopbackAlias().map(alias -> {
+			try {
+				var address = InetAddress.getByName(alias);
+				if (address.getHostAddress().equals("127.0.0.1")) {
+					return alias;
+				}
+			} catch (UnknownHostException e) {
+				//no-op
 			}
-		} catch (UnknownHostException e) {
 			return null;
-		}
+		}).orElse(null);
 	}
 
 	private void cleanup() {

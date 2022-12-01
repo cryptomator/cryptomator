@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stub by design -->
+
+<!-- jPackage Section
+overrides.wxi is a placeholder to set/alter WiX variables referenced from default
+main.wxs file.
+
+Put custom overrides.wxi in resource directory to replace this default file.
+
+Override default overrides.wxi if configuring of msi installers through jpackage
+command line is not sufficient.
+
+WiX variables referenced from default main.wxs that can be altered in custom overrides.wxi:
+
+- JpProductLanguage
+Value of `Language` attribute of `Product` WiX element. Default value is 1033.
+
+- JpInstallerVersion
+Value of `InstallerVersion` attribute of `Package` WiX element. Default value is 200.
+
+- JpCompressedMsi
+Value of `Compressed` attribute of `Package` WiX element. Default value is `yes`.
+
+- JpAllowDowngrades
+Should be defined to enable downgrades and undefined to disable downgrades.
+Default value is `yes`.
+
+- JpAllowUpgrades
+Should be defined to enable upgrades and undefined to disable upgrades.
+Default value is `yes`.
+-->
+
+<!-- Cryptomator Section
+
+Non-opening ProgID settings:
+- IconFileEncryptedData
+Full file name of icon file used for encrypted data files. Default is "Cryptomator-Vault.ico"
+
+- ProgIdContentType
+Media Type of the encrypted data files. Default is "application/vnd.cryptomator.encrypted"
+
+Close Application settings:
+- CloseApplicationTarget
+Full name of executable to be checkd in the close application util. Default is "cryptomator.exe"
+
+Legacy Installation settings:
+- SkipCryptomatorLegacyCheck
+Should be defined to disable checking for the inno setup installation of Cryptomator and undefined, to enable it.
+ -->
+<Include/>

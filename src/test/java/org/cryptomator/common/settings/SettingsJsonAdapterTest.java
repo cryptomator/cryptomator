@@ -27,6 +27,7 @@ public class SettingsJsonAdapterTest {
 						{"id": "1", "path": "/vault1", "mountName": "vault1", "winDriveLetter": "X"},
 						{"id": "2", "path": "/vault2", "mountName": "vault2", "winDriveLetter": "Y"}
 					],
+					"autoCloseVaults" : true,
 					"checkForUpdatesEnabled": true,
 					"port": 8080,
 					"language": "de-DE",
@@ -40,6 +41,7 @@ public class SettingsJsonAdapterTest {
 		Assertions.assertTrue(settings.checkForUpdates().get());
 		Assertions.assertEquals(2, settings.getDirectories().size());
 		Assertions.assertEquals(8080, settings.port().get());
+		Assertions.assertEquals(true, settings.autoCloseVaults().get());
 		Assertions.assertEquals("de-DE", settings.languageProperty().get());
 		Assertions.assertEquals(42, settings.numTrayNotifications().get());
 		Assertions.assertEquals(WebDavUrlScheme.DAV, settings.preferredGvfsScheme().get());

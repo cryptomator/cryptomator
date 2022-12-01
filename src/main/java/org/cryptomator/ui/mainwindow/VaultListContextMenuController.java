@@ -1,8 +1,5 @@
 package org.cryptomator.ui.mainwindow;
 
-import com.tobiasdiez.easybind.EasyBind;
-import com.tobiasdiez.easybind.optional.ObservableOptionalValue;
-import com.tobiasdiez.easybind.optional.OptionalBinding;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -14,33 +11,39 @@ import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
 import javax.inject.Inject;
-import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import java.util.EnumSet;
+import java.util.Objects;
 
-import static org.cryptomator.common.vaults.VaultState.Value.*;
+import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
+import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
+import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
 
 @MainWindowScoped
 public class VaultListContextMenuController implements FxController {
 
-	private final ObservableOptionalValue<Vault> selectedVault;
+	private final ReadOnlyObjectProperty<Vault> selectedVault;
 	private final Stage mainWindow;
 	private final FxApplicationWindows appWindows;
 	private final VaultService vaultService;
 	private final KeychainManager keychain;
 	private final RemoveVaultComponent.Builder removeVault;
-	private final VaultOptionsComponent.Builder vaultOptionsWindow;
-	private final OptionalBinding<VaultState.Value> selectedVaultState;
-	private final Binding<Boolean> selectedVaultPassphraseStored;
-	private final Binding<Boolean> selectedVaultRemovable;
-	private final Binding<Boolean> selectedVaultUnlockable;
-	private final Binding<Boolean> selectedVaultLockable;
+	private final VaultOptionsComponent.Factory vaultOptionsWindow;
+	private final ObservableValue<VaultState.Value> selectedVaultState;
+	private final ObservableValue<Boolean> selectedVaultPassphraseStored;
+	private final ObservableValue<Boolean> selectedVaultRemovable;
+	private final ObservableValue<Boolean> selectedVaultUnlockable;
+	private final ObservableValue<Boolean> selectedVaultLockable;
 
 	@Inject
-	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, @MainWindow Stage mainWindow, FxApplicationWindows appWindows, VaultService vaultService, KeychainManager keychain, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Builder vaultOptionsWindow) {
-		this.selectedVault = EasyBind.wrapNullable(selectedVault);
+	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, @MainWindow Stage mainWindow, FxApplicationWindows appWindows, VaultService vaultService, KeychainManager keychain, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Factory vaultOptionsWindow) {
+		this.selectedVault = selectedVault;
 		this.mainWindow = mainWindow;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
@@ -48,8 +51,8 @@ public class VaultListContextMenuController implements FxController {
 		this.removeVault = removeVault;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 
-		this.selectedVaultState = this.selectedVault.mapObservable(Vault::stateProperty);
-		this.selectedVaultPassphraseStored = this.selectedVault.map(this::isPasswordStored).orElse(false);
+		this.selectedVaultState = selectedVault.flatMap(Vault::stateProperty).orElse(null);
+		this.selectedVaultPassphraseStored = selectedVault.map(this::isPasswordStored).orElse(false);
 		this.selectedVaultRemovable = selectedVaultState.map(EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION)::contains).orElse(false);
 		this.selectedVaultUnlockable = selectedVaultState.map(LOCKED::equals).orElse(false);
 		this.selectedVaultLockable = selectedVaultState.map(UNLOCKED::equals).orElse(false);
@@ -61,40 +64,37 @@ public class VaultListContextMenuController implements FxController {
 
 	@FXML
 	public void didClickRemoveVault() {
-		selectedVault.ifValuePresent(v -> {
-			removeVault.vault(v).build().showRemoveVault();
-		});
+		var vault = Objects.requireNonNull(selectedVault.get());
+		removeVault.vault(vault).build().showRemoveVault();
 	}
 
 	@FXML
 	public void didClickShowVaultOptions() {
-		selectedVault.ifValuePresent(v -> {
-			vaultOptionsWindow.vault(v).build().showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
-		});
+		var vault = Objects.requireNonNull(selectedVault.get());
+		vaultOptionsWindow.create(vault).showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
 	}
 
 	@FXML
 	public void didClickUnlockVault() {
-		selectedVault.ifValuePresent(v -> {
-			appWindows.startUnlockWorkflow(v, mainWindow);
-		});
+		var vault = Objects.requireNonNull(selectedVault.get());
+		appWindows.startUnlockWorkflow(vault, mainWindow);
 	}
 
 	@FXML
 	public void didClickLockVault() {
-		selectedVault.ifValuePresent(v -> {
-			appWindows.startLockWorkflow(v, mainWindow);
-		});
+		var vault = Objects.requireNonNull(selectedVault.get());
+		appWindows.startLockWorkflow(vault, mainWindow);
 	}
 
 	@FXML
 	public void didClickRevealVault() {
-		selectedVault.ifValuePresent(vaultService::reveal);
+		var vault = Objects.requireNonNull(selectedVault.get());
+		vaultService.reveal(vault);
 	}
 
 	// Getter and Setter
 
-	public Binding<Boolean> selectedVaultUnlockableProperty() {
+	public ObservableValue<Boolean> selectedVaultUnlockableProperty() {
 		return selectedVaultUnlockable;
 	}
 
@@ -102,7 +102,7 @@ public class VaultListContextMenuController implements FxController {
 		return selectedVaultUnlockable.getValue();
 	}
 
-	public Binding<Boolean> selectedVaultLockableProperty() {
+	public ObservableValue<Boolean> selectedVaultLockableProperty() {
 		return selectedVaultLockable;
 	}
 
@@ -110,7 +110,7 @@ public class VaultListContextMenuController implements FxController {
 		return selectedVaultLockable.getValue();
 	}
 
-	public Binding<Boolean> selectedVaultRemovableProperty() {
+	public ObservableValue<Boolean> selectedVaultRemovableProperty() {
 		return selectedVaultRemovable;
 	}
 
@@ -118,7 +118,7 @@ public class VaultListContextMenuController implements FxController {
 		return selectedVaultRemovable.getValue();
 	}
 
-	public Binding<Boolean> selectedVaultPassphraseStoredProperty() {
+	public ObservableValue<Boolean> selectedVaultPassphraseStoredProperty() {
 		return selectedVaultPassphraseStored;
 	}
 

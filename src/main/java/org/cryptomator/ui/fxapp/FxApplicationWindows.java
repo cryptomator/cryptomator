@@ -40,7 +40,7 @@ public class FxApplicationWindows {
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
-	private final Lazy<QuitComponent> quitWindow;
+	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
@@ -48,12 +48,12 @@ public class FxApplicationWindows {
 	private final FilteredList<Window> visibleWindows;
 
 	@Inject
-	public FxApplicationWindows(@PrimaryStage Stage primaryStage, Optional<TrayIntegrationProvider> trayIntegration, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Lazy<QuitComponent> quitWindow, UnlockComponent.Factory unlockWorkflowFactory, LockComponent.Factory lockWorkflowFactory, ErrorComponent.Factory errorWindowFactory, ExecutorService executor) {
+	public FxApplicationWindows(@PrimaryStage Stage primaryStage, Optional<TrayIntegrationProvider> trayIntegration, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, QuitComponent.Builder quitWindowBuilder, UnlockComponent.Factory unlockWorkflowFactory, LockComponent.Factory lockWorkflowFactory, ErrorComponent.Factory errorWindowFactory, ExecutorService executor) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
-		this.quitWindow = quitWindow;
+		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
@@ -104,8 +104,8 @@ public class FxApplicationWindows {
 		return CompletableFuture.supplyAsync(() -> preferencesWindow.get().showPreferencesWindow(selectedTab), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
-	public CompletionStage<Stage> showQuitWindow(QuitResponse response) {
-		return CompletableFuture.supplyAsync(() -> quitWindow.get().showQuitWindow(response), Platform::runLater).whenComplete(this::reportErrors);
+	public void showQuitWindow(QuitResponse response, boolean forced) {
+			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {

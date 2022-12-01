@@ -10,7 +10,6 @@ import javax.inject.Named;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -33,8 +32,6 @@ public class CreateNewVaultNameController implements FxController {
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
 	private final BooleanBinding validVaultName;
-	private final BooleanBinding invalidVaultName;
-	private final StringBinding warningText;
 
 	@Inject
 	CreateNewVaultNameController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
@@ -44,18 +41,12 @@ public class CreateNewVaultNameController implements FxController {
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.validVaultName = Bindings.createBooleanBinding(this::isValidVaultName, vaultName);
-		this.invalidVaultName = validVaultName.not();
-		this.warningText = Bindings.when(vaultName.isNotEmpty().and(invalidVaultName)).then(resourceBundle.getString("addvaultwizard.new.invalidName")).otherwise((String) null);
 	}
 
 	@FXML
 	public void initialize() {
-		vaultName.bind(textField.textProperty());
+		vaultName.bindBidirectional(textField.textProperty());
 		vaultName.addListener(this::vaultNameChanged);
-	}
-
-	public boolean isValidVaultName() {
-		return vaultName.get() != null && VALID_NAME_PATTERN.matcher(vaultName.get().trim()).matches();
 	}
 
 	private void vaultNameChanged(@SuppressWarnings("unused") Observable observable) {
@@ -75,32 +66,17 @@ public class CreateNewVaultNameController implements FxController {
 	@FXML
 	public void next() {
 		window.setScene(chooseLocationScene.get());
+		vaultName.set(vaultName.get().trim());
 	}
 
 	/* Getter/Setter */
 
-	public BooleanBinding invalidVaultNameProperty() {
-		return invalidVaultName;
+	public BooleanBinding validVaultNameProperty() {
+		return validVaultName;
 	}
 
-	public boolean isInvalidVaultName() {
-		return invalidVaultName.get();
-	}
-
-	public StringBinding warningTextProperty() {
-		return warningText;
-	}
-
-	public String getWarningText() {
-		return warningText.get();
-	}
-
-	public BooleanBinding showWarningProperty() {
-		return warningText.isNotEmpty();
-	}
-
-	public boolean isShowWarning() {
-		return showWarningProperty().get();
+	public boolean isValidVaultName() {
+		return vaultName.get() != null && VALID_NAME_PATTERN.matcher(vaultName.get().trim()).matches();
 	}
 
 }

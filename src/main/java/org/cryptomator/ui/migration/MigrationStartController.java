@@ -25,9 +25,6 @@ public class MigrationStartController implements FxController {
 		this.runMigrationScene = runMigrationScene;
 	}
 
-	public void initialize() {
-	}
-
 	@FXML
 	public void cancel() {
 		window.close();

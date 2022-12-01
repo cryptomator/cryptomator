@@ -41,6 +41,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("askedForUpdateCheck").value(value.askedForUpdateCheck().get());
 		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
 		out.name("startHidden").value(value.startHidden().get());
+		out.name("autoCloseVaults").value(value.autoCloseVaults().get());
 		out.name("port").value(value.port().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
@@ -49,6 +50,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("theme").value(value.theme().get().name());
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
 		out.name("keychainProvider").value(value.keychainProvider().get());
+		out.name("useKeychain").value(value.useKeychain().get());
 		out.name("licenseKey").value(value.licenseKey().get());
 		out.name("showMinimizeButton").value(value.showMinimizeButton().get());
 		out.name("showTrayIcon").value(value.showTrayIcon().get());
@@ -82,6 +84,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "askedForUpdateCheck" -> settings.askedForUpdateCheck().set(in.nextBoolean());
 				case "checkForUpdatesEnabled" -> settings.checkForUpdates().set(in.nextBoolean());
 				case "startHidden" -> settings.startHidden().set(in.nextBoolean());
+				case "autoCloseVaults" -> settings.autoCloseVaults().set(in.nextBoolean());
 				case "port" -> settings.port().set(in.nextInt());
 				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
 				case "preferredGvfsScheme" -> settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
@@ -90,6 +93,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
 				case "keychainProvider" -> settings.keychainProvider().set(in.nextString());
+				case "useKeychain" -> settings.useKeychain().set(in.nextBoolean());
 				case "licenseKey" -> settings.licenseKey().set(in.nextString());
 				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
 				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
@@ -101,7 +105,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "language" -> settings.languageProperty().set(in.nextString());
 
 				default -> {
-					LOG.warn("Unsupported vault setting found in JSON: " + name);
+					LOG.warn("Unsupported vault setting found in JSON: {}", name);
 					in.skipValue();
 				}
 			}

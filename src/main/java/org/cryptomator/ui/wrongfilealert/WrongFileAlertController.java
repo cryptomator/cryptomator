@@ -15,7 +15,7 @@ import java.io.UncheckedIOException;
 @WrongFileAlertScoped
 public class WrongFileAlertController implements FxController {
 
-	private static final String DOCUMENTATION_URI = "https://docs.cryptomator.org/en/1.5/desktop/accessing-vaults/";
+	private static final String DOCUMENTATION_URI = "https://docs.cryptomator.org/en/1.6/desktop/accessing-vaults/";
 
 	private final Application app;
 	private final Stage window;
@@ -30,6 +30,7 @@ public class WrongFileAlertController implements FxController {
 
 	@FXML
 	public void initialize() {
+		//TODO: add dark-mode screens
 		final String resource = SystemUtils.IS_OS_MAC ? "/img/vault-volume-mac.png" : "/img/vault-volume-win.png";
 		try (InputStream in = getClass().getResourceAsStream(resource)) {
 			this.screenshot = new Image(in);

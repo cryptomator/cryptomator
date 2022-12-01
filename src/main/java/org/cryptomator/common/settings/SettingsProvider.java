@@ -49,14 +49,12 @@ public class SettingsProvider implements Supplier<Settings> {
 
 	private final AtomicReference<ScheduledFuture<?>> scheduledSaveCmd = new AtomicReference<>();
 	private final Supplier<Settings> settings = Suppliers.memoize(this::load);
-	private final SettingsJsonAdapter settingsJsonAdapter;
 	private final Environment env;
 	private final ScheduledExecutorService scheduler;
 	private final Gson gson;
 
 	@Inject
 	public SettingsProvider(SettingsJsonAdapter settingsJsonAdapter, Environment env, ScheduledExecutorService scheduler) {
-		this.settingsJsonAdapter = settingsJsonAdapter;
 		this.env = env;
 		this.scheduler = scheduler;
 		this.gson = new GsonBuilder() //
@@ -118,7 +116,7 @@ public class SettingsProvider implements Supplier<Settings> {
 		try {
 			Files.createDirectories(settingsPath.getParent());
 			Path tmpPath = settingsPath.resolveSibling(settingsPath.getFileName().toString() + ".tmp");
-			try (OutputStream out = Files.newOutputStream(tmpPath, StandardOpenOption.CREATE_NEW); //
+			try (OutputStream out = Files.newOutputStream(tmpPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE); //
 				 Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
 				gson.toJson(settings, writer);
 			}

@@ -28,7 +28,7 @@
 				<fx:include source="vault_options_mount.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="keyTab" id="KEY" text="%vaultOptions.masterkey">
+		<Tab fx:id="keyTab" id="KEY" text="%vaultOptions.masterkey"> <!-- is removed in controller, when config.keyid.scheme is not masterkeyfile -->
 			<graphic>
 				<FontAwesome5IconView glyph="KEY"/>
 			</graphic>

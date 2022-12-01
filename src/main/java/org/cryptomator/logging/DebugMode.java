@@ -5,29 +5,24 @@
  *******************************************************************************/
 package org.cryptomator.logging;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
 import org.cryptomator.common.settings.Settings;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javafx.beans.value.ObservableValue;
-import java.util.Map;
 
 @Singleton
 public class DebugMode {
 
-	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DebugMode.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DebugMode.class);
 
 	private final Settings settings;
-	private final LoggerContext context;
 
 	@Inject
-	public DebugMode(Settings settings, LoggerContext context) {
+	public DebugMode(Settings settings) {
 		this.settings = settings;
-		this.context = context;
 	}
 
 	public void initialize() {
@@ -40,19 +35,13 @@ public class DebugMode {
 	}
 
 	private void setLogLevels(boolean debugMode) {
+		var configurator = LogbackConfiguratorFactory.provider();
 		if (debugMode) {
-			setLogLevels(LoggerModule.DEBUG_LOG_LEVELS);
+			configurator.setLogLevels(LogbackConfigurator.DEBUG_LOG_LEVELS);
 			LOG.debug("Debug mode enabled");
 		} else {
 			LOG.debug("Debug mode disabled");
-			setLogLevels(LoggerModule.DEFAULT_LOG_LEVELS);
-		}
-	}
-
-	private void setLogLevels(Map<String, Level> logLevels) {
-		for (Map.Entry<String, Level> loglevel : logLevels.entrySet()) {
-			Logger logger = context.getLogger(loglevel.getKey());
-			logger.setLevel(loglevel.getValue());
+			configurator.setLogLevels(LogbackConfigurator.DEFAULT_LOG_LEVELS);
 		}
 	}
 

@@ -1,10 +1,10 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import org.cryptomator.common.Nullable;
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.common.Passphrase;
 import org.cryptomator.ui.common.WeakBindings;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
@@ -50,7 +50,7 @@ public class PassphraseEntryController implements FxController {
 	private final KeychainManager keychain;
 	private final StringBinding vaultName;
 	private final BooleanProperty unlockInProgress = new SimpleBooleanProperty();
-	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, unlockInProgress);
+	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.when(unlockInProgress).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 	private final BooleanProperty unlockButtonDisabled = new SimpleBooleanProperty();
 
 	/* FXML */
@@ -186,7 +186,7 @@ public class PassphraseEntryController implements FxController {
 	}
 
 	public ContentDisplay getUnlockButtonContentDisplay() {
-		return unlockInProgress.get() ? ContentDisplay.LEFT : ContentDisplay.TEXT_ONLY;
+		return unlockButtonContentDisplay.get();
 	}
 
 	public ReadOnlyBooleanProperty userInteractionDisabledProperty() {

@@ -36,13 +36,10 @@ public interface VaultOptionsComponent {
 		stage.requestFocus();
 	}
 
-	@Subcomponent.Builder
-	interface Builder {
+	@Subcomponent.Factory
+	interface Factory {
 
-		@BindsInstance
-		Builder vault(@VaultOptionsWindow Vault vault);
-
-		VaultOptionsComponent build();
+		VaultOptionsComponent create(@BindsInstance @VaultOptionsWindow Vault vault);
 	}
 
 }

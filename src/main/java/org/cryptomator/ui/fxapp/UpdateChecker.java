@@ -9,14 +9,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
 import java.util.Comparator;
-import java.util.Optional;
 
 @FxApplicationScoped
 public class UpdateChecker {
@@ -25,8 +23,7 @@ public class UpdateChecker {
 	private static final Duration AUTOCHECK_DELAY = Duration.seconds(5);
 
 	private final Settings settings;
-	private final Optional<String> applicationVersion;
-	private final StringProperty currentVersionProperty;
+	private final String currentVersion;
 	private final StringProperty latestVersionProperty;
 	private final Comparator<String> semVerComparator;
 	private final ScheduledService<String> updateCheckerService;
@@ -34,11 +31,10 @@ public class UpdateChecker {
 	@Inject
 	UpdateChecker(Settings settings, Environment env, @Named("latestVersion") StringProperty latestVersionProperty, @Named("SemVer") Comparator<String> semVerComparator, ScheduledService<String> updateCheckerService) {
 		this.settings = settings;
-		this.applicationVersion = env.getAppVersion();
 		this.latestVersionProperty = latestVersionProperty;
 		this.semVerComparator = semVerComparator;
 		this.updateCheckerService = updateCheckerService;
-		this.currentVersionProperty = new SimpleStringProperty(applicationVersion.orElse("SNAPSHOT"));
+		this.currentVersion = env.getAppVersion();
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -66,11 +62,10 @@ public class UpdateChecker {
 	}
 
 	private void checkSucceeded(WorkerStateEvent event) {
-		String currentVersion = applicationVersion.orElse(null);
 		String latestVersion = updateCheckerService.getValue();
 		LOG.info("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 
-		if (currentVersion == null || semVerComparator.compare(currentVersion, latestVersion) < 0) {
+		if (semVerComparator.compare(currentVersion, latestVersion) < 0) {
 			// update is available
 			latestVersionProperty.set(latestVersion);
 		} else {
@@ -92,8 +87,8 @@ public class UpdateChecker {
 		return latestVersionProperty;
 	}
 
-	public ReadOnlyStringProperty currentVersionProperty() {
-		return currentVersionProperty;
+	public String getCurrentVersion() {
+		return currentVersion;
 	}
 
 }

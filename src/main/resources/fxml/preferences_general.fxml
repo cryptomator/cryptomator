@@ -4,7 +4,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Hyperlink?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -24,8 +23,10 @@
 
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" />
 
+		<CheckBox fx:id="autoCloseVaultsCheckbox" text="%preferences.general.autoCloseVaults" />
+
 		<HBox spacing="12" alignment="CENTER_LEFT">
-			<Label text="%preferences.general.keychainBackend"/>
+			<CheckBox fx:id="useKeychainCheckbox" text="%preferences.general.keychainBackend"/>
 			<ChoiceBox fx:id="keychainBackendChoiceBox"/>
 		</HBox>
 

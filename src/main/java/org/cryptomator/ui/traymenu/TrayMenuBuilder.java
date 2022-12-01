@@ -3,6 +3,7 @@ package org.cryptomator.ui.traymenu;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.integrations.tray.ActionItem;
 import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
@@ -31,8 +32,8 @@ import java.util.ResourceBundle;
 public class TrayMenuBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuBuilder.class);
-	private static final String TRAY_ICON_MAC = "/img/tray_icon_mac.png";
-	private static final String TRAY_ICON = "/img/tray_icon.png";
+	private static final String TRAY_ICON_MAC = "/img/tray_icon_mac@2x.png";
+	private static final String TRAY_ICON = "/img/window_icon_32.png";
 
 	private final ResourceBundle resourceBundle;
 	private final VaultService vaultService;
@@ -63,6 +64,11 @@ public class TrayMenuBuilder {
 
 		try (var image = getClass().getResourceAsStream(SystemUtils.IS_OS_MAC_OSX ? TRAY_ICON_MAC : TRAY_ICON)) {
 			trayMenu.showTrayIcon(image.readAllBytes(), this::showMainWindow, "Cryptomator");
+			trayMenu.onBeforeOpenMenu(() -> {
+				for (Vault vault : vaults) {
+					VaultListManager.redetermineVaultState(vault);
+				}
+			});
 			rebuildMenu();
 			initialized = true;
 		} catch (IOException e) {

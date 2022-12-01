@@ -1,0 +1,60 @@
+name: Update Error Database
+
+on:
+  discussion:
+    types: [created, edited, category_changed, answered, unanswered]
+  discussion_comment:
+    types: [created, edited, deleted]
+
+jobs:
+  update-error-db:
+    runs-on: ubuntu-latest
+    if: github.event.discussion.category.name == 'Errors'
+    steps:
+      - name: Query Discussion Data
+        id: query-data
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const query = `query ($owner: String!, $name: String!, $discussionNumber: Int!) {
+              repository(owner: $owner, name: $name) {
+                discussion(number: $discussionNumber) {
+                  id
+                  upvoteCount
+                  title
+                  url
+                  answer {
+                    url
+                    upvoteCount
+                  }
+                  comments {
+                    totalCount
+                  }
+                }
+              }
+            }`;
+            const variables = {
+              owner: context.repo.owner,
+              name: context.repo.repo,
+              discussionNumber: context.payload.discussion.number
+            }
+            return await github.graphql(query, variables)
+      - name: Get Gist
+        id: get-gist
+        uses: andymckay/get-gist-action@master
+        with:
+          gistURL: https://gist.github.com/cryptobot/accba9fb9555e7192271b85606f97230
+      - name: Merge Error Code Data
+        run: |
+          jq -c '.' ${{ steps.get-gist.outputs.file }} > original.json
+          echo $DISCUSSION | jq -c '.repository.discussion | .comments = .comments.totalCount | {(.id|tostring) : .}' > new.json
+          jq -s '.[0] * .[1]' original.json new.json > merged.json
+        env:
+          DISCUSSION: ${{ steps.query-data.outputs.result }}
+      - name: Patch Gist
+        uses: exuanbo/actions-deploy-gist@v1
+        with:
+          token: ${{ secrets.CRYPTOBOT_GIST_TOKEN }}
+          gist_id: accba9fb9555e7192271b85606f97230
+          gist_file_name: errorcodes.json
+          file_path: merged.json

@@ -4,6 +4,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+JAVA_HOME = /usr/lib/jvm/java-19-coffeelibs
+
 %:
 	dh $@
 
@@ -16,15 +18,15 @@ override_dh_auto_clean:
 override_dh_auto_build:
 	mkdir resources
 	ln -s ../common/org.cryptomator.Cryptomator512.png resources/cryptomator.png
-	jlink \
+	$(JAVA_HOME)/bin/jlink \
 		--output runtime \
-		--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
 		--strip-native-commands \
 		--no-header-files \
 		--no-man-pages \
 		--strip-debug \
 		--compress=2
-	jpackage \
+	$(JAVA_HOME)/bin/jpackage \
 		--type app-image \
 		--runtime-image runtime \
 		--input libs \
@@ -40,6 +42,7 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\"" \
 		--java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\"" \
 		--java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
+		--java-options "-Dcryptomator.p12Path=\"~/.config/Cryptomator/key.p12\"" \
 		--java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\"" \
 		--java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
 		--java-options "-Dcryptomator.showTrayIcon=false" \

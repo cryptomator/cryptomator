@@ -10,6 +10,7 @@ package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Volume.VolumeException;
@@ -33,6 +34,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -59,7 +61,6 @@ public class Vault {
 	private final ObjectProperty<Exception> lastKnownException;
 	private final VaultConfigCache configCache;
 	private final VaultStats stats;
-	private final StringBinding displayName;
 	private final StringBinding displayablePath;
 	private final BooleanBinding locked;
 	private final BooleanBinding processing;
@@ -83,7 +84,6 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
-		this.displayName = Bindings.createStringBinding(this::getDisplayName, vaultSettings.displayName());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
@@ -125,6 +125,7 @@ public class Vault {
 				.withKeyLoader(keyLoader) //
 				.withFlags(flags) //
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength().get()) //
+				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
@@ -264,8 +265,8 @@ public class Vault {
 		return state.get() == VaultState.Value.ERROR;
 	}
 
-	public StringBinding displayNameProperty() {
-		return displayName;
+	public ReadOnlyStringProperty displayNameProperty() {
+		return vaultSettings.displayName();
 	}
 
 	public String getDisplayName() {
