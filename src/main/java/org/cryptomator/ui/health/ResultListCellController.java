@@ -104,7 +104,7 @@ public class ResultListCellController implements FxController {
 			case GOOD -> "health.result.severityTip.good";
 			case INFO -> "health.result.severityTip.info";
 			case WARN -> "health.result.severityTip.warn";
-			case CRITICAL -> "health.result.severityTip.critical";
+			case CRITICAL -> "health.result.severityTip.crit";
 		});
 	}
 

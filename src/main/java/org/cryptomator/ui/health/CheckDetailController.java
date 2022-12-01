@@ -24,6 +24,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.util.StringConverter;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -54,6 +55,7 @@ public class CheckDetailController implements FxController {
 	private final Binding<Boolean> warnOrCritsExist;
 	private final ResultListCellFactory resultListCellFactory;
 	private final ResultFixApplier resultFixApplier;
+	private final ResourceBundle resourceBundle;
 
 	private final BooleanProperty fixAllInfoResultsExecuted;
 	private final BooleanBinding fixAllInfoResultsPossible;
@@ -65,9 +67,10 @@ public class CheckDetailController implements FxController {
 	private Subscription resultSubscription;
 
 	@Inject
-	public CheckDetailController(ObjectProperty<Check> selectedTask, ResultListCellFactory resultListCellFactory, ResultFixApplier resultFixApplier) {
+	public CheckDetailController(ObjectProperty<Check> selectedTask, ResultListCellFactory resultListCellFactory, ResultFixApplier resultFixApplier, ResourceBundle resourceBundle) {
 		this.resultListCellFactory = resultListCellFactory;
 		this.resultFixApplier = resultFixApplier;
+		this.resourceBundle = resourceBundle;
 		this.results = EasyBind.wrapList(FXCollections.observableArrayList());
 		this.check = selectedTask;
 		this.checkState = selectedTask.flatMap(Check::stateProperty);
@@ -115,7 +118,7 @@ public class CheckDetailController implements FxController {
 
 		severityChoiceBox.getItems().add(null);
 		severityChoiceBox.getItems().addAll(Arrays.stream(DiagnosticResult.Severity.values()).toList());
-		//severityFilter.setConverter(new SeverityStringifier());
+		severityChoiceBox.setConverter(new SeverityStringifier());
 		severityChoiceBox.setValue(null);
 
 		fixStateChoiceBox.getItems().add(null);
@@ -145,6 +148,39 @@ public class CheckDetailController implements FxController {
 			ClipboardContent clipboardContent = new ClipboardContent();
 			clipboardContent.putString(result.diagnosis().toString());
 			Clipboard.getSystemClipboard().setContent(clipboardContent);
+		}
+	}
+
+	/* -- Internal classes -- */
+
+	class SeverityStringifier extends StringConverter<Severity> {
+
+		@Override
+		public String toString(Severity object) {
+			if (object == null) {
+				return resourceBundle.getString("health.result.severityFilter.none");
+			}
+			return switch (object) {
+				case GOOD -> resourceBundle.getString("health.result.severityFilter.good");
+				case INFO -> resourceBundle.getString("health.result.severityFilter.info");
+				case WARN -> resourceBundle.getString("health.result.severityFilter.warn");
+				case CRITICAL -> resourceBundle.getString("health.result.severityFilter.crit");
+			};
+		}
+
+		@Override
+		public Severity fromString(String string) {
+			if (resourceBundle.getString("health.result.severityFilter.good").equals(string)) {
+				return Severity.GOOD;
+			} else if (resourceBundle.getString("health.result.severityFilter.info").equals(string)) {
+				return Severity.INFO;
+			} else if (resourceBundle.getString("health.result.severityFilter.warn").equals(string)) {
+				return Severity.WARN;
+			} else if (resourceBundle.getString("health.result.severityFilter.crit").equals(string)) {
+				return Severity.CRITICAL;
+			} else {
+				return null;
+			}
 		}
 	}
 
