@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
+<?import javafx.scene.shape.Circle?>
 <HBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.stats.VaultStatisticsController"
@@ -22,18 +23,17 @@
 	</padding>
 
 	<!-- Caching -->
-	<VBox prefWidth="200" prefHeight="200">
-		<StackPane>
-			<Group>
-				<Arc styleClass="cache-arc-background" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="-270"/>
-				<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDegrees}"/>
-			</Group>
-			<VBox StackPane.alignment="CENTER" alignment="CENTER">
-				<FormattedLabel styleClass="label-extra-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
-				<Label text="%stats.cacheHitRate"/>
-			</VBox>
-		</StackPane>
-	</VBox>
+	<StackPane prefWidth="200" prefHeight="200">
+		<Group>
+			<Circle centerX="100" centerY="100" radius="100" opacity="0"/> <!-- for alignment. visible=false does not yield the desired result -->
+			<Arc styleClass="cache-arc-background" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="-270"/>
+			<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDegrees}"/>
+		</Group>
+		<VBox StackPane.alignment="CENTER" alignment="CENTER">
+			<FormattedLabel styleClass="label-extra-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
+			<Label text="%stats.cacheHitRate"/>
+		</VBox>
+	</StackPane>
 
 	<!-- Read -->
 	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
@@ -86,10 +86,8 @@
 				<Cursor fx:constant="DEFAULT"/>
 			</cursor>
 		</AreaChart>
-		<Label></Label> <!-- So the three graphs are aligned -->
-		<FormattedLabel format="%stats.access.accessCount" arg1="${controller.filesAccessed}"/>
 		<FormattedLabel format="%stats.access.totalAccessCount" arg1="${controller.totalFilesAccessed}"/>
-
-
+		<Label/> <!-- to align with other graphs -->
+		<Label/> <!-- to align with other graphs -->
 	</VBox>
 </HBox>
