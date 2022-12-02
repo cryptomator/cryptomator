@@ -18,13 +18,17 @@ env:
   JAVA_VERSION: 19
 
 jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ github.event.inputs.version }}
+
   build:
     name: Build Debian Package
     runs-on: ubuntu-20.04
+    needs: [get-version]
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Install build tools
         run: |
           sudo add-apt-repository ppa:coffeelibs/openjdk
@@ -36,28 +40,12 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
-      - id: versions 
-        name: Apply version information
-        run: |
-          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR=${GITHUB_REF##*/}
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR="${{ github.event.inputs.version }}"
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          else
-            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
-          fi
-          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-          REVCOUNT=`git rev-list --count HEAD`
-          echo "::set-output name=semVerStr::${SEM_VER_STR}"
-          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
-          echo "::set-output name=revNum::${REVCOUNT}"
-          echo "::set-output name=ppaVerStr::${SEM_VER_STR/-/\~}-${REVCOUNT}"
-      - name: Validate Version
-        uses: skymatic/semver-validation-action@v1
-        with:
-          version: ${{ steps.versions.outputs.semVerStr }}
+      - id: versions
+        name: Create PPA version string
+        run: echo "ppaVerStr=${SEM_VER_STR/-/\~}-${REVCOUNT}" >> $GITHUB_OUTPUT
+        env:
+          SEM_VER_STR: ${{ needs.get-version.outputs.semVerStr }}
+          REVCOUNT: ${{ needs.get-version.outputs.revNum }}
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,linux -DskipTests
       - name: Create orig.tar.gz with common/ libs/ mods/
@@ -77,9 +65,9 @@ jobs:
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
           mv pkgdir cryptomator_${{ steps.versions.outputs.ppaVerStr }}
         env:
-          SEMVER_STR: ${{ steps.versions.outputs.semVerStr }}
-          VERSION_NUM: ${{ steps.versions.outputs.semVerNum }}
-          REVISION_NUM: ${{ steps.versions.outputs.revNum }}
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+          VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
+          REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
           PPA_VERSION: ${{ steps.versions.outputs.ppaVerStr }}-0ppa1
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |
