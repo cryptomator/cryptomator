@@ -5,6 +5,12 @@
 #export DH_VERBOSE=1
 
 JAVA_HOME = /usr/lib/jvm/java-19-coffeelibs
+DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+ifeq ($(DEB_BUILD_ARCH),amd64)
+JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods
+else ifeq ($(DEB_BUILD_ARCH),arm64)
+JMODS_PATH = jmods/aarch64:${JAVA_HOME}/jmods
+endif
 
 %:
 	dh $@
@@ -20,7 +26,8 @@ override_dh_auto_build:
 	ln -s ../common/org.cryptomator.Cryptomator512.png resources/cryptomator.png
 	$(JAVA_HOME)/bin/jlink \
 		--output runtime \
-		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+		--module-path "${JMODS_PATH}" \
+		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
 		--strip-native-commands \
 		--no-header-files \
 		--no-man-pages \

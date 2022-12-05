@@ -37,7 +37,17 @@ jobs:
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
+          java-package: 'jdk+fx'
           cache: ${{ env.JAVA_CACHE }}
+      - name: Ensure major jfx version in pom equals in jdk
+        shell: pwsh
+        run: |
+          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
+          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
+            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
+            exit 1
+          }
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
@@ -53,7 +63,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
           --no-man-pages
