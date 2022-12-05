@@ -45,6 +45,7 @@ jobs:
           architecture: ${{ matrix.architecture }}
           cache: 'maven'
       - name: Ensure major jfx version in pom equals in jdk
+        if: ${{ matrix.architecture}} == 'x64'
         shell: pwsh
         run: |
           $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
