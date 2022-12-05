@@ -35,9 +35,9 @@ jobs:
         shell: pwsh
         run: |
           $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
-          $jfxJdkVersion = (Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=',''
+          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
           if ($jfxPomVersion[0] -ne $jfxJdkVersion) {
-            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK(${jfxJdkVersion}) "
+            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
             exit 1
           }
       - name: Set version
