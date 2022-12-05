@@ -68,7 +68,7 @@ jobs:
           $jfxJmodVersionAmd64 = (Get-Content -Path "jmods/aarch64/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=',''
           $jfxJmodVersionAarch64 = (Get-Content -Path "jmods/aarch64/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=',''
           if ($jfxJmodVersionAmd64 -ne $jfxJmodVersionAarch64 ) {
-            Out-Error "JavaFX Jmods for aarch64 and amd64 are different major versions"
+            Write-Error "JavaFX Jmods for aarch64 and amd64 are different major versions"
             exit 1
           }
           if ($jfxPomVersion[0] -ne $jfxJmodVersionAmd64) {
