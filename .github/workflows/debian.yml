@@ -56,21 +56,23 @@ jobs:
           curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
           mkdir -p jmods/amd64
           unzip -j openjfx-amd64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/amd64
-          unzip -j jmods/amd64/javafx.base.jmod lib/javafx.properties -d jmods/amd64
           curl -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
           mkdir -p jmods/aarch64
           unzip -j openjfx-aarch64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/aarch64
-          unzip -j jmods/aarch64/javafx.base.jmod lib/javafx.properties -d jmods/aarch64
       - name: Ensure major jfx version in pom and in jmods is the same
         shell: pwsh
         run: |
-          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
-          $jfxJmodVersionAmd64 = ((Get-Content -Path "jmods/aarch64/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          $jfxJmodVersionAarch64 = ((Get-Content -Path "jmods/aarch64/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          mkdir jfxBaseJmodAmd64
+          jmod extract --dir jfxBaseJmodAmd64 jmods/amd64/javafx.base.jmod
+          $jfxJmodVersionAmd64 = ((Get-Content -Path "jfxBaseJmodAmd64/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          mkdir jfxBaseJmodAarch64
+          jmod extract --dir jfxBaseJmodAarch64 jmods/aarch64/javafx.base.jmod
+          $jfxJmodVersionAarch64 = ((Get-Content -Path "jfxBaseJmodAarch64/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
           if ($jfxJmodVersionAmd64[0] -ne $jfxJmodVersionAarch64[0] ) {
             Write-Error "JavaFX Jmods for aarch64 and amd64 are different major versions"
             exit 1
           }
+          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
           if ($jfxPomVersion[0] -ne $jfxJmodVersionAmd64[0]) {
             Out-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version of Jmods($($jfxJmodVersionAmd64[0])) "
             exit 1
