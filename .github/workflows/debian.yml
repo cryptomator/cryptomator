@@ -74,7 +74,7 @@ jobs:
           }
           $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
           if ($jfxPomVersion[0] -ne $jfxJmodVersionAmd64[0]) {
-            Out-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version of Jmods($($jfxJmodVersionAmd64[0])) "
+            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version of Jmods($($jfxJmodVersionAmd64[0])) "
             exit 1
           }
       - name: Create orig.tar.gz with common/ libs/ mods/ jmods/
