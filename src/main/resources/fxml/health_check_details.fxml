@@ -40,14 +40,13 @@
 		</Button>
 
 	</HBox>
-	<VBox spacing="3" VBox.vgrow="ALWAYS">
+	<VBox spacing="6" VBox.vgrow="ALWAYS">
 		<HBox alignment="CENTER_LEFT" spacing="6">
 			<Label fx:id="filterLbl" text="%health.check.detail.listFilters.label">
 				<graphic>
 					<FontAwesome5IconView glyph="FUNNEL" glyphSize="${filterLbl.height}" styleClass="glyph-icon-muted"/>
 				</graphic>
 			</Label>
-			<Region minWidth="12" />
 			<ChoiceBox fx:id="severityChoiceBox" />
 			<ChoiceBox fx:id="fixStateChoiceBox" />
 		</HBox>
