@@ -36,7 +36,7 @@ jobs:
         run: |
           $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
           $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          if ($jfxPomVersion[0] -ne $jfxJdkVersion) {
+          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
             Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
             exit 1
           }

@@ -64,15 +64,15 @@ jobs:
       - name: Ensure major jfx version in pom and in jmods is the same
         shell: pwsh
         run: |
-          $jfxPomVersion = (&mvn help:evaluate -Dexpression=javafx.version -q -DforceStdout) -split "\."
-          $jfxJmodVersionAmd64 = (Get-Content -Path "jmods/aarch64/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=',''
-          $jfxJmodVersionAarch64 = (Get-Content -Path "jmods/aarch64/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=',''
-          if ($jfxJmodVersionAmd64 -ne $jfxJmodVersionAarch64 ) {
+          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
+          $jfxJmodVersionAmd64 = ((Get-Content -Path "jmods/aarch64/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          $jfxJmodVersionAarch64 = ((Get-Content -Path "jmods/aarch64/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          if ($jfxJmodVersionAmd64[0] -ne $jfxJmodVersionAarch64[0] ) {
             Write-Error "JavaFX Jmods for aarch64 and amd64 are different major versions"
             exit 1
           }
-          if ($jfxPomVersion[0] -ne $jfxJmodVersionAmd64) {
-            Out-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version of Jmods(${jfxJmodVersion}) "
+          if ($jfxPomVersion[0] -ne $jfxJmodVersionAmd64[0]) {
+            Out-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version of Jmods($($jfxJmodVersionAmd64[0])) "
             exit 1
           }
       - name: Create orig.tar.gz with common/ libs/ mods/ jmods/
