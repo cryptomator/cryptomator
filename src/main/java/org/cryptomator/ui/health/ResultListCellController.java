@@ -182,6 +182,10 @@ public class ResultListCellController implements FxController {
 		return fixGlyph;
 	}
 
+	public FontAwesome5Icon getFixGlyph() {
+		return fixGlyph.getValue();
+	}
+
 	public BooleanBinding fixableProperty() {
 		return fixable;
 	}
