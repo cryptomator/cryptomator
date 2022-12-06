@@ -5,25 +5,59 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.health.CheckStateIconView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
-	  spacing="6">
-	<Label fx:id="detailHeader" styleClass="label-extra-large" text="${controller.checkName}" contentDisplay="LEFT">
-		<graphic>
-			<HBox alignment="CENTER" minWidth="25" maxWidth="25">
-				<CheckStateIconView fx:id="checkStateIconView" check="${controller.check}" glyphSize="20"/>
-			</HBox>
-		</graphic>
-	</Label>
+	  spacing="12">
+	<HBox alignment="CENTER" >
+		<VBox spacing="12">
+			<Label fx:id="detailHeader" styleClass="label-extra-large" text="${controller.checkName}" contentDisplay="RIGHT">
+				<graphic>
+					<HBox alignment="CENTER" minWidth="25" maxWidth="25">
+						<CheckStateIconView check="${controller.check}" glyphSize="20"/>
+					</HBox>
+				</graphic>
+			</Label>
+			<Label text="%health.check.detail.checkRunning" visible="${controller.checkRunning}" managed="${controller.checkRunning}"/>
+			<Label text="%health.check.detail.checkScheduled" visible="${controller.checkScheduled}" managed="${controller.checkScheduled}"/>
+			<Label text="%health.check.detail.checkSkipped" visible="${controller.checkSkipped}" managed="${controller.checkSkipped}"/>
+			<Label text="%health.check.detail.checkCancelled" visible="${controller.checkCancelled}" managed="${controller.checkCancelled}"/>
+			<Label text="%health.check.detail.checkFailed" visible="${controller.checkFailed}" managed="${controller.checkFailed}"/>
+			<Label text="%health.check.detail.checkFinished" visible="${controller.checkSucceeded &amp;&amp; !controller.warnOrCritsExist}" managed="${controller.checkSucceeded &amp;&amp; !controller.warnOrCritsExist}"/>
+			<Label text="%health.check.detail.checkFinishedAndFound" visible="${controller.checkSucceeded &amp;&amp; controller.warnOrCritsExist}" managed="${controller.checkSucceeded &amp;&amp; controller.warnOrCritsExist}"/>
+		</VBox>
+		<Region HBox.hgrow="ALWAYS"/>
+		<Button text="%health.check.detail.fixAllSpecificBtn" contentDisplay="RIGHT" graphicTextGap="3" visible="${controller.checkFinished}" managed="${controller.checkFinished}" disable="${! controller.fixAllInfoResultsPossible}" onAction="#fixAllInfoResults">
+			<graphic>
+				<FontAwesome5IconView glyph="INFO_CIRCLE" glyphSize="12" styleClass="glyph-icon-muted"/>
+			</graphic>
+		</Button>
 
-	<Label text="%health.check.detail.checkRunning" visible="${controller.checkRunning}" managed="${controller.checkRunning}"/>
-	<Label text="%health.check.detail.checkScheduled" visible="${controller.checkScheduled}" managed="${controller.checkScheduled}"/>
-	<Label text="%health.check.detail.checkSkipped" visible="${controller.checkSkipped}" managed="${controller.checkSkipped}"/>
-	<Label text="%health.check.detail.checkCancelled" visible="${controller.checkCancelled}" managed="${controller.checkCancelled}"/>
-	<Label text="%health.check.detail.checkFailed" visible="${controller.checkFailed}" managed="${controller.checkFailed}"/>
-	<Label text="%health.check.detail.checkFinished" visible="${controller.checkSucceeded &amp;&amp; !controller.warnOrCritsExist}" managed="${controller.checkSucceeded &amp;&amp; !controller.warnOrCritsExist}"/>
-	<Label text="%health.check.detail.checkFinishedAndFound" visible="${controller.checkSucceeded &amp;&amp; controller.warnOrCritsExist}" managed="${controller.checkSucceeded &amp;&amp; controller.warnOrCritsExist}"/>
-
-	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25"/>
+	</HBox>
+	<VBox spacing="6" VBox.vgrow="ALWAYS">
+		<HBox alignment="CENTER_LEFT" spacing="6">
+			<Label fx:id="filterLbl" text="%health.check.detail.listFilters.label">
+				<graphic>
+					<FontAwesome5IconView glyph="FUNNEL" glyphSize="${filterLbl.height}" styleClass="glyph-icon-muted"/>
+				</graphic>
+			</Label>
+			<ChoiceBox fx:id="severityChoiceBox" />
+			<ChoiceBox fx:id="fixStateChoiceBox" />
+		</HBox>
+		<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25">
+			<contextMenu>
+				<ContextMenu>
+					<items>
+						<MenuItem text="%generic.button.copy" onAction="#copyResultDetails"/>
+					</items>
+				</ContextMenu>
+			</contextMenu>
+		</ListView>
+	</VBox>
 </VBox>

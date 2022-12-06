@@ -27,6 +27,7 @@ public enum FontAwesome5Icon {
 	FILE("\uF15B"), //
 	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
+	FUNNEL("\uF0B0"), //
 	HAND_HOLDING_HEART("\uF4BE"), //
 	HEART("\uF004"), //
 	HDD("\uF0A0"), //
