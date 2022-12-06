@@ -21,7 +21,7 @@ record Result(DiagnosticResult diagnosis, ObjectProperty<FixState> fixState) {
 	}
 
 	public static Result create(DiagnosticResult diagnosis, Path vaultPath, VaultConfig config, Masterkey masterkey, Cryptor cryptor) {
-		FixState initialState = diagnosis.getFix(vaultPath, config, masterkey, cryptor).isPresent()? FixState.FIXABLE : FixState.NOT_FIXABLE;
+		FixState initialState = diagnosis.getFix(vaultPath, config, masterkey, cryptor).map( _f -> FixState.FIXABLE).orElse(FixState.NOT_FIXABLE);
 		return new Result(diagnosis, new SimpleObjectProperty<>(initialState));
 	}
 
