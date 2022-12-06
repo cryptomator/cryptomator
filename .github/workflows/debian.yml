@@ -1,18 +1,23 @@
 name: Build Debian Package
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
+      ref:
+        description: 'GitHub Ref'
+        required: true
+        description: 'refs/tags/1.6.16'
+      semver:
+        description: 'SemVer String (e.g. 1.7.0-beta1)'
+        required: true
+      ppaver:
+        description: 'Full PPA Version String (e.g. 1.6.16+1.7.0~beta1-0ppa1)'
+        required: true
       dput:
         description: 'Upload to PPA'
         required: true
         default: false
         type: boolean
-      version:
-        description: 'Version'
-        required: false
 
 env:
   JAVA_VERSION: 19
@@ -20,17 +25,22 @@ env:
   OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/19/openjfx-19_linux-aarch64_bin-jmods.zip'
 
 jobs:
-  get-version:
-    uses: ./.github/workflows/get-version.yml
-    with:
-      version: ${{ github.event.inputs.version }}
-
   build:
     name: Build Debian Package
     runs-on: ubuntu-20.04
-    needs: [get-version]
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.events.inputs.ref }}
+      - id: versions
+        name: Get version information
+        run: |
+          SEM_VER_STR="${{ github.events.inputs.semver }}"
+          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "semVerStr=${SEM_VER_STR}" >> $GITHUB_OUTPUT
+          echo "semVerNum=${SEM_VER_NUM}" >> $GITHUB_OUTPUT
+          echo "revNum=${REVCOUNT}" >> $GITHUB_OUTPUT
       - name: Install build tools
         run: |
           sudo add-apt-repository ppa:coffeelibs/openjdk
@@ -42,12 +52,6 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
-      - id: versions
-        name: Create PPA version string
-        run: echo "ppaVerStr=${SEM_VER_STR/-/\~}-${REVCOUNT}" >> $GITHUB_OUTPUT
-        env:
-          SEM_VER_STR: ${{ needs.get-version.outputs.semVerStr }}
-          REVCOUNT: ${{ needs.get-version.outputs.revNum }}
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,linux -DskipTests
       - name: Download OpenJFX jmods
@@ -85,7 +89,7 @@ jobs:
           cp -r jmods pkgdir
           cp -r dist/linux/common/ pkgdir
           cp target/cryptomator-*.jar pkgdir/mods
-          tar -cJf cryptomator_${{ steps.versions.outputs.ppaVerStr }}.orig.tar.xz -C pkgdir .
+          tar -cJf cryptomator_${{ github.event.inputs.ppaver }}.orig.tar.xz -C pkgdir .
       - name: Patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
@@ -93,12 +97,12 @@ jobs:
           envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${{ steps.versions.outputs.ppaVerStr }}
+          mv pkgdir cryptomator_${{ github.event.inputs.ppaver }}
         env:
-          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
-          VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
-          REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
-          PPA_VERSION: ${{ steps.versions.outputs.ppaVerStr }}-0ppa1
+          SEMVER_STR: ${{ steps.versions.outputs.semVerStr }}
+          VERSION_NUM: ${{ steps.versions.outputs.semVerNum }}
+          REVISION_NUM: ${{ steps.versions.outputs.revNum }}
+          PPA_VERSION: ${{ github.event.inputs.ppaver }}
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -113,7 +117,7 @@ jobs:
         env:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
-        working-directory: cryptomator_${{ steps.versions.outputs.ppaVerStr }}
+        working-directory: cryptomator_${{ github.event.inputs.ppaver }}
       - name: Create detached GPG signatures
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
@@ -130,13 +134,21 @@ jobs:
             cryptomator_*_amd64.deb
             cryptomator_*.asc
       - name: Publish on PPA
-        if: startsWith(github.ref, 'refs/tags/') || inputs.dput
+        if: inputs.dput
         run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_*_source.changes
+      
+      # If ref is a tag, also upload to GitHub Releases:
+      - name: Determine tag name
+        if: startsWith(github.events.inputs.ref, 'refs/tags/')
+        run: |
+          REF=${{ github.events.inputs.ref }}
+          echo "TAG_NAME=${REF##*/}" >> $GITHUB_ENV
       - name: Publish Debian package on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.events.inputs.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           fail_on_unmatched_files: true
+          tag_name: ${{ github.env.TAG_NAME }}
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
             cryptomator_*_amd64.deb
