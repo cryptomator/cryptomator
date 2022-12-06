@@ -2,7 +2,6 @@ package org.cryptomator.ui.vaultoptions;
 
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
@@ -11,9 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
@@ -28,7 +26,7 @@ public class MasterkeyOptionsController implements FxController {
 	private final RecoveryKeyComponent.Builder recoveryKeyWindow;
 	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
 	private final KeychainManager keychain;
-	private final BooleanExpression passwordSaved;
+	private final ObservableValue<Boolean> passwordSaved;
 
 
 	@Inject
@@ -40,7 +38,7 @@ public class MasterkeyOptionsController implements FxController {
 		this.forgetPasswordWindow = forgetPasswordWindow;
 		this.keychain = keychain;
 		if (keychain.isSupported() && !keychain.isLocked()) {
-			this.passwordSaved = Bindings.createBooleanBinding(this::isPasswordSaved, keychain.getPassphraseStoredProperty(vault.getId()));
+			this.passwordSaved = keychain.getPassphraseStoredProperty(vault.getId()).orElse(false);
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
 		}
@@ -67,13 +65,11 @@ public class MasterkeyOptionsController implements FxController {
 		forgetPasswordWindow.vault(vault).owner(window).build().showForgetPassword();
 	}
 
-	public BooleanExpression passwordSavedProperty() {
+	public ObservableValue<Boolean> passwordSavedProperty() {
 		return passwordSaved;
 	}
 
 	public boolean isPasswordSaved() {
-		if (keychain.isSupported() && !keychain.isLocked() && vault != null) {
-			return keychain.getPassphraseStoredProperty(vault.getId()).get();
-		} else return false;
+		return passwordSaved.getValue();
 	}
 }

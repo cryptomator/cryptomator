@@ -1,5 +1,6 @@
 package org.cryptomator.ui.traymenu;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.integrations.common.CheckAvailability;
 import org.cryptomator.integrations.common.Priority;
@@ -19,6 +20,8 @@ import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 @CheckAvailability
@@ -28,6 +31,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 	private static final Logger LOG = LoggerFactory.getLogger(AwtTrayMenuController.class);
 
 	private final PopupMenu menu = new PopupMenu();
+	private TrayIcon trayIcon;
 
 	@CheckAvailability
 	public static boolean isAvailable() {
@@ -37,7 +41,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 	@Override
 	public void showTrayIcon(byte[] rawImageData, Runnable defaultAction, String tooltip) throws TrayMenuException {
 		var image = Toolkit.getDefaultToolkit().createImage(rawImageData);
-		var trayIcon = new TrayIcon(image, tooltip, menu);
+		trayIcon = new TrayIcon(image, tooltip, menu);
 
 		trayIcon.setImageAutoSize(true);
 		if (SystemUtils.IS_OS_WINDOWS) {
@@ -56,6 +60,18 @@ public class AwtTrayMenuController implements TrayMenuController {
 	public void updateTrayMenu(List<TrayMenuItem> items) {
 		menu.removeAll();
 		addChildren(menu, items);
+	}
+
+
+	@Override
+	public void onBeforeOpenMenu(Runnable listener) {
+		Preconditions.checkNotNull(this.trayIcon);
+		this.trayIcon.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				listener.run();
+			}
+		});
 	}
 
 	private void addChildren(Menu menu, List<TrayMenuItem> items) {

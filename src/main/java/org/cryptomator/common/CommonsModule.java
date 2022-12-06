@@ -23,6 +23,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -130,16 +131,16 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static Binding<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
-		return Bindings.createObjectBinding(() -> {
+	static ObservableValue<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
+		return settings.port().map(port -> {
 			String host = SystemUtils.IS_OS_WINDOWS ? "127.0.0.1" : "localhost";
 			return InetSocketAddress.createUnresolved(host, settings.port().intValue());
-		}, settings.port());
+		});
 	}
 
 	@Provides
 	@Singleton
-	static WebDavServer provideWebDavServer(Binding<InetSocketAddress> serverSocketAddressBinding) {
+	static WebDavServer provideWebDavServer(ObservableValue<InetSocketAddress> serverSocketAddressBinding) {
 		WebDavServer server = WebDavServer.create();
 		// no need to unsubscribe eventually, because server is a singleton
 		EasyBind.subscribe(serverSocketAddressBinding, server::bind);

@@ -15,55 +15,74 @@ on:
         required: false
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 19
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/19/openjfx-19_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/19/openjfx-19_linux-aarch64_bin-jmods.zip'
 
 jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ github.event.inputs.version }}
+
   build:
     name: Build Debian Package
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
+    needs: [get-version]
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v3
       - name: Install build tools
         run: |
+          sudo add-apt-repository ppa:coffeelibs/openjdk
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dput
+          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-19 libgtk2.0-0
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
-      - id: versions 
-        name: Apply version information
-        run: |
-          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR=${GITHUB_REF##*/}
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR="${{ github.event.inputs.version }}"
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          else
-            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
-          fi
-          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-          REVCOUNT=`git rev-list --count HEAD`
-          echo "::set-output name=semVerStr::${SEM_VER_STR}"
-          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
-          echo "::set-output name=revNum::${REVCOUNT}"
-          echo "::set-output name=ppaVerStr::${SEM_VER_STR/-/\~}-${REVCOUNT}"
-      - name: Validate Version
-        uses: skymatic/semver-validation-action@v1
-        with:
-          version: ${{ steps.versions.outputs.semVerStr }}
+      - id: versions
+        name: Create PPA version string
+        run: echo "ppaVerStr=${SEM_VER_STR/-/\~}-${REVCOUNT}" >> $GITHUB_OUTPUT
+        env:
+          SEM_VER_STR: ${{ needs.get-version.outputs.semVerStr }}
+          REVCOUNT: ${{ needs.get-version.outputs.revNum }}
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,linux -DskipTests
-      - name: Create orig.tar.gz with common/ libs/ mods/
+      - name: Download OpenJFX jmods
+        id: download-jmods
+        run: |
+          curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
+          mkdir -p jmods/amd64
+          unzip -j openjfx-amd64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/amd64
+          curl -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
+          mkdir -p jmods/aarch64
+          unzip -j openjfx-aarch64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/aarch64
+      - name: Ensure major jfx version in pom and in jmods is the same
+        shell: pwsh
+        run: |
+          mkdir jfxBaseJmodAmd64
+          jmod extract --dir jfxBaseJmodAmd64 jmods/amd64/javafx.base.jmod
+          $jfxJmodVersionAmd64 = ((Get-Content -Path "jfxBaseJmodAmd64/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          mkdir jfxBaseJmodAarch64
+          jmod extract --dir jfxBaseJmodAarch64 jmods/aarch64/javafx.base.jmod
+          $jfxJmodVersionAarch64 = ((Get-Content -Path "jfxBaseJmodAarch64/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          if ($jfxJmodVersionAmd64[0] -ne $jfxJmodVersionAarch64[0] ) {
+            Write-Error "JavaFX Jmods for aarch64 and amd64 are different major versions"
+            exit 1
+          }
+          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
+          if ($jfxPomVersion[0] -ne $jfxJmodVersionAmd64[0]) {
+            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version of Jmods($($jfxJmodVersionAmd64[0])) "
+            exit 1
+          }
+      - name: Create orig.tar.gz with common/ libs/ mods/ jmods/
         run: |
           mkdir pkgdir
           cp -r target/libs pkgdir
           cp -r target/mods pkgdir
+          cp -r jmods pkgdir
           cp -r dist/linux/common/ pkgdir
           cp target/cryptomator-*.jar pkgdir/mods
           tar -cJf cryptomator_${{ steps.versions.outputs.ppaVerStr }}.orig.tar.xz -C pkgdir .
@@ -76,9 +95,9 @@ jobs:
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
           mv pkgdir cryptomator_${{ steps.versions.outputs.ppaVerStr }}
         env:
-          SEMVER_STR: ${{ steps.versions.outputs.semVerStr }}
-          VERSION_NUM: ${{ steps.versions.outputs.semVerNum }}
-          REVISION_NUM: ${{ steps.versions.outputs.revNum }}
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+          VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
+          REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
           PPA_VERSION: ${{ steps.versions.outputs.ppaVerStr }}-0ppa1
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |

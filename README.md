@@ -61,7 +61,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 - File names get encrypted
 - Folder structure gets obfuscated
 - Use as many vaults in your Dropbox as you want, each having individual passwords
-- Three thousand commits for the security of your data!! :tada:
+- Four thousand commits for the security of your data!! :tada:
 
 ### Privacy
 
@@ -85,7 +85,7 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ### Dependencies
 
-* JDK 17 (e.g. temurin)
+* JDK 19 (e.g. temurin)
 * Maven 3
 
 ### Run Maven
@@ -98,10 +98,6 @@ mvn clean install
 ```
 
 This will build all the jars and bundle them together with their OS-specific dependencies under `target`. This can now be used to build native packages.
-
-### Start Cryptomator
-
-If you unzip the buildkit for your OS, you will find a launcher script with some basic settings. You might want to adjust these to your needs. To start Cryptomator, simply execute the launcher script from a terminal, e.g. `launcher-linux.sh`, if you're on a Linux system.
 
 ## License
 
