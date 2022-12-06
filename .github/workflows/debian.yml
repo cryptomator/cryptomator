@@ -10,7 +10,7 @@ on:
         description: 'SemVer String (e.g. 1.7.0-beta1)'
         required: true
       ppaver:
-        description: 'Full PPA Version String (e.g. 1.6.16+1.7.0~beta1-0ppa1)'
+        description: 'Base PPA Version String (e.g. 1.6.16+1.7.0~beta1) without -0ppa1'
         required: true
       dput:
         description: 'Upload to PPA'
@@ -101,7 +101,7 @@ jobs:
           SEMVER_STR: ${{ steps.versions.outputs.semVerStr }}
           VERSION_NUM: ${{ steps.versions.outputs.semVerNum }}
           REVISION_NUM: ${{ steps.versions.outputs.revNum }}
-          PPA_VERSION: ${{ github.event.inputs.ppaver }}
+          PPA_VERSION: ${{ github.event.inputs.ppaver }}-0ppa1
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
