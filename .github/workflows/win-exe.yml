@@ -316,12 +316,12 @@ jobs:
     needs: [build-msi, build-exe]
     steps:
       - name: Download .msi
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: msi
           path: msi
       - name: Download .exe
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: exe
           path: exe
@@ -331,7 +331,7 @@ jobs:
           cp msi/*.msi files
           cp exe/*.exe files
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
