@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
+<?import javafx.scene.shape.Circle?>
 <HBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.stats.VaultStatisticsController"
@@ -22,18 +23,17 @@
 	</padding>
 
 	<!-- Caching -->
-	<VBox prefWidth="200" prefHeight="200">
-		<StackPane>
-			<Group>
-				<Arc styleClass="cache-arc-background" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="-270"/>
-				<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDegrees}"/>
-			</Group>
-			<VBox StackPane.alignment="CENTER" alignment="CENTER">
-				<FormattedLabel styleClass="label-extra-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
-				<Label text="%stats.cacheHitRate"/>
-			</VBox>
-		</StackPane>
-	</VBox>
+	<StackPane prefWidth="200" prefHeight="200">
+		<Group>
+			<Circle centerX="100" centerY="100" radius="100" opacity="0"/> <!-- for alignment. visible=false does not yield the desired result -->
+			<Arc styleClass="cache-arc-background" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="-270"/>
+			<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDegrees}"/>
+		</Group>
+		<VBox StackPane.alignment="CENTER" alignment="CENTER">
+			<FormattedLabel styleClass="label-extra-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
+			<Label text="%stats.cacheHitRate"/>
+		</VBox>
+	</StackPane>
 
 	<!-- Read -->
 	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
@@ -71,5 +71,23 @@
 		<DataLabel byteFormat="%stats.write.total.data.none" kibFormat="%stats.write.total.data.kib" mibFormat="%stats.write.total.data.mib" gibFormat="%stats.write.total.data.gib" dataInBytes="${controller.totalBytesWritten}"/>
 		<DataLabel byteFormat="%stats.encr.total.data.none" kibFormat="%stats.encr.total.data.kib" mibFormat="%stats.encr.total.data.mib" gibFormat="%stats.encr.total.data.gib" dataInBytes="${controller.totalBytesEncrypted}"/>
 		<FormattedLabel format="%stats.write.accessCount" arg1="${controller.filesWritten}"/>
+	</VBox>
+	<!-- Access -->
+	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
+		<FormattedLabel styleClass="label-large" format="%stats.access.current" arg1="${controller.filesAccessed}"/>
+		<AreaChart fx:id="accessChart" styleClass="io-stats" createSymbols="false" animated="false">
+			<xAxis>
+				<NumberAxis fx:id="accessChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
+			</xAxis>
+			<yAxis>
+				<NumberAxis fx:id="accessChartYAxis" styleClass="io-stats" autoRanging="true" forceZeroInRange="true" side="LEFT" tickUnit="Infinity"/>
+			</yAxis>
+			<cursor>
+				<Cursor fx:constant="DEFAULT"/>
+			</cursor>
+		</AreaChart>
+		<FormattedLabel format="%stats.access.total" arg1="${controller.totalFilesAccessed}"/>
+		<Label/> <!-- to align with other graphs -->
+		<Label/> <!-- to align with other graphs -->
 	</VBox>
 </HBox>

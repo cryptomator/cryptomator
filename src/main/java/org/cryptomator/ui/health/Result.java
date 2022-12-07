@@ -1,10 +1,14 @@
 package org.cryptomator.ui.health;
 
+import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
+import org.cryptomator.cryptolib.api.Cryptor;
+import org.cryptomator.cryptolib.api.Masterkey;
 
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import java.nio.file.Path;
 
 record Result(DiagnosticResult diagnosis, ObjectProperty<FixState> fixState) {
 
@@ -16,8 +20,8 @@ record Result(DiagnosticResult diagnosis, ObjectProperty<FixState> fixState) {
 		FIX_FAILED
 	}
 
-	public static Result create(DiagnosticResult diagnosis) {
-		FixState initialState = diagnosis.getSeverity() == DiagnosticResult.Severity.WARN ? FixState.FIXABLE : FixState.NOT_FIXABLE;
+	public static Result create(DiagnosticResult diagnosis, Path vaultPath, VaultConfig config, Masterkey masterkey, Cryptor cryptor) {
+		FixState initialState = diagnosis.getFix(vaultPath, config, masterkey, cryptor).map( _f -> FixState.FIXABLE).orElse(FixState.NOT_FIXABLE);
 		return new Result(diagnosis, new SimpleObjectProperty<>(initialState));
 	}
 

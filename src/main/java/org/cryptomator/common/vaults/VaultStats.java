@@ -41,6 +41,8 @@ public class VaultStats {
 	private final LongProperty totalBytesDecrypted = new SimpleLongProperty();
 	private final LongProperty filesRead = new SimpleLongProperty();
 	private final LongProperty filesWritten = new SimpleLongProperty();
+	private final LongProperty filesAccessed = new SimpleLongProperty();
+	private final LongProperty totalFilesAccessed = new SimpleLongProperty();
 	private final ObjectProperty<Instant> lastActivity = new SimpleObjectProperty<>();
 
 	@Inject
@@ -82,6 +84,8 @@ public class VaultStats {
 		var oldAccessCount = filesRead.get() + filesWritten.get();
 		filesRead.set(stats.map(CryptoFileSystemStats::pollAmountOfAccessesRead).orElse(0L));
 		filesWritten.set(stats.map(CryptoFileSystemStats::pollAmountOfAccessesWritten).orElse(0L));
+		filesAccessed.set(stats.map(CryptoFileSystemStats::pollAmountOfAccesses).orElse(0L));
+		totalFilesAccessed.set(stats.map(CryptoFileSystemStats::pollTotalAmountOfAccesses).orElse(0L));
 		var newAccessCount = filesRead.get() + filesWritten.get();
 
 		// check for any I/O activity
@@ -187,6 +191,19 @@ public class VaultStats {
 	public LongProperty filesWritten() {return filesWritten;}
 
 	public long getFilesWritten() {return filesWritten.get();}
+
+	public LongProperty filesAccessed() {
+		return filesAccessed;}
+
+	public long getFilesAccessed() {return filesAccessed.get();}
+
+	public LongProperty totalFilesAccessed(){
+		return totalFilesAccessed;
+	}
+
+	public long getTotalFilesAccessed(){
+		return totalFilesAccessed.get();
+	}
 
 	public ObjectProperty<Instant> lastActivityProperty() {
 		return lastActivity;

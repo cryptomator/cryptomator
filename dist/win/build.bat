@@ -9,8 +9,9 @@ SET ABOUT_URL="https://cryptomator.org"
 SET UPDATE_URL="https://cryptomator.org/downloads/"
 SET HELP_URL="https://cryptomator.org/contact/"
 SET MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
+SET LOOPBACK_ALIAS="cryptomator-vault"
 
-powershell -NoLogo -NoExit -ExecutionPolicy Unrestricted -Command .\build.ps1^
+powershell -NoLogo -ExecutionPolicy Unrestricted -Command .\build.ps1^
  -AppName %APPNAME%^
  -MainJarGlob "%MAIN_JAR_GLOB%"^
  -ModuleAndMainClass "%MODULE_AND_MAIN_CLASS%"^
@@ -20,4 +21,5 @@ powershell -NoLogo -NoExit -ExecutionPolicy Unrestricted -Command .\build.ps1^
  -AboutUrl "%ABOUT_URL%"^
  -HelpUrl "%HELP_URL%"^
  -UpdateUrl "%UPDATE_URL%"^
+ -LoopbackAlias "%LOOPBACK_ALIAS%"^
  -Clean 1

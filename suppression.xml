@@ -35,13 +35,15 @@
 		<cve>CVE-2022-25366</cve>
 	</suppress>
 
+	<!-- Apache Commons-cli false positives below -->
 	<suppress>
 		<notes><![CDATA[
 			False positive for commons-cli due, see https://github.com/jeremylong/DependencyCheck/pull/4148
 		]]></notes>
 		<gav regex="true">^commons\-cli:commons\-cli:.*$</gav>
 		<cpe>cpe:/a:apache:james</cpe>
-		<!-- while we are at it exclude also this fp -->
+		<!-- while we are at it exclude also these fp -->
 		<cpe>cpe:/a:spirit-project:spirit</cpe>
+		<cpe>cpe:/a:apache:commons_net</cpe>
 	</suppress>
 </suppressions>
