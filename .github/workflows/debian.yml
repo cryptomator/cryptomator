@@ -9,6 +9,7 @@ on:
       semver:
         description: 'SemVer String (e.g. 1.7.0-beta1)'
         required: true
+        type: string
       ppaver:
         description: 'Base PPA Version String (e.g. 1.6.16+1.7.0~beta1) without -0ppa1'
         required: true
@@ -31,6 +32,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.events.inputs.ref }}
+          fetch-depth: 0
       - id: versions
         name: Get version information
         run: |
