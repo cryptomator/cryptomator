@@ -300,6 +300,7 @@ jobs:
             Cryptomator-*.exe
             Cryptomator-*.asc
       - name: Slack Notification
+        if: ${{ needs.get-version.outputs.versionType == 'stable' }}
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
