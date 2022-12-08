@@ -9,7 +9,6 @@ on:
       semver:
         description: 'SemVer String (e.g. 1.7.0-beta1)'
         required: true
-        type: string
       ppaver:
         description: 'Base PPA Version String (e.g. 1.6.16+1.7.0~beta1) without -0ppa1'
         required: true
@@ -31,12 +30,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.events.inputs.ref }}
+          ref: ${{ inputs.ref }}
           fetch-depth: 0
       - id: versions
         name: Get version information
         run: |
-          SEM_VER_STR="${{ github.events.inputs.semver }}"
+          SEM_VER_STR="${{ inputs.semver }}"
           SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
           REVCOUNT=`git rev-list --count HEAD`
           echo "semVerStr=${SEM_VER_STR}" >> $GITHUB_OUTPUT
@@ -93,7 +92,7 @@ jobs:
           cp -r jmods pkgdir
           cp -r dist/linux/common/ pkgdir
           cp target/cryptomator-*.jar pkgdir/mods
-          tar -cJf cryptomator_${{ github.event.inputs.ppaver }}.orig.tar.xz -C pkgdir .
+          tar -cJf cryptomator_${{ inputs.ppaver }}.orig.tar.xz -C pkgdir .
       - name: Patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
@@ -101,12 +100,12 @@ jobs:
           envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${{ github.event.inputs.ppaver }}
+          mv pkgdir cryptomator_${{ inputs.ppaver }}
         env:
           SEMVER_STR: ${{ steps.versions.outputs.semVerStr }}
           VERSION_NUM: ${{ steps.versions.outputs.semVerNum }}
           REVISION_NUM: ${{ steps.versions.outputs.revNum }}
-          PPA_VERSION: ${{ github.event.inputs.ppaver }}-0ppa1
+          PPA_VERSION: ${{ inputs.ppaver }}-0ppa1
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -121,7 +120,7 @@ jobs:
         env:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
-        working-directory: cryptomator_${{ github.event.inputs.ppaver }}
+        working-directory: cryptomator_${{ inputs.ppaver }}
       - name: Create detached GPG signatures
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
@@ -143,12 +142,12 @@ jobs:
       
       # If ref is a tag, also upload to GitHub Releases:
       - name: Determine tag name
-        if: startsWith(github.events.inputs.ref, 'refs/tags/')
+        if: startsWith(inputs.ref, 'refs/tags/')
         run: |
-          REF=${{ github.events.inputs.ref }}
+          REF=${{ inputs.ref }}
           echo "TAG_NAME=${REF##*/}" >> $GITHUB_ENV
       - name: Publish Debian package on GitHub Releases
-        if: startsWith(github.events.inputs.ref, 'refs/tags/')
+        if: startsWith(inputs.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           fail_on_unmatched_files: true
