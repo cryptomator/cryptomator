@@ -1,11 +1,6 @@
 name: Release to Winget
 
 on:
-  workflow_call:
-    inputs:
-      releaseTag:
-        required: true
-        type: string
   workflow_dispatch:
     inputs:
       releaseTag:
@@ -18,7 +13,7 @@ jobs:
     name: Publish on winget repo
     runs-on: windows-latest
     steps:
-      - name: Get download url for msi artifacts
+      - name: Get download url for release assets
         id: get-release-assets
         uses: actions/github-script@v6
         with:

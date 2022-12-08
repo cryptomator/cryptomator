@@ -16,7 +16,7 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.StartController"
-	  prefWidth="600"
+	  prefWidth="650"
 	  prefHeight="400"
 	  spacing="12">
 	<padding>

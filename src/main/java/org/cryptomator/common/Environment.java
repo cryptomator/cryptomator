@@ -26,6 +26,7 @@ public class Environment {
 	private static final String KEYCHAIN_PATHS_PROP_NAME = "cryptomator.integrationsWin.keychainPaths";
 	private static final String P12_PATH_PROP_NAME = "cryptomator.p12Path";
 	private static final String LOG_DIR_PROP_NAME = "cryptomator.logDir";
+	private static final String LOOPBACK_ALIAS_PROP_NAME = "cryptomator.loopbackAlias";
 	private static final String MOUNTPOINT_DIR_PROP_NAME = "cryptomator.mountPointsDir";
 	private static final String MIN_PW_LENGTH_PROP_NAME = "cryptomator.minPwLength";
 	private static final String APP_VERSION_PROP_NAME = "cryptomator.appVersion";
@@ -45,6 +46,7 @@ public class Environment {
 		logCryptomatorSystemProperty(IPC_SOCKET_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(KEYCHAIN_PATHS_PROP_NAME);
 		logCryptomatorSystemProperty(LOG_DIR_PROP_NAME);
+		logCryptomatorSystemProperty(LOOPBACK_ALIAS_PROP_NAME);
 		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(MOUNTPOINT_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(MIN_PW_LENGTH_PROP_NAME);
@@ -90,6 +92,10 @@ public class Environment {
 		return getPath(LOG_DIR_PROP_NAME).map(this::replaceHomeDir);
 	}
 
+	public Optional<String> getLoopbackAlias() {
+		return Optional.ofNullable(System.getProperty(LOOPBACK_ALIAS_PROP_NAME));
+	}
+
 	public Optional<Path> getPluginDir() {
 		return getPath(PLUGIN_DIR_PROP_NAME).map(this::replaceHomeDir);
 	}
@@ -112,20 +118,11 @@ public class Environment {
 	}
 
 	public int getMinPwLength() {
-		return getInt(MIN_PW_LENGTH_PROP_NAME, DEFAULT_MIN_PW_LENGTH);
+		return Integer.getInteger(MIN_PW_LENGTH_PROP_NAME, DEFAULT_MIN_PW_LENGTH);
 	}
 
 	public boolean showTrayIcon() {
 		return Boolean.getBoolean(TRAY_ICON_PROP_NAME);
-	}
-
-	private int getInt(String propertyName, int defaultValue) {
-		String value = System.getProperty(propertyName);
-		try {
-			return Integer.parseInt(value);
-		} catch (NumberFormatException e) { // includes "null" values
-			return defaultValue;
-		}
 	}
 
 	private Optional<Path> getPath(String propertyName) {

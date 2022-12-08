@@ -13,9 +13,15 @@ env:
   JAVA_VERSION: 19
 
 jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ github.event.inputs.version }}
+
   build:
     name: Build Cryptomator.app for ${{ matrix.output-suffix }}
     runs-on: ${{ matrix.os }}
+    needs: [get-version]
     strategy:
       fail-fast: false
       matrix:
@@ -30,36 +36,26 @@ jobs:
           xcode-path: '/Applications/Xcode_13.2.1.app'
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
+          java-package: 'jdk+fx'
           architecture: ${{ matrix.architecture }}
           cache: 'maven'
-      - id: versions
-        name: Apply version information
+      - name: Ensure major jfx version in pom equals in jdk
+        if: ${{ !contains(matrix.os, 'self-hosted') }}
+        shell: pwsh
         run: |
-          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR=${GITHUB_REF##*/}
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR="${{ github.event.inputs.version }}"
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          else
-            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
-          fi
-          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-          REVCOUNT=`git rev-list --count HEAD`
-          echo "::set-output name=semVerStr::${SEM_VER_STR}"
-          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
-          echo "::set-output name=revNum::${REVCOUNT}"
-      - name: Validate Version
-        uses: skymatic/semver-validation-action@v1
-        with:
-          version: ${{ steps.versions.outputs.semVerStr }}
+          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
+          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
+            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
+            exit 1
+          }
+      - name: Set version
+        run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,mac -DskipTests
       - name: Patch target dir
@@ -73,7 +69,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -92,7 +88,7 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2022 Skymatic GmbH"
-          --app-version "${{ steps.versions.outputs.semVerNum }}"
+          --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.mac"
           --java-options "-Xss5m"
@@ -100,7 +96,7 @@ jobs:
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
-          --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
           --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
@@ -108,7 +104,7 @@ jobs:
           --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
           --java-options "-Dcryptomator.showTrayIcon=true"
-          --java-options "-Dcryptomator.buildNumber=\"dmg-${{ steps.versions.outputs.revNum }}\""
+          --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --mac-package-identifier org.cryptomator
           --resource-dir dist/mac/resources
       - name: Patch Cryptomator.app
@@ -118,8 +114,8 @@ jobs:
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
         env:
-          VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
-          REVISION_NO: ${{ steps.versions.outputs.revNum }}
+          VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
+          REVISION_NO: ${{ needs.get-version.outputs.revNum }}
       - name: Generate license for dmg
         run: >
           mvn -B license:add-third-party
@@ -153,6 +149,10 @@ jobs:
           CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
       - name: Codesign
         run: |
+          echo "Codesigning jdk files..."
+          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+          echo "Codesigning jar contents..."
           find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
           for JAR_PATH in `find Cryptomator.app -name "*.jar"`; do
             if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
@@ -203,7 +203,7 @@ jobs:
           --icon ".VolumeIcon.icns" 512 758
           Cryptomator-${VERSION_NO}-${{ matrix.output-suffix }}.dmg dmg
         env:
-          VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
+          VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
       - name: Notarize .dmg
         if: startsWith(github.ref, 'refs/tags/')
         uses: cocoalibs/xcode-notarization-action@v1
@@ -214,7 +214,7 @@ jobs:
           team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
           xcode-path: ${{ matrix.xcode-path }}
       - name: Add possible alpha/beta tags to installer name
-        run: mv Cryptomator-*.dmg Cryptomator-${{ steps.versions.outputs.semVerStr }}-${{ matrix.output-suffix }}.dmg
+        run: mv Cryptomator-*.dmg Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.output-suffix }}.dmg
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import

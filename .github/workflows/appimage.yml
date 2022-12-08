@@ -13,40 +13,35 @@ env:
   JAVA_VERSION: 19
 
 jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ github.event.inputs.version }}
+
   build:
     name: Build AppImage
     runs-on: ubuntu-latest
+    needs: [get-version]
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
+          java-package: 'jdk+fx'
           cache: 'maven'
-      - id: versions 
-        name: Apply version information
+      - name: Ensure major jfx version in pom equals in jdk
+        shell: pwsh
         run: |
-          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR=${GITHUB_REF##*/}
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR="${{ github.event.inputs.version }}"
-            mvn versions:set -DnewVersion=${SEM_VER_STR}
-          else
-            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
-          fi
-          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-          REVCOUNT=`git rev-list --count HEAD`
-          echo "::set-output name=semVerStr::${SEM_VER_STR}"
-          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
-          echo "::set-output name=revNum::${REVCOUNT}"
-      - name: Validate Version
-        uses: skymatic/semver-validation-action@v1
-        with:
-          version: ${{ steps.versions.outputs.semVerStr }}
+          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
+          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
+          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
+            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
+            exit 1
+          }
+      - name: Set version
+        run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,linux -DskipTests
       - name: Patch target dir
@@ -60,7 +55,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -69,8 +64,8 @@ jobs:
       - name: Prepare additional launcher
         run: envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/linux/launcher-gtk2.properties > launcher-gtk2.properties
         env:
-          SEMVER_STR: ${{  steps.versions.outputs.semVerStr }}
-          REVISION_NUM: ${{  steps.versions.outputs.revNum }}
+          SEMVER_STR: ${{  needs.get-version.outputs.semVerStr }}
+          REVISION_NUM: ${{  needs.get-version.outputs.revNum }}
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -84,12 +79,12 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2022 Skymatic GmbH"
-          --app-version "${{  steps.versions.outputs.semVerNum }}.${{  steps.versions.outputs.revNum }}"
+          --app-version "${{  needs.get-version.outputs.semVerNum }}.${{  needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
-          --java-options "-Dcryptomator.appVersion=\"${{  steps.versions.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.appVersion=\"${{  needs.get-version.outputs.semVerStr }}\""
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\""
           --java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\""
@@ -98,7 +93,7 @@ jobs:
           --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=false"
-          --java-options "-Dcryptomator.buildNumber=\"appimage-${{  steps.versions.outputs.revNum }}\""
+          --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
           --add-launcher Cryptomator-gtk2=launcher-gtk2.properties
           --resource-dir dist/linux/resources
       - name: Patch Cryptomator.AppDir
@@ -136,7 +131,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Build AppImage
         run: >
-          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{  steps.versions.outputs.semVerStr }}-x86_64.AppImage
+          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{  needs.get-version.outputs.semVerStr }}-x86_64.AppImage
           -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
           --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
       - name: Create detached GPG signatures

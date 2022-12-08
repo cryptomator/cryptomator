@@ -1,0 +1,40 @@
+name: Post Release Publish Tasks
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download source tarball
+        run: |
+          curl -L -H "Accept: application/vnd.github+json" ${{ github.event.release.tarball_url }} --output cryptomator-${{ github.event.release.tag_name }}.tar.gz
+      - name: Sign source tarball with key 615D449FE6E6A235
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.tar.gz
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Publish asc on GitHub Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            cryptomator-*.tar.gz.asc
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: false
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "Release ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} published."
+          SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/debian.yml|deploy to PPA>."
+          SLACK_FOOTER: false
+          MSG_MINIMAL: true

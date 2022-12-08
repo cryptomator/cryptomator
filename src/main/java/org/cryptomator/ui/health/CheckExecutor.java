@@ -70,7 +70,7 @@ public class CheckExecutor {
 			try (var masterkeyClone = masterkey.copy(); //
 				 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
 				c.getHealthCheck().check(vaultPath, vaultConfig, masterkeyClone, cryptor, diagnosis -> {
-					Platform.runLater(() -> c.getResults().add(Result.create(diagnosis)));
+					Platform.runLater(() -> c.getResults().add(Result.create(diagnosis, vaultPath, vaultConfig, masterkeyClone, cryptor)));
 					highestResultSeverity = Comparators.max(highestResultSeverity, diagnosis.getSeverity());
 				});
 			}

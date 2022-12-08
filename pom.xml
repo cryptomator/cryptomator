@@ -28,13 +28,12 @@
 		<nonModularGroupIds>com.github.jnr,org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptolib.version>2.1.0-rc1</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>2.4.5</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.5.3</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.2.0-beta2</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.1.2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.1.2</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.1.0</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>2.0.0-beta1</cryptomator.fuse.version>
+		<cryptomator.fuse.version>2.0.0-beta2</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0-beta1</cryptomator.dokany.version>
 		<cryptomator.webdav.version>2.0.0-beta1</cryptomator.webdav.version>
 
@@ -59,17 +58,12 @@
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>23.0.0</jetbrains.annotations.version>
-		<dependency-check.version>7.2.1</dependency-check.version>
+		<dependency-check.version>7.4.0</dependency-check.version>
 		<jacoco.version>0.8.8</jacoco.version>
 	</properties>
 
 	<dependencies>
 		<!-- Cryptomator Libs -->
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>cryptolib</artifactId>
-			<version>${cryptomator.cryptolib.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptofs</artifactId>
@@ -373,6 +367,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
+					<!-- sort jars into two buckets (classpath and modulepath). exclude openjfx, which gets jlinked separately -->
 					<execution>
 						<id>copy-mods</id>
 						<phase>prepare-package</phase>
@@ -382,7 +377,7 @@
 						<configuration>
 							<includeScope>runtime</includeScope>
 							<outputDirectory>${project.build.directory}/mods</outputDirectory>
-							<excludeGroupIds>${nonModularGroupIds}</excludeGroupIds>
+							<excludeGroupIds>org.openjfx,${nonModularGroupIds}</excludeGroupIds>
 						</configuration>
 					</execution>
 					<execution>
