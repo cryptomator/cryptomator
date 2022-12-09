@@ -58,13 +58,13 @@ jobs:
           SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
           REVCOUNT=`git rev-list --count HEAD`
           TYPE="unknown"
-          if [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
+          if [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             TYPE="stable"
-          elif [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+-alpha[1-9] ]]; then
+          elif [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+-alpha[1-9]+$ ]]; then
             TYPE="alpha"
-          elif [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+-beta[1-9] ]]; then
+          elif [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+-beta[1-9]+$ ]]; then
             TYPE="beta"
-          elif [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+-rc[1-9] ]]; then
+          elif [[ $SEM_VER_STR =~ [0-9]+\.[0-9]+\.[0-9]+-rc[1-9]$ ]]; then
             TYPE="rc"
           fi
           echo "semVerStr=${SEM_VER_STR}" >> $GITHUB_OUTPUT
