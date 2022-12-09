@@ -22,7 +22,7 @@ jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml
     with:
-      version: ${{ github.event.inputs.version }}
+      version: ${{ inputs.version }}
 
   build-msi:
     name: Build .msi Installer
