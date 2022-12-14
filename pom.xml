@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.6.16</version>
+	<version>1.6.17</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -27,6 +27,7 @@
 		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
+		<cryptomator.cryptolib.version>2.1.1</cryptomator.cryptolib.version>
 		<cryptomator.cryptofs.version>2.5.3</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.2.0-beta1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.1.2</cryptomator.integrations.win.version>
@@ -63,6 +64,12 @@
 
 	<dependencies>
 		<!-- Cryptomator Libs -->
+		<dependency>
+			<!-- needed due to https://github.com/cryptomator/cryptolib/issues/34-->
+			<groupId>org.cryptomator</groupId>
+			<artifactId>cryptolib</artifactId>
+			<version>${cryptomator.cryptolib.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptofs</artifactId>
