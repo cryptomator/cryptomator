@@ -98,6 +98,7 @@ jobs:
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "--enable-preview"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
       - name: Patch Application Directory
