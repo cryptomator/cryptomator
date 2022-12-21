@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -66,6 +67,10 @@ public class VaultListManager {
 					vaultList.add(newVault);
 					return newVault;
 				});
+	}
+
+	public List<Vault> list() {
+		return vaultList;
 	}
 
 	private VaultSettings newVaultSettings(Path path) {

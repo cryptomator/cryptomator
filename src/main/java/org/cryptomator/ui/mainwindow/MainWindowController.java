@@ -21,9 +21,11 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,8 @@ public class MainWindowController implements FxController {
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	private final BooleanProperty draggingOver = new SimpleBooleanProperty();
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
+	private final BooleanProperty draggingUnlockedVaultContentOver = new SimpleBooleanProperty();
+	private final BooleanProperty draggingUnknownDragboardContentOver = new SimpleBooleanProperty();
 	public StackPane root;
 
 	@Inject
@@ -78,18 +82,27 @@ public class MainWindowController implements FxController {
 		} else if (DragEvent.DRAG_OVER.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 			event.acceptTransferModes(TransferMode.ANY);
 			draggingVaultOver.set(event.getDragboard().getFiles().stream().map(File::toPath).anyMatch(this::containsVault));
+			draggingUnlockedVaultContentOver.set(event.getDragboard().getFiles().stream().map(File::toPath).anyMatch(this::containsUnlockedVaultContent));
+			draggingUnknownDragboardContentOver.set(!draggingVaultOver.get() && !draggingUnlockedVaultContentOver.get());
 		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 			Set<Path> vaultPaths = event.getDragboard().getFiles().stream().map(File::toPath).filter(this::containsVault).collect(Collectors.toSet());
-			if (vaultPaths.isEmpty()) {
-				wrongFileAlert.build().showWrongFileAlertWindow();
-			} else {
+			if (!vaultPaths.isEmpty()) {
 				vaultPaths.forEach(this::addVault);
+			}
+			Set<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).collect(Collectors.toSet());
+			if (!ciphertextPaths.isEmpty()) {
+				ciphertextPaths.forEach(this::revealPath);
+			}
+			if (vaultPaths.isEmpty() && ciphertextPaths.isEmpty()) {
+				wrongFileAlert.build().showWrongFileAlertWindow();
 			}
 			event.setDropCompleted(!vaultPaths.isEmpty());
 			event.consume();
 		} else if (DragEvent.DRAG_EXITED.equals(event.getEventType())) {
 			draggingOver.set(false);
 			draggingVaultOver.set(false);
+			draggingUnlockedVaultContentOver.set(false);
+			draggingUnknownDragboardContentOver.set(false);
 		}
 	}
 
@@ -116,6 +129,34 @@ public class MainWindowController implements FxController {
 		}
 	}
 
+	private boolean containsUnlockedVaultContent(Path path) {
+		return vaultListManager.list().stream().anyMatch(v -> path.startsWith(v.getAccessPoint()));
+	}
+
+	private Optional<Path> getCiphertextPath(Path path) {
+		return vaultListManager.list().stream() //
+				.filter(v -> path.startsWith(v.getAccessPoint())) //
+				.findAny() //
+				.map(v -> {
+					try {
+						var cleartextPathString = path.toString().substring(v.getAccessPoint().length());
+						if (!cleartextPathString.startsWith("/")) {
+							cleartextPathString = "/" + cleartextPathString;
+						}
+						var cleartextPath = Path.of(cleartextPathString);
+						return v.getCiphertextPath(cleartextPath);
+					} catch (IOException e) {
+						LOG.debug("Unable to get ciphertext path from path: {}", path);
+						return null;
+					}
+				});
+	}
+
+	private void revealPath(Path path) {
+		// Unable to use `application.get().getHostServices().showDocument()` here, because it does not reveal files, only folders.
+		Desktop.getDesktop().browseFileDirectory(path.toFile());
+	}
+
 	/* Getter/Setter */
 
 	public BooleanProperty draggingOverProperty() {
@@ -132,5 +173,21 @@ public class MainWindowController implements FxController {
 
 	public boolean isDraggingVaultOver() {
 		return draggingVaultOver.get();
+	}
+
+	public BooleanProperty draggingUnlockedVaultContentOverProperty() {
+		return draggingUnlockedVaultContentOver;
+	}
+
+	public boolean isDraggingUnlockedVaultContentOver() {
+		return draggingUnlockedVaultContentOver.get();
+	}
+
+	public BooleanProperty draggingUnknownDragboardContentOverProperty() {
+		return draggingUnknownDragboardContentOver;
+	}
+
+	public boolean isDraggingUnknownDragboardContentOver() {
+		return draggingUnknownDragboardContentOver.get();
 	}
 }

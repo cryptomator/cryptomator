@@ -21,13 +21,17 @@
 			</SplitPane>
 
 			<VBox styleClass="drag-n-drop-indicator" visible="${controller.draggingOver}" alignment="TOP_CENTER">
-				<HBox visible="${!controller.draggingVaultOver}" managed="${!controller.draggingVaultOver}" spacing="6" styleClass="drag-n-drop-header" alignment="CENTER" VBox.vgrow="NEVER">
-					<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
-					<Label text="%main.dropZone.unknownDragboardContent"/>
-				</HBox>
 				<HBox visible="${controller.draggingVaultOver}" managed="${controller.draggingVaultOver}" spacing="6" styleClass="drag-n-drop-header" alignment="CENTER" VBox.vgrow="NEVER">
 					<FontAwesome5IconView glyph="CHECK"/>
 					<Label text="%main.dropZone.dropVault"/>
+				</HBox>
+				<HBox visible="${controller.draggingUnlockedVaultContentOver}" managed="${controller.draggingUnlockedVaultContentOver}" spacing="6" styleClass="drag-n-drop-header" alignment="CENTER" VBox.vgrow="NEVER">
+					<FontAwesome5IconView glyph="CHECK"/>
+					<Label text="%main.dropZone.dropUnlockedVaultContent"/>
+				</HBox>
+				<HBox visible="${controller.draggingUnknownDragboardContentOver}" managed="${controller.draggingUnknownDragboardContentOver}" spacing="6" styleClass="drag-n-drop-header" alignment="CENTER" VBox.vgrow="NEVER">
+					<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
+					<Label text="%main.dropZone.unknownDragboardContent"/>
 				</HBox>
 				<Region VBox.vgrow="ALWAYS"/>
 			</VBox>
