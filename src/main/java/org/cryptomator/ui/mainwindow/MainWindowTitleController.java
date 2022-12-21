@@ -2,6 +2,7 @@ package org.cryptomator.ui.mainwindow;
 
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.integrations.autoupdate.AutoUpdateProvider;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplicationTerminator;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
@@ -19,6 +20,7 @@ import javafx.fxml.FXML;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import java.util.Optional;
 
 @MainWindowScoped
 public class MainWindowTitleController implements FxController {
@@ -30,6 +32,7 @@ public class MainWindowTitleController implements FxController {
 	private final FxApplicationWindows appWindows;
 	private final boolean trayMenuInitialized;
 	private final UpdateChecker updateChecker;
+	private final Optional<AutoUpdateProvider> autoUpdateProvider;
 	private final BooleanBinding updateAvailable;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
@@ -40,12 +43,13 @@ public class MainWindowTitleController implements FxController {
 	private double yOffset;
 
 	@Inject
-	MainWindowTitleController(@MainWindow Stage window, FxApplicationTerminator terminator, FxApplicationWindows appWindows, TrayMenuComponent trayMenu, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings) {
+	MainWindowTitleController(@MainWindow Stage window, FxApplicationTerminator terminator, FxApplicationWindows appWindows, TrayMenuComponent trayMenu, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings, Optional<AutoUpdateProvider> autoUpdateProvider) {
 		this.window = window;
 		this.terminator = terminator;
 		this.appWindows = appWindows;
 		this.trayMenuInitialized = trayMenu.isInitialized();
 		this.updateChecker = updateChecker;
+		this.autoUpdateProvider = autoUpdateProvider;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
@@ -56,6 +60,9 @@ public class MainWindowTitleController implements FxController {
 	public void initialize() {
 		LOG.trace("init MainWindowTitleController");
 		updateChecker.automaticallyCheckForUpdatesIfEnabled();
+		if (autoUpdateProvider.isPresent()) {
+			autoUpdateProvider.get().initAutoUpdate();
+		}
 		titleBar.setOnMousePressed(event -> {
 			xOffset = event.getSceneX();
 			yOffset = event.getSceneY();
@@ -93,6 +100,9 @@ public class MainWindowTitleController implements FxController {
 
 	@FXML
 	public void close() {
+		if (autoUpdateProvider.isPresent()) {
+			autoUpdateProvider.get().cleanUpAutoUpdate();
+		}
 		if (trayMenuInitialized) {
 			window.close();
 		} else {
