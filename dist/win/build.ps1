@@ -40,6 +40,7 @@ $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 # compile
 &mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
+Copy-Item "$buildDir\..\..\target\libs\winsparkle-java-*.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
 $runtimeImagePath = '.\runtime'
