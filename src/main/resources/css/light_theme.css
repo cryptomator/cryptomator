@@ -208,11 +208,6 @@
 	-fx-border-width: 3px;
 }
 
-.main-window .drag-n-drop-indicator .drag-n-drop-header {
-	-fx-background-color: SECONDARY;
-	-fx-padding: 3px;
-}
-
 /*******************************************************************************
  *                                                                             *
  * TabPane                                                                     *
