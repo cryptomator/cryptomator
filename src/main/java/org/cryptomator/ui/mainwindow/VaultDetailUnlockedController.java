@@ -63,8 +63,10 @@ public class VaultDetailUnlockedController implements FxController {
 
 	private void handleDragEvent(DragEvent event) {
 		if (DragEvent.DRAG_OVER.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
-			event.acceptTransferModes(TransferMode.ANY);
 			draggingUnlockedVaultContentOver.set(event.getDragboard().getFiles().stream().map(File::toPath).anyMatch(this::containsUnlockedVaultContent));
+			if (draggingUnlockedVaultContentOver.get()) {
+				event.acceptTransferModes(TransferMode.LINK);
+			}
 		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 			Set<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).collect(Collectors.toSet());
 			if (!ciphertextPaths.isEmpty()) {
