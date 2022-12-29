@@ -48,9 +48,10 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
 		Preconditions.checkArgument(keyId.getScheme().startsWith(SCHEME_PREFIX));
 		try {
+			var keypair = deviceKey.get();
 			startAuthFlow();
 			var jwe = result.get();
-			return JWEHelper.decrypt(jwe, deviceKey.get().getPrivate());
+			return JWEHelper.decrypt(jwe, keypair.getPrivate());
 		} catch (DeviceKey.DeviceKeyRetrievalException e) {
 			throw new MasterkeyLoadingFailedException("Failed to load keypair", e);
 		} catch (CancellationException e) {
