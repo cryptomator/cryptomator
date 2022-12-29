@@ -9,4 +9,5 @@ java ^
 	-Dcryptomator.keychainPath="~/AppData/Roaming/Cryptomator/keychain.json" ^
 	-Xss20m ^
 	-Xmx512m ^
+	--enable-preview ^
 	-m org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator

@@ -57,6 +57,11 @@ public class AwtTrayMenuController implements TrayMenuController {
 	}
 
 	@Override
+	public void updateTrayIcon(byte[] imageData) {
+
+	}
+
+	@Override
 	public void updateTrayMenu(List<TrayMenuItem> items) {
 		menu.removeAll();
 		addChildren(menu, items);
