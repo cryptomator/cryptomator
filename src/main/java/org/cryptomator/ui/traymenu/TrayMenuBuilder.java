@@ -33,7 +33,9 @@ public class TrayMenuBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuBuilder.class);
 	private static final String TRAY_ICON_MAC = "/img/tray_icon_mac@2x.png";
+	private static final String TRAY_ICON_UNLOCKED_MAC = "/img/tray_icon_unlocked_mac@2x.png";
 	private static final String TRAY_ICON = "/img/tray_icon.png";
+	private static final String TRAY_ICON_UNLOCKED = "/img/tray_icon_unlocked.png";
 
 	private final ResourceBundle resourceBundle;
 	private final VaultService vaultService;
@@ -62,8 +64,8 @@ public class TrayMenuBuilder {
 			v.displayNameProperty().addListener(this::vaultListChanged);
 		});
 
-		try (var image = getClass().getResourceAsStream(SystemUtils.IS_OS_MAC_OSX ? TRAY_ICON_MAC : TRAY_ICON)) {
-			trayMenu.showTrayIcon(image.readAllBytes(), this::showMainWindow, "Cryptomator");
+		try {
+			trayMenu.showTrayIcon(getAppropriateTrayIconImage(), this::showMainWindow, "Cryptomator");
 			trayMenu.onBeforeOpenMenu(() -> {
 				for (Vault vault : vaults) {
 					VaultListManager.redetermineVaultState(vault);
@@ -71,8 +73,6 @@ public class TrayMenuBuilder {
 			});
 			rebuildMenu();
 			initialized = true;
-		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to load embedded resource", e);
 		} catch (TrayMenuException e) {
 			LOG.error("Adding tray icon failed", e);
 		}
@@ -84,6 +84,7 @@ public class TrayMenuBuilder {
 
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		assert Platform.isFxApplicationThread();
+		trayMenu.updateTrayIcon(getAppropriateTrayIconImage());
 		rebuildMenu();
 	}
 
@@ -152,6 +153,24 @@ public class TrayMenuBuilder {
 
 	private void showPreferencesWindow() {
 		appWindows.showPreferencesWindow(SelectedPreferencesTab.ANY);
+	}
+
+	private byte[] getAppropriateTrayIconImage() {
+		boolean isAnyVaultUnlocked = vaults.stream().anyMatch(Vault::isUnlocked);
+
+		String resourceName;
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			resourceName = isAnyVaultUnlocked ? TRAY_ICON_UNLOCKED_MAC : TRAY_ICON_MAC;
+		} else {
+			resourceName = isAnyVaultUnlocked ? TRAY_ICON_UNLOCKED : TRAY_ICON;
+		}
+
+		try (var image = getClass().getResourceAsStream(resourceName)) {
+			assert image != null;
+			return image.readAllBytes();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Failed to load tray icon image: " + resourceName, e);
+		}
 	}
 
 }
