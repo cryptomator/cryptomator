@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.hub.NoKeychainController"
@@ -41,7 +42,7 @@
 				</padding>
 			</Label>
 
-			<Label text="%hub.noKeychain.description" wrapText="true" textAlignment="LEFT"/>
+			<FormattedLabel format="%hub.noKeychain.description" arg1="%preferences.general.keychainBackend" wrapText="true" textAlignment="LEFT"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
