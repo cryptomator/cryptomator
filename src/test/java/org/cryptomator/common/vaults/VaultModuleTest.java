@@ -2,21 +2,12 @@ package org.cryptomator.common.vaults;
 
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.common.settings.VolumeImpl;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import java.nio.file.Path;
 
