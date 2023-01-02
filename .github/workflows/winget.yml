@@ -1,6 +1,11 @@
 name: Release to Winget
 
 on:
+  workflow_call:
+    inputs:
+      releaseTag:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       releaseTag:

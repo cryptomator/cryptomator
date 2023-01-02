@@ -76,6 +76,11 @@ public class DeviceKey {
 
 	private P384KeyPair createAndStoreNewKeyPair(char[] passphrase, Path p12File) throws IOException {
 		var keyPair = P384KeyPair.generate();
+		var tmpFile = p12File.resolveSibling(p12File.getFileName().toString() + ".tmp");
+		if(Files.exists(tmpFile)) {
+			LOG.debug("Leftover from devicekey creation detected. Deleting {}", tmpFile);
+			Files.delete(tmpFile);
+		}
 		LOG.debug("Store new device key to {}", p12File);
 		keyPair.store(p12File, passphrase);
 		return keyPair;

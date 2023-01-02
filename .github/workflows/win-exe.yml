@@ -22,7 +22,7 @@ jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml
     with:
-      version: ${{ github.event.inputs.version }}
+      version: ${{ inputs.version }}
 
   build-msi:
     name: Build .msi Installer
@@ -197,6 +197,15 @@ jobs:
             *.msi
             *.asc
 
+  call-winget-flow:
+    needs: [get-version, build-msi]
+    if: github.event.action == 'published' && needs.get-version.outputs.versionType == 'stable'
+    uses: ./.github/workflows/winget.yml
+    with:
+      releaseTag: ${{ github.event.release.tag_name }}
+    secrets: inherit
+
+
   build-exe:
     name: Build .exe installer
     runs-on: windows-latest
@@ -301,18 +310,6 @@ jobs:
           files: |
             Cryptomator-*.exe
             Cryptomator-*.asc
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_USERNAME: 'Cryptobot'
-          SLACK_ICON: false
-          SLACK_ICON_EMOJI: ':bot:'
-          SLACK_CHANNEL: 'cryptomator-desktop'
-          SLACK_TITLE: "Windows build of ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} finished."
-          SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/winget.yml|deploy to Winget>."
-          SLACK_FOOTER: false
-          MSG_MINIMAL: true
 
   allowlist:
     name: Anti Virus Allowlisting

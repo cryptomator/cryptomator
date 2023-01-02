@@ -88,6 +88,13 @@ public abstract class HubKeyLoadingModule {
 	abstract KeyLoadingStrategy bindHubKeyLoadingStrategyToHubHttps(HubKeyLoadingStrategy strategy);
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_NO_KEYCHAIN)
+	@KeyLoadingScoped
+	static Scene provideHubNoKeychainScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_NO_KEYCHAIN);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_AUTH_FLOW)
 	@KeyLoadingScoped
 	static Scene provideHubAuthFlowScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
@@ -135,6 +142,11 @@ public abstract class HubKeyLoadingModule {
 	static Scene provideHubUnauthorizedDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE);
 	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(NoKeychainController.class)
+	abstract FxController bindNoKeychainController(NoKeychainController controller);
 
 	@Binds
 	@IntoMap

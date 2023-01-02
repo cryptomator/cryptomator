@@ -12,7 +12,7 @@ Package: cryptomator
 Architecture: any
 Section: utils
 Priority: optional
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfuse2, xdg-utils, libjffi-jni
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfuse2, xdg-utils, libjffi-jni, libffi7
 Recommends: gvfs-backends, gvfs-fuse, gnome-keyring
 XB-AppName: Cryptomator
 XB-Category: Utility;Security;FileTools;
