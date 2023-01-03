@@ -237,7 +237,7 @@ public class MountOptionsController implements FxController {
 	}
 
 	public ObservableValue<Boolean> readOnlySupportedProperty() {
-		return mountpointDriveLetterSupported;
+		return readOnlySupported;
 	}
 
 	public boolean isReadOnlySupported() {
