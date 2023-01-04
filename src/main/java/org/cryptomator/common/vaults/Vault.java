@@ -342,7 +342,7 @@ public class Vault {
 	public Path getCiphertextPath(Path cleartextPath) throws IOException {
 		var fs = cryptoFileSystem.get();
 		var cryptoPath = fs.getPath(cleartextPath.toString());
-		return fs.getPathToCiphertext(cryptoPath);
+		return fs.getCiphertextPath(cryptoPath);
 	}
 
 	public boolean isHavingCustomMountFlags() {
