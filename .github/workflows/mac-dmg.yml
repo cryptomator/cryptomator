@@ -87,7 +87,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --copyright "(C) 2016 - 2023 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
