@@ -38,7 +38,7 @@
 
 	<HBox alignment="BOTTOM_CENTER">
 		<StackPane fx:id="dropZone">
-			<Button text="%main.vaultDetail.revealEncryptedItemBtn" minWidth="120" contentDisplay="BOTTOM">
+			<Button text="%main.vaultDetail.revealEncryptedItemBtn" minWidth="120" onAction="#chooseItemAndReveal" contentDisplay="BOTTOM">
 				<graphic>
 					<Label styleClass="label-small,label-muted" text="%main.vaultDetail.dropZone"/>
 				</graphic>

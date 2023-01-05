@@ -20,12 +20,14 @@ import javafx.fxml.FXML;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,7 @@ public class VaultDetailUnlockedController implements FxController {
 	private final FxApplicationWindows appWindows;
 	private final VaultService vaultService;
 	private final Stage mainWindow;
+	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
 	private final BooleanProperty draggingUnlockedVaultContentOver = new SimpleBooleanProperty();
@@ -45,11 +48,12 @@ public class VaultDetailUnlockedController implements FxController {
 	public StackPane dropZone;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, @MainWindow Stage mainWindow) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, @MainWindow Stage mainWindow, ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
 		this.mainWindow = mainWindow;
+		this.resourceBundle = resourceBundle;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
 		this.vaultStatsBuilder = vaultStatsBuilder;
 	}
@@ -98,6 +102,22 @@ public class VaultDetailUnlockedController implements FxController {
 		vaultStats.getUnchecked(vault.get()).showVaultStatisticsWindow();
 	}
 
+	@FXML
+	public void chooseItemAndReveal() {
+		var fileChooser = new FileChooser();
+		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.filePickerTitle"));
+		fileChooser.setInitialDirectory(Path.of(vault.get().getAccessPoint()).toFile());
+		var cleartextFile = fileChooser.showOpenDialog(mainWindow);
+		if (cleartextFile != null) {
+			var ciphertextPath = getCiphertextPath(cleartextFile.toPath());
+			if (ciphertextPath.isPresent()) {
+				revealPath(ciphertextPath.get());
+			} else {
+				LOG.warn("Could not find ciphertext file for {}", cleartextFile);
+			}
+		}
+	}
+
 	private boolean containsUnlockedVaultContent(Path path) {
 		return path.startsWith(vault.get().getAccessPoint());
 	}
@@ -109,7 +129,7 @@ public class VaultDetailUnlockedController implements FxController {
 		}
 		try {
 			var accessPoint = vault.get().getAccessPoint();
-			var relativeCleartextPath = path.toString().substring(accessPoint.length()-(accessPoint.endsWith("/")?-1:0));
+			var relativeCleartextPath = path.toString().substring(accessPoint.length() - (accessPoint.endsWith("/") ? -1 : 0));
 			return Optional.of(vault.get().getCiphertextPath(relativeCleartextPath));
 		} catch (IOException e) {
 			LOG.debug("Unable to get ciphertext path from path: {}", path);
