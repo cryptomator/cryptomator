@@ -11,15 +11,20 @@ command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found."; exit 1; }
 VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
 
+mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
+
 # compile
-mvn -B -f ../../../pom.xml clean package -DskipTests -Plinux
+mvn -B -f ../../../pom.xml clean package -Pdependency-check,linux -DskipTests
+cp ../../../LICENSE.txt ../../../target
+cp ../launcher.sh ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
 # add runtime
 ${JAVA_HOME}/bin/jlink \
+    --verbose \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
@@ -27,7 +32,7 @@ ${JAVA_HOME}/bin/jlink \
     --compress=1
 
 # create app dir
-envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/linux/launcher-gtk2.properties > launcher-gtk2.properties
+envsubst '${SEMVER_STR} ${REVISION_NUM}' < ../launcher-gtk2.properties > launcher-gtk2.properties
 ${JAVA_HOME}/bin/jpackage \
     --verbose \
     --type app-image \
@@ -35,7 +40,7 @@ ${JAVA_HOME}/bin/jpackage \
     --input ../../../target/libs \
     --module-path ../../../target/mods \
     --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator \
-    --dest . \
+    --dest appdir \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
     --copyright "(C) 2016 - 2023 Skymatic GmbH" \
@@ -46,6 +51,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\"" \
     --java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
+    --java-options "-Dcryptomator.p12Path=\"~/.config/Cryptomator/key.p12\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\"" \
     --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=false" \
@@ -54,9 +60,8 @@ ${JAVA_HOME}/bin/jpackage \
     --resource-dir ../resources
 
 # transform AppDir
-mv Cryptomator Cryptomator.AppDir
+mv appdir/Cryptomator Cryptomator.AppDir
 cp -r resources/AppDir/* Cryptomator.AppDir/
-chmod +x Cryptomator.AppDir/lib/runtime/bin/java
 envsubst '${REVISION_NO}' < resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
 cp ../common/org.cryptomator.Cryptomator256.png Cryptomator.AppDir/usr/share/icons/hicolor/256x256/apps/org.cryptomator.Cryptomator.png
 cp ../common/org.cryptomator.Cryptomator512.png Cryptomator.AppDir/usr/share/icons/hicolor/512x512/apps/org.cryptomator.Cryptomator.png
@@ -77,11 +82,16 @@ mv jni/x86_64-Linux/* Cryptomator.AppDir/lib/app/libjffi.so
 rm -r jni/x86_64-Linux
 
 # load AppImageTool
-curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o /tmp/appimagetool.AppImage
-chmod +x /tmp/appimagetool.AppImage
+curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage
+chmod +x appimagetool.AppImage
+./appimagetool.AppImage --appimage-extract
 
 # create AppImage
-/tmp/appimagetool.AppImage \
-    Cryptomator.AppDir \
-    cryptomator-SNAPSHOT-x86_64.AppImage \
-    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
+./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${SEMVER_STR}-x86_64.AppImage  \
+-u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
+
+echo ""
+echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-x86_64.AppImage"
+echo ""
+echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir appimagetool.AppImage jni runtime squashfs-root; rm launcher-gtk2.properties"
+echo ""
