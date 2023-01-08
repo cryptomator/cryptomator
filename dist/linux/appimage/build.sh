@@ -14,7 +14,7 @@ SEMVER_STR=${VERSION}
 mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 
 # compile
-mvn -B -f ../../../pom.xml clean package -Pdependency-check,linux -DskipTests
+mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
 cp ../../../LICENSE.txt ../../../target
 cp ../launcher.sh ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
@@ -82,16 +82,17 @@ mv jni/x86_64-Linux/* Cryptomator.AppDir/lib/app/libjffi.so
 rm -r jni/x86_64-Linux
 
 # load AppImageTool
-curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage
-chmod +x appimagetool.AppImage
-./appimagetool.AppImage --appimage-extract
+curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o /tmp/appimagetool.AppImage
+chmod +x /tmp/appimagetool.AppImage
 
 # create AppImage
-./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${SEMVER_STR}-x86_64.AppImage  \
--u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
+/tmp/appimagetool.AppImage \
+    Cryptomator.AppDir \
+    cryptomator-${SEMVER_STR}-x86_64.AppImage  \
+    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
 
 echo ""
 echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-x86_64.AppImage"
 echo ""
-echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir appimagetool.AppImage jni runtime squashfs-root; rm launcher-gtk2.properties"
+echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir jni runtime squashfs-root; rm launcher-gtk2.properties /tmp/appimagetool.AppImage"
 echo ""
