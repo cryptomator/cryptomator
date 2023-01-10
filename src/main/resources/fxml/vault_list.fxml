@@ -32,5 +32,5 @@
 			</graphic>
 		</Button>
 	</VBox>
-	<Region styleClass="drag-n-drop-indicator" visible="${controller.draggingVaultOver}"/>
+	<Region styleClass="drag-n-drop-border" visible="${controller.draggingVaultOver}"/>
 </StackPane>

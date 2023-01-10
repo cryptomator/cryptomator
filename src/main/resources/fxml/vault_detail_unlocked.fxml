@@ -5,7 +5,6 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
@@ -37,14 +36,11 @@
 	<Region VBox.vgrow="ALWAYS"/>
 
 	<HBox alignment="BOTTOM_CENTER">
-		<StackPane fx:id="dropZone">
-			<Button text="%main.vaultDetail.revealEncryptedItemBtn" minWidth="120" onAction="#chooseItemAndReveal" contentDisplay="BOTTOM">
-				<graphic>
-					<Label styleClass="label-small,label-muted" text="%main.vaultDetail.dropZone"/>
-				</graphic>
-			</Button>
-			<Region styleClass="drag-n-drop-indicator" visible="${controller.draggingUnlockedVaultContentOver}"/>
-		</StackPane>
+		<Button fx:id="dropZone" styleClass="drag-n-drop" text="%main.vaultDetail.revealEncryptedItemBtn" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseItemAndReveal" contentDisplay="TOP">
+			<graphic>
+				<FontAwesome5IconView glyph="ARROW_DOWN"/>
+			</graphic>
+		</Button>
 
 		<Region HBox.hgrow="ALWAYS"/>
 

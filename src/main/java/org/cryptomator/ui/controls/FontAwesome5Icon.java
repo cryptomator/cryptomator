@@ -5,6 +5,7 @@ package org.cryptomator.ui.controls;
  */
 public enum FontAwesome5Icon {
 	ANCHOR("\uF13D"), //
+	ARROW_DOWN("\uF063"), //
 	ARROW_UP("\uF062"), //
 	BAN("\uF05E"), //
 	BUG("\uF188"), //

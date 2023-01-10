@@ -3,6 +3,7 @@ package org.cryptomator.ui.mainwindow;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.tobiasdiez.easybind.EasyBind;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
@@ -17,9 +18,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.awt.Desktop;
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 public class VaultDetailUnlockedController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultDetailUnlockedController.class);
-
+	private static final String ACTIVE_CLASS = "active";
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final FxApplicationWindows appWindows;
 	private final VaultService vaultService;
@@ -45,7 +46,7 @@ public class VaultDetailUnlockedController implements FxController {
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
 	private final BooleanProperty draggingUnlockedVaultContentOver = new SimpleBooleanProperty();
 
-	public StackPane dropZone;
+	public Button dropZone;
 
 	@Inject
 	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, @MainWindow Stage mainWindow, ResourceBundle resourceBundle) {
@@ -63,6 +64,8 @@ public class VaultDetailUnlockedController implements FxController {
 		dropZone.setOnDragOver(this::handleDragEvent);
 		dropZone.setOnDragDropped(this::handleDragEvent);
 		dropZone.setOnDragExited(this::handleDragEvent);
+
+		EasyBind.includeWhen(dropZone.getStyleClass(), ACTIVE_CLASS, draggingUnlockedVaultContentOver);
 	}
 
 	private void handleDragEvent(DragEvent event) {
