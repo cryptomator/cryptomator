@@ -129,8 +129,11 @@ public class VaultDetailUnlockedController implements FxController {
 		}
 		try {
 			var accessPoint = vault.get().getAccessPoint();
-			var relativeCleartextPath = path.toString().substring(accessPoint.length() - (accessPoint.endsWith("/") ? -1 : 0));
-			return Optional.of(vault.get().getCiphertextPath(relativeCleartextPath));
+			var cleartextPath = path.toString().substring(accessPoint.length());
+			if (!cleartextPath.startsWith("/")) {
+				cleartextPath = "/" + cleartextPath;
+			}
+			return Optional.of(vault.get().getCiphertextPath(cleartextPath));
 		} catch (IOException e) {
 			LOG.debug("Unable to get ciphertext path from path: {}", path);
 			return Optional.empty();

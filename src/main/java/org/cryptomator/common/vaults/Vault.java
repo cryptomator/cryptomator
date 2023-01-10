@@ -340,7 +340,6 @@ public class Vault {
 	}
 
 
-
 	/**
 	 * Gets from the cleartext path its ciphertext counterpart.
 	 * The cleartext path has to start from the vault root (by starting with "/").
@@ -348,12 +347,12 @@ public class Vault {
 	 * @return Local os path to the ciphertext resource
 	 * @throws IOException if an I/O error occurs
 	 */
-	public Path getCiphertextPath(String vaultAbsoluteClearTextPath) throws IOException {
-		if(!vaultAbsoluteClearTextPath.startsWith("/")) {
+	public Path getCiphertextPath(String cleartextPath) throws IOException {
+		if (!cleartextPath.startsWith("/")) {
 			throw new IllegalArgumentException("Input path must be absolute from vault root by starting with \"/\".");
 		}
 		var fs = cryptoFileSystem.get();
-		var cryptoPath = fs.getRootDirectories().iterator().next().resolve(vaultAbsoluteClearTextPath);
+		var cryptoPath = fs.getPath(cleartextPath);
 		return fs.getCiphertextPath(cryptoPath);
 	}
 
