@@ -161,11 +161,10 @@ public class Vault {
 		}
 	}
 
-	private MountBuilder prepareMount(MountService actualMountService, Path cryptoRoot) throws IOException {
-		var mountProvider = mountService.getValue().service();
-		var builder = mountProvider.forFileSystem(cryptoRoot);
+	private MountBuilder prepareMount(MountService mountService, Path cryptoRoot) throws IOException {
+		var builder = mountService.forFileSystem(cryptoRoot);
 
-		for (var capability : mountProvider.capabilities()) {
+		for (var capability : mountService.capabilities()) {
 			switch (capability) {
 				case FILE_SYSTEM_NAME -> builder.setFileSystemName("crypto");
 				case LOOPBACK_PORT -> builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
@@ -180,19 +179,19 @@ public class Vault {
 		var userChosenMountPoint = vaultSettings.getMountPoint();
 		var defaultMountPointBase = env.getMountPointsDir().orElseThrow();
 		if (userChosenMountPoint == null) {
-			if (mountProvider.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
+			if (mountService.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
 				// no need to set a mount point
-			} else if (mountProvider.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
+			} else if (mountService.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
 				builder.setMountpoint(windowsDriveLetters.getFirstDesiredAvailable().orElseThrow());
-			} else if (mountProvider.hasCapability(MOUNT_WITHIN_EXISTING_PARENT)) {
+			} else if (mountService.hasCapability(MOUNT_WITHIN_EXISTING_PARENT)) {
 				Files.createDirectories(defaultMountPointBase);
 				builder.setMountpoint(defaultMountPointBase);
-			} else if (mountProvider.hasCapability(MOUNT_TO_EXISTING_DIR) ) {
+			} else if (mountService.hasCapability(MOUNT_TO_EXISTING_DIR) ) {
 				var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName().get());
 				Files.createDirectories(mountPoint);
 				builder.setMountpoint(mountPoint);
 			}
-		} else if (mountProvider.hasCapability(MOUNT_TO_EXISTING_DIR) || mountProvider.hasCapability(MOUNT_WITHIN_EXISTING_PARENT) || mountProvider.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
+		} else if (mountService.hasCapability(MOUNT_TO_EXISTING_DIR) || mountService.hasCapability(MOUNT_WITHIN_EXISTING_PARENT) || mountService.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
 			// TODO: move the mount point away in case of MOUNT_WITHIN_EXISTING_PARENT?
 			builder.setMountpoint(userChosenMountPoint);
 		}
