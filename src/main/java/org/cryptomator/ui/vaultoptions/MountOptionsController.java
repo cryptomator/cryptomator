@@ -34,6 +34,7 @@ public class MountOptionsController implements FxController {
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
 
+	private final ObservableValue<String> defaultMountFlags;
 	private final ObservableValue<Boolean> mountpointDirSupported;
 	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
 	private final ObservableValue<Boolean> readOnlySupported;
@@ -59,6 +60,13 @@ public class MountOptionsController implements FxController {
 		this.vault = vault;
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
+		this.defaultMountFlags = mountService.map(as -> {
+			if (as.service().hasCapability(MountCapability.MOUNT_FLAGS)) {
+				return as.service().getDefaultMountFlags();
+			} else {
+				return "";
+			}
+		});
 		this.mountpointDirSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
 		this.mountpointDriveLetterSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.mountFlagsSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
@@ -101,12 +109,12 @@ public class MountOptionsController implements FxController {
 		if (customMountFlagsCheckbox.isSelected()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 			mountFlagsField.textProperty().unbind();
-			vault.setCustomMountFlags(vault.defaultMountFlagsProperty().getValue());
+			vault.setCustomMountFlags(defaultMountFlags.getValue());
 			mountFlagsField.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
 		} else {
 			mountFlagsField.textProperty().unbindBidirectional(vault.getVaultSettings().mountFlags());
 			vault.setCustomMountFlags(null);
-			mountFlagsField.textProperty().bind(vault.defaultMountFlagsProperty());
+			mountFlagsField.textProperty().bind(defaultMountFlags);
 		}
 	}
 

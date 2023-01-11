@@ -13,7 +13,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.mount.ActualMountService;
-import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -75,7 +74,6 @@ public class Vault {
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
 	private final ObservableValue<ActualMountService> mountService;
-	private final ObservableValue<String> defaultMountFlags;
 	private final VaultConfigCache configCache;
 	private final VaultStats stats;
 	private final StringBinding displayablePath;
@@ -101,7 +99,6 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.mountService = mountService;
-		this.defaultMountFlags = mountService.map(s -> s.service().getDefaultMountFlags());
 		this.stats = stats;
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
@@ -170,7 +167,7 @@ public class Vault {
 				case LOOPBACK_PORT -> builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
 				case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
 				case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
-				case MOUNT_FLAGS -> builder.setMountFlags(defaultMountFlags.getValue()); // TODO use custom mount flags (pre-populated with default mount flags)
+				case MOUNT_FLAGS -> builder.setMountFlags(Objects.requireNonNullElse(vaultSettings.mountFlags().getValue(), mountService.getDefaultMountFlags()));
 				case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
 				case VOLUME_NAME -> builder.setVolumeName(vaultSettings.mountName().get());
 			}
@@ -186,7 +183,7 @@ public class Vault {
 			} else if (mountService.hasCapability(MOUNT_WITHIN_EXISTING_PARENT)) {
 				Files.createDirectories(defaultMountPointBase);
 				builder.setMountpoint(defaultMountPointBase);
-			} else if (mountService.hasCapability(MOUNT_TO_EXISTING_DIR) ) {
+			} else if (mountService.hasCapability(MOUNT_TO_EXISTING_DIR)) {
 				var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName().get());
 				Files.createDirectories(mountPoint);
 				builder.setMountpoint(mountPoint);
@@ -379,23 +376,6 @@ public class Vault {
 
 	public boolean isHavingCustomMountFlags() {
 		return !Strings.isNullOrEmpty(vaultSettings.mountFlags().get());
-	}
-
-	public ObservableValue<String> defaultMountFlagsProperty() {
-		return defaultMountFlags;
-	}
-
-	public String getDefaultMountFlags() {
-		return defaultMountFlags.getValue();
-	}
-
-	public String getEffectiveMountFlags() {
-		String mountFlags = vaultSettings.mountFlags().get();
-		if (Strings.isNullOrEmpty(mountFlags)) {
-			return ""; //TODO: should the provider provide dem defaults??
-		} else {
-			return mountFlags;
-		}
 	}
 
 	public VaultConfigCache getVaultConfigCache() {
