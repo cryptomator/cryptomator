@@ -409,12 +409,13 @@ public class Vault {
 	}
 
 
-	/* TODO: reactivate/ needed at all?
 	public boolean supportsForcedUnmount() {
-		return volume.supportsForcedUnmount();
+		var mh = mountHandle.get();
+		if(mh == null) {
+			throw new IllegalStateException("Vault is not mounted");
+		};
+		return mountHandle.get().supportsUnmountForced();
 	}
-
-	 */
 
 	private record MountHandle(Mount mount, boolean supportsUnmountForced) {
 
