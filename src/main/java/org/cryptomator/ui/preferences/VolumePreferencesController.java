@@ -1,5 +1,6 @@
 package org.cryptomator.ui.preferences;
 
+import org.cryptomator.common.mount.ActualMountService;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountService;
@@ -22,7 +23,7 @@ import java.util.List;
 public class VolumePreferencesController implements FxController {
 
 	private final Settings settings;
-	private final ObservableValue<MountService> selectedMountService;
+	private final ObservableValue<ActualMountService> selectedMountService;
 	private final BooleanExpression loopbackPortSupported;
 	private final List<MountService> mountProviders;
 	public ChoiceBox<MountService> volumeTypeChoiceBox;
@@ -30,17 +31,17 @@ public class VolumePreferencesController implements FxController {
 	public Button loopbackPortApplyButton;
 
 	@Inject
-	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ObservableValue<MountService> selectedMountService) {
+	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ObservableValue<ActualMountService> actualMountService) {
 		this.settings = settings;
 		this.mountProviders = mountProviders;
-		this.selectedMountService = selectedMountService;
-		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
+		this.selectedMountService = actualMountService;
+		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(as -> as.service().hasCapability(MountCapability.LOOPBACK_PORT)));
 	}
 
 	public void initialize() {
 		volumeTypeChoiceBox.getItems().addAll(mountProviders);
 		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
-		volumeTypeChoiceBox.getSelectionModel().select(selectedMountService.getValue());
+		volumeTypeChoiceBox.getSelectionModel().select(selectedMountService.getValue().service());
 		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvide, newProvider) -> settings.mountService().set(newProvider.getClass().getName()));
 
 		loopbackPortField.setText(String.valueOf(settings.port().get()));
@@ -81,7 +82,7 @@ public class VolumePreferencesController implements FxController {
 
 		@Override
 		public String toString(MountService provider) {
-			return provider== null? "None" : provider.displayName(); //TODO: adjust message
+			return provider== null? "Automatic" : provider.displayName(); //TODO: adjust message
 		}
 
 		@Override

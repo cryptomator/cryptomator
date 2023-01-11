@@ -2,6 +2,7 @@ package org.cryptomator.common.mount;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.mount.MountService;
 
@@ -20,11 +21,14 @@ public class MountModule {
 
 	@Provides
 	@Singleton
-	static ObservableValue<MountService> provideMountService(Settings settings, List<MountService> serviceImpls) {
-		return settings.mountService().map(desiredServiceImpl -> {
-			var fallbackProvider = serviceImpls.stream().findFirst().orElse(null);
-			return serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny().orElse(fallbackProvider);
-		});
+	static ObservableValue<ActualMountService> provideMountService(Settings settings, List<MountService> serviceImpls) {
+		var fallbackProvider = serviceImpls.stream().findFirst().orElse(null);
+		return ObservableUtil.mapWithDefault(settings.mountService(), //
+				desiredServiceImpl -> { //
+					var desiredService = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny(); //
+					return new ActualMountService(desiredService.orElse(fallbackProvider), desiredService.isPresent()); //
+				}, //
+				new ActualMountService(fallbackProvider, true));
 	}
 
 }

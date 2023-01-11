@@ -12,6 +12,8 @@ import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.mount.ActualMountService;
+import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -72,7 +74,7 @@ public class Vault {
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
-	private final ObservableValue<MountService> mountService;
+	private final ObservableValue<ActualMountService> mountService;
 	private final ObservableValue<String> defaultMountFlags;
 	private final VaultConfigCache configCache;
 	private final VaultStats stats;
@@ -90,7 +92,7 @@ public class Vault {
 	private AtomicReference<MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(Environment env, Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<MountService> mountService, VaultStats stats, WindowsDriveLetters windowsDriveLetters) {
+	Vault(Environment env, Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<ActualMountService> mountService, VaultStats stats, WindowsDriveLetters windowsDriveLetters) {
 		this.env = env;
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
@@ -99,7 +101,7 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.mountService = mountService;
-		this.defaultMountFlags = mountService.map(MountService::getDefaultMountFlags);
+		this.defaultMountFlags = mountService.map(s -> s.service().getDefaultMountFlags());
 		this.stats = stats;
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
@@ -159,8 +161,8 @@ public class Vault {
 		}
 	}
 
-	private MountBuilder prepareMount(Path cryptoRoot) throws IOException {
-		var mountProvider = mountService.getValue();
+	private MountBuilder prepareMount(MountService actualMountService, Path cryptoRoot) throws IOException {
+		var mountProvider = mountService.getValue().service();
 		var builder = mountProvider.forFileSystem(cryptoRoot);
 
 		for (var capability : mountProvider.capabilities()) {
@@ -207,8 +209,9 @@ public class Vault {
 		try {
 			cryptoFileSystem.set(fs);
 			var rootPath = fs.getRootDirectories().iterator().next();
-			var supportsForcedUnmount = mountService.getValue().hasCapability(MountCapability.UNMOUNT_FORCED);
-			var mountHandle = new MountHandle(prepareMount(rootPath).mount(), supportsForcedUnmount);
+			var actualMountService = mountService.getValue().service();
+			var supportsForcedUnmount = actualMountService.hasCapability(MountCapability.UNMOUNT_FORCED);
+			var mountHandle = new MountHandle(prepareMount(actualMountService, rootPath).mount(), supportsForcedUnmount);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
 		} finally {
 			if (!success) {
