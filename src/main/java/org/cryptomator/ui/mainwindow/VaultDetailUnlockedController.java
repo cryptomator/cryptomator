@@ -34,10 +34,9 @@ public class VaultDetailUnlockedController implements FxController {
 	private final Stage mainWindow;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
-	private final ObservableValue<Mountpoint> mountPoint;
 	private final ObservableValue<Boolean> accessibleViaPath;
 	private final ObservableValue<Boolean> accessibleViaUri;
-	private final ObservableValue<String> mountUri;
+	private final ObservableValue<String> mountPoint;
 
 	@Inject
 	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, @MainWindow Stage mainWindow) {
@@ -47,10 +46,16 @@ public class VaultDetailUnlockedController implements FxController {
 		this.mainWindow = mainWindow;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
 		this.vaultStatsBuilder = vaultStatsBuilder;
-		this.mountPoint = vault.flatMap(Vault::mountPointProperty);
-		this.accessibleViaPath = mountPoint.map(m -> m instanceof Mountpoint.WithPath).orElse(false);
-		this.accessibleViaUri = mountPoint.map(m -> m instanceof Mountpoint.WithUri).orElse(false);
-		this.mountUri = mountPoint.map(Mountpoint::uri).map(URI::toASCIIString).orElse("");
+		var mp = vault.flatMap(Vault::mountPointProperty);
+		this.accessibleViaPath = mp.map(m -> m instanceof Mountpoint.WithPath).orElse(false);
+		this.accessibleViaUri = mp.map(m -> m instanceof Mountpoint.WithUri).orElse(false);
+		this.mountPoint = mp.map(m -> {
+			if(m instanceof Mountpoint.WithPath mwp) {
+				return mwp.path().toString();
+			} else {
+				return m.uri().toASCIIString();
+			}
+		});
 	}
 
 	private VaultStatisticsComponent buildVaultStats(Vault vault) {
@@ -66,7 +71,7 @@ public class VaultDetailUnlockedController implements FxController {
 	public void copyMountUri() {
 		//TODO: add popup that conent is copied
 		ClipboardContent clipboardContent = new ClipboardContent();
-		clipboardContent.putString(getMountUri());
+		clipboardContent.putString(mountPoint.getValue());
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
 	}
 
@@ -106,12 +111,12 @@ public class VaultDetailUnlockedController implements FxController {
 		return accessibleViaUri.getValue();
 	}
 
-	public ObservableValue<String> mountUriProperty() {
-		return mountUri;
+	public ObservableValue<String> mountPointProperty() {
+		return mountPoint;
 	}
 
-	public String getMountUri() {
-		return mountUri.getValue();
+	public String getMountPoint() {
+		return mountPoint.getValue();
 	}
 
 
