@@ -27,7 +27,7 @@
 			<HBox spacing="12" alignment="CENTER">
 				<FontAwesome5IconView glyph="LINK" glyphSize="24"/>
 				<VBox spacing="4" alignment="CENTER_LEFT">
-					<Label text="%generic.button.copy"/> <!-- TODO -->
+					<Label text="%main.vaultDetail.copyUri"/>
 					<Label styleClass="label-extra-small" text="${controller.mountPoint}" textOverrun="CENTER_ELLIPSIS"/>
 				</VBox>
 			</HBox>

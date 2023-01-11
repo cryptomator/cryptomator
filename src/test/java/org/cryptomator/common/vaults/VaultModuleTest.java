@@ -26,41 +26,4 @@ public class VaultModuleTest {
 		System.setProperty("user.home", tmpDir.toString());
 	}
 
-	/* TODO: reactivate!
-	@Test
-	@DisplayName("provideDefaultMountFlags on Mac/FUSE")
-	@EnabledOnOs(OS.MAC)
-	public void testMacFuseDefaultMountFlags() {
-		Mockito.when(settings.preferredVolumeImpl()).thenReturn(new SimpleObjectProperty<>(VolumeImpl.FUSE));
-
-		StringBinding result = module.provideDefaultMountFlags(settings, vaultSettings);
-
-		MatcherAssert.assertThat(result.get(), CoreMatchers.containsString("-ovolname=\"TEST\""));
-		MatcherAssert.assertThat(result.get(), CoreMatchers.containsString("-ordonly"));
-	}
-
-	@Test
-	@DisplayName("provideDefaultMountFlags on Linux/FUSE")
-	@EnabledOnOs(OS.LINUX)
-	public void testLinuxFuseDefaultMountFlags() {
-		Mockito.when(settings.preferredVolumeImpl()).thenReturn(new SimpleObjectProperty<>(VolumeImpl.FUSE));
-
-		StringBinding result = module.provideDefaultMountFlags(settings, vaultSettings);
-
-		MatcherAssert.assertThat(result.get(), CoreMatchers.containsString("-oro"));
-	}
-
-	@Test
-	@DisplayName("provideDefaultMountFlags on Windows/Dokany")
-	@EnabledOnOs(OS.WINDOWS)
-	public void testWinDokanyDefaultMountFlags() {
-		Mockito.when(settings.preferredVolumeImpl()).thenReturn(new SimpleObjectProperty<>(VolumeImpl.DOKANY));
-
-		StringBinding result = module.provideDefaultMountFlags(settings, vaultSettings);
-
-		MatcherAssert.assertThat(result.get(), CoreMatchers.containsString("--options CURRENT_SESSION,WRITE_PROTECTION"));
-	}
-
-	 */
-
 }

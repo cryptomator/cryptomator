@@ -168,8 +168,8 @@ public class Vault {
 		for (var capability : mountProvider.capabilities()) {
 			switch (capability) {
 				case FILE_SYSTEM_NAME -> builder.setFileSystemName("crypto");
-				case LOOPBACK_PORT -> builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings?
-				case LOOPBACK_HOST_NAME -> builder.setLoopbackHostName("cryptomator-vault"); //TODO: Read from system property
+				case LOOPBACK_PORT -> builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
+				case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
 				case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
 				case MOUNT_FLAGS -> builder.setMountFlags(defaultMountFlags.getValue()); // TODO use custom mount flags (pre-populated with default mount flags)
 				case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
