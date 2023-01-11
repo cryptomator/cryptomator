@@ -19,6 +19,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 import java.net.URI;
 import java.util.Optional;
@@ -62,7 +64,10 @@ public class VaultDetailUnlockedController implements FxController {
 
 	@FXML
 	public void copyMountUri() {
-		// TODO
+		//TODO: add popup that conent is copied
+		ClipboardContent clipboardContent = new ClipboardContent();
+		clipboardContent.putString(getMountUri());
+		Clipboard.getSystemClipboard().setContent(clipboardContent);
 	}
 
 	@FXML
