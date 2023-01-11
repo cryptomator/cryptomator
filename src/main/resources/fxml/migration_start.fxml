@@ -6,16 +6,20 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.migration.MigrationStartController"
-	  minWidth="400"
-	  maxWidth="400"
-	  minHeight="145"
+	  prefWidth="580"
+	  prefHeight="350"
 	  spacing="12">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
@@ -23,13 +27,47 @@
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
 			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="FILE_IMPORT" glyphSize="24"/>
+				<padding>
+					<Insets left="12"/>
+				</padding>
+				<Circle styleClass="glyph-icon-primary" radius="48"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="FILE_IMPORT" glyphSize="48"/>
 			</StackPane>
 
-			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel format="%migration.start.prompt" arg1="${controller.vault.displayName}" wrapText="true"/>
-				<CheckBox fx:id="confirmSyncDone" text="%migration.start.confirm"/>
+			<VBox HBox.hgrow="ALWAYS" alignment="CENTER">
+				<padding>
+					<Insets top="0" right="12" bottom="0" left="12"/>
+				</padding>
+				<Label text="%migration.start.header" styleClass="label-extra-large"/>
+				<Region minHeight="15"/>
+				<VBox>
+					<FormattedLabel format="%migration.start.text" arg1="${controller.vault.displayName}" wrapText="true"/>
+					<GridPane alignment="CENTER_LEFT" >
+						<padding>
+							<Insets left="6"/>
+						</padding>
+						<columnConstraints>
+							<ColumnConstraints minWidth="20" halignment="LEFT"/>
+							<ColumnConstraints fillWidth="true"/>
+						</columnConstraints>
+						<rowConstraints>
+							<RowConstraints valignment="TOP"/>
+							<RowConstraints valignment="TOP"/>
+							<RowConstraints valignment="TOP"/>
+							<RowConstraints valignment="TOP"/>
+						</rowConstraints>
+						<Label text="1." GridPane.rowIndex="0" GridPane.columnIndex="0" />
+						<Label text="%migration.start.remarkUndone" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+						<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0" />
+						<Label text="%migration.start.remarkVersions" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+						<Label text="3." GridPane.rowIndex="2" GridPane.columnIndex="0" />
+						<Label text="%migration.start.remarkCanRun" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+						<Label text="4." GridPane.rowIndex="3" GridPane.columnIndex="0" />
+						<Label text="%migration.start.remarkSynced" wrapText="true" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+					</GridPane>
+					<Region minHeight="15"/>
+					<CheckBox fx:id="confirmSyncDone" text="%migration.start.confirm"/>
+				</VBox>
 			</VBox>
 		</HBox>
 
