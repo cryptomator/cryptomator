@@ -83,6 +83,7 @@ public class MountOptionsController implements FxController {
 		// custom mount flags:
 		mountFlagsField.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
 		customMountFlagsCheckbox.setSelected(vault.isHavingCustomMountFlags());
+		toggleUseCustomMountFlags();
 
 		//driveLetter choice box
 		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAll());

@@ -47,19 +47,21 @@
 			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointDriveLetterBtn.selected}" value="${controller.driveLetter}"/>
 		</HBox>
 
-		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.mountpointDirSupported}" managed="${controller.mountpointDirSupported}">
-			<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDirBtn" text="%vaultOptions.mount.mountPoint.custom"/>
-			<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointDirBtn.selected}">
-				<graphic>
-					<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
-				</graphic>
-			</Button>
-		</HBox>
-		<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false" >
-			<VBox.margin>
-				<Insets left="24"/>
-			</VBox.margin>
-		</TextField>
+		<VBox spacing="6" visible="${controller.mountpointDirSupported}" managed="${controller.mountpointDirSupported}">
+			<HBox spacing="6" alignment="CENTER_LEFT">
+				<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDirBtn" text="%vaultOptions.mount.mountPoint.custom"/>
+				<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointDirBtn.selected}">
+					<graphic>
+						<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
+					</graphic>
+				</Button>
+			</HBox>
+			<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false" >
+				<VBox.margin>
+					<Insets left="24"/>
+				</VBox.margin>
+			</TextField>
+		</VBox>
 	</children>
 
 </VBox>
