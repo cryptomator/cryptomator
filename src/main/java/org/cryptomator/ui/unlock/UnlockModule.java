@@ -23,6 +23,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Module(subcomponents = {KeyLoadingComponent.class})
 abstract class UnlockModule {
@@ -55,6 +56,13 @@ abstract class UnlockModule {
 	@UnlockScoped
 	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @UnlockWindow Vault vault, @UnlockWindow Stage window) {
 		return compBuilder.vault(vault).window(window).build().keyloadingStrategy();
+	}
+
+	@Provides
+	@UnlockWindow
+	@UnlockScoped
+	static AtomicReference<Throwable> unlockException() {
+		return new AtomicReference<>();
 	}
 
 	@Provides

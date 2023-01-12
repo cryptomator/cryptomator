@@ -2,6 +2,7 @@ package org.cryptomator.ui.unlock;
 
 import com.google.common.base.Throwables;
 import dagger.Lazy;
+import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.CryptoException;
@@ -20,6 +21,7 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -38,9 +40,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> invalidMountPointScene;
 	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
+	private final AtomicReference<Throwable> unlockFailedException;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, FxApplicationWindows appWindows, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, FxApplicationWindows appWindows, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, @UnlockWindow AtomicReference<Throwable> unlockFailedException) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -48,6 +51,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.appWindows = appWindows;
 		this.keyLoadingStrategy = keyLoadingStrategy;
+		this.unlockFailedException = unlockFailedException;
 	}
 
 	@Override
@@ -67,13 +71,15 @@ public class UnlockWorkflow extends Task<Boolean> {
 		} catch (Exception e) {
 			Throwables.propagateIfPossible(e, IOException.class);
 			Throwables.propagateIfPossible(e, CryptoException.class);
+			Throwables.propagateIfPossible(e, IllegalMountPointException.class);
 			Throwables.propagateIfPossible(e, MountFailedException.class);
 			throw new IllegalStateException("unexpected exception type", e);
 		}
 	}
 
-	private void showInvalidMountPointScene() {
+	private void handleIllegalMountPointError(IllegalMountPointException impe) {
 		Platform.runLater(() -> {
+			unlockFailedException.set(impe);
 			window.setScene(invalidMountPointScene.get());
 			window.show();
 		});
@@ -107,7 +113,11 @@ public class UnlockWorkflow extends Task<Boolean> {
 	protected void failed() {
 		LOG.info("Unlock of '{}' failed.", vault.getDisplayName());
 		Throwable throwable = super.getException();
-		handleGenericError(throwable);
+		if(throwable instanceof IllegalMountPointException impe) {
+			handleIllegalMountPointError(impe);
+		} else {
+			handleGenericError(throwable);
+		}
 		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 

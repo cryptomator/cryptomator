@@ -13,6 +13,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.mount.ActualMountService;
+import org.cryptomator.common.mount.IllegalMountPointException;
+import org.cryptomator.common.mount.MountPointNotExistsException;
+import org.cryptomator.common.mount.MountPointNotSupportedException;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -175,22 +178,45 @@ public class Vault {
 
 		var userChosenMountPoint = vaultSettings.getMountPoint();
 		var defaultMountPointBase = env.getMountPointsDir().orElseThrow();
+		var canMountToDriveLetter = mountService.hasCapability(MOUNT_AS_DRIVE_LETTER);
+		var canMountToParent = mountService.hasCapability(MOUNT_WITHIN_EXISTING_PARENT);
+		var canMountToDir = mountService.hasCapability(MOUNT_TO_EXISTING_DIR);
 		if (userChosenMountPoint == null) {
 			if (mountService.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
 				// no need to set a mount point
-			} else if (mountService.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
+			} else if (canMountToDriveLetter) {
 				builder.setMountpoint(windowsDriveLetters.getFirstDesiredAvailable().orElseThrow());
-			} else if (mountService.hasCapability(MOUNT_WITHIN_EXISTING_PARENT)) {
+			} else if (canMountToParent) {
 				Files.createDirectories(defaultMountPointBase);
 				builder.setMountpoint(defaultMountPointBase);
-			} else if (mountService.hasCapability(MOUNT_TO_EXISTING_DIR)) {
+			} else if (canMountToDir) {
 				var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName().get());
 				Files.createDirectories(mountPoint);
 				builder.setMountpoint(mountPoint);
 			}
-		} else if (mountService.hasCapability(MOUNT_TO_EXISTING_DIR) || mountService.hasCapability(MOUNT_WITHIN_EXISTING_PARENT) || mountService.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
+		} else {
 			// TODO: move the mount point away in case of MOUNT_WITHIN_EXISTING_PARENT?
-			builder.setMountpoint(userChosenMountPoint);
+			try {
+				builder.setMountpoint(userChosenMountPoint);
+			} catch (IllegalArgumentException e) {
+				//TODO: move code elsewhere
+				var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
+				var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter) || (!canMountToDir && !mpIsDriveLetter) || (!canMountToParent && !mpIsDriveLetter);
+				if(configNotSupported) {
+					throw new MountPointNotSupportedException(e.getMessage());
+				} else if (canMountToDir && !canMountToParent && !Files.exists(userChosenMountPoint)) {
+					//mountpoint must exist
+					throw new MountPointNotExistsException(e.getMessage());
+				} else {
+					throw new IllegalMountPointException(e.getMessage());
+				}
+				/*
+				//TODO:
+				if (!canMountToDir && canMountToParent && !Files.notExists(userChosenMountPoint)) {
+					//parent must exist, mountpoint must not exist
+				}
+				 */
+			}
 		}
 
 		return builder;
