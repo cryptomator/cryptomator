@@ -11,13 +11,8 @@ package org.cryptomator.common.vaults;
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.common.Environment;
-import org.cryptomator.common.mount.ActualMountService;
-import org.cryptomator.common.mount.IllegalMountPointException;
-import org.cryptomator.common.mount.MountPointNotExistsException;
-import org.cryptomator.common.mount.MountPointNotSupportedException;
+import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -27,11 +22,7 @@ import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
-import org.cryptomator.integrations.mount.Mount;
-import org.cryptomator.integrations.mount.MountBuilder;
-import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountFailedException;
-import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.slf4j.Logger;
@@ -48,20 +39,13 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.cryptomator.integrations.mount.MountCapability.MOUNT_AS_DRIVE_LETTER;
-import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_EXISTING_DIR;
-import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH;
-import static org.cryptomator.integrations.mount.MountCapability.MOUNT_WITHIN_EXISTING_PARENT;
 
 @PerVault
 public class Vault {
@@ -70,13 +54,10 @@ public class Vault {
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
-	private final Environment env;
-	private final Settings settings;
 	private final VaultSettings vaultSettings;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
-	private final ObservableValue<ActualMountService> mountService;
 	private final VaultConfigCache configCache;
 	private final VaultStats stats;
 	private final StringBinding displayablePath;
@@ -88,20 +69,18 @@ public class Vault {
 	private final BooleanBinding unknownError;
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final WindowsDriveLetters windowsDriveLetters;
+	private final Mounter mounter;
 	private final BooleanProperty showingStats;
 
-	private AtomicReference<MountHandle> mountHandle = new AtomicReference<>(null);
+	private AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(Environment env, Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<ActualMountService> mountService, VaultStats stats, WindowsDriveLetters windowsDriveLetters) {
-		this.env = env;
-		this.settings = settings;
+	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
 		this.state = state;
 		this.lastKnownException = lastKnownException;
-		this.mountService = mountService;
 		this.stats = stats;
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
@@ -112,6 +91,7 @@ public class Vault {
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.windowsDriveLetters = windowsDriveLetters;
+		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
 	}
 
@@ -161,67 +141,6 @@ public class Vault {
 		}
 	}
 
-	private MountBuilder prepareMount(MountService mountService, Path cryptoRoot) throws IOException {
-		var builder = mountService.forFileSystem(cryptoRoot);
-
-		for (var capability : mountService.capabilities()) {
-			switch (capability) {
-				case FILE_SYSTEM_NAME -> builder.setFileSystemName("crypto");
-				case LOOPBACK_PORT -> builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
-				case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
-				case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
-				case MOUNT_FLAGS -> builder.setMountFlags(Objects.requireNonNullElse(vaultSettings.mountFlags().getValue(), mountService.getDefaultMountFlags()));
-				case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
-				case VOLUME_NAME -> builder.setVolumeName(vaultSettings.mountName().get());
-			}
-		}
-
-		var userChosenMountPoint = vaultSettings.getMountPoint();
-		var defaultMountPointBase = env.getMountPointsDir().orElseThrow();
-		var canMountToDriveLetter = mountService.hasCapability(MOUNT_AS_DRIVE_LETTER);
-		var canMountToParent = mountService.hasCapability(MOUNT_WITHIN_EXISTING_PARENT);
-		var canMountToDir = mountService.hasCapability(MOUNT_TO_EXISTING_DIR);
-		if (userChosenMountPoint == null) {
-			if (mountService.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
-				// no need to set a mount point
-			} else if (canMountToDriveLetter) {
-				builder.setMountpoint(windowsDriveLetters.getFirstDesiredAvailable().orElseThrow());
-			} else if (canMountToParent) {
-				Files.createDirectories(defaultMountPointBase);
-				builder.setMountpoint(defaultMountPointBase);
-			} else if (canMountToDir) {
-				var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName().get());
-				Files.createDirectories(mountPoint);
-				builder.setMountpoint(mountPoint);
-			}
-		} else {
-			// TODO: move the mount point away in case of MOUNT_WITHIN_EXISTING_PARENT?
-			try {
-				builder.setMountpoint(userChosenMountPoint);
-			} catch (IllegalArgumentException e) {
-				//TODO: move code elsewhere
-				var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
-				var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter) || (!canMountToDir && !mpIsDriveLetter) || (!canMountToParent && !mpIsDriveLetter);
-				if(configNotSupported) {
-					throw new MountPointNotSupportedException(e.getMessage());
-				} else if (canMountToDir && !canMountToParent && !Files.exists(userChosenMountPoint)) {
-					//mountpoint must exist
-					throw new MountPointNotExistsException(e.getMessage());
-				} else {
-					throw new IllegalMountPointException(e.getMessage());
-				}
-				/*
-				//TODO:
-				if (!canMountToDir && canMountToParent && !Files.notExists(userChosenMountPoint)) {
-					//parent must exist, mountpoint must not exist
-				}
-				 */
-			}
-		}
-
-		return builder;
-	}
-
 	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, MountFailedException {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
@@ -231,9 +150,7 @@ public class Vault {
 		try {
 			cryptoFileSystem.set(fs);
 			var rootPath = fs.getRootDirectories().iterator().next();
-			var actualMountService = mountService.getValue().service();
-			var supportsForcedUnmount = actualMountService.hasCapability(MountCapability.UNMOUNT_FORCED);
-			var mountHandle = new MountHandle(prepareMount(actualMountService, rootPath).mount(), supportsForcedUnmount);
+			var mountHandle = mounter.mountAndcreateHandle(vaultSettings, rootPath);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
 		} finally {
 			if (!success) {
@@ -242,7 +159,6 @@ public class Vault {
 		}
 	}
 
-
 	public synchronized void lock(boolean forced) throws UnmountFailedException, IOException {
 		var mountHandle = this.mountHandle.get();
 		if (mountHandle == null) {
@@ -250,14 +166,17 @@ public class Vault {
 			return;
 		}
 
-		if (forced && mountHandle.supportsUnmountForced) {
-			mountHandle.mount.unmountForced();
+		if (forced && mountHandle.supportsUnmountForced()) {
+			mountHandle.mount().unmountForced();
 		} else {
-			mountHandle.mount.unmount();
+			mountHandle.mount().unmount();
 		}
 
 		try {
-			mountHandle.mount.close();
+			mountHandle.mount().close();
+			if(mountHandle.mountWithinParent()) {
+				//TODO: cleanup
+			}
 		} finally {
 			destroyCryptoFileSystem();
 		}
@@ -352,7 +271,7 @@ public class Vault {
 
 	public Mountpoint getMountPoint() {
 		var handle = mountHandle.get();
-		return handle == null ? null : handle.mount.getMountpoint();
+		return handle == null ? null : handle.mount().getMountpoint();
 	}
 
 	public StringBinding displayablePathProperty() {
@@ -434,16 +353,14 @@ public class Vault {
 		}
 	}
 
-
 	public boolean supportsForcedUnmount() {
 		var mh = mountHandle.get();
-		if(mh == null) {
+		if (mh == null) {
+			//TODO: or return false?
 			throw new IllegalStateException("Vault is not mounted");
-		};
+		}
+		;
 		return mountHandle.get().supportsUnmountForced();
 	}
 
-	private record MountHandle(Mount mount, boolean supportsUnmountForced) {
-
-	}
 }
