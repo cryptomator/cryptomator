@@ -87,7 +87,6 @@ public class MountOptionsController implements FxController {
 		//driveLetter choice box
 		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAll());
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
-		driveLetterSelection.setOnShowing(event -> driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle))); //To check the reserved drive letters again
 
 		//mountPoint toggle group
 		var mountPoint = vaultSettings.getMountPoint();
