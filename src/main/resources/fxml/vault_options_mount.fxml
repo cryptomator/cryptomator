@@ -44,7 +44,7 @@
 
 		<HBox spacing="6" visible="${controller.mountpointDriveLetterSupported}" managed="${controller.mountpointDriveLetterSupported}">
 			<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDriveLetterBtn" text="%vaultOptions.mount.mountPoint.driveLetter"/>
-			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointDriveLetterBtn.selected}" value="${controller.driveLetter}"/>
+			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointDriveLetterBtn.selected}"/>
 		</HBox>
 
 		<VBox spacing="6" visible="${controller.mountpointDirSupported}" managed="${controller.mountpointDirSupported}">

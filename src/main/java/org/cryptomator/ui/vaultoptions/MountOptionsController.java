@@ -39,7 +39,6 @@ public class MountOptionsController implements FxController {
 	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
 	private final ObservableValue<Boolean> readOnlySupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
-	private final ObservableValue<Path> driveLetter;
 	private final ObservableValue<String> directoryPath;
 
 
@@ -71,7 +70,6 @@ public class MountOptionsController implements FxController {
 		this.mountpointDriveLetterSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.mountFlagsSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
 		this.readOnlySupported = mountService.map(as -> as.service().hasCapability(MountCapability.READ_ONLY));
-		this.driveLetter = vault.getVaultSettings().mountPoint().map(p -> isDriveLetter(p) ? p : null);
 		this.directoryPath = vault.getVaultSettings().mountPoint().map(p -> isDriveLetter(p) ? null : p.toString());
 	}
 
@@ -88,7 +86,7 @@ public class MountOptionsController implements FxController {
 		//driveLetter choice box
 		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAll());
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
-		driveLetterSelection.setOnShowing(event -> driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle))); //TODO: does this work?
+		driveLetterSelection.setOnShowing(event -> driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle))); //To check the reserved drive letters again
 
 		//mountPoint toggle group
 		var mountPoint = vault.getVaultSettings().getMountPoint();
@@ -98,7 +96,8 @@ public class MountOptionsController implements FxController {
 		} else if (mountPoint.getParent() == null && isDriveLetter(mountPoint)) {
 			//prepare and select drive letter
 			mountPointToggleGroup.selectToggle(mountPointDriveLetterBtn);
-		} else if (driveLetterSelection.getValue() == null) {
+			driveLetterSelection.valueProperty().bindBidirectional(vault.getVaultSettings().mountPoint());
+		} else {
 			//prepare and select dir
 			mountPointToggleGroup.selectToggle(mountPointDirBtn);
 		}
@@ -158,21 +157,23 @@ public class MountOptionsController implements FxController {
 	}
 
 	private void selectedToggleChanged(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
-		Path mountPointToBe = null;
-		try {
-			//Remark: the mountpoint corresponding to the newToggle must be null, otherwise it would not be new!
-			if (mountPointDriveLetterBtn.equals(newToggle)) {
-				mountPointToBe = driveLetterSelection.getItems().get(0);
-			} else if (mountPointDirBtn.equals(newToggle)) {
-				mountPointToBe = chooseCustomMountPointInternal();
+		//Remark: the mountpoint corresponding to the newToggle must be null, otherwise it would not be new!
+		driveLetterSelection.valueProperty().unbindBidirectional(vault.getVaultSettings().mountPoint());
+		if (mountPointDriveLetterBtn.equals(newToggle)) {
+			vaultSettings.mountPoint().set(windowsDriveLetters.getFirstDesiredAvailable().orElse(windowsDriveLetters.getAll().stream().findAny().get()));
+			driveLetterSelection.valueProperty().bindBidirectional(vault.getVaultSettings().mountPoint());
+		} else if (mountPointDirBtn.equals(newToggle)) {
+			try {
+				vaultSettings.mountPoint().set(chooseCustomMountPointInternal());
+			} catch (NoDirSelectedException e) {
+				if (oldToggle != null && !mountPointDirBtn.equals(oldToggle)) {
+					mountPointToggleGroup.selectToggle(oldToggle);
+				} else {
+					mountPointToggleGroup.selectToggle(mountPointAutoBtn);
+				}
 			}
-			vault.getVaultSettings().mountPoint().set(mountPointToBe);
-		} catch (NoDirSelectedException e) {
-			if (!mountPointDirBtn.equals(oldToggle)) {
-				mountPointToggleGroup.selectToggle(oldToggle);
-			} else {
-				mountPointToggleGroup.selectToggle(mountPointAutoBtn);
-			}
+		} else {
+			vaultSettings.mountPoint().set(null);
 		}
 	}
 
@@ -252,14 +253,6 @@ public class MountOptionsController implements FxController {
 
 	public boolean isReadOnlySupported() {
 		return readOnlySupported.getValue();
-	}
-
-	public ObservableValue<Path> driveLetterProperty() {
-		return driveLetter;
-	}
-
-	public Path getDriveLetter() {
-		return driveLetter.getValue();
 	}
 
 	public ObservableValue<String> directoryPathProperty() {
