@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import org.cryptomator.ui.controls.NumericTextField?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -25,5 +26,32 @@
 			<NumericTextField fx:id="loopbackPortField"/>
 			<Button text="%generic.button.apply" fx:id="loopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
 		</HBox>
+
+		<Label text="%preferences.volume.supportedFeatures"/>
+		<VBox spacing="12">
+			<padding>
+				<Insets left="24"/>
+			</padding>
+			<Label text="%preferences.volume.feature.mountToDir" visible="${controller.mountToDirSupported}" managed="${controller.mountToDirSupported}" contentDisplay="LEFT">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK"/>
+				</graphic>
+			</Label>
+			<Label text="%preferences.volume.feature.mountToDriveLetter" visible="${controller.mountToDriveLetterSupported}" managed="${controller.mountToDriveLetterSupported}">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK"/>
+				</graphic>
+			</Label>
+			<Label text="%preferences.volume.feature.mountFlags" visible="${controller.mountFlagsSupported}" managed="${controller.mountFlagsSupported}">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK"/>
+				</graphic>
+			</Label>
+			<Label text="%preferences.volume.feature.readOnly" visible="${controller.readonlySupported}" managed="${controller.readonlySupported}">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK"/>
+				</graphic>
+			</Label>
+		</VBox>
 	</children>
 </VBox>

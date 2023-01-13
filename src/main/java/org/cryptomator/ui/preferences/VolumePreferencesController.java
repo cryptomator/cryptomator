@@ -25,6 +25,10 @@ public class VolumePreferencesController implements FxController {
 	private final Settings settings;
 	private final ObservableValue<ActualMountService> selectedMountService;
 	private final BooleanExpression loopbackPortSupported;
+	private final ObservableValue<Boolean> mountToDirSupported;
+	private final ObservableValue<Boolean> mountToDriveLetterSupported;
+	private final ObservableValue<Boolean> mountFlagsSupported;
+	private final ObservableValue<Boolean> readonlySupported;
 	private final List<MountService> mountProviders;
 	public ChoiceBox<MountService> volumeTypeChoiceBox;
 	public TextField loopbackPortField;
@@ -36,6 +40,10 @@ public class VolumePreferencesController implements FxController {
 		this.mountProviders = mountProviders;
 		this.selectedMountService = actualMountService;
 		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(as -> as.service().hasCapability(MountCapability.LOOPBACK_PORT)));
+		this.mountToDirSupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT) || as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR));
+		this.mountToDriveLetterSupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
+		this.mountFlagsSupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
+		this.readonlySupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.READ_ONLY));
 	}
 
 	public void initialize() {
@@ -47,7 +55,6 @@ public class VolumePreferencesController implements FxController {
 		loopbackPortField.setText(String.valueOf(settings.port().get()));
 		loopbackPortApplyButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(loopbackPortField.textProperty()));
 		loopbackPortApplyButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateLoopbackPort, loopbackPortField.textProperty()).not());
-
 	}
 
 	private boolean validateLoopbackPort() {
@@ -76,6 +83,38 @@ public class VolumePreferencesController implements FxController {
 		return loopbackPortSupported.get();
 	}
 
+	public ObservableValue<Boolean> readonlySupportedProperty() {
+		return readonlySupported;
+	}
+
+	public boolean isReadonlySupported() {
+		return readonlySupported.getValue();
+	}
+
+	public ObservableValue<Boolean> mountToDirSupportedProperty() {
+		return mountToDirSupported;
+	}
+
+	public boolean isMountToDirSupported() {
+		return mountToDirSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> mountToDriveLetterSupportedProperty() {
+		return mountToDriveLetterSupported;
+	}
+
+	public boolean isMountToDriveLetterSupported() {
+		return mountToDriveLetterSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> mountFlagsSupportedProperty() {
+		return mountFlagsSupported;
+	}
+
+	public boolean isMountFlagsSupported() {
+		return mountFlagsSupported.getValue();
+	}
+
 	/* Helpers */
 
 	private static class MountServiceConverter extends StringConverter<MountService> {
@@ -90,6 +129,4 @@ public class VolumePreferencesController implements FxController {
 			throw new UnsupportedOperationException();
 		}
 	}
-
-
 }
