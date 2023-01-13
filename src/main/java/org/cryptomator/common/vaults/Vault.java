@@ -173,9 +173,7 @@ public class Vault {
 
 		try {
 			mountHandle.mountObj().close();
-			if(mountHandle.mountWithinCustomParent()) {
-				mounter.cleanup(mountHandle);
-			}
+			mountHandle.specialCleanup().run();
 		} finally {
 			destroyCryptoFileSystem();
 		}

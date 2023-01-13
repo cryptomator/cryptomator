@@ -50,7 +50,7 @@ public class Mounter {
 			this.vaultSettings = vaultSettings;
 		}
 
-		MadePreparations prepare() throws IOException {
+		Runnable prepare() throws IOException {
 			for (var capability : service.capabilities()) {
 				switch (capability) {
 					case FILE_SYSTEM_NAME -> builder.setFileSystemName("cryptoFs");
@@ -67,13 +67,13 @@ public class Mounter {
 			return prepareMountPoint();
 		}
 
-		private MadePreparations prepareMountPoint() throws IOException {
+		private Runnable prepareMountPoint() throws IOException {
+			Runnable cleanup = () -> {};
 			var userChosenMountPoint = vaultSettings.getMountPoint();
 			var defaultMountPointBase = env.getMountPointsDir().orElseThrow();
 			var canMountToDriveLetter = service.hasCapability(MOUNT_AS_DRIVE_LETTER);
 			var canMountToParent = service.hasCapability(MOUNT_WITHIN_EXISTING_PARENT);
 			var canMountToDir = service.hasCapability(MOUNT_TO_EXISTING_DIR);
-			boolean mountWithinCustomParent = false;
 
 			if (userChosenMountPoint == null) {
 				if (service.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
@@ -89,9 +89,12 @@ public class Mounter {
 					builder.setMountpoint(mountPoint);
 				}
 			} else {
-				mountWithinCustomParent = canMountToParent && !canMountToDir;
-				if (mountWithinCustomParent) {
-					// TODO: move the mount point away in case of MOUNT_WITHIN_EXISTING_PARENT
+				if (canMountToParent && !canMountToDir) {
+					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
+					cleanup = () -> {
+						System.out.println("CLEANUP");
+						MountWithinParentUtil.cleanup(userChosenMountPoint);
+					};
 				}
 				try {
 					builder.setMountpoint(userChosenMountPoint);
@@ -104,17 +107,12 @@ public class Mounter {
 						//mountpoint must exist
 						throw new MountPointNotExistsException(e.getMessage());
 					} else {
+						//TODO: if (!canMountToDir && canMountToParent && !Files.notExists(userChosenMountPoint)) {
 						throw new IllegalMountPointException(e.getMessage());
 					}
-				/*
-				//TODO:
-				if (!canMountToDir && canMountToParent && !Files.notExists(userChosenMountPoint)) {
-					//parent must exist, mountpoint must not exist
-				}
-				 */
 				}
 			}
-			return new MadePreparations(mountWithinCustomParent);
+			return cleanup;
 		}
 
 	}
@@ -123,22 +121,11 @@ public class Mounter {
 		var mountService = this.mountServiceObservable.getValue().service();
 		var builder = mountService.forFileSystem(cryptoFsRoot);
 		var internal = new SettledMounter(mountService, builder, vaultSettings);
-		var preps = internal.prepare();
-		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), preps.mountWithinCustomParent);
+		var cleanup = internal.prepare();
+		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), cleanup);
 	}
 
-	public void cleanup(MountHandle handle) {
-		if(handle.mountWithinCustomParent) {
-			//TODO
-		}
-	}
-
-
-	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, boolean mountWithinCustomParent) {
-
-	}
-
-	private record MadePreparations(boolean mountWithinCustomParent) {
+	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, Runnable specialCleanup) {
 
 	}
 
