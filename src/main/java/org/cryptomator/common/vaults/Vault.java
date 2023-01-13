@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.mount.Mounter;
@@ -150,7 +149,7 @@ public class Vault {
 		try {
 			cryptoFileSystem.set(fs);
 			var rootPath = fs.getRootDirectories().iterator().next();
-			var mountHandle = mounter.mountAndcreateHandle(vaultSettings, rootPath);
+			var mountHandle = mounter.mount(vaultSettings, rootPath);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
 		} finally {
 			if (!success) {
@@ -167,15 +166,15 @@ public class Vault {
 		}
 
 		if (forced && mountHandle.supportsUnmountForced()) {
-			mountHandle.mount().unmountForced();
+			mountHandle.mountObj().unmountForced();
 		} else {
-			mountHandle.mount().unmount();
+			mountHandle.mountObj().unmount();
 		}
 
 		try {
-			mountHandle.mount().close();
-			if(mountHandle.mountWithinParent()) {
-				//TODO: cleanup
+			mountHandle.mountObj().close();
+			if(mountHandle.mountWithinCustomParent()) {
+				mounter.cleanup(mountHandle);
 			}
 		} finally {
 			destroyCryptoFileSystem();
@@ -271,7 +270,7 @@ public class Vault {
 
 	public Mountpoint getMountPoint() {
 		var handle = mountHandle.get();
-		return handle == null ? null : handle.mount().getMountpoint();
+		return handle == null ? null : handle.mountObj().getMountpoint();
 	}
 
 	public StringBinding displayablePathProperty() {
