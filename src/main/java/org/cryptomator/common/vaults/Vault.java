@@ -319,16 +319,8 @@ public class Vault {
 		return vaultSettings.path().getValue();
 	}
 
-	public boolean isHavingCustomMountFlags() {
-		return !Strings.isNullOrEmpty(vaultSettings.mountFlags().get());
-	}
-
 	public VaultConfigCache getVaultConfigCache() {
 		return configCache;
-	}
-
-	public void setCustomMountFlags(String mountFlags) {
-		vaultSettings.mountFlags().set(mountFlags);
 	}
 
 	public String getId() {
