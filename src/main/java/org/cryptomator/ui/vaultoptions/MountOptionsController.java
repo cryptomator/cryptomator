@@ -170,7 +170,8 @@ public class MountOptionsController implements FxController {
 		} catch (NoDirSelectedException e) {
 			if (!mountPointDirBtn.equals(oldToggle)) {
 				mountPointToggleGroup.selectToggle(oldToggle);
-
+			} else {
+				mountPointToggleGroup.selectToggle(mountPointAutoBtn);
 			}
 		}
 	}
