@@ -107,7 +107,7 @@ public class Mounter {
 						//mountpoint must exist
 						throw new MountPointNotExistsException(e.getMessage());
 					} else {
-						//TODO: if (!canMountToDir && canMountToParent && !Files.notExists(userChosenMountPoint)) {
+						//TODO: add specific exception for !canMountToDir && canMountToParent && !Files.notExists(userChosenMountPoint)
 						throw new IllegalMountPointException(e.getMessage());
 					}
 				}

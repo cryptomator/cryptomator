@@ -345,10 +345,8 @@ public class Vault {
 	public boolean supportsForcedUnmount() {
 		var mh = mountHandle.get();
 		if (mh == null) {
-			//TODO: or return false?
 			throw new IllegalStateException("Vault is not mounted");
 		}
-		;
 		return mountHandle.get().supportsUnmountForced();
 	}
 

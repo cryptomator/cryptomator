@@ -82,7 +82,7 @@ public class VolumePreferencesController implements FxController {
 
 		@Override
 		public String toString(MountService provider) {
-			return provider== null? "Automatic" : provider.displayName(); //TODO: adjust message
+			return provider.displayName();
 		}
 
 		@Override
