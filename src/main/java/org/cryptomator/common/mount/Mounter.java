@@ -58,7 +58,14 @@ public class Mounter {
 							builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
 					case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
 					case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
-					case MOUNT_FLAGS -> builder.setMountFlags(Objects.requireNonNullElse(vaultSettings.mountFlags().getValue(), service.getDefaultMountFlags()));
+					case MOUNT_FLAGS -> {
+						var mountFlags = vaultSettings.mountFlags().get();
+						if( mountFlags == null || mountFlags.isBlank()) {
+							builder.setMountFlags(service.getDefaultMountFlags());
+						} else {
+							builder.setMountFlags(mountFlags);
+						}
+					}
 					case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
 					case VOLUME_NAME -> builder.setVolumeName(vaultSettings.mountName().get());
 				}
