@@ -116,6 +116,9 @@ jobs:
       - name: Fix permissions
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
+      - name: Extract integrations DLL for code signing
+        shell: pwsh
+        run: gci ./appdir/Cryptomator/app/mods/ -File integrations-win-*.jar | ForEach-Object {Set-Location -Path $_.Directory; jar --file=$($_.FullName) --extract integrations.dll }
       - name: Codesign
         uses: skymatic/code-sign-action@v2
         with:
@@ -126,6 +129,10 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
+      - name: Repack signed DLL into jar
+        shell: pwsh
+        run: |
+          gci ./appdir/Cryptomator/app/mods/ -File integrations-win-*.jar | ForEach-Object {Set-Location -Path $_.Directory; jar --file=$($_.FullName) --update integrations.dll; Remove-Item integrations.dll}
       - name: Generate license for MSI
         run: >
           mvn -B license:add-third-party
