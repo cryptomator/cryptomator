@@ -148,7 +148,6 @@ public class VaultDetailUnlockedController implements FxController {
 			});
 		}, () -> LOG.warn("No service provider to reveal files found."));
 	}
-	}
 
 	/* Getter/Setter */
 
