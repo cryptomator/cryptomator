@@ -5,6 +5,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.tobiasdiez.easybind.EasyBind;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.integrations.revealpath.RevealFailedException;
+import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
@@ -23,14 +25,12 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {
@@ -75,10 +75,8 @@ public class VaultDetailUnlockedController implements FxController {
 				event.acceptTransferModes(TransferMode.LINK);
 			}
 		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
-			Set<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).collect(Collectors.toSet());
-			if (!ciphertextPaths.isEmpty()) {
-				ciphertextPaths.forEach(this::revealPath);
-			}
+			List<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).toList();
+			revealPaths(ciphertextPaths);
 			event.setDropCompleted(!ciphertextPaths.isEmpty());
 			event.consume();
 		} else if (DragEvent.DRAG_EXITED.equals(event.getEventType())) {
@@ -113,11 +111,7 @@ public class VaultDetailUnlockedController implements FxController {
 		var cleartextFile = fileChooser.showOpenDialog(mainWindow);
 		if (cleartextFile != null) {
 			var ciphertextPath = getCiphertextPath(cleartextFile.toPath());
-			if (ciphertextPath.isPresent()) {
-				revealPath(ciphertextPath.get());
-			} else {
-				LOG.warn("Could not find ciphertext file for {}", cleartextFile);
-			}
+			revealPaths(ciphertextPath.stream().toList());
 		}
 	}
 
@@ -138,14 +132,22 @@ public class VaultDetailUnlockedController implements FxController {
 			}
 			return Optional.of(vault.get().getCiphertextPath(cleartextPath));
 		} catch (IOException e) {
-			LOG.debug("Unable to get ciphertext path from path: {}", path);
+			LOG.warn("Unable to get ciphertext path from path: {}", path);
 			return Optional.empty();
 		}
 	}
 
-	private void revealPath(Path path) {
-		// Unable to use `application.get().getHostServices().showDocument()` here, because it does not reveal files, only folders.
-		Desktop.getDesktop().browseFileDirectory(path.toFile());
+	private void revealPaths(List<Path> paths) {
+		RevealPathService.get().findAny().ifPresentOrElse(s -> {
+			paths.forEach(path -> {
+				try {
+					s.reveal(path);
+				} catch (RevealFailedException e) {
+					LOG.error("Revealing ciphertext file failed.", e);
+				}
+			});
+		}, () -> LOG.warn("No service provider to reveal files found."));
+	}
 	}
 
 	/* Getter/Setter */
