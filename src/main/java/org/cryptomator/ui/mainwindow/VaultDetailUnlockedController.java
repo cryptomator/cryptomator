@@ -11,6 +11,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
+import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,20 +47,22 @@ public class VaultDetailUnlockedController implements FxController {
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final FxApplicationWindows appWindows;
 	private final VaultService vaultService;
+	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	private final Stage mainWindow;
 	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
-	private final BooleanProperty draggingUnlockedVaultContentOver = new SimpleBooleanProperty();
+	private final BooleanProperty draggingOver = new SimpleBooleanProperty();
 	private final BooleanProperty ciphertextPathsCopied = new SimpleBooleanProperty();
 
 	public Button dropZone;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, @MainWindow Stage mainWindow, ResourceBundle resourceBundle) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, WrongFileAlertComponent.Builder wrongFileAlert, @MainWindow Stage mainWindow, ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
+		this.wrongFileAlert = wrongFileAlert;
 		this.mainWindow = mainWindow;
 		this.resourceBundle = resourceBundle;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
@@ -72,22 +75,23 @@ public class VaultDetailUnlockedController implements FxController {
 		dropZone.setOnDragDropped(this::handleDragEvent);
 		dropZone.setOnDragExited(this::handleDragEvent);
 
-		EasyBind.includeWhen(dropZone.getStyleClass(), ACTIVE_CLASS, draggingUnlockedVaultContentOver);
+		EasyBind.includeWhen(dropZone.getStyleClass(), ACTIVE_CLASS, draggingOver);
 	}
-
 	private void handleDragEvent(DragEvent event) {
 		if (DragEvent.DRAG_OVER.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
-			draggingUnlockedVaultContentOver.set(event.getDragboard().getFiles().stream().map(File::toPath).anyMatch(this::containsUnlockedVaultContent));
-			if (draggingUnlockedVaultContentOver.get()) {
-				event.acceptTransferModes(TransferMode.LINK);
-			}
+			event.acceptTransferModes(TransferMode.ANY);
+			draggingOver.set(true);
 		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 			List<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).toList();
-			revealOrCopyPaths(ciphertextPaths);
+			if (ciphertextPaths.isEmpty()) {
+				wrongFileAlert.build().showWrongFileAlertWindow();
+			} else {
+				revealOrCopyPaths(ciphertextPaths);
+			}
 			event.setDropCompleted(!ciphertextPaths.isEmpty());
 			event.consume();
 		} else if (DragEvent.DRAG_EXITED.equals(event.getEventType())) {
-			draggingUnlockedVaultContentOver.set(false);
+			draggingOver.set(false);
 		}
 	}
 
@@ -188,14 +192,6 @@ public class VaultDetailUnlockedController implements FxController {
 
 	public Vault getVault() {
 		return vault.get();
-	}
-
-	public BooleanProperty draggingUnlockedVaultContentOverProperty() {
-		return draggingUnlockedVaultContentOver;
-	}
-
-	public boolean isDraggingUnlockedVaultContentOver() {
-		return draggingUnlockedVaultContentOver.get();
 	}
 
 	public BooleanProperty ciphertextPathsCopiedProperty() {
