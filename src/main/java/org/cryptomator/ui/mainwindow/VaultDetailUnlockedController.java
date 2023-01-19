@@ -15,12 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
@@ -29,8 +32,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {
@@ -45,6 +51,7 @@ public class VaultDetailUnlockedController implements FxController {
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
 	private final BooleanProperty draggingUnlockedVaultContentOver = new SimpleBooleanProperty();
+	private final BooleanProperty ciphertextPathsCopied = new SimpleBooleanProperty();
 
 	public Button dropZone;
 
@@ -76,7 +83,7 @@ public class VaultDetailUnlockedController implements FxController {
 			}
 		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 			List<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).toList();
-			revealPaths(ciphertextPaths);
+			revealOrCopyPaths(ciphertextPaths);
 			event.setDropCompleted(!ciphertextPaths.isEmpty());
 			event.consume();
 		} else if (DragEvent.DRAG_EXITED.equals(event.getEventType())) {
@@ -110,8 +117,8 @@ public class VaultDetailUnlockedController implements FxController {
 		fileChooser.setInitialDirectory(Path.of(vault.get().getAccessPoint()).toFile());
 		var cleartextFile = fileChooser.showOpenDialog(mainWindow);
 		if (cleartextFile != null) {
-			var ciphertextPath = getCiphertextPath(cleartextFile.toPath());
-			revealPaths(ciphertextPath.stream().toList());
+			var ciphertextPaths = getCiphertextPath(cleartextFile.toPath()).stream().toList();
+			revealOrCopyPaths(ciphertextPaths);
 		}
 	}
 
@@ -137,8 +144,21 @@ public class VaultDetailUnlockedController implements FxController {
 		}
 	}
 
-	private void revealPaths(List<Path> paths) {
-		RevealPathService.get().findAny().ifPresentOrElse(s -> {
+	private void revealOrCopyPaths(List<Path> paths) {
+		if (!revealPaths(paths)) {
+			LOG.warn("No service provider to reveal files found.");
+			copyPathsToClipboard(paths);
+		}
+	}
+
+	/**
+	 * Reveals the paths over the {@link RevealPathService} in the file system
+	 *
+	 * @param paths List of Paths to reveal
+	 * @return true, if at least one service provider was present, false otherwise
+	 */
+	private boolean revealPaths(List<Path> paths) {
+		return RevealPathService.get().findAny().map(s -> {
 			paths.forEach(path -> {
 				try {
 					s.reveal(path);
@@ -146,7 +166,18 @@ public class VaultDetailUnlockedController implements FxController {
 					LOG.error("Revealing ciphertext file failed.", e);
 				}
 			});
-		}, () -> LOG.warn("No service provider to reveal files found."));
+			return true;
+		}).orElse(false);
+	}
+
+	private void copyPathsToClipboard(List<Path> paths) {
+		StringBuilder clipboardString = new StringBuilder();
+		paths.forEach(p -> clipboardString.append(p.toString()).append("\n"));
+		Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, clipboardString.toString()));
+		ciphertextPathsCopied.setValue(true);
+		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
+			ciphertextPathsCopied.set(false);
+		});
 	}
 
 	/* Getter/Setter */
@@ -167,4 +198,11 @@ public class VaultDetailUnlockedController implements FxController {
 		return draggingUnlockedVaultContentOver.get();
 	}
 
+	public BooleanProperty ciphertextPathsCopiedProperty() {
+		return ciphertextPathsCopied;
+	}
+
+	public boolean isCiphertextPathsCopied() {
+		return ciphertextPathsCopied.get();
+	}
 }

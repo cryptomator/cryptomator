@@ -36,9 +36,14 @@
 	<Region VBox.vgrow="ALWAYS"/>
 
 	<HBox alignment="BOTTOM_CENTER">
-		<Button fx:id="dropZone" styleClass="drag-n-drop" text="%main.vaultDetail.revealEncryptedItemBtn" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseItemAndReveal" contentDisplay="TOP">
+		<Button fx:id="dropZone" styleClass="drag-n-drop" text="%main.vaultDetail.revealEncryptedItemBtn" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseItemAndReveal" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
 			<graphic>
 				<FontAwesome5IconView glyph="ARROW_DOWN"/>
+			</graphic>
+		</Button>
+		<Button text="%main.vaultDetail.encryptedPathsCopied" styleClass="drag-n-drop" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseItemAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
+			<graphic>
+				<FontAwesome5IconView glyph="CHECK"/>
 			</graphic>
 		</Button>
 
