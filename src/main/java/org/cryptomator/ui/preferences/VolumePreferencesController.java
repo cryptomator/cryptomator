@@ -15,6 +15,8 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
 import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 /**
  * TODO: if WebDAV is selected under Windows, show warning that specific mount options (like selecting a directory as mount point) are _not_ supported
@@ -24,6 +26,7 @@ public class VolumePreferencesController implements FxController {
 
 	private final Settings settings;
 	private final ObservableValue<ActualMountService> selectedMountService;
+	private final ResourceBundle resourceBundle;
 	private final BooleanExpression loopbackPortSupported;
 	private final ObservableValue<Boolean> mountToDirSupported;
 	private final ObservableValue<Boolean> mountToDriveLetterSupported;
@@ -35,10 +38,11 @@ public class VolumePreferencesController implements FxController {
 	public Button loopbackPortApplyButton;
 
 	@Inject
-	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ObservableValue<ActualMountService> actualMountService) {
+	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ObservableValue<ActualMountService> actualMountService, ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.mountProviders = mountProviders;
 		this.selectedMountService = actualMountService;
+		this.resourceBundle = resourceBundle;
 		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(as -> as.service().hasCapability(MountCapability.LOOPBACK_PORT)));
 		this.mountToDirSupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT) || as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR));
 		this.mountToDriveLetterSupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
@@ -47,10 +51,15 @@ public class VolumePreferencesController implements FxController {
 	}
 
 	public void initialize() {
+		volumeTypeChoiceBox.getItems().add(null);
 		volumeTypeChoiceBox.getItems().addAll(mountProviders);
 		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
-		volumeTypeChoiceBox.getSelectionModel().select(selectedMountService.getValue().service());
-		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvide, newProvider) -> settings.mountService().set(newProvider.getClass().getName()));
+		boolean autoSelected = settings.mountService().get() == null;
+		volumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue().service());
+		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvider, newProvider) -> {
+			var toSet = Optional.ofNullable(newProvider).map(nP -> nP.getClass().getName()).orElse(null);
+			settings.mountService().set(toSet);
+		});
 
 		loopbackPortField.setText(String.valueOf(settings.port().get()));
 		loopbackPortApplyButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(loopbackPortField.textProperty()));
@@ -117,11 +126,15 @@ public class VolumePreferencesController implements FxController {
 
 	/* Helpers */
 
-	private static class MountServiceConverter extends StringConverter<MountService> {
+	private class MountServiceConverter extends StringConverter<MountService> {
 
 		@Override
 		public String toString(MountService provider) {
-			return provider.displayName();
+			if (provider == null) {
+				return resourceBundle.getString("generic.choicebox.autoSelection");
+			} else {
+				return provider.displayName();
+			}
 		}
 
 		@Override
