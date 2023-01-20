@@ -204,16 +204,6 @@
 	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 2, 0, 0, 0);
 }
 
-.main-window .drag-n-drop-indicator {
-	-fx-border-color: SECONDARY;
-	-fx-border-width: 3px;
-}
-
-.main-window .drag-n-drop-indicator .drag-n-drop-header {
-	-fx-background-color: SECONDARY;
-	-fx-padding: 3px;
-}
-
 /*******************************************************************************
  *                                                                             *
  * TabPane                                                                     *
@@ -883,4 +873,41 @@
 .default-color0.chart-series-area-fill {
 	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
 	-fx-stroke: transparent;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Drag and Drop                                                               *
+ *                                                                             *
+ ******************************************************************************/
+
+.drag-n-drop-border {
+	-fx-border-color: SECONDARY;
+	-fx-border-width: 3px;
+}
+
+.button.drag-n-drop {
+	-fx-background-color: CONTROL_BG_NORMAL;
+	-fx-background-insets: 0;
+	-fx-padding: 1.4em 1em 1.4em 1em;
+	-fx-text-fill: TEXT_FILL_MUTED;
+	-fx-font-size: 0.8em;
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-radius: 4px;
+	-fx-border-style: dashed inside;
+	-fx-border-width: 1px;
+}
+
+.button.drag-n-drop:focused {
+	-fx-border-color: CONTROL_BORDER_FOCUSED;
+}
+
+.button.drag-n-drop:armed {
+	-fx-background-color: CONTROL_BG_ARMED;
+}
+
+.button.drag-n-drop.active {
+	-fx-border-color: SECONDARY;
+	-fx-border-style: solid inside;
+	-fx-border-width: 1px;
 }

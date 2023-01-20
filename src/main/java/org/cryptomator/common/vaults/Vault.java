@@ -67,7 +67,6 @@ public class Vault {
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
 	private final ObjectBinding<Mountpoint> mountPoint;
-	private final WindowsDriveLetters windowsDriveLetters;
 	private final Mounter mounter;
 	private final BooleanProperty showingStats;
 
@@ -89,7 +88,6 @@ public class Vault {
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
-		this.windowsDriveLetters = windowsDriveLetters;
 		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
 	}
@@ -314,6 +312,22 @@ public class Vault {
 
 	public Path getPath() {
 		return vaultSettings.path().getValue();
+	}
+
+	/**
+	 * Gets from the cleartext path its ciphertext counterpart.
+	 * The cleartext path has to start from the vault root (by starting with "/").
+	 *
+	 * @return Local os path to the ciphertext resource
+	 * @throws IOException if an I/O error occurs
+	 */
+	public Path getCiphertextPath(String cleartextPath) throws IOException {
+		if (!cleartextPath.startsWith("/")) {
+			throw new IllegalArgumentException("Input path must be absolute from vault root by starting with \"/\".");
+		}
+		var fs = cryptoFileSystem.get();
+		var cryptoPath = fs.getPath(cleartextPath);
+		return fs.getCiphertextPath(cryptoPath);
 	}
 
 	public VaultConfigCache getVaultConfigCache() {

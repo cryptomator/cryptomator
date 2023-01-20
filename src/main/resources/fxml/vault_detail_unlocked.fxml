@@ -5,6 +5,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.geometry.Insets?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailUnlockedController"
@@ -41,7 +43,28 @@
 
 	<Region VBox.vgrow="ALWAYS"/>
 
-	<HBox alignment="BOTTOM_RIGHT">
+	<HBox alignment="BOTTOM_CENTER">
+		<HBox visible="${controller.accessibleViaPath}" managed="${controller.accessibleViaPath}">
+			<padding>
+				<Insets topRightBottomLeft="0"/>
+			</padding>
+			<Button fx:id="dropZone" styleClass="drag-n-drop" text="%main.vaultDetail.locateEncryptedFileBtn" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseFileAndReveal" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
+				<graphic>
+					<FontAwesome5IconView glyph="FILE_DOWNLOAD" glyphSize="15"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
+				</tooltip>
+			</Button>
+			<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseFileAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
+				</graphic>
+			</Button>
+		</HBox>
+
+		<Region HBox.hgrow="ALWAYS"/>
+
 		<Button text="%main.vaultDetail.stats" minWidth="120" onAction="#showVaultStatistics" contentDisplay="BOTTOM">
 			<graphic>
 				<VBox spacing="6">
