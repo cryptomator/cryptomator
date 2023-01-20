@@ -8,25 +8,29 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
-<VBox xmlns:fx="http://javafx.com/fxml"
-	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
-	  minWidth="206">
-	<StackPane VBox.vgrow="ALWAYS">
-		<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
-			<contextMenu>
-				<fx:include source="vault_list_contextmenu.fxml"/>
-			</contextMenu>
-		</ListView>
-		<VBox visible="${controller.emptyVaultList}" spacing="6" alignment="CENTER">
-			<Region VBox.vgrow="ALWAYS"/>
-			<Label VBox.vgrow="NEVER" text="%main.vaultlist.emptyList.onboardingInstruction" textAlignment="CENTER" wrapText="true"/>
-			<Arc VBox.vgrow="NEVER" styleClass="onboarding-overlay-arc" type="OPEN" centerX="50" centerY="0" radiusY="100" radiusX="50" startAngle="0" length="-60" strokeWidth="1"/>
-		</VBox>
-	</StackPane>
-	<Button styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" onAction="#didClickAddVault" alignment="BASELINE_CENTER" maxWidth="Infinity">
-		<graphic>
-			<FontAwesome5IconView glyph="PLUS"/>
-		</graphic>
-	</Button>
-</VBox>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+		   xmlns="http://javafx.com/javafx"
+		   fx:id="root"
+		   fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
+		   minWidth="206">
+	<VBox>
+		<StackPane VBox.vgrow="ALWAYS">
+			<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
+				<contextMenu>
+					<fx:include source="vault_list_contextmenu.fxml"/>
+				</contextMenu>
+			</ListView>
+			<VBox visible="${controller.emptyVaultList}" spacing="6" alignment="CENTER">
+				<Region VBox.vgrow="ALWAYS"/>
+				<Label VBox.vgrow="NEVER" text="%main.vaultlist.emptyList.onboardingInstruction" textAlignment="CENTER" wrapText="true"/>
+				<Arc VBox.vgrow="NEVER" styleClass="onboarding-overlay-arc" type="OPEN" centerX="50" centerY="0" radiusY="100" radiusX="50" startAngle="0" length="-60" strokeWidth="1"/>
+			</VBox>
+		</StackPane>
+		<Button styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" onAction="#didClickAddVault" alignment="BASELINE_CENTER" maxWidth="Infinity">
+			<graphic>
+				<FontAwesome5IconView glyph="PLUS"/>
+			</graphic>
+		</Button>
+	</VBox>
+	<Region styleClass="drag-n-drop-border" visible="${controller.draggingVaultOver}"/>
+</StackPane>

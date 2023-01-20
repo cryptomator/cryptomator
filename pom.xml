@@ -28,11 +28,11 @@
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptolib.version>2.1.1</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>2.5.3</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>1.2.0-beta3</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.1.2</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.1.2</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.1.0</cryptomator.integrations.linux.version>
+		<cryptomator.cryptofs.version>2.6.1</cryptomator.cryptofs.version>
+		<cryptomator.integrations.version>1.2.0-beta4</cryptomator.integrations.version>
+		<cryptomator.integrations.win.version>1.2.0-beta1</cryptomator.integrations.win.version>
+		<cryptomator.integrations.mac.version>1.2.0-beta1</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.linux.version>1.2.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>1.3.4</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.3.3</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.2.8</cryptomator.webdav.version>
