@@ -99,7 +99,6 @@ public class Mounter {
 				if (canMountToParent && !canMountToDir) {
 					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
 					cleanup = () -> {
-						System.out.println("CLEANUP");
 						MountWithinParentUtil.cleanup(userChosenMountPoint);
 					};
 				}
