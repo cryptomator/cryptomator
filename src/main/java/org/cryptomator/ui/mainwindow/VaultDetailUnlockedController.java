@@ -77,6 +77,7 @@ public class VaultDetailUnlockedController implements FxController {
 
 		EasyBind.includeWhen(dropZone.getStyleClass(), ACTIVE_CLASS, draggingOver);
 	}
+
 	private void handleDragEvent(DragEvent event) {
 		if (DragEvent.DRAG_OVER.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 			event.acceptTransferModes(TransferMode.LINK);
@@ -115,7 +116,7 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	@FXML
-	public void chooseItemAndReveal() {
+	public void chooseFileAndReveal() {
 		var fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.filePickerTitle"));
 		fileChooser.setInitialDirectory(Path.of(vault.get().getAccessPoint()).toFile());
@@ -126,12 +127,12 @@ public class VaultDetailUnlockedController implements FxController {
 		}
 	}
 
-	private boolean containsUnlockedVaultContent(Path path) {
+	private boolean startsWithVaultAccessPoint(Path path) {
 		return path.startsWith(vault.get().getAccessPoint());
 	}
 
 	private Optional<Path> getCiphertextPath(Path path) {
-		if (!containsUnlockedVaultContent(path)) {
+		if (!startsWithVaultAccessPoint(path)) {
 			LOG.debug("Path does not start with access point of selected vault: {}", path);
 			return Optional.empty();
 		}

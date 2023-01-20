@@ -36,7 +36,7 @@
 	<Region VBox.vgrow="ALWAYS"/>
 
 	<HBox alignment="BOTTOM_CENTER">
-		<Button fx:id="dropZone" styleClass="drag-n-drop" text="%main.vaultDetail.locateEncryptedFileBtn" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseItemAndReveal" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
+		<Button fx:id="dropZone" styleClass="drag-n-drop" text="%main.vaultDetail.locateEncryptedFileBtn" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseFileAndReveal" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
 			<graphic>
 				<FontAwesome5IconView glyph="FILE_DOWNLOAD" glyphSize="15"/>
 			</graphic>
@@ -44,9 +44,9 @@
 				<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
 			</tooltip>
 		</Button>
-		<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseItemAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
+		<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseFileAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
 			<graphic>
-				<FontAwesome5IconView glyph="CHECK"/>
+				<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
 			</graphic>
 		</Button>
 
