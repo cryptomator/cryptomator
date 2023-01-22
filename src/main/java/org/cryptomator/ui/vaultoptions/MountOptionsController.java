@@ -109,7 +109,10 @@ public class MountOptionsController implements FxController {
 		if (customMountFlagsCheckbox.isSelected()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 			mountFlagsField.textProperty().unbind();
-			vaultSettings.mountFlags().set(defaultMountFlags.getValue());
+			var mountFlags = vaultSettings.mountFlags().get();
+			if(mountFlags == null || mountFlags.isBlank()) {
+				vaultSettings.mountFlags().set(defaultMountFlags.getValue());
+			}
 			mountFlagsField.textProperty().bindBidirectional(vaultSettings.mountFlags());
 		} else {
 			mountFlagsField.textProperty().unbindBidirectional(vaultSettings.mountFlags());
