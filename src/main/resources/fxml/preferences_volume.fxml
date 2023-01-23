@@ -32,6 +32,11 @@
 
 		<Label text="%preferences.volume.supportedFeatures"/>
 		<VBox spacing="12">
+			<Label text="%preferences.volume.feature.mountAuto">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK"/>
+				</graphic>
+			</Label>
 			<Label text="%preferences.volume.feature.mountToDir" visible="${controller.mountToDirSupported}" managed="${controller.mountToDirSupported}" contentDisplay="LEFT">
 				<graphic>
 					<FontAwesome5IconView glyph="CHECK"/>
