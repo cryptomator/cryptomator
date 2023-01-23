@@ -63,7 +63,7 @@
 					</graphic>
 				</Button>
 			</HBox>
-			<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false" >
+			<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false">
 				<VBox.margin>
 					<Insets left="24"/>
 				</VBox.margin>
