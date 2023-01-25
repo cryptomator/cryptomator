@@ -131,7 +131,7 @@ public class VolumePreferencesController implements FxController {
 		@Override
 		public String toString(MountService provider) {
 			if (provider == null) {
-				return resourceBundle.getString("generic.choicebox.autoSelection");
+				return resourceBundle.getString("preferences.volume.type.automatic");
 			} else {
 				return provider.displayName();
 			}
