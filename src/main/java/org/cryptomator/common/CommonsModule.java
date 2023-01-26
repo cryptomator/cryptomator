@@ -10,19 +10,17 @@ import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.keychain.KeychainModule;
+import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
-import org.cryptomator.frontend.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javafx.beans.binding.Binding;
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
@@ -34,7 +32,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Module(subcomponents = {VaultComponent.class}, includes = {VaultListModule.class, KeychainModule.class})
+@Module(subcomponents = {VaultComponent.class}, includes = {VaultListModule.class, KeychainModule.class, MountModule.class})
 public abstract class CommonsModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CommonsModule.class);
@@ -136,15 +134,6 @@ public abstract class CommonsModule {
 			String host = SystemUtils.IS_OS_WINDOWS ? "127.0.0.1" : "localhost";
 			return InetSocketAddress.createUnresolved(host, settings.port().intValue());
 		});
-	}
-
-	@Provides
-	@Singleton
-	static WebDavServer provideWebDavServer(ObservableValue<InetSocketAddress> serverSocketAddressBinding) {
-		WebDavServer server = WebDavServer.create();
-		// no need to unsubscribe eventually, because server is a singleton
-		EasyBind.subscribe(serverSocketAddressBinding, server::bind);
-		return server;
 	}
 
 }

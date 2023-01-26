@@ -24,7 +24,8 @@
 		<project.jdk.version>19</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
-		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
+		<!-- Check progress on https://github.com/swiesend/secret-service/issues/31 to remove hypfvieh, swiesend and jnr -->
+		<nonModularGroupIds>com.github.jnr,org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptolib.version>2.1.1</cryptomator.cryptolib.version>
@@ -33,9 +34,9 @@
 		<cryptomator.integrations.win.version>1.2.0-beta1</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.0-beta2</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.2.0-beta1</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>1.3.4</cryptomator.fuse.version>
-		<cryptomator.dokany.version>1.3.3</cryptomator.dokany.version>
-		<cryptomator.webdav.version>1.2.8</cryptomator.webdav.version>
+		<cryptomator.fuse.version>2.0.0-beta4</cryptomator.fuse.version>
+		<cryptomator.dokany.version>2.0.0-beta2</cryptomator.dokany.version>
+		<cryptomator.webdav.version>2.0.0-beta4</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.12.0</commons-lang3.version>
@@ -314,6 +315,7 @@
 					<compilerArgs>
 						<arg>-Adagger.fastInit=enabled</arg>
 						<arg>-Adagger.formatGeneratedSource=enabled</arg>
+						<arg>--enable-preview</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>

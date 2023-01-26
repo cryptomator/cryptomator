@@ -34,8 +34,6 @@ public class VaultSettingsJsonAdapterTest {
 				() -> assertEquals("foo", vaultSettings.getId()),
 				() -> assertEquals(Paths.get("/foo/bar"), vaultSettings.path().get()),
 				() -> assertEquals("test", vaultSettings.displayName().get()),
-				() -> assertEquals("X", vaultSettings.winDriveLetter().get()),
-				() -> assertEquals("/home/test/crypto", vaultSettings.customMountPath().get()),
 				() -> assertEquals("--foo --bar", vaultSettings.mountFlags().get())
 		);
 	}

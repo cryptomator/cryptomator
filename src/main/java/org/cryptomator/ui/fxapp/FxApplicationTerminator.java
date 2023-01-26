@@ -3,10 +3,9 @@ package org.cryptomator.ui.fxapp;
 import com.google.common.base.Preconditions;
 import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.cryptomator.ui.common.VaultService;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -18,6 +17,7 @@ import javafx.collections.ObservableList;
 import java.awt.Desktop;
 import java.awt.desktop.QuitResponse;
 import java.awt.desktop.QuitStrategy;
+import java.io.IOException;
 import java.util.EnumSet;
 import java.util.EventObject;
 import java.util.Set;
@@ -128,10 +128,8 @@ public class FxApplicationTerminator {
 			if (vault.isUnlocked()) {
 				try {
 					vault.lock(true);
-				} catch (Volume.VolumeException e) {
+				} catch (UnmountFailedException | IOException e) {
 					LOG.error("Failed to unmount vault " + vault.getPath(), e);
-				} catch (LockNotCompletedException e) {
-					LOG.error("Failed to lock vault " + vault.getPath(), e);
 				}
 			}
 		}

@@ -71,7 +71,6 @@ public class AwtTrayMenuController implements TrayMenuController {
 		addChildren(menu, items);
 	}
 
-
 	@Override
 	public void onBeforeOpenMenu(Runnable listener) {
 		Preconditions.checkNotNull(this.trayIcon);

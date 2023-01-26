@@ -1,13 +1,18 @@
 package org.cryptomator.ui.unlock;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.vaults.MountPointRequirement;
+import org.cryptomator.common.mount.MountPointNotExistsException;
+import org.cryptomator.common.mount.MountPointNotSupportedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.controls.FormattedLabel;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 //At the current point in time only the CustomMountPointChooser may cause this window to be shown.
 @UnlockScoped
@@ -15,11 +20,32 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
+	private final AtomicReference<Throwable> unlockException;
+	private final FxApplicationWindows appWindows;
+	private final ResourceBundle resourceBundle;
+
+	public FormattedLabel dialogDescription;
 
 	@Inject
-	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault) {
+	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow AtomicReference<Throwable> unlockException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
+		this.unlockException = unlockException;
+		this.appWindows = appWindows;
+		this.resourceBundle = resourceBundle;
+	}
+
+	@FXML
+	public void initialize() {
+		var e = unlockException.get();
+		String translationKey = "unlock.error.customPath.description.generic";
+		if (e instanceof MountPointNotSupportedException) {
+			translationKey = "unlock.error.customPath.description.notSupported";
+		} else if (e instanceof MountPointNotExistsException) {
+			translationKey = "unlock.error.customPath.description.notExists";
+		}
+		dialogDescription.setFormat(resourceBundle.getString(translationKey));
+		dialogDescription.setArg1(e.getMessage());
 	}
 
 	@FXML
@@ -27,30 +53,10 @@ public class UnlockInvalidMountPointController implements FxController {
 		window.close();
 	}
 
-	/* Getter/Setter */
-
-	public String getMountPoint() {
-		return vault.getVaultSettings().getCustomMountPath().orElse("AUTO");
+	@FXML
+	public void closeAndOpenPreferences() {
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+		window.close();
 	}
 
-	public boolean getNotExisting() {
-		return getMountPointRequirement() == MountPointRequirement.EMPTY_MOUNT_POINT;
-	}
-
-	public boolean getExisting() {
-		return getMountPointRequirement() == MountPointRequirement.PARENT_NO_MOUNT_POINT;
-	}
-
-	public boolean getDriveLetterOccupied() {
-		return getMountPointRequirement() == MountPointRequirement.UNUSED_ROOT_DIR;
-	}
-
-	private MountPointRequirement getMountPointRequirement() {
-		var requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!")).getMountPointRequirement();
-		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
-		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
-		assert requirement != MountPointRequirement.UNUSED_ROOT_DIR || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
-
-		return requirement;
-	}
 }

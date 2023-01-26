@@ -9,6 +9,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +45,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("autoCloseVaults").value(value.autoCloseVaults().get());
 		out.name("port").value(value.port().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
-		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
 		out.name("debugMode").value(value.debugMode().get());
-		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
 		out.name("theme").value(value.theme().get().name());
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
 		out.name("keychainProvider").value(value.keychainProvider().get());
@@ -60,7 +59,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("windowHeight").value((value.windowHeightProperty().get()));
 		out.name("displayConfiguration").value((value.displayConfigurationProperty().get()));
 		out.name("language").value((value.languageProperty().get()));
-
+		out.name("mountService").value(value.mountService().get());
 		out.endObject();
 	}
 
@@ -75,7 +74,9 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 	@Override
 	public Settings read(JsonReader in) throws IOException {
 		Settings settings = new Settings(env);
-
+		//1.6.x legacy
+		String volumeImpl = null;
+		//legacy end
 		in.beginObject();
 		while (in.hasNext()) {
 			String name = in.nextName();
@@ -87,9 +88,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "autoCloseVaults" -> settings.autoCloseVaults().set(in.nextBoolean());
 				case "port" -> settings.port().set(in.nextInt());
 				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
-				case "preferredGvfsScheme" -> settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
 				case "debugMode" -> settings.debugMode().set(in.nextBoolean());
-				case "preferredVolumeImpl" -> settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
 				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
 				case "keychainProvider" -> settings.keychainProvider().set(in.nextString());
@@ -103,33 +102,52 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "windowHeight" -> settings.windowHeightProperty().set(in.nextInt());
 				case "displayConfiguration" -> settings.displayConfigurationProperty().set(in.nextString());
 				case "language" -> settings.languageProperty().set(in.nextString());
-
+				case "mountService" -> {
+					var token = in.peek();
+					if (JsonToken.STRING == token) {
+						settings.mountService().set(in.nextString());
+					}
+				}
+				//1.6.x legacy
+				case "preferredVolumeImpl" -> volumeImpl = in.nextString();
+				//legacy end
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: {}", name);
 					in.skipValue();
 				}
 			}
+
 		}
 		in.endObject();
+
+		//1.6.x legacy
+		if (volumeImpl != null) {
+			settings.mountService().set(convertLegacyVolumeImplToMountService(volumeImpl));
+		}
+		//legacy end
 
 		return settings;
 	}
 
-	private VolumeImpl parsePreferredVolumeImplName(String nioAdapterName) {
-		try {
-			return VolumeImpl.valueOf(nioAdapterName.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid volume type {}. Defaulting to {}.", nioAdapterName, Settings.DEFAULT_PREFERRED_VOLUME_IMPL);
-			return Settings.DEFAULT_PREFERRED_VOLUME_IMPL;
-		}
-	}
-
-	private WebDavUrlScheme parseWebDavUrlSchemePrefix(String webDavUrlSchemeName) {
-		try {
-			return WebDavUrlScheme.valueOf(webDavUrlSchemeName.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid WebDAV url scheme {}. Defaulting to {}.", webDavUrlSchemeName, Settings.DEFAULT_GVFS_SCHEME);
-			return Settings.DEFAULT_GVFS_SCHEME;
+	private String convertLegacyVolumeImplToMountService(String volumeImpl) {
+		if (volumeImpl.equals("Dokany")) {
+			return "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
+		} else if (volumeImpl.equals("FUSE")) {
+			if(SystemUtils.IS_OS_WINDOWS) {
+				return "org.cryptomator.frontend.fuse.mount.WinFspNetworkMountProvider";
+			} else if (SystemUtils.IS_OS_MAC) {
+				return "org.cryptomator.frontend.fuse.mount.MacFuseMountProvider";
+			} else {
+				return "org.cryptomator.frontend.fuse.mount.LinuxFuseMountProvider";
+			}
+		} else {
+			if(SystemUtils.IS_OS_WINDOWS) {
+				return "org.cryptomator.frontend.webdav.mount.WindowsMounter";
+			} else if (SystemUtils.IS_OS_MAC) {
+				return "org.cryptomator.frontend.webdav.mount.MacAppleScriptMounter";
+			} else {
+				return "org.cryptomator.frontend.webdav.mount.LinuxGioMounter";
+			}
 		}
 	}
 

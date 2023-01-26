@@ -7,8 +7,8 @@
 		<cvssBelow>9</cvssBelow>
 	</suppress>
 	<suppress>
-		<notes><![CDATA[ Suppress known vulnerabilities in FUSE libraries for jnr-fuse (dependency of fuse-nio-adapter). ]]></notes>
-		<gav regex="true">^com\.github\.serceman:jnr-fuse:.*$</gav>
+		<notes><![CDATA[ Suppress known vulnerabilities in FUSE libraries for jfuse (dependency of fuse-nio-adapter). ]]></notes>
+		<gav regex="true">^org\.cryptomator:jfuse.*$</gav>
 		<cvssBelow>9</cvssBelow>
 	</suppress>
 

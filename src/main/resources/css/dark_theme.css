@@ -911,3 +911,14 @@
 	-fx-border-style: solid inside;
 	-fx-border-width: 1px;
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * Separator                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.separator {
+	-fx-padding: 0.5px;
+	-fx-background-color: CONTROL_BORDER_NORMAL;
+}

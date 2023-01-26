@@ -1,10 +1,12 @@
 package org.cryptomator.ui.mainwindow;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.tobiasdiez.easybind.EasyBind;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
@@ -21,9 +23,11 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
@@ -44,6 +48,7 @@ public class VaultDetailUnlockedController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultDetailUnlockedController.class);
 	private static final String ACTIVE_CLASS = "active";
+
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final FxApplicationWindows appWindows;
 	private final VaultService vaultService;
@@ -52,9 +57,13 @@ public class VaultDetailUnlockedController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
+	private final ObservableValue<Boolean> accessibleViaPath;
+	private final ObservableValue<Boolean> accessibleViaUri;
+	private final ObservableValue<String> mountPoint;
 	private final BooleanProperty draggingOver = new SimpleBooleanProperty();
 	private final BooleanProperty ciphertextPathsCopied = new SimpleBooleanProperty();
 
+	//FXML
 	public Button dropZone;
 
 	@Inject
@@ -67,6 +76,16 @@ public class VaultDetailUnlockedController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
 		this.vaultStatsBuilder = vaultStatsBuilder;
+		var mp = vault.flatMap(Vault::mountPointProperty);
+		this.accessibleViaPath = mp.map(m -> m instanceof Mountpoint.WithPath).orElse(false);
+		this.accessibleViaUri = mp.map(m -> m instanceof Mountpoint.WithUri).orElse(false);
+		this.mountPoint = mp.map(m -> {
+			if (m instanceof Mountpoint.WithPath mwp) {
+				return mwp.path().toString();
+			} else {
+				return m.uri().toASCIIString();
+			}
+		});
 	}
 
 	public void initialize() {
@@ -106,6 +125,13 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	@FXML
+	public void copyMountUri() {
+		ClipboardContent clipboardContent = new ClipboardContent();
+		clipboardContent.putString(mountPoint.getValue());
+		Clipboard.getSystemClipboard().setContent(clipboardContent);
+	}
+
+	@FXML
 	public void lock() {
 		appWindows.startLockWorkflow(vault.get(), mainWindow);
 	}
@@ -117,9 +143,10 @@ public class VaultDetailUnlockedController implements FxController {
 
 	@FXML
 	public void chooseFileAndReveal() {
+		Preconditions.checkState(accessibleViaPath.getValue());
 		var fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.filePickerTitle"));
-		fileChooser.setInitialDirectory(Path.of(vault.get().getAccessPoint()).toFile());
+		fileChooser.setInitialDirectory(Path.of(mountPoint.getValue()).toFile());
 		var cleartextFile = fileChooser.showOpenDialog(mainWindow);
 		if (cleartextFile != null) {
 			var ciphertextPaths = getCiphertextPath(cleartextFile.toPath()).stream().toList();
@@ -128,7 +155,7 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	private boolean startsWithVaultAccessPoint(Path path) {
-		return path.startsWith(vault.get().getAccessPoint());
+		return path.startsWith(Path.of(mountPoint.getValue()));
 	}
 
 	private Optional<Path> getCiphertextPath(Path path) {
@@ -137,7 +164,7 @@ public class VaultDetailUnlockedController implements FxController {
 			return Optional.empty();
 		}
 		try {
-			var accessPoint = vault.get().getAccessPoint();
+			var accessPoint = mountPoint.getValue();
 			var cleartextPath = path.toString().substring(accessPoint.length());
 			if (!cleartextPath.startsWith("/")) {
 				cleartextPath = "/" + cleartextPath;
@@ -193,6 +220,30 @@ public class VaultDetailUnlockedController implements FxController {
 
 	public Vault getVault() {
 		return vault.get();
+	}
+
+	public ObservableValue<Boolean> accessibleViaPathProperty() {
+		return accessibleViaPath;
+	}
+
+	public boolean isAccessibleViaPath() {
+		return accessibleViaPath.getValue();
+	}
+
+	public ObservableValue<Boolean> accessibleViaUriProperty() {
+		return accessibleViaUri;
+	}
+
+	public boolean isAccessibleViaUri() {
+		return accessibleViaUri.getValue();
+	}
+
+	public ObservableValue<String> mountPointProperty() {
+		return mountPoint;
+	}
+
+	public String getMountPoint() {
+		return mountPoint.getValue();
 	}
 
 	public BooleanProperty ciphertextPathsCopiedProperty() {

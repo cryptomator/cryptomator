@@ -1,17 +1,16 @@
 package org.cryptomator.ui.vaultoptions;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.Environment;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.VolumeImpl;
+import org.cryptomator.common.mount.ActualMountService;
+import org.cryptomator.common.mount.WindowsDriveLetters;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.WindowsDriveLetters;
+import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 
 import javax.inject.Inject;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -34,98 +33,128 @@ import java.util.Set;
 public class MountOptionsController implements FxController {
 
 	private final Stage window;
-	private final Vault vault;
-	private final VolumeImpl usedVolumeImpl;
+	private final VaultSettings vaultSettings;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
 
+	private final ObservableValue<String> defaultMountFlags;
+	private final ObservableValue<Boolean> mountpointDirSupported;
+	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
+	private final ObservableValue<Boolean> readOnlySupported;
+	private final ObservableValue<Boolean> mountFlagsSupported;
+	private final ObservableValue<String> directoryPath;
+	private final FxApplicationWindows applicationWindows;
+
+
+	//-- FXML objects --
 	public CheckBox readOnlyCheckbox;
 	public CheckBox customMountFlagsCheckbox;
-	public TextField mountFlags;
-	public ToggleGroup mountPoint;
-	public RadioButton mountPointAuto;
-	public RadioButton mountPointWinDriveLetter;
-	public RadioButton mountPointCustomDir;
-	public ChoiceBox<String> driveLetterSelection;
+	public TextField mountFlagsField;
+	public ToggleGroup mountPointToggleGroup;
+	public RadioButton mountPointAutoBtn;
+	public RadioButton mountPointDriveLetterBtn;
+	public RadioButton mountPointDirBtn;
+	public TextField directoryPathField;
+	public ChoiceBox<Path> driveLetterSelection;
 
 	@Inject
-	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
+	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ObservableValue<ActualMountService> mountService, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, FxApplicationWindows applicationWindows) {
 		this.window = window;
-		this.vault = vault;
-		this.usedVolumeImpl = settings.preferredVolumeImpl().get();
+		this.vaultSettings = vault.getVaultSettings();
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
+		this.defaultMountFlags = mountService.map(as -> {
+			if (as.service().hasCapability(MountCapability.MOUNT_FLAGS)) {
+				return as.service().getDefaultMountFlags();
+			} else {
+				return "";
+			}
+		});
+		this.mountpointDirSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
+		this.mountpointDriveLetterSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
+		this.mountFlagsSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
+		this.readOnlySupported = mountService.map(as -> as.service().hasCapability(MountCapability.READ_ONLY));
+		this.directoryPath = vault.getVaultSettings().mountPoint().map(p -> isDriveLetter(p) ? null : p.toString());
+		this.applicationWindows = applicationWindows;
 	}
 
 	@FXML
 	public void initialize() {
-
 		// readonly:
-		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
-		//TODO: support this feature on Windows
-		if (usedVolumeImpl == VolumeImpl.FUSE && isOsWindows()) {
-			readOnlyCheckbox.setSelected(false); // to prevent invalid states
-			readOnlyCheckbox.setDisable(true);
-		}
+		readOnlyCheckbox.selectedProperty().bindBidirectional(vaultSettings.usesReadOnlyMode());
 
 		// custom mount flags:
-		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
-		customMountFlagsCheckbox.setSelected(vault.isHavingCustomMountFlags());
-		if (vault.isHavingCustomMountFlags()) {
-			mountFlags.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
-			readOnlyCheckbox.setSelected(false); // to prevent invalid states
-		} else {
-			mountFlags.textProperty().bind(vault.defaultMountFlagsProperty());
-		}
+		mountFlagsField.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
+		customMountFlagsCheckbox.setSelected(!Strings.isNullOrEmpty(vaultSettings.mountFlags().getValue()));
+		toggleUseCustomMountFlags();
 
-		// mount point options:
-		mountPoint.selectedToggleProperty().addListener(this::toggleMountPoint);
-		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAllDriveLetters());
+		//driveLetter choice box
+		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAll());
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
-		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
-		if (vault.getVaultSettings().useCustomMountPath().get() && vault.getVaultSettings().getCustomMountPath().isPresent()) {
-			mountPoint.selectToggle(mountPointCustomDir);
-		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
-			mountPoint.selectToggle(mountPointWinDriveLetter);
+		//mountPoint toggle group
+		var mountPoint = vaultSettings.getMountPoint();
+		if (mountPoint == null) {
+			//prepare and select auto
+			mountPointToggleGroup.selectToggle(mountPointAutoBtn);
+		} else if (mountPoint.getParent() == null && isDriveLetter(mountPoint)) {
+			//prepare and select drive letter
+			mountPointToggleGroup.selectToggle(mountPointDriveLetterBtn);
+			driveLetterSelection.valueProperty().bindBidirectional(vaultSettings.mountPoint());
 		} else {
-			mountPoint.selectToggle(mountPointAuto);
+			//prepare and select dir
+			mountPointToggleGroup.selectToggle(mountPointDirBtn);
 		}
+		mountPointToggleGroup.selectedToggleProperty().addListener(this::selectedToggleChanged);
+	}
 
-		vault.getVaultSettings().useCustomMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
-		vault.getVaultSettings().winDriveLetter().bind( //
-				Bindings.when(mountPoint.selectedToggleProperty().isEqualTo(mountPointWinDriveLetter)) //
-						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
-						.otherwise((String) null) //
-		);
+	@FXML
+	public void openVolumePreferences() {
+		applicationWindows.showPreferencesWindow(SelectedPreferencesTab.VOLUME);
 	}
 
 	@FXML
 	public void toggleUseCustomMountFlags() {
 		if (customMountFlagsCheckbox.isSelected()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
-			mountFlags.textProperty().unbind();
-			vault.setCustomMountFlags(vault.defaultMountFlagsProperty().get());
-			mountFlags.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
+			mountFlagsField.textProperty().unbind();
+			var mountFlags = vaultSettings.mountFlags().get();
+			if (mountFlags == null || mountFlags.isBlank()) {
+				vaultSettings.mountFlags().set(defaultMountFlags.getValue());
+			}
+			mountFlagsField.textProperty().bindBidirectional(vaultSettings.mountFlags());
 		} else {
-			mountFlags.textProperty().unbindBidirectional(vault.getVaultSettings().mountFlags());
-			vault.setCustomMountFlags(null);
-			mountFlags.textProperty().bind(vault.defaultMountFlagsProperty());
+			mountFlagsField.textProperty().unbindBidirectional(vaultSettings.mountFlags());
+			vaultSettings.mountFlags().set(null);
+			mountFlagsField.textProperty().bind(defaultMountFlags);
 		}
 	}
 
 	@FXML
 	public void chooseCustomMountPoint() {
-		chooseCustomMountPointOrReset(mountPointCustomDir);
+		try {
+			Path chosenPath = chooseCustomMountPointInternal();
+			vaultSettings.mountPoint().set(chosenPath);
+		} catch (NoDirSelectedException e) {
+			//no-op
+		}
 	}
 
-	private void chooseCustomMountPointOrReset(Toggle previousMountToggle) {
+	/**
+	 * Prepares and opens a directory chooser dialog.
+	 * This method blocks until the dialog is closed.
+	 *
+	 * @return the absolute path to the chosen directory
+	 * @throws NoDirSelectedException if dialog is closed without choosing a directory
+	 */
+	private Path chooseCustomMountPointInternal() throws NoDirSelectedException {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.mountPoint.directoryPickerTitle"));
 		try {
-			var initialDir = Path.of(vault.getVaultSettings().getCustomMountPath().orElse(System.getProperty("user.home")));
+			var mp = vaultSettings.mountPoint().get();
+			var initialDir = mp != null && !isDriveLetter(mp) ? mp : Path.of(System.getProperty("user.home"));
 
-			if(Files.exists(initialDir)) {
+			if (Files.isDirectory(initialDir)) {
 				directoryChooser.setInitialDirectory(initialDir.toFile());
 			}
 		} catch (InvalidPathException e) {
@@ -133,73 +162,116 @@ public class MountOptionsController implements FxController {
 		}
 		File file = directoryChooser.showDialog(window);
 		if (file != null) {
-			vault.getVaultSettings().customMountPath().set(file.getAbsolutePath());
+			return file.toPath();
 		} else {
-			mountPoint.selectToggle(previousMountToggle);
+			throw new NoDirSelectedException();
 		}
 	}
 
-	private void toggleMountPoint(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
-		if (mountPointCustomDir.equals(newValue) && Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())) {
-			chooseCustomMountPointOrReset(oldValue);
+	private void selectedToggleChanged(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
+		//Remark: the mountpoint corresponding to the newToggle must be null, otherwise it would not be new!
+		driveLetterSelection.valueProperty().unbindBidirectional(vaultSettings.mountPoint());
+		if (mountPointDriveLetterBtn.equals(newToggle)) {
+			vaultSettings.mountPoint().set(windowsDriveLetters.getFirstDesiredAvailable().orElse(windowsDriveLetters.getAll().stream().findAny().get()));
+			driveLetterSelection.valueProperty().bindBidirectional(vaultSettings.mountPoint());
+		} else if (mountPointDirBtn.equals(newToggle)) {
+			try {
+				vaultSettings.mountPoint().set(chooseCustomMountPointInternal());
+			} catch (NoDirSelectedException e) {
+				if (oldToggle != null && !mountPointDirBtn.equals(oldToggle)) {
+					mountPointToggleGroup.selectToggle(oldToggle);
+				} else {
+					mountPointToggleGroup.selectToggle(mountPointAutoBtn);
+				}
+			}
+		} else {
+			vaultSettings.mountPoint().set(null);
 		}
 	}
 
-	/**
-	 * Converts 'C' to "C:" to translate between model and GUI.
-	 */
-	private static class WinDriveLetterLabelConverter extends StringConverter<String> {
+	private boolean isDriveLetter(Path mountPoint) {
+		if (mountPoint != null) {
+			var s = mountPoint.toString();
+			return s.length() == 3 && s.endsWith(":\\");
+		}
+		return false;
+	}
 
-		private final Set<String> occupiedDriveLetters;
+	private static class WinDriveLetterLabelConverter extends StringConverter<Path> {
+
+		private final Set<Path> occupiedDriveLetters;
 		private final ResourceBundle resourceBundle;
 
 		WinDriveLetterLabelConverter(WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle) {
-			this.occupiedDriveLetters = windowsDriveLetters.getOccupiedDriveLetters();
+			this.occupiedDriveLetters = windowsDriveLetters.getOccupied();
 			this.resourceBundle = resourceBundle;
 		}
 
 		@Override
-		public String toString(String driveLetter) {
-			if (Strings.isNullOrEmpty(driveLetter)) {
+		public String toString(Path driveLetter) {
+			if (driveLetter == null) {
 				return "";
 			} else if (occupiedDriveLetters.contains(driveLetter)) {
-				return driveLetter + ": (" + resourceBundle.getString("vaultOptions.mount.winDriveLetterOccupied") + ")";
+				return driveLetter.toString().substring(0, 2) + " (" + resourceBundle.getString("vaultOptions.mount.winDriveLetterOccupied") + ")";
 			} else {
-				return driveLetter + ":";
+				return driveLetter.toString().substring(0, 2);
 			}
 		}
 
 		@Override
-		public String fromString(String string) {
-			throw new UnsupportedOperationException();
+		public Path fromString(String string) {
+			if (string.isEmpty()) {
+				return null;
+			} else {
+				return Path.of(string + "\\");
+			}
 		}
 
 	}
 
+	//@formatter:off
+	private static class NoDirSelectedException extends Exception {}
+	//@formatter:on
+
 	// Getter & Setter
 
-	public boolean isOsWindows() {
-		return SystemUtils.IS_OS_WINDOWS;
+	public ObservableValue<Boolean> mountFlagsSupportedProperty() {
+		return mountFlagsSupported;
 	}
 
-	public boolean isCustomMountPointSupported() {
-		return !(usedVolumeImpl == VolumeImpl.WEBDAV && isOsWindows());
+	public boolean isMountFlagsSupported() {
+		return mountFlagsSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> mountpointDirSupportedProperty() {
+		return mountpointDirSupported;
+	}
+
+	public boolean isMountpointDirSupported() {
+		return mountpointDirSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> mountpointDriveLetterSupportedProperty() {
+		return mountpointDriveLetterSupported;
+	}
+
+	public boolean isMountpointDriveLetterSupported() {
+		return mountpointDriveLetterSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> readOnlySupportedProperty() {
+		return readOnlySupported;
 	}
 
 	public boolean isReadOnlySupported() {
-		return !(usedVolumeImpl == VolumeImpl.FUSE && isOsWindows());
+		return readOnlySupported.getValue();
 	}
 
-	public StringProperty customMountPathProperty() {
-		return vault.getVaultSettings().customMountPath();
+	public ObservableValue<String> directoryPathProperty() {
+		return directoryPath;
 	}
 
-	public boolean isCustomMountOptionsSupported() {
-		return usedVolumeImpl != VolumeImpl.WEBDAV;
+	public String getDirectoryPath() {
+		return directoryPath.getValue();
 	}
-
-	public String getCustomMountPath() {
-		return vault.getVaultSettings().customMountPath().get();
-	}
-
 }
