@@ -24,8 +24,8 @@
 		<project.jdk.version>19</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
-		<!-- Check progress on https://github.com/swiesend/secret-service/issues/31 to remove swiesend -->
-		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava</nonModularGroupIds>
+		<!-- Once hypfvieh, swiesend, purejava and integrations-linux have module-info, remove them-->
+		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptolib.version>2.1.1</cryptomator.cryptolib.version>
