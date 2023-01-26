@@ -8,12 +8,10 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.common.Environment;
+import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -23,11 +21,7 @@ import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
-import org.cryptomator.integrations.mount.Mount;
-import org.cryptomator.integrations.mount.MountBuilder;
-import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountFailedException;
-import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.slf4j.Logger;
@@ -44,20 +38,13 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.cryptomator.integrations.mount.MountCapability.MOUNT_AS_DRIVE_LETTER;
-import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_EXISTING_DIR;
-import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH;
-import static org.cryptomator.integrations.mount.MountCapability.MOUNT_WITHIN_EXISTING_PARENT;
 
 @PerVault
 public class Vault {
@@ -66,14 +53,10 @@ public class Vault {
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
-	private final Environment env;
-	private final Settings settings;
 	private final VaultSettings vaultSettings;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
-	private final ObservableValue<MountService> mountService;
-	private final ObservableValue<String> defaultMountFlags;
 	private final VaultConfigCache configCache;
 	private final VaultStats stats;
 	private final StringBinding displayablePath;
@@ -84,22 +67,18 @@ public class Vault {
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
 	private final ObjectBinding<Mountpoint> mountPoint;
-	private final WindowsDriveLetters windowsDriveLetters;
+	private final Mounter mounter;
 	private final BooleanProperty showingStats;
 
-	private AtomicReference<MountHandle> mountHandle = new AtomicReference<>(null);
+	private AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(Environment env, Settings settings, VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, ObservableValue<MountService> mountService, VaultStats stats, WindowsDriveLetters windowsDriveLetters) {
-		this.env = env;
-		this.settings = settings;
+	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
 		this.state = state;
 		this.lastKnownException = lastKnownException;
-		this.mountService = mountService;
-		this.defaultMountFlags = mountService.map(MountService::getDefaultMountFlags);
 		this.stats = stats;
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
@@ -109,7 +88,7 @@ public class Vault {
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
-		this.windowsDriveLetters = windowsDriveLetters;
+		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
 	}
 
@@ -159,45 +138,6 @@ public class Vault {
 		}
 	}
 
-	private MountBuilder prepareMount(Path cryptoRoot) throws IOException {
-		var mountProvider = mountService.getValue();
-		var builder = mountProvider.forFileSystem(cryptoRoot);
-
-		for (var capability : mountProvider.capabilities()) {
-			switch (capability) {
-				case FILE_SYSTEM_NAME -> builder.setFileSystemName("crypto");
-				case LOOPBACK_PORT -> builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings?
-				case LOOPBACK_HOST_NAME -> builder.setLoopbackHostName("cryptomator-vault"); //TODO: Read from system property
-				case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
-				case MOUNT_FLAGS -> builder.setMountFlags(defaultMountFlags.getValue()); // TODO use custom mount flags (pre-populated with default mount flags)
-				case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
-				case VOLUME_NAME -> builder.setVolumeName(vaultSettings.mountName().get());
-			}
-		}
-
-		var userChosenMountPoint = vaultSettings.getMountPoint();
-		var defaultMountPointBase = env.getMountPointsDir().orElseThrow();
-		if (userChosenMountPoint == null) {
-			if (mountProvider.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
-				// no need to set a mount point
-			} else if (mountProvider.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
-				builder.setMountpoint(windowsDriveLetters.getFirstDesiredAvailable().orElseThrow());
-			} else if (mountProvider.hasCapability(MOUNT_WITHIN_EXISTING_PARENT)) {
-				Files.createDirectories(defaultMountPointBase);
-				builder.setMountpoint(defaultMountPointBase);
-			} else if (mountProvider.hasCapability(MOUNT_TO_EXISTING_DIR) ) {
-				var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName().get());
-				Files.createDirectories(mountPoint);
-				builder.setMountpoint(mountPoint);
-			}
-		} else if (mountProvider.hasCapability(MOUNT_TO_EXISTING_DIR) || mountProvider.hasCapability(MOUNT_WITHIN_EXISTING_PARENT) || mountProvider.hasCapability(MOUNT_AS_DRIVE_LETTER)) {
-			// TODO: move the mount point away in case of MOUNT_WITHIN_EXISTING_PARENT?
-			builder.setMountpoint(userChosenMountPoint);
-		}
-
-		return builder;
-	}
-
 	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, MountFailedException {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
@@ -207,8 +147,7 @@ public class Vault {
 		try {
 			cryptoFileSystem.set(fs);
 			var rootPath = fs.getRootDirectories().iterator().next();
-			var supportsForcedUnmount = mountService.getValue().hasCapability(MountCapability.UNMOUNT_FORCED);
-			var mountHandle = new MountHandle(prepareMount(rootPath).mount(), supportsForcedUnmount);
+			var mountHandle = mounter.mount(vaultSettings, rootPath);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
 		} finally {
 			if (!success) {
@@ -217,7 +156,6 @@ public class Vault {
 		}
 	}
 
-
 	public synchronized void lock(boolean forced) throws UnmountFailedException, IOException {
 		var mountHandle = this.mountHandle.get();
 		if (mountHandle == null) {
@@ -225,14 +163,15 @@ public class Vault {
 			return;
 		}
 
-		if (forced && mountHandle.supportsUnmountForced) {
-			mountHandle.mount.unmountForced();
+		if (forced && mountHandle.supportsUnmountForced()) {
+			mountHandle.mountObj().unmountForced();
 		} else {
-			mountHandle.mount.unmount();
+			mountHandle.mountObj().unmount();
 		}
 
 		try {
-			mountHandle.mount.close();
+			mountHandle.mountObj().close();
+			mountHandle.specialCleanup().run();
 		} finally {
 			destroyCryptoFileSystem();
 		}
@@ -327,7 +266,7 @@ public class Vault {
 
 	public Mountpoint getMountPoint() {
 		var handle = mountHandle.get();
-		return handle == null ? null : handle.mount.getMountpoint();
+		return handle == null ? null : handle.mountObj().getMountpoint();
 	}
 
 	public StringBinding displayablePathProperty() {
@@ -375,33 +314,24 @@ public class Vault {
 		return vaultSettings.path().getValue();
 	}
 
-	public boolean isHavingCustomMountFlags() {
-		return !Strings.isNullOrEmpty(vaultSettings.mountFlags().get());
-	}
-
-	public ObservableValue<String> defaultMountFlagsProperty() {
-		return defaultMountFlags;
-	}
-
-	public String getDefaultMountFlags() {
-		return defaultMountFlags.getValue();
-	}
-
-	public String getEffectiveMountFlags() {
-		String mountFlags = vaultSettings.mountFlags().get();
-		if (Strings.isNullOrEmpty(mountFlags)) {
-			return ""; //TODO: should the provider provide dem defaults??
-		} else {
-			return mountFlags;
+	/**
+	 * Gets from the cleartext path its ciphertext counterpart.
+	 * The cleartext path has to start from the vault root (by starting with "/").
+	 *
+	 * @return Local os path to the ciphertext resource
+	 * @throws IOException if an I/O error occurs
+	 */
+	public Path getCiphertextPath(String cleartextPath) throws IOException {
+		if (!cleartextPath.startsWith("/")) {
+			throw new IllegalArgumentException("Input path must be absolute from vault root by starting with \"/\".");
 		}
+		var fs = cryptoFileSystem.get();
+		var cryptoPath = fs.getPath(cleartextPath);
+		return fs.getCiphertextPath(cryptoPath);
 	}
 
 	public VaultConfigCache getVaultConfigCache() {
 		return configCache;
-	}
-
-	public void setCustomMountFlags(String mountFlags) {
-		vaultSettings.mountFlags().set(mountFlags);
 	}
 
 	public String getId() {
@@ -426,15 +356,12 @@ public class Vault {
 		}
 	}
 
-
-	/* TODO: reactivate/ needed at all?
 	public boolean supportsForcedUnmount() {
-		return volume.supportsForcedUnmount();
+		var mh = mountHandle.get();
+		if (mh == null) {
+			throw new IllegalStateException("Vault is not mounted");
+		}
+		return mountHandle.get().supportsUnmountForced();
 	}
 
-	 */
-
-	private record MountHandle(Mount mount, boolean supportsUnmountForced) {
-
-	}
 }

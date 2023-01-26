@@ -39,8 +39,8 @@ public class AwtTrayMenuController implements TrayMenuController {
 	}
 
 	@Override
-	public void showTrayIcon(byte[] rawImageData, Runnable defaultAction, String tooltip) throws TrayMenuException {
-		var image = Toolkit.getDefaultToolkit().createImage(rawImageData);
+	public void showTrayIcon(byte[] imageData, Runnable defaultAction, String tooltip) throws TrayMenuException {
+		var image = Toolkit.getDefaultToolkit().createImage(imageData);
 		trayIcon = new TrayIcon(image, tooltip, menu);
 
 		trayIcon.setImageAutoSize(true);
@@ -57,6 +57,15 @@ public class AwtTrayMenuController implements TrayMenuController {
 	}
 
 	@Override
+	public void updateTrayIcon(byte[] imageData) {
+		if (trayIcon == null) {
+			throw new IllegalStateException("Failed to update the icon as it has not yet been added");
+		}
+		var image = Toolkit.getDefaultToolkit().createImage(imageData);
+		trayIcon.setImage(image);
+	}
+
+	@Override
 	public void updateTrayMenu(List<TrayMenuItem> items) {
 		menu.removeAll();
 		addChildren(menu, items);
@@ -67,7 +76,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 		Preconditions.checkNotNull(this.trayIcon);
 		this.trayIcon.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void mousePressed(MouseEvent e) {
 				listener.run();
 			}
 		});

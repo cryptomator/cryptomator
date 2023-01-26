@@ -27,7 +27,7 @@ override_dh_auto_build:
 	$(JAVA_HOME)/bin/jlink \
 		--output runtime \
 		--module-path "${JMODS_PATH}" \
-		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
 		--strip-native-commands \
 		--no-header-files \
 		--no-man-pages \
@@ -42,9 +42,7 @@ override_dh_auto_build:
 		--dest . \
 		--name cryptomator \
 		--vendor "Skymatic GmbH" \
-		--copyright "(C) 2016 - 2022 Skymatic GmbH" \
-		--java-options "--enable-preview" \
-		--java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64" \
+		--copyright "(C) 2016 - 2023 Skymatic GmbH" \
 		--java-options "-Xss5m" \
 		--java-options "-Xmx256m" \
 		--java-options "-Dfile.encoding=\"utf-8\"" \

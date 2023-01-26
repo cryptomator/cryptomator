@@ -9,6 +9,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,9 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 	@Override
 	public Settings read(JsonReader in) throws IOException {
 		Settings settings = new Settings(env);
-
+		//1.6.x legacy
+		String volumeImpl = null;
+		//legacy end
 		in.beginObject();
 		while (in.hasNext()) {
 			String name = in.nextName();
@@ -105,16 +108,47 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 						settings.mountService().set(in.nextString());
 					}
 				}
-
+				//1.6.x legacy
+				case "preferredVolumeImpl" -> volumeImpl = in.nextString();
+				//legacy end
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: {}", name);
 					in.skipValue();
 				}
 			}
+
 		}
 		in.endObject();
 
+		//1.6.x legacy
+		if (volumeImpl != null) {
+			settings.mountService().set(convertLegacyVolumeImplToMountService(volumeImpl));
+		}
+		//legacy end
+
 		return settings;
+	}
+
+	private String convertLegacyVolumeImplToMountService(String volumeImpl) {
+		if (volumeImpl.equals("Dokany")) {
+			return "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
+		} else if (volumeImpl.equals("FUSE")) {
+			if(SystemUtils.IS_OS_WINDOWS) {
+				return "org.cryptomator.frontend.fuse.mount.WinFspNetworkMountProvider";
+			} else if (SystemUtils.IS_OS_MAC) {
+				return "org.cryptomator.frontend.fuse.mount.MacFuseMountProvider";
+			} else {
+				return "org.cryptomator.frontend.fuse.mount.LinuxFuseMountProvider";
+			}
+		} else {
+			if(SystemUtils.IS_OS_WINDOWS) {
+				return "org.cryptomator.frontend.webdav.mount.WindowsMounter";
+			} else if (SystemUtils.IS_OS_MAC) {
+				return "org.cryptomator.frontend.webdav.mount.MacAppleScriptMounter";
+			} else {
+				return "org.cryptomator.frontend.webdav.mount.LinuxGioMounter";
+			}
+		}
 	}
 
 	private UiTheme parseUiTheme(String uiThemeName) {

@@ -151,7 +151,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           fail_on_unmatched_files: true
-          tag_name: ${{ github.env.TAG_NAME }}
+          tag_name: ${{ inputs.ref }}
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
             cryptomator_*_amd64.deb

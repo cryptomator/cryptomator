@@ -22,7 +22,7 @@ jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml
     with:
-      version: ${{ github.event.inputs.version }}
+      version: ${{ inputs.version }}
 
   build-msi:
     name: Build .msi Installer
@@ -81,7 +81,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --copyright "(C) 2016 - 2023 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.win"
@@ -118,6 +118,9 @@ jobs:
       - name: Fix permissions
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
+      - name: Extract integrations DLL for code signing
+        shell: pwsh
+        run: gci ./appdir/Cryptomator/app/mods/ -File integrations-win-*.jar | ForEach-Object {Set-Location -Path $_.Directory; jar --file=$($_.FullName) --extract integrations.dll }
       - name: Codesign
         uses: skymatic/code-sign-action@v2
         with:
@@ -128,6 +131,10 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
+      - name: Repack signed DLL into jar
+        shell: pwsh
+        run: |
+          gci ./appdir/Cryptomator/app/mods/ -File integrations-win-*.jar | ForEach-Object {Set-Location -Path $_.Directory; jar --file=$($_.FullName) --update integrations.dll; Remove-Item integrations.dll}
       - name: Generate license for MSI
         run: >
           mvn -B license:add-third-party
@@ -149,7 +156,7 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --copyright "(C) 2016 - 2023 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --win-menu
           --win-dir-chooser
@@ -247,7 +254,7 @@ jobs:
           -out dist/win/bundle/
           -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           -dBundleVendor="Skymatic GmbH"
-          -dBundleCopyright="(C) 2016 - 2022 Skymatic GmbH"
+          -dBundleCopyright="(C) 2016 - 2023 Skymatic GmbH"
           -dAboutUrl="https://cryptomator.org"
           -dHelpUrl="https://cryptomator.org/contact"
           -dUpdateUrl="https://cryptomator.org/downloads/"

@@ -38,8 +38,6 @@ class VaultSettingsJsonAdapter {
 		out.endObject();
 	}
 
-	//TODO: usesCustomMountPath, customMountPath and winDriveLetter removed
-	//	-> migration required
 	public VaultSettings read(JsonReader in) throws IOException {
 		String id = null;
 		String path = null;
@@ -54,6 +52,12 @@ class VaultSettingsJsonAdapter {
 		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
 		boolean autoLockWhenIdle = VaultSettings.DEFAULT_AUTOLOCK_WHEN_IDLE;
 		int autoLockIdleSeconds = VaultSettings.DEFAULT_AUTOLOCK_IDLE_SECONDS;
+
+		//legacy from 1.6.x
+		boolean useCustomMountPath = false;
+		String customMountPath = "";
+		String winDriveLetter = "";
+		//legacy end
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -78,6 +82,11 @@ class VaultSettingsJsonAdapter {
 				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
 				case "autoLockWhenIdle" -> autoLockWhenIdle = in.nextBoolean();
 				case "autoLockIdleSeconds" -> autoLockIdleSeconds = in.nextInt();
+				//legacy from 1.6.x
+				case "winDriveLetter" -> winDriveLetter = in.nextString();
+				case "usesIndividualMountPath", "useCustomMountPath" -> useCustomMountPath = in.nextBoolean();
+				case "individualMountPath", "customMountPath" -> customMountPath = in.nextString();
+				//legacy end
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: {}", name);
 					in.skipValue();
@@ -102,6 +111,13 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.autoLockWhenIdle().set(autoLockWhenIdle);
 		vaultSettings.autoLockIdleSeconds().set(autoLockIdleSeconds);
 		vaultSettings.mountPoint().set(mountPoint);
+		//legacy from 1.6.x
+		if(useCustomMountPath && !customMountPath.isBlank()) {
+			vaultSettings.mountPoint().set(parseMountPoint(customMountPath));
+		} else if(!winDriveLetter.isBlank() ) {
+			vaultSettings.mountPoint().set(parseMountPoint(winDriveLetter+":\\"));
+		}
+		//legacy end
 		return vaultSettings;
 	}
 

@@ -3,26 +3,43 @@ package org.cryptomator.ui.mainwindow;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_EXT;
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 import static org.cryptomator.common.vaults.VaultState.Value.MISSING;
@@ -31,6 +48,7 @@ import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
 @MainWindowScoped
 public class VaultListController implements FxController {
 
+	private static final Logger LOG = LoggerFactory.getLogger(VaultListController.class);
 
 	private final Stage mainWindow;
 	private final ObservableList<Vault> vaults;
@@ -39,17 +57,21 @@ public class VaultListController implements FxController {
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
 	private final RemoveVaultComponent.Builder removeVaultDialogue;
+	private final VaultListManager vaultListManager;
+	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 
 	public ListView<Vault> vaultList;
+	public StackPane root;
 
 	@Inject
-	VaultListController(@MainWindow Stage mainWindow, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVaultDialogue) {
+	VaultListController(@MainWindow Stage mainWindow, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVaultDialogue, VaultListManager vaultListManager) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
 		this.addVaultWizard = addVaultWizard;
 		this.removeVaultDialogue = removeVaultDialogue;
+		this.vaultListManager = vaultListManager;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -100,6 +122,11 @@ public class VaultListController implements FxController {
 				keyEvent.consume();
 			}
 		});
+
+		root.setOnDragEntered(this::handleDragEvent);
+		root.setOnDragOver(this::handleDragEvent);
+		root.setOnDragDropped(this::handleDragEvent);
+		root.setOnDragExited(this::handleDragEvent);
 	}
 
 	private void deselect(MouseEvent released) {
@@ -128,6 +155,47 @@ public class VaultListController implements FxController {
 		}
 	}
 
+	private void handleDragEvent(DragEvent event) {
+		if (DragEvent.DRAG_OVER.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+			draggingVaultOver.set(event.getDragboard().getFiles().stream().map(File::toPath).anyMatch(this::containsVault));
+			if (draggingVaultOver.get()) {
+				event.acceptTransferModes(TransferMode.ANY);
+			}
+		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+			Set<Path> vaultPaths = event.getDragboard().getFiles().stream().map(File::toPath).filter(this::containsVault).collect(Collectors.toSet());
+			if (!vaultPaths.isEmpty()) {
+				vaultPaths.forEach(this::addVault);
+			}
+			event.setDropCompleted(!vaultPaths.isEmpty());
+			event.consume();
+		} else if (DragEvent.DRAG_EXITED.equals(event.getEventType())) {
+			draggingVaultOver.set(false);
+		}
+	}
+
+	private boolean containsVault(Path path) {
+		try {
+			if (path.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT)) {
+				path = path.getParent();
+			}
+			return CryptoFileSystemProvider.checkDirStructureForVault(path, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) != DirStructure.UNRELATED;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	private void addVault(Path pathToVault) {
+		try {
+			if (pathToVault.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT)) {
+				vaultListManager.add(pathToVault.getParent());
+			} else {
+				vaultListManager.add(pathToVault);
+			}
+		} catch (IOException e) {
+			LOG.debug("Not a vault: {}", pathToVault);
+		}
+	}
+
 	// Getter and Setter
 
 	public BooleanBinding emptyVaultListProperty() {
@@ -137,5 +205,14 @@ public class VaultListController implements FxController {
 	public boolean isEmptyVaultList() {
 		return emptyVaultList.get();
 	}
+
+	public BooleanProperty draggingVaultOverProperty() {
+		return draggingVaultOver;
+	}
+
+	public boolean isDraggingVaultOver() {
+		return draggingVaultOver.get();
+	}
+
 
 }

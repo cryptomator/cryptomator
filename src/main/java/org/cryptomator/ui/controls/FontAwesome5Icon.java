@@ -25,6 +25,7 @@ public enum FontAwesome5Icon {
 	EYE_SLASH("\uF070"), //
 	FAST_FORWARD("\uF050"), //
 	FILE("\uF15B"), //
+	FILE_DOWNLOAD("\uF56D"), //
 	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
 	FUNNEL("\uF0B0"), //

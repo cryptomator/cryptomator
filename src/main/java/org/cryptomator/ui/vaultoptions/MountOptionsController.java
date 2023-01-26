@@ -1,11 +1,14 @@
 package org.cryptomator.ui.vaultoptions;
 
-import org.cryptomator.common.Environment;
+import com.google.common.base.Strings;
+import org.cryptomator.common.mount.ActualMountService;
 import org.cryptomator.common.mount.WindowsDriveLetters;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.mount.MountCapability;
-import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 
 import javax.inject.Inject;
 import javafx.beans.value.ObservableValue;
@@ -30,16 +33,17 @@ import java.util.Set;
 public class MountOptionsController implements FxController {
 
 	private final Stage window;
-	private final Vault vault;
+	private final VaultSettings vaultSettings;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
 
+	private final ObservableValue<String> defaultMountFlags;
 	private final ObservableValue<Boolean> mountpointDirSupported;
 	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
 	private final ObservableValue<Boolean> readOnlySupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
-	private final ObservableValue<Path> driveLetter;
 	private final ObservableValue<String> directoryPath;
+	private final FxApplicationWindows applicationWindows;
 
 
 	//-- FXML objects --
@@ -54,42 +58,50 @@ public class MountOptionsController implements FxController {
 	public ChoiceBox<Path> driveLetterSelection;
 
 	@Inject
-	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ObservableValue<MountService> mountService, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
+	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ObservableValue<ActualMountService> mountService, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, FxApplicationWindows applicationWindows) {
 		this.window = window;
-		this.vault = vault;
+		this.vaultSettings = vault.getVaultSettings();
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
-		this.mountpointDirSupported = mountService.map(s -> s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
-		this.mountpointDriveLetterSupported = mountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
-		this.mountFlagsSupported = mountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
-		this.readOnlySupported = mountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
-		this.driveLetter = vault.getVaultSettings().mountPoint().map(p -> isDriveLetter(p) ? p : null);
+		this.defaultMountFlags = mountService.map(as -> {
+			if (as.service().hasCapability(MountCapability.MOUNT_FLAGS)) {
+				return as.service().getDefaultMountFlags();
+			} else {
+				return "";
+			}
+		});
+		this.mountpointDirSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
+		this.mountpointDriveLetterSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
+		this.mountFlagsSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
+		this.readOnlySupported = mountService.map(as -> as.service().hasCapability(MountCapability.READ_ONLY));
 		this.directoryPath = vault.getVaultSettings().mountPoint().map(p -> isDriveLetter(p) ? null : p.toString());
+		this.applicationWindows = applicationWindows;
 	}
 
 	@FXML
 	public void initialize() {
 		// readonly:
-		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
+		readOnlyCheckbox.selectedProperty().bindBidirectional(vaultSettings.usesReadOnlyMode());
 
 		// custom mount flags:
 		mountFlagsField.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
-		customMountFlagsCheckbox.setSelected(vault.isHavingCustomMountFlags());
+		customMountFlagsCheckbox.setSelected(!Strings.isNullOrEmpty(vaultSettings.mountFlags().getValue()));
+		toggleUseCustomMountFlags();
 
 		//driveLetter choice box
 		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAll());
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
-		driveLetterSelection.setOnShowing(event -> driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle))); //TODO: does this work?
 
 		//mountPoint toggle group
-		var mountPoint = vault.getVaultSettings().getMountPoint();
+		var mountPoint = vaultSettings.getMountPoint();
 		if (mountPoint == null) {
 			//prepare and select auto
 			mountPointToggleGroup.selectToggle(mountPointAutoBtn);
 		} else if (mountPoint.getParent() == null && isDriveLetter(mountPoint)) {
 			//prepare and select drive letter
 			mountPointToggleGroup.selectToggle(mountPointDriveLetterBtn);
-		} else if (driveLetterSelection.getValue() == null) {
+			driveLetterSelection.valueProperty().bindBidirectional(vaultSettings.mountPoint());
+		} else {
 			//prepare and select dir
 			mountPointToggleGroup.selectToggle(mountPointDirBtn);
 		}
@@ -97,16 +109,24 @@ public class MountOptionsController implements FxController {
 	}
 
 	@FXML
+	public void openVolumePreferences() {
+		applicationWindows.showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+	}
+
+	@FXML
 	public void toggleUseCustomMountFlags() {
 		if (customMountFlagsCheckbox.isSelected()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 			mountFlagsField.textProperty().unbind();
-			vault.setCustomMountFlags(vault.defaultMountFlagsProperty().getValue());
-			mountFlagsField.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
+			var mountFlags = vaultSettings.mountFlags().get();
+			if (mountFlags == null || mountFlags.isBlank()) {
+				vaultSettings.mountFlags().set(defaultMountFlags.getValue());
+			}
+			mountFlagsField.textProperty().bindBidirectional(vaultSettings.mountFlags());
 		} else {
-			mountFlagsField.textProperty().unbindBidirectional(vault.getVaultSettings().mountFlags());
-			vault.setCustomMountFlags(null);
-			mountFlagsField.textProperty().bind(vault.defaultMountFlagsProperty());
+			mountFlagsField.textProperty().unbindBidirectional(vaultSettings.mountFlags());
+			vaultSettings.mountFlags().set(null);
+			mountFlagsField.textProperty().bind(defaultMountFlags);
 		}
 	}
 
@@ -114,7 +134,7 @@ public class MountOptionsController implements FxController {
 	public void chooseCustomMountPoint() {
 		try {
 			Path chosenPath = chooseCustomMountPointInternal();
-			vault.getVaultSettings().mountPoint().set(chosenPath);
+			vaultSettings.mountPoint().set(chosenPath);
 		} catch (NoDirSelectedException e) {
 			//no-op
 		}
@@ -131,7 +151,7 @@ public class MountOptionsController implements FxController {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.mountPoint.directoryPickerTitle"));
 		try {
-			var mp = vault.getVaultSettings().mountPoint().get();
+			var mp = vaultSettings.mountPoint().get();
 			var initialDir = mp != null && !isDriveLetter(mp) ? mp : Path.of(System.getProperty("user.home"));
 
 			if (Files.isDirectory(initialDir)) {
@@ -149,27 +169,30 @@ public class MountOptionsController implements FxController {
 	}
 
 	private void selectedToggleChanged(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
-		Path mountPointToBe = null;
-		try {
-			//Remark: the mountpoint corresponding to the newToggle must be null, otherwise it would not be new!
-			if (mountPointDriveLetterBtn.equals(newToggle)) {
-				mountPointToBe = driveLetterSelection.getItems().get(0);
-			} else if (mountPointDirBtn.equals(newToggle)) {
-				mountPointToBe = chooseCustomMountPointInternal();
+		//Remark: the mountpoint corresponding to the newToggle must be null, otherwise it would not be new!
+		driveLetterSelection.valueProperty().unbindBidirectional(vaultSettings.mountPoint());
+		if (mountPointDriveLetterBtn.equals(newToggle)) {
+			vaultSettings.mountPoint().set(windowsDriveLetters.getFirstDesiredAvailable().orElse(windowsDriveLetters.getAll().stream().findAny().get()));
+			driveLetterSelection.valueProperty().bindBidirectional(vaultSettings.mountPoint());
+		} else if (mountPointDirBtn.equals(newToggle)) {
+			try {
+				vaultSettings.mountPoint().set(chooseCustomMountPointInternal());
+			} catch (NoDirSelectedException e) {
+				if (oldToggle != null && !mountPointDirBtn.equals(oldToggle)) {
+					mountPointToggleGroup.selectToggle(oldToggle);
+				} else {
+					mountPointToggleGroup.selectToggle(mountPointAutoBtn);
+				}
 			}
-			vault.getVaultSettings().mountPoint().set(mountPointToBe);
-		} catch (NoDirSelectedException e) {
-			if (!mountPointDirBtn.equals(oldToggle)) {
-				mountPointToggleGroup.selectToggle(oldToggle);
-
-			}
+		} else {
+			vaultSettings.mountPoint().set(null);
 		}
 	}
 
 	private boolean isDriveLetter(Path mountPoint) {
 		if (mountPoint != null) {
 			var s = mountPoint.toString();
-			return s.length() == 3 && mountPoint.toString().endsWith(":\\");
+			return s.length() == 3 && s.endsWith(":\\");
 		}
 		return false;
 	}
@@ -237,19 +260,11 @@ public class MountOptionsController implements FxController {
 	}
 
 	public ObservableValue<Boolean> readOnlySupportedProperty() {
-		return mountpointDriveLetterSupported;
+		return readOnlySupported;
 	}
 
 	public boolean isReadOnlySupported() {
 		return readOnlySupported.getValue();
-	}
-
-	public ObservableValue<Path> driveLetterProperty() {
-		return driveLetter;
-	}
-
-	public Path getDriveLetter() {
-		return driveLetter.getValue();
 	}
 
 	public ObservableValue<String> directoryPathProperty() {
@@ -259,5 +274,4 @@ public class MountOptionsController implements FxController {
 	public String getDirectoryPath() {
 		return directoryPath.getValue();
 	}
-
 }
