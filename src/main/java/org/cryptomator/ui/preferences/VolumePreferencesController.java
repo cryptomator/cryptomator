@@ -1,6 +1,6 @@
 package org.cryptomator.ui.preferences;
 
-import org.cryptomator.common.mount.ActualMountService;
+import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountService;
@@ -18,14 +18,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-/**
- * TODO: if WebDAV is selected under Windows, show warning that specific mount options (like selecting a directory as mount point) are _not_ supported
- */
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
 
 	private final Settings settings;
-	private final ObservableValue<ActualMountService> selectedMountService;
+	private final ObservableValue<MountService> selectedMountService;
 	private final ResourceBundle resourceBundle;
 	private final BooleanExpression loopbackPortSupported;
 	private final ObservableValue<Boolean> mountToDirSupported;
@@ -38,16 +35,18 @@ public class VolumePreferencesController implements FxController {
 	public Button loopbackPortApplyButton;
 
 	@Inject
-	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ObservableValue<ActualMountService> actualMountService, ResourceBundle resourceBundle) {
+	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.mountProviders = mountProviders;
-		this.selectedMountService = actualMountService;
 		this.resourceBundle = resourceBundle;
-		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(as -> as.service().hasCapability(MountCapability.LOOPBACK_PORT)));
-		this.mountToDirSupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT) || as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR));
-		this.mountToDriveLetterSupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
-		this.mountFlagsSupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
-		this.readonlySupported = selectedMountService.map(as -> as.service().hasCapability(MountCapability.READ_ONLY));
+
+		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
+		this.selectedMountService = ObservableUtil.mapWithDefault(settings.mountService(), serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
+		this.mountToDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT) || s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR));
+		this.mountToDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
+		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
+		this.readonlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 	}
 
 	public void initialize() {
@@ -55,7 +54,7 @@ public class VolumePreferencesController implements FxController {
 		volumeTypeChoiceBox.getItems().addAll(mountProviders);
 		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
 		boolean autoSelected = settings.mountService().get() == null;
-		volumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue().service());
+		volumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue());
 		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvider, newProvider) -> {
 			var toSet = Optional.ofNullable(newProvider).map(nP -> nP.getClass().getName()).orElse(null);
 			settings.mountService().set(toSet);
