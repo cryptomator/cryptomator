@@ -77,12 +77,6 @@ ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryp
 ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
 
-# extract jffi
-JFFI_NATIVE_JAR=`ls Cryptomator.AppDir/lib/app | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
-${JAVA_HOME}/bin/jar -xf Cryptomator.AppDir/lib/app/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
-mv jni/x86_64-Linux/* Cryptomator.AppDir/lib/app/libjffi.so
-rm -r jni/x86_64-Linux
-
 # load AppImageTool
 curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage

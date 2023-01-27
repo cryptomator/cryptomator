@@ -103,6 +103,7 @@ jobs:
           --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
+          --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --mac-package-identifier org.cryptomator
