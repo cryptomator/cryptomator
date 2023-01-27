@@ -148,10 +148,8 @@ jobs:
           echo "TAG_NAME=${REF##*/}" >> $GITHUB_ENV
       - name: Publish Debian package on GitHub Releases
         if: startsWith(inputs.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          files: |
-            cryptomator_*_amd64.deb
-            cryptomator_*.asc
+        env:
+          GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+        run: |
+          artifacts=$(ls | grep cryptomator*.deb)
+          gh release upload ${{ env.TAG_NAME }} $artifacts
