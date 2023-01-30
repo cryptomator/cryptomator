@@ -65,13 +65,10 @@
 				<Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />
 				<!-- TODO: localize? -->
 				<Control Id="Suggestion" Type="Text" X="135" Y="100" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
-					<Text>We recommend for the best user experience to download and install one of the following third party Windows drivers:</Text>
+					<Text>We recommend for the best user experience to download and install the following third party Windows driver:</Text>
 				</Control>
 				<Control Id="WinFsp" Type="Hyperlink" X="140" Y="125" Width="220" Height="60" Transparent="yes">
-					<Text><![CDATA[• WinFsp (<a href="http://www.secfs.net/winfsp/rel/">Homepage</a>)]]></Text>
-				</Control>
-				<Control Id="Dokany" Type="Hyperlink" X="140" Y="137" Width="220" Height="60" Transparent="yes">
-					<Text><![CDATA[• Dokany (<a href="https://dokan-dev.github.io/">Homepage</a>)]]></Text>
+					<Text><![CDATA[WinFsp (<a href="https://winfsp.dev/">Homepage</a>)]]></Text>
 				</Control>
 			</Dialog>
 
