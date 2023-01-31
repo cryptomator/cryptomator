@@ -12,7 +12,7 @@ Get-ChildItem $profileList | ForEach-Object { $_.GetValue("ProfileImagePath") } 
     if($profileNameMatches.Count -eq 1) {
         #check if the last path part is contained in the local user name list
         #otherwise do not touch it
-        return $localUsers.Contains($matches[0].Groups[1].Value)
+        return $localUsers.Contains($profileNameMatches[0].Groups[1].Value)
     } else {
         return $false;
     }
@@ -22,9 +22,8 @@ Get-ChildItem $profileList | ForEach-Object { $_.GetValue("ProfileImagePath") } 
         #No settings file, nothing to do.
         return;
     }
-
     $settings = Get-Content -Path $settingsPath | ConvertFrom-Json
-    if($settings.preferredVolumeImpl -eq "FUSE") {
+    if($settings.preferredVolumeImpl -ne "FUSE") {
         #Fuse not used, nothing to do
         return;
     }
