@@ -1,4 +1,5 @@
-# This script migrates Cryptomator settings for all local users on Windows in case a custom directory is used
+# This script migrates Cryptomator settings for all local users on Windows in case the users uses custom directories as mountpoint
+#
 #Requires -RunAsAdministrator
 
 #Get all active, local user profiles
@@ -6,11 +7,14 @@ $profileList = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList'
 $localUsers = Get-LocalUser | Where-Object {$_.Enabled} | ForEach-Object { $_.Name}
 
 Get-ChildItem $profileList | ForEach-Object { $_.GetValue("ProfileImagePath") } | Where-Object {
-    $matches = ($_ | Select-String -Pattern "\\([^\\]+)$").Matches
-    if($matches.Count -eq 1) {
+    $profileNameMatches = ($_ | Select-String -Pattern "\\([^\\]+)$").Matches
+    if($profileNameMatches.Count -eq 1) {
+        #check if the last path part is contained in the local user name list
+        #otherwise do not touch it
         return $localUsers.Contains($matches[0].Groups[1].Value)
+    } else {
+        return $false;
     }
-    return $false;
 } | ForEach-Object {
     $settingsPath = "$_\AppData\Roaming\Cryptomator\settings.json"
     if(!(Test-Path -Path $settingsPath)) {

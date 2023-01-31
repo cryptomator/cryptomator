@@ -132,6 +132,9 @@
     <!-- WebDAV patches -->
     <CustomAction Id="PatchWebDAV" Impersonate="no" ExeCommand="[INSTALLDIR]patchWebDAV.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
 
+    <!-- Special Settings migration for 1.7.0 -->
+    <CustomAction Id="170MigrateSettings" Impersonate="no" ExeCommand="[INSTALLDIR]version170-migrate-settings.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
+
     <!-- Running App detection and exit -->
     <Property Id="FOUNDRUNNINGAPP" Admin="yes"/>
     <util:CloseApplication
@@ -182,6 +185,7 @@
       <RemoveExistingProducts After="InstallValidate"/>
 
       <Custom Action="PatchWebDAV" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
+      <Custom Action="170MigrateSettings" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
     </InstallExecuteSequence>
 
     <WixVariable Id="WixUIBannerBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\banner.bmp" />
