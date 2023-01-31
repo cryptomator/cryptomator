@@ -1,4 +1,5 @@
 # This script migrates Cryptomator settings for all local users on Windows in case the users uses custom directories as mountpoint
+# See also https://github.com/cryptomator/cryptomator/issues/2652
 #
 #Requires -RunAsAdministrator
 
