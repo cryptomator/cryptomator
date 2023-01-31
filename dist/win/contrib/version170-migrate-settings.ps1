@@ -18,7 +18,7 @@ Get-ChildItem $profileList | ForEach-Object { $_.GetValue("ProfileImagePath") } 
     }
 } | ForEach-Object {
     $settingsPath = "$_\AppData\Roaming\Cryptomator\settings.json"
-    if(!(Test-Path -Path $settingsPath)) {
+    if(!(Test-Path -Path $settingsPath -PathType Leaf)) {
         #No settings file, nothing to do.
         return;
     }
