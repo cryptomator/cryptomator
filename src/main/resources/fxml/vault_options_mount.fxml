@@ -26,7 +26,7 @@
 	</padding>
 	<children>
 		<TextFlow>
-			<Text text="%vaultOptions.mount.info"/>
+			<Text text="%vaultOptions.mount.info" styleClass="label"/>
 			<Text text=" "/>
 			<Hyperlink styleClass="hyperlink-underline" text="%vaultOptions.mount.linkToPreferences" onAction="#openVolumePreferences" wrapText="true"/>
 		</TextFlow>
