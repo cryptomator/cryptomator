@@ -81,6 +81,7 @@ public class Mounter {
 			var canMountToDriveLetter = service.hasCapability(MOUNT_AS_DRIVE_LETTER);
 			var canMountToParent = service.hasCapability(MOUNT_WITHIN_EXISTING_PARENT);
 			var canMountToDir = service.hasCapability(MOUNT_TO_EXISTING_DIR);
+			var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
 
 			if (userChosenMountPoint == null) {
 				if (service.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
@@ -96,7 +97,7 @@ public class Mounter {
 					builder.setMountpoint(mountPoint);
 				}
 			} else {
-				if (canMountToParent && !canMountToDir) {
+				if (!mpIsDriveLetter && canMountToParent && !canMountToDir) {
 					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
 					cleanup = () -> {
 						MountWithinParentUtil.cleanup(userChosenMountPoint);
@@ -105,7 +106,6 @@ public class Mounter {
 				try {
 					builder.setMountpoint(userChosenMountPoint);
 				} catch (IllegalArgumentException e) {
-					var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
 					var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter) || (!canMountToDir && !mpIsDriveLetter) || (!canMountToParent && !mpIsDriveLetter);
 					if (configNotSupported) {
 						throw new MountPointNotSupportedException(e.getMessage());
