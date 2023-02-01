@@ -132,7 +132,7 @@
     <!-- WebDAV patches -->
     <CustomAction Id="PatchWebDAV" Impersonate="no" ExeCommand="[INSTALLDIR]patchWebDAV.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
 
-    <!-- Special Settings migration for 1.7.0 -->
+    <!-- Special Settings migration for 1.7.0,. Should be removed eventually, for more info, see ../contrib/version170-migrate-settings.ps1-->
     <CustomAction Id="V170MigrateSettings" Impersonate="no" ExeCommand="[INSTALLDIR]version170-migrate-settings.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
 
     <!-- Running App detection and exit -->
