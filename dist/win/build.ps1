@@ -93,6 +93,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
+	--add-launcher jfxDebug=$buildDir\resources\jfxDebug.properties `
 	--resource-dir resources `
 	--icon resources/$AppName.ico
 

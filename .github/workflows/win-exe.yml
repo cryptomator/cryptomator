@@ -166,6 +166,7 @@ jobs:
           --resource-dir dist/win/resources
           --license-file dist/win/resources/license.rtf
           --file-associations dist/win/resources/FAvaultFile.properties
+          --add-launcher jfxDebug=dist/wind/resources/jfxDebug.properties
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
       - name: Codesign MSI
