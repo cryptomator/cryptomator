@@ -63,6 +63,12 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
 }
 
+# prepare additional launcher
+$debugProps = Get-Content -Path $buildDir\resources\debug-launcher.properties
+$debugProps = $debugProps -replace '\${SEM_VER_STR}', "$semVerNo"
+$debugProps = $debugProps -replace '\${REVISION_NUM}', "$revisionNo"
+Set-Content -Path $buildDir\resources\debug.properties -Value $debugProps
+
 # create app dir
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
@@ -93,7 +99,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
-	--add-launcher jfxDebug=$buildDir\resources\jfxDebug.properties `
+	--add-launcher debug=$buildDir\resources\debug.properties `
 	--resource-dir resources `
 	--icon resources/$AppName.ico
 
