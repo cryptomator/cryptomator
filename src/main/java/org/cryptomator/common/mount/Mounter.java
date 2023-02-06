@@ -96,7 +96,8 @@ public class Mounter {
 					builder.setMountpoint(mountPoint);
 				}
 			} else {
-				if (canMountToParent && !canMountToDir) {
+				var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
+				if (!mpIsDriveLetter && canMountToParent && !canMountToDir) {
 					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
 					cleanup = () -> {
 						MountWithinParentUtil.cleanup(userChosenMountPoint);
@@ -105,7 +106,6 @@ public class Mounter {
 				try {
 					builder.setMountpoint(userChosenMountPoint);
 				} catch (IllegalArgumentException e) {
-					var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
 					var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter) || (!canMountToDir && !mpIsDriveLetter) || (!canMountToParent && !mpIsDriveLetter);
 					if (configNotSupported) {
 						throw new MountPointNotSupportedException(e.getMessage());

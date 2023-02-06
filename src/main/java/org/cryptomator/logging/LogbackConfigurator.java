@@ -84,6 +84,10 @@ public class LogbackConfigurator extends ContextAwareBase implements Configurato
 			upgrades.addAppender(upgrade);
 			upgrades.addAppender(file);
 			upgrades.setAdditive(false);
+
+			// configure fuse file locking logger:
+			Logger fuseLocking = context.getLogger("org.cryptomator.frontend.fuse.locks");
+			fuseLocking.setLevel(Level.OFF);
 		}
 		return ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY;
 	}

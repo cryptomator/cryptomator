@@ -171,7 +171,7 @@ public class VaultDetailUnlockedController implements FxController {
 			}
 			return Optional.of(vault.get().getCiphertextPath(cleartextPath));
 		} catch (IOException e) {
-			LOG.warn("Unable to get ciphertext path from path: {}", path);
+			LOG.warn("Unable to get ciphertext path from path: {}", path, e);
 			return Optional.empty();
 		}
 	}

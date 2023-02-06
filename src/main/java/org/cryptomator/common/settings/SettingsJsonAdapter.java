@@ -37,6 +37,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 	@Override
 	public void write(JsonWriter out, Settings value) throws IOException {
 		out.beginObject();
+		out.name("lastWrittenByVersion").value(env.getAppVersion()+env.getBuildNumber().map("-"::concat).orElse(""));
 		out.name("directories");
 		writeVaultSettingsArray(out, value.getDirectories());
 		out.name("askedForUpdateCheck").value(value.askedForUpdateCheck().get());

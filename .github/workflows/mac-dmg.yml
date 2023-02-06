@@ -61,7 +61,6 @@ jobs:
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
-          cp dist/mac/launcher.sh target
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
         run: >
