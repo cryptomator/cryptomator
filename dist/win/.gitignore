@@ -5,4 +5,4 @@ installer
 *.pdb
 *.msi
 license.rtf
-debug.properties
+*Debug.properties

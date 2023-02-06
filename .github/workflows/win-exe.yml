@@ -70,10 +70,11 @@ jobs:
           --compress=1
       - name: Prepare debug launcher config
         shell: bash
-        run: envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/win/resources/debug-launcher.properties > debug-launcher.properties
+        run: envsubst '${SEMVER_STR} ${REVISION_NUM} ${APP_NAME} ${LOOPBACK_ALIAS}' < dist/win/resources/debug-launcher.properties > dist/win/resources/CryptomatorDebug.properties
         env:
-          SEMVER_STR: ${{  needs.get-version.outputs.semVerStr }}
-          REVISION_NUM: ${{  needs.get-version.outputs.revNum }}
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+          REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
+          APP_NAME: 'Cryptomator'
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -107,7 +108,7 @@ jobs:
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"~/AppData/Roaming/Cryptomator/keychain.json\""
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
-          --add-launcher debug=debug-launcher.properties
+          --add-launcher "CryptomatorDebug=CryptomatorDebug.properties"
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
@@ -122,7 +123,9 @@ jobs:
             exit 1
           }
       - name: Fix permissions
-        run: attrib -r appdir/Cryptomator/Cryptomator.exe
+        run: |
+          attrib -r appdir/Cryptomator/Cryptomator.exe
+          attrib -r appdir/Cryptomator/CryptomatorDebug.exe
         shell: pwsh
       - name: Extract integrations DLL for code signing
         shell: pwsh
