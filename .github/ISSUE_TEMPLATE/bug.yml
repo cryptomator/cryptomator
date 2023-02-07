@@ -37,14 +37,19 @@ body:
     id: volume-type
     attributes:
       label: Volume Type
-      description: What is selected under Settings → Virtual Drive?
-      multiple: true
-      options:
-        - FUSE
-        - Dokany
-        - WebDAV
+      description: What volume type is selected under Settings → Virtual Drive?
+      value: |
+        - WinFsp
+        - WinFsp (Local Drive)
+        - FUSE-T
+        - macFUSE
+        - WebDAV (Windows Explorer)
+        - WebDAV (AppleScript)
+        - WebDAV (gio)
+        - WebDAV (HTTP Address)
+        - Dokany (1.5)
     validations:
-      required: false
+      required: true
   - type: textarea
     id: reproduction-steps
     attributes:
