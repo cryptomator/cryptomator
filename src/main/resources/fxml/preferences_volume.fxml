@@ -27,7 +27,7 @@
 					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 				</graphic>
 				<tooltip>
-					<Tooltip text="Open Cryptomator Docs to learn more about the different volume types." showDelay="100ms"/>
+					<Tooltip text="%preferences.volume.docsTooltip" showDelay="100ms"/>
 				</tooltip>
 			</Hyperlink>
 		</HBox>
