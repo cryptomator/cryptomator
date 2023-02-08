@@ -16,6 +16,7 @@ import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,7 @@ import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -82,6 +84,13 @@ public abstract class CommonsModule {
 	static Comparator<String> providesSemVerComparator() {
 		return new SemVerComparator();
 	}
+
+	@Provides
+	@Singleton
+	static Optional<RevealPathService> provideRevealPathService() {
+		return RevealPathService.get().findFirst();
+	}
+
 
 	@Provides
 	@Singleton

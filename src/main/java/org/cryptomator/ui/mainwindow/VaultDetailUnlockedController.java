@@ -54,6 +54,7 @@ public class VaultDetailUnlockedController implements FxController {
 	private final VaultService vaultService;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	private final Stage mainWindow;
+	private final Optional<RevealPathService> revealPathService;
 	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
@@ -67,12 +68,13 @@ public class VaultDetailUnlockedController implements FxController {
 	public Button dropZone;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, WrongFileAlertComponent.Builder wrongFileAlert, @MainWindow Stage mainWindow, ResourceBundle resourceBundle) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, WrongFileAlertComponent.Builder wrongFileAlert, @MainWindow Stage mainWindow, Optional<RevealPathService> revealPathService, ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
 		this.wrongFileAlert = wrongFileAlert;
 		this.mainWindow = mainWindow;
+		this.revealPathService = revealPathService;
 		this.resourceBundle = resourceBundle;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
 		this.vaultStatsBuilder = vaultStatsBuilder;
@@ -177,29 +179,21 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	private void revealOrCopyPaths(List<Path> paths) {
-		if (!revealPaths(paths)) {
+		revealPathService.ifPresentOrElse(svc -> revealPaths(svc, paths), () -> {
 			LOG.warn("No service provider to reveal files found.");
 			copyPathsToClipboard(paths);
-		}
+		});
 	}
 
-	/**
-	 * Reveals the paths over the {@link RevealPathService} in the file system
-	 *
-	 * @param paths List of Paths to reveal
-	 * @return true, if at least one service provider was present, false otherwise
-	 */
-	private boolean revealPaths(List<Path> paths) {
-		return RevealPathService.get().findAny().map(s -> {
-			paths.forEach(path -> {
-				try {
-					s.reveal(path);
-				} catch (RevealFailedException e) {
-					LOG.error("Revealing ciphertext file failed.", e);
-				}
-			});
-			return true;
-		}).orElse(false);
+	private void revealPaths(RevealPathService service, List<Path> paths) {
+		paths.forEach(path -> {
+			try {
+				LOG.debug("Revealing {}", path);
+				service.reveal(path);
+			} catch (RevealFailedException e) {
+				LOG.error("Revealing ciphertext file failed.", e);
+			}
+		});
 	}
 
 	private void copyPathsToClipboard(List<Path> paths) {
