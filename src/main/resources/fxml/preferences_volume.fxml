@@ -10,6 +10,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Tooltip?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.VolumePreferencesController"
@@ -21,6 +22,14 @@
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.volume.type"/>
 			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
+				<graphic>
+					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="Open Cryptomator Docs to learn more about the different volume types." showDelay="100ms"/>
+				</tooltip>
+			</Hyperlink>
 		</HBox>
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">
@@ -58,17 +67,6 @@
 					<FontAwesome5IconView glyph="CHECK"/>
 				</graphic>
 			</Label>
-		</VBox>
-
-		<Separator orientation="HORIZONTAL"/>
-
-		<VBox HBox.hgrow="ALWAYS" spacing="6">
-			<Label text="%preferences.volume.docs.description" wrapText="true" VBox.vgrow="ALWAYS"/>
-			<Hyperlink text="%preferences.volume.docs.linkText" onAction="#openDocs" contentDisplay="LEFT">
-				<graphic>
-					<FontAwesome5IconView glyph="LINK"/>
-				</graphic>
-			</Hyperlink>
 		</VBox>
 	</children>
 </VBox>
