@@ -1,5 +1,6 @@
 package org.cryptomator.ui.preferences;
 
+import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.mount.MountCapability;
@@ -7,6 +8,7 @@ import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ObservableValue;
@@ -21,6 +23,8 @@ import java.util.ResourceBundle;
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
 
+	private static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/vault-mounting/";
+
 	private final Settings settings;
 	private final ObservableValue<MountService> selectedMountService;
 	private final ResourceBundle resourceBundle;
@@ -29,14 +33,16 @@ public class VolumePreferencesController implements FxController {
 	private final ObservableValue<Boolean> mountToDriveLetterSupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
 	private final ObservableValue<Boolean> readonlySupported;
+	private final Lazy<Application> application;
 	private final List<MountService> mountProviders;
 	public ChoiceBox<MountService> volumeTypeChoiceBox;
 	public TextField loopbackPortField;
 	public Button loopbackPortApplyButton;
 
 	@Inject
-	VolumePreferencesController(Settings settings, List<MountService> mountProviders, ResourceBundle resourceBundle) {
+	VolumePreferencesController(Settings settings, Lazy<Application> application, List<MountService> mountProviders, ResourceBundle resourceBundle) {
 		this.settings = settings;
+		this.application = application;
 		this.mountProviders = mountProviders;
 		this.resourceBundle = resourceBundle;
 
@@ -140,5 +146,9 @@ public class VolumePreferencesController implements FxController {
 		public MountService fromString(String string) {
 			throw new UnsupportedOperationException();
 		}
+	}
+
+	public void openDocs() {
+		application.get().getHostServices().showDocument(DOCS_MOUNTING_URL);
 	}
 }

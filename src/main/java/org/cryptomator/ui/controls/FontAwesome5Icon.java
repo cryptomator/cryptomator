@@ -42,6 +42,7 @@ public enum FontAwesome5Icon {
 	PLUS("\uF067"), //
 	PRINT("\uF02F"), //
 	QUESTION("\uF128"), //
+	QUESTION_CIRCLE("\uf059"), //
 	REDO("\uF01E"), //
 	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //
