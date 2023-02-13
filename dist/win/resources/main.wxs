@@ -143,11 +143,11 @@
       CloseMessage="no"
       RebootPrompt="no"
       PromptToContinue="yes"
-      Description="A running instance of $(var.JpAppName) is found. Please close it to continue."
+      Description="A running instance of $(var.JpAppName) is found, using files marked for update. Please close it to continue."
       Property="FOUNDRUNNINGAPP"
       >
     </util:CloseApplication>
-    <CustomAction Id="FailOnRunningApp" Impersonate="no" ExeCommand="[SystemFolder]\cmd.exe /c &quot;exit 1&quot;" Directory="INSTALLDIR" Execute="immediate" Return="check" />
+    <CustomAction Id="FailOnRunningApp" Error="Installation aborted, because files marked for update are used by a running instance of $(var.JpAppName)."/>
 
     <?ifdef JpIcon ?>
     <Property Id="ARPPRODUCTICON" Value="JpARPPRODUCTICON"/>
@@ -182,7 +182,7 @@
       <Custom Action="WixCloseApplications" Before="InstallValidate"></Custom>
       <Custom Action="FailOnRunningApp" After="WixCloseApplications" >FOUNDRUNNINGAPP</Custom>
 
-      <RemoveExistingProducts After="InstallValidate"/>
+      <RemoveExistingProducts After="InstallValidate"/> <!-- Moved from CostInitialize, due to WixCloseApplications -->
 
       <Custom Action="PatchWebDAV" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
       <Custom Action="V170MigrateSettings" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
