@@ -54,7 +54,7 @@
         Property="JP_UPGRADABLE_FOUND"
         Maximum="$(var.JpAppVersion)"
         MigrateFeatures="yes"
-        IncludeMaximum="$(var.JpUpgradeVersionOnlyDetectUpgrade)" />
+        IncludeMaximum="yes" />  <!-- TODO: check if this needs to be set to yes-->
       <UpgradeVersion
         OnlyDetect="$(var.JpUpgradeVersionOnlyDetectDowngrade)"
         Property="JP_DOWNGRADABLE_FOUND"
