@@ -14,7 +14,6 @@ import javafx.beans.value.ObservableValue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 
 import static org.cryptomator.integrations.mount.MountCapability.MOUNT_AS_DRIVE_LETTER;
 import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_EXISTING_DIR;
@@ -60,7 +59,7 @@ public class Mounter {
 					case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
 					case MOUNT_FLAGS -> {
 						var mountFlags = vaultSettings.mountFlags().get();
-						if( mountFlags == null || mountFlags.isBlank()) {
+						if (mountFlags == null || mountFlags.isBlank()) {
 							builder.setMountFlags(service.getDefaultMountFlags());
 						} else {
 							builder.setMountFlags(mountFlags);
@@ -81,9 +80,10 @@ public class Mounter {
 			var canMountToDriveLetter = service.hasCapability(MOUNT_AS_DRIVE_LETTER);
 			var canMountToParent = service.hasCapability(MOUNT_WITHIN_EXISTING_PARENT);
 			var canMountToDir = service.hasCapability(MOUNT_TO_EXISTING_DIR);
+			var canMountToSystem = service.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH);
 
 			if (userChosenMountPoint == null) {
-				if (service.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH)) {
+				if (canMountToSystem) {
 					// no need to set a mount point
 				} else if (canMountToDriveLetter) {
 					builder.setMountpoint(driveLetters.getFirstDesiredAvailable().orElseThrow()); //TODO: catch exception and translate
@@ -105,8 +105,11 @@ public class Mounter {
 				}
 				try {
 					builder.setMountpoint(userChosenMountPoint);
-				} catch (IllegalArgumentException e) {
-					var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter) || (!canMountToDir && !mpIsDriveLetter) || (!canMountToParent && !mpIsDriveLetter);
+				} catch (IllegalArgumentException | UnsupportedOperationException e) {
+					var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter) //mounting as driveletter, albeit not supported
+							|| (!canMountToDir && !mpIsDriveLetter) //mounting to directory, albeit not supported
+							|| (!canMountToParent && !mpIsDriveLetter) //
+							|| (!canMountToDir && !canMountToParent && !canMountToSystem && !canMountToDriveLetter);
 					if (configNotSupported) {
 						throw new MountPointNotSupportedException(e.getMessage());
 					} else if (canMountToDir && !canMountToParent && !Files.exists(userChosenMountPoint)) {

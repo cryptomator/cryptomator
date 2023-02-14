@@ -156,7 +156,7 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2023 Skymatic GmbH"
-          --app-version "${{ needs.get-version.outputs.semVerNum }}"
+          --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           --win-menu
           --win-dir-chooser
           --win-shortcut-prompt

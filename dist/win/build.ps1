@@ -129,7 +129,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--name $AppName `
 	--vendor $Vendor `
 	--copyright $copyright `
-	--app-version "$semVerNo" `
+	--app-version "$semVerNo.$revisionNo" `
 	--win-menu `
 	--win-dir-chooser `
 	--win-shortcut-prompt `
