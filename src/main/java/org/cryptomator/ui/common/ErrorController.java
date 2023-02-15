@@ -29,9 +29,11 @@ public class ErrorController implements FxController {
 			OS: %s / %s
 			App: %s / %s
 			
-			<!-- ✏️ Please describe what happened as accurately as possible. -->
+			<!-- ✏ Please describe what happened as accurately as possible. -->
 			
-			<!-- 📋 Please also copy and paste the detail text from the error window. -->
+			<!-- 📋 Please also copy and paste the detail text from the error window to the next line. -->
+			
+			<!-- ❗ If the description or the detail text is missing, the discussion will be deleted. -->
 			""";
 
 	private final Application application;
