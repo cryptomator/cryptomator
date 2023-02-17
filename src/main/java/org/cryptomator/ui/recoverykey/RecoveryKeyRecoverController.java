@@ -139,7 +139,7 @@ public class RecoveryKeyRecoverController implements FxController {
 		}
 	}
 
-	public void validateRecoveryKey() {
+	private void validateRecoveryKey() {
 		isWrongKey = false;
 		var valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
 		if (valid) {
