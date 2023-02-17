@@ -44,10 +44,11 @@ public class RecoveryKeyRecoverController implements FxController {
 	private final ObservableValue<Boolean> recoveryKeyWrong;
 	private final ObservableValue<Boolean> recoveryKeyInvalid;
 	private final RecoveryKeyFactory recoveryKeyFactory;
-
 	private final ObjectProperty<RecoveryKeyState> recoveryKeyState;
 	private final Lazy<Scene> resetPasswordScene;
 	private final AutoCompleter autoCompleter;
+
+	private volatile boolean isWrongKey;
 
 	public TextArea textarea;
 
@@ -119,8 +120,6 @@ public class RecoveryKeyRecoverController implements FxController {
 
 	/**
 	 * Checks, if vault config is signed with the given key.
-	 * <p>
-	 * If not, but the deriving recovery key is valid, sets the recoveryKeyState to WRONG.
 	 *
 	 * @param key byte array of possible signing key
 	 * @return true, if vault config is signed with this key
@@ -132,7 +131,7 @@ public class RecoveryKeyRecoverController implements FxController {
 			return true;
 		} catch (VaultKeyInvalidException e) {
 			LOG.debug("Provided recovery key does not match vault config signature.");
-			recoveryKeyState.setValue(RecoveryKeyState.WRONG);
+			isWrongKey = true;
 			return false;
 		} catch (VaultConfigLoadException e) {
 			LOG.error("Failed to parse vault config", e);
@@ -141,10 +140,13 @@ public class RecoveryKeyRecoverController implements FxController {
 	}
 
 	public void validateRecoveryKey() {
+		isWrongKey = false;
 		var valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
 		if (valid) {
 			recoveryKeyState.set(RecoveryKeyState.CORRECT);
-		} else if (recoveryKeyState.getValue() != RecoveryKeyState.WRONG) { // set via side effect in checkKeyAgainstVaultConfig()
+		} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()
+			recoveryKeyState.set(RecoveryKeyState.WRONG);
+		} else {
 			recoveryKeyState.set(RecoveryKeyState.INVALID);
 		}
 	}
