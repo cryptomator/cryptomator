@@ -4,6 +4,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import dagger.Lazy;
 import org.cryptomator.common.Nullable;
+import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
@@ -15,9 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
@@ -38,10 +40,15 @@ public class RecoveryKeyRecoverController implements FxController {
 	private final Vault vault;
 	private final VaultConfig.UnverifiedVaultConfig unverifiedVaultConfig;
 	private final StringProperty recoveryKey;
+	private final ObservableValue<Boolean> recoveryKeyCorrect;
+	private final ObservableValue<Boolean> recoveryKeyWrong;
+	private final ObservableValue<Boolean> recoveryKeyInvalid;
 	private final RecoveryKeyFactory recoveryKeyFactory;
-	private final BooleanBinding validRecoveryKey;
+	private final ObjectProperty<RecoveryKeyState> recoveryKeyState;
 	private final Lazy<Scene> resetPasswordScene;
 	private final AutoCompleter autoCompleter;
+
+	private volatile boolean isWrongKey;
 
 	public TextArea textarea;
 
@@ -53,14 +60,18 @@ public class RecoveryKeyRecoverController implements FxController {
 		this.unverifiedVaultConfig = unverifiedVaultConfig;
 		this.recoveryKey = recoveryKey;
 		this.recoveryKeyFactory = recoveryKeyFactory;
-		this.validRecoveryKey = Bindings.createBooleanBinding(this::isValidRecoveryKey, recoveryKey);
 		this.resetPasswordScene = resetPasswordScene;
 		this.autoCompleter = new AutoCompleter(recoveryKeyFactory.getDictionary());
+		this.recoveryKeyState = new SimpleObjectProperty<>();
+		this.recoveryKeyCorrect = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.CORRECT::equals, false);
+		this.recoveryKeyWrong = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.WRONG::equals, false);
+		this.recoveryKeyInvalid = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.INVALID::equals, false);
 	}
 
 	@FXML
 	public void initialize() {
 		recoveryKey.bind(textarea.textProperty());
+		textarea.textProperty().addListener(((observable, oldValue, newValue) -> validateRecoveryKey()));
 	}
 
 	private TextFormatter.Change filterTextChange(TextFormatter.Change change) {
@@ -107,6 +118,12 @@ public class RecoveryKeyRecoverController implements FxController {
 		window.setScene(resetPasswordScene.get());
 	}
 
+	/**
+	 * Checks, if vault config is signed with the given key.
+	 *
+	 * @param key byte array of possible signing key
+	 * @return true, if vault config is signed with this key
+	 */
 	private boolean checkKeyAgainstVaultConfig(byte[] key) {
 		try {
 			var config = unverifiedVaultConfig.verify(key, unverifiedVaultConfig.allegedVaultVersion());
@@ -114,10 +131,23 @@ public class RecoveryKeyRecoverController implements FxController {
 			return true;
 		} catch (VaultKeyInvalidException e) {
 			LOG.debug("Provided recovery key does not match vault config signature.");
+			isWrongKey = true;
 			return false;
 		} catch (VaultConfigLoadException e) {
 			LOG.error("Failed to parse vault config", e);
 			return false;
+		}
+	}
+
+	private void validateRecoveryKey() {
+		isWrongKey = false;
+		var valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
+		if (valid) {
+			recoveryKeyState.set(RecoveryKeyState.CORRECT);
+		} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()
+			recoveryKeyState.set(RecoveryKeyState.WRONG);
+		} else {
+			recoveryKeyState.set(RecoveryKeyState.INVALID);
 		}
 	}
 
@@ -127,19 +157,46 @@ public class RecoveryKeyRecoverController implements FxController {
 		return vault;
 	}
 
-	public BooleanBinding validRecoveryKeyProperty() {
-		return validRecoveryKey;
-	}
-
-	public boolean isValidRecoveryKey() {
-		if (unverifiedVaultConfig != null) {
-			return recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), this::checkKeyAgainstVaultConfig);
-		} else {
-			return recoveryKeyFactory.validateRecoveryKey(recoveryKey.get());
-		}
-	}
-
 	public TextFormatter getRecoveryKeyTextFormatter() {
 		return new TextFormatter<>(this::filterTextChange);
+	}
+
+	public ObservableValue<Boolean> recoveryKeyInvalidProperty() {
+		return recoveryKeyInvalid;
+	}
+
+	public boolean isRecoveryKeyInvalid() {
+		return recoveryKeyInvalid.getValue();
+	}
+
+	public ObservableValue<Boolean> recoveryKeyCorrectProperty() {
+		return recoveryKeyCorrect;
+	}
+
+	public boolean isRecoveryKeyCorrect() {
+		return recoveryKeyCorrect.getValue();
+	}
+
+	public ObservableValue<Boolean> recoveryKeyWrongProperty() {
+		return recoveryKeyWrong;
+	}
+
+	public boolean isRecoveryKeyWrong() {
+		return recoveryKeyWrong.getValue();
+	}
+
+	private enum RecoveryKeyState {
+		/**
+		 * Recovery key is a valid key and belongs to this vault
+		 */
+		CORRECT,
+		/**
+		 * Recovery key is a valid key, but does not belong to this vault
+		 */
+		WRONG,
+		/**
+		 * Recovery key is not a valid key.
+		 */
+		INVALID;
 	}
 }
