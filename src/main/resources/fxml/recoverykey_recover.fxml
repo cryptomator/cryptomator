@@ -33,7 +33,7 @@
 					<FontAwesome5IconView glyph="ANCHOR"/>
 				</graphic>
 			</Label>
-			<Label text="%recoveryKey.recover.validKey" graphicTextGap="6" contentDisplay="LEFT" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyCorrect}">
+			<Label text="%recoveryKey.recover.correctKey" graphicTextGap="6" contentDisplay="LEFT" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyCorrect}">
 				<graphic>
 					<FontAwesome5IconView glyph="CHECK"/>
 				</graphic>
