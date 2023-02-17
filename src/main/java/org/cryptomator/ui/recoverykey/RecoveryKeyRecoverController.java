@@ -140,18 +140,16 @@ public class RecoveryKeyRecoverController implements FxController {
 		}
 	}
 
-	/* Getter/Setter */
-
 	public void validateRecoveryKey() {
 		var valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
 		if (valid) {
 			recoveryKeyState.set(RecoveryKeyState.CORRECT);
-		} else {
-			if (recoveryKeyState.getValue() != RecoveryKeyState.WRONG) { //set via side effect in checkKeyAgainstVaultConfig
-				recoveryKeyState.set(RecoveryKeyState.INVALID);
-			}
+		} else if (recoveryKeyState.getValue() != RecoveryKeyState.WRONG) { // set via side effect in checkKeyAgainstVaultConfig()
+			recoveryKeyState.set(RecoveryKeyState.INVALID);
 		}
 	}
+
+	/* Getter/Setter */
 
 	public Vault getVault() {
 		return vault;
