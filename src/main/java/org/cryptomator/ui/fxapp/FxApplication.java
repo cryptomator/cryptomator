@@ -68,7 +68,7 @@ public class FxApplication {
 		});
 
 		launchEventHandler.startHandlingLaunchEvents();
-		autoUnlocker.unlock();
+		autoUnlocker.unlockAll();
+		autoUnlocker.startMissingVaultsChecker();
 	}
-
 }
