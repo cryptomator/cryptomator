@@ -84,4 +84,9 @@ abstract class VaultOptionsModule {
 	@IntoMap
 	@FxControllerKey(MasterkeyOptionsController.class)
 	abstract FxController bindMasterkeyOptionsController(MasterkeyOptionsController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(HubOptionsController.class)
+	abstract FxController bindHubOptionsController(HubOptionsController controller);
 }
