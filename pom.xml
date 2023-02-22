@@ -66,7 +66,7 @@
 	<dependencies>
 		<!-- Cryptomator Libs -->
 		<dependency>
-			<!-- needed due to https://github.com/cryptomator/cryptolib/issues/34-->
+			<!-- needed due to https://github.com/cryptomator/cryptolib/issues/34 -->
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptolib</artifactId>
 			<version>${cryptomator.cryptolib.version}</version>
