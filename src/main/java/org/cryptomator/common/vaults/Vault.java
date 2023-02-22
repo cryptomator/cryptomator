@@ -316,18 +316,29 @@ public class Vault {
 
 	/**
 	 * Gets from the cleartext path its ciphertext counterpart.
-	 * The cleartext path has to start from the vault root (by starting with "/").
 	 *
 	 * @return Local os path to the ciphertext resource
 	 * @throws IOException if an I/O error occurs
+	 * @throws IllegalStateException if the vault is not unlocked
 	 */
-	public Path getCiphertextPath(String cleartextPath) throws IOException {
-		if (!cleartextPath.startsWith("/")) {
-			throw new IllegalArgumentException("Input path must be absolute from vault root by starting with \"/\".");
+	public Path getCiphertextPath(Path cleartextPath) throws IOException {
+		if (!state.getValue().equals(VaultState.Value.UNLOCKED)) {
+			throw new IllegalStateException("Vault is not unlocked");
 		}
 		var fs = cryptoFileSystem.get();
-		var cryptoPath = fs.getPath(cleartextPath);
-		return fs.getCiphertextPath(cryptoPath);
+		var osPathSeparator = cleartextPath.getFileSystem().getSeparator();
+		var cryptoFsPathSeparator = fs.getSeparator();
+
+		if (getMountPoint() instanceof Mountpoint.WithPath mp) {
+			var absoluteCryptoFsPath = cryptoFsPathSeparator + mp.path().relativize(cleartextPath).toString();
+			if (!cryptoFsPathSeparator.equals(osPathSeparator)) {
+				absoluteCryptoFsPath = absoluteCryptoFsPath.replace(osPathSeparator, cryptoFsPathSeparator);
+			}
+			var cryptoPath = fs.getPath(absoluteCryptoFsPath);
+			return fs.getCiphertextPath(cryptoPath);
+		} else {
+			throw new UnsupportedOperationException("URI mount points not supported.");
+		}
 	}
 
 	public VaultConfigCache getVaultConfigCache() {

@@ -12,7 +12,6 @@
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
@@ -26,8 +25,8 @@
 	</padding>
 	<children>
 		<TextFlow>
-			<Text text="%vaultOptions.mount.info" styleClass="label"/>
-			<Text text=" "/>
+			<Label text="%vaultOptions.mount.info"/>
+			<Label text=" "/>
 			<Hyperlink styleClass="hyperlink-underline" text="%vaultOptions.mount.linkToPreferences" onAction="#openVolumePreferences" wrapText="true"/>
 		</TextFlow>
 		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly" visible="${controller.readOnlySupported}" managed="${controller.readOnlySupported}"/>
