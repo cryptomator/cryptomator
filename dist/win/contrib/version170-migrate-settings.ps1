@@ -7,19 +7,9 @@
 
 #Get all active, local user profiles
 $profileList = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList'
-$localUsers = Get-LocalUser | Where-Object {$_.Enabled} | ForEach-Object { $_.Name}
-
-Get-ChildItem $profileList | ForEach-Object { $_.GetValue("ProfileImagePath") } | Where-Object {
-    $profileNameMatches = ($_ | Select-String -Pattern "\\([^\\]+)$").Matches
-    if($profileNameMatches.Count -eq 1) {
-        #check if the last path part is contained in the local user name list
-        #otherwise do not touch it
-        return $localUsers.Contains($profileNameMatches[0].Groups[1].Value)
-    } else {
-        return $false;
-    }
-} | ForEach-Object {
-    $settingsPath = "$_\AppData\Roaming\Cryptomator\settings.json"
+Get-ChildItem $profileList | ForEach-Object {
+    $profilePath =  $_.GetValue("ProfileImagePath") 
+    $settingsPath = "$profilePath\AppData\Roaming\Cryptomator\settings.json"
     if(!(Test-Path -Path $settingsPath -PathType Leaf)) {
         #No settings file, nothing to do.
         return;
