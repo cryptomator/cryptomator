@@ -37,30 +37,30 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 	@Override
 	public void write(JsonWriter out, Settings value) throws IOException {
 		out.beginObject();
-		out.name("lastWrittenByVersion").value(env.getAppVersion()+env.getBuildNumber().map("-"::concat).orElse(""));
+		out.name("writtenByVersion").value(env.getAppVersion() + env.getBuildNumber().map("-"::concat).orElse(""));
 		out.name("directories");
 		writeVaultSettingsArray(out, value.getDirectories());
 		out.name("askedForUpdateCheck").value(value.askedForUpdateCheck().get());
-		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
-		out.name("startHidden").value(value.startHidden().get());
 		out.name("autoCloseVaults").value(value.autoCloseVaults().get());
-		out.name("port").value(value.port().get());
-		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
+		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
 		out.name("debugMode").value(value.debugMode().get());
-		out.name("theme").value(value.theme().get().name());
-		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
+		out.name("displayConfiguration").value((value.displayConfigurationProperty().get()));
 		out.name("keychainProvider").value(value.keychainProvider().get());
-		out.name("useKeychain").value(value.useKeychain().get());
+		out.name("language").value((value.languageProperty().get()));
 		out.name("licenseKey").value(value.licenseKey().get());
+		out.name("mountService").value(value.mountService().get());
+		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
+		out.name("port").value(value.port().get());
 		out.name("showMinimizeButton").value(value.showMinimizeButton().get());
 		out.name("showTrayIcon").value(value.showTrayIcon().get());
+		out.name("startHidden").value(value.startHidden().get());
+		out.name("theme").value(value.theme().get().name());
+		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
+		out.name("useKeychain").value(value.useKeychain().get());
+		out.name("windowHeight").value((value.windowHeightProperty().get()));
+		out.name("windowWidth").value((value.windowWidthProperty().get()));
 		out.name("windowXPosition").value((value.windowXPositionProperty().get()));
 		out.name("windowYPosition").value((value.windowYPositionProperty().get()));
-		out.name("windowWidth").value((value.windowWidthProperty().get()));
-		out.name("windowHeight").value((value.windowHeightProperty().get()));
-		out.name("displayConfiguration").value((value.displayConfigurationProperty().get()));
-		out.name("language").value((value.languageProperty().get()));
-		out.name("mountService").value(value.mountService().get());
 		out.endObject();
 	}
 
@@ -82,33 +82,34 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
+				case "writtenByVersion" -> in.skipValue(); //noop
 				case "directories" -> settings.getDirectories().addAll(readVaultSettingsArray(in));
 				case "askedForUpdateCheck" -> settings.askedForUpdateCheck().set(in.nextBoolean());
-				case "checkForUpdatesEnabled" -> settings.checkForUpdates().set(in.nextBoolean());
-				case "startHidden" -> settings.startHidden().set(in.nextBoolean());
 				case "autoCloseVaults" -> settings.autoCloseVaults().set(in.nextBoolean());
-				case "port" -> settings.port().set(in.nextInt());
-				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
+				case "checkForUpdatesEnabled" -> settings.checkForUpdates().set(in.nextBoolean());
 				case "debugMode" -> settings.debugMode().set(in.nextBoolean());
-				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
-				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
-				case "keychainProvider" -> settings.keychainProvider().set(in.nextString());
-				case "useKeychain" -> settings.useKeychain().set(in.nextBoolean());
-				case "licenseKey" -> settings.licenseKey().set(in.nextString());
-				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
-				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
-				case "windowXPosition" -> settings.windowXPositionProperty().set(in.nextInt());
-				case "windowYPosition" -> settings.windowYPositionProperty().set(in.nextInt());
-				case "windowWidth" -> settings.windowWidthProperty().set(in.nextInt());
-				case "windowHeight" -> settings.windowHeightProperty().set(in.nextInt());
 				case "displayConfiguration" -> settings.displayConfigurationProperty().set(in.nextString());
+				case "keychainProvider" -> settings.keychainProvider().set(in.nextString());
 				case "language" -> settings.languageProperty().set(in.nextString());
+				case "licenseKey" -> settings.licenseKey().set(in.nextString());
 				case "mountService" -> {
 					var token = in.peek();
 					if (JsonToken.STRING == token) {
 						settings.mountService().set(in.nextString());
 					}
 				}
+				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
+				case "port" -> settings.port().set(in.nextInt());
+				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
+				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
+				case "startHidden" -> settings.startHidden().set(in.nextBoolean());
+				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
+				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
+				case "useKeychain" -> settings.useKeychain().set(in.nextBoolean());
+				case "windowHeight" -> settings.windowHeightProperty().set(in.nextInt());
+				case "windowWidth" -> settings.windowWidthProperty().set(in.nextInt());
+				case "windowXPosition" -> settings.windowXPositionProperty().set(in.nextInt());
+				case "windowYPosition" -> settings.windowYPositionProperty().set(in.nextInt());
 				//1.6.x legacy
 				case "preferredVolumeImpl" -> volumeImpl = in.nextString();
 				//legacy end
@@ -134,7 +135,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		if (volumeImpl.equals("Dokany")) {
 			return "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
 		} else if (volumeImpl.equals("FUSE")) {
-			if(SystemUtils.IS_OS_WINDOWS) {
+			if (SystemUtils.IS_OS_WINDOWS) {
 				return "org.cryptomator.frontend.fuse.mount.WinFspNetworkMountProvider";
 			} else if (SystemUtils.IS_OS_MAC) {
 				return "org.cryptomator.frontend.fuse.mount.MacFuseMountProvider";
@@ -142,7 +143,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				return "org.cryptomator.frontend.fuse.mount.LinuxFuseMountProvider";
 			}
 		} else {
-			if(SystemUtils.IS_OS_WINDOWS) {
+			if (SystemUtils.IS_OS_WINDOWS) {
 				return "org.cryptomator.frontend.webdav.mount.WindowsMounter";
 			} else if (SystemUtils.IS_OS_MAC) {
 				return "org.cryptomator.frontend.webdav.mount.MacAppleScriptMounter";

@@ -102,10 +102,10 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_LICENSE_EXCEEDED)
+	@FxmlScene(FxmlFile.HUB_INVALID_LICENSE)
 	@KeyLoadingScoped
-	static Scene provideLicenseExceededScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_LICENSE_EXCEEDED);
+	static Scene provideInvalidLicenseScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_INVALID_LICENSE);
 	}
 
 	@Provides
@@ -162,8 +162,8 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(LicenseExceededController.class)
-	abstract FxController bindLicenseExceededController(LicenseExceededController controller);
+	@FxControllerKey(InvalidLicenseController.class)
+	abstract FxController bindInvalidLicenseController(InvalidLicenseController controller);
 
 	@Binds
 	@IntoMap
