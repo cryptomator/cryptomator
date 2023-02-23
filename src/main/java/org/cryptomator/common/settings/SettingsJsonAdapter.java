@@ -109,6 +109,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 						settings.mountService().set(in.nextString());
 					}
 				}
+				case "lastWrittenByVersion" -> in.skipValue(); //noop
 				//1.6.x legacy
 				case "preferredVolumeImpl" -> volumeImpl = in.nextString();
 				//legacy end
