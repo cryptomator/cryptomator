@@ -15,7 +15,7 @@
 <?import javafx.scene.shape.Circle?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.common.ErrorController"
+	  fx:controller="org.cryptomator.ui.error.ErrorController"
 	  prefWidth="450"
 	  prefHeight="450"
 	  spacing="18"
