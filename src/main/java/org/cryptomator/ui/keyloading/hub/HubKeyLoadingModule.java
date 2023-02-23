@@ -15,8 +15,6 @@ import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.NewPasswordController;
-import org.cryptomator.ui.common.PasswordStrengthUtil;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
@@ -152,13 +150,6 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(AuthFlowController.class)
 	abstract FxController bindAuthFlowController(AuthFlowController controller);
-
-	@Provides
-	@IntoMap
-	@FxControllerKey(NewPasswordController.class)
-	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
-		return new NewPasswordController(resourceBundle, strengthRater);
-	}
 
 	@Binds
 	@IntoMap

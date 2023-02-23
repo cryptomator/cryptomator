@@ -9,7 +9,6 @@ import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;

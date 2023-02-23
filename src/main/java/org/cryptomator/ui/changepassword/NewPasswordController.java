@@ -1,5 +1,6 @@
-package org.cryptomator.ui.common;
+package org.cryptomator.ui.changepassword;
 
+import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 

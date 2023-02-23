@@ -6,7 +6,7 @@
  * Contributors:
  *     Jean-Noël Charon - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.ui.common;
+package org.cryptomator.ui.changepassword;
 
 import com.nulabinc.zxcvbn.Zxcvbn;
 import org.cryptomator.common.Environment;

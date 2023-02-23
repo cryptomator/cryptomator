@@ -1,4 +1,4 @@
-package org.cryptomator.ui.forgetPassword;
+package org.cryptomator.ui.forgetpassword;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Documented;

@@ -1,10 +1,16 @@
-package org.cryptomator.ui.common;
+package org.cryptomator.ui.error;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.ErrorCode;
+import org.cryptomator.ui.common.DefaultSceneFactory;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxControllerKey;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
+import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Named;
 import javax.inject.Provider;

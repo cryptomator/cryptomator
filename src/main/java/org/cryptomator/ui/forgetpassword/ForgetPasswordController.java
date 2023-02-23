@@ -1,4 +1,4 @@
-package org.cryptomator.ui.forgetPassword;
+package org.cryptomator.ui.forgetpassword;
 
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;

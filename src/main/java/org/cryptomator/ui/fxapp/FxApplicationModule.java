@@ -7,9 +7,7 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.common.ErrorComponent;
-import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -18,13 +16,9 @@ import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 
-import javax.inject.Named;
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.util.Collections;
-import java.util.List;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class})
 abstract class FxApplicationModule {
