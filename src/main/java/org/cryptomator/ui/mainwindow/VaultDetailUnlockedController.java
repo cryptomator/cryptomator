@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.tobiasdiez.easybind.EasyBind;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.revealpath.RevealFailedException;
@@ -101,7 +102,11 @@ public class VaultDetailUnlockedController implements FxController {
 
 	private void handleDragEvent(DragEvent event) {
 		if (DragEvent.DRAG_OVER.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
-			event.acceptTransferModes(TransferMode.LINK);
+			if(SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_MAC) {
+				event.acceptTransferModes(TransferMode.LINK);
+			} else {
+				event.acceptTransferModes(TransferMode.ANY);
+			}
 			draggingOver.set(true);
 		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 			List<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).toList();

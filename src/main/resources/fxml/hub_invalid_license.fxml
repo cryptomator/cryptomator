@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Circle?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.hub.LicenseExceededController"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.InvalidLicenseController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
@@ -33,12 +33,12 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%hub.licenseExceeded.message" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%hub.invalidLicense.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="%hub.licenseExceeded.description" wrapText="true"/>
+			<Label text="%hub.invalidLicense.description" wrapText="true"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
