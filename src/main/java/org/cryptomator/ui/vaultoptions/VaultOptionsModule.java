@@ -13,7 +13,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
