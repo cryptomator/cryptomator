@@ -23,7 +23,8 @@
 1. Open the view of installed apps
 2. Search for &quot;WinFsp&quot;
 3. Uninstall the listed application
-4. Restart this installer">(InstalledWinFspVersion = v0.0.0.0) OR ($(var.BundledWinFspVersion) &lt;= InstalledWinFspVersion)</bal:Condition>
+4. Reboot your device
+5. Restart this installer">(InstalledWinFspVersion = v0.0.0.0) OR ($(var.BundledWinFspVersion) &lt;= InstalledWinFspVersion)</bal:Condition>
 
         <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
         <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
