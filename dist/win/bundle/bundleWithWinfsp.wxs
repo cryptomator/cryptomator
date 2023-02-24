@@ -1,12 +1,30 @@
 <?xml version="1.0"?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
     <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/bundle.html-->
     <!-- Attributes explicitly not used:
         Condition - the single msi files have their own install conditions, no need to copy them here
     -->
+
     <Bundle Name="Cryptomator" UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b" Version="$(var.BundleVersion)" Manufacturer="$(var.BundleVendor)"
      AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="bundle\resources\Cryptomator.ico">
+
+        <!-- detect outdated WinFsp installations -->
+        <?include "resources\winFspMetaData.wxi" ?>
+        <util:ProductSearch
+            Variable="InstalledWinFspVersion"
+            Result="version"
+            UpgradeCode="82F812D9-4083-4EF1-8BC8-0F1EDA05B46B"
+        />
+        <!-- Note: The bundle engine takes the Message format literaly -->
+        <bal:Condition Message=
+"The WinFsp driver used by Cryptomator is outdated and must be removed before the installation.
+
+1. Open the view of installed apps
+2. Search for &quot;WinFsp&quot;
+3. Uninstall the listed application
+4. Reboot your device
+5. Restart this installer">(InstalledWinFspVersion = v0.0.0.0) OR ($(var.BundledWinFspVersion) &lt;= InstalledWinFspVersion)</bal:Condition>
 
         <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
         <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">

@@ -10,6 +10,7 @@
     <Font Id="2" Height="-22" Weight="500" Foreground="666666">Segoe UI</Font>
     <Font Id="3" Height="-12" Weight="500" Foreground="000000" Background="FFFFFF">Segoe UI</Font>
     <Font Id="4" Height="-12" Weight="500" Foreground="ff0000" Background="FFFFFF" Underline="yes">Segoe UI</Font>
+    <Font Id="5" Height="-12" Weight="700" Foreground="000000" Background="FFFFFF">Segoe UI</Font>
 
     <Image X="11" Y="11" Width="64" Height="64" ImageFile="logo.png" />
     <Text X="80" Y="11" Width="-11" Height="64" FontId="1" DisablePrefix="yes">#(loc.Title)</Text>
@@ -82,7 +83,7 @@
         <Text Name="FailureUninstallHeader" X="185" Y="50" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureUninstallHeader)</Text>
         <Text Name="FailureRepairHeader" X="185" Y="50" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureRepairHeader)</Text>
         <Hypertext Name="FailureLogFileLink" X="185" Y="121" Width="-11" Height="68" FontId="3" TabStop="yes" HideWhenDisabled="yes">#(loc.FailureHyperlinkLogText)</Hypertext>
-        <Hypertext Name="FailureMessageText" X="185" Y="-115" Width="-11" Height="80" FontId="3" TabStop="yes" HideWhenDisabled="yes" />
+        <Hypertext Name="FailureMessageText" X="185" Y="-80" Width="-11" Height="140" FontId="5" TabStop="yes" HideWhenDisabled="yes" />
         <Text Name="FailureRestartText" X="185" Y="-57" Width="-11" Height="80" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureRestartText)</Text>
         <Button Name="FailureRestartButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0" HideWhenDisabled="yes">#(loc.FailureRestartButton)</Button>
         <Button Name="FailureCloseButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.FailureCloseButton)</Button>
