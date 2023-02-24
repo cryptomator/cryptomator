@@ -250,6 +250,7 @@ jobs:
         run: >
           "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
           -ext WixBalExtension
+          -ext WixUtilExtension
           -out dist/win/bundle/
           -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           -dBundleVendor="Skymatic GmbH"
@@ -261,6 +262,7 @@ jobs:
         run: >
           "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
           -ext WixBalExtension
+          -ext WixUtilExtension
           -out installer/unsigned/Cryptomator-Installer.exe
       - name: Detach burn engine in preparation to sign
         run: >
