@@ -74,7 +74,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 
 ### Consistency
 
-- HMAC over file contents to recognize changed ciphertext before decryption
+- Authenticated encryption is used for file content to recognize changed ciphertext before decryption
 - I/O operations are transactional and atomic, if the filesystems support it
 - Each file contains all information needed for decryption (except for the key of course), no common metadata means no [SPOF](http://en.wikipedia.org/wiki/Single_point_of_failure)
 
