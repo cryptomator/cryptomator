@@ -38,7 +38,7 @@
 	<!-- Apache Commons-cli false positives below -->
 	<suppress>
 		<notes><![CDATA[
-			False positive for commons-cli due, see https://github.com/jeremylong/DependencyCheck/pull/4148
+		False positive for commons-cli due, see https://github.com/jeremylong/DependencyCheck/pull/4148
 		]]></notes>
 		<gav regex="true">^commons\-cli:commons\-cli:.*$</gav>
 		<cpe>cpe:/a:apache:james</cpe>
@@ -46,4 +46,13 @@
 		<cpe>cpe:/a:spirit-project:spirit</cpe>
 		<cpe>cpe:/a:apache:commons_net</cpe>
 	</suppress>
+
+	<suppress>
+		<notes><![CDATA[
+		False positive for jackson-core-2.13.4.jar, see https://github.com/jeremylong/DependencyCheck/issues/5502
+   ]]></notes>
+		<packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-core@.*$</packageUrl>
+		<cve>CVE-2022-45688</cve>
+	</suppress>
+
 </suppressions>

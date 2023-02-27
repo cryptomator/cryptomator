@@ -34,7 +34,7 @@
 		<cryptomator.integrations.win.version>1.2.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.2.0</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>2.0.0</cryptomator.fuse.version>
+		<cryptomator.fuse.version>2.0.2</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>2.0.0</cryptomator.webdav.version>
 
@@ -59,7 +59,7 @@
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>23.0.0</jetbrains.annotations.version>
-		<dependency-check.version>7.4.4</dependency-check.version>
+		<dependency-check.version>8.1.0</dependency-check.version>
 		<jacoco.version>0.8.8</jacoco.version>
 	</properties>
 

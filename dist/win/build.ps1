@@ -153,7 +153,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 # download Winfsp
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
-$winfspMsiUrl= (Select-String -Path ".\bundle\resources\winfsp-download.url" -Pattern 'https:.*').Matches.Value
+$winfspMsiUrl= (Select-String -Path ".\bundle\resources\winFspMetaData.wxi" -Pattern '<\?define BundledWinFspDownloadLink="(.+)".*?>').Matches.Groups[1].Value
 Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 
@@ -161,11 +161,11 @@ Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redir
 Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi"
 
 # create bundle including winfsp
-& "$env:WIX\bin\candle.exe" .\bundle\bundleWithWinfsp.wxs -ext WixBalExtension -out bundle\ `
+& "$env:WIX\bin\candle.exe" .\bundle\bundleWithWinfsp.wxs -ext WixBalExtension -ext WixUtilextension -out bundle\ `
 	-dBundleVersion="$semVerNo.$revisionNo" `
 	-dBundleVendor="$Vendor" `
 	-dBundleCopyright="$copyright" `
 	-dAboutUrl="$AboutUrl" `
 	-dHelpUrl="$HelpUrl" `
 	-dUpdateUrl="$UpdateUrl"
-& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\$AppName-Installer.exe
+& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -ext WixUtilextension -out installer\$AppName-Installer.exe
