@@ -30,10 +30,12 @@ jobs:
           architecture: x64
           output-suffix: x64
           xcode-path: '/Applications/Xcode_13.2.1.app'
+          fuse-lib: macFUSE
         - os: [self-hosted, macOS, ARM64]
           architecture: aarch64
           output-suffix: arm64
           xcode-path: '/Applications/Xcode_13.2.1.app'
+          fuse-lib: FUSE-T
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -177,7 +179,7 @@ jobs:
         run: |
           mkdir dmg
           mv Cryptomator.app dmg
-          cp dist/mac/dmg/resources/macFUSE.webloc dmg
+          cp dist/mac/dmg/resources/${{ matrix.fuse-lib }}.webloc dmg
           ls -l dmg
       - name: Install create-dmg
         run: |
@@ -188,14 +190,14 @@ jobs:
           create-dmg
           --volname Cryptomator
           --volicon "dist/mac/dmg/resources/Cryptomator-Volume.icns"
-          --background "dist/mac/dmg/resources/Cryptomator-background.tiff"
+          --background "dist/mac/dmg/resources/Cryptomator-${{ matrix.fuse-lib }}-background.tiff"
           --window-pos 400 100
           --window-size 640 694
           --icon-size 128
           --icon "Cryptomator.app" 128 245
           --hide-extension "Cryptomator.app"
-          --icon "macFUSE.webloc" 320 501
-          --hide-extension "macFUSE.webloc"
+          --icon "${{ matrix.fuse-lib }}.webloc" 320 501
+          --hide-extension "${{ matrix.fuse-lib }}.webloc"
           --app-drop-link 512 245
           --eula "dist/mac/dmg/resources/license.rtf"
           --icon ".background" 128 758
