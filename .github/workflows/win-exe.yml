@@ -22,7 +22,7 @@ jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml
     with:
-      version: ${{ github.event.inputs.version }}
+      version: ${{ inputs.version }}
 
   build-msi:
     name: Build .msi Installer
@@ -55,7 +55,6 @@ jobs:
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
-          cp dist/linux/launcher.sh target
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
         run: >
@@ -81,8 +80,10 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --copyright "(C) 2016 - 2023 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
+          --java-options "--enable-preview"
+          --java-options "--enable-native-access=org.cryptomator.jfuse.win"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
@@ -116,6 +117,9 @@ jobs:
       - name: Fix permissions
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
+      - name: Extract integrations DLL for code signing
+        shell: pwsh
+        run: gci ./appdir/Cryptomator/app/mods/ -File integrations-win-*.jar | ForEach-Object {Set-Location -Path $_.Directory; jar --file=$($_.FullName) --extract integrations.dll }
       - name: Codesign
         uses: skymatic/code-sign-action@v2
         with:
@@ -126,6 +130,10 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
+      - name: Repack signed DLL into jar
+        shell: pwsh
+        run: |
+          gci ./appdir/Cryptomator/app/mods/ -File integrations-win-*.jar | ForEach-Object {Set-Location -Path $_.Directory; jar --file=$($_.FullName) --update integrations.dll; Remove-Item integrations.dll}
       - name: Generate license for MSI
         run: >
           mvn -B license:add-third-party
@@ -147,8 +155,8 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2022 Skymatic GmbH"
-          --app-version "${{ needs.get-version.outputs.semVerNum }}"
+          --copyright "(C) 2016 - 2023 Skymatic GmbH"
+          --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           --win-menu
           --win-dir-chooser
           --win-shortcut-prompt
@@ -197,7 +205,7 @@ jobs:
 
   call-winget-flow:
     needs: [get-version, build-msi]
-    if: github.event.action == 'published' && needs.get-version.outputs.type == 'stable'
+    if: github.event.action == 'published' && needs.get-version.outputs.versionType == 'stable'
     uses: ./.github/workflows/winget.yml
     with:
       releaseTag: ${{ github.event.release.tag_name }}
@@ -235,17 +243,18 @@ jobs:
         shell: pwsh
       - name: Download WinFsp
         run: |
-          $winfspUrl= (Select-String -Path ".\dist\win\bundle\resources\winfsp-download.url" -Pattern 'https:.*').Matches.Value
+          $winfspUrl = (Select-String -Path ".\dist\win\bundle\resources\winFspMetaData.wxi" -Pattern '<\?define BundledWinFspDownloadLink="(.+)".*?>').Matches.Groups[1].Value
           curl --output dist/win/bundle/resources/winfsp.msi -L $winfspUrl
         shell: pwsh
       - name: Compile to wixObj file
         run: >
           "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
           -ext WixBalExtension
+          -ext WixUtilExtension
           -out dist/win/bundle/
           -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           -dBundleVendor="Skymatic GmbH"
-          -dBundleCopyright="(C) 2016 - 2022 Skymatic GmbH"
+          -dBundleCopyright="(C) 2016 - 2023 Skymatic GmbH"
           -dAboutUrl="https://cryptomator.org"
           -dHelpUrl="https://cryptomator.org/contact"
           -dUpdateUrl="https://cryptomator.org/downloads/"
@@ -253,6 +262,7 @@ jobs:
         run: >
           "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
           -ext WixBalExtension
+          -ext WixUtilExtension
           -out installer/unsigned/Cryptomator-Installer.exe
       - name: Detach burn engine in preparation to sign
         run: >
@@ -316,12 +326,12 @@ jobs:
     needs: [build-msi, build-exe]
     steps:
       - name: Download .msi
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: msi
           path: msi
       - name: Download .exe
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: exe
           path: exe
@@ -331,7 +341,7 @@ jobs:
           cp msi/*.msi files
           cp exe/*.exe files
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com

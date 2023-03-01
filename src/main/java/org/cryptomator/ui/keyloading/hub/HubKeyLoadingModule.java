@@ -88,6 +88,13 @@ public abstract class HubKeyLoadingModule {
 	abstract KeyLoadingStrategy bindHubKeyLoadingStrategyToHubHttps(HubKeyLoadingStrategy strategy);
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_NO_KEYCHAIN)
+	@KeyLoadingScoped
+	static Scene provideHubNoKeychainScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_NO_KEYCHAIN);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_AUTH_FLOW)
 	@KeyLoadingScoped
 	static Scene provideHubAuthFlowScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
@@ -95,10 +102,10 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_LICENSE_EXCEEDED)
+	@FxmlScene(FxmlFile.HUB_INVALID_LICENSE)
 	@KeyLoadingScoped
-	static Scene provideLicenseExceededScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_LICENSE_EXCEEDED);
+	static Scene provideInvalidLicenseScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_INVALID_LICENSE);
 	}
 
 	@Provides
@@ -138,6 +145,11 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
+	@FxControllerKey(NoKeychainController.class)
+	abstract FxController bindNoKeychainController(NoKeychainController controller);
+
+	@Binds
+	@IntoMap
 	@FxControllerKey(AuthFlowController.class)
 	abstract FxController bindAuthFlowController(AuthFlowController controller);
 
@@ -150,8 +162,8 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(LicenseExceededController.class)
-	abstract FxController bindLicenseExceededController(LicenseExceededController controller);
+	@FxControllerKey(InvalidLicenseController.class)
+	abstract FxController bindInvalidLicenseController(InvalidLicenseController controller);
 
 	@Binds
 	@IntoMap

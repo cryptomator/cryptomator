@@ -21,12 +21,13 @@ rm -rf runtime dmg *.app *.dmg
 # set variables
 APP_NAME="Cryptomator"
 VENDOR="Skymatic GmbH"
-COPYRIGHT_YEARS="2016 - 2022"
+COPYRIGHT_YEARS="2016 - 2023"
 PACKAGE_IDENTIFIER="org.cryptomator"
 MAIN_JAR_GLOB="cryptomator-*.jar"
 MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
 REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
+FUSE_LIB="FUSE-T"
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
@@ -65,6 +66,8 @@ ${JAVA_HOME}/bin/jpackage \
     --vendor "${VENDOR}" \
     --copyright "(C) ${COPYRIGHT_YEARS} ${VENDOR}" \
     --app-version "${VERSION_NO}" \
+    --java-options "--enable-preview" \
+    --java-options "--enable-native-access=org.cryptomator.jfuse.mac" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
@@ -77,6 +80,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/${APP_NAME}/ipc.socket\"" \
     --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/${APP_NAME}/key.p12\"" \
     --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"${APP_NAME}\"" \
+    --java-options "-Dcryptomator.mountPointsDir=\"~/${APP_NAME}\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \
@@ -122,20 +126,20 @@ fi
 # prepare dmg contents
 mkdir dmg
 mv ${APP_NAME}.app dmg
-cp resources/macFUSE.webloc dmg
+cp resources/${FUSE_LIB}.webloc dmg
 
 # create dmg
 create-dmg \
     --volname ${APP_NAME} \
     --volicon "resources/${APP_NAME}-Volume.icns" \
-    --background "resources/${APP_NAME}-background.tiff" \
+    --background "resources/${APP_NAME}-${FUSE_LIB}-background.tiff" \
     --window-pos 400 100 \
     --window-size 640 694 \
     --icon-size 128 \
     --icon "${APP_NAME}.app" 128 245 \
     --hide-extension "${APP_NAME}.app" \
-    --icon "macFUSE.webloc" 320 501 \
-    --hide-extension "macFUSE.webloc" \
+    --icon "${FUSE_LIB}.webloc" 320 501 \
+    --hide-extension "${FUSE_LIB}.webloc" \
     --app-drop-link 512 245 \
     --eula "resources/license.rtf" \
     --icon ".background" 128 758 \

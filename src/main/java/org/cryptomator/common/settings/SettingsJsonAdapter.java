@@ -9,6 +9,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,31 +37,30 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 	@Override
 	public void write(JsonWriter out, Settings value) throws IOException {
 		out.beginObject();
+		out.name("writtenByVersion").value(env.getAppVersion() + env.getBuildNumber().map("-"::concat).orElse(""));
 		out.name("directories");
 		writeVaultSettingsArray(out, value.getDirectories());
 		out.name("askedForUpdateCheck").value(value.askedForUpdateCheck().get());
-		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
-		out.name("startHidden").value(value.startHidden().get());
 		out.name("autoCloseVaults").value(value.autoCloseVaults().get());
-		out.name("port").value(value.port().get());
-		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
-		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
+		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
 		out.name("debugMode").value(value.debugMode().get());
-		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
-		out.name("theme").value(value.theme().get().name());
-		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
+		out.name("displayConfiguration").value((value.displayConfigurationProperty().get()));
 		out.name("keychainProvider").value(value.keychainProvider().get());
-		out.name("useKeychain").value(value.useKeychain().get());
+		out.name("language").value((value.languageProperty().get()));
 		out.name("licenseKey").value(value.licenseKey().get());
+		out.name("mountService").value(value.mountService().get());
+		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
+		out.name("port").value(value.port().get());
 		out.name("showMinimizeButton").value(value.showMinimizeButton().get());
 		out.name("showTrayIcon").value(value.showTrayIcon().get());
+		out.name("startHidden").value(value.startHidden().get());
+		out.name("theme").value(value.theme().get().name());
+		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
+		out.name("useKeychain").value(value.useKeychain().get());
+		out.name("windowHeight").value((value.windowHeightProperty().get()));
+		out.name("windowWidth").value((value.windowWidthProperty().get()));
 		out.name("windowXPosition").value((value.windowXPositionProperty().get()));
 		out.name("windowYPosition").value((value.windowYPositionProperty().get()));
-		out.name("windowWidth").value((value.windowWidthProperty().get()));
-		out.name("windowHeight").value((value.windowHeightProperty().get()));
-		out.name("displayConfiguration").value((value.displayConfigurationProperty().get()));
-		out.name("language").value((value.languageProperty().get()));
-
 		out.endObject();
 	}
 
@@ -75,61 +75,81 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 	@Override
 	public Settings read(JsonReader in) throws IOException {
 		Settings settings = new Settings(env);
-
+		//1.6.x legacy
+		String volumeImpl = null;
+		//legacy end
 		in.beginObject();
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
+				case "writtenByVersion" -> in.skipValue(); //noop
 				case "directories" -> settings.getDirectories().addAll(readVaultSettingsArray(in));
 				case "askedForUpdateCheck" -> settings.askedForUpdateCheck().set(in.nextBoolean());
-				case "checkForUpdatesEnabled" -> settings.checkForUpdates().set(in.nextBoolean());
-				case "startHidden" -> settings.startHidden().set(in.nextBoolean());
 				case "autoCloseVaults" -> settings.autoCloseVaults().set(in.nextBoolean());
-				case "port" -> settings.port().set(in.nextInt());
-				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
-				case "preferredGvfsScheme" -> settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
+				case "checkForUpdatesEnabled" -> settings.checkForUpdates().set(in.nextBoolean());
 				case "debugMode" -> settings.debugMode().set(in.nextBoolean());
-				case "preferredVolumeImpl" -> settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
-				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
-				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
+				case "displayConfiguration" -> settings.displayConfigurationProperty().set(in.nextString());
 				case "keychainProvider" -> settings.keychainProvider().set(in.nextString());
-				case "useKeychain" -> settings.useKeychain().set(in.nextBoolean());
+				case "language" -> settings.languageProperty().set(in.nextString());
 				case "licenseKey" -> settings.licenseKey().set(in.nextString());
+				case "mountService" -> {
+					var token = in.peek();
+					if (JsonToken.STRING == token) {
+						settings.mountService().set(in.nextString());
+					}
+				}
+				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
+				case "port" -> settings.port().set(in.nextInt());
 				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
 				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
+				case "startHidden" -> settings.startHidden().set(in.nextBoolean());
+				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
+				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
+				case "useKeychain" -> settings.useKeychain().set(in.nextBoolean());
+				case "windowHeight" -> settings.windowHeightProperty().set(in.nextInt());
+				case "windowWidth" -> settings.windowWidthProperty().set(in.nextInt());
 				case "windowXPosition" -> settings.windowXPositionProperty().set(in.nextInt());
 				case "windowYPosition" -> settings.windowYPositionProperty().set(in.nextInt());
-				case "windowWidth" -> settings.windowWidthProperty().set(in.nextInt());
-				case "windowHeight" -> settings.windowHeightProperty().set(in.nextInt());
-				case "displayConfiguration" -> settings.displayConfigurationProperty().set(in.nextString());
-				case "language" -> settings.languageProperty().set(in.nextString());
-
+				//1.6.x legacy
+				case "preferredVolumeImpl" -> volumeImpl = in.nextString();
+				//legacy end
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: {}", name);
 					in.skipValue();
 				}
 			}
+
 		}
 		in.endObject();
+
+		//1.6.x legacy
+		if (volumeImpl != null) {
+			settings.mountService().set(convertLegacyVolumeImplToMountService(volumeImpl));
+		}
+		//legacy end
 
 		return settings;
 	}
 
-	private VolumeImpl parsePreferredVolumeImplName(String nioAdapterName) {
-		try {
-			return VolumeImpl.valueOf(nioAdapterName.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid volume type {}. Defaulting to {}.", nioAdapterName, Settings.DEFAULT_PREFERRED_VOLUME_IMPL);
-			return Settings.DEFAULT_PREFERRED_VOLUME_IMPL;
-		}
-	}
-
-	private WebDavUrlScheme parseWebDavUrlSchemePrefix(String webDavUrlSchemeName) {
-		try {
-			return WebDavUrlScheme.valueOf(webDavUrlSchemeName.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid WebDAV url scheme {}. Defaulting to {}.", webDavUrlSchemeName, Settings.DEFAULT_GVFS_SCHEME);
-			return Settings.DEFAULT_GVFS_SCHEME;
+	private String convertLegacyVolumeImplToMountService(String volumeImpl) {
+		if (volumeImpl.equals("Dokany")) {
+			return "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
+		} else if (volumeImpl.equals("FUSE")) {
+			if (SystemUtils.IS_OS_WINDOWS) {
+				return "org.cryptomator.frontend.fuse.mount.WinFspNetworkMountProvider";
+			} else if (SystemUtils.IS_OS_MAC) {
+				return "org.cryptomator.frontend.fuse.mount.MacFuseMountProvider";
+			} else {
+				return "org.cryptomator.frontend.fuse.mount.LinuxFuseMountProvider";
+			}
+		} else {
+			if (SystemUtils.IS_OS_WINDOWS) {
+				return "org.cryptomator.frontend.webdav.mount.WindowsMounter";
+			} else if (SystemUtils.IS_OS_MAC) {
+				return "org.cryptomator.frontend.webdav.mount.MacAppleScriptMounter";
+			} else {
+				return "org.cryptomator.frontend.webdav.mount.LinuxGioMounter";
+			}
 		}
 	}
 

@@ -1,11 +1,13 @@
 package org.cryptomator.common.vaults;
 
+import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javafx.collections.ObservableList;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +41,7 @@ public class AutoLocker {
 		try {
 			vault.lock(false);
 			LOG.info("Autolocked {} after idle timeout", vault.getDisplayName());
-		} catch (Volume.VolumeException | LockNotCompletedException e) {
+		} catch (UnmountFailedException | IOException e) {
 			LOG.error("Autolocking failed.", e);
 		}
 	}

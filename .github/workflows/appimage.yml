@@ -16,7 +16,7 @@ jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml
     with:
-      version: ${{ github.event.inputs.version }}
+      version: ${{ inputs.version }}
 
   build:
     name: Build AppImage
@@ -47,7 +47,6 @@ jobs:
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
-          cp dist/linux/launcher.sh target
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
         run: >
@@ -55,7 +54,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -78,8 +77,10 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --copyright "(C) 2016 - 2023 Skymatic GmbH"
           --app-version "${{  needs.get-version.outputs.semVerNum }}.${{  needs.get-version.outputs.revNum }}"
+          --java-options "--enable-preview"
+          --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{  needs.get-version.outputs.semVerStr }}\""
@@ -109,12 +110,6 @@ jobs:
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
           ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
-      - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
-        run: |
-          JFFI_NATIVE_JAR=`ls lib/app/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
-          ${JAVA_HOME}/bin/jar -xf lib/app/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
-          mv jni/x86_64-Linux/* lib/app/libjffi.so
-        working-directory: Cryptomator.AppDir
       - name: Download AppImageKit
         run: |
           curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage

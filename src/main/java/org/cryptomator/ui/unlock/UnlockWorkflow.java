@@ -2,13 +2,11 @@ package org.cryptomator.ui.unlock;
 
 import com.google.common.base.Throwables;
 import dagger.Lazy;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.mountpoint.InvalidMountPointException;
-import org.cryptomator.common.vaults.MountPointRequirement;
+import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
@@ -23,9 +21,7 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.NotDirectoryException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -44,9 +40,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> invalidMountPointScene;
 	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
+	private final AtomicReference<Throwable> unlockFailedException;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, FxApplicationWindows appWindows, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, FxApplicationWindows appWindows, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, @UnlockWindow AtomicReference<Throwable> unlockFailedException) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -54,10 +51,11 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.appWindows = appWindows;
 		this.keyLoadingStrategy = keyLoadingStrategy;
+		this.unlockFailedException = unlockFailedException;
 	}
 
 	@Override
-	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException, CryptoException {
+	protected Boolean call() throws InterruptedException, IOException, CryptoException, MountFailedException {
 		try {
 			attemptUnlock();
 			return true;
@@ -67,50 +65,21 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private void attemptUnlock() throws IOException, VolumeException, InvalidMountPointException, CryptoException {
+	private void attemptUnlock() throws IOException, CryptoException, MountFailedException {
 		try {
 			keyLoadingStrategy.use(vault::unlock);
 		} catch (Exception e) {
 			Throwables.propagateIfPossible(e, IOException.class);
-			Throwables.propagateIfPossible(e, VolumeException.class);
-			Throwables.propagateIfPossible(e, InvalidMountPointException.class);
 			Throwables.propagateIfPossible(e, CryptoException.class);
+			Throwables.propagateIfPossible(e, IllegalMountPointException.class);
+			Throwables.propagateIfPossible(e, MountFailedException.class);
 			throw new IllegalStateException("unexpected exception type", e);
 		}
 	}
 
-	private void handleInvalidMountPoint(InvalidMountPointException impExc) {
-		var requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!", impExc)).getMountPointRequirement();
-		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
-		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
-		assert requirement != MountPointRequirement.UNUSED_ROOT_DIR || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
-
-		Throwable cause = impExc.getCause();
-		// TODO: apply https://openjdk.java.net/jeps/8213076 in future JDK versions
-		if (cause instanceof NotDirectoryException) {
-			if (requirement == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
-				LOG.error("Unlock failed. Parent folder is missing: {}", cause.getMessage());
-			} else {
-				LOG.error("Unlock failed. Mountpoint doesn't exist (needs to be a folder): {}", cause.getMessage());
-			}
-			showInvalidMountPointScene();
-		} else if (cause instanceof FileAlreadyExistsException) {
-			if (requirement == MountPointRequirement.UNUSED_ROOT_DIR) {
-				LOG.error("Unlock failed. Drive Letter already in use: {}", cause.getMessage());
-			} else {
-				LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
-			}
-			showInvalidMountPointScene();
-		} else if (cause instanceof DirectoryNotEmptyException) {
-			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
-			showInvalidMountPointScene();
-		} else {
-			handleGenericError(impExc);
-		}
-	}
-
-	private void showInvalidMountPointScene() {
+	private void handleIllegalMountPointError(IllegalMountPointException impe) {
 		Platform.runLater(() -> {
+			unlockFailedException.set(impe);
 			window.setScene(invalidMountPointScene.get());
 			window.show();
 		});
@@ -144,8 +113,8 @@ public class UnlockWorkflow extends Task<Boolean> {
 	protected void failed() {
 		LOG.info("Unlock of '{}' failed.", vault.getDisplayName());
 		Throwable throwable = super.getException();
-		if (throwable instanceof InvalidMountPointException e) {
-			handleInvalidMountPoint(e);
+		if(throwable instanceof IllegalMountPointException impe) {
+			handleIllegalMountPointError(impe);
 		} else {
 			handleGenericError(throwable);
 		}

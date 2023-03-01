@@ -1,18 +1,22 @@
 name: Build Debian Package
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
+      ref:
+        description: 'GitHub Ref (e.g. refs/tags/1.6.16)'
+        required: true
+      semver:
+        description: 'SemVer String (e.g. 1.7.0-beta1)'
+        required: true
+      ppaver:
+        description: 'Base PPA Version String (e.g. 1.6.16+1.7.0~beta1) without -0ppa1'
+        required: true
       dput:
         description: 'Upload to PPA'
         required: true
         default: false
         type: boolean
-      version:
-        description: 'Version'
-        required: false
 
 env:
   JAVA_VERSION: 19
@@ -20,17 +24,23 @@ env:
   OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/19/openjfx-19_linux-aarch64_bin-jmods.zip'
 
 jobs:
-  get-version:
-    uses: ./.github/workflows/get-version.yml
-    with:
-      version: ${{ github.event.inputs.version }}
-
   build:
     name: Build Debian Package
     runs-on: ubuntu-20.04
-    needs: [get-version]
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+      - id: versions
+        name: Get version information
+        run: |
+          SEM_VER_STR="${{ inputs.semver }}"
+          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "semVerStr=${SEM_VER_STR}" >> $GITHUB_OUTPUT
+          echo "semVerNum=${SEM_VER_NUM}" >> $GITHUB_OUTPUT
+          echo "revNum=${REVCOUNT}" >> $GITHUB_OUTPUT
       - name: Install build tools
         run: |
           sudo add-apt-repository ppa:coffeelibs/openjdk
@@ -42,12 +52,6 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
-      - id: versions
-        name: Create PPA version string
-        run: echo "ppaVerStr=${SEM_VER_STR/-/\~}-${REVCOUNT}" >> $GITHUB_OUTPUT
-        env:
-          SEM_VER_STR: ${{ needs.get-version.outputs.semVerStr }}
-          REVCOUNT: ${{ needs.get-version.outputs.revNum }}
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,linux -DskipTests
       - name: Download OpenJFX jmods
@@ -60,23 +64,26 @@ jobs:
           mkdir -p jmods/aarch64
           unzip -j openjfx-aarch64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/aarch64
       - name: Ensure major jfx version in pom and in jmods is the same
-        shell: pwsh
         run: |
-          mkdir jfxBaseJmodAmd64
-          jmod extract --dir jfxBaseJmodAmd64 jmods/amd64/javafx.base.jmod
-          $jfxJmodVersionAmd64 = ((Get-Content -Path "jfxBaseJmodAmd64/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          mkdir jfxBaseJmodAarch64
-          jmod extract --dir jfxBaseJmodAarch64 jmods/aarch64/javafx.base.jmod
-          $jfxJmodVersionAarch64 = ((Get-Content -Path "jfxBaseJmodAarch64/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          if ($jfxJmodVersionAmd64[0] -ne $jfxJmodVersionAarch64[0] ) {
-            Write-Error "JavaFX Jmods for aarch64 and amd64 are different major versions"
+          JMOD_VERSION_AMD64=$(jmod describe jmods/amd64/javafx.base.jmod | head -1)
+          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
+          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64%%.*}
+          JMOD_VERSION_AARCH64=$(jmod describe jmods/aarch64/javafx.base.jmod | head -1)
+          JMOD_VERSION_AARCH64=${JMOD_VERSION_AARCH64#*@}
+          JMOD_VERSION_AARCH64=${JMOD_VERSION_AARCH64%%.*}
+          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+          POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+
+          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION_AMD64})"
             exit 1
-          }
-          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
-          if ($jfxPomVersion[0] -ne $jfxJmodVersionAmd64[0]) {
-            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version of Jmods($($jfxJmodVersionAmd64[0])) "
+          fi
+
+          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AARCH64 ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != aarch64 jmod version (${JMOD_VERSION_AARCH64})"
             exit 1
-          }
+          fi
       - name: Create orig.tar.gz with common/ libs/ mods/ jmods/
         run: |
           mkdir pkgdir
@@ -85,7 +92,7 @@ jobs:
           cp -r jmods pkgdir
           cp -r dist/linux/common/ pkgdir
           cp target/cryptomator-*.jar pkgdir/mods
-          tar -cJf cryptomator_${{ steps.versions.outputs.ppaVerStr }}.orig.tar.xz -C pkgdir .
+          tar -cJf cryptomator_${{ inputs.ppaver }}.orig.tar.xz -C pkgdir .
       - name: Patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
@@ -93,12 +100,12 @@ jobs:
           envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${{ steps.versions.outputs.ppaVerStr }}
+          mv pkgdir cryptomator_${{ inputs.ppaver }}
         env:
-          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
-          VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
-          REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
-          PPA_VERSION: ${{ steps.versions.outputs.ppaVerStr }}-0ppa1
+          SEMVER_STR: ${{ steps.versions.outputs.semVerStr }}
+          VERSION_NUM: ${{ steps.versions.outputs.semVerNum }}
+          REVISION_NUM: ${{ steps.versions.outputs.revNum }}
+          PPA_VERSION: ${{ inputs.ppaver }}-0ppa1
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -113,7 +120,7 @@ jobs:
         env:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
-        working-directory: cryptomator_${{ steps.versions.outputs.ppaVerStr }}
+        working-directory: cryptomator_${{ inputs.ppaver }}
       - name: Create detached GPG signatures
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
@@ -130,14 +137,19 @@ jobs:
             cryptomator_*_amd64.deb
             cryptomator_*.asc
       - name: Publish on PPA
-        if: startsWith(github.ref, 'refs/tags/') || inputs.dput
+        if: inputs.dput
         run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_*_source.changes
+      
+      # If ref is a tag, also upload to GitHub Releases:
+      - name: Determine tag name
+        if: startsWith(inputs.ref, 'refs/tags/')
+        run: |
+          REF=${{ inputs.ref }}
+          echo "TAG_NAME=${REF##*/}" >> $GITHUB_ENV
       - name: Publish Debian package on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          files: |
-            cryptomator_*_amd64.deb
-            cryptomator_*.asc
+        if: startsWith(inputs.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+        run: |
+          artifacts=$(ls | grep cryptomator*.deb)
+          gh release upload ${{ env.TAG_NAME }} $artifacts

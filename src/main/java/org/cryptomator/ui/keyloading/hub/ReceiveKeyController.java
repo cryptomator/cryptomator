@@ -42,11 +42,11 @@ public class ReceiveKeyController implements FxController {
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
 	private final URI vaultBaseUri;
-	private final Lazy<Scene> licenseExceededScene;
+	private final Lazy<Scene> invalidLicenseScene;
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<JWEObject> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_LICENSE_EXCEEDED) Lazy<Scene> licenseExceededScene) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<JWEObject> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
 		this.window = window;
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
@@ -54,7 +54,7 @@ public class ReceiveKeyController implements FxController {
 		this.registerDeviceScene = registerDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
 		this.vaultBaseUri = getVaultBaseUri(vault);
-		this.licenseExceededScene = licenseExceededScene;
+		this.invalidLicenseScene = invalidLicenseScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
 	}
@@ -96,7 +96,7 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	private void licenseExceeded() {
-		window.setScene(licenseExceededScene.get());
+		window.setScene(invalidLicenseScene.get());
 	}
 
 	private void needsDeviceRegistration() {

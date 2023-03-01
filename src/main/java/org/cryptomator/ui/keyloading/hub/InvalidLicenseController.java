@@ -7,12 +7,12 @@ import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
-public class LicenseExceededController implements FxController {
+public class InvalidLicenseController implements FxController {
 
 	private final Stage window;
 
 	@Inject
-	public LicenseExceededController(@KeyLoading Stage window) {
+	public InvalidLicenseController(@KeyLoading Stage window) {
 		this.window = window;
 	}
 

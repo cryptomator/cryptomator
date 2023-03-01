@@ -25,6 +25,7 @@ public enum FontAwesome5Icon {
 	EYE_SLASH("\uF070"), //
 	FAST_FORWARD("\uF050"), //
 	FILE("\uF15B"), //
+	FILE_DOWNLOAD("\uF56D"), //
 	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
 	FUNNEL("\uF0B0"), //
@@ -41,6 +42,7 @@ public enum FontAwesome5Icon {
 	PLUS("\uF067"), //
 	PRINT("\uF02F"), //
 	QUESTION("\uF128"), //
+	QUESTION_CIRCLE("\uf059"), //
 	REDO("\uF01E"), //
 	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //

@@ -54,7 +54,7 @@
         Property="JP_UPGRADABLE_FOUND"
         Maximum="$(var.JpAppVersion)"
         MigrateFeatures="yes"
-        IncludeMaximum="$(var.JpUpgradeVersionOnlyDetectUpgrade)" />
+        IncludeMaximum="yes" />  <!-- TODO: check if this needs to be set to yes-->
       <UpgradeVersion
         OnlyDetect="$(var.JpUpgradeVersionOnlyDetectDowngrade)"
         Property="JP_DOWNGRADABLE_FOUND"
@@ -132,6 +132,9 @@
     <!-- WebDAV patches -->
     <CustomAction Id="PatchWebDAV" Impersonate="no" ExeCommand="[INSTALLDIR]patchWebDAV.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
 
+    <!-- Special Settings migration for 1.7.0,. Should be removed eventually, for more info, see ../contrib/version170-migrate-settings.ps1-->
+    <CustomAction Id="V170MigrateSettings" Impersonate="no" ExeCommand="[INSTALLDIR]version170-migrate-settings.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
+
     <!-- Running App detection and exit -->
     <Property Id="FOUNDRUNNINGAPP" Admin="yes"/>
     <util:CloseApplication
@@ -140,11 +143,11 @@
       CloseMessage="no"
       RebootPrompt="no"
       PromptToContinue="yes"
-      Description="A running instance of $(var.JpAppName) is found. Please close it to continue."
+      Description="A running instance of $(var.JpAppName) is found, using files marked for update. Please close it to continue."
       Property="FOUNDRUNNINGAPP"
       >
     </util:CloseApplication>
-    <CustomAction Id="FailOnRunningApp" Impersonate="no" ExeCommand="[SystemFolder]\cmd.exe /c &quot;exit 1&quot;" Directory="INSTALLDIR" Execute="immediate" Return="check" />
+    <CustomAction Id="FailOnRunningApp" Error="Installation aborted, because files marked for update are used by a running instance of $(var.JpAppName)."/>
 
     <?ifdef JpIcon ?>
     <Property Id="ARPPRODUCTICON" Value="JpARPPRODUCTICON"/>
@@ -179,9 +182,10 @@
       <Custom Action="WixCloseApplications" Before="InstallValidate"></Custom>
       <Custom Action="FailOnRunningApp" After="WixCloseApplications" >FOUNDRUNNINGAPP</Custom>
 
-      <RemoveExistingProducts After="InstallValidate"/>
+      <RemoveExistingProducts After="InstallValidate"/> <!-- Moved from CostInitialize, due to WixCloseApplications -->
 
       <Custom Action="PatchWebDAV" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
+      <Custom Action="V170MigrateSettings" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
     </InstallExecuteSequence>
 
     <WixVariable Id="WixUIBannerBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\banner.bmp" />

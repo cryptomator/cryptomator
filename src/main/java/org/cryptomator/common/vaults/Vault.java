@@ -8,12 +8,11 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.common.mountpoint.InvalidMountPointException;
+import org.cryptomator.common.mount.Mounter;
+import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
@@ -22,15 +21,18 @@ import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.integrations.mount.MountFailedException;
+import org.cryptomator.integrations.mount.Mountpoint;
+import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -41,9 +43,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @PerVault
@@ -54,8 +54,6 @@ public class Vault {
 	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
 	private final VaultSettings vaultSettings;
-	private final Provider<Volume> volumeProvider;
-	private final StringBinding defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
@@ -68,18 +66,16 @@ public class Vault {
 	private final BooleanBinding missing;
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
-	private final StringBinding accessPoint;
-	private final BooleanBinding accessPointPresent;
+	private final ObjectBinding<Mountpoint> mountPoint;
+	private final Mounter mounter;
 	private final BooleanProperty showingStats;
 
-	private volatile Volume volume;
+	private AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
+	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
-		this.volumeProvider = volumeProvider;
-		this.defaultMountFlags = defaultMountFlags;
 		this.cryptoFileSystem = cryptoFileSystem;
 		this.state = state;
 		this.lastKnownException = lastKnownException;
@@ -91,8 +87,8 @@ public class Vault {
 		this.missing = Bindings.createBooleanBinding(this::isMissing, state);
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
-		this.accessPoint = Bindings.createStringBinding(this::getAccessPoint, state);
-		this.accessPointPresent = this.accessPoint.isNotEmpty();
+		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
+		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
 	}
 
@@ -142,7 +138,7 @@ public class Vault {
 		}
 	}
 
-	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
+	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, MountFailedException {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
 		}
@@ -150,9 +146,9 @@ public class Vault {
 		boolean success = false;
 		try {
 			cryptoFileSystem.set(fs);
-			volume = volumeProvider.get();
-			volume.mount(fs, getEffectiveMountFlags(), this::lockOnVolumeExit);
-			success = true;
+			var rootPath = fs.getRootDirectories().iterator().next();
+			var mountHandle = mounter.mount(vaultSettings, rootPath);
+			success = this.mountHandle.compareAndSet(null, mountHandle);
 		} finally {
 			if (!success) {
 				destroyCryptoFileSystem();
@@ -160,37 +156,28 @@ public class Vault {
 		}
 	}
 
-	private void lockOnVolumeExit(Throwable t) {
-		LOG.info("Unmounted vault '{}'", getDisplayName());
-		destroyCryptoFileSystem();
-		state.set(VaultState.Value.LOCKED);
-		if (t != null) {
-			LOG.warn("Unexpected unmount and lock of vault " + getDisplayName(), t);
+	public synchronized void lock(boolean forced) throws UnmountFailedException, IOException {
+		var mountHandle = this.mountHandle.get();
+		if (mountHandle == null) {
+			//TODO: noop or InvalidStateException?
+			return;
 		}
-	}
 
-	public synchronized void lock(boolean forced) throws VolumeException, LockNotCompletedException {
-		//initiate unmount
-		if (forced && volume.supportsForcedUnmount()) {
-			volume.unmountForced();
+		if (forced && mountHandle.supportsUnmountForced()) {
+			mountHandle.mountObj().unmountForced();
 		} else {
-			volume.unmount();
+			mountHandle.mountObj().unmount();
 		}
 
-		//wait for lockOnVolumeExit to be executed
 		try {
-			boolean locked = state.awaitState(VaultState.Value.LOCKED, 3000, TimeUnit.MILLISECONDS);
-			if (!locked) {
-				throw new LockNotCompletedException("Locking of vault " + this.getDisplayName() + " still in progress.");
-			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new LockNotCompletedException(e);
+			mountHandle.mountObj().close();
+			mountHandle.specialCleanup().run();
+		} finally {
+			destroyCryptoFileSystem();
 		}
-	}
 
-	public void reveal(Volume.Revealer vaultRevealer) throws VolumeException {
-		volume.reveal(vaultRevealer);
+		this.mountHandle.set(null);
+		LOG.info("Locked vault '{}'", getDisplayName());
 	}
 
 	// ******************************************************************************
@@ -273,25 +260,13 @@ public class Vault {
 		return vaultSettings.displayName().get();
 	}
 
-	public StringBinding accessPointProperty() {
-		return accessPoint;
+	public ObjectBinding<Mountpoint> mountPointProperty() {
+		return mountPoint;
 	}
 
-	public String getAccessPoint() {
-		if (state.getValue() == VaultState.Value.UNLOCKED) {
-			assert volume != null;
-			return volume.getMountPoint().orElse(Path.of("")).toString();
-		} else {
-			return "";
-		}
-	}
-
-	public BooleanBinding accessPointPresentProperty() {
-		return accessPointPresent;
-	}
-
-	public boolean isAccessPointPresent() {
-		return accessPointPresent.get();
+	public Mountpoint getMountPoint() {
+		var handle = mountHandle.get();
+		return handle == null ? null : handle.mountObj().getMountpoint();
 	}
 
 	public StringBinding displayablePathProperty() {
@@ -314,7 +289,7 @@ public class Vault {
 	}
 
 	public boolean isShowingStats() {
-		return accessPointPresent.get();
+		return mountHandle.get() != null;
 	}
 
 
@@ -339,24 +314,30 @@ public class Vault {
 		return vaultSettings.path().getValue();
 	}
 
-	public boolean isHavingCustomMountFlags() {
-		return !Strings.isNullOrEmpty(vaultSettings.mountFlags().get());
-	}
+	/**
+	 * Gets from the cleartext path its ciphertext counterpart.
+	 *
+	 * @return Local os path to the ciphertext resource
+	 * @throws IOException if an I/O error occurs
+	 * @throws IllegalStateException if the vault is not unlocked
+	 */
+	public Path getCiphertextPath(Path cleartextPath) throws IOException {
+		if (!state.getValue().equals(VaultState.Value.UNLOCKED)) {
+			throw new IllegalStateException("Vault is not unlocked");
+		}
+		var fs = cryptoFileSystem.get();
+		var osPathSeparator = cleartextPath.getFileSystem().getSeparator();
+		var cryptoFsPathSeparator = fs.getSeparator();
 
-	public StringBinding defaultMountFlagsProperty() {
-		return defaultMountFlags;
-	}
-
-	public String getDefaultMountFlags() {
-		return defaultMountFlags.get();
-	}
-
-	public String getEffectiveMountFlags() {
-		String mountFlags = vaultSettings.mountFlags().get();
-		if (Strings.isNullOrEmpty(mountFlags)) {
-			return getDefaultMountFlags();
+		if (getMountPoint() instanceof Mountpoint.WithPath mp) {
+			var absoluteCryptoFsPath = cryptoFsPathSeparator + mp.path().relativize(cleartextPath).toString();
+			if (!cryptoFsPathSeparator.equals(osPathSeparator)) {
+				absoluteCryptoFsPath = absoluteCryptoFsPath.replace(osPathSeparator, cryptoFsPathSeparator);
+			}
+			var cryptoPath = fs.getPath(absoluteCryptoFsPath);
+			return fs.getCiphertextPath(cryptoPath);
 		} else {
-			return mountFlags;
+			throw new UnsupportedOperationException("URI mount points not supported.");
 		}
 	}
 
@@ -364,16 +345,8 @@ public class Vault {
 		return configCache;
 	}
 
-	public void setCustomMountFlags(String mountFlags) {
-		vaultSettings.mountFlags().set(mountFlags);
-	}
-
 	public String getId() {
 		return vaultSettings.getId();
-	}
-
-	public Optional<Volume> getVolume() {
-		return Optional.ofNullable(this.volume);
 	}
 
 	// ******************************************************************************
@@ -395,6 +368,11 @@ public class Vault {
 	}
 
 	public boolean supportsForcedUnmount() {
-		return volume.supportsForcedUnmount();
+		var mh = mountHandle.get();
+		if (mh == null) {
+			throw new IllegalStateException("Vault is not mounted");
+		}
+		return mountHandle.get().supportsUnmountForced();
 	}
+
 }
