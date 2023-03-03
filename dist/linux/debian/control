@@ -12,7 +12,7 @@ Package: cryptomator
 Architecture: any
 Section: utils
 Priority: optional
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfuse3-3
+Depends: ${shlibs:Depends}, ${misc:Depends}, fuse3
 Recommends: gvfs-backends, gvfs-fuse, gnome-keyring
 XB-AppName: Cryptomator
 XB-Category: Utility;Security;FileTools;
