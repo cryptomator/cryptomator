@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
 
-	private static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/vault-mounting/";
+	private static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/volume-type/";
 
 	private final Settings settings;
 	private final ObservableValue<MountService> selectedMountService;
