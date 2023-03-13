@@ -9,12 +9,15 @@ import org.cryptomator.integrations.mount.MountService;
 import javax.inject.Singleton;
 import javafx.beans.value.ObservableValue;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Module
 public class MountModule {
 
 	private static final AtomicReference<MountService> formerSelectedMountService = new AtomicReference<>(null);
+	private static final AtomicBoolean<MountService> MAC_FUSE_SELECTED_ONCE = new AtomicBoolean(false);
+	private static final AtomicBoolean<MountService> FUSET_SELECTED_ONCE = new AtomicBoolean(false);
 
 	@Provides
 	@Singleton
@@ -42,7 +45,17 @@ public class MountModule {
 
 	//see https://github.com/cryptomator/cryptomator/issues/2786
 	private static ActualMountService applyWorkaroundForFuseTMacFuse(MountService targetedService, boolean isDesired) {
-		if (isFUSETOrMacFUSE(targetedService) && isFUSETOrMacFUSE(formerSelectedMountService.get()) && !targetedService.equals(formerSelectedMountService.get())) {
+		//check if any of both were already used. If not, check if targetedService is macFuse or FUSE-T
+		if (!MAC_FUSE_SELECTED_ONCE.get() && !FUSET_SELECTED_ONCE.get()) {
+			if (isMacFuseService(targetedService)) {
+				MAC_FUSE_SELECTED_ONCE.set(true);
+			} else if (isFuseTService(targetedService)) {
+				FUSET_SELECTED_ONCE.set(true);
+			}
+		}
+
+		if ((MAC_FUSE_SELECTED_ONCE.get() && isFuseTService(targetedService)) //
+				|| (FUSET_SELECTED_ONCE.get() && isMacFuseService(targetedService))) {
 			return new ActualMountService(formerSelectedMountService.get(), false); //
 		} else {
 			formerSelectedMountService.set(targetedService);
@@ -50,12 +63,12 @@ public class MountModule {
 		}
 	}
 
-	private static boolean isFUSETOrMacFUSE(MountService service) {
-		if (service == null) {
-			return false;
-		} else {
-			return List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider").contains(service.getClass().getName());
-		}
+	private static boolean isFuseTService(MountService service) {
+		return "org.cryptomator.frontend.fuse.mount.FuseTMountProvider".equals(service.getClass().getName());
+	}
+
+	private static boolean isMacFuseService(MountService service) {
+		return "org.cryptomator.frontend.fuse.mount.MacFuseMountProvider".equals(service.getClass().getName());
 	}
 
 }
