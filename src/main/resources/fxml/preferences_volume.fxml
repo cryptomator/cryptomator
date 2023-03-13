@@ -32,6 +32,8 @@
 			</Hyperlink>
 		</HBox>
 
+		<Label styleClass="label-red" text="To apply the changes, Cryptomator needs to be restarted." visible="${controller.macFuseAndFUSETRestartRequired}" managed="${controller.macFuseAndFUSETRestartRequired}"/>
+
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">
 			<Label text="%preferences.volume.tcp.port"/>
 			<NumericTextField fx:id="loopbackPortField"/>

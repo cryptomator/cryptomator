@@ -116,6 +116,10 @@
 	-fx-font-size: 0.64em;
 }
 
+.label-red {
+	-fx-text-fill: RED_5;
+}
+
 .text-flow > * {
 	-fx-fill: TEXT_FILL;
 }

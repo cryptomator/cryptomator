@@ -33,6 +33,7 @@ public class VolumePreferencesController implements FxController {
 	private final ObservableValue<Boolean> mountToDriveLetterSupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
 	private final ObservableValue<Boolean> readonlySupported;
+	private final ObservableValue<Boolean> macFuseAndFUSETRestartRequired;
 	private final Lazy<Application> application;
 	private final List<MountService> mountProviders;
 	public ChoiceBox<MountService> volumeTypeChoiceBox;
@@ -53,6 +54,12 @@ public class VolumePreferencesController implements FxController {
 		this.mountToDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
 		this.readonlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
+		var mountServiceAtStart = selectedMountService.getValue();
+		this.macFuseAndFUSETRestartRequired = selectedMountService.map(s -> isFUSETOrMacFUSE(mountServiceAtStart) && isFUSETOrMacFUSE(s) && !mountServiceAtStart.equals(s));
+	}
+
+	private boolean isFUSETOrMacFUSE(MountService service) {
+		return List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider").contains(service.getClass().getName());
 	}
 
 	public void initialize() {
@@ -127,6 +134,14 @@ public class VolumePreferencesController implements FxController {
 
 	public boolean isMountFlagsSupported() {
 		return mountFlagsSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> macFuseAndFUSETRestartRequiredProperty() {
+		return macFuseAndFUSETRestartRequired;
+	}
+
+	public boolean isMacFuseAndFUSETRestartRequired() {
+		return macFuseAndFUSETRestartRequired.getValue();
 	}
 
 	/* Helpers */
