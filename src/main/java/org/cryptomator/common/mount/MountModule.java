@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MountModule {
 
 	private static final AtomicReference<MountService> formerSelectedMountService = new AtomicReference<>(null);
-	private static final AtomicBoolean<MountService> MAC_FUSE_SELECTED_ONCE = new AtomicBoolean(false);
-	private static final AtomicBoolean<MountService> FUSET_SELECTED_ONCE = new AtomicBoolean(false);
+	private static final AtomicBoolean MAC_FUSE_SELECTED_ONCE = new AtomicBoolean(false);
+	private static final AtomicBoolean FUSET_SELECTED_ONCE = new AtomicBoolean(false);
 
 	@Provides
 	@Singleton
