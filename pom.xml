@@ -17,6 +17,11 @@
 			<email>sebastian.stenzel@gmail.com</email>
 			<timezone>+1</timezone>
 		</developer>
+		<developer>
+			<name>Armin Schrenk</name>
+			<email>armin.schrenk+dev@mailbox.org</email>
+			<timezone>+1</timezone>
+		</developer>
 	</developers>
 
 	<properties>
