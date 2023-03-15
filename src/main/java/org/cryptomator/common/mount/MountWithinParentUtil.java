@@ -51,7 +51,12 @@ public final class MountWithinParentUtil {
 				if (SystemUtils.IS_OS_WINDOWS) {
 					Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
 				}
+				while (!Files.notExists(mountPoint)) {
+					Thread.sleep(1000);
+				}
 			} catch (IOException e) {
+				throw new MountPointPreparationException(e);
+			} catch (InterruptedException e) {
 				throw new MountPointPreparationException(e);
 			}
 		}
