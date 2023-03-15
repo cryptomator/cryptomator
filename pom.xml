@@ -33,13 +33,12 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptolib.version>2.1.1</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>2.6.1</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.6.2</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.2.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.2.0</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>2.0.3</cryptomator.fuse.version>
+		<cryptomator.fuse.version>2.0.4</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>2.0.2</cryptomator.webdav.version>
 
@@ -70,12 +69,6 @@
 
 	<dependencies>
 		<!-- Cryptomator Libs -->
-		<dependency>
-			<!-- needed due to https://github.com/cryptomator/cryptolib/issues/34 -->
-			<groupId>org.cryptomator</groupId>
-			<artifactId>cryptolib</artifactId>
-			<version>${cryptomator.cryptolib.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptofs</artifactId>
