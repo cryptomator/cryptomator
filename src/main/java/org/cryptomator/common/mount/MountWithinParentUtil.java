@@ -62,6 +62,7 @@ public final class MountWithinParentUtil {
 			} catch (IOException e) {
 				throw new MountPointPreparationException(e);
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new MountPointPreparationException(e);
 			}
 		}
