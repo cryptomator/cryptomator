@@ -51,7 +51,18 @@ public final class MountWithinParentUtil {
 				if (SystemUtils.IS_OS_WINDOWS) {
 					Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
 				}
+				int attempts = 0;
+				while (!Files.notExists(mountPoint)) {
+					if (attempts >= 10) {
+						throw new MountPointPreparationException("Path " + mountPoint + " could not be cleared");
+					}
+					Thread.sleep(1000);
+					attempts++;
+				}
 			} catch (IOException e) {
+				throw new MountPointPreparationException(e);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new MountPointPreparationException(e);
 			}
 		}

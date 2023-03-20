@@ -55,4 +55,13 @@
 		<cve>CVE-2022-45688</cve>
 	</suppress>
 
+	<suppress>
+		<notes><![CDATA[
+  		Suppress false positive, because com.google.common.io.Files.getTempDir() is not used
+   ]]></notes>
+		<packageUrl regex="true">^pkg:maven/com\.google\.guava/guava@.*$</packageUrl>
+		<vulnerabilityName>CVE-2020-8908</vulnerabilityName>
+		<cve>CVE-2020-8908</cve>
+	</suppress>
+
 </suppressions>

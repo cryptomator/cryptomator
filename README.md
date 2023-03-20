@@ -21,7 +21,6 @@ Cryptomator is provided free of charge as an open-source project despite the hig
   <tbody>
     <tr>
       <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="80"></a></td>
-      <td><a href="https://proxy-hub.com/"><img src="https://cryptomator.org/img/sponsors/proxyhub.svg" alt="Proxy-Hub" height="80"></a></td>
     </tr>
   </tbody>
 </table>
@@ -32,7 +31,6 @@ Cryptomator is provided free of charge as an open-source project despite the hig
   <tbody>
     <tr>
       <td><a href="https://mowcapital.com/"><img src="https://cryptomator.org/img/sponsors/mowcapital.svg" alt="Mow Capital" height="40"></a></td>
-      <td><a href="https://www.easeus.com/"><img src="https://cryptomator.org/img/sponsors/easeus.png" alt="EaseUS" height="40"></a></td>
       <td><a href="https://www.hassmann-it-forensik.de/"><img src="https://cryptomator.org/img/sponsors/hassmannitforensik.png" alt="Hassmann IT-Forensik" height="40"></a></td>
     </tr>
   </tbody>
@@ -74,7 +72,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 
 ### Consistency
 
-- HMAC over file contents to recognize changed ciphertext before decryption
+- Authenticated encryption is used for file content to recognize changed ciphertext before decryption
 - I/O operations are transactional and atomic, if the filesystems support it
 - Each file contains all information needed for decryption (except for the key of course), no common metadata means no [SPOF](http://en.wikipedia.org/wiki/Single_point_of_failure)
 

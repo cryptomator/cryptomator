@@ -1,8 +1,6 @@
-name: Build Windows Installer
+name: Build Windows Debug Installer
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       version:
@@ -82,6 +80,7 @@ jobs:
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2023 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
+          --win-console
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.win"
           --java-options "-Xss5m"
@@ -96,9 +95,10 @@ jobs:
           --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
           --java-options "-Dcryptomator.loopbackAlias=\"${{ env.LOOPBACK_ALIAS }}\""
           --java-options "-Dcryptomator.showTrayIcon=true"
-          --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}\""
+          --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}-dbg\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Djavafx.verbose=true"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
       - name: Patch Application Directory
@@ -115,7 +115,8 @@ jobs:
             exit 1
           }
       - name: Fix permissions
-        run: attrib -r appdir/Cryptomator/Cryptomator.exe
+        run: |
+          attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
       - name: Extract integrations DLL for code signing
         shell: pwsh
@@ -193,159 +194,3 @@ jobs:
             Cryptomator-*.msi
             Cryptomator-*.asc
           if-no-files-found: error
-      - name: Publish .msi on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          files: |
-            *.msi
-            *.asc
-
-  build-exe:
-    name: Build .exe installer
-    runs-on: windows-latest
-    needs: [get-version, build-msi]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Download .msi
-        uses: actions/download-artifact@v3
-        with:
-          name: msi
-          path: dist/win/bundle/resources
-      - name: Strip version info from msi file name
-        run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
-      - uses: actions/setup-java@v3
-        with:
-          distribution: ${{ env.JAVA_DIST }}
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: ${{ env.JAVA_CACHE }}
-      - name: Generate license for exe
-        run: >
-          mvn -B license:add-third-party
-          "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
-          "-Dlicense.outputDirectory=dist/win/bundle/resources"
-          "-Dlicense.includedScopes=compile"
-          "-Dlicense.excludedGroups=^org\.cryptomator"
-          "-Dlicense.failOnMissing=true"
-          "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
-        shell: pwsh
-      - name: Download WinFsp
-        run: |
-          $winfspUrl = (Select-String -Path ".\dist\win\bundle\resources\winFspMetaData.wxi" -Pattern '<\?define BundledWinFspDownloadLink="(.+)".*?>').Matches.Groups[1].Value
-          curl --output dist/win/bundle/resources/winfsp.msi -L $winfspUrl
-        shell: pwsh
-      - name: Compile to wixObj file
-        run: >
-          "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
-          -ext WixBalExtension
-          -ext WixUtilExtension
-          -out dist/win/bundle/
-          -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
-          -dBundleVendor="Skymatic GmbH"
-          -dBundleCopyright="(C) 2016 - 2023 Skymatic GmbH"
-          -dAboutUrl="https://cryptomator.org"
-          -dHelpUrl="https://cryptomator.org/contact"
-          -dUpdateUrl="https://cryptomator.org/downloads/"
-      - name: Create executable with linker
-        run: >
-          "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
-          -ext WixBalExtension
-          -ext WixUtilExtension
-          -out installer/unsigned/Cryptomator-Installer.exe
-      - name: Detach burn engine in preparation to sign
-        run: >
-          "${WIX}/bin/insignia.exe"
-          -ib installer/unsigned/Cryptomator-Installer.exe
-          -o tmp/engine.exe
-      - name: Codesign burn engine
-        uses: skymatic/code-sign-action@v2
-        with:
-          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
-          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
-          certificatesha1: 5FC94CE149E5B511E621F53A060AC67CBD446B3A
-          description: Cryptomator Installer
-          timestampUrl: 'http://timestamp.digicert.com'
-          folder: tmp
-      - name: Reattach signed burn engine to installer
-        run : >
-          "${WIX}/bin/insignia.exe"
-          -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
-          -o installer/Cryptomator-Installer.exe
-      - name: Codesign EXE
-        uses: skymatic/code-sign-action@v2
-        with:
-          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
-          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
-          certificatesha1: 5FC94CE149E5B511E621F53A060AC67CBD446B3A
-          description: Cryptomator Installer
-          timestampUrl: 'http://timestamp.digicert.com'
-          folder: installer
-      - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.exe
-      - name: Create detached GPG signature with key 615D449FE6E6A235
-        run: |
-          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.exe
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: exe
-          path: |
-            Cryptomator-*.exe
-            Cryptomator-*.asc
-          if-no-files-found: error
-      - name: Publish .msi on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          files: |
-            Cryptomator-*.exe
-            Cryptomator-*.asc
-
-  allowlist:
-    name: Anti Virus Allowlisting
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    needs: [build-msi, build-exe]
-    steps:
-      - name: Download .msi
-        uses: actions/download-artifact@v3
-        with:
-          name: msi
-          path: msi
-      - name: Download .exe
-        uses: actions/download-artifact@v3
-        with:
-          name: exe
-          path: exe
-      - name: Collect files
-        run: |
-          mkdir files
-          cp msi/*.msi files
-          cp exe/*.exe files
-      - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@4.3.3
-        with:
-          protocol: ftps
-          server: allowlist.kaspersky-labs.com
-          port: 990
-          username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
-          password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
-          local-dir: files/
-      - name: Upload to Avast
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
-        with:
-          protocol: ftp
-          server: whitelisting.avast.com
-          port: 21
-          username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
-          password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
-          local-dir: files/
