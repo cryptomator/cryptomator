@@ -65,7 +65,13 @@ public class Mounter {
 							builder.setMountFlags(mountFlags);
 						}
 					}
-					case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
+					case VOLUME_ID -> {
+						if(vaultSettings.usesVaultIdAsVolumeId().get()) {
+							builder.setVolumeId(vaultSettings.getId()+"\\test");
+						} else {
+							builder.setVolumeId(vaultSettings.mountName().get());
+						}
+					}
 					case VOLUME_NAME -> builder.setVolumeName(vaultSettings.mountName().get());
 				}
 			}

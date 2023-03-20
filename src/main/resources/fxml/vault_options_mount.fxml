@@ -30,6 +30,7 @@
 			<Hyperlink styleClass="hyperlink-underline" text="%vaultOptions.mount.linkToPreferences" onAction="#openVolumePreferences" wrapText="true"/>
 		</TextFlow>
 		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly" visible="${controller.readOnlySupported}" managed="${controller.readOnlySupported}"/>
+		<CheckBox fx:id="useVaultIdAsVolumeId" text="TODO vault id as volume id" visible="${controller.volumeIdSupported}" managed="${controller.volumeIdSupported}"/>
 
 		<VBox visible="${controller.mountFlagsSupported}" managed="${controller.mountFlagsSupported}">
 			<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags"/>

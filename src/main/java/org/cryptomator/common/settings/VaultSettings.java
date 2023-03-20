@@ -42,6 +42,7 @@ public class VaultSettings {
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
 	private final StringProperty displayName = new SimpleStringProperty();
+	private final BooleanProperty vaultIdAsVolumeId = new SimpleBooleanProperty(false);
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REVEAL_AFTER_MOUNT);
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
@@ -125,6 +126,10 @@ public class VaultSettings {
 
 	public ObjectProperty<Path> mountPoint() {
 		return mountPoint;
+	}
+
+	public BooleanProperty usesVaultIdAsVolumeId() {
+		return vaultIdAsVolumeId;
 	}
 
 	public BooleanProperty usesReadOnlyMode() {

@@ -40,6 +40,7 @@ public class MountOptionsController implements FxController {
 	private final ObservableValue<String> defaultMountFlags;
 	private final ObservableValue<Boolean> mountpointDirSupported;
 	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
+	private final ObservableValue<Boolean> volumeIdSupported;
 	private final ObservableValue<Boolean> readOnlySupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
 	private final ObservableValue<String> directoryPath;
@@ -48,6 +49,7 @@ public class MountOptionsController implements FxController {
 
 	//-- FXML objects --
 	public CheckBox readOnlyCheckbox;
+	public CheckBox useVaultIdAsVolumeId;
 	public CheckBox customMountFlagsCheckbox;
 	public TextField mountFlagsField;
 	public ToggleGroup mountPointToggleGroup;
@@ -73,6 +75,7 @@ public class MountOptionsController implements FxController {
 		this.mountpointDirSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
 		this.mountpointDriveLetterSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.mountFlagsSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
+		this.volumeIdSupported = mountService.map(as -> as.service().hasCapability(MountCapability.VOLUME_ID));
 		this.readOnlySupported = mountService.map(as -> as.service().hasCapability(MountCapability.READ_ONLY));
 		this.directoryPath = vault.getVaultSettings().mountPoint().map(p -> isDriveLetter(p) ? null : p.toString());
 		this.applicationWindows = applicationWindows;
@@ -82,6 +85,9 @@ public class MountOptionsController implements FxController {
 	public void initialize() {
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vaultSettings.usesReadOnlyMode());
+
+		// use volume name as volume id
+		useVaultIdAsVolumeId.selectedProperty().bindBidirectional(vaultSettings.usesVaultIdAsVolumeId());
 
 		// custom mount flags:
 		mountFlagsField.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
@@ -266,6 +272,16 @@ public class MountOptionsController implements FxController {
 	public boolean isReadOnlySupported() {
 		return readOnlySupported.getValue();
 	}
+
+	public ObservableValue<Boolean> volumeIdSupportedProperty() {
+		return volumeIdSupported;
+	}
+
+	public boolean getVolumeIdSupported() {
+		return volumeIdSupported.getValue();
+	}
+
+
 
 	public ObservableValue<String> directoryPathProperty() {
 		return directoryPath;
