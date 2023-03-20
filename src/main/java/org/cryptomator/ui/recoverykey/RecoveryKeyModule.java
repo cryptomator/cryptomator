@@ -142,6 +142,13 @@ abstract class RecoveryKeyModule {
 
 	@Provides
 	@IntoMap
+	@FxControllerKey(RecoveryKeyValidateController.class)
+	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory);
+	}
+
+	@Provides
+	@IntoMap
 	@FxControllerKey(NewPasswordController.class)
 	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
 		return new NewPasswordController(resourceBundle, strengthRater);
