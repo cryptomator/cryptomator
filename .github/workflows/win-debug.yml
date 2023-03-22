@@ -46,7 +46,7 @@ jobs:
           if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.equals("${{ env.JFX_JMODS_HASH }}")) {
             exit 1;
           }
-          Expand-Archive -DestinationPath jfxjmods
+          Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
           Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
         shell: pwsh
       - name: Ensure major jfx version in pom and in jmods is the same
