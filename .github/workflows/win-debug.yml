@@ -43,7 +43,7 @@ jobs:
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
           curl --output jfxjmods.zip -L "${{ env.JFX_JMODS_URL }}"
-          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.equals("${{ JFX_JMODS_HASH }}")) {
+          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.equals("${{ env.JFX_JMODS_HASH }}")) {
             exit 1;
           }
           Expand-Archive -DestinationPath jfxjmods
