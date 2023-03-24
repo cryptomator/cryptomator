@@ -6,6 +6,8 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.ui.changepassword.NewPasswordController;
+import org.cryptomator.ui.changepassword.PasswordStrengthUtil;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -13,8 +15,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.quit.QuitController;
-import org.cryptomator.ui.quit.QuitForcedController;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.cryptomator.ui.recoverykey.RecoveryKeyValidateController;
 
@@ -70,10 +70,17 @@ abstract class ConvertVaultModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL)
+	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_START)
 	@ConvertVaultScoped
-	static Scene provideHubToLocalScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL);
+	static Scene provideHubToLocalStartScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_START);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_CONVERT)
+	@ConvertVaultScoped
+	static Scene provideHubToLocalConvertScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_CONVERT);
 	}
 
 	// ------------------
@@ -82,6 +89,19 @@ abstract class ConvertVaultModule {
 	@IntoMap
 	@FxControllerKey(HubToLocalStartController.class)
 	abstract FxController bindHubToLocalStartController(HubToLocalStartController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(HubToLocalConvertController.class)
+	abstract FxController bindHubToLocalConvertController(HubToLocalConvertController controller);
+
+
+	@Provides
+	@IntoMap
+	@FxControllerKey(NewPasswordController.class)
+	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
+		return new NewPasswordController(resourceBundle, strengthRater);
+	}
 
 	@Provides
 	@IntoMap

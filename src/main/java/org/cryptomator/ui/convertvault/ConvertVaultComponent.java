@@ -23,7 +23,7 @@ public interface ConvertVaultComponent {
 	@ConvertVaultWindow
 	Stage window();
 
-	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL)
+	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_START)
 	Lazy<Scene> hubToLocalScene();
 
 	default void showHubToLocalWindow() {
