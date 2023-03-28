@@ -1,5 +1,6 @@
 package org.cryptomator.ui.changepassword;
 
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
@@ -90,6 +91,10 @@ public class NewPasswordController implements FxController {
 
 	public int getPasswordStrength() {
 		return passwordStrength.get();
+	}
+
+	public Passphrase getNewPassword() {
+		return passwordField.getCharacters();
 	}
 
 }

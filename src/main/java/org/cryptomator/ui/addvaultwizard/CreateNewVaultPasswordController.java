@@ -48,13 +48,13 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
+import static org.cryptomator.common.Constants.DEFAULT_KEY_ID;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 @AddVaultWizardScoped
 public class CreateNewVaultPasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultPasswordController.class);
-	private static final URI DEFAULT_KEY_ID = URI.create(MasterkeyFileLoadingStrategy.SCHEME + ":" + MASTERKEY_FILENAME); // TODO better place?
 
 	private final Stage window;
 	private final Lazy<Scene> chooseLocationScene;
