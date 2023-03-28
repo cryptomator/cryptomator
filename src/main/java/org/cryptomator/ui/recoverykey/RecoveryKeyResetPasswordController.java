@@ -76,7 +76,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 		@Override
 		protected Void call() throws IOException, IllegalArgumentException {
-			recoveryKeyFactory.resetPasswordWithRecoveryKey(vault.getPath(), recoveryKey.get(), newPasswordController.passwordField.getCharacters());
+			recoveryKeyFactory.newMasterkeyFileWithPassphrase(vault.getPath(), recoveryKey.get(), newPasswordController.passwordField.getCharacters());
 			return null;
 		}
 

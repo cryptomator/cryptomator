@@ -81,7 +81,7 @@ public class RecoveryKeyFactory {
 	 * @throws IllegalArgumentException If the recoveryKey is invalid
 	 * @apiNote This is a long-running operation and should be invoked in a background thread
 	 */
-	public void resetPasswordWithRecoveryKey(Path vaultPath, String recoveryKey, CharSequence newPassword) throws IOException, IllegalArgumentException {
+	public void newMasterkeyFileWithPassphrase(Path vaultPath, String recoveryKey, CharSequence newPassword) throws IOException, IllegalArgumentException {
 		final byte[] rawKey = decodeRecoveryKey(recoveryKey);
 		try (var masterkey = new Masterkey(rawKey)) {
 			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
