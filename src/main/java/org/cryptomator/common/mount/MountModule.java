@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MountModule {
 
 	private static final AtomicReference<MountService> formerSelectedMountService = new AtomicReference<>(null);
-	private static final AtomicReference<MountService> firstUsedFuseMountService = new AtomicReference<>(null);
+	private static final AtomicReference<MountService> firstUsedProblematicFuseMountService = new AtomicReference<>(null);
 
 	@Provides
 	@Singleton
@@ -32,24 +32,24 @@ public class MountModule {
 				desiredServiceImpl -> { //
 					var serviceFromSettings = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny(); //
 					var targetedService = serviceFromSettings.orElse(fallbackProvider);
-					return applyWorkaroundForFuse(targetedService, serviceFromSettings.isPresent());
+					return applyWorkaroundForProblematicFuse(targetedService, serviceFromSettings.isPresent());
 				}, //
 				() -> { //
-					return applyWorkaroundForFuse(fallbackProvider, true);
+					return applyWorkaroundForProblematicFuse(fallbackProvider, true);
 				});
 		return observableMountService;
 	}
 
 	//see https://github.com/cryptomator/cryptomator/issues/2786
-	private synchronized static ActualMountService applyWorkaroundForFuse(MountService targetedService, boolean isDesired) {
-		//set the first used fuse service if applicable
-		var targetIsFuse = isFuseService(targetedService);
-		if (targetIsFuse && firstUsedFuseMountService.get() == null) {
-			firstUsedFuseMountService.set(targetedService);
+	private synchronized static ActualMountService applyWorkaroundForProblematicFuse(MountService targetedService, boolean isDesired) {
+		//set the first used problematic fuse service if applicable
+		var targetIsProblematicFuse = isProblematicFuseService(targetedService);
+		if (targetIsProblematicFuse && firstUsedProblematicFuseMountService.get() == null) {
+			firstUsedProblematicFuseMountService.set(targetedService);
 		}
 
-		//make sure that the first used fuse service is always used
-		if (targetIsFuse && !firstUsedFuseMountService.get().equals(targetedService)) {
+		//make sure that the first used problematic fuse service is always used
+		if (targetIsProblematicFuse && !firstUsedProblematicFuseMountService.get().equals(targetedService)) {
 			return new ActualMountService(formerSelectedMountService.get(), false);
 		} else {
 			formerSelectedMountService.set(targetedService);
@@ -57,7 +57,7 @@ public class MountModule {
 		}
 	}
 
-	private static boolean isFuseService(MountService service) {
-		return service.getClass().getName().startsWith("org.cryptomator.frontend.fuse.mount.");
+	private static boolean isProblematicFuseService(MountService service) {
+		return List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider").contains(service.getClass().getName());
 	}
 }

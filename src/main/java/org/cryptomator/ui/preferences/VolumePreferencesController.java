@@ -55,11 +55,11 @@ public class VolumePreferencesController implements FxController {
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
 		this.readonlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 		var mountServiceAtStart = selectedMountService.getValue();
-		this.fuseRestartRequired = selectedMountService.map(s -> isFuse(mountServiceAtStart) && isFuse(s) && !mountServiceAtStart.equals(s));
+		this.fuseRestartRequired = selectedMountService.map(s -> isProblematicFuse(mountServiceAtStart) && isProblematicFuse(s) && !mountServiceAtStart.equals(s));
 	}
 
-	private boolean isFuse(MountService service) {
-		return service.getClass().getName().startsWith("org.cryptomator.frontend.fuse.mount.");
+	private boolean isProblematicFuse(MountService service) {
+		return List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider").contains(service.getClass().getName());
 	}
 
 	public void initialize() {
