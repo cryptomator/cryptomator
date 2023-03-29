@@ -33,7 +33,7 @@ public class VolumePreferencesController implements FxController {
 	private final ObservableValue<Boolean> mountToDriveLetterSupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
 	private final ObservableValue<Boolean> readonlySupported;
-	private final ObservableValue<Boolean> macFuseAndFUSETRestartRequired;
+	private final ObservableValue<Boolean> fuseRestartRequired;
 	private final Lazy<Application> application;
 	private final List<MountService> mountProviders;
 	public ChoiceBox<MountService> volumeTypeChoiceBox;
@@ -55,11 +55,11 @@ public class VolumePreferencesController implements FxController {
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
 		this.readonlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 		var mountServiceAtStart = selectedMountService.getValue();
-		this.macFuseAndFUSETRestartRequired = selectedMountService.map(s -> isFUSETOrMacFUSE(mountServiceAtStart) && isFUSETOrMacFUSE(s) && !mountServiceAtStart.equals(s));
+		this.fuseRestartRequired = selectedMountService.map(s -> isFuse(mountServiceAtStart) && isFuse(s) && !mountServiceAtStart.equals(s));
 	}
 
-	private boolean isFUSETOrMacFUSE(MountService service) {
-		return List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider").contains(service.getClass().getName());
+	private boolean isFuse(MountService service) {
+		return service.getClass().getName().startsWith("org.cryptomator.frontend.fuse.mount.");
 	}
 
 	public void initialize() {
@@ -136,12 +136,12 @@ public class VolumePreferencesController implements FxController {
 		return mountFlagsSupported.getValue();
 	}
 
-	public ObservableValue<Boolean> macFuseAndFUSETRestartRequiredProperty() {
-		return macFuseAndFUSETRestartRequired;
+	public ObservableValue<Boolean> fuseRestartRequiredProperty() {
+		return fuseRestartRequired;
 	}
 
-	public boolean isMacFuseAndFUSETRestartRequired() {
-		return macFuseAndFUSETRestartRequired.getValue();
+	public boolean getFuseRestartRequired() {
+		return fuseRestartRequired.getValue();
 	}
 
 	/* Helpers */
