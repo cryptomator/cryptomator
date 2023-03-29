@@ -318,41 +318,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>3.1.0</version>
-				<executions>
-					<execution>
-						<id>compile-light-theme</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<mainClass>javafx.graphics/com.sun.javafx.css.parser.Css2Bin</mainClass>
-							<arguments>
-								<arg>${project.basedir}/src/main/resources/css/light_theme.css</arg>
-								<arg>${project.build.outputDirectory}/css/light_theme.bss</arg>
-							</arguments>
-						</configuration>
-					</execution>
-					<execution>
-						<id>compile-dark-theme</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<mainClass>javafx.graphics/com.sun.javafx.css.parser.Css2Bin</mainClass>
-							<arguments>
-								<arg>${project.basedir}/src/main/resources/css/dark_theme.css</arg>
-								<arg>${project.build.outputDirectory}/css/dark_theme.bss</arg>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
