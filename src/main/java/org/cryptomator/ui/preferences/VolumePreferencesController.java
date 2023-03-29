@@ -2,12 +2,14 @@ package org.cryptomator.ui.preferences;
 
 import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
@@ -19,6 +21,7 @@ import javafx.util.StringConverter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
@@ -41,7 +44,7 @@ public class VolumePreferencesController implements FxController {
 	public Button loopbackPortApplyButton;
 
 	@Inject
-	VolumePreferencesController(Settings settings, Lazy<Application> application, List<MountService> mountProviders, ResourceBundle resourceBundle) {
+	VolumePreferencesController(Settings settings, Lazy<Application> application, List<MountService> mountProviders, @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.application = application;
 		this.mountProviders = mountProviders;
@@ -54,12 +57,12 @@ public class VolumePreferencesController implements FxController {
 		this.mountToDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
 		this.readonlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
-		var mountServiceAtStart = selectedMountService.getValue();
-		this.fuseRestartRequired = selectedMountService.map(s -> isProblematicFuse(mountServiceAtStart) && isProblematicFuse(s) && !mountServiceAtStart.equals(s));
-	}
+		this.fuseRestartRequired = selectedMountService.map(s -> {//
+			return firstUsedProblematicFuseMountService.get() != null //
+					&& MountModule.isProblematicFuseService(s) //
+					&& !firstUsedProblematicFuseMountService.get().equals(s);
+		});
 
-	private boolean isProblematicFuse(MountService service) {
-		return List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider").contains(service.getClass().getName());
 	}
 
 	public void initialize() {
