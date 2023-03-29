@@ -11,8 +11,8 @@ import javafx.beans.value.ObservableValue;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.cryptomator.common.mount.MountModule.FirstUsedFuseOnMacOS.FUSET;
-import static org.cryptomator.common.mount.MountModule.FirstUsedFuseOnMacOS.MACFUSE;
+import static org.cryptomator.common.mount.MountModule.FirstUsedFuseOnMacOS.FUSE_T;
+import static org.cryptomator.common.mount.MountModule.FirstUsedFuseOnMacOS.MAC_FUSE;
 import static org.cryptomator.common.mount.MountModule.FirstUsedFuseOnMacOS.UNDEFINED;
 
 @Module
@@ -47,8 +47,8 @@ public class MountModule {
 
 	//see https://github.com/cryptomator/cryptomator/issues/2786
 	private synchronized static ActualMountService applyWorkaroundForFuseTMacFuse(MountService targetedService, boolean isDesired) {
-		var targetIsFuseT= isFuseTService(targetedService);
-		var targetIsMacFuse= isMacFuseService(targetedService);
+		var targetIsFuseT = isFuseTService(targetedService);
+		var targetIsMacFuse = isMacFuseService(targetedService);
 
 		//if none of macFUSE and FUSE-T were selected before, check if targetedService is macFUSE or FUSE-T
 		if (FIRST_USED.get() == UNDEFINED) {
@@ -60,7 +60,7 @@ public class MountModule {
 		}
 
 		//if one of both were selected before and now the other should be used
-		if ((FIRST_USED.get() == MAC_FUSE && targetIsFuseT) || (FIRST_USED.get() == FUSE_T && targetIsMacFuse )) {
+		if ((FIRST_USED.get() == MAC_FUSE && targetIsFuseT) || (FIRST_USED.get() == FUSE_T && targetIsMacFuse)) {
 			//return the former mount service
 			return new ActualMountService(formerSelectedMountService.get(), false); //
 		} else {
@@ -77,7 +77,7 @@ public class MountModule {
 		return "org.cryptomator.frontend.fuse.mount.MacFuseMountProvider".equals(service.getClass().getName());
 	}
 
-	private enum FirstUsedFuseOnMacOS {
+	enum FirstUsedFuseOnMacOS {
 		UNDEFINED,
 		MAC_FUSE,
 		FUSE_T;
