@@ -1,11 +1,13 @@
 package org.cryptomator.ui.convertvault;
 
+import dagger.Lazy;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.changepassword.NewPasswordController;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,7 @@ import org.mockito.Mockito;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +42,9 @@ public class HubToLocalConvertControllerTest {
 	MasterkeyFileAccess masterkeyFileAccess;
 	ExecutorService backgroundExecutorService;
 	BooleanProperty isConverting;
+	FxApplicationWindows appWindows;
+	Lazy<Scene> successScene;
+
 	NewPasswordController newPasswordController;
 
 	HubToLocalConvertController inTest;
@@ -52,8 +58,10 @@ public class HubToLocalConvertControllerTest {
 		masterkeyFileAccess = Mockito.mock(MasterkeyFileAccess.class);
 		backgroundExecutorService = Mockito.mock(ExecutorService.class);
 		isConverting = Mockito.mock(BooleanProperty.class);
+		appWindows = Mockito.mock(FxApplicationWindows.class);
+		successScene = Mockito.mock(Lazy.class);
 		newPasswordController = Mockito.mock(NewPasswordController.class);
-		inTest = new HubToLocalConvertController(window, vault, recoveryKey, recoveryKeyFactory, masterkeyFileAccess, backgroundExecutorService);
+		inTest = new HubToLocalConvertController(window, successScene, appWindows, vault, recoveryKey, recoveryKeyFactory, masterkeyFileAccess, backgroundExecutorService);
 		inTest.newPasswordController = newPasswordController;
 	}
 

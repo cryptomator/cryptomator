@@ -83,6 +83,13 @@ abstract class ConvertVaultModule {
 		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_CONVERT);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_SUCCESS)
+	@ConvertVaultScoped
+	static Scene provideHubToLocalSuccessScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_SUCCESS);
+	}
+
 	// ------------------
 
 	@Binds
@@ -94,6 +101,11 @@ abstract class ConvertVaultModule {
 	@IntoMap
 	@FxControllerKey(HubToLocalConvertController.class)
 	abstract FxController bindHubToLocalConvertController(HubToLocalConvertController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(HubToLocalSuccessController.class)
+	abstract FxController bindHubToLocalSuccessController(HubToLocalSuccessController controller);
 
 
 	@Provides

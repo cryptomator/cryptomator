@@ -1,17 +1,20 @@
 package org.cryptomator.ui.convertvault;
 
 import com.google.common.base.Preconditions;
+import dagger.Lazy;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.common.BackupHelper;
-import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +25,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -42,6 +45,8 @@ public class HubToLocalConvertController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(HubToLocalConvertController.class);
 
 	private final Stage window;
+	private final Lazy<Scene> successScene;
+	private final FxApplicationWindows applicationWindows;
 	private final Vault vault;
 	private final StringProperty recoveryKey;
 	private final RecoveryKeyFactory recoveryKeyFactory;
@@ -53,8 +58,10 @@ public class HubToLocalConvertController implements FxController {
 	NewPasswordController newPasswordController;
 
 	@Inject
-	public HubToLocalConvertController(@ConvertVaultWindow Stage window, @ConvertVaultWindow Vault vault, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, MasterkeyFileAccess masterkeyFileAccess, ExecutorService backgroundExecutorService) {
+	public HubToLocalConvertController(@ConvertVaultWindow Stage window, @FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows applicationWindows, @ConvertVaultWindow Vault vault, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, MasterkeyFileAccess masterkeyFileAccess, ExecutorService backgroundExecutorService) {
 		this.window = window;
+		this.successScene = successScene;
+		this.applicationWindows = applicationWindows;
 		this.vault = vault;
 		this.recoveryKey = recoveryKey;
 		this.recoveryKeyFactory = recoveryKeyFactory;
@@ -82,11 +89,12 @@ public class HubToLocalConvertController implements FxController {
 					isConverting.setValue(false);
 					if (exception == null) { //TODO: check, how the exceptions are wrapped
 						LOG.info("Conversion of vault {} succeeded.", vault.getPath());
+						window.setScene(successScene.get());
 					} else {
 						LOG.error("Conversion of vault {} failed.", vault.getPath(), exception);
+						applicationWindows.showErrorWindow(exception, window, null);
 					}
 				}, Platform::runLater); //
-		//window.setScene(resetPasswordScene.get());
 	}
 
 	//visible for testing
