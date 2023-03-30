@@ -57,7 +57,7 @@ public class MountModule {
 			firstUsedProblematicFuseMountService.set(targetedService);
 		}
 
-		//make sure that the first used problematic fuse service is always used
+		//do not use the targeted mount service and fallback to former one, if the service is problematic _and_ not the first problematic one used.
 		if (targetIsProblematicFuse && !firstUsedProblematicFuseMountService.get().equals(targetedService)) {
 			return new ActualMountService(formerSelectedMountService.get(), false);
 		} else {
