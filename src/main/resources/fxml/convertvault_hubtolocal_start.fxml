@@ -8,10 +8,11 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.convertvault.HubToLocalStartController"
-	  minWidth="350"
-	  minHeight="280"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
 	  spacing="12"
-	  alignment="TOP_LEFT">
+	  alignment="TOP_CENTER">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>

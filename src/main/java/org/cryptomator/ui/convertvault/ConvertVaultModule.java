@@ -66,6 +66,7 @@ abstract class ConvertVaultModule {
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
+		stage.setTitle("TODO recovery");
 		return stage;
 	}
 

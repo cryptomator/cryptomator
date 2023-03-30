@@ -4,6 +4,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.HubOptionsController"
@@ -13,9 +14,12 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 
-	<Button fx:id="convertToLocalButton" text="TODO Convert" onAction="#startConversion">
-		<graphic>
-			<FontAwesome5IconView glyph="ANCHOR"/>
-		</graphic>
-	</Button>
+	<Label maxWidth="-Infinity" text="TODO some explanation" wrapText="true"/>
+	<VBox spacing="6" alignment="CENTER">
+		<Button fx:id="convertToLocalButton" text="TODO Convert" onAction="#startConversion">
+			<graphic>
+				<FontAwesome5IconView glyph="ANCHOR"/>
+			</graphic>
+		</Button>
+	</VBox>
 </VBox>
