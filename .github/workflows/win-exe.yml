@@ -44,7 +44,7 @@ jobs:
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk+fx'
+          java-package: 'jdk'
           cache: ${{ env.JAVA_CACHE }}
       - name: Download and extract JavaFX jmods from Gluon
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
