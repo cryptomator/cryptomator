@@ -8,6 +8,10 @@ on:
       version:
         description: 'Version'
         required: false
+      isDebug:
+        description: 'Build debug version with console output'
+        type: boolean 
+
 
 env:
   JAVA_VERSION: 19
@@ -32,6 +36,7 @@ jobs:
     needs: [get-version]
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
+      WIN_CONSOLE_FLAG: ''
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -84,6 +89,9 @@ jobs:
           --no-man-pages
           --strip-debug
           --compress=1
+      - name: Change win-console flag if debug is active
+        if: ${{ inputs.isDebug }}
+        run: echo "WIN_CONSOLE_FLAG=--win-console" >> $GITHUB_ENV
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -115,8 +123,10 @@ jobs:
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Djavafx.verbose=${{ inputs.isDebug }}"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
+          ${WIN_CONSOLE_FLAG}
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
