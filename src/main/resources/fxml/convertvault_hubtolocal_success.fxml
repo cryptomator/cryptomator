@@ -24,7 +24,6 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<Region VBox.vgrow="ALWAYS"/>
 		<Group>
 			<StackPane>
 				<padding>
@@ -47,7 +46,7 @@
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
 				<buttons>
-					<Button text="%generic.button.done" ButtonBar.buttonData="FINISH" onAction="#close" defaultButton="true" cancelButton="true"/>
+					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" cancelButton="true" onAction="#close"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>
