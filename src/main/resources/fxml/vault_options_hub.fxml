@@ -14,11 +14,11 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 
-	<Label maxWidth="-Infinity" text="TODO some explanation" wrapText="true"/>
+	<Label maxWidth="-Infinity" text="%vaultOptions.hub.convertInfo" wrapText="true"/>
 	<VBox spacing="6" alignment="CENTER">
-		<Button fx:id="convertToLocalButton" text="TODO Convert" onAction="#startConversion">
+		<Button fx:id="convertToLocalButton" text="%vaultOptions.hub.convertBtn" onAction="#startConversion" maxWidth="Infinity">
 			<graphic>
-				<FontAwesome5IconView glyph="ANCHOR"/>
+				<FontAwesome5IconView glyph="EXCHANGE_ALT"/>
 			</graphic>
 		</Button>
 	</VBox>
