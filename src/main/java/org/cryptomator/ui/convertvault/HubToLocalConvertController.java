@@ -21,16 +21,20 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -52,13 +56,15 @@ public class HubToLocalConvertController implements FxController {
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final ExecutorService backgroundExecutorService;
-	private final BooleanProperty isConverting;
+	private final ResourceBundle resourceBundle;
+	private final BooleanProperty conversionStarted;
 
 	@FXML
 	NewPasswordController newPasswordController;
+	public Button convertBtn;
 
 	@Inject
-	public HubToLocalConvertController(@ConvertVaultWindow Stage window, @FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows applicationWindows, @ConvertVaultWindow Vault vault, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, MasterkeyFileAccess masterkeyFileAccess, ExecutorService backgroundExecutorService) {
+	public HubToLocalConvertController(@ConvertVaultWindow Stage window, @FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows applicationWindows, @ConvertVaultWindow Vault vault, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, MasterkeyFileAccess masterkeyFileAccess, ExecutorService backgroundExecutorService, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.successScene = successScene;
 		this.applicationWindows = applicationWindows;
@@ -67,11 +73,23 @@ public class HubToLocalConvertController implements FxController {
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.backgroundExecutorService = backgroundExecutorService;
-		this.isConverting = new SimpleBooleanProperty(false);
+		this.resourceBundle = resourceBundle;
+		this.conversionStarted = new SimpleBooleanProperty(false);
+
 	}
 
 	@FXML
 	public void initialize() {
+		convertBtn.disableProperty().bind(Bindings.createBooleanBinding( //
+				() -> !newPasswordController.isGoodPassword() || conversionStarted.get(), //
+				newPasswordController.goodPasswordProperty(), //
+				conversionStarted));
+		convertBtn.contentDisplayProperty().bind(Bindings.createObjectBinding( //
+				() -> conversionStarted.getValue() ? ContentDisplay.LEFT : ContentDisplay.TEXT_ONLY, //
+				conversionStarted));
+		convertBtn.textProperty().bind(Bindings.createStringBinding( //
+				() -> resourceBundle.getString("convertVault.convert.convertBtn." + (conversionStarted.get() ? "processing" : "before")), //
+				conversionStarted));
 	}
 
 	@FXML
@@ -83,10 +101,9 @@ public class HubToLocalConvertController implements FxController {
 	public void convert() {
 		Preconditions.checkState(newPasswordController.isGoodPassword());
 		LOG.info("Converting hub vault {} to local", vault.getPath());
-		CompletableFuture.runAsync(() -> isConverting.setValue(true), Platform::runLater) //
+		CompletableFuture.runAsync(() -> conversionStarted.setValue(true), Platform::runLater) //
 				.thenRunAsync(this::convertInternal, backgroundExecutorService) //TODO: which executor is used?
 				.whenCompleteAsync((result, exception) -> {
-					isConverting.setValue(false);
 					if (exception == null) { //TODO: check, how the exceptions are wrapped
 						LOG.info("Conversion of vault {} succeeded.", vault.getPath());
 						window.setScene(successScene.get());
@@ -137,9 +154,5 @@ public class HubToLocalConvertController implements FxController {
 	}
 
 	/* Getter/Setter */
-
-	public NewPasswordController getNewPasswordController() {
-		return newPasswordController;
-	}
 
 }

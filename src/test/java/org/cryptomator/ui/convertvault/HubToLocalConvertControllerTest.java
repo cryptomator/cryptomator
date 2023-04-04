@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 
@@ -41,6 +42,7 @@ public class HubToLocalConvertControllerTest {
 	RecoveryKeyFactory recoveryKeyFactory;
 	MasterkeyFileAccess masterkeyFileAccess;
 	ExecutorService backgroundExecutorService;
+	ResourceBundle resourceBundle;
 	BooleanProperty isConverting;
 	FxApplicationWindows appWindows;
 	Lazy<Scene> successScene;
@@ -57,11 +59,12 @@ public class HubToLocalConvertControllerTest {
 		recoveryKeyFactory = Mockito.mock(RecoveryKeyFactory.class);
 		masterkeyFileAccess = Mockito.mock(MasterkeyFileAccess.class);
 		backgroundExecutorService = Mockito.mock(ExecutorService.class);
+		resourceBundle = Mockito.mock(ResourceBundle.class);
 		isConverting = Mockito.mock(BooleanProperty.class);
 		appWindows = Mockito.mock(FxApplicationWindows.class);
 		successScene = Mockito.mock(Lazy.class);
 		newPasswordController = Mockito.mock(NewPasswordController.class);
-		inTest = new HubToLocalConvertController(window, successScene, appWindows, vault, recoveryKey, recoveryKeyFactory, masterkeyFileAccess, backgroundExecutorService);
+		inTest = new HubToLocalConvertController(window, successScene, appWindows, vault, recoveryKey, recoveryKeyFactory, masterkeyFileAccess, backgroundExecutorService, resourceBundle);
 		inTest.newPasswordController = newPasswordController;
 	}
 
@@ -136,7 +139,7 @@ public class HubToLocalConvertControllerTest {
 
 		@Test
 		public void testConvertInternalNotWrapsIAE() throws IOException {
-			Mockito.doThrow(new IllegalArgumentException("yudu")).when(recoveryKeyFactory).newMasterkeyFileWithPassphrase(any(),anyString(),any());
+			Mockito.doThrow(new IllegalArgumentException("yudu")).when(recoveryKeyFactory).newMasterkeyFileWithPassphrase(any(), anyString(), any());
 
 			Assertions.assertThrows(IllegalArgumentException.class, inSpy::convertInternal);
 
