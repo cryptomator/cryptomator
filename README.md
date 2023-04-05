@@ -21,7 +21,6 @@ Cryptomator is provided free of charge as an open-source project despite the hig
   <tbody>
     <tr>
       <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="80"></a></td>
-      <td><a href="https://proxy-hub.com/"><img src="https://cryptomator.org/img/sponsors/proxyhub.svg" alt="Proxy-Hub" height="80"></a></td>
     </tr>
   </tbody>
 </table>

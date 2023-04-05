@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.7.3</version>
+	<version>1.7.4</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -33,12 +33,12 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.6.2</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.6.3</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.2.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.2.0</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>2.0.4</cryptomator.fuse.version>
+		<cryptomator.fuse.version>2.0.5</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>2.0.2</cryptomator.webdav.version>
 
@@ -316,41 +316,6 @@
 						<arg>--enable-preview</arg>
 					</compilerArgs>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>3.1.0</version>
-				<executions>
-					<execution>
-						<id>compile-light-theme</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<mainClass>javafx.graphics/com.sun.javafx.css.parser.Css2Bin</mainClass>
-							<arguments>
-								<arg>${project.basedir}/src/main/resources/css/light_theme.css</arg>
-								<arg>${project.build.outputDirectory}/css/light_theme.bss</arg>
-							</arguments>
-						</configuration>
-					</execution>
-					<execution>
-						<id>compile-dark-theme</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<mainClass>javafx.graphics/com.sun.javafx.css.parser.Css2Bin</mainClass>
-							<arguments>
-								<arg>${project.basedir}/src/main/resources/css/dark_theme.css</arg>
-								<arg>${project.build.outputDirectory}/css/dark_theme.bss</arg>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -2,12 +2,14 @@ package org.cryptomator.ui.preferences;
 
 import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
@@ -19,6 +21,7 @@ import javafx.util.StringConverter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
@@ -33,6 +36,7 @@ public class VolumePreferencesController implements FxController {
 	private final ObservableValue<Boolean> mountToDriveLetterSupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
 	private final ObservableValue<Boolean> readonlySupported;
+	private final ObservableValue<Boolean> fuseRestartRequired;
 	private final Lazy<Application> application;
 	private final List<MountService> mountProviders;
 	public ChoiceBox<MountService> volumeTypeChoiceBox;
@@ -40,7 +44,7 @@ public class VolumePreferencesController implements FxController {
 	public Button loopbackPortApplyButton;
 
 	@Inject
-	VolumePreferencesController(Settings settings, Lazy<Application> application, List<MountService> mountProviders, ResourceBundle resourceBundle) {
+	VolumePreferencesController(Settings settings, Lazy<Application> application, List<MountService> mountProviders, @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.application = application;
 		this.mountProviders = mountProviders;
@@ -53,6 +57,12 @@ public class VolumePreferencesController implements FxController {
 		this.mountToDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
 		this.readonlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
+		this.fuseRestartRequired = selectedMountService.map(s -> {//
+			return firstUsedProblematicFuseMountService.get() != null //
+					&& MountModule.isProblematicFuseService(s) //
+					&& !firstUsedProblematicFuseMountService.get().equals(s);
+		});
+
 	}
 
 	public void initialize() {
@@ -127,6 +137,14 @@ public class VolumePreferencesController implements FxController {
 
 	public boolean isMountFlagsSupported() {
 		return mountFlagsSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> fuseRestartRequiredProperty() {
+		return fuseRestartRequired;
+	}
+
+	public boolean getFuseRestartRequired() {
+		return fuseRestartRequired.getValue();
 	}
 
 	/* Helpers */

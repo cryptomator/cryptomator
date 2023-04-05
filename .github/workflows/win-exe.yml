@@ -8,11 +8,17 @@ on:
       version:
         description: 'Version'
         required: false
+      isDebug:
+        description: 'Build debug version with console output'
+        type: boolean 
+
 
 env:
   JAVA_VERSION: 19
-  JAVA_DIST: 'zulu'
+  JAVA_DIST: 'temurin'
   JAVA_CACHE: 'maven'
+  JFX_JMODS_URL: 'https://download2.gluonhq.com/openjfx/19.0.2.1/openjfx-19.0.2.1_windows-x64_bin-jmods.zip'
+  JFX_JMODS_HASH: 'B7CF2CAD2468842B3B78D99F6C0555771499A36FA1F1EE3DD1B9A4597F1FAB86'
 
 defaults:
   run:
@@ -30,6 +36,7 @@ jobs:
     needs: [get-version]
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
+      WIN_CONSOLE_FLAG: ''
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -37,17 +44,31 @@ jobs:
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk+fx'
+          java-package: 'jdk'
           cache: ${{ env.JAVA_CACHE }}
-      - name: Ensure major jfx version in pom equals in jdk
-        shell: pwsh
+      - name: Download and extract JavaFX jmods from Gluon
+        #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
-          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
-          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
-            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
-            exit 1
+          curl --output jfxjmods.zip -L "${{ env.JFX_JMODS_URL }}"
+          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.equals("${{ env.JFX_JMODS_HASH }}")) {
+            exit 1;
           }
+          Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
+          Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
+        shell: pwsh
+      - name: Ensure major jfx version in pom and in jmods is the same
+        run: |
+          JMOD_VERSION_AMD64=$(jmod describe jfxjmods/javafx.base.jmod | head -1)
+          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
+          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64%%.*}
+          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+          POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+
+          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION_AMD64})"
+            exit 1
+          fi
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
@@ -61,13 +82,16 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${JAVA_HOME}/jmods"
+          --module-path "jfxjmods;${JAVA_HOME}/jmods"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
           --no-man-pages
           --strip-debug
           --compress=1
+      - name: Change win-console flag if debug is active
+        if: ${{ inputs.isDebug }}
+        run: echo "WIN_CONSOLE_FLAG=--win-console" >> $GITHUB_ENV
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -99,8 +123,10 @@ jobs:
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Djavafx.verbose=${{ inputs.isDebug }}"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
+          ${WIN_CONSOLE_FLAG}
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
