@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.7.4</version>
+	<version>1.7.5</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -33,7 +33,7 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.6.3</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.6.2</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.2.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.0</cryptomator.integrations.mac.version>
