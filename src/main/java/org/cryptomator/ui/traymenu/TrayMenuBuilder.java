@@ -23,7 +23,9 @@ import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -36,6 +38,10 @@ public class TrayMenuBuilder {
 	private static final String TRAY_ICON_UNLOCKED_MAC = "/img/tray_icon_unlocked_mac@2x.png";
 	private static final String TRAY_ICON = "/img/tray_icon.png";
 	private static final String TRAY_ICON_UNLOCKED = "/img/tray_icon_unlocked.png";
+	private static final String TRAY_ICON_SVG = "tray_icon.svg";
+	private static final String TRAY_ICON_UNLOCKED_SVG = "tray_icon_unlocked.svg";
+	private static final String DATA_URI_SCHEME = "data:image/png;base64,";
+	private static final String FILE_URI_SCHEME = "file:///";
 
 	private final ResourceBundle resourceBundle;
 	private final VaultService vaultService;
@@ -155,10 +161,16 @@ public class TrayMenuBuilder {
 		appWindows.showPreferencesWindow(SelectedPreferencesTab.ANY);
 	}
 
-	private byte[] getAppropriateTrayIconImage() {
+	private URI getAppropriateTrayIconImage() {
 		boolean isAnyVaultUnlocked = vaults.stream().anyMatch(Vault::isUnlocked);
 
 		String resourceName;
+
+		if (SystemUtils.IS_OS_LINUX) {
+			resourceName = isAnyVaultUnlocked ? TRAY_ICON_UNLOCKED_SVG : TRAY_ICON_SVG;
+			return URI.create(FILE_URI_SCHEME + resourceName);
+		}
+
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			resourceName = isAnyVaultUnlocked ? TRAY_ICON_UNLOCKED_MAC : TRAY_ICON_MAC;
 		} else {
@@ -167,10 +179,11 @@ public class TrayMenuBuilder {
 
 		try (var image = getClass().getResourceAsStream(resourceName)) {
 			assert image != null;
-			return image.readAllBytes();
+			var imageBytes = image.readAllBytes();
+			var data = Base64.getEncoder().encodeToString(imageBytes);
+			return URI.create(DATA_URI_SCHEME + data);
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to load tray icon image: " + resourceName, e);
 		}
 	}
-
 }

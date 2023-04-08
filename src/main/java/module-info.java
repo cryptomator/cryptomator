@@ -1,6 +1,7 @@
 import ch.qos.logback.classic.spi.Configurator;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
+import org.cryptomator.ui.traymenu.AppindicatorTrayMenuController;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 open module org.cryptomator.desktop {
@@ -31,12 +32,13 @@ open module org.cryptomator.desktop {
 	requires com.tobiasdiez.easybind;
 	requires dagger;
 	requires io.github.coffeelibs.tinyoauth2client;
+	requires libappindicator.gtk3.java.minimal;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
 
-	provides TrayMenuController with AwtTrayMenuController;
+	provides TrayMenuController with AwtTrayMenuController, AppindicatorTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
 }

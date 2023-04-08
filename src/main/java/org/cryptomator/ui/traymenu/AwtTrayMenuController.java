@@ -22,25 +22,32 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URI;
+import java.util.Base64;
 import java.util.List;
 
+/**
+ * Responsible to manage the tray icon on macOS and Windows using AWT.
+ * For Linux, we use {@link AppindicatorTrayMenuController}
+ */
 @CheckAvailability
 @Priority(Priority.FALLBACK)
 public class AwtTrayMenuController implements TrayMenuController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AwtTrayMenuController.class);
 
+	private static final String DATA_URI_SCHEME = "data:image/png;base64,";
 	private final PopupMenu menu = new PopupMenu();
 	private TrayIcon trayIcon;
 
 	@CheckAvailability
 	public static boolean isAvailable() {
-		return SystemTray.isSupported();
+		return !SystemUtils.IS_OS_LINUX && SystemTray.isSupported();
 	}
 
 	@Override
-	public void showTrayIcon(byte[] imageData, Runnable defaultAction, String tooltip) throws TrayMenuException {
-		var image = Toolkit.getDefaultToolkit().createImage(imageData);
+	public void showTrayIcon(URI uri, Runnable defaultAction, String tooltip) throws TrayMenuException {
+		var image = Toolkit.getDefaultToolkit().createImage(getImageBytes(uri));
 		trayIcon = new TrayIcon(image, tooltip, menu);
 
 		trayIcon.setImageAutoSize(true);
@@ -57,11 +64,8 @@ public class AwtTrayMenuController implements TrayMenuController {
 	}
 
 	@Override
-	public void updateTrayIcon(byte[] imageData) {
-		if (trayIcon == null) {
-			throw new IllegalStateException("Failed to update the icon as it has not yet been added");
-		}
-		var image = Toolkit.getDefaultToolkit().createImage(imageData);
+	public void updateTrayIcon(URI uri) {
+		var image = Toolkit.getDefaultToolkit().createImage(getImageBytes(uri));
 		trayIcon.setImage(image);
 	}
 
@@ -100,4 +104,8 @@ public class AwtTrayMenuController implements TrayMenuController {
 		}
 	}
 
+	private byte[] getImageBytes(URI uri) {
+		var data = uri.toString().split(DATA_URI_SCHEME)[1];
+		return Base64.getDecoder().decode(data);
+	}
 }

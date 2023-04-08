@@ -2,7 +2,7 @@
   <configuration default="false" name="Cryptomator Linux" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
     <module name="cryptomator" />
-    <option name="VM_PARAMETERS" value="-Dcryptomator.settingsPath=&quot;~/.config/Cryptomator/settings.json&quot; -Dcryptomator.p12Path=&quot;~/.config/Cryptomator/key.p12&quot; -Dcryptomator.ipcSocketPath=&quot;~/.config/Cryptomator/ipc.socket&quot; -Dcryptomator.logDir=&quot;~/.local/share/Cryptomator/logs&quot; -Dcryptomator.pluginDir=&quot;~/.local/share/Cryptomator/plugins&quot; -Dcryptomator.mountPointsDir=&quot;~/.local/share/Cryptomator/mnt&quot; -Dcryptomator.showTrayIcon=true -Xss20m -Xmx512m --enable-preview --enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64" />
+    <option name="VM_PARAMETERS" value="-Dcryptomator.settingsPath=&quot;~/.config/Cryptomator/settings.json&quot; -Dcryptomator.p12Path=&quot;~/.config/Cryptomator/key.p12&quot; -Dcryptomator.ipcSocketPath=&quot;~/.config/Cryptomator/ipc.socket&quot; -Dcryptomator.logDir=&quot;~/.local/share/Cryptomator/logs&quot; -Dcryptomator.pluginDir=&quot;~/.local/share/Cryptomator/plugins&quot; -Dcryptomator.mountPointsDir=&quot;~/.local/share/Cryptomator/mnt&quot; -Dcryptomator.showTrayIcon=true -Xss20m -Xmx512m --enable-preview --enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,libappindicator.gtk3.java.minimal" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
