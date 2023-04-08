@@ -24,6 +24,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+/**
+ * Responsible to manage the tray icon on macOS and Windows using AWT.
+ * For Linux, we use {@link AppindicatorTrayMenuController}
+ */
 @CheckAvailability
 @Priority(Priority.FALLBACK)
 public class AwtTrayMenuController implements TrayMenuController {
@@ -35,7 +39,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 
 	@CheckAvailability
 	public static boolean isAvailable() {
-		return SystemTray.isSupported();
+		return !SystemUtils.IS_OS_LINUX && SystemTray.isSupported();
 	}
 
 	@Override

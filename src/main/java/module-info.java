@@ -31,6 +31,7 @@ open module org.cryptomator.desktop {
 	requires com.tobiasdiez.easybind;
 	requires dagger;
 	requires io.github.coffeelibs.tinyoauth2client;
+	requires libappindicator.gtk3.java;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
 

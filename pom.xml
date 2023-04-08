@@ -250,6 +250,13 @@
 			<version>${jetbrains.annotations.version}</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- Java bindings for libappindicator -->
+		<dependency>
+			<groupId>org.purejava</groupId>
+			<artifactId>libappindicator-gtk3-java</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>
