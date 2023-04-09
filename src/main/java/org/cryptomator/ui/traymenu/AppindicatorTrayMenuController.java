@@ -28,7 +28,7 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	private final MemorySession session = MemorySession.openShared();
 	private MemoryAddress indicator;
-	private final MemoryAddress menu = gtk_menu_new();
+	private MemoryAddress menu = gtk_menu_new();
 
 	@CheckAvailability
 	public static boolean isAvailable() {
@@ -52,7 +52,10 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	@Override
 	public void updateTrayMenu(List<TrayMenuItem> items) throws TrayMenuException {
+		menu = gtk_menu_new();
 		addChildren(menu, items);
+		gtk_widget_show_all(menu);
+		app_indicator_set_menu(indicator, menu);
 	}
 
 	@Override
@@ -83,6 +86,7 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 				gtk_menu_item_set_submenu(gtkMenuItem, gtkSubmenu);
 				gtk_menu_shell_append(menu, gtkMenuItem);
 			}
+			gtk_widget_show_all(menu);
 		}
 	}
 }
