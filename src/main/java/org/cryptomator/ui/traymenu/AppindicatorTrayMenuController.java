@@ -23,8 +23,8 @@ import static org.purejava.linux.app_indicator_h.*;
 public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppindicatorTrayMenuController.class);
-	private static final String TRAY_ICON = "/img/tray_icon.png";
-	private static final String TRAY_ICON_UNLOCKED = "/img/tray_icon_unlocked.png";
+	private static final String TRAY_ICON = "/img/cryptomator-icon-white.svg";
+	private static final String TRAY_ICON_UNLOCKED = "/img/cryptomator-icon-white.svg";
 
 	private final MemorySession session = MemorySession.openShared();
 	private MemoryAddress indicator;
@@ -42,6 +42,7 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 				APP_INDICATOR_CATEGORY_APPLICATION_STATUS());
 		gtk_widget_show_all(menu);
 		app_indicator_set_menu(indicator, menu);
+		app_indicator_set_status(indicator, APP_INDICATOR_STATUS_ACTIVE());
 	}
 
 	@Override
