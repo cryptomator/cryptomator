@@ -1,6 +1,7 @@
 import ch.qos.logback.classic.spi.Configurator;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
+import org.cryptomator.ui.traymenu.AppindicatorTrayMenuController;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 open module org.cryptomator.desktop {
@@ -38,6 +39,6 @@ open module org.cryptomator.desktop {
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
 
-	provides TrayMenuController with AwtTrayMenuController;
+	provides TrayMenuController with AwtTrayMenuController, AppindicatorTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
 }
