@@ -15,7 +15,7 @@ public class ActionItemCallback implements GCallback {
 
 	@Override
 	public void apply() {
-		LOG.info("Hit Action {}", actionItem.action().toString());
+		LOG.debug("Hit tray menu action '{}'", actionItem.title());
 		actionItem.action().run();
 	}
 }
