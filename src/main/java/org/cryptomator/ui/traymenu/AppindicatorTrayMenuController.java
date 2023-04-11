@@ -23,8 +23,8 @@ import static org.purejava.linux.app_indicator_h.*;
 public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppindicatorTrayMenuController.class);
-	private static final String TRAY_ICON = "/img/cryptomator-icon-white.svg";
-	private static final String TRAY_ICON_UNLOCKED = "/img/cryptomator-icon-white.svg";
+	private static final String TRAY_ICON = "/img/cryptomator-icon-16-mono.svg";
+	private static final String TRAY_ICON_UNLOCKED = "/img/cryptomator-icon-16-colored.svg";
 
 	private final MemorySession session = MemorySession.openShared();
 	private MemoryAddress indicator;
