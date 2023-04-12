@@ -36,6 +36,8 @@ public class TrayMenuBuilder {
 	private static final String TRAY_ICON_UNLOCKED_MAC = "/img/tray_icon_unlocked_mac@2x.png";
 	private static final String TRAY_ICON = "/img/tray_icon.png";
 	private static final String TRAY_ICON_UNLOCKED = "/img/tray_icon_unlocked.png";
+	private static final String TRAY_ICON_SVG = "/img/cryptomator-icon-16-mono.svg";
+	private static final String TRAY_ICON_SVG_COLORED = "/img/cryptomator-icon-16-colored.svg";
 
 	private final ResourceBundle resourceBundle;
 	private final VaultService vaultService;
@@ -65,7 +67,7 @@ public class TrayMenuBuilder {
 		});
 
 		try {
-			trayMenu.showTrayIcon(getAppropriateTrayIconImage(), this::showMainWindow, "Cryptomator");
+			trayMenu.showTrayIcon(getAppropriateTrayIconImage(), TRAY_ICON_SVG, this::showMainWindow, "Cryptomator");
 			trayMenu.onBeforeOpenMenu(() -> {
 				for (Vault vault : vaults) {
 					VaultListManager.redetermineVaultState(vault);
@@ -84,7 +86,7 @@ public class TrayMenuBuilder {
 
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		assert Platform.isFxApplicationThread();
-		trayMenu.updateTrayIcon(getAppropriateTrayIconImage());
+		trayMenu.updateTrayIcon(getAppropriateTrayIconImage(), getAppropriateTrayIconSVG());
 		rebuildMenu();
 	}
 
@@ -173,4 +175,7 @@ public class TrayMenuBuilder {
 		}
 	}
 
+	private String getAppropriateTrayIconSVG() {
+		return vaults.stream().anyMatch(Vault::isUnlocked) ? TRAY_ICON_SVG_COLORED : TRAY_ICON_SVG;
+	}
 }

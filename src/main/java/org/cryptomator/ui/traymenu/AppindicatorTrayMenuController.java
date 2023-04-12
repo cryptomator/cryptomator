@@ -23,8 +23,6 @@ import static org.purejava.linux.app_indicator_h.*;
 public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppindicatorTrayMenuController.class);
-	private static final String TRAY_ICON = "/img/cryptomator-icon-16-mono.svg";
-	private static final String TRAY_ICON_UNLOCKED = "/img/cryptomator-icon-16-colored.svg";
 
 	private final MemorySession session = MemorySession.openShared();
 	private MemoryAddress indicator;
@@ -36,9 +34,9 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 	}
 
 	@Override
-	public void showTrayIcon(byte[] bytes, Runnable runnable, String s) throws TrayMenuException {
+	public void showTrayIcon(byte[] bytes, String icon, Runnable runnable, String s) throws TrayMenuException {
 		indicator = app_indicator_new(MemoryAllocator.ALLOCATE_FOR("org.cryptomator.Cryptomator"),
-				MemoryAllocator.ALLOCATE_FOR(TRAY_ICON),
+				MemoryAllocator.ALLOCATE_FOR(icon),
 				APP_INDICATOR_CATEGORY_APPLICATION_STATUS());
 		gtk_widget_show_all(menu);
 		app_indicator_set_menu(indicator, menu);
@@ -46,8 +44,8 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 	}
 
 	@Override
-	public void updateTrayIcon(byte[] bytes) {
-
+	public void updateTrayIcon(byte[] bytes, String icon) {
+		app_indicator_set_icon(indicator, MemoryAllocator.ALLOCATE_FOR(icon));
 	}
 
 	@Override
