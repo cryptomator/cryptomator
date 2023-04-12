@@ -13,8 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.SystemTray;
+import java.io.File;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySession;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.purejava.linux.app_indicator_h.*;
@@ -36,7 +39,7 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 	@Override
 	public void showTrayIcon(byte[] bytes, String icon, Runnable runnable, String s) throws TrayMenuException {
 		indicator = app_indicator_new(MemoryAllocator.ALLOCATE_FOR("org.cryptomator.Cryptomator"),
-				MemoryAllocator.ALLOCATE_FOR(icon),
+				MemoryAllocator.ALLOCATE_FOR(getAbsolutePath(icon)),
 				APP_INDICATOR_CATEGORY_APPLICATION_STATUS());
 		gtk_widget_show_all(menu);
 		app_indicator_set_menu(indicator, menu);
@@ -45,7 +48,7 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	@Override
 	public void updateTrayIcon(byte[] bytes, String icon) {
-		app_indicator_set_icon(indicator, MemoryAllocator.ALLOCATE_FOR(icon));
+		app_indicator_set_icon(indicator, MemoryAllocator.ALLOCATE_FOR(getAbsolutePath(icon)));
 	}
 
 	@Override
@@ -86,5 +89,18 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 			}
 			gtk_widget_show_all(menu);
 		}
+	}
+	private String getAbsolutePath(String iconName) {
+		var res = getClass().getClassLoader().getResource(iconName);
+		if (null == res) {
+			throw new IllegalArgumentException("Icon '" + iconName + "' cannot be found in resource folder");
+		}
+		File file = null;
+		try {
+			file = Paths.get(res.toURI()).toFile();
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Icon '" + iconName + "' cannot be converted to file", e);
+		}
+		return file.getAbsolutePath();
 	}
 }

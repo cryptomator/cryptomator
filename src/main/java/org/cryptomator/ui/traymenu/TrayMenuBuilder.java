@@ -36,8 +36,8 @@ public class TrayMenuBuilder {
 	private static final String TRAY_ICON_UNLOCKED_MAC = "/img/tray_icon_unlocked_mac@2x.png";
 	private static final String TRAY_ICON = "/img/tray_icon.png";
 	private static final String TRAY_ICON_UNLOCKED = "/img/tray_icon_unlocked.png";
-	private static final String TRAY_ICON_SVG = "/img/cryptomator-icon-16-mono.svg";
-	private static final String TRAY_ICON_SVG_COLORED = "/img/cryptomator-icon-16-colored.svg";
+	private static final String TRAY_ICON_SVG = "cryptomator-icon-16-mono.svg";
+	private static final String TRAY_ICON_SVG_COLORED = "cryptomator-icon-16-colored.svg";
 
 	private final ResourceBundle resourceBundle;
 	private final VaultService vaultService;
