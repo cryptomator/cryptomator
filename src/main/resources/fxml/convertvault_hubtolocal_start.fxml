@@ -14,7 +14,7 @@
 	  spacing="12"
 	  alignment="TOP_CENTER">
 	<padding>
-		<Insets topRightBottomLeft="24"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
 		<fx:include fx:id="recoveryKeyValidate" source="recoverykey_validate.fxml"/>
