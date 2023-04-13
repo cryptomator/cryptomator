@@ -33,7 +33,7 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	@CheckAvailability
 	public static boolean isAvailable() {
-		return SystemUtils.IS_OS_LINUX && SystemTray.isSupported();
+		return SystemUtils.IS_OS_LINUX && MemoryAllocator.isLoadedNativeLib() && SystemTray.isSupported();
 	}
 
 	@Override
