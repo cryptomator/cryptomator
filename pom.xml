@@ -55,6 +55,7 @@
 		<slf4j.version>2.0.6</slf4j.version>
 		<tinyoauth2.version>0.5.1</tinyoauth2.version>
 		<zxcvbn.version>1.7.0</zxcvbn.version>
+		<appindicator.version>1.0.0-SNAPSHOT</appindicator.version>
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
@@ -254,8 +255,8 @@
 		<!-- Java bindings for libappindicator -->
 		<dependency>
 			<groupId>org.purejava</groupId>
-			<artifactId>libappindicator-gtk3-java</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<artifactId>libappindicator-gtk3-minimal-java</artifactId>
+			<version>${appindicator.version}</version>
 		</dependency>
 	</dependencies>
 
