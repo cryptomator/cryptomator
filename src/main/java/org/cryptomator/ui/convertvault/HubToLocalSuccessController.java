@@ -31,6 +31,7 @@ public class HubToLocalSuccessController implements FxController {
 	@FXML
 	public void close() {
 		window.close();
+		window.getOwner().hide();
 	}
 
 	/* Observables */
