@@ -10,22 +10,13 @@ import javafx.stage.Stage;
 
 public class HubToLocalSuccessController implements FxController {
 
-	private final FxApplicationWindows appWindows;
 	private final Stage window;
 	private final Vault vault;
 
 	@Inject
-	HubToLocalSuccessController(FxApplicationWindows appWindows, @ConvertVaultWindow Stage window, @ConvertVaultWindow Vault vault) {
-		this.appWindows = appWindows;
+	HubToLocalSuccessController(@ConvertVaultWindow Stage window, @ConvertVaultWindow Vault vault) {
 		this.window = window;
 		this.vault = vault;
-	}
-
-	@FXML
-	public void unlockAndClose() {
-		close();
-		vault.getVaultConfigCache();
-		appWindows.startUnlockWorkflow(vault, window);
 	}
 
 	@FXML

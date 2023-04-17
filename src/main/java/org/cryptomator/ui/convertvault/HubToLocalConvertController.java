@@ -102,9 +102,9 @@ public class HubToLocalConvertController implements FxController {
 		Preconditions.checkState(newPasswordController.isGoodPassword());
 		LOG.info("Converting hub vault {} to local", vault.getPath());
 		CompletableFuture.runAsync(() -> conversionStarted.setValue(true), Platform::runLater) //
-				.thenRunAsync(this::convertInternal, backgroundExecutorService) //TODO: which executor is used?
+				.thenRunAsync(this::convertInternal, backgroundExecutorService)
 				.whenCompleteAsync((result, exception) -> {
-					if (exception == null) { //TODO: check, how the exceptions are wrapped
+					if (exception == null) {
 						LOG.info("Conversion of vault {} succeeded.", vault.getPath());
 						window.setScene(successScene.get());
 					} else {
