@@ -100,7 +100,7 @@ public class HubToPasswordConvertController implements FxController {
 	@FXML
 	public void convert() {
 		Preconditions.checkState(newPasswordController.isGoodPassword());
-		LOG.info("Converting hub vault {} to local", vault.getPath());
+		LOG.info("Converting hub vault {} to password", vault.getPath());
 		CompletableFuture.runAsync(() -> conversionStarted.setValue(true), Platform::runLater) //
 				.thenRunAsync(this::convertInternal, backgroundExecutorService)
 				.whenCompleteAsync((result, exception) -> {
@@ -121,7 +121,7 @@ public class HubToPasswordConvertController implements FxController {
 			recoveryKeyFactory.newMasterkeyFileWithPassphrase(vault.getPath(), recoveryKey.get(), passphrase);
 			LOG.debug("Successfully created masterkey file for vault {}", vault.getPath());
 			backupHubConfig(vault.getPath().resolve(VAULTCONFIG_FILENAME));
-			replaceWithLocalConfig(passphrase);
+			replaceWithPasswordConfig(passphrase);
 		} catch (MasterkeyLoadingFailedException e) {
 			throw new CompletionException(new IOException("Vault conversion failed", e));
 		} catch (IOException e) {

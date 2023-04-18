@@ -104,7 +104,7 @@ public class HubToPasswordConvertControllerTest {
 			Mockito.when(vaultPath.resolve(anyString())).thenReturn(configPath);
 			Mockito.doNothing().when(recoveryKeyFactory).newMasterkeyFileWithPassphrase(any(), anyString(), any());
 			Mockito.doNothing().when(inSpy).backupHubConfig(any());
-			Mockito.doNothing().when(inSpy).replaceWithLocalConfig(any());
+			Mockito.doNothing().when(inSpy).replaceWithPasswordConfig(any());
 			Mockito.doNothing().when(passphrase).destroy();
 		}
 
@@ -115,13 +115,13 @@ public class HubToPasswordConvertControllerTest {
 
 			Mockito.verify(recoveryKeyFactory, times(1)).newMasterkeyFileWithPassphrase(vaultPath, actualRecoveryKey, passphrase);
 			Mockito.verify(inSpy, times(1)).backupHubConfig(configPath);
-			Mockito.verify(inSpy, times(1)).replaceWithLocalConfig(passphrase);
+			Mockito.verify(inSpy, times(1)).replaceWithPasswordConfig(passphrase);
 			Mockito.verify(passphrase, times(1)).destroy();
 		}
 
 		@Test
 		public void testConvertInternalWrapsCryptoException() throws IOException {
-			Mockito.doThrow(new MasterkeyLoadingFailedException("yadda")).when(inSpy).replaceWithLocalConfig(any());
+			Mockito.doThrow(new MasterkeyLoadingFailedException("yadda")).when(inSpy).replaceWithPasswordConfig(any());
 
 			Assertions.assertThrows(CompletionException.class, inSpy::convertInternal);
 
