@@ -71,42 +71,42 @@ abstract class ConvertVaultModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_START)
+	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_START)
 	@ConvertVaultScoped
-	static Scene provideHubToLocalStartScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_START);
+	static Scene provideHubToPasswordStartScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_START);
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_CONVERT)
+	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_CONVERT)
 	@ConvertVaultScoped
-	static Scene provideHubToLocalConvertScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_CONVERT);
+	static Scene provideHubToPasswordConvertScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_CONVERT);
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_SUCCESS)
+	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_SUCCESS)
 	@ConvertVaultScoped
-	static Scene provideHubToLocalSuccessScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_SUCCESS);
+	static Scene provideHubToPasswordSuccessScene(@ConvertVaultWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_SUCCESS);
 	}
 
 	// ------------------
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(HubToLocalStartController.class)
-	abstract FxController bindHubToLocalStartController(HubToLocalStartController controller);
+	@FxControllerKey(HubToPasswordStartController.class)
+	abstract FxController bindHubToPasswordStartController(HubToPasswordStartController controller);
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(HubToLocalConvertController.class)
-	abstract FxController bindHubToLocalConvertController(HubToLocalConvertController controller);
+	@FxControllerKey(HubToPasswordConvertController.class)
+	abstract FxController bindHubToPasswordConvertController(HubToPasswordConvertController controller);
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(HubToLocalSuccessController.class)
-	abstract FxController bindHubToLocalSuccessController(HubToLocalSuccessController controller);
+	@FxControllerKey(HubToPasswordSuccessController.class)
+	abstract FxController bindHubToPasswordSuccessController(HubToPasswordSuccessController controller);
 
 
 	@Provides

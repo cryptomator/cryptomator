@@ -44,9 +44,9 @@ import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 
-public class HubToLocalConvertController implements FxController {
+public class HubToPasswordConvertController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(HubToLocalConvertController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HubToPasswordConvertController.class);
 
 	private final Stage window;
 	private final Lazy<Scene> successScene;
@@ -64,7 +64,7 @@ public class HubToLocalConvertController implements FxController {
 	public Button convertBtn;
 
 	@Inject
-	public HubToLocalConvertController(@ConvertVaultWindow Stage window, @FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows applicationWindows, @ConvertVaultWindow Vault vault, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, MasterkeyFileAccess masterkeyFileAccess, ExecutorService backgroundExecutorService, ResourceBundle resourceBundle) {
+	public HubToPasswordConvertController(@ConvertVaultWindow Stage window, @FxmlScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows applicationWindows, @ConvertVaultWindow Vault vault, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, MasterkeyFileAccess masterkeyFileAccess, ExecutorService backgroundExecutorService, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.successScene = successScene;
 		this.applicationWindows = applicationWindows;

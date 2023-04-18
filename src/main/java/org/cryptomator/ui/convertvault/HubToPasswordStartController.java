@@ -11,7 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class HubToLocalStartController implements FxController {
+public class HubToPasswordStartController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> convertScene;
@@ -20,7 +20,7 @@ public class HubToLocalStartController implements FxController {
 	RecoveryKeyValidateController recoveryKeyValidateController;
 
 	@Inject
-	public HubToLocalStartController(@ConvertVaultWindow Stage window, @FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_CONVERT) Lazy<Scene> convertScene) {
+	public HubToPasswordStartController(@ConvertVaultWindow Stage window, @FxmlScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_CONVERT) Lazy<Scene> convertScene) {
 		this.window = window;
 		this.convertScene = convertScene;
 	}

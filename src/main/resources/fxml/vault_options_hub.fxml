@@ -16,7 +16,7 @@
 
 	<Label maxWidth="-Infinity" text="%vaultOptions.hub.convertInfo" wrapText="true"/>
 	<VBox spacing="6" alignment="CENTER">
-		<Button fx:id="convertToLocalButton" text="%vaultOptions.hub.convertBtn" onAction="#startConversion" maxWidth="Infinity">
+		<Button fx:id="convertHubToPasswordButton" text="%vaultOptions.hub.convertBtn" onAction="#startConversion" maxWidth="Infinity">
 			<graphic>
 				<FontAwesome5IconView glyph="EXCHANGE_ALT"/>
 			</graphic>

@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 
-public class HubToLocalConvertControllerTest {
+public class HubToPasswordConvertControllerTest {
 
 	Stage window;
 	Vault vault;
@@ -49,7 +49,7 @@ public class HubToLocalConvertControllerTest {
 
 	NewPasswordController newPasswordController;
 
-	HubToLocalConvertController inTest;
+	HubToPasswordConvertController inTest;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -64,7 +64,7 @@ public class HubToLocalConvertControllerTest {
 		appWindows = Mockito.mock(FxApplicationWindows.class);
 		successScene = Mockito.mock(Lazy.class);
 		newPasswordController = Mockito.mock(NewPasswordController.class);
-		inTest = new HubToLocalConvertController(window, successScene, appWindows, vault, recoveryKey, recoveryKeyFactory, masterkeyFileAccess, backgroundExecutorService, resourceBundle);
+		inTest = new HubToPasswordConvertController(window, successScene, appWindows, vault, recoveryKey, recoveryKeyFactory, masterkeyFileAccess, backgroundExecutorService, resourceBundle);
 		inTest.newPasswordController = newPasswordController;
 	}
 
@@ -93,7 +93,7 @@ public class HubToLocalConvertControllerTest {
 		Path vaultPath = Mockito.mock(Path.class, "/vault/path");
 		Path configPath = Mockito.mock(Path.class, "/vault/path/config");
 		String actualRecoveryKey = "recoveryKey";
-		HubToLocalConvertController inSpy;
+		HubToPasswordConvertController inSpy;
 
 		@BeforeEach
 		public void beforeEach() throws IOException {

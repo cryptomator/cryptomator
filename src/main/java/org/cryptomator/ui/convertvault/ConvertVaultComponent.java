@@ -23,12 +23,12 @@ public interface ConvertVaultComponent {
 	@ConvertVaultWindow
 	Stage window();
 
-	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOLOCAL_START)
-	Lazy<Scene> hubToLocalScene();
+	@FxmlScene(FxmlFile.CONVERTVAULT_HUBTOPASSWORD_START)
+	Lazy<Scene> hubToPasswordScene();
 
-	default void showHubToLocalWindow() {
+	default void showHubToPasswordWindow() {
 		Stage stage = window();
-		stage.setScene(hubToLocalScene().get());
+		stage.setScene(hubToPasswordScene().get());
 		stage.sizeToScene();
 		stage.show();
 	}

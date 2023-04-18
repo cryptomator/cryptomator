@@ -22,6 +22,6 @@ public class HubOptionsController implements FxController {
 	}
 
 	public void startConversion() {
-		convertVaultFactory.create(vault,window).showHubToLocalWindow();
+		convertVaultFactory.create(vault,window).showHubToPasswordWindow();
 	}
 }
