@@ -140,7 +140,7 @@ public class HubToPasswordConvertController implements FxController {
 	}
 
 	//visible for testing
-	void replaceWithLocalConfig(Passphrase passphrase) throws IOException, MasterkeyLoadingFailedException {
+	void replaceWithPasswordConfig(Passphrase passphrase) throws IOException, MasterkeyLoadingFailedException {
 		var unverifiedVaultConfig = vault.getVaultConfigCache().get();
 		try (var masterkey = masterkeyFileAccess.load(vault.getPath().resolve(MASTERKEY_FILENAME), passphrase)) {
 			var vaultConfig = unverifiedVaultConfig.verify(masterkey.getEncoded(), unverifiedVaultConfig.allegedVaultVersion());
