@@ -159,7 +159,7 @@ public class HubToPasswordConvertController implements FxController {
 					.shorteningThreshold(hubConfig.getShorteningThreshold()) //
 					.build();
 			if (passwordConfig.getVaultVersion() != hubConfig.getVaultVersion()) {
-				throw new VaultVersionMismatchException("Only vaults of version " + passwordConfig.getVaultVersion() + "can be converted.");
+				throw new VaultVersionMismatchException("Only vaults of version " + passwordConfig.getVaultVersion() + " can be converted.");
 			}
 			var token = passwordConfig.toToken(Constants.DEFAULT_KEY_ID.toString(), masterkey.getEncoded());
 			Files.writeString(passwordConfigPath, token, StandardCharsets.US_ASCII, WRITE, CREATE_NEW);
