@@ -1,9 +1,9 @@
-package org.cryptomator.ui.common;
+package org.cryptomator.ui.changepassword;
 
 import com.google.common.base.Strings;
 import org.cryptomator.common.Environment;
+import org.cryptomator.ui.changepassword.PasswordStrengthUtil;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

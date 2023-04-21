@@ -18,6 +18,7 @@ public enum FontAwesome5Icon {
 	COPY("\uF0C5"), //
 	CROWN("\uF521"), //
 	EDIT("\uF044"), //
+	EXCHANGE_ALT("\uF362"), //
 	EXCLAMATION("\uF12A"), //
 	EXCLAMATION_CIRCLE("\uF06A"), //
 	EXCLAMATION_TRIANGLE("\uF071"), //

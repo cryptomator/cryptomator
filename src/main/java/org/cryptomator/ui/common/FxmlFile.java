@@ -9,6 +9,9 @@ public enum FxmlFile {
 	ADDVAULT_SUCCESS("/fxml/addvault_success.fxml"), //
 	ADDVAULT_WELCOME("/fxml/addvault_welcome.fxml"), //
 	CHANGEPASSWORD("/fxml/changepassword.fxml"), //
+	CONVERTVAULT_HUBTOPASSWORD_START("/fxml/convertvault_hubtopassword_start.fxml"), //
+	CONVERTVAULT_HUBTOPASSWORD_CONVERT("/fxml/convertvault_hubtopassword_convert.fxml"), //
+	CONVERTVAULT_HUBTOPASSWORD_SUCCESS("/fxml/convertvault_hubtopassword_success.fxml"), //
 	ERROR("/fxml/error.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
 	HEALTH_START("/fxml/health_start.fxml"), //
