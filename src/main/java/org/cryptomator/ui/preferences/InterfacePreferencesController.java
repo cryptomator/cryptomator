@@ -67,7 +67,7 @@ public class InterfacePreferencesController implements FxController {
 		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
 
 		preferredLanguageChoiceBox.getItems().add(null);
-		preferredLanguageChoiceBox.getItems().addAll(SupportedLanguages.LANGUAGAE_TAGS);
+		preferredLanguageChoiceBox.getItems().addAll(SupportedLanguages.LANGUAGE_TAGS);
 		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.languageProperty());
 		preferredLanguageChoiceBox.setConverter(new LanguageTagConverter(resourceBundle));
 
