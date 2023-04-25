@@ -66,6 +66,7 @@
 	</content_rating>
 
 	<releases>
+		<release date="2023-04-25" version="1.8.0"/>
 		<release date="2023-04-07" version="1.7.5"/>
 		<release date="2023-04-05" version="1.7.4"/>
 		<release date="2023-03-15" version="1.7.3"/>
