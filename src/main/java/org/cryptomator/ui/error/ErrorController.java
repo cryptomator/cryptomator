@@ -1,8 +1,9 @@
-package org.cryptomator.ui.common;
+package org.cryptomator.ui.error;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.ErrorCode;
 import org.cryptomator.common.Nullable;
+import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javax.inject.Named;

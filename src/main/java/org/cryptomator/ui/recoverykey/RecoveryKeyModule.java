@@ -13,8 +13,8 @@ import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.NewPasswordController;
-import org.cryptomator.ui.common.PasswordStrengthUtil;
+import org.cryptomator.ui.changepassword.NewPasswordController;
+import org.cryptomator.ui.changepassword.PasswordStrengthUtil;
 import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
@@ -139,6 +139,13 @@ abstract class RecoveryKeyModule {
 	@IntoMap
 	@FxControllerKey(RecoveryKeyResetPasswordSuccessController.class)
 	abstract FxController bindRecoveryKeyResetPasswordSuccessController(RecoveryKeyResetPasswordSuccessController controller);
+
+	@Provides
+	@IntoMap
+	@FxControllerKey(RecoveryKeyValidateController.class)
+	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory);
+	}
 
 	@Provides
 	@IntoMap

@@ -1,4 +1,4 @@
-package org.cryptomator.ui.forgetPassword;
+package org.cryptomator.ui.convertvault;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Documented;
@@ -9,6 +9,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Qualifier
 @Documented
 @Retention(RUNTIME)
-@interface ForgetPasswordWindow {
+@interface ConvertVaultWindow {
 
 }

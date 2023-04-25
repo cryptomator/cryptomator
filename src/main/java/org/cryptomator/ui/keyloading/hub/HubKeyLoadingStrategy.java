@@ -29,8 +29,8 @@ import java.util.concurrent.ExecutionException;
 public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 
 	private static final String SCHEME_PREFIX = "hub+";
-	static final String SCHEME_HUB_HTTP = SCHEME_PREFIX + "http";
-	static final String SCHEME_HUB_HTTPS = SCHEME_PREFIX + "https";
+	public static final String SCHEME_HUB_HTTP = SCHEME_PREFIX + "http";
+	public static final String SCHEME_HUB_HTTPS = SCHEME_PREFIX + "https";
 
 	private final Stage window;
 	private final KeychainManager keychainManager;

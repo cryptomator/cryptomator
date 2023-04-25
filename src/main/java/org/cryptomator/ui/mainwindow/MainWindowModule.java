@@ -6,7 +6,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
-import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;

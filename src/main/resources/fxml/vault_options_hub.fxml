@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.vaultoptions.HubOptionsController"
+	  spacing="6"
+	  alignment="TOP_CENTER">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+
+	<Label maxWidth="-Infinity" text="%vaultOptions.hub.convertInfo" wrapText="true"/>
+	<VBox spacing="6" alignment="CENTER">
+		<Button fx:id="convertHubToPasswordButton" text="%vaultOptions.hub.convertBtn" onAction="#startConversion" maxWidth="Infinity">
+			<graphic>
+				<FontAwesome5IconView glyph="EXCHANGE_ALT"/>
+			</graphic>
+		</Button>
+	</VBox>
+</VBox>
