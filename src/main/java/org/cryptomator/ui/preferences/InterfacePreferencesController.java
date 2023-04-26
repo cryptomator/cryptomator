@@ -1,6 +1,5 @@
 package org.cryptomator.ui.preferences;
 
-import com.google.common.base.Strings;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
@@ -66,8 +65,10 @@ public class InterfacePreferencesController implements FxController {
 
 		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
 
-		preferredLanguageChoiceBox.getItems().add(null);
-		preferredLanguageChoiceBox.getItems().addAll(SupportedLanguages.LANGUAGAE_TAGS);
+		// System default and English at the top of the list
+		preferredLanguageChoiceBox.getItems().add(Settings.DEFAULT_LANGUAGE);
+		preferredLanguageChoiceBox.getItems().add(SupportedLanguages.ENGLISH);
+		preferredLanguageChoiceBox.getItems().addAll(SupportedLanguages.LANGUAGE_TAGS);
 		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.languageProperty());
 		preferredLanguageChoiceBox.setConverter(new LanguageTagConverter(resourceBundle));
 
@@ -141,9 +142,7 @@ public class InterfacePreferencesController implements FxController {
 				return resourceBundle.getString("preferences.interface.language.auto");
 			} else {
 				var locale = Locale.forLanguageTag(tag);
-				var lang = locale.getDisplayLanguage(locale);
-				var region = locale.getDisplayCountry(locale);
-				return lang + (Strings.isNullOrEmpty(region) ? "" : " (" + region + ")");
+				return locale.getDisplayName();
 			}
 		}
 
