@@ -34,6 +34,7 @@ public class InterfacePreferencesController implements FxController {
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
 	private final ResourceBundle resourceBundle;
+	private final SupportedLanguages supportedLanguages;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox showMinimizeButtonCheckbox;
 	public CheckBox showTrayIconCheckbox;
@@ -43,13 +44,14 @@ public class InterfacePreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	InterfacePreferencesController(Settings settings, TrayMenuComponent trayMenu, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle) {
+	InterfacePreferencesController(Settings settings, SupportedLanguages supportedLanguages, TrayMenuComponent trayMenu, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.trayMenuInitialized = trayMenu.isInitialized();
 		this.trayMenuSupported = trayMenu.isSupported();
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.resourceBundle = resourceBundle;
+		this.supportedLanguages = supportedLanguages;
 	}
 
 	@FXML
@@ -65,10 +67,7 @@ public class InterfacePreferencesController implements FxController {
 
 		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
 
-		// System default and English at the top of the list
-		preferredLanguageChoiceBox.getItems().add(Settings.DEFAULT_LANGUAGE);
-		preferredLanguageChoiceBox.getItems().add(SupportedLanguages.ENGLISH);
-		preferredLanguageChoiceBox.getItems().addAll(SupportedLanguages.LANGUAGE_TAGS);
+		preferredLanguageChoiceBox.getItems().addAll(supportedLanguages.getLanguageTags());
 		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.languageProperty());
 		preferredLanguageChoiceBox.setConverter(new LanguageTagConverter(resourceBundle));
 
