@@ -25,28 +25,29 @@ public class SupportedLanguages {
 
 	private final List<String> sortedLanguageTags;
 
+	private final Locale preferredLocale;
+
 	@Inject
 	public SupportedLanguages(Settings settings) {
 		var preferredLanguage = settings.languageProperty().get();
-		if (preferredLanguage == null) {
-			LOG.debug("Using system locale");
-		} else {
-			var preferredLocale = Locale.forLanguageTag(preferredLanguage);
-			LOG.debug("Applying preferred locale {}", preferredLocale.getDisplayName(Locale.ENGLISH));
-			Locale.setDefault(preferredLocale);
-		}
-		sortedLanguageTags = LANGUAGE_TAGS.stream().sorted((a, b) -> {
-			var collator = Collator.getInstance(Locale.getDefault());
+		preferredLocale = preferredLanguage == null ? Locale.getDefault() : Locale.forLanguageTag(preferredLanguage);
+		var sorted = LANGUAGE_TAGS.stream().sorted((a, b) -> {
+			var collator = Collator.getInstance(preferredLocale);
 			collator.setStrength(Collator.PRIMARY);
 			return collator.compare(Locale.forLanguageTag(a).getDisplayName(), Locale.forLanguageTag(b).getDisplayName());
 		}).collect(Collectors.toList());
-		sortedLanguageTags.add(0, Settings.DEFAULT_LANGUAGE);
-		sortedLanguageTags.add(1, ENGLISH);
+		sorted.add(0, Settings.DEFAULT_LANGUAGE);
+		sorted.add(1, ENGLISH);
+		sortedLanguageTags = Collections.unmodifiableList(sorted);
+	}
 
+	public void applyPreferred() {
+		LOG.debug("Using locale {}", preferredLocale);
+		Locale.setDefault(preferredLocale);
 	}
 
 	public List<String> getLanguageTags() {
-		return Collections.unmodifiableList(sortedLanguageTags);
+		return sortedLanguageTags;
 	}
 
 }

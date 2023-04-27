@@ -35,13 +35,15 @@ public class Cryptomator {
 	private static final Logger LOG = LoggerFactory.getLogger(Cryptomator.class);
 
 	private final DebugMode debugMode;
+	private final SupportedLanguages supportedLanguages;
 	private final Environment env;
 	private final Lazy<IpcMessageHandler> ipcMessageHandler;
 	private final ShutdownHook shutdownHook;
 
 	@Inject
-	Cryptomator(DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook) {
+	Cryptomator(DebugMode debugMode, SupportedLanguages supportedLanguages, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook) {
 		this.debugMode = debugMode;
+		this.supportedLanguages = supportedLanguages;
 		this.env = env;
 		this.ipcMessageHandler = ipcMessageHandler;
 		this.shutdownHook = shutdownHook;
@@ -78,6 +80,7 @@ public class Cryptomator {
 		LOG.debug("Dagger graph initialized after {}ms", System.currentTimeMillis() - STARTUP_TIME);
 		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion(), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 		debugMode.initialize();
+		supportedLanguages.applyPreferred();
 
 		/*
 		 * Attempts to create an IPC connection to a running Cryptomator instance and sends it the given args.
