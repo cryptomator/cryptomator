@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.foreign.MemoryAddress;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentScope;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -27,9 +27,9 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppindicatorTrayMenuController.class);
 
-	private final MemorySession session = MemorySession.openShared();
-	private MemoryAddress indicator;
-	private MemoryAddress menu = gtk_menu_new();
+	private final SegmentScope scope = SegmentScope.auto();
+	private MemorySegment indicator;
+	private MemorySegment menu = gtk_menu_new();
 
 	@CheckAvailability
 	public static boolean isAvailable() {
@@ -64,7 +64,7 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 
 	}
 
-	private void addChildren(MemoryAddress menu, List<TrayMenuItem> items) {
+	private void addChildren(MemorySegment menu, List<TrayMenuItem> items) {
 		for (var item : items) {
 			// TODO: use Pattern Matching for switch, once available
 			if (item instanceof ActionItem a) {
@@ -72,7 +72,7 @@ public class AppindicatorTrayMenuController implements TrayMenuController {
 				gtk_menu_item_set_label(gtkMenuItem, MemoryAllocator.ALLOCATE_FOR(a.title()));
 				g_signal_connect_object(gtkMenuItem,
 						MemoryAllocator.ALLOCATE_FOR("activate"),
-						MemoryAllocator.ALLOCATE_CALLBACK_FOR(new ActionItemCallback(a), session),
+						MemoryAllocator.ALLOCATE_CALLBACK_FOR(new ActionItemCallback(a), scope),
 						menu,
 						0);
 				gtk_menu_shell_append(menu, gtkMenuItem);
