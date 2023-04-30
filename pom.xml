@@ -34,10 +34,10 @@
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.6.2</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>2.0.0</cryptomator.integrations.version>
+		<cryptomator.integrations.version>2.0.0-alpha1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.0</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.2.0</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.linux.version>2.0.0-alpha1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>2.0.5</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>2.0.2</cryptomator.webdav.version>
@@ -55,7 +55,6 @@
 		<slf4j.version>2.0.6</slf4j.version>
 		<tinyoauth2.version>0.5.1</tinyoauth2.version>
 		<zxcvbn.version>1.7.0</zxcvbn.version>
-		<appindicator.version>1.2.0</appindicator.version>
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
@@ -250,13 +249,6 @@
 			<artifactId>annotations</artifactId>
 			<version>${jetbrains.annotations.version}</version>
 			<scope>provided</scope>
-		</dependency>
-
-		<!-- Java bindings for libappindicator -->
-		<dependency>
-			<groupId>org.purejava</groupId>
-			<artifactId>libappindicator-gtk3-java-minimal</artifactId>
-			<version>${appindicator.version}</version>
 		</dependency>
 	</dependencies>
 
