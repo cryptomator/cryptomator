@@ -88,18 +88,19 @@ public class AwtTrayMenuController implements TrayMenuController {
 
 	private void addChildren(Menu menu, List<TrayMenuItem> items) {
 		for (var item : items) {
-			// TODO: use Pattern Matching for switch, once available
-			if (item instanceof ActionItem a) {
-				var menuItem = new MenuItem(a.title());
-				menuItem.addActionListener(evt -> a.action().run());
-				menuItem.setEnabled(a.enabled());
-				menu.add(menuItem);
-			} else if (item instanceof SeparatorItem) {
-				menu.addSeparator();
-			} else if (item instanceof SubMenuItem s) {
-				var submenu = new Menu(s.title());
-				addChildren(submenu, s.items());
-				menu.add(submenu);
+			switch (item) {
+				case ActionItem a -> {
+					var menuItem = new MenuItem(a.title());
+					menuItem.addActionListener(evt -> a.action().run());
+					menuItem.setEnabled(a.enabled());
+					menu.add(menuItem);
+				}
+				case SeparatorItem separatorItem -> menu.addSeparator();
+				case SubMenuItem s -> {
+					var submenu = new Menu(s.title());
+					addChildren(submenu, s.items());
+					menu.add(submenu);
+				}
 			}
 		}
 	}
