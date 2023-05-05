@@ -31,11 +31,11 @@ public class SupportedLanguages {
 	public SupportedLanguages(Settings settings) {
 		var preferredLanguage = settings.languageProperty().get();
 		preferredLocale = preferredLanguage == null ? Locale.getDefault() : Locale.forLanguageTag(preferredLanguage);
-		var sorted = LANGUAGE_TAGS.stream().sorted((a, b) -> {
-			var collator = Collator.getInstance(preferredLocale);
-			collator.setStrength(Collator.PRIMARY);
-			return collator.compare(Locale.forLanguageTag(a).getDisplayName(), Locale.forLanguageTag(b).getDisplayName());
-		}).collect(Collectors.toList());
+		var collator = Collator.getInstance(preferredLocale);
+		collator.setStrength(Collator.PRIMARY);
+		var sorted = LANGUAGE_TAGS.stream() //
+				.sorted((a, b) -> collator.compare(Locale.forLanguageTag(a).getDisplayName(), Locale.forLanguageTag(b).getDisplayName())) //
+				.collect(Collectors.toList());
 		sorted.add(0, Settings.DEFAULT_LANGUAGE);
 		sorted.add(1, ENGLISH);
 		sortedLanguageTags = Collections.unmodifiableList(sorted);
