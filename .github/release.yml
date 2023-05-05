@@ -10,14 +10,20 @@ changelog:
   categories:
     - title: What's New 🎉
       labels:
-        - release-notes:feature
+        - type:feature-request
+        - type:enhancement
     - title: Bugfixes 🐛
       labels:
-        - release-notes:bugfix
+        - type:security-issue
+        - type:bug
+        - type:minor-bug
     - title: Other Changes 📎
       labels:
         - "*"
       exclude:
         labels:
-          - release-notes:feature
-          - release-notes:bugfix
+          - type:feature-request
+          - type:enhancement
+          - type:security-issue
+          - type:bug
+          - type:minor-bug
