@@ -7,6 +7,7 @@ import org.cryptomator.integrations.common.Priority;
 import org.cryptomator.integrations.tray.ActionItem;
 import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
+import org.cryptomator.integrations.tray.TrayIconLoader;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.integrations.tray.TrayMenuException;
 import org.cryptomator.integrations.tray.TrayMenuItem;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.AWTException;
+import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -25,6 +27,7 @@ import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.util.Base64;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Responsible to manage the tray icon on macOS and Windows using AWT.
@@ -39,6 +42,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 	private static final String DATA_URI_SCHEME = "data:image/png;base64,";
 	private final PopupMenu menu = new PopupMenu();
 	private TrayIcon trayIcon;
+	private Image image;
 
 	@CheckAvailability
 	public static boolean isAvailable() {
@@ -46,8 +50,9 @@ public class AwtTrayMenuController implements TrayMenuController {
 	}
 
 	@Override
-	public void showTrayIcon(URI uri, Runnable defaultAction, String tooltip) throws TrayMenuException {
-		var image = Toolkit.getDefaultToolkit().createImage(getImageBytes(uri));
+	public void showTrayIcon(Consumer<TrayIconLoader> iconLoader, Runnable defaultAction, String tooltip) throws TrayMenuException {
+		TrayIconLoader.PngData callback = this::updateTrayIconWithPngData;
+		iconLoader.accept(callback);
 		trayIcon = new TrayIcon(image, tooltip, menu);
 
 		trayIcon.setImageAutoSize(true);
@@ -63,9 +68,21 @@ public class AwtTrayMenuController implements TrayMenuController {
 		}
 	}
 
+	private void showTrayIconWithPngData(byte[] imageData) {
+		image = Toolkit.getDefaultToolkit().createImage(imageData);
+	}
+
 	@Override
-	public void updateTrayIcon(URI uri) {
-		var image = Toolkit.getDefaultToolkit().createImage(getImageBytes(uri));
+	public void updateTrayIcon(Consumer<TrayIconLoader> iconLoader) {
+		TrayIconLoader.PngData callback = this::updateTrayIconWithPngData;
+		iconLoader.accept(callback);
+	}
+
+	private void updateTrayIconWithPngData(byte[] imageData) {
+		if (trayIcon == null) {
+			throw new IllegalStateException("Failed to update the icon as it has not yet been added");
+		}
+		var image = Toolkit.getDefaultToolkit().createImage(imageData);
 		trayIcon.setImage(image);
 	}
 
@@ -103,10 +120,5 @@ public class AwtTrayMenuController implements TrayMenuController {
 				}
 			}
 		}
-	}
-
-	private byte[] getImageBytes(URI uri) {
-		var data = uri.toString().split(DATA_URI_SCHEME)[1];
-		return Base64.getDecoder().decode(data);
 	}
 }
