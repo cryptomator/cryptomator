@@ -23,7 +23,8 @@ public class AutoUnlocker {
 	private final ObservableList<Vault> vaults;
 	private final FxApplicationWindows appWindows;
 	private final ScheduledExecutorService scheduler;
-	private ScheduledFuture<?> future;
+	private ScheduledFuture<?> checkFuture;
+	private ScheduledFuture<?> timeoutFuture;
 	private boolean isPeriodicCheckActive = false;
 
 	@Inject
@@ -47,12 +48,13 @@ public class AutoUnlocker {
 	public void startMissingVaultsChecker() {
 		if (!isPeriodicCheckActive && getMissingAutoUnlockVaults().count() > 0) {
 			LOG.info("Found MISSING vaults, starting periodic check");
-			future = scheduler.scheduleWithFixedDelay(this::tick, 0, 1, TimeUnit.SECONDS);
+			checkFuture = scheduler.scheduleWithFixedDelay(this::check, 0, 1, TimeUnit.SECONDS);
+			timeoutFuture = scheduler.schedule(this::timeout, 2, TimeUnit.MINUTES);
 			isPeriodicCheckActive = true;
 		}
 	}
 
-	private void tick() {
+	private void check() {
 		// Find the vaults that are missing but have an existing directory
 		Vault[] vaultArray = getMissingAutoUnlockVaults().filter(v -> v.getPath().toFile().isDirectory()).toArray(Vault[]::new);
 		if (vaultArray.length > 0) {
@@ -71,8 +73,15 @@ public class AutoUnlocker {
 		if (getMissingAutoUnlockVaults().count() == 0) {
 			LOG.info("No more MISSING vaults, stopping periodic check");
 			isPeriodicCheckActive = false;
-			future.cancel(false);
+			checkFuture.cancel(false);
+			timeoutFuture.cancel(false);
 		}
+	}
+
+	private void timeout() {
+		LOG.info("MISSING vaults periodic check timed out");
+		isPeriodicCheckActive = false;
+		checkFuture.cancel(false);
 	}
 
 	private Stream<Vault> getMissingAutoUnlockVaults() {
