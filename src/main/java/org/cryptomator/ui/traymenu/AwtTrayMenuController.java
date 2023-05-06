@@ -51,7 +51,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 
 	@Override
 	public void showTrayIcon(Consumer<TrayIconLoader> iconLoader, Runnable defaultAction, String tooltip) throws TrayMenuException {
-		TrayIconLoader.PngData callback = this::updateTrayIconWithPngData;
+		TrayIconLoader.PngData callback = this::showTrayIconWithPngData;
 		iconLoader.accept(callback);
 		trayIcon = new TrayIcon(image, tooltip, menu);
 
