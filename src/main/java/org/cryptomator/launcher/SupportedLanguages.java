@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.StreamSupport;
 
 @Singleton
@@ -60,15 +63,29 @@ public class SupportedLanguages {
 	 */
 	private static List<String> getSupportedLanguageTags() {
 		try {
-			var i18Dir = Path.of(SupportedLanguages.class.getResource("/i18n").toURI());
-			try (var dirStream = Files.newDirectoryStream(i18Dir, "strings_*.properties")) {
-				return StreamSupport.stream(dirStream.spliterator(), false) //
-						.map(SupportedLanguages::getBCP47CodeFromFileName) //
-						.toList();
+			var i18DirURI = SupportedLanguages.class.getResource("/i18n").toURI();
+			var uriScheme = i18DirURI.getScheme();
+			if (uriScheme.equals("jar")) {
+				final String[] array = i18DirURI.toString().split("!");
+				try (var jarFs = FileSystems.newFileSystem(URI.create(array[0]), Map.<String, String>of())) {
+					return streamDirectory(jarFs.getPath(array[1]));
+				}
+			} else if (uriScheme.equals("file")) {
+				return streamDirectory(Path.of(i18DirURI));
+			} else {
+				throw new IOException("Unsupported uri scheme: " + uriScheme);
 			}
 		} catch (URISyntaxException | IOException e) {
 			LOG.warn("Unable to determine additional supported languages.", e);
 			return List.of();
+		}
+	}
+
+	private static List<String> streamDirectory(Path i18Dir) throws IOException {
+		try (var dirStream = Files.newDirectoryStream(i18Dir, "strings_*.properties")) {
+			return StreamSupport.stream(dirStream.spliterator(), false) //
+					.map(SupportedLanguages::getBCP47CodeFromFileName) //
+					.toList();
 		}
 	}
 

@@ -51,7 +51,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods" `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr,jdk.zipfs `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
@@ -93,6 +93,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
+	--win-console `
 	--resource-dir resources `
 	--icon resources/$AppName.ico
 

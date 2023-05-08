@@ -46,7 +46,7 @@ cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr,jdk.zipfs \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
