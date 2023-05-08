@@ -4,7 +4,7 @@ on:
   pull_request:
 
 env:
-  JAVA_VERSION: 19
+  JAVA_VERSION: 20
 
 defaults:
   run:

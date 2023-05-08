@@ -19,9 +19,11 @@ on:
         type: boolean
 
 env:
-  JAVA_VERSION: 19
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/19.0.2.1/openjfx-19.0.2.1_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/19.0.2.1/openjfx-19.0.2.1_linux-aarch64_bin-jmods.zip'
+  JAVA_VERSION: 20
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_linux-x64_bin-jmods.zip'
+  JMODS_AMD64_HASH: '0b244b08354dc5e1b639765fd0858cbc154774e9cb05467c4111b7c63d3b3721'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_linux-aarch64_bin-jmods.zip'
+  JMODS_AARCH64_HASH: '4b0dd30282c067aa07fe840374115b5ec5dcfd8dc479ebd2231dfdb6a518b3b3'
 
 jobs:
   build:
@@ -58,9 +60,19 @@ jobs:
         id: download-jmods
         run: |
           curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
+          echo "${{ env.JMODS_AMD64_HASH }} openjfx-amd64.zip" | sha256sum -c
+          if [ $? != 0 ]; then
+            echo "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
+            exit 1
+          fi
           mkdir -p jmods/amd64
           unzip -j openjfx-amd64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/amd64
           curl -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
+          echo "${{ env.JMODS_AARCH64_HASH }} openjfx-aarch64.zip" | sha256sum -c
+          if [ $? != 0 ]; then
+            echo "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AARCH64 }}.";
+            exit 1
+          fi
           mkdir -p jmods/aarch64
           unzip -j openjfx-aarch64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/aarch64
       - name: Ensure major jfx version in pom and in jmods is the same
