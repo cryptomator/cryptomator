@@ -1,7 +1,6 @@
 package org.cryptomator.launcher;
 
 import org.cryptomator.common.settings.Settings;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,10 +10,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Singleton
@@ -26,7 +28,6 @@ public class SupportedLanguages {
 
 	static {
 		List<String> supportedLanguages = new ArrayList<>();
-		supportedLanguages.add("en");
 		try {
 			var i18Dir = getI18Dir();
 			try (var dirStream = Files.newDirectoryStream(i18Dir, "strings_*.properties")) {
@@ -41,7 +42,7 @@ public class SupportedLanguages {
 	}
 
 	private static Path getI18Dir() throws URISyntaxException {
-		var i18nUri = Optional.of(SupportedLanguages.class.getResource("/i18n")).orElseThrow().toURI();
+		var i18nUri = Optional.of(SupportedLanguages.class.getResource("/i18n")).get().toURI();
 		return Path.of(i18nUri);
 	}
 
@@ -50,21 +51,33 @@ public class SupportedLanguages {
 		return fileName.substring("strings_".length(), fileName.indexOf(".properties")).replace('_', '-');
 	}
 
-	@Nullable
-	private final String preferredLanguage;
+	public static final String ENGLISH = "en";
+
+	private final List<String> sortedLanguageTags;
+
+	private final Locale preferredLocale;
 
 	@Inject
 	public SupportedLanguages(Settings settings) {
-		this.preferredLanguage = settings.languageProperty().get();
+		var preferredLanguage = settings.languageProperty().get();
+		preferredLocale = preferredLanguage == null ? Locale.getDefault() : Locale.forLanguageTag(preferredLanguage);
+		var collator = Collator.getInstance(preferredLocale);
+		collator.setStrength(Collator.PRIMARY);
+		var sorted = LANGUAGE_TAGS.stream() //
+				.sorted((a, b) -> collator.compare(Locale.forLanguageTag(a).getDisplayName(), Locale.forLanguageTag(b).getDisplayName())) //
+				.collect(Collectors.toList());
+		sorted.add(0, Settings.DEFAULT_LANGUAGE);
+		sorted.add(1, ENGLISH);
+		sortedLanguageTags = Collections.unmodifiableList(sorted);
 	}
 
 	public void applyPreferred() {
-		if (preferredLanguage == null) {
-			LOG.debug("Using system locale");
-			return;
-		}
-		var preferredLocale = Locale.forLanguageTag(preferredLanguage);
-		LOG.debug("Applying preferred locale {}", preferredLocale.getDisplayName(Locale.ENGLISH));
+		LOG.debug("Using locale {}", preferredLocale);
 		Locale.setDefault(preferredLocale);
 	}
+
+	public List<String> getLanguageTags() {
+		return sortedLanguageTags;
+	}
+
 }
