@@ -93,7 +93,6 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
-	--win-console `
 	--resource-dir resources `
 	--icon resources/$AppName.ico
 

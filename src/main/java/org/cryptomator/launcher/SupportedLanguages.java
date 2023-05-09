@@ -24,11 +24,9 @@ import java.util.stream.StreamSupport;
 public class SupportedLanguages {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SupportedLanguages.class);
-
 	public static final String ENGLISH = "en";
 
 	private final List<String> sortedLanguageTags;
-
 	private final Locale preferredLocale;
 
 	@Inject
