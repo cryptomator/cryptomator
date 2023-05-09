@@ -18,9 +18,9 @@ public class SupportedLanguages {
 	private static final Logger LOG = LoggerFactory.getLogger(SupportedLanguages.class);
 	// these are BCP 47 language codes, not ISO. Note the "-" instead of the "_".
 	// "en" is not part of this list - it is always inserted at the top.
-	public static final List<String> LANGUAGE_TAGS = List.of("ar", "be", "bn", "bs", "ca", "cs", "da", "de", "el", "es", "fil", "fa", "fr", "gl", "he", //
-			"hi", "hr", "hu", "id", "it", "ja", "ko", "lv", "mk", "nb", "nl", "nn", "no", "pa", "pl", "pt", "pt-BR", "ro", "ru", "si", "sk", "sr", "sr-Latn", "sv", "sw", //
-			"ta", "te", "th", "tr", "uk", "vi", "zh", "zh-HK", "zh-TW");
+	public static final List<String> LANGUAGE_TAGS = List.of("ar", "be", "bn", "bs", "ca", "cs", "da", "de", "el", "es", "fr", "gl", "he", //
+			"hi", "hr", "hu", "id", "it", "ja", "ko", "lv", "nb", "nl", "nn", "pa", "pl", "pt", "pt-BR", "ro", "ru", "sk", "sr", "sr-Latn", "sv", "sw", //
+			"ta", "th", "tr", "uk", "vi", "zh", "zh-HK", "zh-TW");
 	public static final String ENGLISH = "en";
 
 	private final List<String> sortedLanguageTags;
