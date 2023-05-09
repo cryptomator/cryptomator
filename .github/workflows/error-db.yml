@@ -46,9 +46,10 @@ jobs:
           gistURL: https://gist.github.com/cryptobot/accba9fb9555e7192271b85606f97230
       - name: Merge Error Code Data
         run: |
-          jq -c '.' ${{ steps.get-gist.outputs.file }} > original.json
+          jq -c 'map({key:.id} + {value:.}) | from_entries' ${{ steps.get-gist.outputs.file }} > original.json
           echo $DISCUSSION | jq -c '.repository.discussion | .comments = .comments.totalCount | {(.id|tostring) : .}' > new.json
           jq -s '.[0] * .[1]' original.json new.json > merged.json
+          jq -c 'to_entries | map(.value)' merged.json > final.json
         env:
           DISCUSSION: ${{ steps.query-data.outputs.result }}
       - name: Patch Gist
@@ -57,4 +58,4 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_GIST_TOKEN }}
           gist_id: accba9fb9555e7192271b85606f97230
           gist_file_name: errorcodes.json
-          file_path: merged.json
+          file_path: final.json
