@@ -99,6 +99,99 @@ mvn clean install
 
 This will build all the jars and bundle them together with their OS-specific dependencies under `target`. This can now be used to build native packages.
 
+## Detailed Building Instructions
+
+<details>
+<summary>Linux+GNU (Debian Base)</summary>
+
+## Install openjdk Runtime (JRE) and Development Tools (JDK) on Debain
+
+```
+sudo apt update
+sudo apt upgrade
+sudo apt install openjdk-17-jre openjdk-17-jdk
+```
+
+## Check Java Version
+
+```
+java --version
+```
+
+## Set openjdk-17-jre as default
+
+```
+sudo update-alternatives --config java
+```
+
+## Install Apache Maven on Debian
+
+```
+wget https://dlcdn.apache.org/maven/maven-3/3.9.1/binaries/apache-maven-3.9.1-bin.tar.gz
+```
+
+<br>
+
+Or manually download from https://maven.apache.org/download.cgi
+
+## Decompress Apache Maven
+
+```
+sudo tar -xv apache-maven-3.9.1-bin.tar.gz
+```
+
+## Move Apache Maven to /opt/maven
+
+```
+sudo mv apache-maven-3.9.1 /opt/maven
+```
+
+## List contents of the /opt/maven directory
+
+```
+ls /opt/maven
+```
+
+## Open a text editor and paste the following
+
+```
+sudo nano /etc/profile.d/maven.sh
+```
+
+```
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/
+export M2_HOME=/opt/maven
+export PATH=${M2_HOME}/bin:${PATH}
+```
+
+## Get Apache Maven in your path
+
+```
+source /etc/profile.d/maven.sh
+```
+
+## Check Apache Maven Version
+
+```
+mvn -version
+```
+
+## Remove The Compressed Apache Maven File
+
+```
+sudo rm apache-maven-3.9.1-bin.tar.gz
+```
+
+# Build Cryptomator
+
+```
+pwd && ls
+cd Cryptomator
+mvn clean install -Plinux
+```
+
+</details>
+
 ## License
 
 This project is dual-licensed under the GPLv3 for FOSS projects as well as a commercial license for independent software vendors and resellers. If you want to modify this application under different conditions, feel free to contact our support team.
