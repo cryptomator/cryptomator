@@ -38,12 +38,12 @@ public class UnlockInvalidMountPointController implements FxController {
 	@FXML
 	public void initialize() {
 		var e = unlockException.get();
-		var translationKeySuffix = switch (e) {
-			case MountPointNotSupportedException x -> "notSupported";
-			case MountPointNotExistsException x -> "notExists";
-			default -> "generic";
+		var translationKey = switch (e) {
+			case MountPointNotSupportedException x -> "unlock.error.customPath.description.notSupported";
+			case MountPointNotExistsException x -> "unlock.error.customPath.description.notExists";
+			default -> "unlock.error.customPath.description.generic";
 		};
-		dialogDescription.setFormat(resourceBundle.getString("unlock.error.customPath.description." + translationKeySuffix));
+		dialogDescription.setFormat(resourceBundle.getString(translationKey));
 		dialogDescription.setArg1(e.getMessage());
 	}
 

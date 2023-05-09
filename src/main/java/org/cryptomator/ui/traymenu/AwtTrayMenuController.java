@@ -91,10 +91,10 @@ public class AwtTrayMenuController implements TrayMenuController {
 					menuItem.setEnabled(a.enabled());
 					menu.add(menuItem);
 				}
-				case SeparatorItem si -> menu.addSeparator();
-				case SubMenuItem smi -> {
-					var submenu = new Menu(smi.title());
-					addChildren(submenu, smi.items());
+				case SeparatorItem s -> menu.addSeparator(); // TODO: rename to _ with JEP 443
+				case SubMenuItem s -> {
+					var submenu = new Menu(s.title());
+					addChildren(submenu, s.items());
 					menu.add(submenu);
 				}
 			}

@@ -6,9 +6,8 @@ public interface IpcMessageListener {
 
 	default void handleMessage(IpcMessage message) {
 		switch (message) {
-			case RevealRunningAppMessage x -> revealRunningApp();
-			case HandleLaunchArgsMessage hlam -> handleLaunchArgs(hlam.args());
-			default -> {}
+			case RevealRunningAppMessage m -> revealRunningApp(); // TODO: rename to _ with JEP 443
+			case HandleLaunchArgsMessage m -> handleLaunchArgs(m.args());
 		}
 	}
 
