@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 @Singleton
 public class SupportedLanguages {
@@ -33,11 +33,12 @@ public class SupportedLanguages {
 		preferredLocale = preferredLanguage == null ? Locale.getDefault() : Locale.forLanguageTag(preferredLanguage);
 		var collator = Collator.getInstance(preferredLocale);
 		collator.setStrength(Collator.PRIMARY);
-		var sorted = LANGUAGE_TAGS.stream() //
-				.sorted((a, b) -> collator.compare(Locale.forLanguageTag(a).getDisplayName(), Locale.forLanguageTag(b).getDisplayName())) //
-				.collect(Collectors.toList());
+		var sorted = new ArrayList<String>();
 		sorted.add(0, Settings.DEFAULT_LANGUAGE);
 		sorted.add(1, ENGLISH);
+		LANGUAGE_TAGS.stream() //
+				.sorted((a, b) -> collator.compare(Locale.forLanguageTag(a).getDisplayName(), Locale.forLanguageTag(b).getDisplayName())) //
+				.forEach(sorted::add);
 		sortedLanguageTags = Collections.unmodifiableList(sorted);
 	}
 
