@@ -36,6 +36,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -56,7 +57,7 @@ public class RegisterDeviceController implements FxController {
 	private final Lazy<Scene> registerFailedScene;
 	private final String deviceId;
 	private final P384KeyPair keyPair;
-	private final CompletableFuture<JWEObject> result;
+	private final CompletableFuture<ReceivedKey> result;
 	private final DecodedJWT jwt;
 	private final HttpClient httpClient;
 	private final BooleanProperty deviceNameAlreadyExists = new SimpleBooleanProperty(false);
@@ -65,7 +66,7 @@ public class RegisterDeviceController implements FxController {
 	public Button registerBtn;
 
 	@Inject
-	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<JWEObject> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene) {
+	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<ReceivedKey> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
@@ -104,11 +105,12 @@ public class RegisterDeviceController implements FxController {
 		var dto = new CreateDeviceDto();
 		dto.id = deviceId;
 		dto.name = deviceNameField.getText();
-		dto.publicKey = BaseEncoding.base64Url().omitPadding().encode(deviceKey);
+		dto.publicKey = Base64.getUrlEncoder().withoutPadding().encodeToString(deviceKey);
 		var json = GSON.toJson(dto); // TODO: do we want to keep GSON? doesn't support records -.-
 		var request = HttpRequest.newBuilder(keyUri) //
+				.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 				.header("Authorization", "Bearer " + bearerToken) //
-				.header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
+				.header("Content-Type", "application/json") //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding()) //
 				.thenApply(response -> {

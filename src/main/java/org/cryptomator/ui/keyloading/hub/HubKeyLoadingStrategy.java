@@ -36,11 +36,11 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	private final KeychainManager keychainManager;
 	private final Lazy<Scene> authFlowScene;
 	private final Lazy<Scene> noKeychainScene;
-	private final CompletableFuture<JWEObject> result;
+	private final CompletableFuture<ReceivedKey> result;
 	private final DeviceKey deviceKey;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<JWEObject> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle) {
 		this.window = window;
 		this.keychainManager = keychainManager;
 		window.setTitle(windowTitle);
@@ -60,7 +60,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 			var keypair = deviceKey.get();
 			showWindow(authFlowScene);
 			var jwe = result.get();
-			return JWEHelper.decrypt(jwe, keypair.getPrivate());
+			return jwe.decryptMasterkey(keypair.getPrivate());
 		} catch (NoKeychainAccessProviderException e) {
 			showWindow(noKeychainScene);
 			throw new UnlockCancelledException("Unlock canceled due to missing prerequisites", e);

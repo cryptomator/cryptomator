@@ -12,10 +12,10 @@ import java.util.concurrent.CompletableFuture;
 public class RegisterFailedController implements FxController {
 
 	private final Stage window;
-	private final CompletableFuture<JWEObject> result;
+	private final CompletableFuture<ReceivedKey> result;
 
 	@Inject
-	public RegisterFailedController(@KeyLoading Stage window, CompletableFuture<JWEObject> result) {
+	public RegisterFailedController(@KeyLoading Stage window, CompletableFuture<ReceivedKey> result) {
 		this.window = window;
 		this.result = result;
 	}

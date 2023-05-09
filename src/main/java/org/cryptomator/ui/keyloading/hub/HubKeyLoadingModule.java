@@ -69,7 +69,7 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
-	static CompletableFuture<JWEObject> provideResult() {
+	static CompletableFuture<ReceivedKey> provideResult() {
 		return new CompletableFuture<>();
 	}
 
