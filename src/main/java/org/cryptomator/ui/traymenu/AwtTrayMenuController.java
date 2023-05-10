@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Responsible to manage the tray icon on macOS and Windows using AWT.
- * For Linux, we use {@link AppindicatorTrayMenuController}
+ * Fallback tray icon implementation using AWT. This will only be used if no better implementation is found.
+ * @see <a href="https://github.com/cryptomator/integrations-linux/blob/33f9a4685b781b55fcce399b8618818bfc08cbdf/src/main/java/org/cryptomator/linux/tray/AppindicatorTrayMenuController.java">preferred AppIndicator-based implementation used on Linux</a>
  */
 @CheckAvailability
 @Priority(Priority.FALLBACK)
@@ -46,7 +46,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 
 	@CheckAvailability
 	public static boolean isAvailable() {
-		return !SystemUtils.IS_OS_LINUX && SystemTray.isSupported();
+		return SystemTray.isSupported();
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 					menuItem.setEnabled(a.enabled());
 					menu.add(menuItem);
 				}
-				case SeparatorItem separatorItem -> menu.addSeparator();
+				case SeparatorItem s -> menu.addSeparator(); // TODO: rename pattern variable with JEP 443
 				case SubMenuItem s -> {
 					var submenu = new Menu(s.title());
 					addChildren(submenu, s.items());

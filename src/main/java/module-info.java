@@ -35,7 +35,7 @@ open module org.cryptomator.desktop {
 	requires org.apache.commons.lang3;
 
 	/* TODO: filename-based modules: */
-	requires static javax.inject;
+	requires static javax.inject; /* ugly dagger/guava crap */
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;

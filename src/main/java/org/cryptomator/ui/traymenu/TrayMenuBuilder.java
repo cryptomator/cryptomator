@@ -69,7 +69,7 @@ public class TrayMenuBuilder {
 			trayMenu.showTrayIcon(loader -> {
 				switch (loader) {
 					case TrayIconLoader.PngData l -> l.loadPng(getAppropriateTrayIconImage());
-					case TrayIconLoader.FreedesktopIconName l -> l.lookupByName(getAppropriateTrayIconSVG());
+					case TrayIconLoader.FreedesktopIconName l -> l.lookupByName(getAppropriateFreedesktopIconName());
 				}
 			}, this::showMainWindow, "Cryptomator");
 			trayMenu.onBeforeOpenMenu(() -> {
@@ -93,7 +93,7 @@ public class TrayMenuBuilder {
 		trayMenu.updateTrayIcon(loader -> {
 			switch (loader) {
 				case TrayIconLoader.PngData l -> l.loadPng(getAppropriateTrayIconImage());
-				case TrayIconLoader.FreedesktopIconName l -> l.lookupByName(getAppropriateTrayIconSVG());
+				case TrayIconLoader.FreedesktopIconName l -> l.lookupByName(getAppropriateFreedesktopIconName());
 			}
 		});
 		rebuildMenu();
@@ -184,7 +184,7 @@ public class TrayMenuBuilder {
 		}
 	}
 
-	private String getAppropriateTrayIconSVG() {
+	private String getAppropriateFreedesktopIconName() {
 		boolean isAnyVaultUnlocked = vaults.stream().anyMatch(Vault::isUnlocked);
 
 		return isAnyVaultUnlocked ? "org.cryptomator.Cryptomator-monochrome-unlocked" : "org.cryptomator.Cryptomator-monochrome";
