@@ -14,11 +14,11 @@ on:
 
 
 env:
-  JAVA_VERSION: 19
+  JAVA_VERSION: 20
   JAVA_DIST: 'temurin'
   JAVA_CACHE: 'maven'
-  JFX_JMODS_URL: 'https://download2.gluonhq.com/openjfx/19.0.2.1/openjfx-19.0.2.1_windows-x64_bin-jmods.zip'
-  JFX_JMODS_HASH: 'B7CF2CAD2468842B3B78D99F6C0555771499A36FA1F1EE3DD1B9A4597F1FAB86'
+  JFX_JMODS_URL: 'https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_windows-x64_bin-jmods.zip'
+  JFX_JMODS_HASH: 'D00767334C43B8832B5CF10267D34CA8F563D187C4655B73EB6020DD79C054B5'
 
 defaults:
   run:
@@ -51,7 +51,7 @@ jobs:
         run: |
           curl --output jfxjmods.zip -L "${{ env.JFX_JMODS_URL }}"
           if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.equals("${{ env.JFX_JMODS_HASH }}")) {
-            exit 1;
+            throw "Wrong checksum of JMOD archive downloaded from ${{ env.JFX_JMODS_URL }}.";
           }
           Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
           Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}

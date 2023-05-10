@@ -10,7 +10,7 @@ import java.util.List;
  */
 public enum LocationPreset {
 
-	DROPBOX("Dropbox", "~/Dropbox"),
+	DROPBOX("Dropbox", "~/Library/CloudStorage/Dropbox", "~/Dropbox"),
 	ICLOUDDRIVE("iCloud Drive", "~/Library/Mobile Documents/com~apple~CloudDocs", "~/iCloudDrive"),
 	GDRIVE("Google Drive", "~/Google Drive/My Drive", "~/Google Drive"),
 	MEGA("MEGA", "~/MEGA"),

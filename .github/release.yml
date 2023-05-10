@@ -1,0 +1,29 @@
+# .github/release.yml
+# see https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes#configuring-automatically-generated-release-notes
+
+changelog:
+  exclude:
+    authors:
+      - cryptobot
+      - dependabot
+      - github-actions
+  categories:
+    - title: What's New 🎉
+      labels:
+        - type:feature-request
+        - type:enhancement
+    - title: Bugfixes 🐛
+      labels:
+        - type:security-issue
+        - type:bug
+        - type:minor-bug
+    - title: Other Changes 📎
+      labels:
+        - "*"
+      exclude:
+        labels:
+          - type:feature-request
+          - type:enhancement
+          - type:security-issue
+          - type:bug
+          - type:minor-bug
