@@ -102,14 +102,16 @@ public class StartController implements FxController {
 	}
 
 	private void loadingKeyFailed(Throwable e) {
-		if (e instanceof UnlockCancelledException) {
-			// ok
-		} else if (e instanceof VaultKeyInvalidException) {
-			LOG.error("Invalid key"); //TODO: specific error screen
-			appWindows.showErrorWindow(e, window, null);
-		} else {
-			LOG.error("Failed to load key.", e);
-			appWindows.showErrorWindow(e, window, null);
+		switch (e) {
+			case UnlockCancelledException uce -> {} //ok
+			case VaultKeyInvalidException vkie -> {
+				LOG.error("Invalid key"); //TODO: specific error screen
+				appWindows.showErrorWindow(e, window, null);
+			}
+			default -> {
+				LOG.error("Failed to load key.", e);
+				appWindows.showErrorWindow(e, window, null);
+			}
 		}
 	}
 

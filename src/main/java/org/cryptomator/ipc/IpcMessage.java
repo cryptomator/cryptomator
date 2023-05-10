@@ -9,8 +9,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.function.Function;
 
-// TODO make sealed, remove enum
-interface IpcMessage {
+//TODO can the enum be removed?
+sealed interface IpcMessage permits HandleLaunchArgsMessage, RevealRunningAppMessage {
 
 	enum MessageType {
 		REVEAL_RUNNING_APP(RevealRunningAppMessage::decode),
