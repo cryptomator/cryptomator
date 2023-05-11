@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.collections.ObservableList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,9 +23,8 @@ public class AutoUnlocker {
 	private final ObservableList<Vault> vaults;
 	private final FxApplicationWindows appWindows;
 	private final ScheduledExecutorService scheduler;
-	private ScheduledFuture<?> checkFuture;
+	private ScheduledFuture<?> unlockMissingFuture;
 	private ScheduledFuture<?> timeoutFuture;
-	private boolean isPeriodicCheckActive = false;
 
 	@Inject
 	public AutoUnlocker(ObservableList<Vault> vaults, FxApplicationWindows appWindows, ScheduledExecutorService scheduler) {
@@ -34,54 +33,41 @@ public class AutoUnlocker {
 		this.scheduler = scheduler;
 	}
 
-	public void unlockAll() {
+	public void tryUnlockForTimespan(int timespan) {
+		// Unlock all available auto unlock vaults
 		unlock(vaults.stream().filter(v -> v.getVaultSettings().unlockAfterStartup().get()));
+
+		// Start a temporary service if there are missing auto unlock vaults
+		if (getMissingAutoUnlockVaults().findAny().isPresent()) {
+			LOG.info("Found MISSING vaults, starting periodic check");
+			unlockMissingFuture = scheduler.scheduleWithFixedDelay(this::unlockMissing, 0, 1, TimeUnit.SECONDS);
+			timeoutFuture = scheduler.schedule(this::timeout, timespan, TimeUnit.MINUTES);
+		}
 	}
 
-	public void unlock(Stream<Vault> vaultStream) {
+	private void unlock(Stream<Vault> vaultStream) {
 		vaultStream.filter(Vault::isLocked)
 				.<CompletionStage<Void>>reduce(CompletableFuture.completedFuture(null),
 				(unlockFlow, v) -> unlockFlow.handle((voit, ex) -> appWindows.startUnlockWorkflow(v, null)).thenCompose(stage -> stage), // we don't care here about the exception, logged elsewhere
 				(unlockChain1, unlockChain2) -> unlockChain1.handle((voit, ex) -> unlockChain2).thenCompose(stage -> stage));
 	}
 
-	public void startMissingVaultsChecker() {
-		if (!isPeriodicCheckActive && getMissingAutoUnlockVaults().count() > 0) {
-			LOG.info("Found MISSING vaults, starting periodic check");
-			checkFuture = scheduler.scheduleWithFixedDelay(this::check, 0, 1, TimeUnit.SECONDS);
-			timeoutFuture = scheduler.schedule(this::timeout, 2, TimeUnit.MINUTES);
-			isPeriodicCheckActive = true;
-		}
-	}
-
-	private void check() {
-		// Find the vaults that are missing but have an existing directory
-		Vault[] vaultArray = getMissingAutoUnlockVaults().filter(v -> v.getPath().toFile().isDirectory()).toArray(Vault[]::new);
-		if (vaultArray.length > 0) {
-
-			// Redetermine vault states
-			for (Vault v : vaultArray) {
-				LOG.info("Found vault directory for '{}'", v.getDisplayName());
-				VaultListManager.redetermineVaultState(v);
-			}
-
-			// Unlock the vaults that were previously missing
-			unlock(Arrays.stream(vaultArray));
-		}
+	private void unlockMissing() {
+		List<Vault> missingAutoUnlockVaults = getMissingAutoUnlockVaults().toList();
+		missingAutoUnlockVaults.forEach(VaultListManager::redetermineVaultState);
+		unlock(missingAutoUnlockVaults.stream());
 
 		// Stop checking if there are no more missing vaults
-		if (getMissingAutoUnlockVaults().count() == 0) {
+		if (getMissingAutoUnlockVaults().findAny().isEmpty()) {
 			LOG.info("No more MISSING vaults, stopping periodic check");
-			isPeriodicCheckActive = false;
-			checkFuture.cancel(false);
+			unlockMissingFuture.cancel(false);
 			timeoutFuture.cancel(false);
 		}
 	}
 
 	private void timeout() {
 		LOG.info("MISSING vaults periodic check timed out");
-		isPeriodicCheckActive = false;
-		checkFuture.cancel(false);
+		unlockMissingFuture.cancel(false);
 	}
 
 	private Stream<Vault> getMissingAutoUnlockVaults() {
