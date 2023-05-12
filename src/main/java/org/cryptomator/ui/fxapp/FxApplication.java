@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
 public class FxApplication {
@@ -68,6 +69,6 @@ public class FxApplication {
 		});
 
 		launchEventHandler.startHandlingLaunchEvents();
-		autoUnlocker.tryUnlockForTimespan(2);
+		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
 	}
 }

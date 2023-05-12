@@ -33,7 +33,7 @@ public class AutoUnlocker {
 		this.scheduler = scheduler;
 	}
 
-	public void tryUnlockForTimespan(int timespan) {
+	public void tryUnlockForTimespan(int timespan, TimeUnit timeUnit) {
 		// Unlock all available auto unlock vaults
 		unlock(vaults.stream().filter(v -> v.getVaultSettings().unlockAfterStartup().get()));
 
@@ -41,7 +41,7 @@ public class AutoUnlocker {
 		if (getMissingAutoUnlockVaults().findAny().isPresent()) {
 			LOG.info("Found MISSING vaults, starting periodic check");
 			unlockMissingFuture = scheduler.scheduleWithFixedDelay(this::unlockMissing, 0, 1, TimeUnit.SECONDS);
-			timeoutFuture = scheduler.schedule(this::timeout, timespan, TimeUnit.MINUTES);
+			timeoutFuture = scheduler.schedule(this::timeout, timespan, timeUnit);
 		}
 	}
 
