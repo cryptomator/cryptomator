@@ -1,4 +1,15 @@
 import ch.qos.logback.classic.spi.Configurator;
+import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.GoogleDriveMacLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.GoogleDriveWindowsLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.ICloudMacLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.ICloudWindowsLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.LocationPresetsProvider;
+import org.cryptomator.common.locationpresets.MegaLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
@@ -39,4 +50,9 @@ open module org.cryptomator.desktop {
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
+	provides LocationPresetsProvider with DropboxMacLocationPresetsProvider, //
+			DropboxWindowsLocationPresetsProvider, ICloudMacLocationPresetsProvider, //
+			ICloudWindowsLocationPresetsProvider, GoogleDriveWindowsLocationPresetsProvider, //
+			GoogleDriveMacLocationPresetsProvider, PCloudLocationPresetsProvider, //
+			MegaLocationPresetsProvider, OneDriveMacLocationPresetsProvider, OneDriveWindowsLocationPresetsProvider;
 }
