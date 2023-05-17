@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import static org.cryptomator.integrations.common.OperatingSystem.Value.WINDOWS;
 
 @OperatingSystem(WINDOWS)
+@CheckAvailability
 public final class DropboxWindowsLocationPresetsProvider implements LocationPresetsProvider {
 
 	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/Dropbox");

@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
 
 @OperatingSystem(MAC)
+@CheckAvailability
 public final class OneDriveMacLocationPresetsProvider implements LocationPresetsProvider {
 
 

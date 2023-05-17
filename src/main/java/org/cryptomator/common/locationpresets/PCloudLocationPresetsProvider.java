@@ -12,6 +12,7 @@ import static org.cryptomator.integrations.common.OperatingSystem.Value.WINDOWS;
 
 @OperatingSystem(WINDOWS)
 @OperatingSystem(MAC)
+@CheckAvailability
 public final class PCloudLocationPresetsProvider implements LocationPresetsProvider {
 
 

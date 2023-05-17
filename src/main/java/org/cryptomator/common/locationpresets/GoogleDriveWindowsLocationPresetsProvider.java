@@ -10,9 +10,10 @@ import java.util.stream.Stream;
 import static org.cryptomator.integrations.common.OperatingSystem.Value.WINDOWS;
 
 @OperatingSystem(WINDOWS)
+@CheckAvailability
 public final class GoogleDriveWindowsLocationPresetsProvider implements LocationPresetsProvider {
 
-	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/Google Drive/My Drive");
+	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/Google Drive");
 
 
 	@CheckAvailability
