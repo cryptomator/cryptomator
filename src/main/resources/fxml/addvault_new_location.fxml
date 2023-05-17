@@ -47,7 +47,7 @@
 		<VBox spacing="6">
 			<Label text="%addvaultwizard.new.locationLabel" labelFor="$locationTextField"/>
 			<TextField fx:id="locationTextField" promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" editable="false" disable="${!controller.anyRadioButtonSelected}" HBox.hgrow="ALWAYS"/>
-			<Label fx:id="vaultPathStatus" styleClass="label-muted" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" text="${controller.statusText}" graphic="${controller.statusGraphic}" />
+			<Label fx:id="locationStatusLabel" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" />
 		</VBox>
 
 		<Region VBox.vgrow="ALWAYS"/>
