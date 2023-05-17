@@ -48,6 +48,8 @@ open module org.cryptomator.desktop {
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
 
+	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
+
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
 	provides LocationPresetsProvider with DropboxMacLocationPresetsProvider, //
