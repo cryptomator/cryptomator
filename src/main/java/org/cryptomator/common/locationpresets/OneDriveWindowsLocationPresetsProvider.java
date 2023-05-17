@@ -1,8 +1,6 @@
 package org.cryptomator.common.locationpresets;
 
 import org.cryptomator.integrations.common.OperatingSystem;
-import org.cryptomator.integrations.locationpresets.LocationPreset;
-import org.cryptomator.integrations.locationpresets.LocationPresetsProvider;
 import org.jetbrains.annotations.Blocking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
