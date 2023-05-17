@@ -1,7 +1,11 @@
 package org.cryptomator.common.locationpresets;
 
 import org.cryptomator.integrations.common.OperatingSystem;
+import org.cryptomator.integrations.locationpresets.LocationPreset;
+import org.cryptomator.integrations.locationpresets.LocationPresetsProvider;
 import org.jetbrains.annotations.Blocking;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,22 +23,22 @@ import static org.cryptomator.integrations.common.OperatingSystem.Value.WINDOWS;
 @OperatingSystem(WINDOWS)
 public final class OneDriveWindowsLocationPresetsProvider implements LocationPresetsProvider {
 
+	private static final Logger LOG = LoggerFactory.getLogger(OneDriveWindowsLocationPresetsProvider.class);
 	private static final String REGSTR_TOKEN = "REG_SZ";
 	private static final String REG_ONEDRIVE_ACCOUNTS = "HKEY_CURRENT_USER\\Software\\Microsoft\\OneDrive\\Accounts\\";
 
 	@Override
 	public Stream<LocationPreset> getLocations() {
 		try {
-
-			var accounts = queryRegistry(REG_ONEDRIVE_ACCOUNTS, List.of(), l -> l.startsWith(REG_ONEDRIVE_ACCOUNTS)).toList();
+			var accountRegKeys = queryRegistry(REG_ONEDRIVE_ACCOUNTS, List.of(), l -> l.startsWith(REG_ONEDRIVE_ACCOUNTS)).toList();
 			var cloudLocations = new ArrayList<LocationPreset>();
-			for (var account : accounts) {
-				var path = queryRegistry(REG_ONEDRIVE_ACCOUNTS + account, List.of("/v", "UserFolder"), l -> l.contains("UserFolder")).map(result -> result.substring(result.indexOf(REGSTR_TOKEN) + REGSTR_TOKEN.length()).trim()) //
+			for (var accountRegKey : accountRegKeys) {
+				var path = queryRegistry(accountRegKey, List.of("/v", "UserFolder"), l -> l.contains("UserFolder")).map(result -> result.substring(result.indexOf(REGSTR_TOKEN) + REGSTR_TOKEN.length()).trim()) //
 						.map(Path::of) //
 						.findFirst().orElseThrow();
 				var name = "OneDrive"; //we assume personal oneDrive account by default
-				if (!account.equals("Personal")) {
-					name = queryRegistry(REG_ONEDRIVE_ACCOUNTS + account, List.of("/v", "DisplayName"), l -> l.contains("DisplayName")).map(result -> result.substring(result.indexOf(REGSTR_TOKEN) + REGSTR_TOKEN.length()).trim()) //
+				if (!accountRegKey.endsWith("Personal")) {
+					name = queryRegistry(accountRegKey, List.of("/v", "DisplayName"), l -> l.contains("DisplayName")).map(result -> result.substring(result.indexOf(REGSTR_TOKEN) + REGSTR_TOKEN.length()).trim()) //
 							.map("OneDrive - "::concat).findFirst().orElseThrow();
 				}
 				cloudLocations.add(new LocationPreset(name, path));
