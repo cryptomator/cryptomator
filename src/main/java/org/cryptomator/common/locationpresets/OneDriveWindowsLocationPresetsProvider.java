@@ -44,28 +44,26 @@ public final class OneDriveWindowsLocationPresetsProvider implements LocationPre
 				cloudLocations.add(new LocationPreset(name, path));
 			}
 			return cloudLocations.stream();
-		} catch (RuntimeException e) {
+		} catch (IOException | CommandFailedException | TimeoutException e) {
+			LOG.error("Unable to determine OneDrive location", e);
+			return Stream.of();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			LOG.error("Determination of OneDrive location interrupted", e);
 			return Stream.of();
 		}
 	}
 
-	private Stream<String> queryRegistry(String keyname, List<String> moreArgs, Predicate<String> outputFilter) {
+	private Stream<String> queryRegistry(String keyname, List<String> moreArgs, Predicate<String> outputFilter) throws InterruptedException, CommandFailedException, TimeoutException, IOException {
 		var args = new ArrayList<String>();
 		args.add("reg");
 		args.add("query");
 		args.add(keyname);
 		args.addAll(moreArgs);
-		try {
-			ProcessBuilder command = new ProcessBuilder(args);
-			Process p = command.start();
-			waitForSuccess(p, 3, "`reg query`");
-			return p.inputReader(StandardCharsets.UTF_8).lines().filter(outputFilter);
-		} catch (TimeoutException | IOException | CommandFailedException e) {
-			throw new RuntimeException("FAIL");
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new RuntimeException("FAIL");
-		}
+		ProcessBuilder command = new ProcessBuilder(args);
+		Process p = command.start();
+		waitForSuccess(p, 3, "`reg query`");
+		return p.inputReader(StandardCharsets.UTF_8).lines().filter(outputFilter);
 	}
 
 
