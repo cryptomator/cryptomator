@@ -1,4 +1,5 @@
 import ch.qos.logback.classic.spi.Configurator;
+import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.GoogleDriveLocationPresetsProvider;
@@ -6,7 +7,8 @@ import org.cryptomator.common.locationpresets.ICloudMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.ICloudWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.LocationPresetsProvider;
 import org.cryptomator.common.locationpresets.MegaLocationPresetsProvider;
-import org.cryptomator.common.locationpresets.OneDriveLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.OneDriveLinuxLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
 import org.cryptomator.integrations.tray.TrayMenuController;
@@ -52,8 +54,9 @@ open module org.cryptomator.desktop {
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
 	provides LocationPresetsProvider with DropboxMacLocationPresetsProvider, //
-			DropboxWindowsLocationPresetsProvider, ICloudMacLocationPresetsProvider, //
-			ICloudWindowsLocationPresetsProvider, GoogleDriveLocationPresetsProvider, //
-			PCloudLocationPresetsProvider, MegaLocationPresetsProvider, //
-			OneDriveLocationPresetsProvider, OneDriveWindowsLocationPresetsProvider;
+			DropboxWindowsLocationPresetsProvider, DropboxLinuxLocationPresetsProvider, //
+			ICloudMacLocationPresetsProvider, ICloudWindowsLocationPresetsProvider, //
+			GoogleDriveLocationPresetsProvider, PCloudLocationPresetsProvider, MegaLocationPresetsProvider, //
+			OneDriveLinuxLocationPresetsProvider, OneDriveWindowsLocationPresetsProvider, //
+			OneDriveMacLocationPresetsProvider;
 }

@@ -19,6 +19,10 @@ public interface LocationPresetsProvider {
 	Logger LOG = LoggerFactory.getLogger(LocationPresetsProvider.class);
 	String USER_HOME = System.getProperty("user.home");
 
+	/**
+	 * Streams account-separated location presets found by this provider
+	 * @return Stream of LocationPresets
+	 */
 	Stream<LocationPreset> getLocations();
 
 	static Path resolveLocation(String p) {

@@ -8,12 +8,10 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.cryptomator.integrations.common.OperatingSystem.Value.LINUX;
-import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
 
-@OperatingSystem(MAC)
 @OperatingSystem(LINUX)
 @CheckAvailability
-public final class OneDriveLocationPresetsProvider implements LocationPresetsProvider {
+public final class OneDriveLinuxLocationPresetsProvider implements LocationPresetsProvider {
 
 
 	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/OneDrive");

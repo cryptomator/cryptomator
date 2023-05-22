@@ -13,21 +13,21 @@ import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
 @CheckAvailability
 public final class DropboxMacLocationPresetsProvider implements LocationPresetsProvider {
 
-	private static final Path LOCATION1 = LocationPresetsProvider.resolveLocation("~/Library/CloudStorage/Dropbox");
-	private static final Path LOCATION2 = LocationPresetsProvider.resolveLocation("~/Dropbox");
+	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/Library/CloudStorage/Dropbox");
+	private static final Path FALLBACK_LOCATION = LocationPresetsProvider.resolveLocation("~/Dropbox");
 
 
 	@CheckAvailability
 	public static boolean isPresent() {
-		return Files.isDirectory(LOCATION1) || Files.isDirectory(LOCATION2);
+		return Files.isDirectory(LOCATION) || Files.isDirectory(FALLBACK_LOCATION);
 	}
 
 	@Override
 	public Stream<LocationPreset> getLocations() {
-		if(Files.isDirectory(LOCATION1)) {
-			return Stream.of(new LocationPreset("Dropbox", LOCATION1));
-		} else if(Files.isDirectory(LOCATION2)) {
-			return Stream.of(new LocationPreset("Dropbox", LOCATION2));
+		if(Files.isDirectory(LOCATION)) {
+			return Stream.of(new LocationPreset("Dropbox", LOCATION));
+		} else if(Files.isDirectory(FALLBACK_LOCATION)) {
+			return Stream.of(new LocationPreset("Dropbox", FALLBACK_LOCATION));
 		} else {
 			return Stream.of();
 		}
