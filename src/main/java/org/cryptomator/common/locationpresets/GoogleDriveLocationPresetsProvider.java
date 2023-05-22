@@ -8,12 +8,14 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
+import static org.cryptomator.integrations.common.OperatingSystem.Value.WINDOWS;
 
+@OperatingSystem(WINDOWS)
 @OperatingSystem(MAC)
 @CheckAvailability
-public final class GoogleDriveMacLocationPresetsProvider implements LocationPresetsProvider {
+public final class GoogleDriveLocationPresetsProvider implements LocationPresetsProvider {
 
-	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/Google Drive/My Drive");
+	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/Google Drive");
 
 
 	@CheckAvailability

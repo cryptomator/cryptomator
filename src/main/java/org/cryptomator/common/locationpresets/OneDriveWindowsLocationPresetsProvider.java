@@ -76,7 +76,7 @@ public final class OneDriveWindowsLocationPresetsProvider implements LocationPre
 	 * @throws CommandFailedException Thrown when the process exit code is non-zero
 	 */
 	@Blocking
-	static void waitForSuccess(Process process, int timeoutSeconds, String cmdDescription) throws TimeoutException, InterruptedException, CommandFailedException {
+	private static void waitForSuccess(Process process, int timeoutSeconds, String cmdDescription) throws TimeoutException, InterruptedException, CommandFailedException {
 		boolean exited = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
 		if (!exited) {
 			throw new TimeoutException(cmdDescription + " timed out after " + timeoutSeconds + "s");
@@ -88,7 +88,7 @@ public final class OneDriveWindowsLocationPresetsProvider implements LocationPre
 		}
 	}
 
-	static class CommandFailedException extends Exception {
+	private static class CommandFailedException extends Exception {
 
 		int exitCode;
 		String stdout;
