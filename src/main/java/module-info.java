@@ -3,6 +3,7 @@ import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvide
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.GoogleDriveLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.GoogleDriveMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.ICloudMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.ICloudWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.LocationPresetsProvider;
@@ -56,7 +57,8 @@ open module org.cryptomator.desktop {
 	provides LocationPresetsProvider with DropboxMacLocationPresetsProvider, //
 			DropboxWindowsLocationPresetsProvider, DropboxLinuxLocationPresetsProvider, //
 			ICloudMacLocationPresetsProvider, ICloudWindowsLocationPresetsProvider, //
-			GoogleDriveLocationPresetsProvider, PCloudLocationPresetsProvider, MegaLocationPresetsProvider, //
+			GoogleDriveLocationPresetsProvider, GoogleDriveMacLocationPresetsProvider, //
+			PCloudLocationPresetsProvider, MegaLocationPresetsProvider, //
 			OneDriveLinuxLocationPresetsProvider, OneDriveWindowsLocationPresetsProvider, //
 			OneDriveMacLocationPresetsProvider;
 }
