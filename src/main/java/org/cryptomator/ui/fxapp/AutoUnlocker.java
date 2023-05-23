@@ -13,6 +13,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @FxApplicationScoped
@@ -35,8 +36,19 @@ public class AutoUnlocker {
 
 	public void tryUnlockForTimespan(int timespan, TimeUnit timeUnit) {
 		// Unlock all available auto unlock vaults
-		unlock(vaults.stream().filter(v -> v.getVaultSettings().unlockAfterStartup().get()));
+		Predicate<Vault> shouldAutoUnlock = v -> v.getVaultSettings().unlockAfterStartup().get();
+		unlockSequentially(vaults.stream().filter(shouldAutoUnlock)).thenRun(() -> startUnlockMissing(timespan, timeUnit));
+	}
 
+	private CompletionStage<Void> unlockSequentially(Stream<Vault> vaultStream) {
+		// this is an attempt to run all the unlock workflows sequentially, i.e. start the next workflow only after completing/failing the previous workflow.
+		return vaultStream.filter(Vault::isLocked).reduce(CompletableFuture.completedFuture(null),
+				(prevUnlock, nextVault) -> prevUnlock.thenCompose(unused -> appWindows.startUnlockWorkflow(nextVault, null)),
+				(prevUnlock, nextUnlock) -> nextUnlock.exceptionally(e -> null) // we don't care here about the exception, logged elsewhere
+				);
+	}
+
+	private void startUnlockMissing(int timespan, TimeUnit timeUnit) {
 		// Start a temporary service if there are missing auto unlock vaults
 		if (getMissingAutoUnlockVaults().findAny().isPresent()) {
 			LOG.info("Found MISSING vaults, starting periodic check");
@@ -45,18 +57,13 @@ public class AutoUnlocker {
 		}
 	}
 
-	private void unlock(Stream<Vault> vaultStream) {
-		vaultStream.filter(Vault::isLocked)
-				.<CompletionStage<Void>>reduce(CompletableFuture.completedFuture(null),
-				(unlockFlow, v) -> unlockFlow.handle((voit, ex) -> appWindows.startUnlockWorkflow(v, null)).thenCompose(stage -> stage), // we don't care here about the exception, logged elsewhere
-				(unlockChain1, unlockChain2) -> unlockChain1.handle((voit, ex) -> unlockChain2).thenCompose(stage -> stage));
-	}
-
 	private void unlockMissing() {
 		List<Vault> missingAutoUnlockVaults = getMissingAutoUnlockVaults().toList();
 		missingAutoUnlockVaults.forEach(VaultListManager::redetermineVaultState);
-		unlock(missingAutoUnlockVaults.stream());
+		unlockSequentially(missingAutoUnlockVaults.stream()).thenRun(this::stopUnlockMissing);
+	}
 
+	private void stopUnlockMissing() {
 		// Stop checking if there are no more missing vaults
 		if (getMissingAutoUnlockVaults().findAny().isEmpty()) {
 			LOG.info("No more MISSING vaults, stopping periodic check");
