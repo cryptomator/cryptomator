@@ -37,7 +37,8 @@ public final class OneDriveWindowsLocationPresetsProvider implements LocationPre
 				var name = "OneDrive"; //we assume personal oneDrive account by default
 				if (!accountRegKey.endsWith("Personal")) {
 					name = queryRegistry(accountRegKey, List.of("/v", "DisplayName"), l -> l.contains("DisplayName")).map(result -> result.substring(result.indexOf(REGSTR_TOKEN) + REGSTR_TOKEN.length()).trim()) //
-							.map("OneDrive - "::concat).findFirst().orElseThrow();
+							.map("OneDrive - "::concat) //
+							.findFirst().orElseThrow();
 				}
 				cloudLocations.add(new LocationPreset(name, path));
 			}
