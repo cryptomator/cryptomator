@@ -12,6 +12,7 @@ import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
+import org.cryptomator.ui.unlock.UnlockWorkflow;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +115,7 @@ public class FxApplicationWindows {
 					LOG.debug("Start unlock workflow for {}", vault.getDisplayName());
 					return unlockWorkflowFactory.create(vault, owner).unlockWorkflow();
 				}, Platform::runLater) //
-				.thenCompose(unlockWorkflow -> CompletableFuture.runAsync(unlockWorkflow, executor)) //
+				.thenAcceptAsync(UnlockWorkflow::run, executor)
 				.exceptionally(e -> {
 					showErrorWindow(e, owner == null ? primaryStage : owner, null);
 					return null;
