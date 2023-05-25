@@ -24,7 +24,7 @@ ${JAVA_HOME}/bin/jlink \
     --verbose \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
@@ -44,7 +44,7 @@ ${JAVA_HOME}/bin/jpackage \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
-    --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64" \
+    --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
     --copyright "(C) 2016 - 2023 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \

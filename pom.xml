@@ -29,8 +29,8 @@
 		<project.jdk.version>20</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
-		<!-- Once hypfvieh, swiesend, purejava and integrations-linux have module-info, remove them-->
-		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
+		<!-- Once swiesend has module-info, remove them-->
+		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.6.2</cryptomator.cryptofs.version>
