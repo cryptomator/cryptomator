@@ -16,7 +16,6 @@ mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 # compile
 mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
 cp ../../../LICENSE.txt ../../../target
-cp ../launcher.sh ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
 # add runtime
