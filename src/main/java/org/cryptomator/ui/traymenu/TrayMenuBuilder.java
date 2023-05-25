@@ -187,6 +187,6 @@ public class TrayMenuBuilder {
 	private String getAppropriateFreedesktopIconName() {
 		boolean isAnyVaultUnlocked = vaults.stream().anyMatch(Vault::isUnlocked);
 
-		return isAnyVaultUnlocked ? "org.cryptomator.Cryptomator-monochrome-unlocked" : "org.cryptomator.Cryptomator-monochrome";
+		return isAnyVaultUnlocked ? "org.cryptomator.Cryptomator.tray-unlocked" : "org.cryptomator.Cryptomator.tray";
 	}
 }
