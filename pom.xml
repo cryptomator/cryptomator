@@ -33,14 +33,14 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.6.2</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.6.4</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.2.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.0</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.2.0</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.linux.version>1.2.1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>3.0.0</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
-		<cryptomator.webdav.version>2.0.2</cryptomator.webdav.version>
+		<cryptomator.webdav.version>2.1.0-SNAPSHOT</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.12.0</commons-lang3.version>
@@ -49,16 +49,16 @@
 		<guava.version>31.1-jre</guava.version>
 		<gson.version>2.10.1</gson.version>
 		<javafx.version>20.0.1</javafx.version>
-		<jwt.version>4.3.0</jwt.version>
+		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.31</nimbus-jose.version>
-		<logback.version>1.4.5</logback.version>
-		<slf4j.version>2.0.6</slf4j.version>
+		<logback.version>1.4.7</logback.version>
+		<slf4j.version>2.0.7</slf4j.version>
 		<tinyoauth2.version>0.5.1</tinyoauth2.version>
 		<zxcvbn.version>1.7.0</zxcvbn.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.9.2</junit.jupiter.version>
-		<mockito.version>5.1.1</mockito.version>
+		<junit.jupiter.version>5.9.3</junit.jupiter.version>
+		<mockito.version>5.3.1</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
 
 		<!-- build-time dependencies -->
