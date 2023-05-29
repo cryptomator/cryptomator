@@ -186,7 +186,6 @@ public class TrayMenuBuilder {
 
 	private String getAppropriateFreedesktopIconName() {
 		boolean isAnyVaultUnlocked = vaults.stream().anyMatch(Vault::isUnlocked);
-		// find tray icons in mounted AppImage
-		return isAnyVaultUnlocked ? System.getenv("APPDIR") + "/usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-unlocked.svg" : System.getenv("APPDIR") + "/usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray.svg";
+		return isAnyVaultUnlocked ? "org.cryptomator.Cryptomator.tray-unlocked-symbolic" : "org.cryptomator.Cryptomator.tray-symbolic";
 	}
 }
