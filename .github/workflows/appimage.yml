@@ -10,7 +10,7 @@ on:
         required: false
 
 env:
-  JAVA_VERSION: 19
+  JAVA_VERSION: 20
 
 jobs:
   get-version:
