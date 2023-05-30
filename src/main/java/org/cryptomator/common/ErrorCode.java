@@ -32,17 +32,14 @@ public class ErrorCode {
 		this.rootCauseSpecificFrames = rootCauseSpecificFrames;
 	}
 
-	// visible for testing
-	String methodCode() {
+	public String methodCode() {
 		return format(traceCode(rootCause, LATEST_FRAME));
 	}
 
-	// visible for testing
-	String rootCauseCode() {
+	public String rootCauseCode() {
 		return format(traceCode(rootCause, rootCauseSpecificFrames));
 	}
 
-	// visible for testing
 	String throwableCode() {
 		return format(traceCode(throwable, ALL_FRAMES));
 	}
