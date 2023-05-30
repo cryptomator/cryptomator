@@ -22,7 +22,7 @@ on:
         value: ${{ jobs.determine-version.outputs.type }}
 
 env:
-  JAVA_VERSION: 19
+  JAVA_VERSION: 20
   JAVA_DIST: 'temurin'
   JAVA_CACHE: 'maven'
 

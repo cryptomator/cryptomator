@@ -70,6 +70,9 @@
     <CustomAction Id="JpDisallowDowngrade" Error="!(loc.DowngradeErrorMessage)" />
     <?endif?>
 
+    <Binary Id="JpCaDll" SourceFile="wixhelper.dll"/>
+    <CustomAction Id="JpFindRelatedProducts" BinaryKey="JpCaDll" DllEntry="FindRelatedProductsEx" />
+
     <?ifndef SkipCryptomatorLegacyCheck ?>
       <!-- Block installation if innosetup entry of Cryptomator is found -->
       <Property Id="OLDEXEINSTALLER">
@@ -172,11 +175,12 @@
       <?endif?>
 
       <?ifndef JpAllowUpgrades ?>
-      <Custom Action="JpDisallowUpgrade" After="FindRelatedProducts">JP_UPGRADABLE_FOUND</Custom>
+      <Custom Action="JpDisallowUpgrade" After="JpFindRelatedProducts">JP_UPGRADABLE_FOUND</Custom>
       <?endif?>
       <?ifndef JpAllowDowngrades ?>
-      <Custom Action="JpDisallowDowngrade" After="FindRelatedProducts">JP_DOWNGRADABLE_FOUND</Custom>
+      <Custom Action="JpDisallowDowngrade" After="JpFindRelatedProducts">JP_DOWNGRADABLE_FOUND</Custom>
       <?endif?>
+      <Custom Action="JpFindRelatedProducts" After="FindRelatedProducts"/>
 
       <!-- Check and fail if Cryptomator is running -->
       <Custom Action="WixCloseApplications" Before="InstallValidate"></Custom>
@@ -187,6 +191,10 @@
       <Custom Action="PatchWebDAV" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
       <Custom Action="V170MigrateSettings" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
     </InstallExecuteSequence>
+
+    <InstallUISequence>
+      <Custom Action="JpFindRelatedProducts" After="FindRelatedProducts"/>
+    </InstallUISequence>
 
     <WixVariable Id="WixUIBannerBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\background.bmp" />
