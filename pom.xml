@@ -46,7 +46,7 @@
 		<commons-lang3.version>3.12.0</commons-lang3.version>
 		<dagger.version>2.45</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<guava.version>31.1-jre</guava.version>
+		<guava.version>32.0.0-jre</guava.version>
 		<gson.version>2.10.1</gson.version>
 		<javafx.version>20.0.1</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
