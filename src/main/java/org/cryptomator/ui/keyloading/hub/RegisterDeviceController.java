@@ -100,14 +100,14 @@ public class RegisterDeviceController implements FxController {
 		registerBtn.setContentDisplay(ContentDisplay.LEFT);
 		registerBtn.setDisable(true);
 
-		var keyUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
+		var deviceUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
 		var deviceKey = keyPair.getPublic().getEncoded();
 		var dto = new CreateDeviceDto();
 		dto.id = deviceId;
 		dto.name = deviceNameField.getText();
 		dto.publicKey = Base64.getUrlEncoder().withoutPadding().encodeToString(deviceKey);
 		var json = GSON.toJson(dto); // TODO: do we want to keep GSON? doesn't support records -.-
-		var request = HttpRequest.newBuilder(keyUri) //
+		var request = HttpRequest.newBuilder(deviceUri) //
 				.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.header("Content-Type", "application/json") //
