@@ -45,7 +45,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:coffeelibs/openjdk
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dh-exec dput coffeelibs-jdk-${{ env.JAVA_VERSION }} libgtk2.0-0
+          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.JAVA_VERSION }} libgtk2.0-0
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -95,7 +95,6 @@ jobs:
           tar -cJf cryptomator_${{ inputs.ppaver }}.orig.tar.xz -C pkgdir .
       - name: Patch and rename pkgdir
         run: |
-          chmod a+x dist/linux/debian/cryptomator.install
           cp -r dist/linux/debian/ pkgdir
           export RFC2822_TIMESTAMP=`date --rfc-2822`
           envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
