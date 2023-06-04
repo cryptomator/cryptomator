@@ -24,8 +24,6 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URI;
-import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -39,7 +37,6 @@ public class AwtTrayMenuController implements TrayMenuController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AwtTrayMenuController.class);
 
-	private static final String DATA_URI_SCHEME = "data:image/png;base64,";
 	private final PopupMenu menu = new PopupMenu();
 	private TrayIcon trayIcon;
 	private Image image;
