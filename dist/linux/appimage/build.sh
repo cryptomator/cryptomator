@@ -76,8 +76,6 @@ cp ../common/org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/sha
 cp ../common/application-vnd.cryptomator.vault.xml Cryptomator.AppDir/usr/share/mime/packages/application-vnd.cryptomator.vault.xml
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
-ln -s usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-symbolic.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.tray-symbolic.svg
-ln -s usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-unlocked-symbolic.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.tray-unlocked-symbolic.svg
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
 ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
