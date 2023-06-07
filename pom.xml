@@ -63,7 +63,7 @@
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>23.0.0</jetbrains.annotations.version>
-		<dependency-check.version>8.1.0</dependency-check.version>
+		<dependency-check.version>8.1.2</dependency-check.version>
 		<jacoco.version>0.8.9</jacoco.version>
 	</properties>
 
