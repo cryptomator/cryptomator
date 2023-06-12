@@ -40,7 +40,7 @@ public class ErrorCode {
 		return format(traceCode(rootCause, rootCauseSpecificFrames));
 	}
 
-	String throwableCode() {
+	public String throwableCode() {
 		return format(traceCode(throwable, ALL_FRAMES));
 	}
 

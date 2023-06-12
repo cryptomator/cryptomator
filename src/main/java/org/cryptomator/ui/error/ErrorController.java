@@ -151,8 +151,8 @@ public class ErrorController implements FxController {
 		}
 	}
 
-	private boolean isPartialMatchFilter(ErrorDiscussion errorDiscussion) {
-		return errorDiscussion.title.contains(" " +errorCode.methodCode());
+	public boolean isPartialMatchFilter(ErrorDiscussion errorDiscussion) {
+		return errorDiscussion.title.contains(" " + errorCode.methodCode());
 	}
 
 	public int compareUpvoteCount(ErrorDiscussion ed1, ErrorDiscussion ed2) {
