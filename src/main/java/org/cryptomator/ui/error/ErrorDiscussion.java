@@ -7,7 +7,6 @@ public class ErrorDiscussion {
 	String url;
 	Answer answer;
 
-
 	static class Answer{
 		private String url;
 		private int upvoteCount;

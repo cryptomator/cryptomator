@@ -97,7 +97,6 @@ public class ErrorController implements FxController {
 	@FXML
 	public void showSolution() {
 		if(matchingErrorDiscussion != null){
-			//TODO: errorDiscussion.url or errorDiscussion.answer.url
 			application.getHostServices().showDocument(matchingErrorDiscussion.url);
 		}
 	}
@@ -139,7 +138,6 @@ public class ErrorController implements FxController {
 					new TypeToken<Map<String,ErrorDiscussion>>(){}.getType());
 
 			if(!map.values().stream().filter(this::isPartialMatchFilter).findFirst().isEmpty()) {
-				lookUpSolutionVisibility.set(true);
 				Comparator<ErrorDiscussion> comp = this::compareExactMatch;
 				matchingErrorDiscussion = map.values().stream().sorted(comp
 						.thenComparing(this::compareSecondLevelMatch)
@@ -147,6 +145,7 @@ public class ErrorController implements FxController {
 						.thenComparing(this::compareIsAnswered)
 						.thenComparing(this::compareUpvoteCount)
 				).findFirst().get();
+				lookUpSolutionVisibility.set(true);
 			}
 		}
 	}
