@@ -10,6 +10,9 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpHelper {
 
+	private HttpHelper(){
+		throw new IllegalStateException("Utility class");
+	}
 	public static String readBody(HttpResponse<InputStream> response) throws IOException {
 		try (var in = response.body(); var reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
 			return CharStreams.toString(reader);

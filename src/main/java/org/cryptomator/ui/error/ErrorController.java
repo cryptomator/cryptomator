@@ -28,6 +28,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -126,9 +127,7 @@ public class ErrorController implements FxController {
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
 
 		copiedDetails.set(true);
-		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
-			copiedDetails.set(false);
-		});
+		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> copiedDetails.set(false));
 	}
 
 	private void loadHttpResponse(HttpResponse<InputStream> response){
@@ -137,15 +136,18 @@ public class ErrorController implements FxController {
 					new InputStreamReader(response.body(),StandardCharsets.UTF_8),
 					new TypeToken<Map<String,ErrorDiscussion>>(){}.getType());
 
-			if(!map.values().stream().filter(this::isPartialMatchFilter).findFirst().isEmpty()) {
+			if(map.values().stream().anyMatch(this::isPartialMatchFilter)) {
 				Comparator<ErrorDiscussion> comp = this::compareExactMatch;
-				matchingErrorDiscussion = map.values().stream().sorted(comp
+				Optional<ErrorDiscussion> value = map.values().stream().min(comp
 						.thenComparing(this::compareSecondLevelMatch)
 						.thenComparing(this::compareThirdLevelMatch)
 						.thenComparing(this::compareIsAnswered)
-						.thenComparing(this::compareUpvoteCount)
-				).findFirst().get();
-				lookUpSolutionVisibility.set(true);
+						.thenComparing(this::compareUpvoteCount));
+
+				if(value.isPresent()){
+					matchingErrorDiscussion = value.get();
+					lookUpSolutionVisibility.set(true);
+				}
 			}
 		}
 	}

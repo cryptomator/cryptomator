@@ -97,7 +97,7 @@ class ErrorControllerTest {
 		ErrorDiscussion ed1 = createErrorDiscussion("",0, null);
 		ErrorDiscussion ed2 = createErrorDiscussion("",0, null);
 		int result = errorController.compareIsAnswered(ed1,ed2);
-		Assertions.assertEquals(result, 0);
+		Assertions.assertEquals(0, result);
 	}
 
 	@Test

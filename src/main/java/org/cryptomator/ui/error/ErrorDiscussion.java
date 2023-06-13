@@ -8,8 +8,5 @@ public class ErrorDiscussion {
 	Answer answer;
 
 	static class Answer{
-		private String url;
-		private int upvoteCount;
 	}
-
 }
