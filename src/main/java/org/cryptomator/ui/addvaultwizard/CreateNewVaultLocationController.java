@@ -1,6 +1,9 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
+import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.locationpresets.LocationPreset;
+import org.cryptomator.common.locationpresets.LocationPresetsProvider;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -10,22 +13,19 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import java.io.File;
@@ -34,6 +34,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @AddVaultWizardScoped
@@ -46,69 +49,71 @@ public class CreateNewVaultLocationController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
 	private final Lazy<Scene> choosePasswordScene;
-	private final ObservedLocationPresets locationPresets;
+	private final List<RadioButton> locationPresetBtns;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
 	private final ResourceBundle resourceBundle;
-	private final BooleanBinding validVaultPath;
+	private final ObservableValue<VaultPathStatus> vaultPathStatus;
+	private final ObservableValue<Boolean> validVaultPath;
 	private final BooleanProperty usePresetPath;
-	private final StringProperty statusText;
-	private final ObjectProperty<Node> statusGraphic;
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
 
 	//FXML
-	public ToggleGroup predefinedLocationToggler;
-	public RadioButton iclouddriveRadioButton;
-	public RadioButton dropboxRadioButton;
-	public RadioButton gdriveRadioButton;
-	public RadioButton onedriveRadioButton;
-	public RadioButton megaRadioButton;
-	public RadioButton pcloudRadioButton;
+	public ToggleGroup locationPresetsToggler;
+	public VBox radioButtonVBox;
 	public RadioButton customRadioButton;
-	public Label vaultPathStatus;
+	public Label locationStatusLabel;
 	public FontAwesome5IconView goodLocation;
 	public FontAwesome5IconView badLocation;
 
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, ObservedLocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
 		this.choosePasswordScene = choosePasswordScene;
-		this.locationPresets = locationPresets;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
-		this.validVaultPath = Bindings.createBooleanBinding(this::validateVaultPathAndSetStatus, this.vaultPath);
+		this.vaultPathStatus = ObservableUtil.mapWithDefault(vaultPath, this::validatePath, new VaultPathStatus(false, "error.message"));
+		this.validVaultPath = ObservableUtil.mapWithDefault(vaultPathStatus, VaultPathStatus::valid, false);
+		this.vaultPathStatus.addListener(this::updateStatusLabel);
 		this.usePresetPath = new SimpleBooleanProperty();
-		this.statusText = new SimpleStringProperty();
-		this.statusGraphic = new SimpleObjectProperty<>();
+		this.locationPresetBtns = LocationPresetsProvider.loadAll(LocationPresetsProvider.class) //
+				.flatMap(LocationPresetsProvider::getLocations) //
+				.sorted(Comparator.comparing(LocationPreset::name)) //
+				.map(preset -> { //
+					var btn = new RadioButton(preset.name());
+					btn.setUserData(preset.path());
+					return btn;
+				}).toList();
 	}
 
-	private boolean validateVaultPathAndSetStatus() {
-		final Path p = vaultPath.get();
-		if (p == null) {
-			statusText.set("Error: Path is NULL.");
-			statusGraphic.set(badLocation);
-			return false;
-		} else if (!Files.exists(p.getParent())) {
-			statusText.set(resourceBundle.getString("addvaultwizard.new.locationDoesNotExist"));
-			statusGraphic.set(badLocation);
-			return false;
+	private VaultPathStatus validatePath(Path p) throws NullPointerException {
+		if (!Files.exists(p.getParent())) {
+			return new VaultPathStatus(false, "addvaultwizard.new.locationDoesNotExist");
 		} else if (!isActuallyWritable(p.getParent())) {
-			statusText.set(resourceBundle.getString("addvaultwizard.new.locationIsNotWritable"));
-			statusGraphic.set(badLocation);
-			return false;
+			return new VaultPathStatus(false, "addvaultwizard.new.locationIsNotWritable");
 		} else if (!Files.notExists(p)) {
-			statusText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
-			statusGraphic.set(badLocation);
-			return false;
+			return new VaultPathStatus(false, "addvaultwizard.new.fileAlreadyExists");
 		} else {
-			statusText.set(resourceBundle.getString("addvaultwizard.new.locationIsOk"));
-			statusGraphic.set(goodLocation);
-			return true;
+			return new VaultPathStatus(true, "addvaultwizard.new.locationIsOk");
 		}
 	}
+
+	private void updateStatusLabel(ObservableValue<? extends VaultPathStatus> observable, VaultPathStatus oldValue, VaultPathStatus newValue) {
+		if (newValue.valid()) {
+			locationStatusLabel.setGraphic(goodLocation);
+			locationStatusLabel.getStyleClass().remove("label-red");
+			locationStatusLabel.getStyleClass().add("label-muted");
+		} else {
+			locationStatusLabel.setGraphic(badLocation);
+			locationStatusLabel.getStyleClass().remove("label-muted");
+			locationStatusLabel.getStyleClass().add("label-red");
+		}
+		this.locationStatusLabel.setText(resourceBundle.getString(newValue.localizationKey()));
+	}
+
 
 	private boolean isActuallyWritable(Path p) {
 		Path tmpFile = p.resolve(TEMP_FILE_FORMAT);
@@ -127,26 +132,15 @@ public class CreateNewVaultLocationController implements FxController {
 
 	@FXML
 	public void initialize() {
-		predefinedLocationToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
-		usePresetPath.bind(predefinedLocationToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
+		radioButtonVBox.getChildren().addAll(1, locationPresetBtns); //first item is the list header
+		locationPresetsToggler.getToggles().addAll(locationPresetBtns);
+		locationPresetsToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
+		usePresetPath.bind(locationPresetsToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
 	}
 
 	private void togglePredefinedLocation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
-		if (iclouddriveRadioButton.equals(newValue)) {
-			vaultPath.set(locationPresets.getIclouddriveLocation().resolve(vaultName.get()));
-		} else if (dropboxRadioButton.equals(newValue)) {
-			vaultPath.set(locationPresets.getDropboxLocation().resolve(vaultName.get()));
-		} else if (gdriveRadioButton.equals(newValue)) {
-			vaultPath.set(locationPresets.getGdriveLocation().resolve(vaultName.get()));
-		} else if (onedriveRadioButton.equals(newValue)) {
-			vaultPath.set(locationPresets.getOnedriveLocation().resolve(vaultName.get()));
-		} else if (megaRadioButton.equals(newValue)) {
-			vaultPath.set(locationPresets.getMegaLocation().resolve(vaultName.get()));
-		} else if (pcloudRadioButton.equals(newValue)) {
-			vaultPath.set(locationPresets.getPcloudLocation().resolve(vaultName.get()));
-		} else if (customRadioButton.equals(newValue)) {
-			vaultPath.set(customVaultPath.resolve(vaultName.get()));
-		}
+		var storagePath = Optional.ofNullable((Path) newValue.getUserData()).orElse(customVaultPath);
+		vaultPath.set(storagePath.resolve(vaultName.get()));
 	}
 
 	@FXML
@@ -156,10 +150,8 @@ public class CreateNewVaultLocationController implements FxController {
 
 	@FXML
 	public void next() {
-		if (validateVaultPathAndSetStatus()) {
+		if (validVaultPath.getValue()) {
 			window.setScene(choosePasswordScene.get());
-		} else {
-			validVaultPath.invalidate();
 		}
 	}
 
@@ -179,6 +171,12 @@ public class CreateNewVaultLocationController implements FxController {
 		}
 	}
 
+	/* Internal classes */
+
+	private record VaultPathStatus(boolean valid, String localizationKey) {
+
+	}
+
 	/* Getter/Setter */
 
 	public Path getVaultPath() {
@@ -189,47 +187,28 @@ public class CreateNewVaultLocationController implements FxController {
 		return vaultPath;
 	}
 
-	public BooleanBinding validVaultPathProperty() {
+	public ObservableValue<Boolean> validVaultPathProperty() {
 		return validVaultPath;
 	}
 
-	public Boolean getValidVaultPath() {
-		return validVaultPath.get();
-	}
-
-	public ObservedLocationPresets getObservedLocationPresets() {
-		return locationPresets;
+	public boolean isValidVaultPath() {
+		return validVaultPath.getValue();
 	}
 
 	public BooleanProperty usePresetPathProperty() {
 		return usePresetPath;
 	}
 
-	public boolean getUsePresetPath() {
+	public boolean isUsePresetPath() {
 		return usePresetPath.get();
 	}
 
 	public BooleanBinding anyRadioButtonSelectedProperty() {
-		return predefinedLocationToggler.selectedToggleProperty().isNotNull();
+		return locationPresetsToggler.selectedToggleProperty().isNotNull();
 	}
 
 	public boolean isAnyRadioButtonSelected() {
 		return anyRadioButtonSelectedProperty().get();
 	}
 
-	public StringProperty statusTextProperty() {
-		return statusText;
-	}
-
-	public String getStatusText() {
-		return statusText.get();
-	}
-
-	public ObjectProperty<Node> statusGraphicProperty() {
-		return statusGraphic;
-	}
-
-	public Node getStatusGraphic() {
-		return statusGraphic.get();
-	}
 }

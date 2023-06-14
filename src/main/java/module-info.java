@@ -1,4 +1,16 @@
 import ch.qos.logback.classic.spi.Configurator;
+import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.GoogleDriveLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.ICloudMacLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.ICloudWindowsLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.LocationPresetsProvider;
+import org.cryptomator.common.locationpresets.MegaLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.OneDriveLinuxLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
@@ -37,6 +49,15 @@ open module org.cryptomator.desktop {
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
 
+	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
+
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
+	provides LocationPresetsProvider with DropboxMacLocationPresetsProvider, //
+			DropboxWindowsLocationPresetsProvider, DropboxLinuxLocationPresetsProvider, //
+			ICloudMacLocationPresetsProvider, ICloudWindowsLocationPresetsProvider, //
+			GoogleDriveLocationPresetsProvider, //
+			PCloudLocationPresetsProvider, MegaLocationPresetsProvider, //
+			OneDriveLinuxLocationPresetsProvider, OneDriveWindowsLocationPresetsProvider, //
+			OneDriveMacLocationPresetsProvider;
 }
