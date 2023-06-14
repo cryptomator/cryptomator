@@ -60,7 +60,7 @@ public class ErrorController implements FxController {
 	private final Environment environment;
 
 	private final BooleanProperty copiedDetails = new SimpleBooleanProperty();
-	private final BooleanProperty lookUpSolutionVisibility = new SimpleBooleanProperty();
+	private final BooleanProperty errorSolutionFound = new SimpleBooleanProperty();
 	private final BooleanProperty isLoadingHttpResponse = new SimpleBooleanProperty();
 	private	ErrorDiscussion matchingErrorDiscussion;
 
@@ -132,13 +132,13 @@ public class ErrorController implements FxController {
 
 	private void loadHttpResponse(HttpResponse<InputStream> response){
 		if (response.statusCode() == 200) {
-			Map<String,ErrorDiscussion> map = new Gson().fromJson(
+			Map<String,ErrorDiscussion> errorDiscussionMap = new Gson().fromJson(
 					new InputStreamReader(response.body(),StandardCharsets.UTF_8),
 					new TypeToken<Map<String,ErrorDiscussion>>(){}.getType());
 
-			if(map.values().stream().anyMatch(this::isPartialMatchFilter)) {
+			if(errorDiscussionMap.values().stream().anyMatch(this::isPartialMatchFilter)) {
 				Comparator<ErrorDiscussion> comp = this::compareExactMatch;
-				Optional<ErrorDiscussion> value = map.values().stream().min(comp
+				Optional<ErrorDiscussion> value = errorDiscussionMap.values().stream().min(comp
 						.thenComparing(this::compareSecondLevelMatch)
 						.thenComparing(this::compareThirdLevelMatch)
 						.thenComparing(this::compareIsAnswered)
@@ -146,7 +146,7 @@ public class ErrorController implements FxController {
 
 				if(value.isPresent()){
 					matchingErrorDiscussion = value.get();
-					lookUpSolutionVisibility.set(true);
+					errorSolutionFound.set(true);
 				}
 			}
 		}
@@ -156,10 +156,30 @@ public class ErrorController implements FxController {
 		return errorDiscussion.title.contains(" " + errorCode.methodCode());
 	}
 
+	/**
+	 * Compares two ErrorDiscussion objects based on their upvote counts and returns the result.
+	 *
+	 * @param ed1 The first ErrorDiscussion object.
+	 * @param ed2 The second ErrorDiscussion object.
+	 * @return An integer indicating which ErrorDiscussion object has a higher upvote count:
+	 *         - A positive value if ed2 has a higher upvote count than ed1,
+	 *         - A negative value if ed1 has a higher upvote count than ed2,
+	 *         - Or 0 if both upvote counts are equal.
+	 */
 	public int compareUpvoteCount(ErrorDiscussion ed1, ErrorDiscussion ed2) {
 		return Integer.compare(ed2.upvoteCount, ed1.upvoteCount);
 	}
 
+	/**
+	 * Compares two ErrorDiscussion objects based on their answered status and returns the result.
+	 *
+	 * @param ed1 The first ErrorDiscussion object.
+	 * @param ed2 The second ErrorDiscussion object.
+	 * @return An integer indicating the answered status of the ErrorDiscussion objects:
+	 *         - A negative value (-1) if ed1 is considered answered and ed2 is considered unanswered,
+	 *         - A positive value (1) if ed1 is considered unanswered and ed2 is considered answered,
+	 *         - Or 0 if both ErrorDiscussion objects are considered answered or unanswered.
+	 */
 	public int compareIsAnswered(ErrorDiscussion ed1, ErrorDiscussion ed2) {
 		if (ed1.answer!=null && ed2.answer==null) {
 			return -1;
@@ -169,6 +189,17 @@ public class ErrorController implements FxController {
 			return 0;
 		}
 	}
+
+	/**
+	 * Compares two ErrorDiscussion objects based on the presence of an exact match with the error code in their titles and returns the result.
+	 *
+	 * @param ed1 The first ErrorDiscussion object.
+	 * @param ed2 The second ErrorDiscussion object.
+	 * @return An integer indicating the comparison result based on the presence of an exact match with the error code in the titles:
+	 *         - A negative value (-1) if ed1 has an exact match with the error code in the title and ed2 does not have a match,
+	 *         - A positive value (1) if ed1 does not have a match and ed2 has an exact match with the error code in the title,
+	 *         - Or 0 if both ErrorDiscussion objects either have an exact match or do not have a match with the error code in the titles.
+	 */
 	public int compareExactMatch(ErrorDiscussion ed1, ErrorDiscussion ed2) {
 		if (ed1.title.contains(getErrorCode()) && !ed2.title.contains(getErrorCode())) {
 			return -1;
@@ -179,6 +210,16 @@ public class ErrorController implements FxController {
 		}
 	}
 
+	/**
+	 * Compares two ErrorDiscussion objects based on the presence of a second-level match with the error code in their titles and returns the result.
+	 *
+	 * @param ed1 The first ErrorDiscussion object.
+	 * @param ed2 The second ErrorDiscussion object.
+	 * @return An integer indicating the comparison result based on the presence of a second-level match with the error code in the titles:
+	 *         - A negative value (-1) if ed1 has a second-level match with the error code in the title and ed2 does not have a match,
+	 *         - A positive value (1) if ed1 does not have a match and ed2 has a second-level match with the error code in the title,
+	 *         - Or 0 if both ErrorDiscussion objects either have a second-level match or do not have a match with the error code in the titles.
+	 */
 	public int compareSecondLevelMatch(ErrorDiscussion ed1, ErrorDiscussion ed2) {
 		String value = " " + errorCode.methodCode() + ErrorCode.DELIM + errorCode.rootCauseCode();
 		if (ed1.title.contains(value) && !ed2.title.contains(value)) {
@@ -190,6 +231,16 @@ public class ErrorController implements FxController {
 		}
 	}
 
+	/**
+	 * Compares two ErrorDiscussion objects based on the presence of a third-level match with the error code in their titles and returns the result.
+	 *
+	 * @param ed1 The first ErrorDiscussion object.
+	 * @param ed2 The second ErrorDiscussion object.
+	 * @return An integer indicating the comparison result based on the presence of a third-level match with the error code in the titles:
+	 *         - A negative value (-1) if ed1 has a third-level match with the error code in the title and ed2 does not have a match,
+	 *         - A positive value (1) if ed1 does not have a match and ed2 has a third-level match with the error code in the title,
+	 *         - Or 0 if both ErrorDiscussion objects either have a third-level match or do not have a match with the error code in the titles.
+	 */
 	public int compareThirdLevelMatch(ErrorDiscussion ed1, ErrorDiscussion ed2) {
 		String value = " " + errorCode.methodCode();
 		if (ed1.title.contains(value) && !ed2.title.contains(value)) {
@@ -226,12 +277,12 @@ public class ErrorController implements FxController {
 		return copiedDetails.get();
 	}
 
-	public BooleanProperty lookUpSolutionVisibilityProperty() {
-		return lookUpSolutionVisibility;
+	public BooleanProperty errorSolutionFoundProperty() {
+		return errorSolutionFound;
 	}
 
-	public boolean getLookUpSolutionVisibility() {
-		return lookUpSolutionVisibility.get();
+	public boolean getErrorSolutionFound() {
+		return errorSolutionFound.get();
 	}
 
 	public BooleanProperty isLoadingHttpResponseProperty() {
