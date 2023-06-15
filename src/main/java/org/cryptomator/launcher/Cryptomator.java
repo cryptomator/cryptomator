@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.PropertiesPreprocessor;
 import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
@@ -63,7 +64,7 @@ public class Cryptomator {
 			System.out.printf("Cryptomator version %s (build %s)%n", appVer, buildNumber);
 			return;
 		}
-
+		PropertiesPreprocessor.run();
 		int exitCode = CRYPTOMATOR_COMPONENT.application().run(args);
 		LOG.info("Exit {}", exitCode);
 		System.exit(exitCode); // end remaining non-daemon threads.
