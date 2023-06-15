@@ -152,6 +152,14 @@ public class ErrorController implements FxController {
 		}
 	}
 
+	/**
+	 * Checks if an ErrorDiscussion object is a partial match based on the presence of the error code's method code in its title.
+	 *
+	 * @param errorDiscussion The ErrorDiscussion object to be checked.
+	 * @return A boolean value indicating if the ErrorDiscussion object is a partial match:
+	 *         - true if the object's title contains the error code's method code,
+	 *         - false otherwise.
+	 */
 	public boolean isPartialMatchFilter(ErrorDiscussion errorDiscussion) {
 		return errorDiscussion.title.contains(" " + errorCode.methodCode());
 	}

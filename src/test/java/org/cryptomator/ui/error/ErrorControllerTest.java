@@ -55,23 +55,13 @@ class ErrorControllerTest {
 	@CsvSource(textBlock = """
 		10, 5, -1 
 		8, 15, 1 
+		10, 10, 0
 		""")
-	public void testCompareUpvoteCount1(int leftUpvoteCount, int rightUpvoteCount, int expectedResult) {
+	public void testCompareUpvoteCount(int leftUpvoteCount, int rightUpvoteCount, int expectedResult) {
 		var left = createErrorDiscussion("", leftUpvoteCount, null);
 		var right = createErrorDiscussion("", rightUpvoteCount, null);
 		int result = errorController.compareUpvoteCount(left, right);
-		Assertions.assertTrue(result*expectedResult>0);
-	}
-
-	@ParameterizedTest
-	@CsvSource(textBlock = """
-		10, 10 
-		""")
-	public void testCompareUpvoteCount2(int leftUpvoteCount, int rightUpvoteCount) {
-		var left = createErrorDiscussion("", leftUpvoteCount, null);
-		var right = createErrorDiscussion("", rightUpvoteCount, null);
-		int result = errorController.compareUpvoteCount(left, right);
-		Assertions.assertEquals(0,result);
+		Assertions.assertEquals(expectedResult,Integer.signum(result));
 	}
 
 	@ParameterizedTest
