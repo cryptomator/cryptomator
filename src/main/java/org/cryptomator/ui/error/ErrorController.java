@@ -103,7 +103,7 @@ public class ErrorController implements FxController {
 		if (matchingErrorDiscussion.isNotNull().get()) {
 			var discussion = matchingErrorDiscussion.get();
 			if (discussion != null) {
-				application.getHostServices().showDocument(matchingErrorDiscussion.get().url);
+				application.getHostServices().showDocument(discussion.url);
 			}
 		}
 	}
