@@ -11,8 +11,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.input.Clipboard;
@@ -60,9 +63,9 @@ public class ErrorController implements FxController {
 	private final Environment environment;
 
 	private final BooleanProperty copiedDetails = new SimpleBooleanProperty();
-	private final BooleanProperty errorSolutionFound = new SimpleBooleanProperty();
+	private final ObjectProperty matchingErrorDiscussion = new SimpleObjectProperty();
+	private final BooleanExpression errorSolutionFound = matchingErrorDiscussion.isNotNull();
 	private final BooleanProperty isLoadingHttpResponse = new SimpleBooleanProperty();
-	private ErrorDiscussion matchingErrorDiscussion;
 
 	@Inject
 	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window, Environment environment, ExecutorService executorService) {
@@ -97,8 +100,9 @@ public class ErrorController implements FxController {
 
 	@FXML
 	public void showSolution() {
-		if (matchingErrorDiscussion != null) {
-			application.getHostServices().showDocument(matchingErrorDiscussion.url);
+		if (matchingErrorDiscussion.isNotNull().get()) {
+			ErrorDiscussion ed = (ErrorDiscussion) matchingErrorDiscussion.get();
+			application.getHostServices().showDocument(ed.url);
 		}
 	}
 
@@ -137,31 +141,30 @@ public class ErrorController implements FxController {
 					new TypeToken<Map<String, ErrorDiscussion>>() {
 					}.getType());
 
-			if (errorDiscussionMap.values().stream().anyMatch(this::isPartialMatchFilter)) {
-				Comparator<ErrorDiscussion> comp = this::compareExactMatch;
-				Optional<ErrorDiscussion> value = errorDiscussionMap.values().stream().min(comp//
-						.thenComparing(this::compareSecondLevelMatch)//
-						.thenComparing(this::compareThirdLevelMatch)//
-						.thenComparing(this::compareIsAnswered)//
-						.thenComparing(this::compareUpvoteCount));
+			if (errorDiscussionMap.values().stream().anyMatch(this::containsMethodCode)) {
+				Comparator<ErrorDiscussion> comp = this::compareByFullErrorCode;
+				Optional<ErrorDiscussion> value = errorDiscussionMap.values().stream().filter(this::containsMethodCode)//
+						.min(comp//
+								.thenComparing(this::compareByRootCauseCode)//
+								.thenComparing(this::compareIsAnswered)//
+								.thenComparing(this::compareUpvoteCount));
 
 				if (value.isPresent()) {
-					matchingErrorDiscussion = value.get();
-					errorSolutionFound.set(true);
+					matchingErrorDiscussion.set(value.get());
 				}
 			}
 		}
 	}
 
 	/**
-	 * Checks if an ErrorDiscussion object is a partial match based on the presence of the error code's method code in its title.
+	 * Checks if an ErrorDiscussion object's title contains the error code's method code.
 	 *
 	 * @param errorDiscussion The ErrorDiscussion object to be checked.
-	 * @return A boolean value indicating if the ErrorDiscussion object is a partial match:
-	 * - true if the object's title contains the error code's method code,
+	 * @return A boolean value indicating if the ErrorDiscussion object's title contains the error code's method code:
+	 * - true if the title contains the method code,
 	 * - false otherwise.
 	 */
-	public boolean isPartialMatchFilter(ErrorDiscussion errorDiscussion) {
+	public boolean containsMethodCode(ErrorDiscussion errorDiscussion) {
 		return errorDiscussion.title.contains(" " + errorCode.methodCode());
 	}
 
@@ -200,16 +203,16 @@ public class ErrorController implements FxController {
 	}
 
 	/**
-	 * Compares two ErrorDiscussion objects based on the presence of an exact match with the error code in their titles and returns the result.
+	 * Compares two ErrorDiscussion objects based on the presence of the full error code in their titles and returns the result.
 	 *
 	 * @param ed1 The first ErrorDiscussion object.
 	 * @param ed2 The second ErrorDiscussion object.
-	 * @return An integer indicating the comparison result based on the presence of an exact match with the error code in the titles:
-	 * - A negative value (-1) if ed1 has an exact match with the error code in the title and ed2 does not have a match,
-	 * - A positive value (1) if ed1 does not have a match and ed2 has an exact match with the error code in the title,
-	 * - Or 0 if both ErrorDiscussion objects either have an exact match or do not have a match with the error code in the titles.
+	 * @return An integer indicating the comparison result based on the presence of the full error code in the titles:
+	 * - A negative value (-1) if ed1 contains the full error code in the title and ed2 does not have a match,
+	 * - A positive value (1) if ed1 does not have a match and ed2 contains the full error code in the title,
+	 * - Or 0 if both ErrorDiscussion objects either contain the full error code or do not have a match in the titles.
 	 */
-	public int compareExactMatch(ErrorDiscussion ed1, ErrorDiscussion ed2) {
+	public int compareByFullErrorCode(ErrorDiscussion ed1, ErrorDiscussion ed2) {
 		if (ed1.title.contains(getErrorCode()) && !ed2.title.contains(getErrorCode())) {
 			return -1;
 		} else if (!ed1.title.contains(getErrorCode()) && ed2.title.contains(getErrorCode())) {
@@ -220,38 +223,17 @@ public class ErrorController implements FxController {
 	}
 
 	/**
-	 * Compares two ErrorDiscussion objects based on the presence of a second-level match with the error code in their titles and returns the result.
+	 * Compares two ErrorDiscussion objects based on the presence of the root cause code in their titles and returns the result.
 	 *
 	 * @param ed1 The first ErrorDiscussion object.
 	 * @param ed2 The second ErrorDiscussion object.
-	 * @return An integer indicating the comparison result based on the presence of a second-level match with the error code in the titles:
-	 * - A negative value (-1) if ed1 has a second-level match with the error code in the title and ed2 does not have a match,
-	 * - A positive value (1) if ed1 does not have a match and ed2 has a second-level match with the error code in the title,
-	 * - Or 0 if both ErrorDiscussion objects either have a second-level match or do not have a match with the error code in the titles.
+	 * @return An integer indicating the comparison result based on the presence of the root cause code in the titles:
+	 * - A negative value (-1) if ed1 contains the root cause code in the title and ed2 does not have a match,
+	 * - A positive value (1) if ed1 does not have a match and ed2 contains the root cause code in the title,
+	 * - Or 0 if both ErrorDiscussion objects either contain the root cause code or do not have a match in the titles.
 	 */
-	public int compareSecondLevelMatch(ErrorDiscussion ed1, ErrorDiscussion ed2) {
+	public int compareByRootCauseCode(ErrorDiscussion ed1, ErrorDiscussion ed2) {
 		String value = " " + errorCode.methodCode() + ErrorCode.DELIM + errorCode.rootCauseCode();
-		if (ed1.title.contains(value) && !ed2.title.contains(value)) {
-			return -1;
-		} else if (!ed1.title.contains(value) && ed2.title.contains(value)) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
-
-	/**
-	 * Compares two ErrorDiscussion objects based on the presence of a third-level match with the error code in their titles and returns the result.
-	 *
-	 * @param ed1 The first ErrorDiscussion object.
-	 * @param ed2 The second ErrorDiscussion object.
-	 * @return An integer indicating the comparison result based on the presence of a third-level match with the error code in the titles:
-	 * - A negative value (-1) if ed1 has a third-level match with the error code in the title and ed2 does not have a match,
-	 * - A positive value (1) if ed1 does not have a match and ed2 has a third-level match with the error code in the title,
-	 * - Or 0 if both ErrorDiscussion objects either have a third-level match or do not have a match with the error code in the titles.
-	 */
-	public int compareThirdLevelMatch(ErrorDiscussion ed1, ErrorDiscussion ed2) {
-		String value = " " + errorCode.methodCode();
 		if (ed1.title.contains(value) && !ed2.title.contains(value)) {
 			return -1;
 		} else if (!ed1.title.contains(value) && ed2.title.contains(value)) {
@@ -286,7 +268,7 @@ public class ErrorController implements FxController {
 		return copiedDetails.get();
 	}
 
-	public BooleanProperty errorSolutionFoundProperty() {
+	public BooleanExpression errorSolutionFoundProperty() {
 		return errorSolutionFound;
 	}
 
