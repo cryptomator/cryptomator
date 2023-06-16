@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class PropertiesPreprocessor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PropertiesPreprocessor.class);
-	private static final Pattern TEMPLATE = Pattern.compile("@\\((.+)\\)");
+	private static final Pattern TEMPLATE = Pattern.compile("@\\{(\\w+)}");
 	private static final LoggingEnvironment ENV = new LoggingEnvironment(System.getenv(), LOG);
 
 	public static void run() {
@@ -29,12 +29,12 @@ public class PropertiesPreprocessor {
 
 	private static String process(String value) {
 		return TEMPLATE.matcher(value).replaceAll(match -> //
-				switch (match.group().substring(2, match.group().length() - 1)) {
+				switch (match.group(1)) {
 					case "appdir" -> ENV.get("APPDIR");
 					case "appdata" -> ENV.get("APPDATA");
 					case "userhome" -> System.getProperty("user.home");
 					default -> {
-						LOG.warn("Found unknown keyword {} in property value {}. Keyword is not replaced.", match.group(), value);
+						LOG.warn("Found unknown variable @{{}} in property value {}.", match.group(), value);
 						yield match.group();
 					}
 				});
