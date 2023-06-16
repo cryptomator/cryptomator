@@ -129,7 +129,7 @@ public class ErrorController implements FxController {
 	@FXML
 	public void copyDetails() {
 		ClipboardContent clipboardContent = new ClipboardContent();
-		clipboardContent.putString(getDetailText());
+		clipboardContent.putString("```\n" + getDetailText() + "\n```");
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
 
 		copiedDetails.set(true);
@@ -259,7 +259,7 @@ public class ErrorController implements FxController {
 	}
 
 	public String getDetailText() {
-		return "```\nError Code " + getErrorCode() + "\n" + getStackTrace() + "\n```";
+		return "Error Code " + getErrorCode() + "\n" + getStackTrace();
 	}
 
 	public BooleanProperty copiedDetailsProperty() {
