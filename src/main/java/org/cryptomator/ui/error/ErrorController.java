@@ -63,7 +63,7 @@ public class ErrorController implements FxController {
 	private final Environment environment;
 
 	private final BooleanProperty copiedDetails = new SimpleBooleanProperty();
-	private final ObjectProperty matchingErrorDiscussion = new SimpleObjectProperty();
+	private final ObjectProperty<ErrorDiscussion> matchingErrorDiscussion = new SimpleObjectProperty<>();
 	private final BooleanExpression errorSolutionFound = matchingErrorDiscussion.isNotNull();
 	private final BooleanProperty isLoadingHttpResponse = new SimpleBooleanProperty();
 
@@ -101,8 +101,10 @@ public class ErrorController implements FxController {
 	@FXML
 	public void showSolution() {
 		if (matchingErrorDiscussion.isNotNull().get()) {
-			ErrorDiscussion ed = (ErrorDiscussion) matchingErrorDiscussion.get();
-			application.getHostServices().showDocument(ed.url);
+			var discussion = matchingErrorDiscussion.get();
+			if (discussion != null) {
+				application.getHostServices().showDocument(matchingErrorDiscussion.get().url);
+			}
 		}
 	}
 
