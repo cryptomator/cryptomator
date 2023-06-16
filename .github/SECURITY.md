@@ -4,7 +4,7 @@
 
 We take security seriously at Cryptomator. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
 
-To report a security vulnerability, please use the GitHub Security Advisory feature. This feature allows you to privately discuss, fix, and publish information about security vulnerabilities.
+To report a security vulnerability, please use the [GitHub Security Advisory feature](https://github.com/cryptomator/cryptomator/security/advisories). This feature allows you to privately discuss, fix, and publish information about security vulnerabilities.
 
 If you prefer to report the vulnerability via email, please send an email to security@cryptomator.org.
 
