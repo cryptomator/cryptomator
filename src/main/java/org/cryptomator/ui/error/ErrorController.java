@@ -45,13 +45,13 @@ public class ErrorController implements FxController {
 	private static final String REPORT_BODY_TEMPLATE = """
 			OS: %s / %s
 			App: %s / %s
-						
+			
 			<!-- ✏ Please describe what happened as accurately as possible. -->
-						
+			
 			<!-- 📋 Please also copy and paste the detail text from the error window. -->
-						
+			
 			<!-- ℹ Text enclosed like this (chevrons, exclamation mark, two dashes) is not visible to others! -->
-						
+			
 			<!-- ❗ If the description or the detail text is missing, the discussion will be deleted. -->
 			""";
 
