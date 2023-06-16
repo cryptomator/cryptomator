@@ -97,7 +97,11 @@ public class Mounter {
 				}
 			} else {
 				var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
-				if (!mpIsDriveLetter && canMountToParent && !canMountToDir) {
+				if (mpIsDriveLetter) {
+					if (driveLetters.getOccupied().contains(userChosenMountPoint)) {
+						throw new MountPointInUseException(userChosenMountPoint.toString());
+					}
+				} else if (canMountToParent && !canMountToDir) {
 					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
 					cleanup = () -> {
 						MountWithinParentUtil.cleanup(userChosenMountPoint);
