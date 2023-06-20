@@ -22,41 +22,7 @@ public class EnvironmentTest {
 	@BeforeEach
 	public void init() {
 		env = Mockito.spy(Environment.getInstance());
-		Mockito.when(env.getHomeDir()).thenReturn(Path.of("/home/testuser"));
 	}
-
-	@Test
-	@DisplayName("cryptomator.settingsPath=~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json")
-	public void testSettingsPath() {
-		System.setProperty("cryptomator.settingsPath", "~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json");
-
-		List<Path> result = env.getSettingsPath().toList();
-		MatcherAssert.assertThat(result, Matchers.hasSize(2));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/settings.json"), //
-				Paths.get("/home/testuser/.Cryptomator/settings.json")));
-	}
-
-	@Test
-	@DisplayName("cryptomator.ipcSocketPath=~/.config/Cryptomator/ipc.socket:~/.Cryptomator/ipc.socket")
-	public void testIpcSocketPath() {
-		System.setProperty("cryptomator.ipcSocketPath", "~/.config/Cryptomator/ipc.socket:~/.Cryptomator/ipc.socket");
-
-		List<Path> result = env.ipcSocketPath().toList();
-		MatcherAssert.assertThat(result, Matchers.hasSize(2));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/ipc.socket"), //
-				Paths.get("/home/testuser/.Cryptomator/ipc.socket")));
-	}
-
-	@Test
-	@DisplayName("cryptomator.integrationsWin.keychainPaths=~/AppData/Roaming/Cryptomator/keychain.json")
-	public void testKeychainPath() {
-		System.setProperty("cryptomator.integrationsWin.keychainPaths", "~/AppData/Roaming/Cryptomator/keychain.json");
-
-		List<Path> result = env.getKeychainPath().toList();
-		MatcherAssert.assertThat(result, Matchers.hasSize(1));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/AppData/Roaming/Cryptomator/keychain.json")));
-	}
-
 	@Test
 	@DisplayName("cryptomator.logDir=/foo/bar")
 	public void testAbsoluteLogDir() {
@@ -65,17 +31,6 @@ public class EnvironmentTest {
 		Optional<Path> logDir = env.getLogDir();
 
 		Assertions.assertTrue(logDir.isPresent());
-	}
-
-	@Test
-	@DisplayName("cryptomator.logDir=~/foo/bar")
-	public void testRelativeLogDir() {
-		System.setProperty("cryptomator.logDir", "~/foo/bar");
-
-		Optional<Path> logDir = env.getLogDir();
-
-		Assertions.assertTrue(logDir.isPresent());
-		Assertions.assertEquals(Paths.get("/home/testuser/foo/bar"), logDir.get());
 	}
 
 	@Nested
@@ -99,28 +54,6 @@ public class EnvironmentTest {
 
 			MatcherAssert.assertThat(result, Matchers.hasSize(1));
 			MatcherAssert.assertThat(result, Matchers.hasItem(Paths.get("/foo/bar/test")));
-		}
-
-		@Test
-		@DisplayName("test.path.property=~/test")
-		public void testSingleHomeRelativePath() {
-			System.setProperty("test.path.property", "~/test");
-			List<Path> result = env.getPaths("test.path.property").toList();
-
-			MatcherAssert.assertThat(result, Matchers.hasSize(1));
-			MatcherAssert.assertThat(result, Matchers.hasItem(Paths.get("/home/testuser/test")));
-		}
-
-		@Test
-		@DisplayName("test.path.property=~/test:~/test2:/foo/bar/test")
-		public void testMultiplePaths() {
-			System.setProperty("test.path.property", "~/test:~/test2:/foo/bar/test");
-			List<Path> result = env.getPaths("test.path.property").toList();
-
-			MatcherAssert.assertThat(result, Matchers.hasSize(3));
-			MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/test"), //
-					Paths.get("/home/testuser/test2"), //
-					Paths.get("/foo/bar/test")));
 		}
 
 	}

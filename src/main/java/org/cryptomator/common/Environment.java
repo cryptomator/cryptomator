@@ -18,7 +18,6 @@ import java.util.stream.StreamSupport;
 public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
-	private static final Path RELATIVE_HOME_DIR = Paths.get("~");
 	private static final char PATH_LIST_SEP = ':';
 	private static final int DEFAULT_MIN_PW_LENGTH = 8;
 	private static final String SETTINGS_PATH_PROP_NAME = "cryptomator.settingsPath";
@@ -89,7 +88,7 @@ public class Environment {
 	}
 
 	public Optional<Path> getLogDir() {
-		return getPath(LOG_DIR_PROP_NAME).map(this::replaceHomeDir);
+		return getPath(LOG_DIR_PROP_NAME);
 	}
 
 	public Optional<String> getLoopbackAlias() {
@@ -97,11 +96,11 @@ public class Environment {
 	}
 
 	public Optional<Path> getPluginDir() {
-		return getPath(PLUGIN_DIR_PROP_NAME).map(this::replaceHomeDir);
+		return getPath(PLUGIN_DIR_PROP_NAME);
 	}
 
 	public Optional<Path> getMountPointsDir() {
-		return getPath(MOUNTPOINT_DIR_PROP_NAME).map(this::replaceHomeDir);
+		return getPath(MOUNTPOINT_DIR_PROP_NAME);
 	}
 
 	/**
@@ -131,22 +130,9 @@ public class Environment {
 	}
 
 	// visible for testing
-	public Path getHomeDir() {
-		return getPath("user.home").orElseThrow();
-	}
-
-	// visible for testing
 	public Stream<Path> getPaths(String propertyName) {
 		Stream<String> rawSettingsPaths = getRawList(propertyName, PATH_LIST_SEP);
-		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Paths::get).map(this::replaceHomeDir);
-	}
-
-	private Path replaceHomeDir(Path path) {
-		if (path.startsWith(RELATIVE_HOME_DIR)) {
-			return getHomeDir().resolve(RELATIVE_HOME_DIR.relativize(path));
-		} else {
-			return path;
-		}
+		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Path::of);
 	}
 
 	private Stream<String> getRawList(String propertyName, char separator) {
