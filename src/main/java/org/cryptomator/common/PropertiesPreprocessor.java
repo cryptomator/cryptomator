@@ -33,9 +33,9 @@ public class PropertiesPreprocessor {
 		return TEMPLATE.matcher(value).replaceAll(match -> //
 				switch (match.group(1)) {
 					case "appdir" -> ENV.get("APPDIR");
-					case "appdata" -> ENV.get("APPDATA");
-					case "localappdata" -> ENV.get("LOCALAPPDATA");
-					case "userhome" -> System.getProperty("user.home");
+					case "appdata" -> ENV.get("APPDATA").replace("\\","\\\\");
+					case "localappdata" -> ENV.get("LOCALAPPDATA").replace("\\","\\\\");
+					case "userhome" -> System.getProperty("user.home").replace("\\","\\\\");
 					default -> {
 						LOG.warn("Found unknown variable @{{}} in property value {}.", match.group(), value);
 						yield match.group();
