@@ -2,6 +2,7 @@ package org.cryptomator.common;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,7 @@ import java.util.stream.StreamSupport;
 public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
-	private static final char PATH_LIST_SEP = ':';
+	private static final char PATH_LIST_SEP = SystemUtils.IS_OS_WINDOWS? ';':':';
 	private static final int DEFAULT_MIN_PW_LENGTH = 8;
 	private static final String SETTINGS_PATH_PROP_NAME = "cryptomator.settingsPath";
 	private static final String IPC_SOCKET_PATH_PROP_NAME = "cryptomator.ipcSocketPath";

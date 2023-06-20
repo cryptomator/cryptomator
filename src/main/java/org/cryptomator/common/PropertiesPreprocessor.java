@@ -34,6 +34,7 @@ public class PropertiesPreprocessor {
 				switch (match.group(1)) {
 					case "appdir" -> ENV.get("APPDIR");
 					case "appdata" -> ENV.get("APPDATA");
+					case "localappdata" -> ENV.get("LOCALAPPDATA");
 					case "userhome" -> System.getProperty("user.home");
 					default -> {
 						LOG.warn("Found unknown variable @{{}} in property value {}.", match.group(), value);
