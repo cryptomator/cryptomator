@@ -1,5 +1,6 @@
 package org.cryptomator.common;
 
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,8 @@ public class PropertiesPreprocessor {
 		LOG.info("Preprocessed cryptomator properties.");
 	}
 
-	private static String process(String value) {
+	@VisibleForTesting
+	static String process(String value) {
 		return TEMPLATE.matcher(value).replaceAll(match -> //
 				switch (match.group(1)) {
 					case "appdir" -> ENV.get("APPDIR");
