@@ -43,6 +43,7 @@ public class ReceiveKeyController implements FxController {
 	private final String deviceId;
 	private final String bearerToken;
 	private final CompletableFuture<ReceivedKey> result;
+	private final Lazy<Scene> setupDeviceScene;
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
 	private final URI vaultBaseUri;
@@ -50,12 +51,13 @@ public class ReceiveKeyController implements FxController {
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_SETUP_DEVICE) Lazy<Scene> setupDeviceScene, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.result = result;
+		this.setupDeviceScene = setupDeviceScene;
 		this.registerDeviceScene = registerDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
 		this.vaultBaseUri = getVaultBaseUri(vault);
@@ -127,12 +129,16 @@ public class ReceiveKeyController implements FxController {
 		try {
 			switch (response.statusCode()) {
 				case 200 -> receivedDeviceTokenSuccess(userToken, response.body());
-				case 403, 404 -> needsDeviceRegistration();
+				case 403, 404 -> needsDeviceSetup();
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	private void needsDeviceSetup() {
+		window.setScene(setupDeviceScene.get());
 	}
 
 	private void receivedDeviceTokenSuccess(String rawUserToken, String rawDeviceToken) throws IOException {
@@ -171,7 +177,7 @@ public class ReceiveKeyController implements FxController {
 				case 200 -> receivedLegacyAccessTokenSuccess(response.body());
 				case 402 -> licenseExceeded();
 				case 403 -> accessNotGranted();
-				case 404 -> needsDeviceRegistration();
+				case 404 -> needsLegacyDeviceRegistration();
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
@@ -193,7 +199,7 @@ public class ReceiveKeyController implements FxController {
 		window.setScene(invalidLicenseScene.get());
 	}
 
-	private void needsDeviceRegistration() {
+	private void needsLegacyDeviceRegistration() {
 		window.setScene(registerDeviceScene.get());
 	}
 

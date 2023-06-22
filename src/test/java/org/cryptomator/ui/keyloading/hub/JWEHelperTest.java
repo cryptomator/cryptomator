@@ -3,7 +3,6 @@ package org.cryptomator.ui.keyloading.hub;
 import com.nimbusds.jose.JWEObject;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.P384KeyPair;
-import org.cryptomator.cryptolib.shaded.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
