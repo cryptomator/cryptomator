@@ -38,7 +38,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -116,12 +115,14 @@ public class SetupDeviceController implements FxController {
 		httpClient.sendAsync(userReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
 				.thenApply(response -> {
 					if (response.statusCode() == 200) {
-						return GSON.fromJson(response.body(), UserDto.class);
+						var dto = GSON.fromJson(response.body(), UserDto.class);
+						return Objects.requireNonNull(dto, "null or empty response body");
 					} else {
 						throw new RuntimeException("Server answered with unexpected status code " + response.statusCode());
 					}
 				}).thenApply(user -> {
 					try {
+						// TODO: if user.privateKey == null, link to "initial setup"
 						var userKey = JWEHelper.decryptUserKey(JWEObject.parse(user.privateKey), setupCodeField.getText());
 						return JWEHelper.encryptUserKey(userKey, deviceKeyPair.getPublic());
 					} catch (ParseException e) {
@@ -180,13 +181,6 @@ public class SetupDeviceController implements FxController {
 		result.cancel(true);
 	}
 
-	/* Getter */
-
-	public String getUserName() {
-		return jwt.getClaim("email").asString();
-	}
-
-
 	//--- Getters & Setters
 
 	public BooleanProperty deviceNameAlreadyExistsProperty() {
@@ -198,7 +192,8 @@ public class SetupDeviceController implements FxController {
 	}
 
 
-	private class UserDto {
+	// TODO convert to record?
+	private static class UserDto {
 		public String id;
 		public String name;
 		public @Nullable String publicKey;
