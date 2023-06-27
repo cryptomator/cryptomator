@@ -5,6 +5,8 @@ import org.cryptomator.integrations.common.OperatingSystem;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
@@ -15,16 +17,23 @@ import static org.cryptomator.integrations.common.OperatingSystem.Value.WINDOWS;
 @CheckAvailability
 public final class PCloudLocationPresetsProvider implements LocationPresetsProvider {
 
-
-	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/pCloudDrive");
+	private static final List<Path> LOCATIONS = Arrays.asList( //
+			LocationPresetsProvider.resolveLocation("~/pCloudDrive"), //
+			LocationPresetsProvider.resolveLocation("~/pCloud Drive") //
+	);
 
 	@CheckAvailability
 	public static boolean isPresent() {
-		return Files.isDirectory(LOCATION);
+		return LOCATIONS.stream().anyMatch(Files::isDirectory);
 	}
 
 	@Override
 	public Stream<LocationPreset> getLocations() {
-		return Stream.of(new LocationPreset("pCloud", LOCATION));
+		return LOCATIONS.stream() //
+				.filter(Files::isDirectory) //
+				.map(location -> new LocationPreset("pCloud", location)) //
+				.findFirst() //
+				.stream();
 	}
+
 }
