@@ -34,10 +34,7 @@ public class Environment {
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 
-	private Environment() {
-		//hack, needed for logging directory to be setup correctly
-		PropertiesPreprocessor.run();
-	}
+	private Environment() {}
 
 	public void log() {
 		LOG.info("user.home: {}", System.getProperty("user.home"));
