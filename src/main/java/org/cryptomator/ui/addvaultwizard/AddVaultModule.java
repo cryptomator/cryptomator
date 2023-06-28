@@ -66,6 +66,13 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
+	@Named("shorteningThreshold")
+	@AddVaultWizardScoped
+	static StringProperty provideShorteningThreshold() {
+		return new SimpleStringProperty();
+	}
+
+	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
 	static ObjectProperty<Vault> provideVault() {
@@ -130,6 +137,13 @@ public abstract class AddVaultModule {
 		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_SUCCESS);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_NEW_ADVANCED_SETTINGS)
+	@AddVaultWizardScoped
+	static Scene provideCreateNewVaultAdvancedSettingsScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_ADVANCED_SETTINGS);
+	}
+
 	// ------------------
 
 	@Binds
@@ -180,5 +194,10 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(AddVaultSuccessController.class)
 	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(CreateNewVaultAdvancedSettingsController.class)
+	abstract FxController bindCreateNewVaultAdvancedSettingsController(CreateNewVaultAdvancedSettingsController controller);
 
 }

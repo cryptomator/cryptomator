@@ -16,7 +16,6 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
-import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URI;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -82,8 +80,26 @@ public class CreateNewVaultPasswordController implements FxController {
 	public Toggle skipRecoveryKey;
 	public NewPasswordController newPasswordSceneController;
 
+	private final StringProperty shorteningThreshold;
+
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows appWindows, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, ReadmeGenerator readmeGenerator, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
+	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, //
+									 @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, //
+									 FxApplicationWindows appWindows, //
+									 ExecutorService executor, //
+									 RecoveryKeyFactory recoveryKeyFactory, //
+									 @Named("vaultName") StringProperty vaultName, //
+									 ObjectProperty<Path> vaultPath, //
+									 @AddVaultWizardWindow ObjectProperty<Vault> vault, //
+									 @Named("recoveryKey") StringProperty recoveryKey, //
+									 VaultListManager vaultListManager, //
+									 ResourceBundle resourceBundle, //
+									 @Named("shorteningThreshold") StringProperty shorteningThreshold, //
+									 ReadmeGenerator readmeGenerator, //
+									 SecureRandom csprng, //
+									 MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.recoveryKeyScene = recoveryKeyScene;
@@ -103,6 +119,11 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.processing = new SimpleBooleanProperty();
 		this.readyToCreateVault = new SimpleBooleanProperty();
 		this.createVaultButtonState = Bindings.when(processing).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
+		this.shorteningThreshold = shorteningThreshold;
+		if(this.shorteningThreshold.isNull().get())
+		{
+			this.shorteningThreshold.set("220");
+		}
 	}
 
 	@FXML
@@ -176,7 +197,11 @@ public class CreateNewVaultPasswordController implements FxController {
 			// 2. initialize vault:
 			try {
 				MasterkeyLoader loader = ignored -> masterkey.copy();
-				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(CryptorProvider.Scheme.SIV_GCM).withKeyLoader(loader).build();
+				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
+						.withCipherCombo(CryptorProvider.Scheme.SIV_GCM) //
+						.withKeyLoader(loader) //
+						.withShorteningThreshold(Integer.parseInt(shorteningThreshold.getValue()))
+						.build();
 				CryptoFileSystemProvider.initialize(path, fsProps, DEFAULT_KEY_ID);
 
 				// 3. write vault-internal readme file:

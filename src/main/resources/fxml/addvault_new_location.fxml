@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.CheckBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultLocationController"
@@ -49,6 +50,10 @@
 			<TextField fx:id="locationTextField" promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" editable="false" disable="${!controller.anyRadioButtonSelected}" HBox.hgrow="ALWAYS"/>
 			<Label fx:id="locationStatusLabel" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" />
 		</VBox>
+
+		<Region prefHeight="12" VBox.vgrow="NEVER"/>
+
+		<CheckBox fx:id="advancedSettingsCheckBox" text="%addvaultwizard.new.showAdvancedSettings.checkbox"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
 

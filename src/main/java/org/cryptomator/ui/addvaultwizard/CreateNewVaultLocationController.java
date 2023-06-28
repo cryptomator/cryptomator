@@ -8,11 +8,14 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
+import org.cryptomator.ui.controls.NumericTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -21,6 +24,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
@@ -49,6 +53,7 @@ public class CreateNewVaultLocationController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
 	private final Lazy<Scene> choosePasswordScene;
+	private final Lazy<Scene> chooseAdvancedSettingsScene;
 	private final List<RadioButton> locationPresetBtns;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
@@ -66,12 +71,20 @@ public class CreateNewVaultLocationController implements FxController {
 	public Label locationStatusLabel;
 	public FontAwesome5IconView goodLocation;
 	public FontAwesome5IconView badLocation;
+	public CheckBox advancedSettingsCheckBox;
 
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_ADVANCED_SETTINGS) Lazy<Scene> chooseAdvancedSettingsScene, //
+									 ObjectProperty<Path> vaultPath, //
+									 @Named("vaultName") StringProperty vaultName, //
+									 ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
 		this.choosePasswordScene = choosePasswordScene;
+		this.chooseAdvancedSettingsScene = chooseAdvancedSettingsScene;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
@@ -151,7 +164,12 @@ public class CreateNewVaultLocationController implements FxController {
 	@FXML
 	public void next() {
 		if (validVaultPath.getValue()) {
-			window.setScene(choosePasswordScene.get());
+			if(advancedSettingsCheckBox.isSelected()){
+				window.setScene(chooseAdvancedSettingsScene.get());
+			}
+			else {
+				window.setScene(choosePasswordScene.get());
+			}
 		}
 	}
 
