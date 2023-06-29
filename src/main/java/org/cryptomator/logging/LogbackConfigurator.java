@@ -14,10 +14,12 @@ import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.spi.ContextAwareBase;
 import ch.qos.logback.core.util.FileSize;
-import org.cryptomator.common.Environment;
+import org.cryptomator.common.LazyProcessedProperties;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 
 public class LogbackConfigurator extends ContextAwareBase implements Configurator {
 
@@ -56,8 +58,10 @@ public class LogbackConfigurator extends ContextAwareBase implements Configurato
 
 	@Override
 	public ExecutionStatus configure(LoggerContext context) {
-		var useCustomCfg = Environment.getInstance().useCustomLogbackConfig();
-		var logDir = Environment.getInstance().getLogDir().orElse(null);
+		//we need to preprocess those, because every other class has a dependency to logging, none are initialized yet
+		var processedProps = new LazyProcessedProperties(System.getProperties());
+		var useCustomCfg = Optional.ofNullable(processedProps.getProperty("logback.configurationFile")).map(s -> Files.exists(Path.of(s))).orElse(false);
+		var logDir = Optional.ofNullable(processedProps.getProperty("cryptomator.logDir")).map(Path::of).orElse(null);
 
 		if (useCustomCfg) {
 			addInfo("Using external logback configuration file.");

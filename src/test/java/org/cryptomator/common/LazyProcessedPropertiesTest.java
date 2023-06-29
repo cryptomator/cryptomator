@@ -1,12 +1,11 @@
 package org.cryptomator.common;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mockito;
 
-public class PropertiesPreprocessorTest {
+public class LazyProcessedPropertiesTest {
 
 	@ParameterizedTest
 	@CsvSource(value = """
@@ -17,7 +16,8 @@ public class PropertiesPreprocessorTest {
 			Longer @{appdir} text with @{appdir}., Longer  text with .
 			""")
 	public void test(String propertyValue, String expected) {
-		var result = PropertiesPreprocessor.process(propertyValue);
+		LazyProcessedProperties inTest = new LazyProcessedProperties(System.getProperties());
+		var result = inTest.process(propertyValue);
 		Assertions.assertEquals(result, expected);
 	}
 
