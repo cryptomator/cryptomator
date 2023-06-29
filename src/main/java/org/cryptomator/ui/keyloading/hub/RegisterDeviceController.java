@@ -2,9 +2,9 @@ package org.cryptomator.ui.keyloading.hub;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.settings.DeviceKey;
@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RegisterDeviceController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RegisterDeviceController.class);
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
+	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
 	private static final List<Integer> EXPECTED_RESPONSE_CODES = List.of(201, 409);
 
 	private final Stage window;
@@ -101,11 +101,8 @@ public class RegisterDeviceController implements FxController {
 
 		var keyUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
 		var deviceKey = keyPair.getPublic().getEncoded();
-		var dto = new CreateDeviceDto();
-		dto.id = deviceId;
-		dto.name = deviceNameField.getText();
-		dto.publicKey = BaseEncoding.base64Url().omitPadding().encode(deviceKey);
-		var json = GSON.toJson(dto); // TODO: do we want to keep GSON? doesn't support records -.-
+		var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64Url().omitPadding().encode(deviceKey));
+		var json = toJson(dto);
 		var request = HttpRequest.newBuilder(keyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
@@ -125,6 +122,14 @@ public class RegisterDeviceController implements FxController {
 					}
 					return null;
 				}, Platform::runLater);
+	}
+
+	private String toJson(CreateDeviceDto dto) {
+		try {
+			return JSON.writer().writeValueAsString(dto);
+		} catch (JacksonException e) {
+			throw new IllegalStateException("Failed to serialize DTO", e);
+		}
 	}
 
 	private void handleResponse(HttpResponse<Void> voidHttpResponse) {
