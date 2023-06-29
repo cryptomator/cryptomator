@@ -29,11 +29,12 @@ public class LazyProcessedProperties extends Properties {
 
 	//Template and env _need_ to be instance variables, otherwise they might not be initialized at access time
 	private final Pattern template = Pattern.compile("@\\{(\\w+)}");
-	private final Map<String, String> env = System.getenv();
+	private final Map<String, String> env;
 	private final Properties delegate;
 
-	public LazyProcessedProperties(Properties props) {
+	public LazyProcessedProperties(Properties props, Map<String, String> systemEnvironment) {
 		this.delegate = props;
+		this.env = systemEnvironment;
 	}
 
 	@Override
@@ -56,6 +57,7 @@ public class LazyProcessedProperties extends Properties {
 		}
 	}
 
+	//visible for testing
 	String process(String value) {
 		return template.matcher(value).replaceAll(match -> //
 				switch (match.group(1)) {

@@ -59,7 +59,7 @@ public class LogbackConfigurator extends ContextAwareBase implements Configurato
 	@Override
 	public ExecutionStatus configure(LoggerContext context) {
 		//we need to preprocess those, because every other class has a dependency to logging, none are initialized yet
-		var processedProps = new LazyProcessedProperties(System.getProperties());
+		var processedProps = new LazyProcessedProperties(System.getProperties(), System.getenv());
 		var useCustomCfg = Optional.ofNullable(processedProps.getProperty("logback.configurationFile")).map(s -> Files.exists(Path.of(s))).orElse(false);
 		var logDir = Optional.ofNullable(processedProps.getProperty("cryptomator.logDir")).map(Path::of).orElse(null);
 
