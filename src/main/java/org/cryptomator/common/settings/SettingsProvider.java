@@ -44,16 +44,11 @@ public class SettingsProvider implements Supplier<Settings> {
 	private final Supplier<Settings> settings = Suppliers.memoize(this::load);
 	private final Environment env;
 	private final ScheduledExecutorService scheduler;
-//	private final Gson gson;
 
 	@Inject
 	public SettingsProvider(Environment env, ScheduledExecutorService scheduler) {
 		this.env = env;
 		this.scheduler = scheduler;
-//		this.gson = new GsonBuilder() //
-//				.setPrettyPrinting().setLenient().disableHtmlEscaping() //
-//				.registerTypeAdapter(Settings.class, settingsJsonAdapter) //
-//				.create();
 	}
 
 	@Override
