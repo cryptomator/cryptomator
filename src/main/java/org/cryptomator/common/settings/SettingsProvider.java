@@ -11,7 +11,6 @@ package org.cryptomator.common.settings;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Suppliers;
-import com.google.gson.JsonParseException;
 import org.cryptomator.common.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +113,7 @@ public class SettingsProvider implements Supplier<Settings> {
 			}
 			Files.move(tmpPath, settingsPath, StandardCopyOption.REPLACE_EXISTING);
 			LOG.info("Settings saved to {}", settingsPath);
-		} catch (IOException | JsonParseException e) {
+		} catch (IOException e) {
 			LOG.error("Failed to save settings.", e);
 		}
 	}
