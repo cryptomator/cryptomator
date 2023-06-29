@@ -90,21 +90,17 @@ public class LazyProcessedProperties extends Properties {
 		PROPS;
 	}
 
+	//auto generated
 	@Override
-	public Object setProperty(String key, String value) {
+	public synchronized Object setProperty(String key, String value) {
 		return delegate.setProperty(key, value);
 	}
 
-	//auto generated
 	@Override
-	public void load(Reader reader) throws IOException {delegate.load(reader);}
+	public synchronized void load(Reader reader) throws IOException {delegate.load(reader);}
 
 	@Override
-	public void load(InputStream inStream) throws IOException {delegate.load(inStream);}
-
-	@Override
-	@Deprecated
-	public void save(OutputStream out, String comments) {delegate.save(out, comments);}
+	public synchronized void load(InputStream inStream) throws IOException {delegate.load(inStream);}
 
 	@Override
 	public void store(Writer writer, String comments) throws IOException {delegate.store(writer, comments);}
@@ -113,7 +109,7 @@ public class LazyProcessedProperties extends Properties {
 	public void store(OutputStream out, @Nullable String comments) throws IOException {delegate.store(out, comments);}
 
 	@Override
-	public void loadFromXML(InputStream in) throws IOException, InvalidPropertiesFormatException {delegate.loadFromXML(in);}
+	public synchronized void loadFromXML(InputStream in) throws IOException, InvalidPropertiesFormatException {delegate.loadFromXML(in);}
 
 	@Override
 	public void storeToXML(OutputStream os, String comment) throws IOException {delegate.storeToXML(os, comment);}
@@ -161,19 +157,19 @@ public class LazyProcessedProperties extends Properties {
 	public Object get(Object key) {return delegate.get(key);}
 
 	@Override
-	public Object put(Object key, Object value) {return delegate.put(key, value);}
+	public synchronized Object put(Object key, Object value) {return delegate.put(key, value);}
 
 	@Override
-	public Object remove(Object key) {return delegate.remove(key);}
+	public synchronized Object remove(Object key) {return delegate.remove(key);}
 
 	@Override
-	public void putAll(Map<?, ?> t) {delegate.putAll(t);}
+	public synchronized void putAll(Map<?, ?> t) {delegate.putAll(t);}
 
 	@Override
-	public void clear() {delegate.clear();}
+	public synchronized void clear() {delegate.clear();}
 
 	@Override
-	public String toString() {return delegate.toString();}
+	public synchronized String toString() {return delegate.toString();}
 
 	@Override
 	public Set<Object> keySet() {return delegate.keySet();}
@@ -185,46 +181,49 @@ public class LazyProcessedProperties extends Properties {
 	public Set<Map.Entry<Object, Object>> entrySet() {return delegate.entrySet();}
 
 	@Override
-	public boolean equals(Object o) {return delegate.equals(o);}
+	public synchronized boolean equals(Object o) {return delegate.equals(o);}
 
 	@Override
-	public int hashCode() {return delegate.hashCode();}
+	public synchronized int hashCode() {return delegate.hashCode();}
 
 	@Override
 	public Object getOrDefault(Object key, Object defaultValue) {return delegate.getOrDefault(key, defaultValue);}
 
 	@Override
-	public void forEach(BiConsumer<? super Object, ? super Object> action) {delegate.forEach(action);}
+	public synchronized void forEach(BiConsumer<? super Object, ? super Object> action) {delegate.forEach(action);}
 
 	@Override
-	public void replaceAll(BiFunction<? super Object, ? super Object, ?> function) {delegate.replaceAll(function);}
+	public synchronized void replaceAll(BiFunction<? super Object, ? super Object, ?> function) {delegate.replaceAll(function);}
 
 	@Override
-	public Object putIfAbsent(Object key, Object value) {return delegate.putIfAbsent(key, value);}
+	public synchronized Object putIfAbsent(Object key, Object value) {return delegate.putIfAbsent(key, value);}
 
 	@Override
-	public boolean remove(Object key, Object value) {return delegate.remove(key, value);}
+	public synchronized boolean remove(Object key, Object value) {return delegate.remove(key, value);}
 
 	@Override
-	public boolean replace(Object key, Object oldValue, Object newValue) {return delegate.replace(key, oldValue, newValue);}
+	public synchronized boolean replace(Object key, Object oldValue, Object newValue) {return delegate.replace(key, oldValue, newValue);}
 
 	@Override
-	public Object replace(Object key, Object value) {return delegate.replace(key, value);}
+	public synchronized Object replace(Object key, Object value) {return delegate.replace(key, value);}
 
 	@Override
-	public Object computeIfAbsent(Object key, Function<? super Object, ?> mappingFunction) {return delegate.computeIfAbsent(key, mappingFunction);}
+	public synchronized Object computeIfAbsent(Object key, Function<? super Object, ?> mappingFunction) {return delegate.computeIfAbsent(key, mappingFunction);}
 
 	@Override
-	public Object computeIfPresent(Object key, BiFunction<? super Object, ? super Object, ?> remappingFunction) {return delegate.computeIfPresent(key, remappingFunction);}
+	public synchronized Object computeIfPresent(Object key, BiFunction<? super Object, ? super Object, ?> remappingFunction) {return delegate.computeIfPresent(key, remappingFunction);}
 
 	@Override
-	public Object compute(Object key, BiFunction<? super Object, ? super Object, ?> remappingFunction) {return delegate.compute(key, remappingFunction);}
+	public synchronized Object compute(Object key, BiFunction<? super Object, ? super Object, ?> remappingFunction) {return delegate.compute(key, remappingFunction);}
 
 	@Override
-	public Object merge(Object key, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {return delegate.merge(key, value, remappingFunction);}
+	public synchronized Object merge(Object key, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {return delegate.merge(key, value, remappingFunction);}
 
 	@Override
-	public Object clone() {return delegate.clone();}
+	public synchronized Object clone() {
+		var delegateClone = (Properties) delegate.clone();
+		return new LazyProcessedProperties(delegateClone, env);
+	}
 
 	public static <K, V> Map<K, V> of() {return Map.of();}
 
