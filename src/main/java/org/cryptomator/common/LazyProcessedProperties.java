@@ -46,7 +46,7 @@ public class LazyProcessedProperties extends PropertiesDecorator {
 					case "localappdata" -> resolveFrom("LOCALAPPDATA", Source.ENV);
 					case "userhome" -> resolveFrom("user.home", Source.PROPS);
 					default -> {
-						LoggerFactory.getLogger(LazyProcessedProperties.class).warn("Unknown variable @{{}} in property value {}.", match.group(), value);
+						LoggerFactory.getLogger(LazyProcessedProperties.class).warn("Unknown variable {} in property value {}.", match.group(), value);
 						yield match.group();
 					}
 				});
