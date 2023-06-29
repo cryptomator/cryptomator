@@ -94,7 +94,7 @@ public class Cryptomator {
 		 * Attempts to create an IPC connection to a running Cryptomator instance and sends it the given args.
 		 * If no external process could be reached, the args will be handled by the loopback IPC endpoint.
 		 */
-		try (var communicator = IpcCommunicator.create(env.ipcSocketPath().toList())) {
+		try (var communicator = IpcCommunicator.create(env.getIpcSocketPath().toList())) {
 			if (communicator.isClient()) {
 				communicator.sendHandleLaunchargs(List.of(args));
 				communicator.sendRevealRunningApp();

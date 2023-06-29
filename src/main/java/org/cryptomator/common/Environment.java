@@ -2,7 +2,6 @@ package org.cryptomator.common;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +79,7 @@ public class Environment {
 		return getPaths(P12_PATH_PROP_NAME);
 	}
 
-	public Stream<Path> ipcSocketPath() {
+	public Stream<Path> getIpcSocketPath() {
 		return getPaths(IPC_SOCKET_PATH_PROP_NAME);
 	}
 
@@ -131,7 +130,7 @@ public class Environment {
 	}
 
 	// visible for testing
-	public Stream<Path> getPaths(String propertyName) {
+	Stream<Path> getPaths(String propertyName) {
 		Stream<String> rawSettingsPaths = getRawList(propertyName, PATH_LIST_SEP);
 		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Path::of);
 	}
