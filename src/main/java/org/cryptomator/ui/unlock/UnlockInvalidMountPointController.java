@@ -1,5 +1,6 @@
 package org.cryptomator.ui.unlock;
 
+import org.cryptomator.common.mount.MountPointInUseException;
 import org.cryptomator.common.mount.MountPointNotExistsException;
 import org.cryptomator.common.mount.MountPointNotSupportedException;
 import org.cryptomator.common.vaults.Vault;
@@ -41,6 +42,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		var translationKey = switch (e) {
 			case MountPointNotSupportedException x -> "unlock.error.customPath.description.notSupported";
 			case MountPointNotExistsException x -> "unlock.error.customPath.description.notExists";
+			case MountPointInUseException x -> "unlock.error.customPath.description.inUse";
 			default -> "unlock.error.customPath.description.generic";
 		};
 		dialogDescription.setFormat(resourceBundle.getString(translationKey));
