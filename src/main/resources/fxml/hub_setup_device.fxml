@@ -46,7 +46,7 @@
 				<padding>
 					<Insets top="12"/>
 				</padding>
-				<Label text="TODO: Enter your setup code" labelFor="$setupCodeField"/>
+				<Label text="%hub.register.setupCodeLabel" labelFor="$setupCodeField"/>
 				<TextField fx:id="setupCodeField" HBox.hgrow="ALWAYS"/>
 			</HBox>
 			<HBox spacing="6" alignment="CENTER_LEFT">
