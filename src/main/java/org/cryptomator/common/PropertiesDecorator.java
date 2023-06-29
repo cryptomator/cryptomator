@@ -163,7 +163,7 @@ public class PropertiesDecorator extends Properties {
 	public synchronized Object merge(Object key, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {return delegate.merge(key, value, remappingFunction);}
 
 	@Override
-	public Object clone() {
+	public synchronized Object clone() {
 		var delegateClone = (Properties) delegate.clone();
 		return new PropertiesDecorator(delegateClone);
 	}
