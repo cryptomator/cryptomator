@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class VolumePreferencesController implements FxController {
 
 	private static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/volume-type/";
+	private static final int MIN_PORT = 1024;
+	private static final int MAX_PORT = 65535;
 
 	private final Settings settings;
 	private final ObservableValue<MountService> selectedMountService;
@@ -85,7 +87,7 @@ public class VolumePreferencesController implements FxController {
 		try {
 			int port = Integer.parseInt(loopbackPortField.getText());
 			return port == 0 // choose port automatically
-					|| port >= Settings.MIN_PORT && port <= Settings.MAX_PORT; // port within range
+					|| port >= MIN_PORT && port <= MAX_PORT; // port within range
 		} catch (NumberFormatException e) {
 			return false;
 		}

@@ -10,6 +10,8 @@ package org.cryptomator.common.settings;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -27,59 +29,85 @@ import java.util.function.Consumer;
 
 public class Settings {
 
-	public static final int MIN_PORT = 1024;
-	public static final int MAX_PORT = 65535;
-	public static final boolean DEFAULT_ASKED_FOR_UPDATE_CHECK = false;
-	public static final boolean DEFAULT_CHECK_FOR_UPDATES = false;
-	public static final boolean DEFAULT_START_HIDDEN = false;
-	public static final boolean DEFAULT_AUTO_CLOSE_VAULTS = false;
-	public static final boolean DEFAULT_USE_KEYCHAIN = true;
-	public static final int DEFAULT_PORT = 42427;
-	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
-	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
+	private static final Logger LOG = LoggerFactory.getLogger(Settings.class);
+
+	static final boolean DEFAULT_ASKED_FOR_UPDATE_CHECK = false;
+	static final boolean DEFAULT_CHECK_FOR_UPDATES = false;
+	static final boolean DEFAULT_START_HIDDEN = false;
+	static final boolean DEFAULT_AUTO_CLOSE_VAULTS = false;
+	static final boolean DEFAULT_USE_KEYCHAIN = true;
+	static final int DEFAULT_PORT = 42427;
+	static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
+	static final boolean DEFAULT_DEBUG_MODE = false;
+	static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	@Deprecated // to be changed to "whatever is available" eventually
-	public static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
-	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
-	public static final String DEFAULT_LICENSE_KEY = "";
-	public static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
-	public static final String DEFAULT_DISPLAY_CONFIGURATION = "";
-	public static final String DEFAULT_LANGUAGE = null;
+	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
+	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
+	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
 
-
-	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
-	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
-	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UPDATES);
-	private final BooleanProperty startHidden = new SimpleBooleanProperty(DEFAULT_START_HIDDEN);
-	private final BooleanProperty autoCloseVaults = new SimpleBooleanProperty(DEFAULT_AUTO_CLOSE_VAULTS);
-	private final BooleanProperty useKeychain = new SimpleBooleanProperty(DEFAULT_USE_KEYCHAIN);
-	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
-	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
-	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
-	private final ObjectProperty<UiTheme> theme = new SimpleObjectProperty<>(DEFAULT_THEME);
-	private final ObjectProperty<String> keychainProvider = new SimpleObjectProperty<>(DEFAULT_KEYCHAIN_PROVIDER);
-	private final ObjectProperty<NodeOrientation> userInterfaceOrientation = new SimpleObjectProperty<>(DEFAULT_USER_INTERFACE_ORIENTATION);
-	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
-	private final BooleanProperty showMinimizeButton = new SimpleBooleanProperty(DEFAULT_SHOW_MINIMIZE_BUTTON);
+	private final ObservableList<VaultSettings> directories;
+	private final BooleanProperty askedForUpdateCheck;
+	private final BooleanProperty checkForUpdates;
+	private final BooleanProperty startHidden;
+	private final BooleanProperty autoCloseVaults;
+	private final BooleanProperty useKeychain;
+	private final IntegerProperty port;
+	private final IntegerProperty numTrayNotifications;
+	private final BooleanProperty debugMode;
+	private final ObjectProperty<UiTheme> theme;
+	private final StringProperty keychainProvider;
+	private final ObjectProperty<NodeOrientation> userInterfaceOrientation;
+	private final StringProperty licenseKey;
+	private final BooleanProperty showMinimizeButton;
 	private final BooleanProperty showTrayIcon;
-	private final IntegerProperty windowXPosition = new SimpleIntegerProperty();
-	private final IntegerProperty windowYPosition = new SimpleIntegerProperty();
-	private final IntegerProperty windowWidth = new SimpleIntegerProperty();
-	private final IntegerProperty windowHeight = new SimpleIntegerProperty();
-	private final ObjectProperty<String> displayConfiguration = new SimpleObjectProperty<>(DEFAULT_DISPLAY_CONFIGURATION);
-	private final StringProperty language = new SimpleStringProperty(DEFAULT_LANGUAGE);
-
-
-	private final StringProperty mountService = new SimpleStringProperty();
-
+	private final IntegerProperty windowXPosition;
+	private final IntegerProperty windowYPosition;
+	private final IntegerProperty windowWidth;
+	private final IntegerProperty windowHeight;
+	private final StringProperty displayConfiguration;
+	private final StringProperty language;
+	private final StringProperty mountService;
 
 	private Consumer<Settings> saveCmd;
 
+	public static Settings create(Environment env) {
+		var defaults = new SettingsJson();
+		defaults.showTrayIcon = env.showTrayIcon();
+		return new Settings(defaults);
+	}
+
 	/**
-	 * Package-private constructor; use {@link SettingsProvider}.
+	 * Recreate settings from json
+	 *
+	 * @param json The parsed settings.json
 	 */
-	Settings(Environment env) {
-		this.showTrayIcon = new SimpleBooleanProperty(env.showTrayIcon());
+	Settings(SettingsJson json) {
+		this.directories = FXCollections.observableArrayList(VaultSettings::observables);
+		this.askedForUpdateCheck = new SimpleBooleanProperty(this, "askedForUpdateCheck", json.askedForUpdateCheck);
+		this.checkForUpdates = new SimpleBooleanProperty(this, "checkForUpdates", json.checkForUpdatesEnabled);
+		this.startHidden = new SimpleBooleanProperty(this, "startHidden", json.startHidden);
+		this.autoCloseVaults = new SimpleBooleanProperty(this, "autoCloseVaults", json.autoCloseVaults);
+		this.useKeychain = new SimpleBooleanProperty(this, "useKeychain", json.useKeychain);
+		this.port = new SimpleIntegerProperty(this, "webDavPort", json.port);
+		this.numTrayNotifications = new SimpleIntegerProperty(this, "numTrayNotifications", json.numTrayNotifications);
+		this.debugMode = new SimpleBooleanProperty(this, "debugMode", json.debugMode);
+		this.theme = new SimpleObjectProperty<>(this, "theme", json.theme);
+		this.keychainProvider = new SimpleStringProperty(this, "keychainProvider", json.keychainProvider);
+		this.userInterfaceOrientation = new SimpleObjectProperty<>(this, "userInterfaceOrientation", parseEnum(json.uiOrientation, NodeOrientation.class, NodeOrientation.LEFT_TO_RIGHT));
+		this.licenseKey = new SimpleStringProperty(this, "licenseKey", json.licenseKey);
+		this.showMinimizeButton = new SimpleBooleanProperty(this, "showMinimizeButton", json.showMinimizeButton);
+		this.showTrayIcon = new SimpleBooleanProperty(this, "showTrayIcon", json.showTrayIcon);
+		this.windowXPosition = new SimpleIntegerProperty(this, "windowXPosition", json.windowXPosition);
+		this.windowYPosition = new SimpleIntegerProperty(this, "windowYPosition", json.windowYPosition);
+		this.windowWidth = new SimpleIntegerProperty(this, "windowWidth", json.windowWidth);
+		this.windowHeight = new SimpleIntegerProperty(this, "windowHeight", json.windowHeight);
+		this.displayConfiguration = new SimpleStringProperty(this, "displayConfiguration", json.displayConfiguration);
+		this.language = new SimpleStringProperty(this, "language", json.language);
+		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
+
+		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
+
+		migrateLegacySettings(json);
 
 		directories.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
@@ -105,6 +133,72 @@ public class Settings {
 		mountService.addListener(this::somethingChanged);
 	}
 
+	@SuppressWarnings("deprecation")
+	private void migrateLegacySettings(SettingsJson json) {
+		// implicit migration of 1.6.x legacy setting "preferredVolumeImpl":
+		if (this.mountService.get() == null && json.preferredVolumeImpl != null) {
+			this.mountService.set(switch (json.preferredVolumeImpl) {
+				case "Dokany" -> "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
+				case "FUSE" -> {
+					if (SystemUtils.IS_OS_WINDOWS) {
+						yield "org.cryptomator.frontend.fuse.mount.WinFspNetworkMountProvider";
+					} else if (SystemUtils.IS_OS_MAC) {
+						yield "org.cryptomator.frontend.fuse.mount.MacFuseMountProvider";
+					} else {
+						yield "org.cryptomator.frontend.fuse.mount.LinuxFuseMountProvider";
+					}
+				}
+				default -> {
+					if (SystemUtils.IS_OS_WINDOWS) {
+						yield "org.cryptomator.frontend.webdav.mount.WindowsMounter";
+					} else if (SystemUtils.IS_OS_MAC) {
+						yield "org.cryptomator.frontend.webdav.mount.MacAppleScriptMounter";
+					} else {
+						yield "org.cryptomator.frontend.webdav.mount.LinuxGioMounter";
+					}
+				}
+			});
+		}
+	}
+
+	public SettingsJson serialized() {
+		var json = new SettingsJson();
+		json.directories = directories.stream().map(VaultSettings::serialized).toList();
+		json.askedForUpdateCheck = askedForUpdateCheck.get();
+		json.checkForUpdatesEnabled = checkForUpdates.get();
+		json.startHidden = startHidden.get();
+		json.autoCloseVaults = autoCloseVaults.get();
+		json.useKeychain = useKeychain.get();
+		json.port = port.get();
+		json.numTrayNotifications = numTrayNotifications.get();
+		json.debugMode = debugMode.get();
+		json.theme = theme.get();
+		json.keychainProvider = keychainProvider.get();
+		json.uiOrientation = userInterfaceOrientation.get().name();
+		json.licenseKey = licenseKey.get();
+		json.showMinimizeButton = showMinimizeButton.get();
+		json.showTrayIcon = showTrayIcon.get();
+		json.windowXPosition = windowXPosition.get();
+		json.windowYPosition = windowYPosition.get();
+		json.windowWidth = windowWidth.get();
+		json.windowHeight = windowHeight.get();
+		json.displayConfiguration = displayConfiguration.get();
+		json.language = language.get();
+		json.mountService = mountService.get();
+		return json;
+	}
+
+	private <E extends Enum<E>> E parseEnum(String value, Class<E> clazz, E defaultValue) {
+		try {
+			return Enum.valueOf(clazz, value.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			LOG.warn("No value {}.{}. Defaulting to {}.", clazz.getSimpleName(), value, defaultValue);
+			return defaultValue;
+		}
+	}
+
+
+	// TODO rename to setChangeListener
 	void setSaveCmd(Consumer<Settings> saveCmd) {
 		this.saveCmd = saveCmd;
 	}
@@ -120,6 +214,7 @@ public class Settings {
 	}
 
 	/* Getter/Setter */
+	// TODO: remove accessors, make fields public
 
 	public ObservableList<VaultSettings> getDirectories() {
 		return directories;
@@ -141,7 +236,7 @@ public class Settings {
 		return autoCloseVaults;
 	}
 
-	public BooleanProperty useKeychain() { return useKeychain; }
+	public BooleanProperty useKeychain() {return useKeychain;}
 
 	public IntegerProperty port() {
 		return port;
@@ -163,7 +258,7 @@ public class Settings {
 		return theme;
 	}
 
-	public ObjectProperty<String> keychainProvider() {return keychainProvider;}
+	public StringProperty keychainProvider() {return keychainProvider;}
 
 	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
 		return userInterfaceOrientation;
@@ -197,7 +292,7 @@ public class Settings {
 		return windowHeight;
 	}
 
-	public ObjectProperty<String> displayConfigurationProperty() {
+	public StringProperty displayConfigurationProperty() {
 		return displayConfiguration;
 	}
 
