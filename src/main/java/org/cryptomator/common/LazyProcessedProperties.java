@@ -1,7 +1,6 @@
 package org.cryptomator.common;
 
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -25,10 +24,8 @@ import java.util.regex.Pattern;
 
 public class LazyProcessedProperties extends Properties {
 
-	private static final Logger LOG = LoggerFactory.getLogger(LazyProcessedProperties.class);
+	private static final Pattern TEMPLATE = Pattern.compile("@\\{(\\w+)}");
 
-	//Template and env _need_ to be instance variables, otherwise they might not be initialized at access time
-	private final Pattern template = Pattern.compile("@\\{(\\w+)}");
 	private final Map<String, String> env;
 	private final Properties delegate;
 
@@ -59,14 +56,14 @@ public class LazyProcessedProperties extends Properties {
 
 	//visible for testing
 	String process(String value) {
-		return template.matcher(value).replaceAll(match -> //
+		return TEMPLATE.matcher(value).replaceAll(match -> //
 				switch (match.group(1)) {
 					case "appdir" -> resolveFrom("APPDIR", Source.ENV);
 					case "appdata" -> resolveFrom("APPDATA", Source.ENV);
 					case "localappdata" -> resolveFrom("LOCALAPPDATA", Source.ENV);
 					case "userhome" -> resolveFrom("user.home", Source.PROPS);
 					default -> {
-						LOG.warn("Unknown variable @{{}} in property value {}.", match.group(), value);
+						LoggerFactory.getLogger(LazyProcessedProperties.class).warn("Unknown variable @{{}} in property value {}.", match.group(), value);
 						yield match.group();
 					}
 				});
@@ -78,7 +75,7 @@ public class LazyProcessedProperties extends Properties {
 			case PROPS -> delegate.getProperty(key);
 		};
 		if (val == null) {
-			LOG.warn("Variable {} used for substitution not found in {}. Replaced with empty string.", key, src);
+			LoggerFactory.getLogger(LazyProcessedProperties.class).warn("Variable {} used for substitution not found in {}. Replaced with empty string.", key, src);
 			return "";
 		} else {
 			return val.replace("\\", "\\\\");
@@ -224,33 +221,4 @@ public class LazyProcessedProperties extends Properties {
 		var delegateClone = (Properties) delegate.clone();
 		return new LazyProcessedProperties(delegateClone, env);
 	}
-
-	public static <K, V> Map<K, V> of() {return Map.of();}
-
-	public static <K, V> Map<K, V> of(K k1, V v1) {return Map.of(k1, v1);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2) {return Map.of(k1, v1, k2, v2);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {return Map.of(k1, v1, k2, v2, k3, v3);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {return Map.of(k1, v1, k2, v2, k3, v3, k4, v4);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {return Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6) {return Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7) {return Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7, K k8, V v8) {return Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9) {return Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9);}
-
-	public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9, K k10, V v10) {return Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10);}
-
-	@SafeVarargs
-	public static <K, V> Map<K, V> ofEntries(Map.Entry<? extends K, ? extends V>... entries) {return Map.ofEntries(entries);}
-
-	public static <K, V> Map.Entry<K, V> entry(K k, V v) {return Map.entry(k, v);}
-
-	public static <K, V> Map<K, V> copyOf(Map<? extends K, ? extends V> map) {return Map.copyOf(map);}
 }
