@@ -9,7 +9,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.LazyProcessedProperties;
+import org.cryptomator.common.SubstitutingProperties;
 import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
@@ -32,7 +32,7 @@ public class Cryptomator {
 	private static final long STARTUP_TIME = System.currentTimeMillis();
 
 	static {
-		var lazyProcessedProps = new LazyProcessedProperties(System.getProperties(), System.getenv());
+		var lazyProcessedProps = new SubstitutingProperties(System.getProperties(), System.getenv());
 		System.setProperties(lazyProcessedProps);
 		CRYPTOMATOR_COMPONENT = DaggerCryptomatorComponent.factory().create(STARTUP_TIME);
 		LOG = LoggerFactory.getLogger(Cryptomator.class);

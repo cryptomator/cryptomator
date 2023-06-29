@@ -12,9 +12,9 @@ import org.mockito.Mockito;
 import java.util.Map;
 import java.util.Properties;
 
-public class LazyProcessedPropertiesTest {
+public class SubstitutingPropertiesTest {
 
-	LazyProcessedProperties inTest;
+	SubstitutingProperties inTest;
 
 	@Nested
 	public class Processing {
@@ -27,7 +27,7 @@ public class LazyProcessedPropertiesTest {
 				"@{@{appdir}},@{foobar}", //
 				"Longer @{appdir} text with @{appdir}., Longer foobar text with foobar."})
 		public void test(String propertyValue, String expected) {
-			LazyProcessedProperties inTest = new LazyProcessedProperties(new Properties(), Map.of("APPDIR", "foobar"));
+			SubstitutingProperties inTest = new SubstitutingProperties(new Properties(), Map.of("APPDIR", "foobar"));
 			var result = inTest.process(propertyValue);
 			Assertions.assertEquals(result, expected);
 		}
@@ -38,7 +38,7 @@ public class LazyProcessedPropertiesTest {
 			var props = new Properties();
 			props.setProperty("user.home", "OneUponABit");
 
-			inTest = new LazyProcessedProperties(props, Map.of());
+			inTest = new SubstitutingProperties(props, Map.of());
 			var result = inTest.process("@{userhome}");
 			Assertions.assertEquals(result, "OneUponABit");
 		}
@@ -47,7 +47,7 @@ public class LazyProcessedPropertiesTest {
 		@ParameterizedTest(name = "Token \"{0}\" replaced with content of {1}")
 		@CsvSource(value = {"appdir, APPDIR, foobar", "appdata, APPDATA, bazbaz", "localappdata, LOCALAPPDATA, boboAlice"})
 		public void testEnvSubstitutions(String token, String envName, String expected) {
-			inTest = new LazyProcessedProperties(new Properties(), Map.of(envName, expected));
+			inTest = new SubstitutingProperties(new Properties(), Map.of(envName, expected));
 			var result = inTest.process("@{" + token + "}");
 			Assertions.assertEquals(result, expected);
 		}
@@ -61,7 +61,7 @@ public class LazyProcessedPropertiesTest {
 		@Test
 		@DisplayName("Undefined properties are not processed")
 		public void testNoProcessingOnNull() {
-			inTest = Mockito.spy(new LazyProcessedProperties(new Properties(), Map.of()));
+			inTest = Mockito.spy(new SubstitutingProperties(new Properties(), Map.of()));
 
 			var result = inTest.getProperty("some.prop");
 			Assertions.assertNull(result);
@@ -74,7 +74,7 @@ public class LazyProcessedPropertiesTest {
 		public void testNoProcessingOnNotCryptomator(String propKey) {
 			var props = new Properties();
 			props.setProperty(propKey, "someValue");
-			inTest = Mockito.spy(new LazyProcessedProperties(props, Map.of()));
+			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of()));
 
 			var result = inTest.getProperty("some.prop");
 			Assertions.assertNull(result);
@@ -86,7 +86,7 @@ public class LazyProcessedPropertiesTest {
 		public void testProcessing() {
 			var props = new Properties();
 			props.setProperty("cryptomator.prop", "someValue");
-			inTest = Mockito.spy(new LazyProcessedProperties(props, Map.of()));
+			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of()));
 			Mockito.doReturn("someValue").when(inTest).process(Mockito.anyString());
 
 			inTest.getProperty("cryptomator.prop");

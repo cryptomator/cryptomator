@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-public class LazyProcessedProperties extends PropertiesDecorator {
+public class SubstitutingProperties extends PropertiesDecorator {
 
 	private static final Pattern TEMPLATE = Pattern.compile("@\\{(\\w+)}");
 
 	private final Map<String, String> env;
 
-	public LazyProcessedProperties(Properties props, Map<String, String> systemEnvironment) {
+	public SubstitutingProperties(Properties props, Map<String, String> systemEnvironment) {
 		super(props);
 		this.env = systemEnvironment;
 	}
@@ -46,7 +46,7 @@ public class LazyProcessedProperties extends PropertiesDecorator {
 					case "localappdata" -> resolveFrom("LOCALAPPDATA", Source.ENV);
 					case "userhome" -> resolveFrom("user.home", Source.PROPS);
 					default -> {
-						LoggerFactory.getLogger(LazyProcessedProperties.class).warn("Unknown variable {} in property value {}.", match.group(), value);
+						LoggerFactory.getLogger(SubstitutingProperties.class).warn("Unknown variable {} in property value {}.", match.group(), value);
 						yield match.group();
 					}
 				});
@@ -58,7 +58,7 @@ public class LazyProcessedProperties extends PropertiesDecorator {
 			case PROPS -> delegate.getProperty(key);
 		};
 		if (val == null) {
-			LoggerFactory.getLogger(LazyProcessedProperties.class).warn("Variable {} used for substitution not found in {}. Replaced with empty string.", key, src);
+			LoggerFactory.getLogger(SubstitutingProperties.class).warn("Variable {} used for substitution not found in {}. Replaced with empty string.", key, src);
 			return "";
 		} else {
 			return val.replace("\\", "\\\\");
