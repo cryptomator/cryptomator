@@ -38,7 +38,8 @@ open module org.cryptomator.desktop {
 	requires ch.qos.logback.core;
 	requires com.auth0.jwt;
 	requires com.google.common;
-	requires com.google.gson;
+	requires com.fasterxml.jackson.databind;
+	requires com.google.gson; // TODO replace with jackson?
 	requires com.nimbusds.jose.jwt;
 	requires com.nulabinc.zxcvbn;
 	requires com.tobiasdiez.easybind;
