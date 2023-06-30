@@ -109,7 +109,7 @@ public class VaultSettings {
 		return BaseEncoding.base64Url().encode(randomBytes);
 	}
 
-	public VaultSettingsJson serialized() {
+	VaultSettingsJson serialized() {
 		var json = new VaultSettingsJson();
 		json.id = id;
 		json.path = path.map(Path::toString).getValue();

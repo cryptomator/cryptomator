@@ -161,7 +161,7 @@ public class Settings {
 		}
 	}
 
-	public SettingsJson serialized() {
+	SettingsJson serialized() {
 		var json = new SettingsJson();
 		json.directories = directories.stream().map(VaultSettings::serialized).toList();
 		json.askedForUpdateCheck = askedForUpdateCheck.get();
