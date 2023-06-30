@@ -139,9 +139,9 @@ public abstract class CommonsModule {
 	@Provides
 	@Singleton
 	static ObservableValue<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
-		return settings.port().map(port -> {
+		return settings.port.map(port -> {
 			String host = SystemUtils.IS_OS_WINDOWS ? "127.0.0.1" : "localhost";
-			return InetSocketAddress.createUnresolved(host, settings.port().intValue());
+			return InetSocketAddress.createUnresolved(host, settings.port.intValue());
 		});
 	}
 

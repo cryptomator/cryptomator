@@ -50,7 +50,7 @@ public class VaultDetailMissingVaultController implements FxController {
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(resourceBundle.getString("addvaultwizard.existing.filePickerMimeDesc"), CRYPTOMATOR_FILENAME_GLOB));
 		File masterkeyFile = fileChooser.showOpenDialog(window);
 		if (masterkeyFile != null) {
-			vault.get().getVaultSettings().path().setValue(masterkeyFile.toPath().toAbsolutePath().getParent());
+			vault.get().getVaultSettings().path.setValue(masterkeyFile.toPath().toAbsolutePath().getParent());
 			recheck();
 		}
 	}

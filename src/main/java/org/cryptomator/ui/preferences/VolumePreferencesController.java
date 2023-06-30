@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class VolumePreferencesController implements FxController {
 
 	private static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/volume-type/";
+	private static final int MIN_PORT = 1024;
+	private static final int MAX_PORT = 65535;
 
 	private final Settings settings;
 	private final ObservableValue<MountService> selectedMountService;
@@ -51,7 +53,7 @@ public class VolumePreferencesController implements FxController {
 		this.resourceBundle = resourceBundle;
 
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		this.selectedMountService = ObservableUtil.mapWithDefault(settings.mountService(), serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		this.selectedMountService = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
 		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
 		this.mountToDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT) || s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR));
 		this.mountToDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
@@ -69,15 +71,15 @@ public class VolumePreferencesController implements FxController {
 		volumeTypeChoiceBox.getItems().add(null);
 		volumeTypeChoiceBox.getItems().addAll(mountProviders);
 		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
-		boolean autoSelected = settings.mountService().get() == null;
+		boolean autoSelected = settings.mountService.get() == null;
 		volumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue());
 		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvider, newProvider) -> {
 			var toSet = Optional.ofNullable(newProvider).map(nP -> nP.getClass().getName()).orElse(null);
-			settings.mountService().set(toSet);
+			settings.mountService.set(toSet);
 		});
 
-		loopbackPortField.setText(String.valueOf(settings.port().get()));
-		loopbackPortApplyButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(loopbackPortField.textProperty()));
+		loopbackPortField.setText(String.valueOf(settings.port.get()));
+		loopbackPortApplyButton.visibleProperty().bind(settings.port.asString().isNotEqualTo(loopbackPortField.textProperty()));
 		loopbackPortApplyButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateLoopbackPort, loopbackPortField.textProperty()).not());
 	}
 
@@ -85,7 +87,7 @@ public class VolumePreferencesController implements FxController {
 		try {
 			int port = Integer.parseInt(loopbackPortField.getText());
 			return port == 0 // choose port automatically
-					|| port >= Settings.MIN_PORT && port <= Settings.MAX_PORT; // port within range
+					|| port >= MIN_PORT && port <= MAX_PORT; // port within range
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -93,7 +95,7 @@ public class VolumePreferencesController implements FxController {
 
 	public void doChangeLoopbackPort() {
 		if (validateLoopbackPort()) {
-			settings.port().set(Integer.parseInt(loopbackPortField.getText()));
+			settings.port.set(Integer.parseInt(loopbackPortField.getText()));
 		}
 	}
 

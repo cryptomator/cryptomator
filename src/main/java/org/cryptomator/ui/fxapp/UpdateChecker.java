@@ -38,7 +38,7 @@ public class UpdateChecker {
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
-		if (settings.checkForUpdates().get()) {
+		if (settings.checkForUpdates.get()) {
 			startCheckingForUpdates(AUTOCHECK_DELAY);
 		}
 	}

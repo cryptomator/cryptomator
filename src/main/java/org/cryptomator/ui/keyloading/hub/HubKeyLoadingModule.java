@@ -170,8 +170,8 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(RegisterDeviceController.class)
-	abstract FxController bindRegisterDeviceController(RegisterDeviceController controller);
+	@FxControllerKey(SetupDeviceController.class)
+	abstract FxController bindSetupDeviceController(SetupDeviceController controller);
 
 	@Binds
 	@IntoMap
@@ -182,11 +182,6 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(RegisterFailedController.class)
 	abstract FxController bindRegisterFailedController(RegisterFailedController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(SetupDeviceController.class)
-	abstract FxController bindSetupDeviceController(SetupDeviceController controller);
 
 	@Binds
 	@IntoMap

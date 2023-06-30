@@ -57,22 +57,22 @@ public class InterfacePreferencesController implements FxController {
 	@FXML
 	public void initialize() {
 		themeChoiceBox.getItems().addAll(UiTheme.applicableValues());
-		if (!themeChoiceBox.getItems().contains(settings.theme().get())) {
-			settings.theme().set(UiTheme.LIGHT);
+		if (!themeChoiceBox.getItems().contains(settings.theme.get())) {
+			settings.theme.set(UiTheme.LIGHT);
 		}
-		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
+		themeChoiceBox.valueProperty().bindBidirectional(settings.theme);
 		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
 
-		showMinimizeButtonCheckbox.selectedProperty().bindBidirectional(settings.showMinimizeButton());
+		showMinimizeButtonCheckbox.selectedProperty().bindBidirectional(settings.showMinimizeButton);
 
-		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
+		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon);
 
 		preferredLanguageChoiceBox.getItems().addAll(supportedLanguages.getLanguageTags());
-		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.languageProperty());
+		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.language);
 		preferredLanguageChoiceBox.setConverter(new LanguageTagConverter(resourceBundle));
 
-		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
-		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
+		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation.get() == NodeOrientation.LEFT_TO_RIGHT);
+		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation.get() == NodeOrientation.RIGHT_TO_LEFT);
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 	}
 
@@ -87,9 +87,9 @@ public class InterfacePreferencesController implements FxController {
 
 	private void toggleNodeOrientation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
 		if (nodeOrientationLtr.equals(newValue)) {
-			settings.userInterfaceOrientation().set(NodeOrientation.LEFT_TO_RIGHT);
+			settings.userInterfaceOrientation.set(NodeOrientation.LEFT_TO_RIGHT);
 		} else if (nodeOrientationRtl.equals(newValue)) {
-			settings.userInterfaceOrientation().set(NodeOrientation.RIGHT_TO_LEFT);
+			settings.userInterfaceOrientation.set(NodeOrientation.RIGHT_TO_LEFT);
 		} else {
 			LOG.warn("Unexpected toggle option {}", newValue);
 		}

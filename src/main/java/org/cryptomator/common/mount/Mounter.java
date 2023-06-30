@@ -54,19 +54,19 @@ public class Mounter {
 				switch (capability) {
 					case FILE_SYSTEM_NAME -> builder.setFileSystemName("cryptoFs");
 					case LOOPBACK_PORT ->
-							builder.setLoopbackPort(settings.port().get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
+							builder.setLoopbackPort(settings.port.get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
 					case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
-					case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode().get());
+					case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode.get());
 					case MOUNT_FLAGS -> {
-						var mountFlags = vaultSettings.mountFlags().get();
+						var mountFlags = vaultSettings.mountFlags.get();
 						if (mountFlags == null || mountFlags.isBlank()) {
 							builder.setMountFlags(service.getDefaultMountFlags());
 						} else {
 							builder.setMountFlags(mountFlags);
 						}
 					}
-					case VOLUME_ID -> builder.setVolumeId(vaultSettings.getId());
-					case VOLUME_NAME -> builder.setVolumeName(vaultSettings.mountName().get());
+					case VOLUME_ID -> builder.setVolumeId(vaultSettings.id);
+					case VOLUME_NAME -> builder.setVolumeName(vaultSettings.mountName.get());
 				}
 			}
 
@@ -75,7 +75,7 @@ public class Mounter {
 
 		private Runnable prepareMountPoint() throws IOException {
 			Runnable cleanup = () -> {};
-			var userChosenMountPoint = vaultSettings.getMountPoint();
+			var userChosenMountPoint = vaultSettings.mountPoint.get();
 			var defaultMountPointBase = env.getMountPointsDir().orElseThrow();
 			var canMountToDriveLetter = service.hasCapability(MOUNT_AS_DRIVE_LETTER);
 			var canMountToParent = service.hasCapability(MOUNT_WITHIN_EXISTING_PARENT);
@@ -91,13 +91,17 @@ public class Mounter {
 					Files.createDirectories(defaultMountPointBase);
 					builder.setMountpoint(defaultMountPointBase);
 				} else if (canMountToDir) {
-					var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName().get());
+					var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName.get());
 					Files.createDirectories(mountPoint);
 					builder.setMountpoint(mountPoint);
 				}
 			} else {
 				var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
-				if (!mpIsDriveLetter && canMountToParent && !canMountToDir) {
+				if (mpIsDriveLetter) {
+					if (driveLetters.getOccupied().contains(userChosenMountPoint)) {
+						throw new MountPointInUseException(userChosenMountPoint.toString());
+					}
+				} else if (canMountToParent && !canMountToDir) {
 					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
 					cleanup = () -> {
 						MountWithinParentUtil.cleanup(userChosenMountPoint);

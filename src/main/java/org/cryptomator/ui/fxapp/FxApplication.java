@@ -45,7 +45,7 @@ public class FxApplication {
 
 		// init system tray
 		final boolean hasTrayIcon;
-		if (settings.showTrayIcon().get() && trayMenu.get().isSupported()) {
+		if (settings.showTrayIcon.get() && trayMenu.get().isSupported()) {
 			trayMenu.get().initializeTrayIcon();
 			Platform.setImplicitExit(false); // don't quit when closing all windows
 			hasTrayIcon = true;
@@ -55,7 +55,7 @@ public class FxApplication {
 
 		// show main window
 		appWindows.showMainWindow().thenAccept(stage -> {
-			if (settings.startHidden().get()) {
+			if (settings.startHidden.get()) {
 				if (hasTrayIcon) {
 					stage.hide();
 				} else {

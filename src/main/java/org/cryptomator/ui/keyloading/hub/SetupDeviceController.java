@@ -2,8 +2,11 @@ package org.cryptomator.ui.keyloading.hub;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.settings.DeviceKey;
@@ -38,7 +41,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -48,7 +50,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SetupDeviceController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SetupDeviceController.class);
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
+	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -115,28 +117,23 @@ public class SetupDeviceController implements FxController {
 		httpClient.sendAsync(userReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
 				.thenApply(response -> {
 					if (response.statusCode() == 200) {
-						var dto = GSON.fromJson(response.body(), UserDto.class);
+						var dto = fromJson(response.body());
 						return Objects.requireNonNull(dto, "null or empty response body");
 					} else {
 						throw new RuntimeException("Server answered with unexpected status code " + response.statusCode());
 					}
 				}).thenApply(user -> {
 					try {
-						// TODO: if user.privateKey == null, link to "initial setup"
+						assert user.privateKey != null; // api/vaults/{v}/user-tokens/me would have returned 403, if user wasn't fully set up yet
 						var userKey = JWEHelper.decryptUserKey(JWEObject.parse(user.privateKey), setupCodeField.getText());
 						return JWEHelper.encryptUserKey(userKey, deviceKeyPair.getPublic());
 					} catch (ParseException e) {
 						throw new RuntimeException("Server answered with unparsable user key", e);
 					}
 				}).thenCompose(jwe -> {
-					var dto = new CreateDeviceDto();
-					dto.id = deviceId;
-					dto.name = deviceNameField.getText();
-					dto.publicKey = Base64.getUrlEncoder().withoutPadding().encodeToString(deviceKey);
-					dto.userKey = jwe.serialize();
-					dto.creationTime = Instant.now().toString();
-					dto.lastSeenTime = Instant.now().toString();
-					var json = GSON.toJson(dto);
+					var now = Instant.now().toString();
+					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64Url().omitPadding().encode(deviceKey), "DESKTOP", jwe.serialize(), now, now);
+					var json = toJson(dto);
 					var putDeviceReq = HttpRequest.newBuilder(deviceUri) //
 							.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 							.header("Authorization", "Bearer " + bearerToken) //
@@ -151,6 +148,22 @@ public class SetupDeviceController implements FxController {
 					}
 					return null;
 				}, Platform::runLater);
+	}
+
+	private UserDto fromJson(String json) {
+		try {
+			return JSON.reader().readValue(json, UserDto.class);
+		} catch (IOException e) {
+			throw new IllegalStateException("Failed to deserialize DTO", e);
+		}
+	}
+
+	private String toJson(CreateDeviceDto dto) {
+		try {
+			return JSON.writer().writeValueAsString(dto);
+		} catch (JacksonException e) {
+			throw new IllegalStateException("Failed to serialize DTO", e);
+		}
 	}
 
 	private void handleResponse(HttpResponse<Void> response) {
@@ -191,13 +204,14 @@ public class SetupDeviceController implements FxController {
 		return deviceNameAlreadyExists.get();
 	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private record UserDto(String id, String name, String publicKey, String privateKey, String setupCode) {}
 
-	// TODO convert to record?
-	private static class UserDto {
-		public String id;
-		public String name;
-		public @Nullable String publicKey;
-		public @Nullable String privateKey;
-		public @Nullable String setupCode;
-	}
+	private record CreateDeviceDto(@JsonProperty(required = true) String id, //
+								  @JsonProperty(required = true) String name, //
+								  @JsonProperty(required = true) String publicKey, //
+								  @JsonProperty(defaultValue = "DESKTOP", required = true) String type, //
+								  @JsonProperty @Nullable String userKey, //
+								  @JsonProperty @Nullable String creationTime, //
+								  @JsonProperty @Nullable String lastSeenTime) {}
 }
