@@ -94,7 +94,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	protected void succeeded() {
 		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayName());
 
-		switch (vault.getVaultSettings().actionAfterUnlock().get()) {
+		switch (vault.getVaultSettings().actionAfterUnlock.get()) {
 			case ASK -> Platform.runLater(() -> {
 				window.setScene(successScene.get());
 				window.show();

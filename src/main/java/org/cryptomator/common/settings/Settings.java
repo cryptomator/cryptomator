@@ -45,28 +45,28 @@ public class Settings {
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
 	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
 
-	private final ObservableList<VaultSettings> directories;
-	private final BooleanProperty askedForUpdateCheck;
-	private final BooleanProperty checkForUpdates;
-	private final BooleanProperty startHidden;
-	private final BooleanProperty autoCloseVaults;
-	private final BooleanProperty useKeychain;
-	private final IntegerProperty port;
-	private final IntegerProperty numTrayNotifications;
-	private final BooleanProperty debugMode;
-	private final ObjectProperty<UiTheme> theme;
-	private final StringProperty keychainProvider;
-	private final ObjectProperty<NodeOrientation> userInterfaceOrientation;
-	private final StringProperty licenseKey;
-	private final BooleanProperty showMinimizeButton;
-	private final BooleanProperty showTrayIcon;
-	private final IntegerProperty windowXPosition;
-	private final IntegerProperty windowYPosition;
-	private final IntegerProperty windowWidth;
-	private final IntegerProperty windowHeight;
-	private final StringProperty displayConfiguration;
-	private final StringProperty language;
-	private final StringProperty mountService;
+	public final ObservableList<VaultSettings> directories;
+	public final BooleanProperty askedForUpdateCheck;
+	public final BooleanProperty checkForUpdates;
+	public final BooleanProperty startHidden;
+	public final BooleanProperty autoCloseVaults;
+	public final BooleanProperty useKeychain;
+	public final IntegerProperty port;
+	public final IntegerProperty numTrayNotifications;
+	public final BooleanProperty debugMode;
+	public final ObjectProperty<UiTheme> theme;
+	public final StringProperty keychainProvider;
+	public final ObjectProperty<NodeOrientation> userInterfaceOrientation;
+	public final StringProperty licenseKey;
+	public final BooleanProperty showMinimizeButton;
+	public final BooleanProperty showTrayIcon;
+	public final IntegerProperty windowXPosition;
+	public final IntegerProperty windowYPosition;
+	public final IntegerProperty windowWidth;
+	public final IntegerProperty windowHeight;
+	public final StringProperty displayConfiguration;
+	public final StringProperty language;
+	public final StringProperty mountService;
 
 	private Consumer<Settings> saveCmd;
 
@@ -211,93 +211,6 @@ public class Settings {
 		if (saveCmd != null) {
 			saveCmd.accept(this);
 		}
-	}
-
-	/* Getter/Setter */
-	// TODO: remove accessors, make fields public
-
-	public ObservableList<VaultSettings> getDirectories() {
-		return directories;
-	}
-
-	public BooleanProperty askedForUpdateCheck() {
-		return askedForUpdateCheck;
-	}
-
-	public BooleanProperty checkForUpdates() {
-		return checkForUpdates;
-	}
-
-	public BooleanProperty startHidden() {
-		return startHidden;
-	}
-
-	public BooleanProperty autoCloseVaults() {
-		return autoCloseVaults;
-	}
-
-	public BooleanProperty useKeychain() {return useKeychain;}
-
-	public IntegerProperty port() {
-		return port;
-	}
-
-	public IntegerProperty numTrayNotifications() {
-		return numTrayNotifications;
-	}
-
-	public BooleanProperty debugMode() {
-		return debugMode;
-	}
-
-	public StringProperty mountService() {
-		return mountService;
-	}
-
-	public ObjectProperty<UiTheme> theme() {
-		return theme;
-	}
-
-	public StringProperty keychainProvider() {return keychainProvider;}
-
-	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
-		return userInterfaceOrientation;
-	}
-
-	public StringProperty licenseKey() {
-		return licenseKey;
-	}
-
-	public BooleanProperty showMinimizeButton() {
-		return showMinimizeButton;
-	}
-
-	public BooleanProperty showTrayIcon() {
-		return showTrayIcon;
-	}
-
-	public IntegerProperty windowXPositionProperty() {
-		return windowXPosition;
-	}
-
-	public IntegerProperty windowYPositionProperty() {
-		return windowYPosition;
-	}
-
-	public IntegerProperty windowWidthProperty() {
-		return windowWidth;
-	}
-
-	public IntegerProperty windowHeightProperty() {
-		return windowHeight;
-	}
-
-	public StringProperty displayConfigurationProperty() {
-		return displayConfiguration;
-	}
-
-	public StringProperty languageProperty() {
-		return language;
 	}
 
 }

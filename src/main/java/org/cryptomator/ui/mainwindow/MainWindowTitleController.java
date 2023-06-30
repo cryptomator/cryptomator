@@ -49,7 +49,7 @@ public class MainWindowTitleController implements FxController {
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.showMinimizeButton = Bindings.createBooleanBinding(this::isShowMinimizeButton, settings.showMinimizeButton(), settings.showTrayIcon());
+		this.showMinimizeButton = Bindings.createBooleanBinding(this::isShowMinimizeButton, settings.showMinimizeButton, settings.showTrayIcon);
 	}
 
 	@FXML
@@ -85,10 +85,10 @@ public class MainWindowTitleController implements FxController {
 	}
 
 	private void saveWindowSettings() {
-		settings.windowYPositionProperty().setValue(window.getY());
-		settings.windowXPositionProperty().setValue(window.getX());
-		settings.windowWidthProperty().setValue(window.getWidth());
-		settings.windowHeightProperty().setValue(window.getHeight());
+		settings.windowXPosition.setValue(window.getX());
+		settings.windowYPosition.setValue(window.getY());
+		settings.windowWidth.setValue(window.getWidth());
+		settings.windowHeight.setValue(window.getHeight());
 	}
 
 	@FXML
@@ -139,7 +139,7 @@ public class MainWindowTitleController implements FxController {
 	}
 
 	public ReadOnlyBooleanProperty debugModeEnabledProperty() {
-		return settings.debugMode();
+		return settings.debugMode;
 	}
 
 	public boolean isDebugModeEnabled() {
@@ -152,6 +152,6 @@ public class MainWindowTitleController implements FxController {
 
 	public boolean isShowMinimizeButton() {
 		// always show the minimize button if no tray icon is present OR it is explicitly enabled
-		return !trayMenuInitialized || settings.showMinimizeButton().get();
+		return !trayMenuInitialized || settings.showMinimizeButton.get();
 	}
 }

@@ -29,7 +29,7 @@ public class SupportedLanguages {
 
 	@Inject
 	public SupportedLanguages(Settings settings) {
-		var preferredLanguage = settings.languageProperty().get();
+		var preferredLanguage = settings.language.get();
 		preferredLocale = preferredLanguage == null ? Locale.getDefault() : Locale.forLanguageTag(preferredLanguage);
 		var collator = Collator.getInstance(preferredLocale);
 		collator.setStrength(Collator.PRIMARY);

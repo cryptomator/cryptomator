@@ -42,19 +42,19 @@ public class VaultSettings {
 
 	private static final Random RNG = new Random();
 
-	private final String id;
-	private final ObjectProperty<Path> path;
-	private final StringProperty displayName;
-	private final BooleanProperty unlockAfterStartup;
-	private final BooleanProperty revealAfterMount;
-	private final BooleanProperty usesReadOnlyMode;
-	private final StringProperty mountFlags;
-	private final IntegerProperty maxCleartextFilenameLength;
-	private final ObjectProperty<WhenUnlocked> actionAfterUnlock;
-	private final BooleanProperty autoLockWhenIdle;
-	private final IntegerProperty autoLockIdleSeconds;
-	private final ObjectProperty<Path> mountPoint;
-	private final StringExpression mountName;
+	public final String id;
+	public final ObjectProperty<Path> path;
+	public final StringProperty displayName;
+	public final BooleanProperty unlockAfterStartup;
+	public final BooleanProperty revealAfterMount;
+	public final BooleanProperty usesReadOnlyMode;
+	public final StringProperty mountFlags;
+	public final IntegerProperty maxCleartextFilenameLength;
+	public final ObjectProperty<WhenUnlocked> actionAfterUnlock;
+	public final BooleanProperty autoLockWhenIdle;
+	public final IntegerProperty autoLockIdleSeconds;
+	public final ObjectProperty<Path> mountPoint;
+	public final StringExpression mountName;
 
 	VaultSettings(VaultSettingsJson json) {
 		this.id = json.id;
@@ -137,69 +137,6 @@ public class VaultSettings {
 
 		// replace control chars as well as chars that aren't allowed in file names on standard file systems by underscore
 		return CharMatcher.anyOf("<>:\"/\\|?*").or(CharMatcher.javaIsoControl()).collapseFrom(withoutFancyWhitespaces, '_');
-	}
-
-	/* Getter/Setter */
-	// TODO: remove accessors, make fields public
-
-	public String getId() {
-		return id;
-	}
-
-	public ObjectProperty<Path> path() {
-		return path;
-	}
-
-	public StringProperty displayName() {
-		return displayName;
-	}
-
-	public StringExpression mountName() {
-		return mountName;
-	}
-
-	public BooleanProperty unlockAfterStartup() {
-		return unlockAfterStartup;
-	}
-
-	public BooleanProperty revealAfterMount() {
-		return revealAfterMount;
-	}
-
-	public Path getMountPoint() {
-		return mountPoint.get();
-	}
-
-	public ObjectProperty<Path> mountPoint() {
-		return mountPoint;
-	}
-
-	public BooleanProperty usesReadOnlyMode() {
-		return usesReadOnlyMode;
-	}
-
-	public StringProperty mountFlags() {
-		return mountFlags;
-	}
-
-	public IntegerProperty maxCleartextFilenameLength() {
-		return maxCleartextFilenameLength;
-	}
-
-	public ObjectProperty<WhenUnlocked> actionAfterUnlock() {
-		return actionAfterUnlock;
-	}
-
-	public WhenUnlocked getActionAfterUnlock() {
-		return actionAfterUnlock.get();
-	}
-
-	public BooleanProperty autoLockWhenIdle() {
-		return autoLockWhenIdle;
-	}
-
-	public IntegerProperty autoLockIdleSeconds() {
-		return autoLockIdleSeconds;
 	}
 
 	/* Hashcode/Equals */

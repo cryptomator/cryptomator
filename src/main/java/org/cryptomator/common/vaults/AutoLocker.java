@@ -50,8 +50,8 @@ public class AutoLocker {
 
 	private boolean exceedsIdleTime(Vault vault) {
 		assert vault.isUnlocked();
-		if (vault.getVaultSettings().autoLockWhenIdle().get()) {
-			int maxIdleSeconds = vault.getVaultSettings().autoLockIdleSeconds().get();
+		if (vault.getVaultSettings().autoLockWhenIdle.get()) {
+			int maxIdleSeconds = vault.getVaultSettings().autoLockIdleSeconds.get();
 			var deadline = vault.getStats().getLastActivity().plusSeconds(maxIdleSeconds);
 			return deadline.isBefore(Instant.now());
 		} else {

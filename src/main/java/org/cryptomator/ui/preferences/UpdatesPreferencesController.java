@@ -42,7 +42,7 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public void initialize() {
-		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates());
+		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 	}
 
 	@FXML
