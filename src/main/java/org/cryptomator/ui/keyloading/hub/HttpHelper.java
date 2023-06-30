@@ -1,14 +1,10 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.io.CharStreams;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 

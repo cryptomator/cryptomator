@@ -48,7 +48,6 @@
 		<easybind.version>2.2</easybind.version>
 		<guava.version>32.0.1-jre</guava.version>
 		<jackson.version>2.15.2</jackson.version>
-		<gson.version>2.10.1</gson.version>
 		<javafx.version>20.0.1</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.31</nimbus-jose.version>
@@ -211,11 +210,6 @@
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger</artifactId>
 			<version>${dagger.version}</version>
-		</dependency>
-		<dependency> <!-- TODO replace with jackson -->
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>${gson.version}</version>
 		</dependency>
 
 		<!-- JUnit / Mockito / Hamcrest -->

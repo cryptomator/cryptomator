@@ -34,7 +34,7 @@ public class SupportedLanguages {
 		var collator = Collator.getInstance(preferredLocale);
 		collator.setStrength(Collator.PRIMARY);
 		var sorted = new ArrayList<String>();
-		sorted.add(0, Settings.DEFAULT_LANGUAGE);
+		sorted.add(0, null);
 		sorted.add(1, ENGLISH);
 		LANGUAGE_TAGS.stream() //
 				.sorted((a, b) -> collator.compare(Locale.forLanguageTag(a).getDisplayName(), Locale.forLanguageTag(b).getDisplayName())) //
