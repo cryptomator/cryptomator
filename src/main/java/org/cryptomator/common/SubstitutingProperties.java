@@ -29,12 +29,8 @@ public class SubstitutingProperties extends PropertiesDecorator {
 
 	@Override
 	public String getProperty(String key, String defaultValue) {
-		var value = delegate.getProperty(key, defaultValue);
-		if (key.startsWith("cryptomator.") && value != null) {
-			return process(value);
-		} else {
-			return value;
-		}
+		var result = getProperty(key);
+		return result != null ? result : defaultValue;
 	}
 
 	//visible for testing

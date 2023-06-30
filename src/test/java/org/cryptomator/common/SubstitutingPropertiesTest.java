@@ -70,7 +70,7 @@ public class SubstitutingPropertiesTest {
 
 		@ParameterizedTest
 		@DisplayName("Properties not starting with \"cryptomator.\" are not processed")
-		@ValueSource(strings = {"example.foo","cryptomatorSomething.foo","org.cryptomator.foo","cryPtoMAtor.foo"})
+		@ValueSource(strings = {"example.foo", "cryptomatorSomething.foo", "org.cryptomator.foo", "cryPtoMAtor.foo"})
 		public void testNoProcessingOnNotCryptomator(String propKey) {
 			var props = new Properties();
 			props.setProperty(propKey, "someValue");
@@ -91,6 +91,19 @@ public class SubstitutingPropertiesTest {
 
 			inTest.getProperty("cryptomator.prop");
 			Mockito.verify(inTest).process("someValue");
+		}
+
+		@Test
+		@DisplayName("Default value is not processed")
+		public void testNoProcessingDefault() {
+			var props = Mockito.mock(Properties.class);
+			Mockito.when(props.getProperty("cryptomator.prop")).thenReturn(null);
+			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of()));
+			Mockito.doReturn("someValue").when(inTest).process(Mockito.anyString());
+
+			var result = inTest.getProperty("cryptomator.prop", "a default");
+			Assertions.assertEquals("a default", result);
+			Mockito.verify(inTest, Mockito.never()).process(Mockito.any());
 		}
 	}
 
