@@ -107,4 +107,44 @@ public class SubstitutingPropertiesTest {
 		}
 	}
 
+	@ParameterizedTest(name = "{0}={1} -> {0}={2}")
+	@DisplayName("Replace @{userhome} during getProperty()")
+	@CsvSource(quoteCharacter = '"', textBlock = """
+			cryptomator.settingsPath, "@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json", "/home/.config/Cryptomator/settings.json:/home/.Cryptomator/settings.json"
+			cryptomator.ipcSocketPath, "@{userhome}/.config/Cryptomator/ipc.socket:@{userhome}/.Cryptomator/ipc.socket", "/home/.config/Cryptomator/ipc.socket:/home/.Cryptomator/ipc.socket"
+			not.cryptomator.not.substituted, "@{userhome}/foo", "@{userhome}/foo"
+			cryptomator.no.placeholder.found, "foo/bar", "foo/bar"
+			""")
+	public void testEndToEndPropsSource(String key, String raw, String substituted) {
+		var delegate = Mockito.mock(Properties.class);
+		Mockito.doReturn("/home").when(delegate).getProperty("user.home");
+		Mockito.doReturn(raw).when(delegate).getProperty(key);
+		var inTest = new SubstitutingProperties(delegate, Map.of());
+
+		var result = inTest.getProperty(key);
+
+		Assertions.assertEquals(substituted, result);
+	}
+
+	@ParameterizedTest(name = "{0}={1} -> {0}={2}")
+	@DisplayName("Replace appdata,localappdata or appdir during getProperty()")
+	@CsvSource(quoteCharacter = '"', textBlock = """
+			cryptomator.settingsPath, "@{appdata}/Cryptomator/settings.json", "C:\\Users\\JimFang\\AppData\\Roaming/Cryptomator/settings.json"
+			cryptomator.ipcSocketPath, "@{localappdata}/Cryptomator/ipc.socket", "C:\\Users\\JimFang\\AppData\\Local/Cryptomator/ipc.socket"
+			cryptomator.integrationsLinux.trayIconsDir, "@{appdir}/hicolor", "/squashfs1337/usr/hicolor"
+			not.cryptomator.not.substituted, "@{appdir}/foo", "@{appdir}/foo"
+			cryptomator.no.placeholder.found, "foo/bar", "foo/bar"
+			""")
+	public void testEndToEndEnvSource(String key, String raw, String substituted) {
+		var delegate = Mockito.mock(Properties.class);
+		Mockito.doReturn(raw).when(delegate).getProperty(key);
+		var env = Map.of("APPDATA", "C:\\Users\\JimFang\\AppData\\Roaming", //
+				"LOCALAPPDATA", "C:\\Users\\JimFang\\AppData\\Local", //
+				"APPDIR", "/squashfs1337/usr");
+		var inTest = new SubstitutingProperties(delegate, env);
+
+		var result = inTest.getProperty(key);
+
+		Assertions.assertEquals(substituted, result);
+	}
 }
