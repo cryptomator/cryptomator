@@ -1,5 +1,6 @@
 package org.cryptomator.common;
 
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
@@ -33,7 +34,7 @@ public class SubstitutingProperties extends PropertiesDecorator {
 		return result != null ? result : defaultValue;
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	String process(String value) {
 		return TEMPLATE.matcher(value).replaceAll(match -> //
 				switch (match.group(1)) {

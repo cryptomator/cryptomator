@@ -30,7 +30,7 @@ public class SubstitutingPropertiesTest {
 		public void test(String propertyValue, String expected) {
 			SubstitutingProperties inTest = new SubstitutingProperties(Mockito.mock(Properties.class), Map.of("APPDIR", "foobar"));
 			var result = inTest.process(propertyValue);
-			Assertions.assertEquals(result, expected);
+			Assertions.assertEquals(expected, result);
 		}
 
 		@Test
@@ -41,7 +41,7 @@ public class SubstitutingPropertiesTest {
 
 			inTest = new SubstitutingProperties(props, Map.of());
 			var result = inTest.process("@{userhome}");
-			Assertions.assertEquals(result, "OneUponABit");
+			Assertions.assertEquals("OneUponABit", result);
 		}
 
 		@DisplayName("Other keywords are replaced accordingly")
@@ -50,7 +50,7 @@ public class SubstitutingPropertiesTest {
 		public void testEnvSubstitutions(String token, String envName, String expected) {
 			inTest = new SubstitutingProperties(new Properties(), Map.of(envName, expected));
 			var result = inTest.process("@{" + token + "}");
-			Assertions.assertEquals(result, expected);
+			Assertions.assertEquals(expected, result);
 		}
 
 	}
