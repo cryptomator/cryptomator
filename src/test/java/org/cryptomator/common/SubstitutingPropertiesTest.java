@@ -21,13 +21,14 @@ public class SubstitutingPropertiesTest {
 
 		@ParameterizedTest
 		@DisplayName("Test template replacement")
-		@CsvSource(value = {"unknown.@{testToken}.test, unknown.@{testToken}.test", //
-				"@{only*words*digits*under_score\\},@{only*words*digits*under_score\\}", //
-				"C:\\Users\\@{appdir}\\dir, C:\\Users\\foobar\\dir", //
-				"@{@{appdir}},@{foobar}", //
-				"Longer @{appdir} text with @{appdir}., Longer foobar text with foobar."})
+		@CsvSource(textBlock = """
+				unknown.@{testToken}.test, unknown.@{testToken}.test
+				@{only*words*digits*under_score},@{only*words*digits*under_score}
+				C:\\Users\\@{appdir}\\dir, C:\\Users\\foobar\\dir
+				@{@{appdir}},@{foobar}
+				Replacing several @{appdir} with @{appdir}., Replacing several foobar with foobar.""")
 		public void test(String propertyValue, String expected) {
-			SubstitutingProperties inTest = new SubstitutingProperties(new Properties(), Map.of("APPDIR", "foobar"));
+			SubstitutingProperties inTest = new SubstitutingProperties(Mockito.mock(Properties.class), Map.of("APPDIR", "foobar"));
 			var result = inTest.process(propertyValue);
 			Assertions.assertEquals(result, expected);
 		}
