@@ -26,8 +26,8 @@ public class DebugMode {
 	}
 
 	public void initialize() {
-		setLogLevels(settings.debugMode().get());
-		settings.debugMode().addListener(this::logLevelChanged);
+		setLogLevels(settings.debugMode.get());
+		settings.debugMode.addListener(this::logLevelChanged);
 	}
 
 	private void logLevelChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observable, @SuppressWarnings("unused") Boolean oldValue, Boolean newValue) {

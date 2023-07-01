@@ -1,6 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.coffeelibs.tinyoauth2client.AuthFlow;
 import io.github.coffeelibs.tinyoauth2client.TinyOAuth2;
 import io.github.coffeelibs.tinyoauth2client.http.response.Response;
@@ -11,6 +11,8 @@ import java.net.URI;
 import java.util.function.Consumer;
 
 class AuthFlowTask extends Task<String> {
+
+	private static final ObjectMapper JSON = new ObjectMapper();
 
 	private final HubConfig hubConfig;
 	private final AuthFlowContext authFlowContext;
@@ -39,8 +41,7 @@ class AuthFlowTask extends Task<String> {
 		if (response.statusCode() != 200) {
 			throw new NotOkResponseException("Authorization returned status code " + response.statusCode());
 		}
-		var json = JsonParser.parseString(response.body());
-		return json.getAsJsonObject().get("access_token").getAsString();
+		return JSON.reader().readTree(response.body()).get("access_token").asText();
 	}
 
 	public static class NotOkResponseException extends RuntimeException {

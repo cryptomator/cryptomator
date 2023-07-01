@@ -49,8 +49,8 @@ public class VaultListManager {
 		this.vaultComponentFactory = vaultComponentFactory;
 		this.defaultVaultName = resourceBundle.getString("defaults.vault.vaultName");
 
-		addAll(settings.getDirectories());
-		vaultList.addListener(new VaultListChangeListener(settings.getDirectories()));
+		addAll(settings.directories);
+		vaultList.addListener(new VaultListChangeListener(settings.directories));
 		autoLocker.init();
 	}
 
@@ -70,11 +70,11 @@ public class VaultListManager {
 
 	private VaultSettings newVaultSettings(Path path) {
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
-		vaultSettings.path().set(path);
+		vaultSettings.path.set(path);
 		if (path.getFileName() != null) {
-			vaultSettings.displayName().set(path.getFileName().toString());
+			vaultSettings.displayName.set(path.getFileName().toString());
 		} else {
-			vaultSettings.displayName().set(defaultVaultName);
+			vaultSettings.displayName.set(defaultVaultName);
 		}
 		return vaultSettings;
 	}
@@ -95,13 +95,13 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
-			var vaultState = determineVaultState(vaultSettings.path().get());
+			var vaultState = determineVaultState(vaultSettings.path.get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 			}
 			return vaultComponentFactory.create(vaultSettings, wrapper, vaultState, null).vault();
 		} catch (IOException e) {
-			LOG.warn("Failed to determine vault state for " + vaultSettings.path().get(), e);
+			LOG.warn("Failed to determine vault state for " + vaultSettings.path.get(), e);
 			return vaultComponentFactory.create(vaultSettings, wrapper, ERROR, e).vault();
 		}
 	}

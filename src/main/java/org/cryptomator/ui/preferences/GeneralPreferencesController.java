@@ -55,17 +55,17 @@ public class GeneralPreferencesController implements FxController {
 
 	@FXML
 	public void initialize() {
-		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
-		autoCloseVaultsCheckbox.selectedProperty().bindBidirectional(settings.autoCloseVaults());
-		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
+		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden);
+		autoCloseVaultsCheckbox.selectedProperty().bindBidirectional(settings.autoCloseVaults);
+		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode);
 		autoStartProvider.ifPresent(autoStart -> autoStartCheckbox.setSelected(autoStart.isEnabled()));
 
 		var keychainSettingsConverter = new KeychainProviderClassNameConverter(keychainAccessProviders);
 		keychainBackendChoiceBox.getItems().addAll(keychainAccessProviders);
-		keychainBackendChoiceBox.setValue(keychainSettingsConverter.fromString(settings.keychainProvider().get()));
+		keychainBackendChoiceBox.setValue(keychainSettingsConverter.fromString(settings.keychainProvider.get()));
 		keychainBackendChoiceBox.setConverter(new KeychainProviderDisplayNameConverter());
-		Bindings.bindBidirectional(settings.keychainProvider(), keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
-		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain());
+		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
+		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
 		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
 	}
 

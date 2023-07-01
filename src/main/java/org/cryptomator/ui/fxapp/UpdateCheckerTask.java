@@ -1,9 +1,7 @@
 package org.cryptomator.ui.fxapp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,20 +9,16 @@ import org.slf4j.LoggerFactory;
 import javafx.concurrent.Task;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 public class UpdateCheckerTask extends Task<String> {
 
+	private static final ObjectMapper JSON = new ObjectMapper();
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateCheckerTask.class);
 
 	private static final long MAX_RESPONSE_SIZE = 10L * 1024; // 10kb should be sufficient. protect against flooding
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
 
 	private final HttpClient httpClient;
 	private final HttpRequest checkForUpdatesRequest;
@@ -48,16 +42,14 @@ public class UpdateCheckerTask extends Task<String> {
 
 	private String processBody(HttpResponse<InputStream> response) throws IOException {
 		try (InputStream in = response.body(); //
-			 InputStream limitedIn = ByteStreams.limit(in, MAX_RESPONSE_SIZE); //
-			 Reader reader = new InputStreamReader(limitedIn, StandardCharsets.UTF_8)) {
-			Map<String, String> map = GSON.fromJson(reader, new TypeToken<Map<String, String>>() {
-			}.getType());
+			 InputStream limitedIn = ByteStreams.limit(in, MAX_RESPONSE_SIZE)) {
+			var json = JSON.reader().readTree(limitedIn);
 			if (SystemUtils.IS_OS_MAC_OSX) {
-				return map.get("mac");
+				return json.get("mac").asText();
 			} else if (SystemUtils.IS_OS_WINDOWS) {
-				return map.get("win");
+				return json.get("win").asText();
 			} else if (SystemUtils.IS_OS_LINUX) {
-				return map.get("linux");
+				return json.get("linux").asText();
 			} else {
 				throw new IllegalStateException("Unsupported operating system");
 			}

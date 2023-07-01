@@ -54,7 +54,7 @@ public class ResizeController implements FxController {
 		LOG.trace("init ResizeController");
 
 		if (neverTouched()) {
-			settings.displayConfigurationProperty().setValue(getMonitorSizes());
+			settings.displayConfiguration.set(getMonitorSizes());
 			return;
 		} else {
 			if (didDisplayConfigurationChange()) {
@@ -65,24 +65,24 @@ public class ResizeController implements FxController {
 				window.setWidth(window.getMinWidth());
 				window.setHeight(window.getMinHeight());
 			} else {
-				window.setHeight(settings.windowHeightProperty().get() > window.getMinHeight() ? settings.windowHeightProperty().get() : window.getMinHeight());
-				window.setWidth(settings.windowWidthProperty().get() > window.getMinWidth() ? settings.windowWidthProperty().get() : window.getMinWidth());
-				window.setX(settings.windowXPositionProperty().get());
-				window.setY(settings.windowYPositionProperty().get());
+				window.setHeight(settings.windowHeight.get() > window.getMinHeight() ? settings.windowHeight.get() : window.getMinHeight());
+				window.setWidth(settings.windowWidth.get() > window.getMinWidth() ? settings.windowWidth.get() : window.getMinWidth());
+				window.setX(settings.windowXPosition.get());
+				window.setY(settings.windowYPosition.get());
 			}
 		}
 		savePositionalSettings();
 	}
 
 	private boolean neverTouched() {
-		return (settings.windowHeightProperty().get() == 0) && (settings.windowWidthProperty().get() == 0) && (settings.windowXPositionProperty().get() == 0) && (settings.windowYPositionProperty().get() == 0);
+		return (settings.windowHeight.get() == 0) && (settings.windowWidth.get() == 0) && (settings.windowXPosition.get() == 0) && (settings.windowYPosition.get() == 0);
 	}
 
 	private boolean didDisplayConfigurationChange() {
 		String currentDisplayConfiguration = getMonitorSizes();
-		String settingsDisplayConfiguration = settings.displayConfigurationProperty().get();
+		String settingsDisplayConfiguration = settings.displayConfiguration.get();
 		boolean configurationHasChanged = !settingsDisplayConfiguration.equals(currentDisplayConfiguration);
-		if (configurationHasChanged) settings.displayConfigurationProperty().setValue(currentDisplayConfiguration);
+		if (configurationHasChanged) settings.displayConfiguration.set(currentDisplayConfiguration);
 		return configurationHasChanged;
 	}
 
@@ -170,10 +170,10 @@ public class ResizeController implements FxController {
 
 	@FXML
 	public void savePositionalSettings() {
-		settings.windowHeightProperty().setValue(window.getHeight());
-		settings.windowWidthProperty().setValue(window.getWidth());
-		settings.windowYPositionProperty().setValue(window.getY());
-		settings.windowXPositionProperty().setValue(window.getX());
+		settings.windowWidth.setValue(window.getWidth());
+		settings.windowHeight.setValue(window.getHeight());
+		settings.windowXPosition.setValue(window.getX());
+		settings.windowYPosition.setValue(window.getY());
 	}
 
 	public BooleanBinding showResizingArrowsProperty() {
