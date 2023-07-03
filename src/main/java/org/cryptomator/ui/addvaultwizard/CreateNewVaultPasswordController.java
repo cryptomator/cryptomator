@@ -10,10 +10,10 @@ import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
@@ -25,6 +25,7 @@ import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
@@ -56,6 +57,7 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> chooseLocationScene;
+	private final Lazy<Scene> chooseAdvancedSettingsScene;
 	private final Lazy<Scene> recoveryKeyScene;
 	private final Lazy<Scene> successScene;
 	private final FxApplicationWindows appWindows;
@@ -73,6 +75,8 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final BooleanProperty processing;
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
+	private final IntegerProperty shorteningThreshold;
+	private final BooleanProperty advancedSettingsEnabled;
 
 	/* FXML */
 	public ToggleGroup recoveryKeyChoice;
@@ -80,11 +84,10 @@ public class CreateNewVaultPasswordController implements FxController {
 	public Toggle skipRecoveryKey;
 	public NewPasswordController newPasswordSceneController;
 
-	private final StringProperty shorteningThreshold;
-
 	@Inject
 	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, //
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_ADVANCED_SETTINGS) Lazy<Scene> chooseAdvancedSettingsScene, //
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, //
 									 @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, //
 									 FxApplicationWindows appWindows, //
@@ -96,12 +99,14 @@ public class CreateNewVaultPasswordController implements FxController {
 									 @Named("recoveryKey") StringProperty recoveryKey, //
 									 VaultListManager vaultListManager, //
 									 ResourceBundle resourceBundle, //
-									 @Named("shorteningThreshold") StringProperty shorteningThreshold, //
+									 @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
 									 ReadmeGenerator readmeGenerator, //
 									 SecureRandom csprng, //
-									 MasterkeyFileAccess masterkeyFileAccess) {
+									 MasterkeyFileAccess masterkeyFileAccess, //
+									 BooleanProperty advancedSettingsEnabled) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
+		this.chooseAdvancedSettingsScene = chooseAdvancedSettingsScene;
 		this.recoveryKeyScene = recoveryKeyScene;
 		this.successScene = successScene;
 		this.appWindows = appWindows;
@@ -120,10 +125,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.readyToCreateVault = new SimpleBooleanProperty();
 		this.createVaultButtonState = Bindings.when(processing).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.shorteningThreshold = shorteningThreshold;
-		if(this.shorteningThreshold.isNull().get())
-		{
-			this.shorteningThreshold.set("220");
-		}
+		this.advancedSettingsEnabled = advancedSettingsEnabled;
 	}
 
 	@FXML
@@ -137,7 +139,11 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void back() {
-		window.setScene(chooseLocationScene.get());
+		if (advancedSettingsEnabled.getValue()) {
+			window.setScene(chooseAdvancedSettingsScene.get());
+		} else {
+			window.setScene(chooseLocationScene.get());
+		}
 	}
 
 	@FXML
@@ -200,7 +206,7 @@ public class CreateNewVaultPasswordController implements FxController {
 				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 						.withCipherCombo(CryptorProvider.Scheme.SIV_GCM) //
 						.withKeyLoader(loader) //
-						.withShorteningThreshold(Integer.parseInt(shorteningThreshold.getValue()))
+						.withShorteningThreshold(shorteningThreshold.get()) //
 						.build();
 				CryptoFileSystemProvider.initialize(path, fsProps, DEFAULT_KEY_ID);
 

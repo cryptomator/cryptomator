@@ -8,14 +8,11 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
-import org.cryptomator.ui.controls.NumericTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -72,6 +69,7 @@ public class CreateNewVaultLocationController implements FxController {
 	public FontAwesome5IconView goodLocation;
 	public FontAwesome5IconView badLocation;
 	public CheckBox advancedSettingsCheckBox;
+	private final BooleanProperty advancedSettingsEnabled;
 
 	@Inject
 	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, //
@@ -80,7 +78,8 @@ public class CreateNewVaultLocationController implements FxController {
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_ADVANCED_SETTINGS) Lazy<Scene> chooseAdvancedSettingsScene, //
 									 ObjectProperty<Path> vaultPath, //
 									 @Named("vaultName") StringProperty vaultName, //
-									 ResourceBundle resourceBundle) {
+									 ResourceBundle resourceBundle, //
+									 BooleanProperty advancedSettingsEnabled) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
 		this.choosePasswordScene = choosePasswordScene;
@@ -88,6 +87,7 @@ public class CreateNewVaultLocationController implements FxController {
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
+		this.advancedSettingsEnabled = advancedSettingsEnabled;
 		this.vaultPathStatus = ObservableUtil.mapWithDefault(vaultPath, this::validatePath, new VaultPathStatus(false, "error.message"));
 		this.validVaultPath = ObservableUtil.mapWithDefault(vaultPathStatus, VaultPathStatus::valid, false);
 		this.vaultPathStatus.addListener(this::updateStatusLabel);
@@ -149,6 +149,7 @@ public class CreateNewVaultLocationController implements FxController {
 		locationPresetsToggler.getToggles().addAll(locationPresetBtns);
 		locationPresetsToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(locationPresetsToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
+		advancedSettingsEnabled.bind(advancedSettingsCheckBox.selectedProperty());
 	}
 
 	private void togglePredefinedLocation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
@@ -164,10 +165,9 @@ public class CreateNewVaultLocationController implements FxController {
 	@FXML
 	public void next() {
 		if (validVaultPath.getValue()) {
-			if(advancedSettingsCheckBox.isSelected()){
+			if (advancedSettingsEnabled.get()) {
 				window.setScene(chooseAdvancedSettingsScene.get());
-			}
-			else {
+			} else {
 				window.setScene(choosePasswordScene.get());
 			}
 		}

@@ -35,7 +35,7 @@
 						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 					</graphic>
 					<tooltip>
-						<Tooltip text="%addvaultwizard.new.shorteningThreshold.tooltip" showDelay="10ms" />
+						<Tooltip text="%addvaultwizard.new.shorteningThreshold.tooltip" showDelay="10ms"/>
 					</tooltip>
 				</Hyperlink>
 			</HBox>
@@ -56,12 +56,12 @@
 				</StackPane>
 			</HBox>
 		</VBox>
-
+		<Label text="%addvaultwizard.new.shorteningThreshold.message"/>
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+X">
 			<buttons>
-				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
+				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back" disable="${!controller.validShorteningThreshold}"/>
 				<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" onAction="#next" defaultButton="true" disable="${!controller.validShorteningThreshold}"/>
 			</buttons>
 		</ButtonBar>

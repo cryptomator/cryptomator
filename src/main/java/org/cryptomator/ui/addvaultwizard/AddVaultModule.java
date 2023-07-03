@@ -5,21 +5,25 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.changepassword.NewPasswordController;
+import org.cryptomator.ui.changepassword.PasswordStrengthUtil;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.changepassword.NewPasswordController;
-import org.cryptomator.ui.changepassword.PasswordStrengthUtil;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -68,8 +72,14 @@ public abstract class AddVaultModule {
 	@Provides
 	@Named("shorteningThreshold")
 	@AddVaultWizardScoped
-	static StringProperty provideShorteningThreshold() {
-		return new SimpleStringProperty();
+	static IntegerProperty provideShorteningThreshold() {
+		return new SimpleIntegerProperty(CreateNewVaultAdvancedSettingsController.DEFAULT_SHORTENING_THRESHOLD);
+	}
+
+	@Provides
+	@AddVaultWizardScoped
+	static BooleanProperty provideAdvancedSettingsEnabled() {
+		return new SimpleBooleanProperty();
 	}
 
 	@Provides
