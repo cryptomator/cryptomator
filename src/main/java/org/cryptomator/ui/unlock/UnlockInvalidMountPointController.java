@@ -21,9 +21,11 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final AtomicReference<Throwable> unlockException;
 	private final FxApplicationWindows appWindows;
 	private final ResourceBundle resourceBundle;
+
+	private final ExceptionType exceptionType;
+	private final String exceptionMessage;
 
 	public FormattedLabel dialogDescription;
 
@@ -31,22 +33,18 @@ public class UnlockInvalidMountPointController implements FxController {
 	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow AtomicReference<Throwable> unlockException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
-		this.unlockException = unlockException;
 		this.appWindows = appWindows;
 		this.resourceBundle = resourceBundle;
+
+		var exc = unlockException.get();
+		this.exceptionType = getExceptionType(exc);
+		this.exceptionMessage = exc.getMessage();
 	}
 
 	@FXML
 	public void initialize() {
-		var e = unlockException.get();
-		var translationKey = switch (e) {
-			case MountPointNotSupportedException x -> "unlock.error.customPath.description.notSupported";
-			case MountPointNotExistsException x -> "unlock.error.customPath.description.notExists";
-			case MountPointInUseException x -> "unlock.error.customPath.description.inUse";
-			default -> "unlock.error.customPath.description.generic";
-		};
-		dialogDescription.setFormat(resourceBundle.getString(translationKey));
-		dialogDescription.setArg1(e.getMessage());
+		dialogDescription.setFormat(resourceBundle.getString(exceptionType.translationKey));
+		dialogDescription.setArg1(exceptionMessage);
 	}
 
 	@FXML
@@ -60,4 +58,26 @@ public class UnlockInvalidMountPointController implements FxController {
 		window.close();
 	}
 
+	private ExceptionType getExceptionType(Throwable unlockException) {
+		return switch (unlockException) {
+			case MountPointNotSupportedException x -> ExceptionType.NOT_SUPPORTED;
+			case MountPointNotExistsException x -> ExceptionType.NOT_EXISTING;
+			case MountPointInUseException x -> ExceptionType.IN_USE;
+			default -> ExceptionType.GENERIC;
+		};
+	}
+
+	private enum ExceptionType {
+
+		NOT_SUPPORTED("unlock.error.customPath.description.notSupported"),
+		NOT_EXISTING("unlock.error.customPath.description.notExists"),
+		IN_USE("unlock.error.customPath.description.inUse"),
+		GENERIC("unlock.error.customPath.description.generic");
+
+		private final String translationKey;
+
+		ExceptionType(String translationKey) {
+			this.translationKey = translationKey;
+		}
+	}
 }
