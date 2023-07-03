@@ -52,9 +52,19 @@ public class UnlockInvalidMountPointController implements FxController {
 		window.close();
 	}
 
+	public boolean isShowPreferences() {
+		return exceptionType.showPreferences;
+	}
+
 	@FXML
 	public void closeAndOpenPreferences() {
 		appWindows.showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+		window.close();
+	}
+
+	@FXML
+	public void closeAndOpenVaultOptions() {
+		//TODO
 		window.close();
 	}
 
@@ -69,15 +79,17 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	private enum ExceptionType {
 
-		NOT_SUPPORTED("unlock.error.customPath.description.notSupported"),
-		NOT_EXISTING("unlock.error.customPath.description.notExists"),
-		IN_USE("unlock.error.customPath.description.inUse"),
-		GENERIC("unlock.error.customPath.description.generic");
+		NOT_SUPPORTED("unlock.error.customPath.description.notSupported", true),
+		NOT_EXISTING("unlock.error.customPath.description.notExists", false),
+		IN_USE("unlock.error.customPath.description.inUse", false),
+		GENERIC("unlock.error.customPath.description.generic", true);
 
 		private final String translationKey;
+		private final boolean showPreferences;
 
-		ExceptionType(String translationKey) {
+		ExceptionType(String translationKey, boolean showPreferences) {
 			this.translationKey = translationKey;
+			this.showPreferences = showPreferences;
 		}
 	}
 }
