@@ -80,7 +80,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/${APP_NAME}/ipc.socket\"" \
     --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/${APP_NAME}/key.p12\"" \
     --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"${APP_NAME}\"" \
-    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/${APP_NAME}\"" \
+    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support${APP_NAME}/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \
