@@ -37,7 +37,7 @@ public class MountModule {
 	static ObservableValue<ActualMountService> provideMountService(Settings settings, List<MountService> serviceImpls, @Named("FUPFMS") AtomicReference<MountService> fupfms) {
 		var fallbackProvider = serviceImpls.stream().findFirst().orElse(null);
 
-		var observableMountService = ObservableUtil.mapWithDefault(settings.mountService(), //
+		var observableMountService = ObservableUtil.mapWithDefault(settings.mountService, //
 				desiredServiceImpl -> { //
 					var serviceFromSettings = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny(); //
 					var targetedService = serviceFromSettings.orElse(fallbackProvider);

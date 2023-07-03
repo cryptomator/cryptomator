@@ -48,7 +48,7 @@ public class SupporterCertificateController implements FxController {
 	private void registrationKeyChanged(@SuppressWarnings("unused") ObservableValue<? extends String> observable, @SuppressWarnings("unused") String oldValue, String newValue) {
 		licenseHolder.validateAndStoreLicense(newValue);
 		if (!licenseHolder.isValidLicense()) {
-			settings.theme().set(UiTheme.LIGHT);
+			settings.theme.set(UiTheme.LIGHT);
 		}
 	}
 

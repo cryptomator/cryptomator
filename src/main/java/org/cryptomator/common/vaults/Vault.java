@@ -80,7 +80,7 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
-		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
+		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path);
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
@@ -98,29 +98,29 @@ public class Vault {
 
 	private CryptoFileSystem createCryptoFileSystem(MasterkeyLoader keyLoader) throws IOException, MasterkeyLoadingFailedException {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
-		if (vaultSettings.usesReadOnlyMode().get()) {
+		if (vaultSettings.usesReadOnlyMode.get()) {
 			flags.add(FileSystemFlags.READONLY);
-		} else if (vaultSettings.maxCleartextFilenameLength().get() == -1) {
+		} else if (vaultSettings.maxCleartextFilenameLength.get() == -1) {
 			LOG.debug("Determining cleartext filename length limitations...");
 			var checker = new FileSystemCapabilityChecker();
 			int shorteningThreshold = configCache.get().allegedShorteningThreshold();
 			int ciphertextLimit = checker.determineSupportedCiphertextFileNameLength(getPath());
 			if (ciphertextLimit < shorteningThreshold) {
 				int cleartextLimit = checker.determineSupportedCleartextFileNameLength(getPath());
-				vaultSettings.maxCleartextFilenameLength().set(cleartextLimit);
+				vaultSettings.maxCleartextFilenameLength.set(cleartextLimit);
 			} else {
-				vaultSettings.maxCleartextFilenameLength().setValue(UNLIMITED_FILENAME_LENGTH);
+				vaultSettings.maxCleartextFilenameLength.setValue(UNLIMITED_FILENAME_LENGTH);
 			}
 		}
 
-		if (vaultSettings.maxCleartextFilenameLength().get() < UNLIMITED_FILENAME_LENGTH) {
-			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength().get());
+		if (vaultSettings.maxCleartextFilenameLength.get() < UNLIMITED_FILENAME_LENGTH) {
+			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength.get());
 		}
 
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withKeyLoader(keyLoader) //
 				.withFlags(flags) //
-				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength().get()) //
+				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
 				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
@@ -253,11 +253,11 @@ public class Vault {
 	}
 
 	public ReadOnlyStringProperty displayNameProperty() {
-		return vaultSettings.displayName();
+		return vaultSettings.displayName;
 	}
 
 	public String getDisplayName() {
-		return vaultSettings.displayName().get();
+		return vaultSettings.displayName.get();
 	}
 
 	public ObjectBinding<Mountpoint> mountPointProperty() {
@@ -274,7 +274,7 @@ public class Vault {
 	}
 
 	public String getDisplayablePath() {
-		Path p = vaultSettings.path().get();
+		Path p = vaultSettings.path.get();
 		if (p.startsWith(HOME_DIR)) {
 			Path relativePath = HOME_DIR.relativize(p);
 			String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
@@ -311,7 +311,7 @@ public class Vault {
 	}
 
 	public Path getPath() {
-		return vaultSettings.path().getValue();
+		return vaultSettings.path.get();
 	}
 
 	/**
@@ -346,7 +346,7 @@ public class Vault {
 	}
 
 	public String getId() {
-		return vaultSettings.getId();
+		return vaultSettings.id;
 	}
 
 	// ******************************************************************************

@@ -1,11 +1,13 @@
 package org.cryptomator.ui.error;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.ErrorCode;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.ui.common.FxController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,8 +23,8 @@ import javafx.scene.Scene;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -38,6 +40,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ErrorController implements FxController {
 
+	private static final ObjectMapper JSON = new ObjectMapper();
+	private static final Logger LOG = LoggerFactory.getLogger(ErrorController.class);
 	private static final String ERROR_CODES_URL = "https://gist.githubusercontent.com/cryptobot/accba9fb9555e7192271b85606f97230/raw/errorcodes.json";
 	private static final String SEARCH_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/categories/errors?discussions_q=category:Errors+%s";
 	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
@@ -137,11 +141,12 @@ public class ErrorController implements FxController {
 	}
 
 	private void loadHttpResponse(HttpResponse<InputStream> response) {
-		if (response.statusCode() == 200) {
-			Map<String, ErrorDiscussion> errorDiscussionMap = new Gson().fromJson(//
-					new InputStreamReader(response.body(), StandardCharsets.UTF_8),//
-					new TypeToken<Map<String, ErrorDiscussion>>() {
-					}.getType());
+		if (response.statusCode() != 200) {
+			LOG.error("Status code {} when trying to load {} ", response.statusCode(), response.uri());
+		}
+		try {
+			var typeRef = new TypeReference<Map<String, ErrorDiscussion>>() {};
+			Map<String, ErrorDiscussion> errorDiscussionMap = JSON.reader().forType(typeRef).readValue(response.body());
 
 			if (errorDiscussionMap.values().stream().anyMatch(this::containsMethodCode)) {
 				Comparator<ErrorDiscussion> comp = this::compareByFullErrorCode;
@@ -155,6 +160,8 @@ public class ErrorController implements FxController {
 					matchingErrorDiscussion.set(value.get());
 				}
 			}
+		} catch (IOException e) {
+			LOG.error("Failed to load or parse JSON from " + response.uri(), e);
 		}
 	}
 

@@ -74,13 +74,13 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dapple.awt.enableTemplateImages=true" \
     --java-options "-Dsun.java2d.metal=true" \
     --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
-    --java-options "-Dcryptomator.logDir=\"~/Library/Logs/${APP_NAME}\"" \
-    --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/${APP_NAME}/Plugins\"" \
-    --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/${APP_NAME}/settings.json\"" \
-    --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/${APP_NAME}/ipc.socket\"" \
-    --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/${APP_NAME}/key.p12\"" \
+    --java-options "-Dcryptomator.logDir=\"@{userhome}/Library/Logs/${APP_NAME}\"" \
+    --java-options "-Dcryptomator.pluginDir=\"@{userhome}/Library/Application Support/${APP_NAME}/Plugins\"" \
+    --java-options "-Dcryptomator.settingsPath=\"@{userhome}/Library/Application Support/${APP_NAME}/settings.json\"" \
+    --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/${APP_NAME}/ipc.socket\"" \
+    --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/${APP_NAME}/key.p12\"" \
     --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"${APP_NAME}\"" \
-    --java-options "-Dcryptomator.mountPointsDir=\"~/${APP_NAME}\"" \
+    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support${APP_NAME}/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \
