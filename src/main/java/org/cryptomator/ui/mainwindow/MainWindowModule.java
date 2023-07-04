@@ -19,7 +19,6 @@ import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
-import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 
 import javax.inject.Named;
@@ -33,7 +32,7 @@ import javafx.stage.StageStyle;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {AddVaultWizardComponent.class, HealthCheckComponent.class, MigrationComponent.class, RemoveVaultComponent.class, VaultOptionsComponent.class, VaultStatisticsComponent.class, WrongFileAlertComponent.class, ErrorComponent.class})
+@Module(subcomponents = {AddVaultWizardComponent.class, MigrationComponent.class, RemoveVaultComponent.class, VaultStatisticsComponent.class, WrongFileAlertComponent.class, ErrorComponent.class})
 abstract class MainWindowModule {
 
 	@Provides
