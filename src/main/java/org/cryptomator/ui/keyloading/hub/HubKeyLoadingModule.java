@@ -1,7 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.io.BaseEncoding;
-import com.nimbusds.jose.JWEObject;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -114,10 +113,10 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE)
+	@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE)
 	@KeyLoadingScoped
 	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE);
+		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE);
 	}
 
 	@Provides
@@ -172,6 +171,11 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(SetupDeviceController.class)
 	abstract FxController bindSetupDeviceController(SetupDeviceController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(LegacyRegisterDeviceController.class)
+	abstract FxController bindLegacyRegisterDeviceController(LegacyRegisterDeviceController controller);
 
 	@Binds
 	@IntoMap
