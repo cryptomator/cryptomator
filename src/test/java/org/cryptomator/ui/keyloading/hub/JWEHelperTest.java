@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Base64;
 
+@SuppressWarnings("resource")
 public class JWEHelperTest {
 
 	// key pairs from frontend tests (crypto.spec.ts):
@@ -29,8 +30,8 @@ public class JWEHelperTest {
 	private static final String PUB_KEY = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAERxQR+NRN6Wga01370uBBzr2NHDbKIC56tPUEq2HX64RhITGhii8Zzbkb1HnRmdF0aq6uqmUy4jUhuxnKxsv59A6JeK7Unn+mpmm3pQAygjoGc9wrvoH4HWJSQYUlsXDu";
 
 	@Test
-	@DisplayName("decryptUserKey")
-	public void testDecryptUserKey() throws ParseException, InvalidKeySpecException {
+	@DisplayName("decryptUserKey with device key")
+	public void testDecryptUserKeyECDHES() throws ParseException, InvalidKeySpecException {
 		var jwe = JWEObject.parse("""
 			eyJhbGciOiJFQ0RILUVTIiwiZW5jIjoiQTI1NkdDTSIsImVwayI6eyJrZXlfb3BzIjpbXSwiZXh0Ijp\
 			0cnVlLCJrdHkiOiJFQyIsIngiOiJoeHpiSWh6SUJza3A5ZkZFUmJSQ2RfOU1fbWYxNElqaDZhcnNoVX\
@@ -47,6 +48,58 @@ public class JWEHelperTest {
 		var userKey = JWEHelper.decryptUserKey(jwe, deviceKeyPair.getPrivate());
 
 		Assertions.assertArrayEquals(Base64.getDecoder().decode(USER_PRIV_KEY), userKey.getEncoded());
+	}
+
+	@Test
+	@DisplayName("decryptUserKey with incorrect device key")
+	public void testDecryptUserKeyECDHESWrongKey() throws ParseException, InvalidKeySpecException {
+		var jwe = JWEObject.parse("""
+			eyJhbGciOiJFQ0RILUVTIiwiZW5jIjoiQTI1NkdDTSIsImVwayI6eyJrZXlfb3BzIjpbXSwiZXh0Ijp\
+			0cnVlLCJrdHkiOiJFQyIsIngiOiJoeHpiSWh6SUJza3A5ZkZFUmJSQ2RfOU1fbWYxNElqaDZhcnNoVX\
+			NkcEEyWno5ejZZNUs4NHpZR2I4b2FHemNUIiwieSI6ImJrMGRaNWhpelZ0TF9hN2hNejBjTUduNjhIR\
+			jZFdWlyNHdlclNkTFV5QWd2NWUzVzNYSG5sdHJ2VlRyU3pzUWYiLCJjcnYiOiJQLTM4NCJ9LCJhcHUi\
+			OiIiLCJhcHYiOiIifQ..pu3Q1nR_yvgRAapG.4zW0xm0JPxbcvZ66R-Mn3k841lHelDQfaUvsZZAtWs\
+			L2w4FMi6H_uu6ArAWYLtNREa_zfcPuyuJsFferYPSNRUWt4OW6aWs-l_wfo7G1ceEVxztQXzQiwD30U\
+			TA8OOdPcUuFfEq2-d9217jezrcyO6m6FjyssEZIrnRArUPWKzGdghXccGkkf0LTZcGJoHeKal-RtyP8\
+			PfvEAWTjSOCpBlSdUJ-1JL3tyd97uVFNaVuH3i7vvcMoUP_bdr0XW3rvRgaeC6X4daPLUvR1hK5Msut\
+			QMtM2vpFghS_zZxIQRqz3B2ECxa9Bjxhmn8kLX5heZ8fq3lH-bmJp1DxzZ4V1RkWk.yVwXG9yARa5Ih\
+			q2koh2NbQ""");
+		var userKeyPair = P384KeyPair.create(new X509EncodedKeySpec(Base64.getDecoder().decode(USER_PUB_KEY)), new PKCS8EncodedKeySpec(Base64.getDecoder().decode(USER_PRIV_KEY)));
+		var incorrectDevicePrivateKey = userKeyPair.getPrivate();
+
+		Assertions.assertThrows(JWEHelper.InvalidJweKeyException.class, () -> JWEHelper.decryptUserKey(jwe, incorrectDevicePrivateKey));
+	}
+
+	@Test
+	@DisplayName("decryptUserKey with setup code")
+	public void testDecryptUserKeyPBES2() throws ParseException {
+		var jwe = JWEObject.parse("""
+				eyJhbGciOiJQQkVTMi1IUzUxMitBMjU2S1ciLCJlbmMiOiJBMjU2R0NNIiwicDJzIjoiT3hMY0Q\
+				xX1pCODc1c2hvUWY2Q1ZHQSIsInAyYyI6MTAwMCwiYXB1IjoiIiwiYXB2IjoiIn0.FD4fcrP4Pb\
+				aKOQ9ZfXl0gpMM6Fa2rfqAvL0K5ZyYUiVeHCNV-A02Rg.urT1ShSv6qQxh8X7.gEqAiUWD98a2E\
+				P7ITCPTw4DJo6-BpqrxA73D6gNIj9z4d1hN-EP99Q4mWBWLH97H8ugbG5rGsm8xsjsBqpWORQqF\
+				mJZR2AhlPiwFaC7n_MDDBupSy_swDnCfj731Lal297IP5WbkFcmozKsyhmwdkctxjf_VHA.fJki\
+				kDjUaxwUKqpvT7qaAQ
+				""");
+
+		var userKey = JWEHelper.decryptUserKey(jwe, "123456");
+
+		Assertions.assertArrayEquals(Base64.getDecoder().decode(PRIV_KEY), userKey.getEncoded());
+	}
+
+	@Test
+	@DisplayName("decryptUserKey with incorrect setup code")
+	public void testDecryptUserKeyPBES2WrongKey() throws ParseException {
+		var jwe = JWEObject.parse("""
+				eyJhbGciOiJQQkVTMi1IUzUxMitBMjU2S1ciLCJlbmMiOiJBMjU2R0NNIiwicDJzIjoiT3hMY0Q\
+				xX1pCODc1c2hvUWY2Q1ZHQSIsInAyYyI6MTAwMCwiYXB1IjoiIiwiYXB2IjoiIn0.FD4fcrP4Pb\
+				aKOQ9ZfXl0gpMM6Fa2rfqAvL0K5ZyYUiVeHCNV-A02Rg.urT1ShSv6qQxh8X7.gEqAiUWD98a2E\
+				P7ITCPTw4DJo6-BpqrxA73D6gNIj9z4d1hN-EP99Q4mWBWLH97H8ugbG5rGsm8xsjsBqpWORQqF\
+				mJZR2AhlPiwFaC7n_MDDBupSy_swDnCfj731Lal297IP5WbkFcmozKsyhmwdkctxjf_VHA.fJki\
+				kDjUaxwUKqpvT7qaAQ
+				""");
+
+		Assertions.assertThrows(JWEHelper.InvalidJweKeyException.class, () -> JWEHelper.decryptUserKey(jwe, "654321"));
 	}
 
 	@Test
@@ -84,9 +137,7 @@ public class JWEHelperTest {
 		var jwe = JWEObject.parse(malformed);
 		var privateKey = P384KeyPair.create(new X509EncodedKeySpec(Base64.getDecoder().decode(PUB_KEY)), new PKCS8EncodedKeySpec(Base64.getDecoder().decode(PRIV_KEY))).getPrivate();
 
-		Assertions.assertThrows(MasterkeyLoadingFailedException.class, () -> {
-			JWEHelper.decryptVaultKey(jwe, privateKey);
-		});
+		Assertions.assertThrows(MasterkeyLoadingFailedException.class, () -> JWEHelper.decryptVaultKey(jwe, privateKey));
 	}
 
 }

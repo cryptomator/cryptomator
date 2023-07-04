@@ -53,22 +53,21 @@ class JWEHelper {
 		}
 	}
 
-	public static ECPrivateKey decryptUserKey(JWEObject jwe, String setupCode) {
+	public static ECPrivateKey decryptUserKey(JWEObject jwe, String setupCode) throws InvalidJweKeyException {
 		try {
 			jwe.decrypt(new PasswordBasedDecrypter(setupCode));
 			return decodeUserKey(jwe);
 		} catch (JOSEException e) {
-			throw new MasterkeyLoadingFailedException("Failed to decrypt JWE", e);
+			throw new InvalidJweKeyException(e);
 		}
 	}
 
-	public static ECPrivateKey decryptUserKey(JWEObject jwe, ECPrivateKey deviceKey) {
+	public static ECPrivateKey decryptUserKey(JWEObject jwe, ECPrivateKey deviceKey) throws InvalidJweKeyException {
 		try {
 			jwe.decrypt(new ECDHDecrypter(deviceKey));
 			return decodeUserKey(jwe);
 		} catch (JOSEException e) {
-			LOG.warn("Failed to decrypt JWE: {}", jwe);
-			throw new MasterkeyLoadingFailedException("Failed to decrypt JWE", e);
+			throw new InvalidJweKeyException(e);
 		}
 	}
 
@@ -90,13 +89,12 @@ class JWEHelper {
 		}
 	}
 
-	public static Masterkey decryptVaultKey(JWEObject jwe, ECPrivateKey privateKey) throws MasterkeyLoadingFailedException {
+	public static Masterkey decryptVaultKey(JWEObject jwe, ECPrivateKey privateKey) throws InvalidJweKeyException {
 		try {
 			jwe.decrypt(new ECDHDecrypter(privateKey));
 			return readKey(jwe, JWE_PAYLOAD_KEY_FIELD, Masterkey::new);
 		} catch (JOSEException e) {
-			LOG.warn("Failed to decrypt JWE: {}", jwe);
-			throw new MasterkeyLoadingFailedException("Failed to decrypt JWE", e);
+			throw new InvalidJweKeyException(e);
 		}
 	}
 
@@ -120,6 +118,13 @@ class JWEHelper {
 			throw new MasterkeyLoadingFailedException("Unexpected JWE payload", e);
 		} finally {
 			Arrays.fill(keyBytes, (byte) 0x00);
+		}
+	}
+
+	public static class InvalidJweKeyException extends MasterkeyLoadingFailedException {
+
+		public InvalidJweKeyException(Throwable cause) {
+			super("Invalid key", cause);
 		}
 	}
 }
