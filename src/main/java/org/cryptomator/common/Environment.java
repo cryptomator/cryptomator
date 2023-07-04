@@ -5,7 +5,6 @@ import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -131,7 +130,7 @@ public class Environment {
 
 	// visible for testing
 	Stream<Path> getPaths(String propertyName) {
-		Stream<String> rawSettingsPaths = getRawList(propertyName, File.pathSeparatorChar);
+		Stream<String> rawSettingsPaths = getRawList(propertyName, System.getProperty("path.separator").charAt(0));
 		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Path::of);
 	}
 
