@@ -46,12 +46,12 @@ public class VaultDetailLockedController implements FxController {
 
 	@FXML
 	public void showVaultOptions() {
-		vaultOptionsWindow.create(vault.get()).showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
+		vaultOptionsWindow.create(vault.get(), mainWindow).showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
 	}
 
 	@FXML
 	public void showKeyVaultOptions() {
-		vaultOptionsWindow.create(vault.get()).showVaultOptionsWindow(SelectedVaultOptionsTab.KEY);
+		vaultOptionsWindow.create(vault.get(), mainWindow).showVaultOptionsWindow(SelectedVaultOptionsTab.KEY);
 	}
 
 	/* Getter/Setter */

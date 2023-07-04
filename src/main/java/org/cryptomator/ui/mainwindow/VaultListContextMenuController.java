@@ -71,7 +71,7 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickShowVaultOptions() {
 		var vault = Objects.requireNonNull(selectedVault.get());
-		vaultOptionsWindow.create(vault).showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
+		vaultOptionsWindow.create(vault, mainWindow).showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
 	}
 
 	@FXML

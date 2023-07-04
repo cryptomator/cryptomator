@@ -109,8 +109,8 @@ public class FxApplicationWindows {
 		return CompletableFuture.supplyAsync(() -> preferencesWindow.get().showPreferencesWindow(selectedTab), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
-	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {
-		return CompletableFuture.supplyAsync(() -> vaultOptionsWindow.create(vault).showVaultOptionsWindow(tab), Platform::runLater).whenComplete(this::reportErrors);
+	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab, @Nullable Stage owner) {
+		return CompletableFuture.supplyAsync(() -> vaultOptionsWindow.create(vault, owner == null ? primaryStage : owner).showVaultOptionsWindow(tab), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	public void showQuitWindow(QuitResponse response, boolean forced) {

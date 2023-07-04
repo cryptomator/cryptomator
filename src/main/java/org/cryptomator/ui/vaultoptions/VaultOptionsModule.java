@@ -15,9 +15,9 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.convertvault.ConvertVaultComponent;
 import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
-import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -46,14 +46,14 @@ abstract class VaultOptionsModule {
 	@Provides
 	@VaultOptionsWindow
 	@VaultOptionsScoped
-	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, @VaultOptionsWindow Vault vault) {
+	static Stage provideStage(StageFactory factory, @Named("vaultOptionsWindowOwner") Stage owner, @VaultOptionsWindow Vault vault) {
 		Stage stage = factory.create();
 		stage.setTitle(vault.getDisplayName());
 		stage.setResizable(true);
 		stage.setMinWidth(400);
 		stage.setMinHeight(300);
 		stage.initModality(Modality.WINDOW_MODAL);
-		stage.initOwner(primaryStage);
+		stage.initOwner(owner);
 		return stage;
 	}
 

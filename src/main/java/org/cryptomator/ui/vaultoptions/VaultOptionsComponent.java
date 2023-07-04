@@ -12,6 +12,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
+import javax.inject.Named;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -40,7 +41,7 @@ public interface VaultOptionsComponent {
 	@Subcomponent.Factory
 	interface Factory {
 
-		VaultOptionsComponent create(@BindsInstance @VaultOptionsWindow Vault vault);
+		VaultOptionsComponent create(@BindsInstance @VaultOptionsWindow Vault vault, @BindsInstance @Named("vaultOptionsWindowOwner") Stage owner);
 	}
 
 }

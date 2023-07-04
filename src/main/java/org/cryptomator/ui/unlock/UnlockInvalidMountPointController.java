@@ -65,7 +65,7 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	@FXML
 	public void closeAndOpenVaultOptions() {
-		appWindows.showVaultOptionsWindow(vault, SelectedVaultOptionsTab.MOUNT);
+		appWindows.showVaultOptionsWindow(vault, SelectedVaultOptionsTab.MOUNT, null);
 		window.close();
 	}
 
