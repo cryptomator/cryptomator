@@ -84,13 +84,13 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dfile.encoding=`"utf-8`"" `
 	--java-options "-Dcryptomator.logDir=`"@{localappdata}/$AppName`"" `
 	--java-options "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`"" `
-	--java-options "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json:@{userhome}/AppData/Roaming/$AppName/settings.json`"" `
+	--java-options "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`"" `
 	--java-options "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`"" `
-	--java-options "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12:@{userhome}/AppData/Roaming/$AppName/key.p12`"" `
+	--java-options "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`"" `
 	--java-options "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`"" `
 	--java-options "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`"" `
 	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
-	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json:@{userhome}/AppData/Roaming/$AppName/keychain.json`"" `
+	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
