@@ -72,7 +72,7 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	/**
-	 * STEP 1 (Request): GET user token for this vault
+	 * STEP 1 (Request): GET vault key for this user
 	 */
 	private void requestUserToken() {
 		var userTokenUri = appendPath(vaultBaseUri, "/user-tokens/me");
@@ -86,7 +86,7 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	/**
-	 * STEP 1 (Response)
+	 * STEP 1 (Response): GET vault key for this user
 	 *
 	 * @param response Response
 	 */
@@ -106,29 +106,29 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	/**
-	 * STEP 2 (Request): GET device token for this user
+	 * STEP 2 (Request): GET user key for this device
 	 */
-	private void requestDeviceToken(String userToken) {
+	private void requestDeviceToken(String encryptedVaultKey) {
 		var deviceTokenUri = appendPath(URI.create(hubConfig.devicesResourceUrl), "/%s/device-token".formatted(deviceId));
 		var request = HttpRequest.newBuilder(deviceTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
-				.thenAcceptAsync(response -> receivedDeviceTokenResponse(userToken, response), Platform::runLater) //
+				.thenAcceptAsync(response -> receivedDeviceTokenResponse(encryptedVaultKey, response), Platform::runLater) //
 				.exceptionally(this::retrievalFailed);
 	}
 
 	/**
-	 * STEP 2 (Response)
+	 * STEP 2 (Response): GET user key for this device
 	 *
 	 * @param response Response
 	 */
-	private void receivedDeviceTokenResponse(String userToken, HttpResponse<String> response) {
+	private void receivedDeviceTokenResponse(String encryptedVaultKey, HttpResponse<String> response) {
 		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
 		try {
 			switch (response.statusCode()) {
-				case 200 -> receivedDeviceTokenSuccess(userToken, response.body());
+				case 200 -> receivedDeviceTokenSuccess(encryptedVaultKey, response.body());
 				case 403, 404 -> needsDeviceSetup();
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
@@ -141,11 +141,11 @@ public class ReceiveKeyController implements FxController {
 		window.setScene(setupDeviceScene.get());
 	}
 
-	private void receivedDeviceTokenSuccess(String rawUserToken, String rawDeviceToken) throws IOException {
+	private void receivedDeviceTokenSuccess(String encryptedVaultKey, String encryptedUserKey) throws IOException {
 		try {
-			var userToken = JWEObject.parse(rawUserToken);
-			var deviceToken = JWEObject.parse(rawDeviceToken);
-			result.complete(ReceivedKey.userAndDeviceKey(userToken, deviceToken));
+			var vaultKeyJwe = JWEObject.parse(encryptedVaultKey);
+			var userKeyJwe = JWEObject.parse(encryptedUserKey);
+			result.complete(ReceivedKey.vaultKeyAndUserKey(vaultKeyJwe, userKeyJwe));
 			window.close();
 		} catch (ParseException e) {
 			throw new IOException("Failed to parse JWE", e);
@@ -155,6 +155,7 @@ public class ReceiveKeyController implements FxController {
 	/**
 	 * LEGACY FALLBACK (Request): GET the legacy access token from Hub 1.x
 	 */
+	@Deprecated
 	private void requestLegacyAccessToken() {
 		var legacyAccessTokenUri = appendPath(vaultBaseUri, "/keys/%s".formatted(deviceId));
 		var request = HttpRequest.newBuilder(legacyAccessTokenUri) //
@@ -171,6 +172,7 @@ public class ReceiveKeyController implements FxController {
 	 *
 	 * @param response Response
 	 */
+	@Deprecated
 	private void receivedLegacyAccessTokenResponse(HttpResponse<String> response) {
 		try {
 			switch (response.statusCode()) {
@@ -185,6 +187,7 @@ public class ReceiveKeyController implements FxController {
 		}
 	}
 
+	@Deprecated
 	private void receivedLegacyAccessTokenSuccess(String rawToken) throws IOException {
 		try {
 			var token = JWEObject.parse(rawToken);
@@ -199,6 +202,7 @@ public class ReceiveKeyController implements FxController {
 		window.setScene(invalidLicenseScene.get());
 	}
 
+	@Deprecated
 	private void needsLegacyDeviceRegistration() {
 		window.setScene(legacyRegisterDeviceScene.get());
 	}
