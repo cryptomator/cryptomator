@@ -26,7 +26,7 @@ if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
 
 $buildDir = Split-Path -Parent $PSCommandPath
 $version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
-$semVerNo = $version -replace '(\d\.\d\.\d).*','$1'
+$semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
 
 Write-Output "`$version=$version"
