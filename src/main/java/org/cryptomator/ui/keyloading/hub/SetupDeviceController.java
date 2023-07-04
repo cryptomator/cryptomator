@@ -1,7 +1,5 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JacksonException;
@@ -23,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -43,6 +42,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -60,10 +60,11 @@ public class SetupDeviceController implements FxController {
 	private final String deviceId;
 	private final P384KeyPair deviceKeyPair;
 	private final CompletableFuture<ReceivedKey> result;
-	private final DecodedJWT jwt;
 	private final HttpClient httpClient;
-	private final BooleanProperty deviceNameAlreadyExists = new SimpleBooleanProperty(false);
 
+	private final BooleanProperty deviceNameAlreadyExists = new SimpleBooleanProperty(false);
+	private final BooleanProperty invalidSetupCode = new SimpleBooleanProperty(false);
+	private final BooleanProperty workInProgress = new SimpleBooleanProperty(false);
 	public TextField setupCodeField;
 	public TextField deviceNameField;
 	public Button registerBtn;
@@ -78,7 +79,6 @@ public class SetupDeviceController implements FxController {
 		this.bearerToken = Objects.requireNonNull(bearerToken.get());
 		this.registerSuccessScene = registerSuccessScene;
 		this.registerFailedScene = registerFailedScene;
-		this.jwt = JWT.decode(this.bearerToken);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
 	}
@@ -86,6 +86,11 @@ public class SetupDeviceController implements FxController {
 	public void initialize() {
 		deviceNameField.setText(determineHostname());
 		deviceNameField.textProperty().addListener(observable -> deviceNameAlreadyExists.set(false));
+		deviceNameField.disableProperty().bind(workInProgress);
+		setupCodeField.textProperty().addListener(observable -> invalidSetupCode.set(false));
+		setupCodeField.disableProperty().bind(workInProgress);
+		registerBtn.disableProperty().bind(workInProgress.or(setupCodeField.textProperty().isEmpty()).or(deviceNameField.textProperty().isEmpty()));
+		registerBtn.contentDisplayProperty().bind(Bindings.when(workInProgress).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY));
 	}
 
 	private String determineHostname() {
@@ -99,11 +104,7 @@ public class SetupDeviceController implements FxController {
 
 	@FXML
 	public void register() {
-		setupCodeField.setDisable(true);
-		deviceNameField.setDisable(true);
-		deviceNameAlreadyExists.set(false);
-		registerBtn.setContentDisplay(ContentDisplay.LEFT);
-		registerBtn.setDisable(true);
+		workInProgress.set(true);
 
 		var apiRootUrl = URI.create(hubConfig.devicesResourceUrl + "/..").normalize(); // TODO: add url to vault config file, only use this as a fallback for legacy vaults
 		var deviceUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
@@ -140,13 +141,13 @@ public class SetupDeviceController implements FxController {
 							.header("Content-Type", "application/json") //
 							.build();
 					return httpClient.sendAsync(putDeviceReq, HttpResponse.BodyHandlers.discarding());
-				}).handleAsync((response, throwable) -> {
+				}).whenCompleteAsync((response, throwable) -> {
 					if (response != null) {
 						this.handleResponse(response);
 					} else {
-						this.registrationFailed(throwable);
+						this.setupFailed(throwable);
 					}
-					return null;
+					workInProgress.set(false);
 				}, Platform::runLater);
 	}
 
@@ -172,17 +173,20 @@ public class SetupDeviceController implements FxController {
 			window.setScene(registerSuccessScene.get());
 		} else if (response.statusCode() == 409) {
 			deviceNameAlreadyExists.set(true);
-			registerBtn.setContentDisplay(ContentDisplay.TEXT_ONLY);
-			registerBtn.setDisable(false);
 		} else {
-			registrationFailed(new IllegalStateException("Unexpected http status code " + response.statusCode()));
+			setupFailed(new IllegalStateException("Unexpected http status code " + response.statusCode()));
 		}
 	}
 
-	private void registrationFailed(Throwable cause) {
-		LOG.warn("Device registration failed.", cause);
-		window.setScene(registerFailedScene.get());
-		result.completeExceptionally(cause);
+	private void setupFailed(Throwable cause) {
+		switch (cause) {
+			case CompletionException e when e.getCause() instanceof JWEHelper.InvalidJweKeyException -> invalidSetupCode.set(true);
+			default -> {
+				LOG.warn("Device setup failed.", cause);
+				window.setScene(registerFailedScene.get());
+				result.completeExceptionally(cause);
+			}
+		}
 	}
 
 	@FXML
@@ -204,14 +208,22 @@ public class SetupDeviceController implements FxController {
 		return deviceNameAlreadyExists.get();
 	}
 
+	public BooleanProperty invalidSetupCodeProperty() {
+		return invalidSetupCode;
+	}
+
+	public boolean isInvalidSetupCode() {
+		return invalidSetupCode.get();
+	}
+
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	private record UserDto(String id, String name, String publicKey, String privateKey, String setupCode) {}
 
 	private record CreateDeviceDto(@JsonProperty(required = true) String id, //
-								  @JsonProperty(required = true) String name, //
-								  @JsonProperty(required = true) String publicKey, //
-								  @JsonProperty(defaultValue = "DESKTOP", required = true) String type, //
-								  @JsonProperty @Nullable String userKey, //
-								  @JsonProperty @Nullable String creationTime, //
-								  @JsonProperty @Nullable String lastSeenTime) {}
+								   @JsonProperty(required = true) String name, //
+								   @JsonProperty(required = true) String publicKey, //
+								   @JsonProperty(defaultValue = "DESKTOP", required = true) String type, //
+								   @JsonProperty @Nullable String userKey, //
+								   @JsonProperty @Nullable String creationTime, //
+								   @JsonProperty @Nullable String lastSeenTime) {}
 }
