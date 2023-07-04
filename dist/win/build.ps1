@@ -12,6 +12,9 @@ Param(
 	[bool] $clean
 )
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
+
 # check preconditions
 if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
 {
@@ -47,11 +50,28 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	Remove-Item -Path $runtimeImagePath -Force -Recurse
 }
 
+## download jfx jmods
+$jfxJmodsChecksum = 'd00767334c43b8832b5cf10267d34ca8f563d187c4655b73eb6020dd79c054b5'
+$jfxJmodsZip = '.\resources\jfxJmods.zip'
+if( !(Test-Path -Path $jfxJmodsZip) ) {
+	$jmodsUrl = "https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_windows-x64_bin-jmods.zip"
+	Write-Output "Downloading ${jmodsUrl}..."
+	Invoke-WebRequest $jmodsUrl -OutFile $jfxJmodsZip # redirects are followed by default
+}
+
+$jmodsChecksumActual = $(Get-FileHash -Path $jfxJmodsZip -Algorithm SHA256).Hash
+if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
+	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $jfxJmodsChecksum, actual: $jmodsChecksumActual"
+	exit 1;	
+}
+Expand-Archive -Force -Path $jfxJmodsZip -DestinationPath ".\resources\"
+
+
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
-	--module-path "$Env:JAVA_HOME/jmods" `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
+	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods-20.0.1" `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
@@ -151,8 +171,6 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
  "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # download Winfsp
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
 $winfspMsiUrl= (Select-String -Path ".\bundle\resources\winFspMetaData.wxi" -Pattern '<\?define BundledWinFspDownloadLink="(.+)".*?>').Matches.Groups[1].Value
 Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
