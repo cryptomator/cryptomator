@@ -129,7 +129,7 @@ public class ReceiveKeyController implements FxController {
 		try {
 			switch (response.statusCode()) {
 				case 200 -> receivedDeviceTokenSuccess(encryptedVaultKey, response.body());
-				case 403, 404 -> needsDeviceSetup();
+				case 403, 404 -> needsDeviceSetup(); // TODO: using the setup code, we can theoretically immediately unlock
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
