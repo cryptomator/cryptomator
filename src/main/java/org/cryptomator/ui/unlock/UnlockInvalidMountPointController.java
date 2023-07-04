@@ -8,6 +8,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FormattedLabel;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
@@ -64,7 +65,7 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	@FXML
 	public void closeAndOpenVaultOptions() {
-		//TODO
+		appWindows.showVaultOptionsWindow(vault, SelectedVaultOptionsTab.MOUNT);
 		window.close();
 	}
 

@@ -13,6 +13,8 @@ import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 import org.cryptomator.ui.unlock.UnlockWorkflow;
+import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
+import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +48,11 @@ public class FxApplicationWindows {
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
+	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final FilteredList<Window> visibleWindows;
 
 	@Inject
-	public FxApplicationWindows(@PrimaryStage Stage primaryStage, Optional<TrayIntegrationProvider> trayIntegration, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, QuitComponent.Builder quitWindowBuilder, UnlockComponent.Factory unlockWorkflowFactory, LockComponent.Factory lockWorkflowFactory, ErrorComponent.Factory errorWindowFactory, ExecutorService executor) {
+	public FxApplicationWindows(@PrimaryStage Stage primaryStage, Optional<TrayIntegrationProvider> trayIntegration, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, QuitComponent.Builder quitWindowBuilder, UnlockComponent.Factory unlockWorkflowFactory, LockComponent.Factory lockWorkflowFactory, ErrorComponent.Factory errorWindowFactory, ExecutorService executor, VaultOptionsComponent.Factory vaultOptionsWindow) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -59,6 +62,7 @@ public class FxApplicationWindows {
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
 		this.executor = executor;
+		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
 	}
 
@@ -103,6 +107,10 @@ public class FxApplicationWindows {
 
 	public CompletionStage<Stage> showPreferencesWindow(SelectedPreferencesTab selectedTab) {
 		return CompletableFuture.supplyAsync(() -> preferencesWindow.get().showPreferencesWindow(selectedTab), Platform::runLater).whenComplete(this::reportErrors);
+	}
+
+	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {
+		return CompletableFuture.supplyAsync(() -> vaultOptionsWindow.create(vault).showVaultOptionsWindow(tab), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	public void showQuitWindow(QuitResponse response, boolean forced) {
