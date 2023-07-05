@@ -17,7 +17,6 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import java.nio.file.Path;
 
@@ -26,21 +25,20 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 
 	public static final int DEFAULT_SHORTENING_THRESHOLD = 220;
 	public static final int MIN_SHORTENING_THRESHOLD = 36;
-	private static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/security/architecture/#name-shortening";
+	private static final String DOCS_NAME_SHORTENING_URL = "https://docs.cryptomator.org/en/1.7/security/architecture/#name-shortening";
 	private final Stage window;
+	private final Lazy<Application> application;
 	private final Lazy<Scene> chooseLocationScene;
 	private final Lazy<Scene> choosePasswordScene;
-	private IntegerProperty shorteningThreshold;
-	public NumericTextField shorteningThresholdTextField;
-	private final BooleanBinding validShorteningThreshold;
-	private final Lazy<Application> application;
 	private final StringProperty vaultNameProperty;
 	private final ObjectProperty<Path> vaultPathProperty;
+	private final IntegerProperty shorteningThreshold;
 
+	private final BooleanBinding validShorteningThreshold;
+
+	//FXML
 	public CheckBox expertSettingsCheckBox;
-	public Label vaultNameLabel;
-	public Label vaultLocationLabel;
-
+	public NumericTextField shorteningThresholdTextField;
 
 	@Inject
 	CreateNewVaultExpertSettingsController(@AddVaultWizardWindow Stage window, //
@@ -75,7 +73,7 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 	@FXML
 	public void toggleUseExpertSettings() {
 		if (!expertSettingsCheckBox.isSelected()) {
-			shorteningThresholdTextField.setText(DEFAULT_SHORTENING_THRESHOLD+"");
+			shorteningThresholdTextField.setText(DEFAULT_SHORTENING_THRESHOLD + "");
 		}
 	}
 
@@ -85,7 +83,9 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 	}
 
 	@FXML
-	public void next() { window.setScene(choosePasswordScene.get()); }
+	public void next() {
+		window.setScene(choosePasswordScene.get());
+	}
 
 	public BooleanBinding validShorteningThresholdProperty() {
 		return validShorteningThreshold;
@@ -105,12 +105,13 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 	}
 
 	public void openDocs() {
-		application.get().getHostServices().showDocument(DOCS_MOUNTING_URL);
+		application.get().getHostServices().showDocument(DOCS_NAME_SHORTENING_URL);
 	}
 
 	public Path getVaultPath() {
 		return vaultPathProperty.get();
 	}
+
 	public String getVaultName() {
 		return vaultNameProperty.get();
 	}
