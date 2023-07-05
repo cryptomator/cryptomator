@@ -75,23 +75,34 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	private enum ExceptionType {
 
-		NOT_SUPPORTED("unlock.error.customPath.description.notSupported", true),
-		NOT_EXISTING("unlock.error.customPath.description.notExists", false),
-		IN_USE("unlock.error.customPath.description.inUse", false),
-		GENERIC("unlock.error.customPath.description.generic", true);
+		NOT_SUPPORTED("unlock.error.customPath.description.notSupported", ButtonAction.SHOW_PREFERENCES),
+		NOT_EXISTING("unlock.error.customPath.description.notExists", ButtonAction.SHOW_VAULT_OPTIONS),
+		IN_USE("unlock.error.customPath.description.inUse", ButtonAction.SHOW_VAULT_OPTIONS),
+		GENERIC("unlock.error.customPath.description.generic", ButtonAction.SHOW_PREFERENCES);
 
 		private final String translationKey;
-		private final boolean showPreferences;
+		private final ButtonAction action;
 
-		ExceptionType(String translationKey, boolean showPreferences) {
+		ExceptionType(String translationKey, ButtonAction action) {
 			this.translationKey = translationKey;
-			this.showPreferences = showPreferences;
+			this.action = action;
 		}
+	}
+
+	private enum ButtonAction {
+
+		SHOW_PREFERENCES,
+		SHOW_VAULT_OPTIONS;
+
 	}
 
 	/* Getter */
 
 	public boolean isShowPreferences() {
-		return exceptionType.showPreferences;
+		return exceptionType.action == ButtonAction.SHOW_PREFERENCES;
+	}
+
+	public boolean isShowVaultOptions() {
+		return exceptionType.action == ButtonAction.SHOW_VAULT_OPTIONS;
 	}
 }
