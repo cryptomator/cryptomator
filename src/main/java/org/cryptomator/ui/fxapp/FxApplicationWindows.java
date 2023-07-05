@@ -110,7 +110,19 @@ public class FxApplicationWindows {
 	}
 
 	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab, @Nullable Stage owner) {
-		return showMainWindow().thenApplyAsync((window) -> vaultOptionsWindow.create(vault, owner == null ? primaryStage : owner).showVaultOptionsWindow(tab), Platform::runLater).whenComplete(this::reportErrors);
+		return showMainWindow().thenApplyAsync(mainWindow -> {
+					assert mainWindow.isShowing();
+					if (owner == null) {
+						return mainWindow;
+					}
+					if (!owner.isShowing()) {
+						LOG.warn("While trying to show vault options for {}, owner stage was supplied, but is not visible.", vault.getDisplayName());
+						owner.show();
+					}
+					return owner;
+				}, Platform::runLater) //
+				.thenApplyAsync(finalOwner -> vaultOptionsWindow.create(vault, finalOwner).showVaultOptionsWindow(tab), Platform::runLater) //
+				.whenComplete(this::reportErrors);
 	}
 
 	public void showQuitWindow(QuitResponse response, boolean forced) {
