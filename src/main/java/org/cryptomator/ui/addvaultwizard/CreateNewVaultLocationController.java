@@ -21,7 +21,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
@@ -49,8 +48,7 @@ public class CreateNewVaultLocationController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
-	private final Lazy<Scene> choosePasswordScene;
-	private final Lazy<Scene> chooseAdvancedSettingsScene;
+	private final Lazy<Scene> chooseExpertSettingsScene;
 	private final List<RadioButton> locationPresetBtns;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
@@ -68,26 +66,21 @@ public class CreateNewVaultLocationController implements FxController {
 	public Label locationStatusLabel;
 	public FontAwesome5IconView goodLocation;
 	public FontAwesome5IconView badLocation;
-	public CheckBox advancedSettingsCheckBox;
-	private final BooleanProperty advancedSettingsEnabled;
 
 	@Inject
 	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, //
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, //
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, //
-									 @FxmlScene(FxmlFile.ADDVAULT_NEW_ADVANCED_SETTINGS) Lazy<Scene> chooseAdvancedSettingsScene, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS) Lazy<Scene> chooseExpertSettingsScene, //
 									 ObjectProperty<Path> vaultPath, //
 									 @Named("vaultName") StringProperty vaultName, //
-									 ResourceBundle resourceBundle, //
-									 BooleanProperty advancedSettingsEnabled) {
+									 ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
-		this.choosePasswordScene = choosePasswordScene;
-		this.chooseAdvancedSettingsScene = chooseAdvancedSettingsScene;
+		this.chooseExpertSettingsScene = chooseExpertSettingsScene;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
-		this.advancedSettingsEnabled = advancedSettingsEnabled;
 		this.vaultPathStatus = ObservableUtil.mapWithDefault(vaultPath, this::validatePath, new VaultPathStatus(false, "error.message"));
 		this.validVaultPath = ObservableUtil.mapWithDefault(vaultPathStatus, VaultPathStatus::valid, false);
 		this.vaultPathStatus.addListener(this::updateStatusLabel);
@@ -149,7 +142,6 @@ public class CreateNewVaultLocationController implements FxController {
 		locationPresetsToggler.getToggles().addAll(locationPresetBtns);
 		locationPresetsToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(locationPresetsToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
-		advancedSettingsEnabled.bind(advancedSettingsCheckBox.selectedProperty());
 	}
 
 	private void togglePredefinedLocation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
@@ -165,11 +157,7 @@ public class CreateNewVaultLocationController implements FxController {
 	@FXML
 	public void next() {
 		if (validVaultPath.getValue()) {
-			if (advancedSettingsEnabled.get()) {
-				window.setScene(chooseAdvancedSettingsScene.get());
-			} else {
-				window.setScene(choosePasswordScene.get());
-			}
+			window.setScene(chooseExpertSettingsScene.get());
 		}
 	}
 

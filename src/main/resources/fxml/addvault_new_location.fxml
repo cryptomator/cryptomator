@@ -51,10 +51,6 @@
 			<Label fx:id="locationStatusLabel" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" />
 		</VBox>
 
-		<Region prefHeight="12" VBox.vgrow="NEVER"/>
-
-		<CheckBox fx:id="advancedSettingsCheckBox" text="%addvaultwizard.new.showAdvancedSettings.checkbox"/>
-
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+X">

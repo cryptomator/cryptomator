@@ -4,7 +4,7 @@ public enum FxmlFile {
 	ADDVAULT_EXISTING("/fxml/addvault_existing.fxml"), //
 	ADDVAULT_NEW_NAME("/fxml/addvault_new_name.fxml"), //
 	ADDVAULT_NEW_LOCATION("/fxml/addvault_new_location.fxml"), //
-	ADDVAULT_NEW_ADVANCED_SETTINGS("/fxml/addvault_new_advanced_settings.fxml"), //
+	ADDVAULT_NEW_EXPERT_SETTINGS("/fxml/addvault_new_expert_settings.fxml"), //
 	ADDVAULT_NEW_PASSWORD("/fxml/addvault_new_password.fxml"), //
 	ADDVAULT_NEW_RECOVERYKEY("/fxml/addvault_new_recoverykey.fxml"), //
 	ADDVAULT_SUCCESS("/fxml/addvault_success.fxml"), //

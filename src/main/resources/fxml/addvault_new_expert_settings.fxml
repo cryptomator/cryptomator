@@ -12,9 +12,11 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.Pane?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultAdvancedSettingsController"
+	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController"
 	  prefWidth="450"
 	  prefHeight="450"
 	  spacing="12"
@@ -23,10 +25,17 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
-
-		<VBox spacing="6">
+		<VBox>
+			<Label text="%addvaultwizard.new.namePrompt"/>
+			<Label text="${controller.vaultName}" wrapText="true" styleClass="label-muted"/>
+			<Region prefHeight="4" VBox.vgrow="NEVER"/>
+			<Label text="%addvaultwizard.new.locationLabel"/>
+			<Label text="${controller.vaultPath}" wrapText="true" styleClass="label-muted"/>
+		</VBox>
+		<Region prefHeight="12" VBox.vgrow="NEVER"/>
+		<CheckBox fx:id="expertSettingsCheckBox" text="%addvaultwizard.new.enableExpertSettings.checkbox" onAction="#toggleUseExpertSettings"/>
+		<VBox spacing="6" visible="${expertSettingsCheckBox.selected}">
 			<HBox spacing="2" HBox.hgrow="NEVER">
 				<Label text="%addvaultwizard.new.shorteningThreshold.title"/>
 				<Region prefWidth="2"/>
@@ -55,13 +64,13 @@
 					</Label>
 				</StackPane>
 			</HBox>
+			<Label text="%addvaultwizard.new.shorteningThreshold.message"/>
 		</VBox>
-		<Label text="%addvaultwizard.new.shorteningThreshold.message"/>
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+X">
 			<buttons>
-				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back" disable="${!controller.validShorteningThreshold}"/>
+				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
 				<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" onAction="#next" defaultButton="true" disable="${!controller.validShorteningThreshold}"/>
 			</buttons>
 		</ButtonBar>

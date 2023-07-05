@@ -19,10 +19,8 @@ import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 
 import javax.inject.Named;
 import javax.inject.Provider;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -73,13 +71,7 @@ public abstract class AddVaultModule {
 	@Named("shorteningThreshold")
 	@AddVaultWizardScoped
 	static IntegerProperty provideShorteningThreshold() {
-		return new SimpleIntegerProperty(CreateNewVaultAdvancedSettingsController.DEFAULT_SHORTENING_THRESHOLD);
-	}
-
-	@Provides
-	@AddVaultWizardScoped
-	static BooleanProperty provideAdvancedSettingsEnabled() {
-		return new SimpleBooleanProperty();
+		return new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.DEFAULT_SHORTENING_THRESHOLD);
 	}
 
 	@Provides
@@ -148,10 +140,10 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.ADDVAULT_NEW_ADVANCED_SETTINGS)
+	@FxmlScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultAdvancedSettingsScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_ADVANCED_SETTINGS);
+	static Scene provideCreateNewVaultExpertSettingsScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS);
 	}
 
 	// ------------------
@@ -207,7 +199,7 @@ public abstract class AddVaultModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(CreateNewVaultAdvancedSettingsController.class)
-	abstract FxController bindCreateNewVaultAdvancedSettingsController(CreateNewVaultAdvancedSettingsController controller);
+	@FxControllerKey(CreateNewVaultExpertSettingsController.class)
+	abstract FxController bindCreateNewVaultExpertSettingsController(CreateNewVaultExpertSettingsController controller);
 
 }

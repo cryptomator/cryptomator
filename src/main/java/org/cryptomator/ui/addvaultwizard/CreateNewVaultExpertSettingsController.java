@@ -12,12 +12,17 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import java.nio.file.Path;
 
 @AddVaultWizardScoped
-public class CreateNewVaultAdvancedSettingsController implements FxController {
+public class CreateNewVaultExpertSettingsController implements FxController {
 
 	public static final int DEFAULT_SHORTENING_THRESHOLD = 220;
 	public static final int MIN_SHORTENING_THRESHOLD = 36;
@@ -29,17 +34,28 @@ public class CreateNewVaultAdvancedSettingsController implements FxController {
 	public NumericTextField shorteningThresholdTextField;
 	private final BooleanBinding validShorteningThreshold;
 	private final Lazy<Application> application;
+	private final StringProperty vaultNameProperty;
+	private final ObjectProperty<Path> vaultPathProperty;
+
+	public CheckBox expertSettingsCheckBox;
+	public Label vaultNameLabel;
+	public Label vaultLocationLabel;
+
 
 	@Inject
-	CreateNewVaultAdvancedSettingsController(@AddVaultWizardWindow Stage window, //
-											 Lazy<Application> application, //
-											 @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, //
-											 @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, //
-											 @Named("shorteningThreshold") IntegerProperty shorteningThreshold) {
+	CreateNewVaultExpertSettingsController(@AddVaultWizardWindow Stage window, //
+										   Lazy<Application> application, //
+										   @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, //
+										   @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, //
+										   @Named("vaultName") StringProperty vaultName, //
+										   ObjectProperty<Path> vaultPath, //
+										   @Named("shorteningThreshold") IntegerProperty shorteningThreshold) {
 		this.window = window;
 		this.application = application;
 		this.chooseLocationScene = chooseLocationScene;
 		this.choosePasswordScene = choosePasswordScene;
+		this.vaultNameProperty = vaultName;
+		this.vaultPathProperty = vaultPath;
 		this.shorteningThreshold = shorteningThreshold;
 		this.validShorteningThreshold = Bindings.createBooleanBinding(this::isValidShorteningThreshold, shorteningThreshold);
 	}
@@ -54,6 +70,13 @@ public class CreateNewVaultAdvancedSettingsController implements FxController {
 				shorteningThreshold.set(0);
 			}
 		});
+	}
+
+	@FXML
+	public void toggleUseExpertSettings() {
+		if (!expertSettingsCheckBox.isSelected()) {
+			shorteningThresholdTextField.setText(DEFAULT_SHORTENING_THRESHOLD+"");
+		}
 	}
 
 	@FXML
@@ -83,5 +106,12 @@ public class CreateNewVaultAdvancedSettingsController implements FxController {
 
 	public void openDocs() {
 		application.get().getHostServices().showDocument(DOCS_MOUNTING_URL);
+	}
+
+	public Path getVaultPath() {
+		return vaultPathProperty.get();
+	}
+	public String getVaultName() {
+		return vaultNameProperty.get();
 	}
 }
