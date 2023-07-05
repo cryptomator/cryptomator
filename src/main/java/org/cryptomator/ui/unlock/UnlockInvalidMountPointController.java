@@ -24,7 +24,6 @@ public class UnlockInvalidMountPointController implements FxController {
 	private final Vault vault;
 	private final FxApplicationWindows appWindows;
 	private final ResourceBundle resourceBundle;
-
 	private final ExceptionType exceptionType;
 	private final String exceptionMessage;
 
@@ -51,10 +50,6 @@ public class UnlockInvalidMountPointController implements FxController {
 	@FXML
 	public void close() {
 		window.close();
-	}
-
-	public boolean isShowPreferences() {
-		return exceptionType.showPreferences;
 	}
 
 	@FXML
@@ -92,5 +87,11 @@ public class UnlockInvalidMountPointController implements FxController {
 			this.translationKey = translationKey;
 			this.showPreferences = showPreferences;
 		}
+	}
+
+	/* Getter */
+
+	public boolean isShowPreferences() {
+		return exceptionType.showPreferences;
 	}
 }
