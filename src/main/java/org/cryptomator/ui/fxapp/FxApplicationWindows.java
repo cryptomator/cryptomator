@@ -110,7 +110,7 @@ public class FxApplicationWindows {
 	}
 
 	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {
-		return CompletableFuture.supplyAsync(() -> vaultOptionsWindow.create(vault).showVaultOptionsWindow(tab), Platform::runLater).whenComplete(this::reportErrors);
+		return showMainWindow().thenApplyAsync((window) -> vaultOptionsWindow.create(vault).showVaultOptionsWindow(tab), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	public void showQuitWindow(QuitResponse response, boolean forced) {
