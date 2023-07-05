@@ -8,6 +8,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FormattedLabel;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
@@ -21,9 +22,10 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final AtomicReference<Throwable> unlockException;
 	private final FxApplicationWindows appWindows;
 	private final ResourceBundle resourceBundle;
+	private final ExceptionType exceptionType;
+	private final String exceptionMessage;
 
 	public FormattedLabel dialogDescription;
 
@@ -31,22 +33,18 @@ public class UnlockInvalidMountPointController implements FxController {
 	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow AtomicReference<Throwable> unlockException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
-		this.unlockException = unlockException;
 		this.appWindows = appWindows;
 		this.resourceBundle = resourceBundle;
+
+		var exc = unlockException.get();
+		this.exceptionType = getExceptionType(exc);
+		this.exceptionMessage = exc.getMessage();
 	}
 
 	@FXML
 	public void initialize() {
-		var e = unlockException.get();
-		var translationKey = switch (e) {
-			case MountPointNotSupportedException x -> "unlock.error.customPath.description.notSupported";
-			case MountPointNotExistsException x -> "unlock.error.customPath.description.notExists";
-			case MountPointInUseException x -> "unlock.error.customPath.description.inUse";
-			default -> "unlock.error.customPath.description.generic";
-		};
-		dialogDescription.setFormat(resourceBundle.getString(translationKey));
-		dialogDescription.setArg1(e.getMessage());
+		dialogDescription.setFormat(resourceBundle.getString(exceptionType.translationKey));
+		dialogDescription.setArg1(exceptionMessage);
 	}
 
 	@FXML
@@ -60,4 +58,51 @@ public class UnlockInvalidMountPointController implements FxController {
 		window.close();
 	}
 
+	@FXML
+	public void closeAndOpenVaultOptions() {
+		appWindows.showVaultOptionsWindow(vault, SelectedVaultOptionsTab.MOUNT);
+		window.close();
+	}
+
+	private ExceptionType getExceptionType(Throwable unlockException) {
+		return switch (unlockException) {
+			case MountPointNotSupportedException x -> ExceptionType.NOT_SUPPORTED;
+			case MountPointNotExistsException x -> ExceptionType.NOT_EXISTING;
+			case MountPointInUseException x -> ExceptionType.IN_USE;
+			default -> ExceptionType.GENERIC;
+		};
+	}
+
+	private enum ExceptionType {
+
+		NOT_SUPPORTED("unlock.error.customPath.description.notSupported", ButtonAction.SHOW_PREFERENCES),
+		NOT_EXISTING("unlock.error.customPath.description.notExists", ButtonAction.SHOW_VAULT_OPTIONS),
+		IN_USE("unlock.error.customPath.description.inUse", ButtonAction.SHOW_VAULT_OPTIONS),
+		GENERIC("unlock.error.customPath.description.generic", ButtonAction.SHOW_PREFERENCES);
+
+		private final String translationKey;
+		private final ButtonAction action;
+
+		ExceptionType(String translationKey, ButtonAction action) {
+			this.translationKey = translationKey;
+			this.action = action;
+		}
+	}
+
+	private enum ButtonAction {
+
+		SHOW_PREFERENCES,
+		SHOW_VAULT_OPTIONS;
+
+	}
+
+	/* Getter */
+
+	public boolean isShowPreferences() {
+		return exceptionType.action == ButtonAction.SHOW_PREFERENCES;
+	}
+
+	public boolean isShowVaultOptions() {
+		return exceptionType.action == ButtonAction.SHOW_VAULT_OPTIONS;
+	}
 }
