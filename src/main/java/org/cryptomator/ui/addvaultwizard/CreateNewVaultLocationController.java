@@ -70,7 +70,6 @@ public class CreateNewVaultLocationController implements FxController {
 	@Inject
 	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, //
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, //
-									 @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, //
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS) Lazy<Scene> chooseExpertSettingsScene, //
 									 ObjectProperty<Path> vaultPath, //
 									 @Named("vaultName") StringProperty vaultName, //

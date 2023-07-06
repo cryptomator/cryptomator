@@ -49,7 +49,7 @@
 				</Hyperlink>
 			</HBox>
 			<HBox>
-				<NumericTextField fx:id="shorteningThresholdTextField" promptText="%addvaultwizard.new.shorteningThreshold.namePrompt" text="220"/>
+				<NumericTextField fx:id="shorteningThresholdTextField"/>
 				<Region prefWidth="4" HBox.hgrow="NEVER"/>
 				<StackPane>
 					<Label styleClass="label-muted" text="%addvaultwizard.new.shorteningThreshold.invalid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${!controller.validShorteningThreshold}" graphicTextGap="6">
