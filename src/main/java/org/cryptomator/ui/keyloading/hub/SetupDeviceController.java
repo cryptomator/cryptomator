@@ -133,7 +133,7 @@ public class SetupDeviceController implements FxController {
 					}
 				}).thenCompose(jwe -> {
 					var now = Instant.now().toString();
-					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64Url().omitPadding().encode(deviceKey), "DESKTOP", jwe.serialize(), now, now);
+					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64().encode(deviceKey), "DESKTOP", jwe.serialize(), now);
 					var json = toJson(dto);
 					var putDeviceReq = HttpRequest.newBuilder(deviceUri) //
 							.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
@@ -222,8 +222,7 @@ public class SetupDeviceController implements FxController {
 	private record CreateDeviceDto(@JsonProperty(required = true) String id, //
 								   @JsonProperty(required = true) String name, //
 								   @JsonProperty(required = true) String publicKey, //
-								   @JsonProperty(defaultValue = "DESKTOP", required = true) String type, //
-								   @JsonProperty @Nullable String userKey, //
-								   @JsonProperty @Nullable String creationTime, //
-								   @JsonProperty @Nullable String lastSeenTime) {}
+								   @JsonProperty(required = true, defaultValue = "DESKTOP") String type, //
+								   @JsonProperty(required = true) String userPrivateKey, //
+								   @JsonProperty(required = true) String creationTime) {}
 }

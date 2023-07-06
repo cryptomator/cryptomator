@@ -1,5 +1,8 @@
 package org.cryptomator.ui.keyloading.hub;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
@@ -8,6 +11,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +31,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +42,7 @@ public class ReceiveKeyController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ReceiveKeyController.class);
 	private static final String SCHEME_PREFIX = "hub+";
+	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -68,20 +74,20 @@ public class ReceiveKeyController implements FxController {
 
 	@FXML
 	public void initialize() {
-		requestUserToken();
+		requestVaultMasterkey();
 	}
 
 	/**
 	 * STEP 1 (Request): GET vault key for this user
 	 */
-	private void requestUserToken() {
-		var userTokenUri = appendPath(vaultBaseUri, "/user-tokens/me");
-		var request = HttpRequest.newBuilder(userTokenUri) //
+	private void requestVaultMasterkey() {
+		var accessTokenUri = appendPath(vaultBaseUri, "/access-token");
+		var request = HttpRequest.newBuilder(accessTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
-				.thenAcceptAsync(this::receivedUserTokenResponse, Platform::runLater) //
+				.thenAcceptAsync(this::receivedVaultMasterkey, Platform::runLater) //
 				.exceptionally(this::retrievalFailed);
 	}
 
@@ -90,14 +96,15 @@ public class ReceiveKeyController implements FxController {
 	 *
 	 * @param response Response
 	 */
-	private void receivedUserTokenResponse(HttpResponse<String> response) {
+	private void receivedVaultMasterkey(HttpResponse<String> response) {
 		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
 		try {
 			switch (response.statusCode()) {
-				case 200 -> requestDeviceToken(response.body());
+				case 200 -> requestUserKey(response.body());
 				case 402 -> licenseExceeded();
 				case 403 -> accessNotGranted();
 				case 404 -> requestLegacyAccessToken();
+				case 410 -> throw new IOException("Vault has been archived."); // TODO add dialog
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
@@ -108,14 +115,14 @@ public class ReceiveKeyController implements FxController {
 	/**
 	 * STEP 2 (Request): GET user key for this device
 	 */
-	private void requestDeviceToken(String encryptedVaultKey) {
-		var deviceTokenUri = appendPath(URI.create(hubConfig.devicesResourceUrl), "/%s/device-token".formatted(deviceId));
+	private void requestUserKey(String encryptedVaultKey) {
+		var deviceTokenUri = appendPath(URI.create(hubConfig.devicesResourceUrl), "/%s".formatted(deviceId));
 		var request = HttpRequest.newBuilder(deviceTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
 				.build();
-		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
-				.thenAcceptAsync(response -> receivedDeviceTokenResponse(encryptedVaultKey, response), Platform::runLater) //
+		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
+				.thenAcceptAsync(response -> receivedUserKey(encryptedVaultKey, response), Platform::runLater) //
 				.exceptionally(this::retrievalFailed);
 	}
 
@@ -124,12 +131,15 @@ public class ReceiveKeyController implements FxController {
 	 *
 	 * @param response Response
 	 */
-	private void receivedDeviceTokenResponse(String encryptedVaultKey, HttpResponse<String> response) {
+	private void receivedUserKey(String encryptedVaultKey, HttpResponse<String> response) {
 		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
 		try {
 			switch (response.statusCode()) {
-				case 200 -> receivedDeviceTokenSuccess(encryptedVaultKey, response.body());
-				case 403, 404 -> needsDeviceSetup(); // TODO: using the setup code, we can theoretically immediately unlock
+				case 200 -> {
+					var device = JSON.reader().readValue(response.body(), DeviceDto.class);
+					receivedBothEncryptedKeys(encryptedVaultKey, device.userPrivateKey);
+				}
+				case 404 -> needsDeviceSetup(); // TODO: using the setup code, we can theoretically immediately unlock
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
@@ -141,7 +151,7 @@ public class ReceiveKeyController implements FxController {
 		window.setScene(setupDeviceScene.get());
 	}
 
-	private void receivedDeviceTokenSuccess(String encryptedVaultKey, String encryptedUserKey) throws IOException {
+	private void receivedBothEncryptedKeys(String encryptedVaultKey, String encryptedUserKey) throws IOException {
 		try {
 			var vaultKeyJwe = JWEObject.parse(encryptedVaultKey);
 			var userKeyJwe = JWEObject.parse(encryptedUserKey);
@@ -180,6 +190,7 @@ public class ReceiveKeyController implements FxController {
 				case 402 -> licenseExceeded();
 				case 403 -> accessNotGranted();
 				case 404 -> needsLegacyDeviceRegistration();
+				case 410 -> throw new IOException("Vault has been archived."); // TODO add dialog
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
@@ -246,4 +257,7 @@ public class ReceiveKeyController implements FxController {
 			throw new IllegalStateException("URI constructed from params known to be valid", e);
 		}
 	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private record DeviceDto(@JsonProperty(value = "userPrivateKey", required = true) String userPrivateKey) {}
 }
