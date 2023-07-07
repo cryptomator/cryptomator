@@ -72,12 +72,24 @@ public final class MountWithinParentUtil {
 		Path hideaway = getHideaway(mountPoint);
 		try {
 			waitForMountpointRestoration(mountPoint);
+			if (Files.notExists(hideaway, LinkOption.NOFOLLOW_LINKS)) {
+				LOG.error("Unable to restore hidden directory to mountpoint \"{}\": Directory does not exist. (Deleted by user?)", mountPoint);
+				return;
+			}
+			if (!Files.isDirectory(hideaway, LinkOption.NOFOLLOW_LINKS)) {
+				LOG.error("Unable to restore hidden directory to mountpoint \"{}\": Not a directory.", mountPoint);
+				if (SystemUtils.IS_OS_WINDOWS) {
+					Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, false);
+				}
+				return;
+			}
+
 			Files.move(hideaway, mountPoint);
 			if (SystemUtils.IS_OS_WINDOWS) {
 				Files.setAttribute(mountPoint, WIN_HIDDEN_ATTR, false);
 			}
 		} catch (IOException e) {
-			LOG.error("Unable to restore hidden directory to mountpoint {}.", mountPoint, e);
+			LOG.error("Unable to restore hidden directory to mountpoint \"{}\".", mountPoint, e);
 		}
 	}
 
