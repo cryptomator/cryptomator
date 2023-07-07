@@ -5,6 +5,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tooltip?>
@@ -12,8 +13,6 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.layout.Pane?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController"
@@ -26,25 +25,29 @@
 	</padding>
 	<children>
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
-		<VBox>
-			<Label text="%addvaultwizard.new.namePrompt"/>
-			<Label text="${controller.vaultName}" wrapText="true" styleClass="label-muted"/>
-			<Region prefHeight="4" VBox.vgrow="NEVER"/>
-			<Label text="%addvaultwizard.new.locationLabel"/>
-			<Label text="${controller.vaultPath}" wrapText="true" styleClass="label-muted"/>
-		</VBox>
+		<Label text="%addvaultwizard.new.expertSettings.summary.introduction" wrapText="true"/>
+		<Label fx:id="vaultNameLabel" alignment="CENTER_RIGHT" graphicTextGap="6" wrapText="true">
+			<graphic>
+				<FontAwesome5IconView styleClass="glyph-icon-muted" glyph="PENCIL"/>
+			</graphic>
+		</Label>
+		<Label fx:id="vaultPathLabel" alignment="CENTER_RIGHT" graphicTextGap="6" wrapText="true">
+			<graphic>
+				<FontAwesome5IconView styleClass="glyph-icon-muted" glyph="HDD"/>
+			</graphic>
+		</Label>
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
-		<CheckBox fx:id="expertSettingsCheckBox" text="%addvaultwizard.new.enableExpertSettings.checkbox" onAction="#toggleUseExpertSettings"/>
+		<CheckBox fx:id="expertSettingsCheckBox" text="%addvaultwizard.new.expertSettings.enableExpertSettingsCheckbox" onAction="#toggleUseExpertSettings"/>
 		<VBox spacing="6" visible="${expertSettingsCheckBox.selected}">
 			<HBox spacing="2" HBox.hgrow="NEVER">
-				<Label text="%addvaultwizard.new.shorteningThreshold.title"/>
+				<Label text="%addvaultwizard.new.expertSettings.shorteningThreshold.title"/>
 				<Region prefWidth="2"/>
 				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
 					<graphic>
 						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 					</graphic>
 					<tooltip>
-						<Tooltip text="%addvaultwizard.new.shorteningThreshold.tooltip" showDelay="10ms"/>
+						<Tooltip text="%addvaultwizard.new.expertSettings.shorteningThreshold.tooltip" showDelay="10ms"/>
 					</tooltip>
 				</Hyperlink>
 			</HBox>
@@ -52,19 +55,19 @@
 				<NumericTextField fx:id="shorteningThresholdTextField"/>
 				<Region prefWidth="4" HBox.hgrow="NEVER"/>
 				<StackPane>
-					<Label styleClass="label-muted" text="%addvaultwizard.new.shorteningThreshold.invalid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${!controller.validShorteningThreshold}" graphicTextGap="6">
+					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.invalid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${!controller.validShorteningThreshold}" graphicTextGap="6">
 						<graphic>
 							<FontAwesome5IconView styleClass="glyph-icon-red" glyph="TIMES"/>
 						</graphic>
 					</Label>
-					<Label styleClass="label-muted" text="%addvaultwizard.new.shorteningThreshold.valid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.validShorteningThreshold}" graphicTextGap="6">
+					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.valid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.validShorteningThreshold}" graphicTextGap="6">
 						<graphic>
 							<FontAwesome5IconView styleClass="glyph-icon-primary" glyph="CHECK"/>
 						</graphic>
 					</Label>
 				</StackPane>
 			</HBox>
-			<Label text="%addvaultwizard.new.shorteningThreshold.message"/>
+			<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.message" visible="${!controller.validShorteningThreshold}"/>
 		</VBox>
 		<Region VBox.vgrow="ALWAYS"/>
 

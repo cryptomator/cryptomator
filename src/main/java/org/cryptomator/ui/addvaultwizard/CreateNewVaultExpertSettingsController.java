@@ -17,6 +17,7 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import java.nio.file.Path;
 
@@ -38,6 +39,8 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 	private final BooleanBinding validShorteningThreshold;
 
 	//FXML
+	public Label vaultNameLabel;
+	public Label vaultPathLabel;
 	public CheckBox expertSettingsCheckBox;
 	public NumericTextField shorteningThresholdTextField;
 
@@ -61,6 +64,8 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 
 	@FXML
 	public void initialize() {
+		vaultNameLabel.textProperty().bind(vaultNameProperty);
+		vaultPathLabel.textProperty().bind(vaultPathProperty.asString());
 		shorteningThresholdTextField.setPromptText(MIN_SHORTENING_THRESHOLD + "-" + DEFAULT_SHORTENING_THRESHOLD);
 		shorteningThresholdTextField.setText(Integer.toString(DEFAULT_SHORTENING_THRESHOLD));
 		shorteningThresholdTextField.textProperty().addListener((observable, oldValue, newValue) -> {
