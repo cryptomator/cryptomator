@@ -17,6 +17,7 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
 import java.io.UncheckedIOException;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -45,6 +46,7 @@ public abstract class UpdateCheckerModule {
 		try {
 			return Optional.of(HttpClient.newBuilder() //
 					.followRedirects(HttpClient.Redirect.NORMAL) // from version 1.6.11 onwards, Cryptomator can follow redirects, in case this URL ever changes
+					.proxy(ProxySelector.getDefault())
 					.build());
 		} catch (UncheckedIOException e) {
 			LOG.error("HttpClient for update check cannot be created.", e);
