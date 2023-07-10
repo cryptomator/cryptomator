@@ -28,7 +28,7 @@
 						<Insets topRightBottomLeft="6"/>
 					</padding>
 					<Circle styleClass="glyph-icon-primary" radius="24"/>
-					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
+					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
 				</StackPane>
 			</Group>
 
