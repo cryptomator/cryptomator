@@ -71,7 +71,7 @@ public abstract class AddVaultModule {
 	@Named("shorteningThreshold")
 	@AddVaultWizardScoped
 	static IntegerProperty provideShorteningThreshold() {
-		return new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.DEFAULT_SHORTENING_THRESHOLD);
+		return new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.MAX_SHORTENING_THRESHOLD);
 	}
 
 	@Provides

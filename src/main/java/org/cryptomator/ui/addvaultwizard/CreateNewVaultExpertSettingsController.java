@@ -24,7 +24,7 @@ import java.nio.file.Path;
 @AddVaultWizardScoped
 public class CreateNewVaultExpertSettingsController implements FxController {
 
-	public static final int DEFAULT_SHORTENING_THRESHOLD = 220;
+	public static final int MAX_SHORTENING_THRESHOLD = 220;
 	public static final int MIN_SHORTENING_THRESHOLD = 36;
 	private static final String DOCS_NAME_SHORTENING_URL = "https://docs.cryptomator.org/en/1.7/security/architecture/#name-shortening";
 
@@ -66,8 +66,8 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 	public void initialize() {
 		vaultNameLabel.textProperty().bind(vaultNameProperty);
 		vaultPathLabel.textProperty().bind(vaultPathProperty.asString());
-		shorteningThresholdTextField.setPromptText(MIN_SHORTENING_THRESHOLD + "-" + DEFAULT_SHORTENING_THRESHOLD);
-		shorteningThresholdTextField.setText(Integer.toString(DEFAULT_SHORTENING_THRESHOLD));
+		shorteningThresholdTextField.setPromptText(MIN_SHORTENING_THRESHOLD + "-" + MAX_SHORTENING_THRESHOLD);
+		shorteningThresholdTextField.setText(Integer.toString(MAX_SHORTENING_THRESHOLD));
 		shorteningThresholdTextField.textProperty().addListener((observable, oldValue, newValue) -> {
 			try {
 				int intValue = Integer.parseInt(newValue);
@@ -81,7 +81,7 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 	@FXML
 	public void toggleUseExpertSettings() {
 		if (!expertSettingsCheckBox.isSelected()) {
-			shorteningThresholdTextField.setText(Integer.toString(DEFAULT_SHORTENING_THRESHOLD));
+			shorteningThresholdTextField.setText(Integer.toString(MAX_SHORTENING_THRESHOLD));
 		}
 	}
 
@@ -101,11 +101,7 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 
 	public boolean isValidShorteningThreshold() {
 		var value = shorteningThreshold.get();
-		if (value < MIN_SHORTENING_THRESHOLD || value > DEFAULT_SHORTENING_THRESHOLD) {
-			return false;
-		} else {
-			return true;
-		}
+		return value >= MIN_SHORTENING_THRESHOLD && value <= MAX_SHORTENING_THRESHOLD;
 	}
 
 	public void openDocs() {
