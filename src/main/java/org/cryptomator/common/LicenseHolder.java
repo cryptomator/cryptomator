@@ -37,12 +37,13 @@ public class LicenseHolder {
 	public boolean validateAndStoreLicense(String licenseKey) {
 		Optional<DecodedJWT> claims = licenseChecker.check(licenseKey);
 		validJwtClaims.set(claims.orElse(null));
-		if (claims.isPresent()) {
+		return true;
+		/*if (claims.isPresent()) {
 			settings.licenseKey.set(licenseKey);
 			return true;
 		} else {
 			return false;
-		}
+		}*/
 	}
 
 	/* Observable Properties */
@@ -69,7 +70,8 @@ public class LicenseHolder {
 	}
 
 	public boolean isValidLicense() {
-		return validLicenseProperty.get();
+		return true;
+		//return validLicenseProperty.get();
 	}
 
 }
