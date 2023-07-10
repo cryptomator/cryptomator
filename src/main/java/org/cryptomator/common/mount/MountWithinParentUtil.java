@@ -12,6 +12,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public final class MountWithinParentUtil {
 
@@ -24,7 +25,7 @@ public final class MountWithinParentUtil {
 
 	static void prepareParentNoMountPoint(Path mountPoint) throws MountPointPreparationException {
 		Path hideaway = getHideaway(mountPoint);
-		var mpExists = Files.exists(mountPoint, LinkOption.NOFOLLOW_LINKS);
+		var mpExists = removeResidualJunction(mountPoint); //Handle junction as not existing
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
 		//TODO: possible improvement by just deleting an _empty_ hideaway
@@ -68,6 +69,25 @@ public final class MountWithinParentUtil {
 				Thread.currentThread().interrupt();
 				throw new MountPointPreparationException(e);
 			}
+		}
+	}
+
+	private static boolean removeResidualJunction(Path path) throws MountPointPreparationException {
+		try {
+			if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+				return false;
+			}
+			if (!SystemUtils.IS_OS_WINDOWS) { //So far this is only a problem on Windows
+				return true;
+			}
+			if (Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
+				LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", path);
+				Files.delete(path); //Throws if path is also a non-empty folder
+				return false;
+			}
+			return true;
+		} catch (IOException e) {
+			throw new MountPointPreparationException(e);
 		}
 	}
 
