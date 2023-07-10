@@ -67,6 +67,9 @@ public class FxApplication {
 			LOG.error("Failed to show main window", error);
 			return null;
 		});
+		if(!settings.checkForUpdates.getValue()){
+			appWindows.showUpdateReminderWindow();
+		}
 
 		launchEventHandler.startHandlingLaunchEvents();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);

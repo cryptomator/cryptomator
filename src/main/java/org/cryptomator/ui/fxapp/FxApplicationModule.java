@@ -15,12 +15,13 @@ import org.cryptomator.ui.quit.QuitComponent;
 
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
+import org.cryptomator.ui.updatereminder.UpdateReminderComponent;
 
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class})
+@Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class, UpdateReminderComponent.class})
 abstract class FxApplicationModule {
 
 	private static Image createImageFromResource(String resourceName) throws IOException {
@@ -52,4 +53,11 @@ abstract class FxApplicationModule {
 	static QuitComponent provideQuitComponent(QuitComponent.Builder builder) {
 		return builder.build();
 	}
+
+	@Provides
+	@FxApplicationScoped
+	static UpdateReminderComponent provideUpdateReminderComponent(UpdateReminderComponent.Builder builder) {
+		return builder.build();
+	}
+
 }
