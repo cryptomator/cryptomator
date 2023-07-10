@@ -28,9 +28,7 @@ public final class MountWithinParentUtil {
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
 		//TODO: possible improvement by just deleting an _empty_ hideaway
-		if (mpExists && hideExists) { //both resources exist (whatever type)
-			throw new MountPointPreparationException(new FileAlreadyExistsException(hideaway.toString()));
-		} else if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
+		if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
 			throw new MountPointPreparationException(new NoSuchFileException(mountPoint.toString()));
 		} else if (!mpExists) { //only hideaway exists
 			checkIsDirectory(hideaway);
@@ -42,8 +40,13 @@ public final class MountWithinParentUtil {
 			} catch (IOException e) {
 				throw new MountPointPreparationException(e);
 			}
-		} else { //only mountpoint exists
+		} else { //mountpoint exists...
 			try {
+				if (hideExists) { //... with hideaway
+					removeResidualHideaway(hideaway);
+				}
+
+				//... (now) without hideaway
 				checkIsDirectory(mountPoint);
 				checkIsEmpty(mountPoint);
 
@@ -66,6 +69,16 @@ public final class MountWithinParentUtil {
 				throw new MountPointPreparationException(e);
 			}
 		}
+	}
+
+	private static void removeResidualHideaway(Path hideaway) throws IOException {
+		if (!Files.isDirectory(hideaway, LinkOption.NOFOLLOW_LINKS)) {
+			if (SystemUtils.IS_OS_WINDOWS) {
+				Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, false);
+			}
+			throw new MountPointPreparationException(new NotDirectoryException(hideaway.toString()));
+		}
+		Files.delete(hideaway);
 	}
 
 	static void cleanup(Path mountPoint) {
