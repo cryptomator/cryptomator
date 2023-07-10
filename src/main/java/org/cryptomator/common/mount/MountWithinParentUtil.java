@@ -73,12 +73,9 @@ public final class MountWithinParentUtil {
 
 	private static void removeResidualHideaway(Path hideaway) throws IOException {
 		if (!Files.isDirectory(hideaway, LinkOption.NOFOLLOW_LINKS)) {
-			if (SystemUtils.IS_OS_WINDOWS) {
-				Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, false);
-			}
 			throw new MountPointPreparationException(new NotDirectoryException(hideaway.toString()));
 		}
-		Files.delete(hideaway);
+		Files.delete(hideaway); //Fails if not empty
 	}
 
 	static void cleanup(Path mountPoint) {
@@ -87,13 +84,6 @@ public final class MountWithinParentUtil {
 			waitForMountpointRestoration(mountPoint);
 			if (Files.notExists(hideaway, LinkOption.NOFOLLOW_LINKS)) {
 				LOG.error("Unable to restore hidden directory to mountpoint \"{}\": Directory does not exist. (Deleted by user?)", mountPoint);
-				return;
-			}
-			if (!Files.isDirectory(hideaway, LinkOption.NOFOLLOW_LINKS)) {
-				LOG.error("Unable to restore hidden directory to mountpoint \"{}\": Not a directory.", mountPoint);
-				if (SystemUtils.IS_OS_WINDOWS) {
-					Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, false);
-				}
 				return;
 			}
 
