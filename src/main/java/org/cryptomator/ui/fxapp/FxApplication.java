@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import java.time.LocalDate;
 import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
@@ -67,7 +68,8 @@ public class FxApplication {
 			LOG.error("Failed to show main window", error);
 			return null;
 		});
-		if(!settings.checkForUpdates.getValue()){
+
+		if(LocalDate.parse(settings.lastUpdateCheck.get()).isBefore(LocalDate.now().minusDays(14)) && !settings.checkForUpdates.getValue()){
 			appWindows.showUpdateReminderWindow();
 		}
 

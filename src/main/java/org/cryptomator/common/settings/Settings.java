@@ -26,6 +26,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
 import java.util.function.Consumer;
+import java.time.LocalDate;
 
 public class Settings {
 
@@ -44,6 +45,7 @@ public class Settings {
 	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
 	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
+	static final String DEFAULT_LAST_UPDATE_CHECK = "2000-01-01";
 
 	public final ObservableList<VaultSettings> directories;
 	public final BooleanProperty askedForUpdateCheck;
@@ -67,6 +69,7 @@ public class Settings {
 	public final StringProperty displayConfiguration;
 	public final StringProperty language;
 	public final StringProperty mountService;
+	public final StringProperty lastUpdateCheck;
 
 	private Consumer<Settings> saveCmd;
 
@@ -104,6 +107,7 @@ public class Settings {
 		this.displayConfiguration = new SimpleStringProperty(this, "displayConfiguration", json.displayConfiguration);
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
+		this.lastUpdateCheck = new SimpleStringProperty(this,"lastUpdateCheck",json.lastUpdateCheck);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
@@ -131,6 +135,7 @@ public class Settings {
 		displayConfiguration.addListener(this::somethingChanged);
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
+		lastUpdateCheck.addListener(this::somethingChanged);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -185,6 +190,7 @@ public class Settings {
 		json.displayConfiguration = displayConfiguration.get();
 		json.language = language.get();
 		json.mountService = mountService.get();
+		json.lastUpdateCheck = lastUpdateCheck.get();
 		return json;
 	}
 
