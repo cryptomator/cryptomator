@@ -73,7 +73,7 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 				int intValue = Integer.parseInt(newValue);
 				shorteningThreshold.set(intValue);
 			} catch (NumberFormatException e) {
-				shorteningThreshold.set(0);
+				shorteningThreshold.set(0); //the value is set to 0 to ensure that an invalid value assignment is detected during a NumberFormatException
 			}
 		});
 	}

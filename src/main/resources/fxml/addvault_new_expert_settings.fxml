@@ -25,15 +25,14 @@
 	</padding>
 	<children>
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
-		<Label text="%addvaultwizard.new.expertSettings.summary.introduction" wrapText="true"/>
 		<Label fx:id="vaultNameLabel" alignment="CENTER_RIGHT" graphicTextGap="6" wrapText="true">
 			<graphic>
-				<FontAwesome5IconView styleClass="glyph-icon-muted" glyph="PENCIL"/>
+				<FontAwesome5IconView styleClass="glyph-icon-muted" wrappingWidth="12" glyph="PENCIL"/>
 			</graphic>
 		</Label>
 		<Label fx:id="vaultPathLabel" alignment="CENTER_RIGHT" graphicTextGap="6" wrapText="true">
 			<graphic>
-				<FontAwesome5IconView styleClass="glyph-icon-muted" glyph="HDD"/>
+				<FontAwesome5IconView styleClass="glyph-icon-muted" wrappingWidth="12" glyph="HDD"/>
 			</graphic>
 		</Label>
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
