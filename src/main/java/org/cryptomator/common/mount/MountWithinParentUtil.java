@@ -26,7 +26,7 @@ public final class MountWithinParentUtil {
 
 		//TODO: possible improvement by just deleting an _empty_ hideaway
 		if (mpExists && hideExists) { //both resources exist (whatever type)
-			throw new HideawayAlreadyExistsException(mountPoint, "Hideaway (" + hideaway + ") already exists for mountpoint: " + mountPoint);
+			throw new HideawayAlreadyExistsException(mountPoint, hideaway, "Hideaway (" + hideaway + ") already exists for mountpoint: " + mountPoint);
 		} else if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
 			throw new MountPointNotExistsException(mountPoint);
 		} else if (!mpExists) { //only hideaway exists

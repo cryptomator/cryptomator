@@ -1,5 +1,6 @@
 package org.cryptomator.ui.unlock;
 
+import org.cryptomator.common.mount.HideawayAlreadyExistsException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.mount.MountPointCouldNotBeClearedException;
 import org.cryptomator.common.mount.MountPointInUseException;
@@ -31,6 +32,7 @@ public class UnlockInvalidMountPointController implements FxController {
 	private final ExceptionType exceptionType;
 	private final Path exceptionPath;
 	private final String exceptionMessage;
+	private final Path hideawayPath;
 
 	public FormattedLabel dialogDescription;
 
@@ -45,6 +47,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		this.exceptionType = getExceptionType(exc);
 		this.exceptionPath = exc.getMountpoint();
 		this.exceptionMessage = exc.getMessage();
+		this.hideawayPath = exc instanceof HideawayAlreadyExistsException haeExc ? haeExc.getHideaway() : null;
 	}
 
 	@FXML
@@ -52,6 +55,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		dialogDescription.setFormat(resourceBundle.getString(exceptionType.translationKey));
 		dialogDescription.setArg1(exceptionPath);
 		dialogDescription.setArg2(exceptionMessage);
+		dialogDescription.setArg3(hideawayPath);
 	}
 
 	@FXML
@@ -76,6 +80,7 @@ public class UnlockInvalidMountPointController implements FxController {
 			case MountPointNotSupportedException x -> ExceptionType.NOT_SUPPORTED;
 			case MountPointNotExistsException x -> ExceptionType.NOT_EXISTING;
 			case MountPointInUseException x -> ExceptionType.IN_USE;
+			case HideawayAlreadyExistsException x -> ExceptionType.HIDEAWAY_EXISTS;
 			case MountPointCouldNotBeClearedException x -> ExceptionType.COULD_NOT_BE_CLEARED;
 			case MountPointNotEmptyDirectoryException x -> ExceptionType.NOT_EMPTY_DIRECTORY;
 			default -> ExceptionType.GENERIC;
@@ -87,6 +92,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		NOT_SUPPORTED("unlock.error.customPath.description.notSupported", ButtonAction.SHOW_PREFERENCES),
 		NOT_EXISTING("unlock.error.customPath.description.notExists", ButtonAction.SHOW_VAULT_OPTIONS),
 		IN_USE("unlock.error.customPath.description.inUse", ButtonAction.SHOW_VAULT_OPTIONS),
+		HIDEAWAY_EXISTS("unlock.error.customPath.description.hideawayExists", ButtonAction.SHOW_VAULT_OPTIONS),
 		COULD_NOT_BE_CLEARED("unlock.error.customPath.description.couldNotBeCleaned", ButtonAction.SHOW_VAULT_OPTIONS),
 		NOT_EMPTY_DIRECTORY("unlock.error.customPath.description.notEmptyDir", ButtonAction.SHOW_VAULT_OPTIONS),
 		GENERIC("unlock.error.customPath.description.generic", ButtonAction.SHOW_PREFERENCES);
@@ -102,6 +108,7 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	private enum ButtonAction {
 
+		//TODO Add option to show filesystem, e.g. for ExceptionType.HIDEAWAY_EXISTS
 		SHOW_PREFERENCES,
 		SHOW_VAULT_OPTIONS;
 
