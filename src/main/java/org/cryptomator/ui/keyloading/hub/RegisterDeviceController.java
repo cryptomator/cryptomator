@@ -31,6 +31,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -76,7 +77,7 @@ public class RegisterDeviceController implements FxController {
 		this.registerFailedScene = registerFailedScene;
 		this.jwt = JWT.decode(this.bearerToken);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
-		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
+		this.httpClient = HttpClient.newBuilder().proxy(ProxySelector.getDefault()).version(HttpClient.Version.HTTP_1_1).executor(executor).build();
 	}
 
 	public void initialize() {

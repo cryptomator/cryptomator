@@ -19,6 +19,7 @@ import javafx.stage.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -56,7 +57,7 @@ public class ReceiveKeyController implements FxController {
 		this.vaultBaseUri = getVaultBaseUri(vault);
 		this.invalidLicenseScene = invalidLicenseScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
-		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
+		this.httpClient = HttpClient.newBuilder().proxy(ProxySelector.getDefault()).version(HttpClient.Version.HTTP_1_1).executor(executor).build();
 	}
 
 	@FXML

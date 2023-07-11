@@ -25,6 +25,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -81,7 +82,7 @@ public class ErrorController implements FxController {
 		this.environment = environment;
 
 		isLoadingHttpResponse.set(true);
-		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
+		HttpClient httpClient = HttpClient.newBuilder().proxy(ProxySelector.getDefault()).version(HttpClient.Version.HTTP_1_1).build();
 		HttpRequest httpRequest = HttpRequest.newBuilder()//
 				.uri(URI.create(ERROR_CODES_URL))//
 				.build();
