@@ -28,7 +28,7 @@ public class LicenseHolder {
 		this.settings = settings;
 		this.licenseChecker = licenseChecker;
 		this.validJwtClaims = new SimpleObjectProperty<>();
-		this.licenseSubject = new SimpleStringProperty("MSFT");
+		this.licenseSubject = validJwtClaims.map(DecodedJWT::getSubject);
 		this.validLicenseProperty = validJwtClaims.isNotNull();
 
 		Optional<DecodedJWT> claims = licenseChecker.check(settings.licenseKey.get());
@@ -38,13 +38,12 @@ public class LicenseHolder {
 	public boolean validateAndStoreLicense(String licenseKey) {
 		Optional<DecodedJWT> claims = licenseChecker.check(licenseKey);
 		validJwtClaims.set(claims.orElse(null));
-		return true;
-		/*if (claims.isPresent()) {
+		if (claims.isPresent()) {
 			settings.licenseKey.set(licenseKey);
 			return true;
 		} else {
 			return false;
-		}*/
+		}
 	}
 
 	/* Observable Properties */
