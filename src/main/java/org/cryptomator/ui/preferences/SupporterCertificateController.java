@@ -32,8 +32,7 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	public void initialize() {
-		//supporterCertificateField.setText(licenseHolder.getLicenseKey().orElse(null));
-		supporterCertificateField.setText("MSFT");
+		supporterCertificateField.setText(licenseHolder.getLicenseKey().orElse(null));
 		supporterCertificateField.textProperty().addListener(this::registrationKeyChanged);
 		supporterCertificateField.setTextFormatter(new TextFormatter<>(this::removeWhitespaces));
 	}
