@@ -40,10 +40,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> invalidMountPointScene;
 	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
-	private final AtomicReference<Throwable> unlockFailedException;
+	private final AtomicReference<IllegalMountPointException> illegalMountPointException;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, FxApplicationWindows appWindows, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, @UnlockWindow AtomicReference<Throwable> unlockFailedException) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, FxApplicationWindows appWindows, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, @UnlockWindow AtomicReference<IllegalMountPointException> illegalMountPointException) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -51,7 +51,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.appWindows = appWindows;
 		this.keyLoadingStrategy = keyLoadingStrategy;
-		this.unlockFailedException = unlockFailedException;
+		this.illegalMountPointException = illegalMountPointException;
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 	private void handleIllegalMountPointError(IllegalMountPointException impe) {
 		Platform.runLater(() -> {
-			unlockFailedException.set(impe);
+			illegalMountPointException.set(impe);
 			window.setScene(invalidMountPointScene.get());
 			window.show();
 		});

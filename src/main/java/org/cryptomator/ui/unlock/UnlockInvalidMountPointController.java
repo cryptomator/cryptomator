@@ -1,5 +1,6 @@
 package org.cryptomator.ui.unlock;
 
+import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.mount.MountPointInUseException;
 import org.cryptomator.common.mount.MountPointNotExistsException;
 import org.cryptomator.common.mount.MountPointNotSupportedException;
@@ -30,13 +31,13 @@ public class UnlockInvalidMountPointController implements FxController {
 	public FormattedLabel dialogDescription;
 
 	@Inject
-	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow AtomicReference<Throwable> unlockException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
+	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow AtomicReference<IllegalMountPointException> illegalMountPointException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.resourceBundle = resourceBundle;
 
-		var exc = unlockException.get();
+		var exc = illegalMountPointException.get();
 		this.exceptionType = getExceptionType(exc);
 		this.exceptionMessage = exc.getMessage();
 	}
