@@ -22,7 +22,7 @@
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.interface.theme"/>
-			<ChoiceBox fx:id="themeChoiceBox" disable="${!controller.licenseHolder.validLicense}"/>
+			<ChoiceBox fx:id="themeChoiceBox"/>
 			<Hyperlink styleClass="hyperlink-underline,hyperlink-muted" text="%preferences.interface.unlockThemes" onAction="#showContributeTab" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}"/>
 		</HBox>
 
