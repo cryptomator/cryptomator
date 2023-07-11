@@ -52,7 +52,8 @@ public class FxApplicationStyle {
 	}
 
 	private void loadSelectedStyleSheet(UiTheme desiredTheme) {
-		UiTheme theme = licenseHolder.isValidLicense() ? desiredTheme : UiTheme.LIGHT;
+		//UiTheme theme = licenseHolder.isValidLicense() ? desiredTheme : UiTheme.LIGHT;
+		UiTheme theme = desiredTheme;
 		switch (theme) {
 			case LIGHT -> applyLightTheme();
 			case DARK -> applyDarkTheme();
