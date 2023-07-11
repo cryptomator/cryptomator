@@ -23,7 +23,7 @@
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.interface.theme"/>
 			<ChoiceBox fx:id="themeChoiceBox"/>
-			<Hyperlink styleClass="hyperlink-underline,hyperlink-muted" text="%preferences.interface.unlockThemes" onAction="#showContributeTab" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}"/>
+			<Hyperlink styleClass="hyperlink-underline,hyperlink-muted" text="%preferences.interface.unlockThemes" onAction="#showContributeTab" visible="false" managed="false"/>
 		</HBox>
 
 		<HBox spacing="12" alignment="CENTER_LEFT">
