@@ -5,12 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 
 public final class MountWithinParentUtil {
@@ -22,16 +19,16 @@ public final class MountWithinParentUtil {
 
 	private MountWithinParentUtil() {}
 
-	static void prepareParentNoMountPoint(Path mountPoint) throws MountPointPreparationException {
+	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException {
 		Path hideaway = getHideaway(mountPoint);
 		var mpExists = Files.exists(mountPoint, LinkOption.NOFOLLOW_LINKS);
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
 		//TODO: possible improvement by just deleting an _empty_ hideaway
 		if (mpExists && hideExists) { //both resources exist (whatever type)
-			throw new MountPointPreparationException(new FileAlreadyExistsException(hideaway.toString()));
+			throw new IllegalMountPointException(mountPoint);
 		} else if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
-			throw new MountPointPreparationException(new NoSuchFileException(mountPoint.toString()));
+			throw new IllegalMountPointException(mountPoint);
 		} else if (!mpExists) { //only hideaway exists
 			checkIsDirectory(hideaway);
 			LOG.info("Mountpoint {} seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
@@ -54,7 +51,7 @@ public final class MountWithinParentUtil {
 				int attempts = 0;
 				while (!Files.notExists(mountPoint)) {
 					if (attempts >= 10) {
-						throw new MountPointPreparationException("Path " + mountPoint + " could not be cleared");
+						throw new IllegalMountPointException(mountPoint, "Path could not be cleared: " + mountPoint);
 					}
 					Thread.sleep(1000);
 					attempts++;
@@ -99,16 +96,16 @@ public final class MountWithinParentUtil {
 		}
 	}
 
-	private static void checkIsDirectory(Path toCheck) throws MountPointPreparationException {
+	private static void checkIsDirectory(Path toCheck) throws IllegalMountPointException {
 		if (!Files.isDirectory(toCheck, LinkOption.NOFOLLOW_LINKS)) {
-			throw new MountPointPreparationException(new NotDirectoryException(toCheck.toString()));
+			throw new IllegalMountPointException(toCheck);
 		}
 	}
 
-	private static void checkIsEmpty(Path toCheck) throws MountPointPreparationException, IOException {
+	private static void checkIsEmpty(Path toCheck) throws IllegalMountPointException, IOException {
 		try (var dirStream = Files.list(toCheck)) {
 			if (dirStream.findFirst().isPresent()) {
-				throw new MountPointPreparationException(new DirectoryNotEmptyException(toCheck.toString()));
+				throw new IllegalMountPointException(toCheck);
 			}
 		}
 	}
