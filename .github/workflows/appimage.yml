@@ -67,7 +67,6 @@ jobs:
           REVISION_NUM: ${{  needs.get-version.outputs.revNum }}
       - name: Run jpackage
         run: >
-          TRAYICONSDIR="@{appdir}/usr/share/icons/hicolor/symbolic/apps"
           ${JAVA_HOME}/bin/jpackage
           --verbose
           --type app-image
@@ -97,6 +96,8 @@ jobs:
           --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
           --add-launcher Cryptomator-gtk2=launcher-gtk2.properties
           --resource-dir dist/linux/resources
+        env:
+          TRAYICONSDIR: "@{appdir}/usr/share/icons/hicolor/symbolic/apps"
       - name: Patch Cryptomator.AppDir
         run: |
           mv appdir/Cryptomator Cryptomator.AppDir
