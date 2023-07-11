@@ -10,7 +10,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import java.util.Optional;
 
@@ -70,8 +69,7 @@ public class LicenseHolder {
 	}
 
 	public boolean isValidLicense() {
-		return true;
-		//return validLicenseProperty.get();
+		return validLicenseProperty.get();
 	}
 
 }
