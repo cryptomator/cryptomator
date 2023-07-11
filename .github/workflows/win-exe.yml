@@ -267,13 +267,6 @@ jobs:
           -o installer/Cryptomator-Installer.exe
       - name: Add possible alpha/beta tags to installer name
         run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.exe
-      - name: Create detached GPG signature with key 615D449FE6E6A235
-        run: |
-          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.exe
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
