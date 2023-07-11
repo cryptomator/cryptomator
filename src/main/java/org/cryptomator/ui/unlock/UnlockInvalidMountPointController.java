@@ -1,6 +1,6 @@
 package org.cryptomator.ui.unlock;
 
-import org.cryptomator.common.mount.ExistingHideawayException;
+import org.cryptomator.common.mount.HideawayNotDirectoryException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.mount.MountPointCleanupFailedException;
 import org.cryptomator.common.mount.MountPointInUseException;
@@ -48,7 +48,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		this.exceptionType = getExceptionType(exc);
 		this.exceptionPath = exc.getMountpoint();
 		this.exceptionMessage = exc.getMessage();
-		this.hideawayPath = exc instanceof ExistingHideawayException haeExc ? haeExc.getHideaway() : null;
+		this.hideawayPath = exc instanceof HideawayNotDirectoryException haeExc ? haeExc.getHideaway() : null;
 	}
 
 	@FXML
@@ -81,7 +81,7 @@ public class UnlockInvalidMountPointController implements FxController {
 			case MountPointNotSupportedException x -> ExceptionType.NOT_SUPPORTED;
 			case MountPointNotExistingException x -> ExceptionType.NOT_EXISTING;
 			case MountPointInUseException x -> ExceptionType.IN_USE;
-			case ExistingHideawayException x -> ExceptionType.HIDEAWAY_EXISTS;
+			case HideawayNotDirectoryException x -> ExceptionType.HIDEAWAY_NOT_DIR;
 			case MountPointCleanupFailedException x -> ExceptionType.COULD_NOT_BE_CLEARED;
 			case MountPointNotEmptyDirectoryException x -> ExceptionType.NOT_EMPTY_DIRECTORY;
 			default -> ExceptionType.GENERIC;
@@ -93,7 +93,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		NOT_SUPPORTED("unlock.error.customPath.description.notSupported", ButtonAction.SHOW_PREFERENCES),
 		NOT_EXISTING("unlock.error.customPath.description.notExists", ButtonAction.SHOW_VAULT_OPTIONS),
 		IN_USE("unlock.error.customPath.description.inUse", ButtonAction.SHOW_VAULT_OPTIONS),
-		HIDEAWAY_EXISTS("unlock.error.customPath.description.hideawayExists", ButtonAction.SHOW_VAULT_OPTIONS),
+		HIDEAWAY_NOT_DIR("unlock.error.customPath.description.hideawayNotDir", ButtonAction.SHOW_VAULT_OPTIONS),
 		COULD_NOT_BE_CLEARED("unlock.error.customPath.description.couldNotBeCleaned", ButtonAction.SHOW_VAULT_OPTIONS),
 		NOT_EMPTY_DIRECTORY("unlock.error.customPath.description.notEmptyDir", ButtonAction.SHOW_VAULT_OPTIONS),
 		GENERIC("unlock.error.customPath.description.generic", ButtonAction.SHOW_PREFERENCES);

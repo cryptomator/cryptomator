@@ -10,7 +10,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -28,8 +27,6 @@ public final class MountWithinParentUtil {
 		var mpExists = removeResidualJunction(mountPoint); //Handle junction as not existing
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
-		//TODO: possible improvement by just deleting an _empty_ hideaway
-		//TODO: Remove "ExistingHideawayException"
 		if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
 			throw new MountPointNotExistingException(mountPoint);
 		} else if (!mpExists) { //only hideaway exists
@@ -45,7 +42,7 @@ public final class MountWithinParentUtil {
 		} else { //mountpoint exists...
 			try {
 				if (hideExists) { //... with hideaway
-					removeResidualHideaway(hideaway);
+					removeResidualHideaway(mountPoint, hideaway);
 				}
 
 				//... (now) without hideaway
@@ -73,8 +70,7 @@ public final class MountWithinParentUtil {
 		}
 	}
 
-	//TODO Remove MountPointPreparationException
-	private static boolean removeResidualJunction(Path path) throws MountPointPreparationException {
+	private static boolean removeResidualJunction(Path path) {
 		try {
 			if (Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
 				LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", path);
@@ -85,14 +81,13 @@ public final class MountWithinParentUtil {
 		} catch (NoSuchFileException e) {
 			return false;
 		} catch (IOException e) {
-			throw new MountPointPreparationException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
-	//TODO Remove MountPointPreparationException
-	private static void removeResidualHideaway(Path hideaway) throws IOException {
+	private static void removeResidualHideaway(Path mountPoint, Path hideaway) throws IOException {
 		if (!Files.isDirectory(hideaway, LinkOption.NOFOLLOW_LINKS)) {
-			throw new MountPointPreparationException(new NotDirectoryException(hideaway.toString()));
+			throw new HideawayNotDirectoryException(mountPoint, hideaway);
 		}
 		Files.delete(hideaway); //Fails if not empty
 	}
