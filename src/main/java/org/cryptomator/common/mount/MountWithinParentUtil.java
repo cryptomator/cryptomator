@@ -19,16 +19,16 @@ public final class MountWithinParentUtil {
 
 	private MountWithinParentUtil() {}
 
-	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException {
+	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException, MountPointPreparationException {
 		Path hideaway = getHideaway(mountPoint);
 		var mpExists = Files.exists(mountPoint, LinkOption.NOFOLLOW_LINKS);
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
 		//TODO: possible improvement by just deleting an _empty_ hideaway
 		if (mpExists && hideExists) { //both resources exist (whatever type)
-			throw new IllegalMountPointException(mountPoint);
+			throw new HideawayAlreadyExistsException(mountPoint, "Hideaway (" + hideaway + ") already exists for mountpoint: " + mountPoint);
 		} else if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
-			throw new IllegalMountPointException(mountPoint);
+			throw new MountPointNotExistsException(mountPoint);
 		} else if (!mpExists) { //only hideaway exists
 			checkIsDirectory(hideaway);
 			LOG.info("Mountpoint {} seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
@@ -51,7 +51,7 @@ public final class MountWithinParentUtil {
 				int attempts = 0;
 				while (!Files.notExists(mountPoint)) {
 					if (attempts >= 10) {
-						throw new IllegalMountPointException(mountPoint, "Path could not be cleared: " + mountPoint);
+						throw new MountPointCouldNotBeClearedException(mountPoint);
 					}
 					Thread.sleep(1000);
 					attempts++;
@@ -98,14 +98,14 @@ public final class MountWithinParentUtil {
 
 	private static void checkIsDirectory(Path toCheck) throws IllegalMountPointException {
 		if (!Files.isDirectory(toCheck, LinkOption.NOFOLLOW_LINKS)) {
-			throw new IllegalMountPointException(toCheck);
+			throw new MountPointNotEmptyDirectoryException(toCheck, "Mountpoint is not a directory: " + toCheck);
 		}
 	}
 
 	private static void checkIsEmpty(Path toCheck) throws IllegalMountPointException, IOException {
 		try (var dirStream = Files.list(toCheck)) {
 			if (dirStream.findFirst().isPresent()) {
-				throw new IllegalMountPointException(toCheck);
+				throw new MountPointNotEmptyDirectoryException(toCheck, "Mountpoint directory is not empty: " + toCheck);
 			}
 		}
 	}
