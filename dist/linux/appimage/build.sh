@@ -56,7 +56,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
     --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\"" \
-    --java-options "-Dcryptomator.showTrayIcon=false" \
+    --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"${TRAYICONSDIR}\"" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
     --add-launcher cryptomator-gtk2=launcher-gtk2.properties \

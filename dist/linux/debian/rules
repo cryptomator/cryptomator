@@ -54,7 +54,7 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
 		--java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
 		--java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\"" \
-		--java-options "-Dcryptomator.showTrayIcon=false" \
+		--java-options "-Dcryptomator.showTrayIcon=true" \
 		--java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"/usr/share/icons/hicolor/symbolic/apps\"" \
 		--java-options "-Dcryptomator.buildNumber=\"deb-${REVISION_NUM}\"" \
 		--java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\"" \
