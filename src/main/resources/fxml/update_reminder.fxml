@@ -11,8 +11,8 @@
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.updatereminder.UpdateReminderController"
-	  minWidth="450"
-	  maxWidth="450"
+	  minWidth="550"
+	  maxWidth="550"
 	  minHeight="145"
 	  spacing="12"
 	  alignment="TOP_LEFT">
