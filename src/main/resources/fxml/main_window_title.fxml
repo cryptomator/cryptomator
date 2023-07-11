@@ -36,7 +36,7 @@
 
 		<Region HBox.hgrow="ALWAYS"/>
 
-		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showContributePreferences" focusTraversable="false" visible="${!controller.licenseHolder.validLicense}">
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showContributePreferences" focusTraversable="false">
 			<graphic>
 				<StackPane>
 					<FontAwesome5IconView glyph="EXCLAMATION_CIRCLE" glyphSize="16"/>
