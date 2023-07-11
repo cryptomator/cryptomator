@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 
+<!-- For Built in variables, see https://wixtoolset.org/docs/tools/burn/builtin-variables/-->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
     <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/bundle.html-->
     <!-- Attributes explicitly not used:
@@ -10,21 +11,11 @@
      AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="bundle\resources\Cryptomator.ico">
 
         <!-- detect outdated WinFsp installations -->
-        <?include "resources\winFspMetaData.wxi" ?>
         <util:ProductSearch
-            Variable="InstalledWinFspVersion"
+            Variable="InstalledLegacyWinFspVersion"
             Result="version"
             UpgradeCode="82F812D9-4083-4EF1-8BC8-0F1EDA05B46B"
         />
-        <!-- Note: The bundle engine takes the Message format literaly -->
-        <bal:Condition Message=
-"The WinFsp driver used by Cryptomator is outdated and must be removed before the installation.
-
-1. Open the view of installed apps
-2. Search for &quot;WinFsp&quot;
-3. Uninstall the listed application
-4. Reboot your device
-5. Restart this installer">(InstalledWinFspVersion = v0.0.0.0) OR ($(var.BundledWinFspVersion) &lt;= InstalledWinFspVersion)</bal:Condition>
 
         <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
         <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
@@ -40,7 +31,21 @@
             />
             <Payload SourceFile="bundle\resources\logoSide.png" />
         </BootstrapperApplicationRef>
+
         <Chain>
+            <ExePackage Cache="yes" PerMachine="yes" Vital="yes" Permanent="no"
+              SourceFile="resources\winfsp1ExeUninstaller.exe"
+              DisplayName="Removing outdated WinFsp Driver"
+              Description="Workaround to remove old winfsp"
+              DetectCondition="false"
+              InstallCondition="InstalledLegacyWinFspVersion &lt;&gt; v0.0.0.0"
+              >
+                <CommandLine Condition="WixBundleUILevel &lt;= 3" InstallArgument="-q" />
+                <ExitCode Behavior="forceReboot" Value="0"/>
+                <ExitCode Behavior="success" Value="1"/>
+                <ExitCode Behavior="error" Value="2"/>
+                <ExitCode Behavior="error" Value="3"/>
+            </ExePackage>
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
             <MsiPackage
                 SourceFile="resources\Cryptomator.msi"
@@ -53,7 +58,6 @@
                 CacheId="cryptomator-bundle-winfsp"
                 Visible="yes"
                 DisplayInternalUI="no"
-                Vital="no"
                 Permanent="yes"
             />
         </Chain>
