@@ -14,6 +14,7 @@ import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,6 +27,7 @@ public class UnlockInvalidMountPointController implements FxController {
 	private final FxApplicationWindows appWindows;
 	private final ResourceBundle resourceBundle;
 	private final ExceptionType exceptionType;
+	private final Path exceptionPath;
 	private final String exceptionMessage;
 
 	public FormattedLabel dialogDescription;
@@ -39,13 +41,15 @@ public class UnlockInvalidMountPointController implements FxController {
 
 		var exc = illegalMountPointException.get();
 		this.exceptionType = getExceptionType(exc);
+		this.exceptionPath = exc.getMountpoint();
 		this.exceptionMessage = exc.getMessage();
 	}
 
 	@FXML
 	public void initialize() {
 		dialogDescription.setFormat(resourceBundle.getString(exceptionType.translationKey));
-		dialogDescription.setArg1(exceptionMessage);
+		dialogDescription.setArg1(exceptionPath);
+		dialogDescription.setArg2(exceptionMessage);
 	}
 
 	@FXML
