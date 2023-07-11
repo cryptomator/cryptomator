@@ -1,7 +1,9 @@
 package org.cryptomator.ui.unlock;
 
 import org.cryptomator.common.mount.IllegalMountPointException;
+import org.cryptomator.common.mount.MountPointCouldNotBeClearedException;
 import org.cryptomator.common.mount.MountPointInUseException;
+import org.cryptomator.common.mount.MountPointNotEmptyDirectoryException;
 import org.cryptomator.common.mount.MountPointNotExistsException;
 import org.cryptomator.common.mount.MountPointNotSupportedException;
 import org.cryptomator.common.vaults.Vault;
@@ -74,6 +76,8 @@ public class UnlockInvalidMountPointController implements FxController {
 			case MountPointNotSupportedException x -> ExceptionType.NOT_SUPPORTED;
 			case MountPointNotExistsException x -> ExceptionType.NOT_EXISTING;
 			case MountPointInUseException x -> ExceptionType.IN_USE;
+			case MountPointCouldNotBeClearedException x -> ExceptionType.COULD_NOT_BE_CLEARED;
+			case MountPointNotEmptyDirectoryException x -> ExceptionType.NOT_EMPTY_DIRECTORY;
 			default -> ExceptionType.GENERIC;
 		};
 	}
@@ -83,6 +87,8 @@ public class UnlockInvalidMountPointController implements FxController {
 		NOT_SUPPORTED("unlock.error.customPath.description.notSupported", ButtonAction.SHOW_PREFERENCES),
 		NOT_EXISTING("unlock.error.customPath.description.notExists", ButtonAction.SHOW_VAULT_OPTIONS),
 		IN_USE("unlock.error.customPath.description.inUse", ButtonAction.SHOW_VAULT_OPTIONS),
+		COULD_NOT_BE_CLEARED("unlock.error.customPath.description.couldNotBeCleaned", ButtonAction.SHOW_VAULT_OPTIONS),
+		NOT_EMPTY_DIRECTORY("unlock.error.customPath.description.notEmptyDir", ButtonAction.SHOW_VAULT_OPTIONS),
 		GENERIC("unlock.error.customPath.description.generic", ButtonAction.SHOW_PREFERENCES);
 
 		private final String translationKey;
