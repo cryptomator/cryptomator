@@ -51,22 +51,21 @@
 				</Hyperlink>
 			</HBox>
 			<HBox>
-				<NumericTextField fx:id="shorteningThresholdTextField"/>
-				<Region prefWidth="4" HBox.hgrow="NEVER"/>
+				<NumericTextField fx:id="shorteningThresholdTextField" maxWidth="60"/>
+				<Region minWidth="4" prefWidth="4" HBox.hgrow="NEVER"/>
 				<StackPane>
-					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.invalid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${!controller.validShorteningThreshold}" graphicTextGap="6">
+					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.invalid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${!controller.validShorteningThreshold}" managed="${!controller.validShorteningThreshold}" graphicTextGap="6">
 						<graphic>
 							<FontAwesome5IconView styleClass="glyph-icon-red" glyph="TIMES"/>
 						</graphic>
 					</Label>
-					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.valid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.validShorteningThreshold}" graphicTextGap="6">
+					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.valid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.validShorteningThreshold}" managed="${controller.validShorteningThreshold}" graphicTextGap="6">
 						<graphic>
 							<FontAwesome5IconView styleClass="glyph-icon-primary" glyph="CHECK"/>
 						</graphic>
 					</Label>
 				</StackPane>
 			</HBox>
-			<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.message" visible="${!controller.validShorteningThreshold}"/>
 		</VBox>
 		<Region VBox.vgrow="ALWAYS"/>
 
