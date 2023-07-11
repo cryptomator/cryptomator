@@ -81,16 +81,8 @@ public abstract class UpdateCheckerModule {
 		ScheduledService<String> service = new ScheduledService<>() {
 			@Override
 			protected Task<String> createTask() {
-				if (httpClient.isPresent()) {
-					return new UpdateCheckerTask(httpClient.get(), checkForUpdatesRequest);
-				} else {
-					return new Task<>() {
-						@Override
-						protected String call() {
-							throw new NullPointerException("No HttpClient present.");
-						}
-					};
-				}
+				return httpClient.map(client -> new UpdateCheckerTask(client, checkForUpdatesRequest))
+						.orElseThrow(() -> new IllegalArgumentException("No HttpClient present."));
 			}
 		};
 		service.setOnFailed(event -> LOG.error("Failed to execute update service", service.getException()));

@@ -157,9 +157,7 @@ public class ErrorController implements FxController {
 								.thenComparing(this::compareIsAnswered)//
 								.thenComparing(this::compareUpvoteCount));
 
-				if (value.isPresent()) {
-					matchingErrorDiscussion.set(value.get());
-				}
+				value.ifPresent(matchingErrorDiscussion::set);
 			}
 		} catch (IOException e) {
 			LOG.error("Failed to load or parse JSON from " + response.uri(), e);
