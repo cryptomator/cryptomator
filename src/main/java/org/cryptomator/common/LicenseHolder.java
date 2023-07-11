@@ -10,6 +10,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ public class LicenseHolder {
 		this.settings = settings;
 		this.licenseChecker = licenseChecker;
 		this.validJwtClaims = new SimpleObjectProperty<>();
-		this.licenseSubject = validJwtClaims.map(DecodedJWT::getSubject);
+		this.licenseSubject = new SimpleStringProperty("MSFT");
 		this.validLicenseProperty = validJwtClaims.isNotNull();
 
 		Optional<DecodedJWT> claims = licenseChecker.check(settings.licenseKey.get());
