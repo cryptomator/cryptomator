@@ -92,12 +92,10 @@ jobs:
           --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
-          --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"${TRAYICONSDIR}\""
+          --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\""
           --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
           --add-launcher Cryptomator-gtk2=launcher-gtk2.properties
           --resource-dir dist/linux/resources
-        env:
-          TRAYICONSDIR: "@{appdir}/usr/share/icons/hicolor/symbolic/apps"
       - name: Patch Cryptomator.AppDir
         run: |
           mv appdir/Cryptomator Cryptomator.AppDir
