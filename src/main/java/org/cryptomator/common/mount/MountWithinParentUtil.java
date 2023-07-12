@@ -4,6 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
@@ -74,18 +75,14 @@ public final class MountWithinParentUtil {
 
 	private static boolean removeResidualJunction(Path path) throws MountPointPreparationException {
 		try {
-			if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
-				return false;
-			}
-			if (!SystemUtils.IS_OS_WINDOWS) { //So far this is only a problem on Windows
-				return true;
-			}
 			if (Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
 				LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", path);
 				Files.delete(path); //Throws if path is also a non-empty folder
 				return false;
 			}
 			return true;
+		} catch (FileNotFoundException e) {
+			return false;
 		} catch (IOException e) {
 			throw new MountPointPreparationException(e);
 		}
