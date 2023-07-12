@@ -50,8 +50,8 @@
 					</tooltip>
 				</Hyperlink>
 			</HBox>
-			<HBox>
-				<NumericTextField fx:id="shorteningThresholdTextField" maxWidth="60"/>
+			<NumericTextField fx:id="shorteningThresholdTextField"/>
+			<HBox alignment="TOP_RIGHT">
 				<Region minWidth="4" prefWidth="4" HBox.hgrow="NEVER"/>
 				<StackPane>
 					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.invalid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${!controller.validShorteningThreshold}" managed="${!controller.validShorteningThreshold}" graphicTextGap="6">
