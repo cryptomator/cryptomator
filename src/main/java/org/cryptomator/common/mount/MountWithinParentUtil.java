@@ -81,7 +81,7 @@ public final class MountWithinParentUtil {
 				return false;
 			}
 			return true;
-		} catch (FileNotFoundException e) {
+		} catch (NoSuchFileException e) {
 			return false;
 		} catch (IOException e) {
 			throw new MountPointPreparationException(e);
@@ -100,7 +100,7 @@ public final class MountWithinParentUtil {
 		try {
 			waitForMountpointRestoration(mountPoint);
 			if (Files.notExists(hideaway, LinkOption.NOFOLLOW_LINKS)) {
-				LOG.error("Unable to restore hidden directory to mountpoint \"{}\": Directory does not exist. (Deleted by user?)", mountPoint);
+				LOG.error("Unable to restore hidden directory to mountpoint \"{}\": Directory does not exist.", mountPoint);
 				return;
 			}
 
