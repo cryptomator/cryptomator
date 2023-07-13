@@ -13,18 +13,19 @@ public class FormattedLabel extends Label {
 	private final StringProperty format = new SimpleStringProperty("");
 	private final ObjectProperty<Object> arg1 = new SimpleObjectProperty<>();
 	private final ObjectProperty<Object> arg2 = new SimpleObjectProperty<>();
-	// add arg2, arg3, ... on demand
+	private final ObjectProperty<Object> arg3 = new SimpleObjectProperty<>();
+	// add arg4, arg5, ... on demand
 
 	public FormattedLabel() {
 		textProperty().bind(createStringBinding());
 	}
 
 	protected StringBinding createStringBinding() {
-		return Bindings.createStringBinding(this::updateText, format, arg1, arg2);
+		return Bindings.createStringBinding(this::updateText, format, arg1, arg2, arg3);
 	}
 
 	private String updateText() {
-		return String.format(format.get(), arg1.get(), arg2.get());
+		return String.format(format.get(), arg1.get(), arg2.get(), arg3.get());
 	}
 
 	/* Observables */
@@ -63,5 +64,17 @@ public class FormattedLabel extends Label {
 
 	public void setArg2(Object arg2) {
 		this.arg2.set(arg2);
+	}
+
+	public ObjectProperty<Object> arg3Property() {
+		return arg3;
+	}
+
+	public Object getArg3() {
+		return arg3.get();
+	}
+
+	public void setArg3(Object arg3) {
+		this.arg3.set(arg3);
 	}
 }
