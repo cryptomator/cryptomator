@@ -32,7 +32,6 @@ ${JAVA_HOME}/bin/jlink \
 
 # create app dir
 envsubst '${SEMVER_STR} ${REVISION_NUM}' < ../launcher-gtk2.properties > launcher-gtk2.properties
-TRAYICONSDIR="@{appdir}/usr/share/icons/hicolor/symbolic/apps"
 ${JAVA_HOME}/bin/jpackage \
     --verbose \
     --type app-image \
@@ -57,7 +56,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
     --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
-    --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"${TRAYICONSDIR}\"" \
+    --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\"" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
     --add-launcher cryptomator-gtk2=launcher-gtk2.properties \
     --resource-dir ../resources
