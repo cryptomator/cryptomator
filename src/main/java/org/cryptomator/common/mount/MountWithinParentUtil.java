@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -19,7 +20,7 @@ public final class MountWithinParentUtil {
 
 	private MountWithinParentUtil() {}
 
-	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException, MountPointPreparationException {
+	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException {
 		Path hideaway = getHideaway(mountPoint);
 		var mpExists = Files.exists(mountPoint, LinkOption.NOFOLLOW_LINKS);
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
@@ -37,7 +38,7 @@ public final class MountWithinParentUtil {
 					Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
 				}
 			} catch (IOException e) {
-				throw new MountPointPreparationException(e);
+				throw new UncheckedIOException(e);
 			}
 		} else { //only mountpoint exists
 			try {
@@ -57,10 +58,10 @@ public final class MountWithinParentUtil {
 					attempts++;
 				}
 			} catch (IOException e) {
-				throw new MountPointPreparationException(e);
+				throw new UncheckedIOException(e);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				throw new MountPointPreparationException(e);
+				throw new RuntimeException(e);
 			}
 		}
 	}

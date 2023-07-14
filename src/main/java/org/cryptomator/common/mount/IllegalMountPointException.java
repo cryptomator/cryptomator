@@ -5,8 +5,6 @@ import java.nio.file.Path;
 /**
  * Indicates that validation or preparation of a mountpoint failed due to a configuration error or an invalid system state.<br>
  * Instances of this exception are usually caught and displayed to the user in an appropriate fashion, e.g. by {@link org.cryptomator.ui.unlock.UnlockInvalidMountPointController UnlockInvalidMountPointController.}
- *
- * @see MountPointPreparationException MountPointPreparationException for wrapping exceptions which occur while preparing the mountpoint.
  */
 public class IllegalMountPointException extends IllegalArgumentException {
 
