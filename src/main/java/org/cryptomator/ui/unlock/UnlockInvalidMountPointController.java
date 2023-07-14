@@ -1,11 +1,11 @@
 package org.cryptomator.ui.unlock;
 
-import org.cryptomator.common.mount.HideawayAlreadyExistsException;
+import org.cryptomator.common.mount.ExistingHideawayException;
 import org.cryptomator.common.mount.IllegalMountPointException;
-import org.cryptomator.common.mount.MountPointCouldNotBeClearedException;
+import org.cryptomator.common.mount.MountPointCleanupFailedException;
 import org.cryptomator.common.mount.MountPointInUseException;
 import org.cryptomator.common.mount.MountPointNotEmptyDirectoryException;
-import org.cryptomator.common.mount.MountPointNotExistsException;
+import org.cryptomator.common.mount.MountPointNotExistingException;
 import org.cryptomator.common.mount.MountPointNotSupportedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
@@ -48,7 +48,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		this.exceptionType = getExceptionType(exc);
 		this.exceptionPath = exc.getMountpoint();
 		this.exceptionMessage = exc.getMessage();
-		this.hideawayPath = exc instanceof HideawayAlreadyExistsException haeExc ? haeExc.getHideaway() : null;
+		this.hideawayPath = exc instanceof ExistingHideawayException haeExc ? haeExc.getHideaway() : null;
 	}
 
 	@FXML
@@ -79,10 +79,10 @@ public class UnlockInvalidMountPointController implements FxController {
 	private ExceptionType getExceptionType(Throwable unlockException) {
 		return switch (unlockException) {
 			case MountPointNotSupportedException x -> ExceptionType.NOT_SUPPORTED;
-			case MountPointNotExistsException x -> ExceptionType.NOT_EXISTING;
+			case MountPointNotExistingException x -> ExceptionType.NOT_EXISTING;
 			case MountPointInUseException x -> ExceptionType.IN_USE;
-			case HideawayAlreadyExistsException x -> ExceptionType.HIDEAWAY_EXISTS;
-			case MountPointCouldNotBeClearedException x -> ExceptionType.COULD_NOT_BE_CLEARED;
+			case ExistingHideawayException x -> ExceptionType.HIDEAWAY_EXISTS;
+			case MountPointCleanupFailedException x -> ExceptionType.COULD_NOT_BE_CLEARED;
 			case MountPointNotEmptyDirectoryException x -> ExceptionType.NOT_EMPTY_DIRECTORY;
 			default -> ExceptionType.GENERIC;
 		};

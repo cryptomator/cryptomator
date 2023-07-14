@@ -26,9 +26,9 @@ public final class MountWithinParentUtil {
 
 		//TODO: possible improvement by just deleting an _empty_ hideaway
 		if (mpExists && hideExists) { //both resources exist (whatever type)
-			throw new HideawayAlreadyExistsException(mountPoint, hideaway, "Hideaway (" + hideaway + ") already exists for mountpoint: " + mountPoint);
+			throw new ExistingHideawayException(mountPoint, hideaway, "Hideaway (" + hideaway + ") already exists for mountpoint: " + mountPoint);
 		} else if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
-			throw new MountPointNotExistsException(mountPoint);
+			throw new MountPointNotExistingException(mountPoint);
 		} else if (!mpExists) { //only hideaway exists
 			checkIsDirectory(hideaway);
 			LOG.info("Mountpoint {} seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
@@ -51,7 +51,7 @@ public final class MountWithinParentUtil {
 				int attempts = 0;
 				while (!Files.notExists(mountPoint)) {
 					if (attempts >= 10) {
-						throw new MountPointCouldNotBeClearedException(mountPoint);
+						throw new MountPointCleanupFailedException(mountPoint);
 					}
 					Thread.sleep(1000);
 					attempts++;
