@@ -4,6 +4,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
@@ -61,7 +62,7 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static AtomicReference<Throwable> unlockException() {
+	static AtomicReference<IllegalMountPointException> illegalMountPointException() {
 		return new AtomicReference<>();
 	}
 

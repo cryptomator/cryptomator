@@ -1,7 +1,11 @@
 package org.cryptomator.ui.unlock;
 
+import org.cryptomator.common.mount.ExistingHideawayException;
+import org.cryptomator.common.mount.IllegalMountPointException;
+import org.cryptomator.common.mount.MountPointCleanupFailedException;
 import org.cryptomator.common.mount.MountPointInUseException;
-import org.cryptomator.common.mount.MountPointNotExistsException;
+import org.cryptomator.common.mount.MountPointNotEmptyDirectoryException;
+import org.cryptomator.common.mount.MountPointNotExistingException;
 import org.cryptomator.common.mount.MountPointNotSupportedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
@@ -9,10 +13,12 @@ import org.cryptomator.ui.controls.FormattedLabel;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
+import org.jetbrains.annotations.PropertyKey;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,26 +31,32 @@ public class UnlockInvalidMountPointController implements FxController {
 	private final FxApplicationWindows appWindows;
 	private final ResourceBundle resourceBundle;
 	private final ExceptionType exceptionType;
+	private final Path exceptionPath;
 	private final String exceptionMessage;
+	private final Path hideawayPath;
 
 	public FormattedLabel dialogDescription;
 
 	@Inject
-	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow AtomicReference<Throwable> unlockException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
+	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow AtomicReference<IllegalMountPointException> illegalMountPointException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.resourceBundle = resourceBundle;
 
-		var exc = unlockException.get();
+		var exc = illegalMountPointException.get();
 		this.exceptionType = getExceptionType(exc);
+		this.exceptionPath = exc.getMountpoint();
 		this.exceptionMessage = exc.getMessage();
+		this.hideawayPath = exc instanceof ExistingHideawayException haeExc ? haeExc.getHideaway() : null;
 	}
 
 	@FXML
 	public void initialize() {
 		dialogDescription.setFormat(resourceBundle.getString(exceptionType.translationKey));
-		dialogDescription.setArg1(exceptionMessage);
+		dialogDescription.setArg1(exceptionPath);
+		dialogDescription.setArg2(exceptionMessage);
+		dialogDescription.setArg3(hideawayPath);
 	}
 
 	@FXML
@@ -67,8 +79,11 @@ public class UnlockInvalidMountPointController implements FxController {
 	private ExceptionType getExceptionType(Throwable unlockException) {
 		return switch (unlockException) {
 			case MountPointNotSupportedException x -> ExceptionType.NOT_SUPPORTED;
-			case MountPointNotExistsException x -> ExceptionType.NOT_EXISTING;
+			case MountPointNotExistingException x -> ExceptionType.NOT_EXISTING;
 			case MountPointInUseException x -> ExceptionType.IN_USE;
+			case ExistingHideawayException x -> ExceptionType.HIDEAWAY_EXISTS;
+			case MountPointCleanupFailedException x -> ExceptionType.COULD_NOT_BE_CLEARED;
+			case MountPointNotEmptyDirectoryException x -> ExceptionType.NOT_EMPTY_DIRECTORY;
 			default -> ExceptionType.GENERIC;
 		};
 	}
@@ -78,12 +93,15 @@ public class UnlockInvalidMountPointController implements FxController {
 		NOT_SUPPORTED("unlock.error.customPath.description.notSupported", ButtonAction.SHOW_PREFERENCES),
 		NOT_EXISTING("unlock.error.customPath.description.notExists", ButtonAction.SHOW_VAULT_OPTIONS),
 		IN_USE("unlock.error.customPath.description.inUse", ButtonAction.SHOW_VAULT_OPTIONS),
+		HIDEAWAY_EXISTS("unlock.error.customPath.description.hideawayExists", ButtonAction.SHOW_VAULT_OPTIONS),
+		COULD_NOT_BE_CLEARED("unlock.error.customPath.description.couldNotBeCleaned", ButtonAction.SHOW_VAULT_OPTIONS),
+		NOT_EMPTY_DIRECTORY("unlock.error.customPath.description.notEmptyDir", ButtonAction.SHOW_VAULT_OPTIONS),
 		GENERIC("unlock.error.customPath.description.generic", ButtonAction.SHOW_PREFERENCES);
 
 		private final String translationKey;
 		private final ButtonAction action;
 
-		ExceptionType(String translationKey, ButtonAction action) {
+		ExceptionType(@PropertyKey(resourceBundle = "i18n.strings") String translationKey, ButtonAction action) {
 			this.translationKey = translationKey;
 			this.action = action;
 		}
@@ -91,6 +109,7 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	private enum ButtonAction {
 
+		//TODO Add option to show filesystem, e.g. for ExceptionType.HIDEAWAY_EXISTS
 		SHOW_PREFERENCES,
 		SHOW_VAULT_OPTIONS;
 
