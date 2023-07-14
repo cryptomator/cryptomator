@@ -13,6 +13,7 @@ import org.cryptomator.ui.controls.FormattedLabel;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
+import org.jetbrains.annotations.PropertyKey;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
@@ -100,7 +101,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		private final String translationKey;
 		private final ButtonAction action;
 
-		ExceptionType(String translationKey, ButtonAction action) {
+		ExceptionType(@PropertyKey(resourceBundle = "i18n.strings") String translationKey, ButtonAction action) {
 			this.translationKey = translationKey;
 			this.action = action;
 		}
