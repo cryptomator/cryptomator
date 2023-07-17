@@ -112,6 +112,7 @@ jobs:
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
           --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Djava.net.useSystemProxies=true"
           --java-options "-Dcryptomator.logDir=\"@{localappdata}/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"@{appdata}/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"@{appdata}/Cryptomator/settings.json;@{userhome}/AppData/Roaming/Cryptomator/settings.json\""

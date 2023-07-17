@@ -102,6 +102,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
 	--app-version "$semVerNo.$revisionNo" `
 	--java-options "-Dfile.encoding=`"utf-8`"" `
+	--java-options "-Djava.net.useSystemProxies=true" `
 	--java-options "-Dcryptomator.logDir=`"@{localappdata}/$AppName`"" `
 	--java-options "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`"" `
 	--java-options "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`"" `

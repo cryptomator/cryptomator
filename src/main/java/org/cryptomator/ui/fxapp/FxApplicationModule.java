@@ -8,6 +8,7 @@ package org.cryptomator.ui.fxapp;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.ui.error.ErrorComponent;
+import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -15,12 +16,13 @@ import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 import org.cryptomator.ui.updatereminder.UpdateReminderComponent;
+import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class, UpdateReminderComponent.class})
+@Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, MainWindowComponent.class, PreferencesComponent.class, VaultOptionsComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class, HealthCheckComponent.class, UpdateReminderComponent.class})
 abstract class FxApplicationModule {
 
 	private static Image createImageFromResource(String resourceName) throws IOException {

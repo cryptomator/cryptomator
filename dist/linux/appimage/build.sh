@@ -50,6 +50,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
+    --java-options "-Djava.net.useSystemProxies=true" \
     --java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
     --java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json\"" \
