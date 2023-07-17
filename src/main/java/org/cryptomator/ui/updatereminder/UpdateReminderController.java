@@ -7,7 +7,6 @@ import org.cryptomator.ui.fxapp.UpdateChecker;
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -31,12 +30,14 @@ public class UpdateReminderController implements FxController {
 		settings.lastUpdateCheck.set(LocalDate.now().format(DateTimeFormatter.ISO_DATE));
 		window.close();
 	}
+
 	@FXML
 	public void once() {
 		settings.lastUpdateCheck.set(LocalDate.now().format(DateTimeFormatter.ISO_DATE));
 		updateChecker.checkForUpdatesNow();
 		window.close();
 	}
+
 	@FXML
 	public void automatically() {
 		settings.lastUpdateCheck.set(LocalDate.now().format(DateTimeFormatter.ISO_DATE));

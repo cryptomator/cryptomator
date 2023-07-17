@@ -69,7 +69,7 @@ public class FxApplication {
 			return null;
 		});
 
-		if(LocalDate.parse(settings.lastUpdateCheck.get()).isBefore(LocalDate.now().minusDays(14)) && !settings.checkForUpdates.getValue()){
+		if (LocalDate.parse(settings.lastUpdateCheck.get()).isBefore(LocalDate.now().minusDays(14)) && !settings.checkForUpdates.getValue()) {
 			appWindows.showUpdateReminderWindow();
 		}
 
