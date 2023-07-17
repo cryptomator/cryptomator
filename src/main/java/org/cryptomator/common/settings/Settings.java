@@ -26,7 +26,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
 import java.util.function.Consumer;
-import java.time.LocalDate;
 
 public class Settings {
 
@@ -107,7 +106,7 @@ public class Settings {
 		this.displayConfiguration = new SimpleStringProperty(this, "displayConfiguration", json.displayConfiguration);
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
-		this.lastUpdateCheck = new SimpleStringProperty(this,"lastUpdateCheck",json.lastUpdateCheck);
+		this.lastUpdateCheck = new SimpleStringProperty(this, "lastUpdateCheck", json.lastUpdateCheck);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
