@@ -25,8 +25,8 @@ public interface UpdateReminderComponent {
 		stage.show();
 	}
 
-	@Subcomponent.Builder
-	interface Builder {
-		UpdateReminderComponent build();
+	@Subcomponent.Factory
+	interface Factory {
+		UpdateReminderComponent create();
 	}
 }

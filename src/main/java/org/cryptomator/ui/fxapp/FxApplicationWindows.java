@@ -46,7 +46,7 @@ public class FxApplicationWindows {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
-	private final UpdateReminderComponent.Builder updateReminderWindowBuilder;
+	private final UpdateReminderComponent.Factory updateReminderWindowBuilder;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
@@ -60,7 +60,7 @@ public class FxApplicationWindows {
 								Lazy<PreferencesComponent> preferencesWindow, //
 								QuitComponent.Builder quitWindowBuilder, //
 								UnlockComponent.Factory unlockWorkflowFactory, //
-								UpdateReminderComponent.Builder updateReminderWindowBuilder, //
+								UpdateReminderComponent.Factory updateReminderWindowBuilder, //
 								LockComponent.Factory lockWorkflowFactory, //
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
@@ -131,7 +131,7 @@ public class FxApplicationWindows {
 	}
 
 	public void showUpdateReminderWindow() {
-		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.build().showUpdateReminderWindow(), Platform::runLater);
+		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.create().showUpdateReminderWindow(), Platform::runLater);
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {

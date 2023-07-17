@@ -57,8 +57,8 @@ abstract class FxApplicationModule {
 
 	@Provides
 	@FxApplicationScoped
-	static UpdateReminderComponent provideUpdateReminderComponent(UpdateReminderComponent.Builder builder) {
-		return builder.build();
+	static UpdateReminderComponent provideUpdateReminderComponent(UpdateReminderComponent.Factory factory) {
+		return factory.create();
 	}
 
 }
