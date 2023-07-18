@@ -34,7 +34,7 @@ abstract class UpdateReminderModule {
 	@UpdateReminderScoped
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("updateReminder.windowTitle"));
+		stage.setTitle(resourceBundle.getString("updateReminder.title"));
 		stage.setMinWidth(550);
 		stage.setMinHeight(100);
 		stage.initModality(Modality.APPLICATION_MODAL);

@@ -36,12 +36,12 @@
 				</Group>
 
 				<VBox HBox.hgrow="ALWAYS">
-					<Label styleClass="label-large" text="%updateReminder.title" wrapText="true">
+					<Label styleClass="label-large" text="%updateReminder.message" wrapText="true">
 						<padding>
 							<Insets bottom="6" top="6"/>
 						</padding>
 					</Label>
-					<Label text="%updateReminder.message" wrapText="true"/>
+					<Label text="%updateReminder.description" wrapText="true"/>
 					<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 				</VBox>
 			</HBox>
