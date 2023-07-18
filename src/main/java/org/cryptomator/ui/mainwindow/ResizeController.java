@@ -15,6 +15,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 @MainWindow
 public class ResizeController implements FxController {
@@ -71,6 +72,9 @@ public class ResizeController implements FxController {
 				window.setY(settings.windowYPosition.get());
 			}
 		}
+
+		window.setOnShowing(this::checkDisplayBounds);
+
 		savePositionalSettings();
 	}
 
@@ -113,6 +117,18 @@ public class ResizeController implements FxController {
 
 		// Within bounds if the visible area matches the window area
 		return visibleArea == windowArea;
+	}
+
+	private void checkDisplayBounds(WindowEvent evt) {
+		if (!isWithinDisplayBounds()) {
+			// If the position is illegal, then the window appears on the main screen in the middle of the window.
+			Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
+			window.setX((primaryScreenBounds.getWidth() - window.getMinWidth()) / 2);
+			window.setY((primaryScreenBounds.getHeight() - window.getMinHeight()) / 2);
+			window.setWidth(window.getMinWidth());
+			window.setHeight(window.getMinHeight());
+			savePositionalSettings();
+		}
 	}
 
 	private String getMonitorSizes() {
@@ -212,5 +228,4 @@ public class ResizeController implements FxController {
 	public boolean isShowResizingArrows() {
 		return showResizingArrows.get();
 	}
-
 }
