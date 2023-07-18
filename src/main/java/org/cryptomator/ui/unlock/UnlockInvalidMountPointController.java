@@ -1,5 +1,6 @@
 package org.cryptomator.ui.unlock;
 
+import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.ExistingHideawayException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.mount.MountPointCleanupFailedException;
@@ -16,11 +17,12 @@ import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.jetbrains.annotations.PropertyKey;
 
 import javax.inject.Inject;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicReference;
 
 //At the current point in time only the CustomMountPointChooser may cause this window to be shown.
 @UnlockScoped
@@ -29,34 +31,31 @@ public class UnlockInvalidMountPointController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final FxApplicationWindows appWindows;
-	private final ResourceBundle resourceBundle;
-	private final ExceptionType exceptionType;
-	private final Path exceptionPath;
-	private final String exceptionMessage;
-	private final Path hideawayPath;
+
+	private final ObservableValue<ExceptionType> exceptionType;
+	private final ObservableValue<Path> exceptionPath;
+	private final ObservableValue<String> exceptionMessage;
+	private final ObservableValue<Path> hideawayPath;
+	private final ObservableValue<String> format;
+	private final ObservableValue<Boolean> showPreferences;
+	private final ObservableValue<Boolean> showVaultOptions;
 
 	public FormattedLabel dialogDescription;
 
 	@Inject
-	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow AtomicReference<IllegalMountPointException> illegalMountPointException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
+	UnlockInvalidMountPointController(@UnlockWindow Stage window, @UnlockWindow Vault vault, @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException, FxApplicationWindows appWindows, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
 		this.appWindows = appWindows;
-		this.resourceBundle = resourceBundle;
 
-		var exc = illegalMountPointException.get();
-		this.exceptionType = getExceptionType(exc);
-		this.exceptionPath = exc.getMountpoint();
-		this.exceptionMessage = exc.getMessage();
-		this.hideawayPath = exc instanceof ExistingHideawayException haeExc ? haeExc.getHideaway() : null;
-	}
+		this.exceptionType = illegalMountPointException.map(this::getExceptionType);
+		this.exceptionPath = illegalMountPointException.map(IllegalMountPointException::getMountpoint);
+		this.exceptionMessage = illegalMountPointException.map(IllegalMountPointException::getMessage);
+		this.hideawayPath = illegalMountPointException.map(e -> e instanceof ExistingHideawayException haeExc ? haeExc.getHideaway() : null);
 
-	@FXML
-	public void initialize() {
-		dialogDescription.setFormat(resourceBundle.getString(exceptionType.translationKey));
-		dialogDescription.setArg1(exceptionPath);
-		dialogDescription.setArg2(exceptionMessage);
-		dialogDescription.setArg3(hideawayPath);
+		this.format = ObservableUtil.mapWithDefault(exceptionType, type -> resourceBundle.getString(type.translationKey), "");
+		this.showPreferences = ObservableUtil.mapWithDefault(exceptionType, type -> type.action == ButtonAction.SHOW_PREFERENCES, false);
+		this.showVaultOptions = ObservableUtil.mapWithDefault(exceptionType, type -> type.action == ButtonAction.SHOW_VAULT_OPTIONS, false);
 	}
 
 	@FXML
@@ -117,11 +116,51 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	/* Getter */
 
-	public boolean isShowPreferences() {
-		return exceptionType.action == ButtonAction.SHOW_PREFERENCES;
+	public Path getExceptionPath() {
+		return exceptionPath.getValue();
 	}
 
-	public boolean isShowVaultOptions() {
-		return exceptionType.action == ButtonAction.SHOW_VAULT_OPTIONS;
+	public ObservableValue<Path> exceptionPathProperty() {
+		return exceptionPath;
+	}
+
+	public String getFormat() {
+		return format.getValue();
+	}
+
+	public ObservableValue<String> formatProperty() {
+		return format;
+	}
+
+	public String getExceptionMessage() {
+		return exceptionMessage.getValue();
+	}
+
+	public ObservableValue<String> exceptionMessageProperty() {
+		return exceptionMessage;
+	}
+
+	public Path getHideawayPath() {
+		return hideawayPath.getValue();
+	}
+
+	public ObservableValue<Path> hideawayPathProperty() {
+		return hideawayPath;
+	}
+
+	public Boolean getShowPreferences() {
+		return showPreferences.getValue();
+	}
+
+	public ObservableValue<Boolean> showPreferencesProperty() {
+		return showPreferences;
+	}
+
+	public Boolean getShowVaultOptions() {
+		return showVaultOptions.getValue();
+	}
+
+	public ObservableValue<Boolean> showVaultOptionsProperty() {
+		return showVaultOptions;
 	}
 }

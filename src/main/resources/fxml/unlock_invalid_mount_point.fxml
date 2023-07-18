@@ -40,7 +40,7 @@
 				</padding>
 			</Label>
 
-			<FormattedLabel fx:id="dialogDescription" wrapText="true" textAlignment="LEFT"/>
+			<FormattedLabel fx:id="dialogDescription" wrapText="true" textAlignment="LEFT" format="${controller.format}" arg1="${controller.exceptionPath}" arg2="${controller.exceptionMessage}" arg3="${controller.hideawayPath}"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
