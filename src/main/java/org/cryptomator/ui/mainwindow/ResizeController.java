@@ -57,8 +57,8 @@ public class ResizeController implements FxController {
 			settings.displayConfiguration.set(getMonitorSizes());
 			return;
 		} else {
-			if (didDisplayConfigurationChange()) {
-				//If the position is illegal, then the window appears on the main screen in the middle of the window.
+			if (didDisplayConfigurationChange() || !isWithinDisplayBounds()) {
+				// If the position is illegal, then the window appears on the main screen in the middle of the window.
 				Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
 				window.setX((primaryScreenBounds.getWidth() - window.getMinWidth()) / 2);
 				window.setY((primaryScreenBounds.getHeight() - window.getMinHeight()) / 2);
@@ -84,6 +84,35 @@ public class ResizeController implements FxController {
 		boolean configurationHasChanged = !settingsDisplayConfiguration.equals(currentDisplayConfiguration);
 		if (configurationHasChanged) settings.displayConfiguration.set(currentDisplayConfiguration);
 		return configurationHasChanged;
+	}
+
+	private boolean isWithinDisplayBounds() {
+		// (x1, y1) is the top left corner of the window, (x2, y2) is the bottom right corner
+		final double slack = 10;
+		final double width = window.getWidth() - 2 * slack;
+		final double height = window.getHeight() - 2 * slack;
+		final double x1 = window.getX() + slack;
+		final double y1 = window.getY() + slack;
+		final double x2 = x1 + width;
+		final double y2 = y1 + height;
+
+		final ObservableList<Screen> screens = Screen.getScreensForRectangle(x1, y1, width, height);
+
+		// Find the total visible area of the window
+		double visibleArea = 0;
+		for (Screen screen : screens) {
+			Rectangle2D bounds = screen.getVisualBounds();
+
+			double xOverlap = Math.min(x2, bounds.getMaxX()) - Math.max(x1, bounds.getMinX());
+			double yOverlap = Math.min(y2, bounds.getMaxY()) - Math.max(y1, bounds.getMinY());
+
+			visibleArea += xOverlap * yOverlap;
+		}
+
+		final double windowArea = width * height;
+
+		// Within bounds if the visible area matches the window area
+		return visibleArea == windowArea;
 	}
 
 	private String getMonitorSizes() {
