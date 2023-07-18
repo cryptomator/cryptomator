@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -54,40 +53,18 @@ public class ResizeController implements FxController {
 	public void initialize() {
 		LOG.trace("init ResizeController");
 
-		if (neverTouched()) {
-			settings.displayConfiguration.set(getMonitorSizes());
-			return;
-		} else {
-			if (didDisplayConfigurationChange() || !isWithinDisplayBounds()) {
-				// If the position is illegal, then the window appears on the main screen in the middle of the window.
-				Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
-				window.setX((primaryScreenBounds.getWidth() - window.getMinWidth()) / 2);
-				window.setY((primaryScreenBounds.getHeight() - window.getMinHeight()) / 2);
-				window.setWidth(window.getMinWidth());
-				window.setHeight(window.getMinHeight());
-			} else {
-				window.setHeight(settings.windowHeight.get() > window.getMinHeight() ? settings.windowHeight.get() : window.getMinHeight());
-				window.setWidth(settings.windowWidth.get() > window.getMinWidth() ? settings.windowWidth.get() : window.getMinWidth());
-				window.setX(settings.windowXPosition.get());
-				window.setY(settings.windowYPosition.get());
-			}
+		if (!neverTouched()) {
+			window.setHeight(settings.windowHeight.get() > window.getMinHeight() ? settings.windowHeight.get() : window.getMinHeight());
+			window.setWidth(settings.windowWidth.get() > window.getMinWidth() ? settings.windowWidth.get() : window.getMinWidth());
+			window.setX(settings.windowXPosition.get());
+			window.setY(settings.windowYPosition.get());
 		}
 
 		window.setOnShowing(this::checkDisplayBounds);
-
-		savePositionalSettings();
 	}
 
 	private boolean neverTouched() {
 		return (settings.windowHeight.get() == 0) && (settings.windowWidth.get() == 0) && (settings.windowXPosition.get() == 0) && (settings.windowYPosition.get() == 0);
-	}
-
-	private boolean didDisplayConfigurationChange() {
-		String currentDisplayConfiguration = getMonitorSizes();
-		String settingsDisplayConfiguration = settings.displayConfiguration.get();
-		boolean configurationHasChanged = !settingsDisplayConfiguration.equals(currentDisplayConfiguration);
-		if (configurationHasChanged) settings.displayConfiguration.set(currentDisplayConfiguration);
-		return configurationHasChanged;
 	}
 
 	private boolean isWithinDisplayBounds() {
@@ -129,17 +106,6 @@ public class ResizeController implements FxController {
 			window.setHeight(window.getMinHeight());
 			savePositionalSettings();
 		}
-	}
-
-	private String getMonitorSizes() {
-		ObservableList<Screen> screens = Screen.getScreens();
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < screens.size(); i++) {
-			Rectangle2D screenBounds = screens.get(i).getBounds();
-			if (!sb.isEmpty()) sb.append(" ");
-			sb.append("displayId: " + i + ", " + screenBounds.getWidth() + "x" + screenBounds.getHeight() + ";");
-		}
-		return sb.toString();
 	}
 
 	private void startResize(MouseEvent evt) {
