@@ -33,16 +33,16 @@
         </BootstrapperApplicationRef>
 
         <Chain>
-            <ExePackage Cache="yes" PerMachine="yes" Vital="yes" Permanent="no"
+            <ExePackage Cache="yes" PerMachine="yes" Permanent="no"
               SourceFile="resources\winfsp-uninstaller.exe"
               DisplayName="Removing outdated WinFsp Driver"
-              Description="Workaround to remove old winfsp"
+              Description="Executable to remove old winfsp"
               DetectCondition="false"
               InstallCondition="InstalledLegacyWinFspVersion &lt;&gt; v0.0.0.0"
               >
                 <CommandLine Condition="WixBundleUILevel &lt;= 3" InstallArgument="-q" />
                 <!-- XML allows line breaks in attributes, hence keep the line breaks here -->
-                <CommandLine Condition="WixBundleUILevel &gt; 3" InstallArgument="-t &quot;Cryptomator Installer&quot; -m &quot;Cryptomator requires a newer version of the WinFsp driver. The installer will now uninstall WinFsp, reboot, and afterwards proceed with this installation.
+                <CommandLine Condition="WixBundleUILevel &gt; 3" InstallArgument="-t &quot;Cryptomator Installer&quot; -m &quot;Cryptomator requires a newer version of the WinFsp driver. The installer will now uninstall WinFsp, reboot, and afterwards proceed with the installation.
 
 Do you want to continue?&quot;" />
                 <ExitCode Behavior="forceReboot" Value="0"/>
