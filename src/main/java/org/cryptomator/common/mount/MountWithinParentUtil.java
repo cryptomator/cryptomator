@@ -30,7 +30,7 @@ public final class MountWithinParentUtil {
 		if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
 			throw new MountPointNotExistingException(mountPoint);
 		} else if (!mpExists) { //only hideaway exists
-			checkIsDirectory(hideaway);
+			checkIsHideawayDirectory(mountPoint, hideaway);
 			LOG.info("Mountpoint {} seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
 			try {
 				if (SystemUtils.IS_OS_WINDOWS) {
@@ -86,9 +86,7 @@ public final class MountWithinParentUtil {
 	}
 
 	private static void removeResidualHideaway(Path mountPoint, Path hideaway) throws IOException {
-		if (!Files.isDirectory(hideaway, LinkOption.NOFOLLOW_LINKS)) {
-			throw new HideawayNotDirectoryException(mountPoint, hideaway);
-		}
+		checkIsHideawayDirectory(mountPoint, hideaway);
 		Files.delete(hideaway); //Fails if not empty
 	}
 
@@ -131,6 +129,12 @@ public final class MountWithinParentUtil {
 	private static void checkIsDirectory(Path toCheck) throws IllegalMountPointException {
 		if (!Files.isDirectory(toCheck, LinkOption.NOFOLLOW_LINKS)) {
 			throw new MountPointNotEmptyDirectoryException(toCheck, "Mountpoint is not a directory: " + toCheck);
+		}
+	}
+
+	private static void checkIsHideawayDirectory(Path mountPoint, Path hideawayToCheck) {
+		if (!Files.isDirectory(hideawayToCheck, LinkOption.NOFOLLOW_LINKS)) {
+			throw new HideawayNotDirectoryException(mountPoint, hideawayToCheck);
 		}
 	}
 
