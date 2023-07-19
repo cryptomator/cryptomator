@@ -70,7 +70,8 @@ public final class MountWithinParentUtil {
 		}
 	}
 
-	private static boolean removeResidualJunction(Path path) {
+	//visible for testing
+	static boolean removeResidualJunction(Path path) {
 		try {
 			if (Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
 				LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", path);
@@ -85,7 +86,8 @@ public final class MountWithinParentUtil {
 		}
 	}
 
-	private static void removeResidualHideaway(Path mountPoint, Path hideaway) throws IOException {
+	//visible for testing
+	static void removeResidualHideaway(Path mountPoint, Path hideaway) throws IOException {
 		checkIsHideawayDirectory(mountPoint, hideaway);
 		Files.delete(hideaway); //Fails if not empty
 	}
