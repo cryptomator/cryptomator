@@ -121,7 +121,7 @@ class MountWithinParentUtilTest {
 
 		prepareParentNoMountPoint(mount);
 		assertTrue(Files.notExists(mount, NOFOLLOW_LINKS));
-		assertTrue(isHidden(hideaway));
+		assertTrue(!SystemUtils.IS_OS_WINDOWS || isHidden(hideaway));
 	}
 
 	@Test
