@@ -260,8 +260,13 @@ jobs:
         shell: pwsh
       - name: Download WinFsp
         run: |
-          $winfspUrl = (Select-String -Path ".\dist\win\bundle\resources\winFspMetaData.wxi" -Pattern '<\?define BundledWinFspDownloadLink="(.+)".*?>').Matches.Groups[1].Value
+          $winfspUrl = (Select-String -Path ".\dist\win\bundle\resources\winfsp.url" -Pattern 'URL=(https://.+)$').Matches.Groups[1].Value
           curl --output dist/win/bundle/resources/winfsp.msi -L $winfspUrl
+        shell: pwsh
+      - name: Download Legacy-WinFsp uninstaller
+        run: |
+          $winfspUninstallerUrl = (Select-String -Path ".\dist\win\bundle\resources\winfsp-uninstaller.url" -Pattern 'URL=(https://.+)$').Matches.Groups[1].Value
+          curl --output dist/win/bundle/resources/winfsp-uninstaller.exe -L $winfspUninstallerUrl
         shell: pwsh
       - name: Compile to wixObj file
         run: >
