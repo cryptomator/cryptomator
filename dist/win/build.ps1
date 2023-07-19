@@ -171,9 +171,14 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
  "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # download Winfsp
-$winfspMsiUrl= (Select-String -Path ".\bundle\resources\winFspMetaData.wxi" -Pattern '<\?define BundledWinFspDownloadLink="(.+)".*?>').Matches.Groups[1].Value
+$winfspMsiUrl= (Select-String -Path ".\bundle\resources\winfsp.url" -Pattern 'URL=(https://.+)$').Matches.Groups[1].Value
 Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
+
+# download legacy-winfsp uninstaller
+$winfspUninstaller= (Select-String -Path ".\bundle\resources\winfsp-uninstaller.url" -Pattern 'URL=(https://.+)$').Matches.Groups[1].Value
+Write-Output "Downloading ${winfspUninstaller}..."
+Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninstaller.exe" # redirects are followed by default
 
 # copy MSI to bundle resources
 Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi"
