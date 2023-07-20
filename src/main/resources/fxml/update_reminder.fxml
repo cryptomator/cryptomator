@@ -14,8 +14,8 @@
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.updatereminder.UpdateReminderController"
-	  minWidth="550"
-	  maxWidth="550"
+	  minWidth="500"
+	  prefWidth="500"
 	  minHeight="145"
 	  spacing="12"
 	  alignment="TOP_LEFT">
@@ -23,35 +23,32 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<VBox>
-			<HBox>
-				<Group>
-					<StackPane>
-						<padding>
-							<Insets topRightBottomLeft="6"/>
-						</padding>
-						<Circle styleClass="glyph-icon-primary" radius="24"/>
-						<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
-					</StackPane>
-				</Group>
+		<Group>
+			<StackPane>
+				<padding>
+					<Insets topRightBottomLeft="6"/>
+				</padding>
+				<Circle styleClass="glyph-icon-primary" radius="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
+			</StackPane>
+		</Group>
 
-				<VBox HBox.hgrow="ALWAYS">
-					<Label styleClass="label-large" text="%updateReminder.message" wrapText="true">
-						<padding>
-							<Insets bottom="6" top="6"/>
-						</padding>
-					</Label>
-					<Label text="%updateReminder.description" wrapText="true"/>
-					<Region VBox.vgrow="ALWAYS" minHeight="18"/>
-				</VBox>
-			</HBox>
-			<ButtonBar buttonMinWidth="120" buttonOrder="CY">
+		<VBox HBox.hgrow="ALWAYS">
+			<Label styleClass="label-large" text="%updateReminder.message" wrapText="true">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
+			<Label text="%updateReminder.description" wrapText="true"/>
+			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CY" >
 				<buttons>
 					<Button text="%updateReminder.notNow" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
 					<Button text="%updateReminder.yesOnce" ButtonBar.buttonData="YES" onAction="#once"/>
 					<Button text="%updateReminder.yesAutomatically" ButtonBar.buttonData="YES" defaultButton="true" onAction="#automatically"/>
 				</buttons>
 			</ButtonBar>
+
 		</VBox>
 	</children>
 </HBox>
