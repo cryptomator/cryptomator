@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
-import java.time.LocalDate;
 import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
@@ -69,9 +68,7 @@ public class FxApplication {
 			return null;
 		});
 
-		if (LocalDate.parse(settings.lastUpdateCheck.get()).isBefore(LocalDate.now().minusDays(14)) && !settings.checkForUpdates.getValue()) {
-			appWindows.showUpdateReminderWindow();
-		}
+		appWindows.checkAndShowUpdateReminderWindow();
 
 		launchEventHandler.startHandlingLaunchEvents();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);

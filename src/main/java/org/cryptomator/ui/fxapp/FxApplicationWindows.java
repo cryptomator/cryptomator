@@ -130,8 +130,8 @@ public class FxApplicationWindows {
 			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
 	}
 
-	public void showUpdateReminderWindow() {
-		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.create().showUpdateReminderWindow(), Platform::runLater);
+	public void checkAndShowUpdateReminderWindow() {
+		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.create().checkAndShowUpdateReminderWindow(), Platform::runLater);
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
