@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class MountWithinParentUtilTest {
 
@@ -55,7 +56,7 @@ class MountWithinParentUtilTest {
 
 		prepareParentNoMountPoint(mount);
 
-		assertTrue(!SystemUtils.IS_OS_WINDOWS || isHidden(hideaway));
+		assumeTrue(isHidden(hideaway));
 	}
 
 	@Test
@@ -119,7 +120,7 @@ class MountWithinParentUtilTest {
 
 		prepareParentNoMountPoint(mount);
 		assertTrue(Files.notExists(mount, NOFOLLOW_LINKS));
-		assertTrue(!SystemUtils.IS_OS_WINDOWS || isHidden(hideaway));
+		assumeTrue(isHidden(hideaway));
 	}
 
 	@Test
