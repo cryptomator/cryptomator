@@ -9,7 +9,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,10 +78,9 @@ class MountWithinParentUtilTest {
 		Files.createFile(hideaway.resolve("dummy"));
 		Files.createDirectory(mount);
 
-		var exc = assertThrows(UncheckedIOException.class, () -> {
+		assertThrows(DirectoryNotEmptyException.class, () -> {
 			prepareParentNoMountPoint(mount);
 		});
-		assertInstanceOf(DirectoryNotEmptyException.class, exc.getCause());
 	}
 
 	@Test

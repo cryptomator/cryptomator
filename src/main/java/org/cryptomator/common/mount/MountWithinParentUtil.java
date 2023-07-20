@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -22,7 +21,7 @@ public final class MountWithinParentUtil {
 
 	private MountWithinParentUtil() {}
 
-	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException {
+	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException, IOException {
 		Path hideaway = getHideaway(mountPoint);
 		var mpExists = removeResidualJunction(mountPoint); //Handle junction as not existing
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
@@ -32,12 +31,8 @@ public final class MountWithinParentUtil {
 		} else if (!mpExists) { //only hideaway exists
 			checkIsHideawayDirectory(mountPoint, hideaway);
 			LOG.info("Mountpoint {} seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
-			try {
-				if (SystemUtils.IS_OS_WINDOWS) {
-					Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
-				}
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
+			if (SystemUtils.IS_OS_WINDOWS) {
+				Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
 			}
 		} else { //mountpoint exists...
 			try {
@@ -61,8 +56,6 @@ public final class MountWithinParentUtil {
 					Thread.sleep(1000);
 					attempts++;
 				}
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				throw new RuntimeException(e);
@@ -71,7 +64,7 @@ public final class MountWithinParentUtil {
 	}
 
 	//visible for testing
-	static boolean removeResidualJunction(Path path) {
+	static boolean removeResidualJunction(Path path) throws IOException {
 		try {
 			if (Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
 				LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", path);
@@ -81,8 +74,6 @@ public final class MountWithinParentUtil {
 			return true;
 		} catch (NoSuchFileException e) {
 			return false;
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
 		}
 	}
 
