@@ -1,5 +1,6 @@
 package org.cryptomator.common.mount;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -55,7 +56,8 @@ class MountWithinParentUtilTest {
 
 		prepareParentNoMountPoint(mount);
 
-		assumeTrue(isHidden(hideaway));
+		assumeTrue(SystemUtils.IS_OS_WINDOWS);
+		assertTrue(isHidden(hideaway));
 	}
 
 	@Test
@@ -119,7 +121,9 @@ class MountWithinParentUtilTest {
 
 		prepareParentNoMountPoint(mount);
 		assertTrue(Files.notExists(mount, NOFOLLOW_LINKS));
-		assumeTrue(isHidden(hideaway));
+
+		assumeTrue(SystemUtils.IS_OS_WINDOWS);
+		assertTrue(isHidden(hideaway));
 	}
 
 	@Test
