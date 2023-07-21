@@ -1,6 +1,7 @@
 package org.cryptomator.common.vaults;
 
 import com.google.common.base.Preconditions;
+import org.cryptomator.integrations.mount.Mountpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,8 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValueBase;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
@@ -43,12 +46,40 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		/**
 		 * Vault is unlocked
 		 */
-		UNLOCKED,
+		UNLOCKED {
+			/**
+			 * Gets from the cleartext path its ciphertext counterpart.
+			 *
+			 * @return Local os path to the ciphertext resource
+			 * @throws IOException if an I/O error occurs
+			 * @throws IllegalStateException if the vault is not unlocked
+			 */
+			Path getCiphertextPath(Vault vault, Path cleartextPath) throws IOException {
+				var fs = vault.getCryptoFileSystem();
+				var osPathSeparator = cleartextPath.getFileSystem().getSeparator();
+				var cryptoFsPathSeparator = fs.getSeparator();
+
+				if (vault.getMountPoint() instanceof Mountpoint.WithPath mp) {
+					var absoluteCryptoFsPath = cryptoFsPathSeparator + mp.path().relativize(cleartextPath).toString();
+					if (!cryptoFsPathSeparator.equals(osPathSeparator)) {
+						absoluteCryptoFsPath = absoluteCryptoFsPath.replace(osPathSeparator, cryptoFsPathSeparator);
+					}
+					var cryptoPath = fs.getPath(absoluteCryptoFsPath);
+					return fs.getCiphertextPath(cryptoPath);
+				} else {
+					throw new UnsupportedOperationException("URI mount points not supported.");
+				}
+			}
+		},
 
 		/**
 		 * Unknown state due to preceding unrecoverable exceptions.
 		 */
 		ERROR;
+
+		Path getCiphertextPath(Vault vault, Path cleartextPath) throws IOException {
+			throw new IllegalStateException("Vault is not unlocked");
+		}
 	}
 
 	private final AtomicReference<Value> value;

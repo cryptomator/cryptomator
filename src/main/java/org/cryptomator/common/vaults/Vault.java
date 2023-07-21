@@ -314,6 +314,10 @@ public class Vault {
 		return vaultSettings.path.get();
 	}
 
+	CryptoFileSystem getCryptoFileSystem() {
+		return cryptoFileSystem.get();
+	}
+
 	/**
 	 * Gets from the cleartext path its ciphertext counterpart.
 	 *
@@ -322,23 +326,7 @@ public class Vault {
 	 * @throws IllegalStateException if the vault is not unlocked
 	 */
 	public Path getCiphertextPath(Path cleartextPath) throws IOException {
-		if (!state.getValue().equals(VaultState.Value.UNLOCKED)) {
-			throw new IllegalStateException("Vault is not unlocked");
-		}
-		var fs = cryptoFileSystem.get();
-		var osPathSeparator = cleartextPath.getFileSystem().getSeparator();
-		var cryptoFsPathSeparator = fs.getSeparator();
-
-		if (getMountPoint() instanceof Mountpoint.WithPath mp) {
-			var absoluteCryptoFsPath = cryptoFsPathSeparator + mp.path().relativize(cleartextPath).toString();
-			if (!cryptoFsPathSeparator.equals(osPathSeparator)) {
-				absoluteCryptoFsPath = absoluteCryptoFsPath.replace(osPathSeparator, cryptoFsPathSeparator);
-			}
-			var cryptoPath = fs.getPath(absoluteCryptoFsPath);
-			return fs.getCiphertextPath(cryptoPath);
-		} else {
-			throw new UnsupportedOperationException("URI mount points not supported.");
-		}
+		return state.get().getCiphertextPath(this, cleartextPath);
 	}
 
 	public VaultConfigCache getVaultConfigCache() {
