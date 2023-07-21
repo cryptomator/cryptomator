@@ -1,6 +1,5 @@
 package org.cryptomator.common.mount;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -12,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static org.cryptomator.common.mount.MountWithinParentUtil.cleanup;
@@ -22,7 +22,6 @@ import static org.cryptomator.common.mount.MountWithinParentUtil.removeResidualJ
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -202,6 +201,10 @@ class MountWithinParentUtilTest {
 	}
 
 	private static boolean isHidden(Path path) throws IOException {
-		return (boolean) Files.getAttribute(path, "dos:hidden", NOFOLLOW_LINKS);
+		try {
+			return (boolean) Objects.requireNonNullElse(Files.getAttribute(path, "dos:hidden", NOFOLLOW_LINKS), false);
+		} catch (UnsupportedOperationException | IllegalMountPointException e) {
+			return false;
+		}
 	}
 }
