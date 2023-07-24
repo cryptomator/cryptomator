@@ -43,10 +43,10 @@ public class ErrorController implements FxController {
 	private static final ObjectMapper JSON = new ObjectMapper();
 	private static final Logger LOG = LoggerFactory.getLogger(ErrorController.class);
 	private static final String ERROR_CODES_URL = "https://gist.githubusercontent.com/cryptobot/accba9fb9555e7192271b85606f97230/raw/errorcodes.json";
-	private static final String SEARCH_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/categories/errors?discussions_q=category:Errors+%s";
-	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
-	private static final String SEARCH_ERRORCODE_DELIM = " OR ";
-	private static final String REPORT_BODY_TEMPLATE = """
+//	private static final String SEARCH_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/categories/errors?discussions_q=category:Errors+%s";
+//	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
+//	private static final String SEARCH_ERRORCODE_DELIM = " OR ";
+/*	private static final String REPORT_BODY_TEMPLATE = """
 			OS: %s / %s
 			App: %s / %s
 			
@@ -58,7 +58,7 @@ public class ErrorController implements FxController {
 			
 			<!-- ❗ If the description or the detail text is missing, the discussion will be deleted. -->
 			""";
-
+*/
 	private final Application application;
 	private final String stackTrace;
 	private final ErrorCode errorCode;
@@ -66,12 +66,14 @@ public class ErrorController implements FxController {
 	private final Stage window;
 	private final Environment environment;
 
+	private final ErrorHandler errorHandler;
+
 	private final BooleanProperty copiedDetails = new SimpleBooleanProperty();
 	private final ObjectProperty<ErrorDiscussion> matchingErrorDiscussion = new SimpleObjectProperty<>();
 	private final BooleanExpression errorSolutionFound = matchingErrorDiscussion.isNotNull();
 	private final BooleanProperty isLoadingHttpResponse = new SimpleBooleanProperty();
 
-	@Inject
+/*	@Inject
 	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window, Environment environment, ExecutorService executorService) {
 		this.application = application;
 		this.stackTrace = stackTrace;
@@ -89,6 +91,26 @@ public class ErrorController implements FxController {
 				.thenAcceptAsync(this::loadHttpResponse, executorService)//
 				.whenCompleteAsync((r, e) -> isLoadingHttpResponse.set(false), Platform::runLater);
 	}
+*/
+@Inject
+ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window, Environment environment, ExecutorService executorService) {
+	this.application = application;
+	this.stackTrace = stackTrace;
+	this.errorCode = errorCode;
+	this.previousScene = previousScene;
+	this.window = window;
+	this.environment = environment;
+	this.errorHandler = new ErrorHandler(application, errorCode, stackTrace);
+
+	isLoadingHttpResponse.set(true);
+	HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
+	HttpRequest httpRequest = HttpRequest.newBuilder()
+			.uri(URI.create(ERROR_CODES_URL))
+			.build();
+	httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())
+			.thenAcceptAsync(this::loadHttpResponse, executorService)
+			.whenCompleteAsync((r, e) -> isLoadingHttpResponse.set(false), Platform::runLater);
+}
 
 	@FXML
 	public void back() {
@@ -102,6 +124,21 @@ public class ErrorController implements FxController {
 		window.close();
 	}
 
+	private void showSolution() {
+		errorHandler.showErrorSolution(matchingErrorDiscussion.get());
+	}
+
+	@FXML
+	private void searchError() {
+		errorHandler.searchError(getErrorCode());
+	}
+
+	@FXML
+	private void reportError() {
+		errorHandler.reportError(getErrorCode(), environment);
+	}
+
+/*
 	@FXML
 	public void showSolution() {
 		if (matchingErrorDiscussion.isNotNull().get()) {
@@ -139,6 +176,7 @@ public class ErrorController implements FxController {
 		copiedDetails.set(true);
 		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> copiedDetails.set(false));
 	}
+*/
 
 	private void loadHttpResponse(HttpResponse<InputStream> response) {
 		if (response.statusCode() != 200) {
