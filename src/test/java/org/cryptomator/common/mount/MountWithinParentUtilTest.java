@@ -89,27 +89,27 @@ class MountWithinParentUtilTest {
 	void testPrepareBothExistMountNotDir(@TempDir Path parentDir) throws IOException {
 		var mount = parentDir.resolve("mount");
 		var hideaway = getHideaway(mount);
-		Files.createDirectory(hideaway);
+		Files.createFile(hideaway);
 		Files.createFile(mount);
 
 		assertThrows(MountPointNotEmptyDirectoryException.class, () -> {
-			prepareParentNoMountPoint(mount);
+			prepareParentNoMountPoint(mount); //Must not throw something related to hideaway
 		});
-		assertTrue(Files.notExists(hideaway, NOFOLLOW_LINKS));
+		assertTrue(Files.exists(hideaway, NOFOLLOW_LINKS));
 	}
 
 	@Test
 	void testPrepareBothExistMountNotEmpty(@TempDir Path parentDir) throws IOException {
 		var mount = parentDir.resolve("mount");
 		var hideaway = getHideaway(mount);
-		Files.createDirectory(hideaway);
+		Files.createFile(hideaway);
 		Files.createDirectory(mount);
 		Files.createFile(mount.resolve("dummy"));
 
 		assertThrows(MountPointNotEmptyDirectoryException.class, () -> {
-			prepareParentNoMountPoint(mount);
+			prepareParentNoMountPoint(mount); //Must not throw something related to hideaway
 		});
-		assertTrue(Files.notExists(hideaway, NOFOLLOW_LINKS));
+		assertTrue(Files.exists(hideaway, NOFOLLOW_LINKS));
 	}
 
 	@Test

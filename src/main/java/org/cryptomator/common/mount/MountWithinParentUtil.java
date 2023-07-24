@@ -40,9 +40,6 @@ public final class MountWithinParentUtil {
 				}
 
 				//... (now) without hideaway
-				checkIsDirectory(mountPoint);
-				checkIsEmpty(mountPoint);
-
 				Files.move(mountPoint, hideaway);
 				if (SystemUtils.IS_OS_WINDOWS) {
 					Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
@@ -68,6 +65,8 @@ public final class MountWithinParentUtil {
 			return false;
 		}
 		if (!Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
+			checkIsDirectory(path);
+			checkIsEmpty(path);
 			return true;
 		}
 		if (Files.exists(path /* FOLLOW_LINKS */)) { //Both junction and target exist
