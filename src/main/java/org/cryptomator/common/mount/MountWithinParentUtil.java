@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -23,7 +22,7 @@ public final class MountWithinParentUtil {
 
 	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException, IOException {
 		Path hideaway = getHideaway(mountPoint);
-		var mpExists = removeResidualJunction(mountPoint); //Handle junction as not existing
+		var mpExists = handleMountPointFolder(mountPoint); //Handle residual (= broken) junction as not existing
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
 		if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
@@ -64,17 +63,19 @@ public final class MountWithinParentUtil {
 	}
 
 	//visible for testing
-	static boolean removeResidualJunction(Path path) throws IOException {
-		try {
-			if (Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
-				LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", path);
-				Files.delete(path); //Throws if path is also a non-empty folder
-				return false;
-			}
-			return true;
-		} catch (NoSuchFileException e) {
+	static boolean handleMountPointFolder(Path path) throws IOException {
+		if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
 			return false;
 		}
+		if (!Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
+			return true;
+		}
+		if (Files.exists(path /* FOLLOW_LINKS */)) { //Both junction and target exist
+			throw new MountPointInUseException(path);
+		}
+		LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", path);
+		Files.delete(path); //Throws if path is also a non-empty folder
+		return false;
 	}
 
 	//visible for testing

@@ -17,9 +17,9 @@ import java.util.Objects;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static org.cryptomator.common.mount.MountWithinParentUtil.cleanup;
 import static org.cryptomator.common.mount.MountWithinParentUtil.getHideaway;
+import static org.cryptomator.common.mount.MountWithinParentUtil.handleMountPointFolder;
 import static org.cryptomator.common.mount.MountWithinParentUtil.prepareParentNoMountPoint;
 import static org.cryptomator.common.mount.MountWithinParentUtil.removeResidualHideaway;
-import static org.cryptomator.common.mount.MountWithinParentUtil.removeResidualJunction;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -127,13 +127,14 @@ class MountWithinParentUtilTest {
 	}
 
 	@Test
-	void testRemoveResidualJunction(@TempDir Path parentDir) throws IOException {
+	void testHandleMountPointFolder(@TempDir Path parentDir) throws IOException {
 		//Sadly can't easily create files with "Other" attribute
 		var regularFile = parentDir.resolve("regularFile");
 		Files.createFile(regularFile);
 
-		assertTrue(removeResidualJunction(regularFile));
-		assertFalse(removeResidualJunction(parentDir.resolve("notExisting")));
+		assertTrue(handleMountPointFolder(regularFile));
+		assertTrue(Files.exists(regularFile));
+		assertFalse(handleMountPointFolder(parentDir.resolve("notExisting")));
 	}
 
 	@Test
