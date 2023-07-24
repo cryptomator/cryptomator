@@ -53,7 +53,7 @@ public class ResizeController implements FxController {
 	public void initialize() {
 		LOG.trace("init ResizeController");
 
-		if (neverTouched()) {
+		if (settings.isNeverTouched()) {
 			settings.displayConfiguration.set(getMonitorSizes());
 			return;
 		} else {
@@ -74,10 +74,14 @@ public class ResizeController implements FxController {
 		savePositionalSettings();
 	}
 
-	private boolean neverTouched() {
-		return (settings.windowHeight.get() == 0) && (settings.windowWidth.get() == 0) && (settings.windowXPosition.get() == 0) && (settings.windowYPosition.get() == 0);
-	}
+/*	private boolean neverTouched() {
 
+		return (settings.windowHeight.get() == 0)
+				&& (settings.windowWidth.get() == 0)
+				&& (settings.windowXPosition.get() == 0)
+				&& (settings.windowYPosition.get() == 0);
+	}
+*/
 	private boolean didDisplayConfigurationChange() {
 		String currentDisplayConfiguration = getMonitorSizes();
 		String settingsDisplayConfiguration = settings.displayConfiguration.get();

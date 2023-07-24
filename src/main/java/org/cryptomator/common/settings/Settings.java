@@ -218,4 +218,9 @@ public class Settings {
 		}
 	}
 
+	// new method extract from ResizeController to refactoring Feature envy
+	public boolean isNeverTouched() {
+		return (windowHeight.get() == 0) && (windowWidth.get() == 0) && (windowXPosition.get() == 0) && (windowYPosition.get() == 0);
+	}
+
 }
