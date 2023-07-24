@@ -78,10 +78,71 @@ public class VaultListController implements FxController {
 		selectedVault.addListener(this::selectedVaultDidChange);
 	}
 
+//	public void initialize() {
+//		vaultList.setItems(vaults);
+//		vaultList.setCellFactory(cellFactory);
+//		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
+//		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
+//			while (c.next()) {
+//				if (c.wasAdded()) {
+//					Vault anyAddedVault = c.getAddedSubList().get(0);
+//					vaultList.getSelectionModel().select(anyAddedVault);
+//				}
+//			}
+//		});
+//		vaultList.addEventFilter(MouseEvent.MOUSE_RELEASED, this::deselect);
+//
+//		//don't show context menu when no vault selected
+//		vaultList.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, request -> {
+//			if (selectedVault.get() == null) {
+//				request.consume();
+//			}
+//		});
+//
+//		//show removeVaultDialog on certain key press
+//		vaultList.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+//			if (keyEvent.getCode() == KeyCode.DELETE) {
+//				pressedShortcutToRemoveVault();
+//				keyEvent.consume();
+//			}
+//		});
+//		if (SystemUtils.IS_OS_MAC) {
+//			vaultList.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+//				if (keyEvent.getCode() == KeyCode.BACK_SPACE) {
+//					pressedShortcutToRemoveVault();
+//					keyEvent.consume();
+//				}
+//			});
+//		}
+//
+//		//register vault selection shortcut to the main window
+//		mainWindow.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
+//			if (keyEvent.isShortcutDown() && keyEvent.getCode().isDigitKey()) {
+//				vaultList.getSelectionModel().select(Integer.parseInt(keyEvent.getText()) - 1);
+//				keyEvent.consume();
+//			}
+//		});
+//
+//		root.setOnDragEntered(this::handleDragEvent);
+//		root.setOnDragOver(this::handleDragEvent);
+//		root.setOnDragDropped(this::handleDragEvent);
+//		root.setOnDragExited(this::handleDragEvent);
+//	}
+
+
 	public void initialize() {
+		setupVaultList();
+		setupContextMenu();
+		setupRemoveVaultShortcut();
+		setupVaultSelectionShortcut();
+		setupDragAndDropEvents();
+	}
+
+	private void setupVaultList() {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
+
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
 			while (c.next()) {
 				if (c.wasAdded()) {
@@ -90,22 +151,28 @@ public class VaultListController implements FxController {
 				}
 			}
 		});
-		vaultList.addEventFilter(MouseEvent.MOUSE_RELEASED, this::deselect);
 
-		//don't show context menu when no vault selected
+		vaultList.addEventFilter(MouseEvent.MOUSE_RELEASED, this::deselect);
+	}
+
+	private void setupContextMenu() {
+		// don't show context menu when no vault selected
 		vaultList.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, request -> {
 			if (selectedVault.get() == null) {
 				request.consume();
 			}
 		});
+	}
 
-		//show removeVaultDialog on certain key press
+	private void setupRemoveVaultShortcut() {
+		// show removeVaultDialog on certain key press
 		vaultList.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
 			if (keyEvent.getCode() == KeyCode.DELETE) {
 				pressedShortcutToRemoveVault();
 				keyEvent.consume();
 			}
 		});
+
 		if (SystemUtils.IS_OS_MAC) {
 			vaultList.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
 				if (keyEvent.getCode() == KeyCode.BACK_SPACE) {
@@ -114,20 +181,25 @@ public class VaultListController implements FxController {
 				}
 			});
 		}
+	}
 
-		//register vault selection shortcut to the main window
+	private void setupVaultSelectionShortcut() {
+		// register vault selection shortcut to the main window
 		mainWindow.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
 			if (keyEvent.isShortcutDown() && keyEvent.getCode().isDigitKey()) {
 				vaultList.getSelectionModel().select(Integer.parseInt(keyEvent.getText()) - 1);
 				keyEvent.consume();
 			}
 		});
+	}
 
+	private void setupDragAndDropEvents() {
 		root.setOnDragEntered(this::handleDragEvent);
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
 	}
+
 
 	private void deselect(MouseEvent released) {
 		if (released.getY() > (vaultList.getItems().size() * vaultList.fixedCellSizeProperty().get())) {
