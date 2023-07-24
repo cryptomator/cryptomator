@@ -127,14 +127,43 @@ class MountWithinParentUtilTest {
 	}
 
 	@Test
-	void testHandleMountPointFolder(@TempDir Path parentDir) throws IOException {
-		//Sadly can't easily create files with "Other" attribute
+	void testHandleMountPointFolderDoesNotExist(@TempDir Path parentDir) throws IOException {
+		assertFalse(handleMountPointFolder(parentDir.resolve("notExisting")));
+	}
+
+	@Test
+	void testHandleMountPointFolderIsFile(@TempDir Path parentDir) throws IOException {
 		var regularFile = parentDir.resolve("regularFile");
 		Files.createFile(regularFile);
 
-		assertTrue(handleMountPointFolder(regularFile));
+		assertThrows(MountPointNotEmptyDirectoryException.class, () -> {
+			handleMountPointFolder(regularFile);
+		});
 		assertTrue(Files.exists(regularFile));
-		assertFalse(handleMountPointFolder(parentDir.resolve("notExisting")));
+	}
+
+	@Test
+	void testHandleMountPointFolderIsNotEmpty(@TempDir Path parentDir) throws IOException {
+		var regularFolder = parentDir.resolve("regularFolder");
+		var dummyFile = regularFolder.resolve("dummy");
+		Files.createDirectory(regularFolder);
+		Files.createFile(dummyFile);
+
+		assertThrows(MountPointNotEmptyDirectoryException.class, () -> {
+			handleMountPointFolder(regularFolder);
+		});
+		assertTrue(Files.exists(regularFolder));
+		assertTrue(Files.exists(dummyFile));
+	}
+
+	@Test
+	void testHandleMountPointFolder(@TempDir Path parentDir) throws IOException {
+		//Sadly can't easily create files with "Other" attribute
+		var regularFolder = parentDir.resolve("regularFolder");
+		Files.createDirectory(regularFolder);
+
+		assertTrue(handleMountPointFolder(regularFolder));
+		assertTrue(Files.exists(regularFolder));
 	}
 
 	@Test
