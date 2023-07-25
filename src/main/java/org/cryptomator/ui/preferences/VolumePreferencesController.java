@@ -45,8 +45,10 @@ public class VolumePreferencesController implements FxController {
 	public TextField loopbackPortField;
 	public Button loopbackPortApplyButton;
 
+	// Refactor Long Parameter List to individual class
 	@Inject
-	VolumePreferencesController(Settings settings, Lazy<Application> application, List<MountService> mountProviders, @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, ResourceBundle resourceBundle) {
+	VolumePreferencesController(Settings settings, Lazy<Application> application,
+								List<MountService> mountProviders, @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.application = application;
 		this.mountProviders = mountProviders;
@@ -66,6 +68,7 @@ public class VolumePreferencesController implements FxController {
 		});
 
 	}
+
 
 	public void initialize() {
 		volumeTypeChoiceBox.getItems().add(null);

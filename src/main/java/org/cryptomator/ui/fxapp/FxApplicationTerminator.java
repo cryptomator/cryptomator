@@ -40,11 +40,20 @@ public class FxApplicationTerminator {
 	private final Settings settings;
 	private final VaultService vaultService;
 
-	@Inject
-	public FxApplicationTerminator(ObservableList<Vault> vaults, ShutdownHook shutdownHook, FxApplicationWindows appWindows, Settings settings, VaultService vaultService) {
-		this.vaults = vaults;
-		this.shutdownHook = shutdownHook;
-		this.appWindows = appWindows;
+
+//	public FxApplicationTerminator(ObservableList<Vault> vaults, ShutdownHook shutdownHook, FxApplicationWindows appWindows, Settings settings, VaultService vaultService) {
+//		this.vaults = vaults;
+//		this.shutdownHook = shutdownHook;
+//		this.appWindows = appWindows;
+//		this.settings = settings;
+//		this.vaultService = vaultService;
+//	}
+
+    @Inject
+	public FxApplicationTerminator(FxApplicationTerminatorParams params,Settings settings, VaultService vaultService) {
+		this.vaults = params.getVaults();
+		this.shutdownHook = params.getShutdownHook();
+		this.appWindows = params.getAppWindows();
 		this.settings = settings;
 		this.vaultService = vaultService;
 	}
