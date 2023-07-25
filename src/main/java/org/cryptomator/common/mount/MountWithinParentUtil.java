@@ -22,18 +22,25 @@ public final class MountWithinParentUtil {
 
 	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException, IOException {
 		Path hideaway = getHideaway(mountPoint);
-		var mpExists = handleMountPointFolder(mountPoint); //Handle residual (= broken) junction as not existing
+		var mpState = getMountPointState(mountPoint);
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
-		if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
+		if (mpState == MountPointState.JUNCTION) {
+			LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", mountPoint);
+			Files.delete(mountPoint); //Throws if mountPoint is also a non-empty folder
+			mpState = MountPointState.NOT_EXISTING;
+		}
+
+		if (mpState == MountPointState.NOT_EXISTING && !hideExists) { //neither mountpoint nor hideaway exist
 			throw new MountPointNotExistingException(mountPoint);
-		} else if (!mpExists) { //only hideaway exists
+		} else if (mpState == MountPointState.NOT_EXISTING) { //only hideaway exists
 			checkIsHideawayDirectory(mountPoint, hideaway);
 			LOG.info("Mountpoint {} seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
 			if (SystemUtils.IS_OS_WINDOWS) {
 				Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
 			}
-		} else { //mountpoint exists...
+		} else {
+			assert mpState == MountPointState.EMPTY_DIR;
 			try {
 				if (hideExists) { //... with hideaway
 					removeResidualHideaway(mountPoint, hideaway);
@@ -60,21 +67,30 @@ public final class MountWithinParentUtil {
 	}
 
 	//visible for testing
-	static boolean handleMountPointFolder(Path path) throws IOException {
+	static MountPointState getMountPointState(Path path) throws IOException {
 		if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
-			return false;
+			return MountPointState.NOT_EXISTING;
 		}
 		if (!Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
 			checkIsMountPointDirectory(path);
 			checkIsMountPointEmpty(path);
-			return true;
+			return MountPointState.EMPTY_DIR;
 		}
 		if (Files.exists(path /* FOLLOW_LINKS */)) { //Both junction and target exist
 			throw new MountPointInUseException(path);
 		}
-		LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", path);
-		Files.delete(path); //Throws if path is also a non-empty folder
-		return false;
+		return MountPointState.JUNCTION;
+	}
+
+	//visible for testing
+	enum MountPointState {
+
+		NOT_EXISTING,
+
+		EMPTY_DIR,
+
+		JUNCTION;
+
 	}
 
 	//visible for testing

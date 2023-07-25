@@ -15,14 +15,17 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static org.cryptomator.common.mount.MountWithinParentUtil.MountPointState.EMPTY_DIR;
+import static org.cryptomator.common.mount.MountWithinParentUtil.MountPointState.NOT_EXISTING;
 import static org.cryptomator.common.mount.MountWithinParentUtil.cleanup;
 import static org.cryptomator.common.mount.MountWithinParentUtil.getHideaway;
-import static org.cryptomator.common.mount.MountWithinParentUtil.handleMountPointFolder;
+import static org.cryptomator.common.mount.MountWithinParentUtil.getMountPointState;
 import static org.cryptomator.common.mount.MountWithinParentUtil.prepareParentNoMountPoint;
 import static org.cryptomator.common.mount.MountWithinParentUtil.removeResidualHideaway;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -128,7 +131,7 @@ class MountWithinParentUtilTest {
 
 	@Test
 	void testHandleMountPointFolderDoesNotExist(@TempDir Path parentDir) throws IOException {
-		assertFalse(handleMountPointFolder(parentDir.resolve("notExisting")));
+		assertSame(getMountPointState(parentDir.resolve("notExisting")), NOT_EXISTING);
 	}
 
 	@Test
@@ -137,9 +140,8 @@ class MountWithinParentUtilTest {
 		Files.createFile(regularFile);
 
 		assertThrows(MountPointNotEmptyDirectoryException.class, () -> {
-			handleMountPointFolder(regularFile);
+			getMountPointState(regularFile);
 		});
-		assertTrue(Files.exists(regularFile));
 	}
 
 	@Test
@@ -150,10 +152,8 @@ class MountWithinParentUtilTest {
 		Files.createFile(dummyFile);
 
 		assertThrows(MountPointNotEmptyDirectoryException.class, () -> {
-			handleMountPointFolder(regularFolder);
+			getMountPointState(regularFolder);
 		});
-		assertTrue(Files.exists(regularFolder));
-		assertTrue(Files.exists(dummyFile));
 	}
 
 	@Test
@@ -162,8 +162,7 @@ class MountWithinParentUtilTest {
 		var regularFolder = parentDir.resolve("regularFolder");
 		Files.createDirectory(regularFolder);
 
-		assertTrue(handleMountPointFolder(regularFolder));
-		assertTrue(Files.exists(regularFolder));
+		assertSame(getMountPointState(regularFolder), EMPTY_DIR);
 	}
 
 	@Test
