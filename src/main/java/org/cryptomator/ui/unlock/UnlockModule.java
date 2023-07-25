@@ -4,6 +4,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
@@ -18,12 +19,13 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Module(subcomponents = {KeyLoadingComponent.class})
 abstract class UnlockModule {
@@ -61,8 +63,8 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static AtomicReference<Throwable> unlockException() {
-		return new AtomicReference<>();
+	static ObjectProperty<IllegalMountPointException> illegalMountPointException() {
+		return new SimpleObjectProperty<>();
 	}
 
 	@Provides
