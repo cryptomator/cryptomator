@@ -47,10 +47,10 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
 fi
 
 # download and check jmods
-curl -L ${{ env.OPENJFX_JMODS }} -o openjfx.zip
+curl -L ${OPENJFX_JMODS} -o openjfx-jmods.zip
 mkdir -p openjfx-jmods/
 unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods/
-JMOD_VERSION=$(jmod describe jmods/amd64/javafx.base.jmod | head -1)
+JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
 JMOD_VERSION=${JMOD_VERSION#*@}
 JMOD_VERSION=${JMOD_VERSION%%.*}
 POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
