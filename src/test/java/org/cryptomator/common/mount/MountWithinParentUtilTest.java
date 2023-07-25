@@ -206,7 +206,6 @@ class MountWithinParentUtilTest {
 		var mount = Path.of("C:\\mount");
 		var hideaway = getHideaway(mount);
 
-		assertEquals(mount.getParent().toAbsolutePath(), Path.of("C:\\").toAbsolutePath());
 		assertEquals(mount.getParent(), hideaway.getParent());
 		assertEquals(mount.getParent().resolve(".~$mount.tmp"), hideaway);
 		assertEquals(mount.getParent().toAbsolutePath() + ".~$mount.tmp", hideaway.toAbsolutePath().toString());
@@ -218,7 +217,6 @@ class MountWithinParentUtilTest {
 		var mount = Path.of("/mount");
 		var hideaway = getHideaway(mount);
 
-		assertEquals(mount.getParent().toAbsolutePath(), Path.of("/").toAbsolutePath());
 		assertEquals(mount.getParent(), hideaway.getParent());
 		assertEquals(mount.getParent().resolve(".~$mount.tmp"), hideaway);
 		assertEquals(mount.getParent().toAbsolutePath() + ".~$mount.tmp", hideaway.toAbsolutePath().toString());

@@ -65,8 +65,8 @@ public final class MountWithinParentUtil {
 			return false;
 		}
 		if (!Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS).isOther()) {
-			checkIsDirectory(path);
-			checkIsEmpty(path);
+			checkIsMountPointDirectory(path);
+			checkIsMountPointEmpty(path);
 			return true;
 		}
 		if (Files.exists(path /* FOLLOW_LINKS */)) { //Both junction and target exist
@@ -119,7 +119,7 @@ public final class MountWithinParentUtil {
 		}
 	}
 
-	private static void checkIsDirectory(Path toCheck) throws IllegalMountPointException {
+	private static void checkIsMountPointDirectory(Path toCheck) throws IllegalMountPointException {
 		if (!Files.isDirectory(toCheck, LinkOption.NOFOLLOW_LINKS)) {
 			throw new MountPointNotEmptyDirectoryException(toCheck, "Mountpoint is not a directory: " + toCheck);
 		}
@@ -131,7 +131,7 @@ public final class MountWithinParentUtil {
 		}
 	}
 
-	private static void checkIsEmpty(Path toCheck) throws IllegalMountPointException, IOException {
+	private static void checkIsMountPointEmpty(Path toCheck) throws IllegalMountPointException, IOException {
 		try (var dirStream = Files.list(toCheck)) {
 			if (dirStream.findFirst().isPresent()) {
 				throw new MountPointNotEmptyDirectoryException(toCheck, "Mountpoint directory is not empty: " + toCheck);
