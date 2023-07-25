@@ -25,7 +25,7 @@ public final class MountWithinParentUtil {
 		var mpState = getMountPointState(mountPoint);
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
-		if (mpState == MountPointState.JUNCTION) {
+		if (mpState == MountPointState.BROKEN_JUNCTION) {
 			LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", mountPoint);
 			Files.delete(mountPoint); //Throws if mountPoint is also a non-empty folder
 			mpState = MountPointState.NOT_EXISTING;
@@ -67,7 +67,7 @@ public final class MountWithinParentUtil {
 	}
 
 	//visible for testing
-	static MountPointState getMountPointState(Path path) throws IOException {
+	static MountPointState getMountPointState(Path path) throws IOException, IllegalMountPointException {
 		if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
 			return MountPointState.NOT_EXISTING;
 		}
@@ -79,7 +79,7 @@ public final class MountWithinParentUtil {
 		if (Files.exists(path /* FOLLOW_LINKS */)) { //Both junction and target exist
 			throw new MountPointInUseException(path);
 		}
-		return MountPointState.JUNCTION;
+		return MountPointState.BROKEN_JUNCTION;
 	}
 
 	//visible for testing
@@ -89,7 +89,7 @@ public final class MountWithinParentUtil {
 
 		EMPTY_DIR,
 
-		JUNCTION;
+		BROKEN_JUNCTION;
 
 	}
 
