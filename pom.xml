@@ -29,7 +29,7 @@
 		<project.jdk.version>20</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
-		<!-- Once swiesend has module-info, remove them-->
+		<!-- remove them, as soon they got modularized or support is dropped (i.e., WebDAV) -->
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
