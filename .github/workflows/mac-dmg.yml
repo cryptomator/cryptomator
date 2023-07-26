@@ -31,7 +31,7 @@ jobs:
           output-suffix: x64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: macFUSE
-          openjfx-url: https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_osx-aarch64_bin-jmods.zip
+          openjfx-url: https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_osx-x64_bin-jmods.zip
           openjfx-sha: 4fcd4bc3cd0edeb899108109e42a0c5a2d87d14a195d11199060862eb6d887b5
         - os: [self-hosted, macOS, ARM64]
           architecture: aarch64
@@ -54,7 +54,7 @@ jobs:
         id: download-jmods
         run: |
           curl -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
-          echo "${{ matrix.openjfx-sha }} openjfx-jmods.zip" | sha256sum --check
+          echo "${{ matrix.openjfx-sha }} *openjfx-jmods.zip" | shasum -a256 --check
           mkdir -p openjfx-jmods/
           unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
       - name: Ensure major jfx version in pom and in jmods is the same
