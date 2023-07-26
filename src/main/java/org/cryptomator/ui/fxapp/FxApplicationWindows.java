@@ -13,6 +13,9 @@ import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 import org.cryptomator.ui.unlock.UnlockWorkflow;
+import org.cryptomator.ui.updatereminder.UpdateReminderComponent;
+import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
+import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,22 +46,36 @@ public class FxApplicationWindows {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
+	private final UpdateReminderComponent.Factory updateReminderWindowBuilder;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
+	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final FilteredList<Window> visibleWindows;
 
 	@Inject
-	public FxApplicationWindows(@PrimaryStage Stage primaryStage, Optional<TrayIntegrationProvider> trayIntegration, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, QuitComponent.Builder quitWindowBuilder, UnlockComponent.Factory unlockWorkflowFactory, LockComponent.Factory lockWorkflowFactory, ErrorComponent.Factory errorWindowFactory, ExecutorService executor) {
+	public FxApplicationWindows(@PrimaryStage Stage primaryStage,
+								Optional<TrayIntegrationProvider> trayIntegration, //
+								Lazy<MainWindowComponent> mainWindow, //
+								Lazy<PreferencesComponent> preferencesWindow, //
+								QuitComponent.Builder quitWindowBuilder, //
+								UnlockComponent.Factory unlockWorkflowFactory, //
+								UpdateReminderComponent.Factory updateReminderWindowBuilder, //
+								LockComponent.Factory lockWorkflowFactory, //
+								ErrorComponent.Factory errorWindowFactory, //
+								VaultOptionsComponent.Factory vaultOptionsWindow, //
+								ExecutorService executor) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
+		this.updateReminderWindowBuilder = updateReminderWindowBuilder;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
 		this.executor = executor;
+		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
 	}
 
@@ -105,8 +122,16 @@ public class FxApplicationWindows {
 		return CompletableFuture.supplyAsync(() -> preferencesWindow.get().showPreferencesWindow(selectedTab), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
+	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {
+		return showMainWindow().thenApplyAsync((window) -> vaultOptionsWindow.create(vault).showVaultOptionsWindow(tab), Platform::runLater).whenComplete(this::reportErrors);
+	}
+
 	public void showQuitWindow(QuitResponse response, boolean forced) {
 			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
+	}
+
+	public void checkAndShowUpdateReminderWindow() {
+		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.create().checkAndShowUpdateReminderWindow(), Platform::runLater);
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {

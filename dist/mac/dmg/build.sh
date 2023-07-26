@@ -71,6 +71,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
+    --java-options "-Djava.net.useSystemProxies=true" \
     --java-options "-Dapple.awt.enableTemplateImages=true" \
     --java-options "-Dsun.java2d.metal=true" \
     --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
@@ -80,7 +81,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/${APP_NAME}/ipc.socket\"" \
     --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/${APP_NAME}/key.p12\"" \
     --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"${APP_NAME}\"" \
-    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/${APP_NAME}\"" \
+    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support${APP_NAME}/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \

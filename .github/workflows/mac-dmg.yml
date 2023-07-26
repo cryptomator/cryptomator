@@ -95,6 +95,7 @@ jobs:
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Djava.net.useSystemProxies=true"
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
@@ -104,7 +105,7 @@ jobs:
           --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
-          --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Cryptomator\""
+          --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --mac-package-identifier org.cryptomator

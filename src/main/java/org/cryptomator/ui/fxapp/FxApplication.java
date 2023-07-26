@@ -68,6 +68,8 @@ public class FxApplication {
 			return null;
 		});
 
+		appWindows.checkAndShowUpdateReminderWindow();
+
 		launchEventHandler.startHandlingLaunchEvents();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
 	}

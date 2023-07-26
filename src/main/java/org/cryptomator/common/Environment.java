@@ -18,7 +18,6 @@ import java.util.stream.StreamSupport;
 public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
-	private static final char PATH_LIST_SEP = ':';
 	private static final int DEFAULT_MIN_PW_LENGTH = 8;
 	private static final String SETTINGS_PATH_PROP_NAME = "cryptomator.settingsPath";
 	private static final String IPC_SOCKET_PATH_PROP_NAME = "cryptomator.ipcSocketPath";
@@ -131,7 +130,7 @@ public class Environment {
 
 	// visible for testing
 	Stream<Path> getPaths(String propertyName) {
-		Stream<String> rawSettingsPaths = getRawList(propertyName, PATH_LIST_SEP);
+		Stream<String> rawSettingsPaths = getRawList(propertyName, System.getProperty("path.separator").charAt(0));
 		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Path::of);
 	}
 
