@@ -28,7 +28,7 @@ public abstract class UpdateCheckerModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateCheckerModule.class);
 
-	private static final URI LATEST_VERSION_URI = URI.create("https://api.cryptomator.org/updates/latestVersion.json");
+	private static final URI LATEST_VERSION_URI = URI.create("https://api.cryptomator.org/desktop/latest-version.json");
 	private static final Duration UPDATE_CHECK_INTERVAL = Duration.hours(3);
 	private static final Duration DISABLED_UPDATE_CHECK_INTERVAL = Duration.hours(100000); // Duration.INDEFINITE leads to overflows...
 
