@@ -31,31 +31,45 @@ jobs:
           output-suffix: x64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: macFUSE
+          openjfx-url: https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_osx-x64_bin-jmods.zip
+          openjfx-sha: 4fcd4bc3cd0edeb899108109e42a0c5a2d87d14a195d11199060862eb6d887b5
         - os: [self-hosted, macOS, ARM64]
           architecture: aarch64
           output-suffix: arm64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: FUSE-T
+          openjfx-url: https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_osx-aarch64_bin-jmods.zip
+          openjfx-sha: e7e99e6dc3d091e7e1c6940d8e1acc282f22b82b234a20ae7cbec4b93a6acabe
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk+fx'
+          java-package: 'jdk'
           architecture: ${{ matrix.architecture }}
           cache: 'maven'
-      - name: Ensure major jfx version in pom equals in jdk
-        if: ${{ !contains(matrix.os, 'self-hosted') }}
-        shell: pwsh
+      - name: Download OpenJFX jmods
+        id: download-jmods
         run: |
-          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
-          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
-            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
+          curl -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
+          echo "${{ matrix.openjfx-sha }} *openjfx-jmods.zip" | shasum -a256 --check
+          mkdir -p openjfx-jmods/
+          unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+      - name: Ensure major jfx version in pom and in jmods is the same
+        run: |
+          JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
+          JMOD_VERSION=${JMOD_VERSION#*@}
+          JMOD_VERSION=${JMOD_VERSION%%.*}
+          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+          POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+
+          if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION_AMD64})"
             exit 1
-          }
+          fi
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
@@ -69,7 +83,7 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${JAVA_HOME}/jmods"
+          --module-path "${JAVA_HOME}/jmods:openjfx-jmods"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
@@ -95,6 +109,7 @@ jobs:
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Djava.net.useSystemProxies=true"
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
@@ -104,7 +119,7 @@ jobs:
           --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
-          --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Cryptomator\""
+          --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --mac-package-identifier org.cryptomator

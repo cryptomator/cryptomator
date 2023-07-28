@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.mockito.Mockito;
 
 import java.nio.file.Path;
@@ -24,6 +25,7 @@ public class EnvironmentTest {
 	public void init() {
 		env = Mockito.spy(Environment.getInstance());
 	}
+
 	@Test
 	@DisplayName("cryptomator.logDir=/foo/bar")
 	public void testAbsoluteLogDir() {
@@ -58,13 +60,33 @@ public class EnvironmentTest {
 		}
 
 		@Test
+		@EnabledIf("isColonPathSeperator")
 		@DisplayName("test.path.property=/foo/bar/test:/bar/nez/tost")
-		public void testTwoPaths() {
+		public void testTwoPathsColon() {
 			System.setProperty("test.path.property", "/foo/bar/test:bar/nez/tost");
 			List<Path> result = env.getPaths("test.path.property").toList();
 
 			MatcherAssert.assertThat(result, Matchers.hasSize(2));
 			MatcherAssert.assertThat(result, Matchers.hasItems(Path.of("/foo/bar/test"), Path.of("bar/nez/tost")));
+		}
+
+		@Test
+		@EnabledIf("isSemiColonPathSeperator")
+		@DisplayName("test.path.property=/foo/bar/test;/bar/nez/tost")
+		public void testTwoPathsSemiColon() {
+			System.setProperty("test.path.property", "/foo/bar/test;bar/nez/tost");
+			List<Path> result = env.getPaths("test.path.property").toList();
+
+			MatcherAssert.assertThat(result, Matchers.hasSize(2));
+			MatcherAssert.assertThat(result, Matchers.hasItems(Path.of("/foo/bar/test"), Path.of("bar/nez/tost")));
+		}
+
+		boolean isColonPathSeperator() {
+			return System.getProperty("path.separator").equals(":");
+		}
+
+		boolean isSemiColonPathSeperator() {
+			return System.getProperty("path.separator").equals(";");
 		}
 
 	}
@@ -78,18 +100,21 @@ public class EnvironmentTest {
 			env.getSettingsPath();
 			Mockito.verify(env).getPaths("cryptomator.settingsPath");
 		}
+
 		@Test
 		public void testP12Path() {
 			Mockito.doReturn(Stream.of()).when(env).getPaths(Mockito.anyString());
 			env.getP12Path();
 			Mockito.verify(env).getPaths("cryptomator.p12Path");
 		}
+
 		@Test
 		public void testIpcSocketPath() {
 			Mockito.doReturn(Stream.of()).when(env).getPaths(Mockito.anyString());
 			env.getIpcSocketPath();
 			Mockito.verify(env).getPaths("cryptomator.ipcSocketPath");
 		}
+
 		@Test
 		public void testKeychainPath() {
 			Mockito.doReturn(Stream.of()).when(env).getPaths(Mockito.anyString());

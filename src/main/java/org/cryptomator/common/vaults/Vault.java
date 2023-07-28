@@ -70,7 +70,7 @@ public class Vault {
 	private final Mounter mounter;
 	private final BooleanProperty showingStats;
 
-	private AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
+	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
 	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter) {
