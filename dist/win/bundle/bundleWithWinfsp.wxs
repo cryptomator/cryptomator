@@ -42,7 +42,7 @@
               >
                 <CommandLine Condition="WixBundleUILevel &lt;= 3" InstallArgument="-q" />
                 <!-- XML allows line breaks in attributes, hence keep the line breaks here -->
-                <CommandLine Condition="WixBundleUILevel &gt; 3" InstallArgument="-t &quot;Cryptomator Installer&quot; -m &quot;Cryptomator requires a newer version of the WinFsp driver. The installer will now uninstall WinFsp, reboot, and afterwards proceed with the installation.
+                <CommandLine Condition="WixBundleUILevel &gt; 3" InstallArgument="-t &quot;Cryptomator Installer&quot; -m &quot;Cryptomator requires a newer version of the WinFsp driver. The installer will now uninstall WinFsp, possibly reboot, and afterwards proceed with the installation.
 
 Do you want to continue?&quot;" />
                 <ExitCode Behavior="success" Value="0"/>
