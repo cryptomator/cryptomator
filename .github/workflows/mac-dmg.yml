@@ -8,6 +8,11 @@ on:
       version:
         description: 'Version'
         required: false
+      notarize:
+        description: 'Notarize'
+        required: true
+        default: false
+        type: boolean
 
 env:
   JAVA_VERSION: 20
@@ -222,7 +227,7 @@ jobs:
         env:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
       - name: Notarize .dmg
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.notarize
         uses: cocoalibs/xcode-notarization-action@v1
         with:
           app-path: 'Cryptomator-*.dmg'
