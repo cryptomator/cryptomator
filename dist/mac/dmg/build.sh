@@ -29,6 +29,14 @@ REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
+ARCH="undefined"
+if [ "$(machine)" = "arm64e" ]; then
+    ARCH="aarch64"
+else
+    ARCH="x64"
+fi
+OPENJFX_JMODS="https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_linux-${ARCH}_bin-jmods.zip"
+
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
 command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found. Fix by 'brew install maven'."; exit 1; }
@@ -38,6 +46,22 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
     if [[ ! `security find-identity -v -p codesigning | grep -w "${CODESIGN_IDENTITY}"` ]]; then echo "Given codesign identity is invalid."; exit 1; fi
 fi
 
+# download and check jmods
+curl -L ${OPENJFX_JMODS} -o openjfx-jmods.zip
+mkdir -p openjfx-jmods/
+unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods/
+JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
+JMOD_VERSION=${JMOD_VERSION#*@}
+JMOD_VERSION=${JMOD_VERSION%%.*}
+POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+
+if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
+>&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION})"
+exit 1
+fi
+
 # compile
 mvn -B -f../../../pom.xml clean package -DskipTests -Pmac
 cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
@@ -45,8 +69,8 @@ cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 # add runtime
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
-    --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+    --module-path "${JAVA_HOME}/jmods:openjfx-jmods" \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
