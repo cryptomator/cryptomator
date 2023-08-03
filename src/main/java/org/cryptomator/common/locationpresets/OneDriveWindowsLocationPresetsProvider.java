@@ -83,8 +83,8 @@ public final class OneDriveWindowsLocationPresetsProvider implements LocationPre
 			throw new TimeoutException(cmdDescription + " timed out after " + timeoutSeconds + "s");
 		}
 		if (process.exitValue() != 0) {
-			@SuppressWarnings("resource") var stdout = process.inputReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));
-			@SuppressWarnings("resource") var stderr = process.errorReader(StandardCharsets.UTF_8).lines().collect(Collectors.joining("\n"));
+			@SuppressWarnings("resource") var stdout = process.inputReader(StandardCharsets.ISO_8859_1).lines().collect(Collectors.joining("\n"));
+			@SuppressWarnings("resource") var stderr = process.errorReader(StandardCharsets.ISO_8859_1).lines().collect(Collectors.joining("\n"));
 			throw new CommandFailedException(cmdDescription, process.exitValue(), stdout, stderr);
 		}
 	}
