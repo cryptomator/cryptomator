@@ -14,6 +14,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.error.ErrorController"
@@ -32,25 +34,41 @@
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
 				<FormattedLabel styleClass="label-extra-large" format="%error.message" arg1="${controller.errorCode}"/>
-				<FontAwesome5Spinner glyphSize="24" visible="${controller.isLoadingHttpResponse}" managed="${controller.isLoadingHttpResponse}"/>
-				<VBox visible="${!controller.isLoadingHttpResponse}" managed="${!controller.isLoadingHttpResponse}">
-					<Label text="%error.existingSolutionDescription" wrapText="true" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}"/>
-					<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.solution" onAction="#showSolution" contentDisplay="LEFT" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}">
-						<graphic>
-							<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
-						</graphic>
-					</Hyperlink>
-					<Label text="%error.description" wrapText="true" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}"/>
-					<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.lookup" onAction="#searchError" contentDisplay="LEFT" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}">
-						<graphic>
-							<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
-						</graphic>
-					</Hyperlink>
-					<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.report" onAction="#reportError" contentDisplay="LEFT" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}">
-						<graphic>
-							<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
-						</graphic>
-					</Hyperlink>
+				<VBox visible="${!controller.lookupDatabaseUserPermission}" managed="${!controller.lookupDatabaseUserPermission}">
+					<TextFlow>
+						<Text text="%error.lookupPermissionMessage"/>
+						<Text text=" "/>
+						<Hyperlink styleClass="hyperlink-underline" text="More Info..."/>
+					</TextFlow>
+					<Region VBox.vgrow="ALWAYS" minHeight="18"/>
+					<ButtonBar buttonMinWidth="120" buttonOrder="+NY">
+						<buttons>
+							<Button text="%error.dismiss" ButtonBar.buttonData="NO" onAction="#dismiss"/>
+							<Button text="%error.lookUpSolution" ButtonBar.buttonData="YES" defaultButton="true" onAction="#lookUpSolution"/>
+						</buttons>
+					</ButtonBar>
+				</VBox>
+				<VBox visible="${controller.lookupDatabaseUserPermission}" managed="${controller.lookupDatabaseUserPermission}">
+					<FontAwesome5Spinner glyphSize="24" visible="${controller.isLoadingHttpResponse}" managed="${controller.isLoadingHttpResponse}"/>
+					<VBox visible="${!controller.isLoadingHttpResponse}" managed="${!controller.isLoadingHttpResponse}">
+						<Label text="%error.existingSolutionDescription" wrapText="true" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}"/>
+						<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.solution" onAction="#showSolution" contentDisplay="LEFT" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}">
+							<graphic>
+								<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
+							</graphic>
+						</Hyperlink>
+						<Label text="%error.description" wrapText="true" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}"/>
+						<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.lookup" onAction="#searchError" contentDisplay="LEFT" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}">
+							<graphic>
+								<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
+							</graphic>
+						</Hyperlink>
+						<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.report" onAction="#reportError" contentDisplay="LEFT" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}">
+							<graphic>
+								<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
+							</graphic>
+						</Hyperlink>
+					</VBox>
 				</VBox>
 			</VBox>
 		</HBox>
