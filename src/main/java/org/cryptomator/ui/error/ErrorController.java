@@ -148,7 +148,6 @@ public class ErrorController implements FxController {
 	@FXML
 	public void lookUpSolution() {
 		lookupDatabaseUserPermission.set(true);
-		isLoadingHttpResponse.set(true);
 		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
 		HttpRequest httpRequest = HttpRequest.newBuilder()//
 				.uri(URI.create(ERROR_CODES_URL))//
@@ -159,6 +158,7 @@ public class ErrorController implements FxController {
 	}
 
 	private void loadHttpResponse(HttpResponse<InputStream> response) {
+		isLoadingHttpResponse.set(true);
 		if (response.statusCode() != 200) {
 			LOG.error("Status code {} when trying to load {} ", response.statusCode(), response.uri());
 		}
