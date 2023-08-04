@@ -43,6 +43,7 @@ public class ErrorController implements FxController {
 	private static final ObjectMapper JSON = new ObjectMapper();
 	private static final Logger LOG = LoggerFactory.getLogger(ErrorController.class);
 	private static final String ERROR_CODES_URL = "https://api.cryptomator.org/desktop/error-codes.json";
+	private static final String LOOKUP_PERMISSION_INFO_URL = "https://docs.cryptomator.org/"; //TODO: set correct url
 	private static final String SEARCH_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/categories/errors?discussions_q=category:Errors+%s";
 	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
 	private static final String SEARCH_ERRORCODE_DELIM = " OR ";
@@ -132,6 +133,11 @@ public class ErrorController implements FxController {
 
 		copiedDetails.set(true);
 		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> copiedDetails.set(false));
+	}
+
+	@FXML
+	public void visitLookupPermissionInfoPage() {
+		application.getHostServices().showDocument(LOOKUP_PERMISSION_INFO_URL);
 	}
 
 	@FXML

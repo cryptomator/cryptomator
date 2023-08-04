@@ -38,7 +38,7 @@
 					<TextFlow>
 						<Text text="%error.lookupPermissionMessage"/>
 						<Text text=" "/>
-						<Hyperlink styleClass="hyperlink-underline" text="More Info..."/>
+						<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.moreInfo" onAction="#visitLookupPermissionInfoPage"/>
 					</TextFlow>
 					<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 					<ButtonBar buttonMinWidth="120" buttonOrder="+NY">
