@@ -34,7 +34,7 @@
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
 				<FormattedLabel styleClass="label-extra-large" format="%error.message" arg1="${controller.errorCode}"/>
-				<VBox visible="${!controller.lookupDatabaseUserPermission}" managed="${!controller.lookupDatabaseUserPermission}">
+				<VBox visible="${!controller.askedForLookupDatabasePermission}" managed="${!controller.askedForLookupDatabasePermission}">
 					<Label text="%error.lookupPermissionMessage" wrapText="true"/>
 					<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 					<ButtonBar buttonMinWidth="120" buttonOrder="+NY">
@@ -44,7 +44,7 @@
 						</buttons>
 					</ButtonBar>
 				</VBox>
-				<VBox visible="${controller.lookupDatabaseUserPermission}" managed="${controller.lookupDatabaseUserPermission}">
+				<VBox visible="${controller.askedForLookupDatabasePermission}" managed="${controller.askedForLookupDatabasePermission}">
 					<FontAwesome5Spinner glyphSize="24" visible="${controller.isLoadingHttpResponse}" managed="${controller.isLoadingHttpResponse}"/>
 					<VBox visible="${!controller.isLoadingHttpResponse}" managed="${!controller.isLoadingHttpResponse}">
 						<Label text="%error.existingSolutionDescription" wrapText="true" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}"/>
