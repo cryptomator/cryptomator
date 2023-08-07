@@ -35,11 +35,7 @@
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
 				<FormattedLabel styleClass="label-extra-large" format="%error.message" arg1="${controller.errorCode}"/>
 				<VBox visible="${!controller.lookupDatabaseUserPermission}" managed="${!controller.lookupDatabaseUserPermission}">
-					<TextFlow>
-						<Text text="%error.lookupPermissionMessage"/>
-						<Text text=" "/>
-						<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.moreInfo" onAction="#visitLookupPermissionInfoPage"/>
-					</TextFlow>
+					<Label text="%error.lookupPermissionMessage" wrapText="true"/>
 					<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 					<ButtonBar buttonMinWidth="120" buttonOrder="+NY">
 						<buttons>
