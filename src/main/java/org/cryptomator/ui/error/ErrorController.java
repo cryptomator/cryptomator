@@ -65,11 +65,13 @@ public class ErrorController implements FxController {
 	private final Scene previousScene;
 	private final Stage window;
 	private final Environment environment;
+	private final ExecutorService executorService;
 
 	private final BooleanProperty copiedDetails = new SimpleBooleanProperty();
 	private final ObjectProperty<ErrorDiscussion> matchingErrorDiscussion = new SimpleObjectProperty<>();
 	private final BooleanExpression errorSolutionFound = matchingErrorDiscussion.isNotNull();
 	private final BooleanProperty isLoadingHttpResponse = new SimpleBooleanProperty();
+	private final BooleanProperty askedForLookupDatabasePermission = new SimpleBooleanProperty();
 
 	@Inject
 	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window, Environment environment, ExecutorService executorService) {
@@ -79,15 +81,7 @@ public class ErrorController implements FxController {
 		this.previousScene = previousScene;
 		this.window = window;
 		this.environment = environment;
-
-		isLoadingHttpResponse.set(true);
-		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
-		HttpRequest httpRequest = HttpRequest.newBuilder()//
-				.uri(URI.create(ERROR_CODES_URL))//
-				.build();
-		httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())//
-				.thenAcceptAsync(this::loadHttpResponse, executorService)//
-				.whenCompleteAsync((r, e) -> isLoadingHttpResponse.set(false), Platform::runLater);
+		this.executorService = executorService;
 	}
 
 	@FXML
@@ -138,6 +132,24 @@ public class ErrorController implements FxController {
 
 		copiedDetails.set(true);
 		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> copiedDetails.set(false));
+	}
+
+	@FXML
+	public void dismiss() {
+		askedForLookupDatabasePermission.set(true);
+	}
+
+	@FXML
+	public void lookUpSolution() {
+		isLoadingHttpResponse.set(true);
+		askedForLookupDatabasePermission.set(true);
+		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
+		HttpRequest httpRequest = HttpRequest.newBuilder()//
+				.uri(URI.create(ERROR_CODES_URL))//
+				.build();
+		httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())//
+				.thenAcceptAsync(this::loadHttpResponse, executorService)//
+				.whenCompleteAsync((r, e) -> isLoadingHttpResponse.set(false), Platform::runLater);
 	}
 
 	private void loadHttpResponse(HttpResponse<InputStream> response) {
@@ -291,6 +303,14 @@ public class ErrorController implements FxController {
 
 	public boolean getIsLoadingHttpResponse() {
 		return isLoadingHttpResponse.get();
+	}
+
+	public BooleanProperty askedForLookupDatabasePermissionProperty() {
+		return askedForLookupDatabasePermission;
+	}
+
+	public boolean getAskedForLookupDatabasePermission() {
+		return askedForLookupDatabasePermission.get();
 	}
 
 }
