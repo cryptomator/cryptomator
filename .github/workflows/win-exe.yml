@@ -10,15 +10,15 @@ on:
         required: false
       isDebug:
         description: 'Build debug version with console output'
-        type: boolean 
+        type: boolean
 
 
 env:
   JAVA_VERSION: 20
   JAVA_DIST: 'temurin'
   JAVA_CACHE: 'maven'
-  JFX_JMODS_URL: 'https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_windows-x64_bin-jmods.zip'
-  JFX_JMODS_HASH: 'D00767334C43B8832B5CF10267D34CA8F563D187C4655B73EB6020DD79C054B5'
+  JFX_JMODS_URL: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip'
+  JFX_JMODS_HASH: '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
 
 defaults:
   run:

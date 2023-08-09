@@ -51,10 +51,10 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$jfxJmodsChecksum = 'd00767334c43b8832b5cf10267d34ca8f563d187c4655b73eb6020dd79c054b5'
+$jmodsUrl = "https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip"
+$jfxJmodsChecksum = '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
 $jfxJmodsZip = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $jfxJmodsZip) ) {
-	$jmodsUrl = "https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_windows-x64_bin-jmods.zip"
 	Write-Output "Downloading ${jmodsUrl}..."
 	Invoke-WebRequest $jmodsUrl -OutFile $jfxJmodsZip # redirects are followed by default
 }
