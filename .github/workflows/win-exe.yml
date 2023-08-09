@@ -359,7 +359,7 @@ jobs:
           cp msi/*.msi files
           cp exe/*.exe files
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
@@ -368,7 +368,7 @@ jobs:
           password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
           local-dir: files/
       - name: Upload to Avast
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           protocol: ftp
           server: whitelisting.avast.com
