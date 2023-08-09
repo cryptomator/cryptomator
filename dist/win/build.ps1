@@ -51,7 +51,8 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$jmodsUrl = "https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip"
+$jmodsVersion='20.0.2'
+$jmodsUrl = "https://download2.gluonhq.com/openjfx/${jmodsVersion}/openjfx-${jmodsVersion}_windows-x64_bin-jmods.zip"
 $jfxJmodsChecksum = '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
 $jfxJmodsZip = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $jfxJmodsZip) ) {
@@ -65,12 +66,13 @@ if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
 	exit 1;	
 }
 Expand-Archive -Force -Path $jfxJmodsZip -DestinationPath ".\resources\"
+Move-Item -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
-	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods-20.0.1" `
+	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
 	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
