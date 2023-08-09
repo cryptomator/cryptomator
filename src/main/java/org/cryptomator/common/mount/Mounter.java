@@ -99,7 +99,7 @@ public class Mounter {
 				var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
 				if (mpIsDriveLetter) {
 					if (driveLetters.getOccupied().contains(userChosenMountPoint)) {
-						throw new MountPointInUseException(userChosenMountPoint.toString());
+						throw new MountPointInUseException(userChosenMountPoint);
 					}
 				} else if (canMountToParent && !canMountToDir) {
 					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
@@ -115,13 +115,13 @@ public class Mounter {
 							|| (!canMountToParent && !mpIsDriveLetter) //
 							|| (!canMountToDir && !canMountToParent && !canMountToSystem && !canMountToDriveLetter);
 					if (configNotSupported) {
-						throw new MountPointNotSupportedException(e.getMessage());
+						throw new MountPointNotSupportedException(userChosenMountPoint, e.getMessage());
 					} else if (canMountToDir && !canMountToParent && !Files.exists(userChosenMountPoint)) {
 						//mountpoint must exist
-						throw new MountPointNotExistsException(e.getMessage());
+						throw new MountPointNotExistingException(userChosenMountPoint, e.getMessage());
 					} else {
 						//TODO: add specific exception for !canMountToDir && canMountToParent && !Files.notExists(userChosenMountPoint)
-						throw new IllegalMountPointException(e.getMessage());
+						throw new IllegalMountPointException(userChosenMountPoint, e.getMessage());
 					}
 				}
 			}
