@@ -102,9 +102,8 @@ public class ReceiveKeyController implements FxController {
 			switch (response.statusCode()) {
 				case 200 -> requestUserKey(response.body());
 				case 402 -> licenseExceeded();
-				case 403 -> accessNotGranted();
+				case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
 				case 404 -> requestLegacyAccessToken();
-				case 410 -> throw new IOException("Vault has been archived."); // TODO add dialog
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
@@ -188,9 +187,8 @@ public class ReceiveKeyController implements FxController {
 			switch (response.statusCode()) {
 				case 200 -> receivedLegacyAccessTokenSuccess(response.body());
 				case 402 -> licenseExceeded();
-				case 403 -> accessNotGranted();
+				case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access
 				case 404 -> needsLegacyDeviceRegistration();
-				case 410 -> throw new IOException("Vault has been archived."); // TODO add dialog
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
