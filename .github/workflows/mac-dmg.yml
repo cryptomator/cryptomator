@@ -45,6 +45,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           java-package: 'jdk+fx'
           architecture: ${{ matrix.architecture }}
+          check-latest: true
           cache: 'maven'
       - name: Ensure major jfx version in pom equals in jdk
         if: ${{ !contains(matrix.os, 'self-hosted') }}

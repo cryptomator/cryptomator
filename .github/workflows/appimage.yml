@@ -30,6 +30,7 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
           java-package: 'jdk+fx'
+          check-latest: true
           cache: 'maven'
       - name: Ensure major jfx version in pom equals in jdk
         shell: pwsh
