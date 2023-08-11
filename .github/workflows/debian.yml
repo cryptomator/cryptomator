@@ -51,6 +51,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
+          check-latest: true
           cache: 'maven'
       - name: Run maven
         run: mvn -B clean package -Pdependency-check,linux -DskipTests
