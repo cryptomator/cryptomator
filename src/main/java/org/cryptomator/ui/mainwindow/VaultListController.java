@@ -7,6 +7,8 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
@@ -34,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,12 +65,14 @@ public class VaultListController implements FxController {
 	private final RemoveVaultComponent.Builder removeVaultDialogue;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
+	private final ResourceBundle resourceBundle;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
+	public Button addVaultBtn;
 
 	@Inject
-	VaultListController(@MainWindow Stage mainWindow, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVaultDialogue, VaultListManager vaultListManager) {
+	VaultListController(@MainWindow Stage mainWindow, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVaultDialogue, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -72,6 +80,7 @@ public class VaultListController implements FxController {
 		this.addVaultWizard = addVaultWizard;
 		this.removeVaultDialogue = removeVaultDialogue;
 		this.vaultListManager = vaultListManager;
+		this.resourceBundle = resourceBundle;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -127,6 +136,24 @@ public class VaultListController implements FxController {
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
+
+		ContextMenu contextMenu = new ContextMenu();
+		FontAwesome5IconView addIcon = new FontAwesome5IconView();
+		addIcon.setGlyph(FontAwesome5Icon.PLUS);
+		MenuItem item1 = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.newButton"), addIcon);
+		FontAwesome5IconView openIcon = new FontAwesome5IconView();
+		openIcon.setGlyph(FontAwesome5Icon.FOLDER_OPEN);
+		MenuItem item2 = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.existingButton"), openIcon);
+		item2.setOnAction(event -> didClickAddVault());
+		contextMenu.getItems().addAll(item1, item2);
+		addVaultBtn.setContextMenu(contextMenu);
+	}
+
+	@FXML
+	private void showMenu() {
+		double screenX = addVaultBtn.localToScreen(addVaultBtn.getBoundsInLocal()).getMinX();
+		double screenY = addVaultBtn.localToScreen(addVaultBtn.getBoundsInLocal()).getMaxY();
+		addVaultBtn.getContextMenu().show(addVaultBtn, screenX, screenY);
 	}
 
 	private void deselect(MouseEvent released) {
