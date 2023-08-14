@@ -76,7 +76,7 @@ public class ReceiveKeyController implements FxController {
 			switch (response.statusCode()) {
 				case 200 -> retrievalSucceeded(response);
 				case 402 -> licenseExceeded();
-				case 403 -> accessNotGranted();
+				case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access
 				case 404 -> needsDeviceRegistration();
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}

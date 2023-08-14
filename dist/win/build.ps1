@@ -51,10 +51,11 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$jfxJmodsChecksum = 'd00767334c43b8832b5cf10267d34ca8f563d187c4655b73eb6020dd79c054b5'
+$jmodsVersion='20.0.2'
+$jmodsUrl = "https://download2.gluonhq.com/openjfx/${jmodsVersion}/openjfx-${jmodsVersion}_windows-x64_bin-jmods.zip"
+$jfxJmodsChecksum = '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
 $jfxJmodsZip = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $jfxJmodsZip) ) {
-	$jmodsUrl = "https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_windows-x64_bin-jmods.zip"
 	Write-Output "Downloading ${jmodsUrl}..."
 	Invoke-WebRequest $jmodsUrl -OutFile $jfxJmodsZip # redirects are followed by default
 }
@@ -65,12 +66,13 @@ if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
 	exit 1;	
 }
 Expand-Archive -Force -Path $jfxJmodsZip -DestinationPath ".\resources\"
+Move-Item -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
-	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods-20.0.1" `
+	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
 	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
@@ -102,6 +104,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
 	--app-version "$semVerNo.$revisionNo" `
 	--java-options "-Dfile.encoding=`"utf-8`"" `
+	--java-options "-Djava.net.useSystemProxies=true" `
 	--java-options "-Dcryptomator.logDir=`"@{localappdata}/$AppName`"" `
 	--java-options "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`"" `
 	--java-options "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`"" `

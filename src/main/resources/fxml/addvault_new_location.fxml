@@ -20,8 +20,8 @@
 	  alignment="CENTER_LEFT">
 	<fx:define>
 		<ToggleGroup fx:id="locationPresetsToggler"/>
-		<FontAwesome5IconView fx:id="badLocation" styleClass="glyph-icon-red" glyph="TIMES" />
-		<FontAwesome5IconView fx:id="goodLocation" styleClass="glyph-icon-primary" glyph="CHECK" />
+		<FontAwesome5IconView fx:id="badLocation" styleClass="glyph-icon-red" glyph="TIMES"/>
+		<FontAwesome5IconView fx:id="goodLocation" styleClass="glyph-icon-primary" glyph="CHECK"/>
 	</fx:define>
 	<padding>
 		<Insets topRightBottomLeft="24"/>
@@ -47,7 +47,7 @@
 		<VBox spacing="6">
 			<Label text="%addvaultwizard.new.locationLabel" labelFor="$locationTextField"/>
 			<TextField fx:id="locationTextField" promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" editable="false" disable="${!controller.anyRadioButtonSelected}" HBox.hgrow="ALWAYS"/>
-			<Label fx:id="locationStatusLabel" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" />
+			<Label fx:id="locationStatusLabel" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6"/>
 		</VBox>
 
 		<Region VBox.vgrow="ALWAYS"/>

@@ -10,15 +10,15 @@ on:
         required: false
       isDebug:
         description: 'Build debug version with console output'
-        type: boolean 
+        type: boolean
 
 
 env:
   JAVA_VERSION: 20
   JAVA_DIST: 'temurin'
   JAVA_CACHE: 'maven'
-  JFX_JMODS_URL: 'https://download2.gluonhq.com/openjfx/20.0.1/openjfx-20.0.1_windows-x64_bin-jmods.zip'
-  JFX_JMODS_HASH: 'D00767334C43B8832B5CF10267D34CA8F563D187C4655B73EB6020DD79C054B5'
+  JFX_JMODS_URL: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip'
+  JFX_JMODS_HASH: '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
 
 defaults:
   run:
@@ -45,12 +45,13 @@ jobs:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
           java-package: 'jdk'
+          check-latest: true
           cache: ${{ env.JAVA_CACHE }}
       - name: Download and extract JavaFX jmods from Gluon
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
           curl --output jfxjmods.zip -L "${{ env.JFX_JMODS_URL }}"
-          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.equals("${{ env.JFX_JMODS_HASH }}")) {
+          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.JFX_JMODS_HASH }}")) {
             throw "Wrong checksum of JMOD archive downloaded from ${{ env.JFX_JMODS_URL }}.";
           }
           Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
@@ -112,6 +113,7 @@ jobs:
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
           --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Djava.net.useSystemProxies=true"
           --java-options "-Dcryptomator.logDir=\"@{localappdata}/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"@{appdata}/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"@{appdata}/Cryptomator/settings.json;@{userhome}/AppData/Roaming/Cryptomator/settings.json\""
@@ -246,6 +248,7 @@ jobs:
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
+          check-latest: true
           cache: ${{ env.JAVA_CACHE }}
       - name: Generate license for exe
         run: >
@@ -363,7 +366,7 @@ jobs:
           cp msi/*.msi files
           cp exe/*.exe files
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
@@ -372,7 +375,7 @@ jobs:
           password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
           local-dir: files/
       - name: Upload to Avast
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           protocol: ftp
           server: whitelisting.avast.com

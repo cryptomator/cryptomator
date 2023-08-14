@@ -1,1 +1,3 @@
 usr/lib/cryptomator/bin/cryptomator usr/bin/cryptomator
+usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.tray.svg usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-symbolic.svg
+usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.tray-unlocked.svg usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-unlocked-symbolic.svg

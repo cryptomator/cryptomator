@@ -63,4 +63,11 @@
 		<cve>CVE-2023-35116</cve>
 	</suppress>
 
+	<suppress>
+		<notes><![CDATA[
+		False positive for jackrabbit-webdav-2.21.15.jar. This component is not affected, see https://lists.apache.org/thread/j03b3qdhborc2jrhdc4d765d3jkh8bfw
+   ]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.apache\.jackrabbit/jackrabbit\-webdav@.*$</packageUrl>
+		<cve>CVE-2023-37895</cve>
+	</suppress>
 </suppressions>

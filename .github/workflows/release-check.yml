@@ -18,7 +18,7 @@ jobs:
     name: Validate commits pushed to release/hotfix branch to fulfill release requirements
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: validate-pom-version
         name: Validate POM version
         run: |
