@@ -66,6 +66,7 @@
 		<dependency-check.version>8.3.1</dependency-check.version>
 		<jacoco.version>0.8.10</jacoco.version>
 		<license-generator.version>2.2.0</license-generator.version>
+		<junit-tree-reporter.version>1.2.1</junit-tree-reporter.version>
 		<mvn-compiler.version>3.11.0</mvn-compiler.version>
 		<mvn-resources.version>3.3.1</mvn-resources.version>
 		<mvn-dependency.version>3.6.0</mvn-dependency.version>
@@ -338,8 +339,22 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>me.fabriciorby</groupId>
+						<artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+						<version>${junit-tree-reporter.version}</version>
+					</dependency>
+				</dependencies>
 				<configuration>
 					<argLine>--enable-preview</argLine>
+					<reportFormat>plain</reportFormat>
+					<consoleOutputReporter>
+						<disable>true</disable>
+					</consoleOutputReporter>
+					<statelessTestsetInfoReporter
+							implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+					</statelessTestsetInfoReporter>
 				</configuration>
 			</plugin>
 			<plugin>
