@@ -54,6 +54,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           java-package: 'jdk'
           architecture: ${{ matrix.architecture }}
+          check-latest: true
           cache: 'maven'
       - name: Download OpenJFX jmods
         id: download-jmods
