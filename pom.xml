@@ -36,35 +36,35 @@
 		<cryptomator.cryptofs.version>2.6.7</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.3.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.2</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.2.0</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.mac.version>1.2.1</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.3.0-beta6</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>3.0.0</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>2.0.3</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
-		<commons-lang3.version>3.12.0</commons-lang3.version>
-		<dagger.version>2.45</dagger.version>
+		<commons-lang3.version>3.13.0</commons-lang3.version>
+		<dagger.version>2.47</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<guava.version>32.0.1-jre</guava.version>
+		<guava.version>32.1.2-jre</guava.version>
 		<jackson.version>2.15.2</jackson.version>
 		<javafx.version>20.0.2</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.31</nimbus-jose.version>
-		<logback.version>1.4.7</logback.version>
+		<logback.version>1.4.11</logback.version>
 		<slf4j.version>2.0.7</slf4j.version>
-		<tinyoauth2.version>0.5.1</tinyoauth2.version>
-		<zxcvbn.version>1.7.0</zxcvbn.version>
+		<tinyoauth2.version>0.6.0</tinyoauth2.version>
+		<zxcvbn.version>1.8.0</zxcvbn.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.9.3</junit.jupiter.version>
-		<mockito.version>5.3.1</mockito.version>
+		<junit.jupiter.version>5.10.0</junit.jupiter.version>
+		<mockito.version>5.4.0</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
 
 		<!-- build-time dependencies -->
-		<jetbrains.annotations.version>23.0.0</jetbrains.annotations.version>
-		<dependency-check.version>8.1.2</dependency-check.version>
-		<jacoco.version>0.8.9</jacoco.version>
+		<jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
+		<dependency-check.version>8.3.1</dependency-check.version>
+		<jacoco.version>0.8.10</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -240,7 +240,7 @@
 		<dependency>
 			<groupId>com.google.jimfs</groupId>
 			<artifactId>jimfs</artifactId>
-			<version>1.2</version>
+			<version>1.3.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -258,27 +258,27 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.10.1</version>
+					<version>3.11.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.3.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.6.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M7</version>
+					<version>3.1.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>2.0.0</version>
+					<version>2.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
