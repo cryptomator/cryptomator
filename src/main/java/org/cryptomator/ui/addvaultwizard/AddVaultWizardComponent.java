@@ -20,19 +20,10 @@ public interface AddVaultWizardComponent {
 	@AddVaultWizardWindow
 	Stage window();
 
-	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
-	Lazy<Scene> scene();
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	Lazy<Scene> sceneNew();
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
 	Lazy<Scene> sceneExisting();
-
-	default void showAddVaultWizard() {
-		Stage stage = window();
-		stage.setScene(scene().get());
-		stage.sizeToScene();
-		stage.show();
-	}
 
 	default void showAddNewVaultWizard() {
 		Stage stage = window();

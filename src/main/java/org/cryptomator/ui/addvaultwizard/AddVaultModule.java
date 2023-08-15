@@ -91,13 +91,6 @@ public abstract class AddVaultModule {
 	// ------------------
 
 	@Provides
-	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
-	@AddVaultWizardScoped
-	static Scene provideWelcomeScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_WELCOME);
-	}
-
-	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
 	@AddVaultWizardScoped
 	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
@@ -147,11 +140,6 @@ public abstract class AddVaultModule {
 	}
 
 	// ------------------
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(AddVaultWelcomeController.class)
-	abstract FxController bindWelcomeController(AddVaultWelcomeController controller);
 
 	@Binds
 	@IntoMap
