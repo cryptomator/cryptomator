@@ -184,11 +184,6 @@ public class VaultListController implements FxController {
 	}
 
 	@FXML
-	public void didClickAddVault() {
-		addVaultWizard.build().showAddVaultWizard();
-	}
-
-	@FXML
 	public void didClickAddExistingVault() {
 		addVaultWizard.build().showAddExistingVaultWizard();
 	}
