@@ -72,7 +72,14 @@ public class VaultListController implements FxController {
 	public Button addVaultBtn;
 
 	@Inject
-	VaultListController(@MainWindow Stage mainWindow, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVaultDialogue, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
+	VaultListController(@MainWindow Stage mainWindow, //
+						ObservableList<Vault> vaults, //
+						ObjectProperty<Vault> selectedVault, //
+						VaultListCellFactory cellFactory, //
+						AddVaultWizardComponent.Builder addVaultWizard, //
+						RemoveVaultComponent.Builder removeVaultDialogue, //
+						VaultListManager vaultListManager, //
+						ResourceBundle resourceBundle) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -141,10 +148,11 @@ public class VaultListController implements FxController {
 		FontAwesome5IconView addIcon = new FontAwesome5IconView();
 		addIcon.setGlyph(FontAwesome5Icon.PLUS);
 		MenuItem item1 = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.newButton"), addIcon);
+		item1.setOnAction(event -> didClickAddNewVault());
 		FontAwesome5IconView openIcon = new FontAwesome5IconView();
 		openIcon.setGlyph(FontAwesome5Icon.FOLDER_OPEN);
 		MenuItem item2 = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.existingButton"), openIcon);
-		item2.setOnAction(event -> didClickAddVault());
+		item2.setOnAction(event -> didClickAddExistingVault());
 		contextMenu.getItems().addAll(item1, item2);
 		addVaultBtn.setContextMenu(contextMenu);
 	}
@@ -171,8 +179,18 @@ public class VaultListController implements FxController {
 	}
 
 	@FXML
+	public void didClickAddNewVault() {
+		addVaultWizard.build().showAddNewVaultWizard();
+	}
+
+	@FXML
 	public void didClickAddVault() {
 		addVaultWizard.build().showAddVaultWizard();
+	}
+
+	@FXML
+	public void didClickAddExistingVault() {
+		addVaultWizard.build().showAddExistingVaultWizard();
 	}
 
 	private void pressedShortcutToRemoveVault() {
