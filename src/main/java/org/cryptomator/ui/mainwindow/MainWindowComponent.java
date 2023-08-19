@@ -26,6 +26,7 @@ public interface MainWindowComponent {
 	default Stage showMainWindow() {
 		Stage stage = window();
 		stage.setScene(scene().get());
+		stage.setIconified(false);
 		stage.show();
 		stage.toFront();
 		stage.requestFocus();
