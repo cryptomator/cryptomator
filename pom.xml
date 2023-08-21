@@ -54,7 +54,7 @@
 		<logback.version>1.4.11</logback.version>
 		<slf4j.version>2.0.7</slf4j.version>
 		<tinyoauth2.version>0.6.0</tinyoauth2.version>
-		<zxcvbn.version>1.8.0</zxcvbn.version>
+		<zxcvbn.version>1.8.2</zxcvbn.version>
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.10.0</junit.jupiter.version>
@@ -63,7 +63,7 @@
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
-		<dependency-check.version>8.3.1</dependency-check.version>
+		<dependency-check.version>8.4.0</dependency-check.version>
 		<jacoco.version>0.8.10</jacoco.version>
 		<license-generator.version>2.2.0</license-generator.version>
 		<junit-tree-reporter.version>1.2.1</junit-tree-reporter.version>
