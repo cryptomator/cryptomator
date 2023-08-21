@@ -34,6 +34,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
@@ -144,15 +145,29 @@ public class VaultListController implements FxController {
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
 
+		initAddVaultBtnContextMenu();
+	}
+
+	private void initAddVaultBtnContextMenu() {
 		ContextMenu contextMenu = new ContextMenu();
 		FontAwesome5IconView addIcon = new FontAwesome5IconView();
 		addIcon.setGlyph(FontAwesome5Icon.PLUS);
+		addIcon.setTextAlignment(TextAlignment.CENTER);
+		addIcon.setWrappingWidth(14);
+
 		MenuItem item1 = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.newButton"), addIcon);
 		item1.setOnAction(event -> didClickAddNewVault());
+		item1.getStyleClass().add("add-vault-menu-item");
+
 		FontAwesome5IconView openIcon = new FontAwesome5IconView();
 		openIcon.setGlyph(FontAwesome5Icon.FOLDER_OPEN);
+		openIcon.setTextAlignment(TextAlignment.CENTER);
+		openIcon.setWrappingWidth(14);
+
 		MenuItem item2 = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.existingButton"), openIcon);
 		item2.setOnAction(event -> didClickAddExistingVault());
+		item2.getStyleClass().add("add-vault-menu-item");
+
 		contextMenu.getItems().addAll(item1, item2);
 		addVaultBtn.setContextMenu(contextMenu);
 	}
