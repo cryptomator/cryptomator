@@ -97,6 +97,17 @@ public class ResizeController implements FxController {
 	}
 
 	private void checkDisplayBounds(WindowEvent evt) {
+
+		// Minimizing a window in Windows and closing it could result in an out of bounds position at (x, y) = (-32000, -32000)
+		// See https://devblogs.microsoft.com/oldnewthing/20041028-00/?p=37453
+		// If the position is (-32000, -32000), restore to the last saved position
+		if (window.getX() == -32000 && window.getY() == -32000) {
+			window.setX(settings.windowXPosition.get());
+			window.setY(settings.windowYPosition.get());
+			window.setWidth(settings.windowWidth.get());
+			window.setHeight(settings.windowHeight.get());
+		}
+
 		if (!isWithinDisplayBounds()) {
 			// If the position is illegal, then the window appears on the main screen in the middle of the window.
 			Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
