@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -145,30 +146,32 @@ public class VaultListController implements FxController {
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
 
-		initAddVaultBtnContextMenu();
+		createAddVaultContextMenu();
 	}
 
-	private void initAddVaultBtnContextMenu() {
+	private void createAddVaultContextMenu() {
 		ContextMenu contextMenu = new ContextMenu();
+		FontAwesome5IconView newIcon = new FontAwesome5IconView();
+		newIcon.setGlyph(FontAwesome5Icon.PLUS);
+		newIcon.setTextAlignment(TextAlignment.CENTER);
+		newIcon.setWrappingWidth(14);
+
+		MenuItem newVaultMenuItem = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.newButton"), newIcon);
+		newVaultMenuItem.setOnAction(event -> didClickAddNewVault());
+		newVaultMenuItem.getStyleClass().add("add-vault-menu-item");
+
 		FontAwesome5IconView addIcon = new FontAwesome5IconView();
-		addIcon.setGlyph(FontAwesome5Icon.PLUS);
+		addIcon.setGlyph(FontAwesome5Icon.FOLDER_OPEN);
 		addIcon.setTextAlignment(TextAlignment.CENTER);
 		addIcon.setWrappingWidth(14);
 
-		MenuItem item1 = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.newButton"), addIcon);
-		item1.setOnAction(event -> didClickAddNewVault());
-		item1.getStyleClass().add("add-vault-menu-item");
+		MenuItem existingVaultMenuItem = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.existingButton"), addIcon);
+		existingVaultMenuItem.setOnAction(event -> didClickAddExistingVault());
+		existingVaultMenuItem.getStyleClass().add("add-vault-menu-item");
 
-		FontAwesome5IconView openIcon = new FontAwesome5IconView();
-		openIcon.setGlyph(FontAwesome5Icon.FOLDER_OPEN);
-		openIcon.setTextAlignment(TextAlignment.CENTER);
-		openIcon.setWrappingWidth(14);
+		contextMenu.getItems().addAll(newVaultMenuItem, existingVaultMenuItem);
 
-		MenuItem item2 = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.existingButton"), openIcon);
-		item2.setOnAction(event -> didClickAddExistingVault());
-		item2.getStyleClass().add("add-vault-menu-item");
-
-		contextMenu.getItems().addAll(item1, item2);
+		addVaultBtn.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, Event::consume);
 		addVaultBtn.setContextMenu(contextMenu);
 	}
 
