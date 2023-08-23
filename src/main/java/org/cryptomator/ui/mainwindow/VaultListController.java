@@ -156,16 +156,16 @@ public class VaultListController implements FxController {
 		newIcon.setTextAlignment(TextAlignment.CENTER);
 		newIcon.setWrappingWidth(14);
 
-		MenuItem newVaultMenuItem = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.newButton"), newIcon);
+		MenuItem newVaultMenuItem = new MenuItem(resourceBundle.getString("main.vaultlist.addVaultBtn.menuItemNew"), newIcon);
 		newVaultMenuItem.setOnAction(event -> didClickAddNewVault());
 		newVaultMenuItem.getStyleClass().add("add-vault-menu-item");
 
-		FontAwesome5IconView addIcon = new FontAwesome5IconView();
-		addIcon.setGlyph(FontAwesome5Icon.FOLDER_OPEN);
-		addIcon.setTextAlignment(TextAlignment.CENTER);
-		addIcon.setWrappingWidth(14);
+		FontAwesome5IconView existingIcon = new FontAwesome5IconView();
+		existingIcon.setGlyph(FontAwesome5Icon.FOLDER_OPEN);
+		existingIcon.setTextAlignment(TextAlignment.CENTER);
+		existingIcon.setWrappingWidth(14);
 
-		MenuItem existingVaultMenuItem = new MenuItem(resourceBundle.getString("addvaultwizard.welcome.existingButton"), addIcon);
+		MenuItem existingVaultMenuItem = new MenuItem(resourceBundle.getString("main.vaultlist.addVaultBtn.menuItemExisting"), existingIcon);
 		existingVaultMenuItem.setOnAction(event -> didClickAddExistingVault());
 		existingVaultMenuItem.getStyleClass().add("add-vault-menu-item");
 
@@ -198,12 +198,12 @@ public class VaultListController implements FxController {
 
 	@FXML
 	public void didClickAddNewVault() {
-		addVaultWizard.build().showAddNewVaultWizard();
+		addVaultWizard.build().showAddNewVaultWizard(resourceBundle);
 	}
 
 	@FXML
 	public void didClickAddExistingVault() {
-		addVaultWizard.build().showAddExistingVaultWizard();
+		addVaultWizard.build().showAddExistingVaultWizard(resourceBundle);
 	}
 
 	private void pressedShortcutToRemoveVault() {

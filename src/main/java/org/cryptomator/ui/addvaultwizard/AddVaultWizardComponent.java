@@ -12,6 +12,7 @@ import org.cryptomator.ui.common.FxmlScene;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.util.ResourceBundle;
 
 @AddVaultWizardScoped
 @Subcomponent(modules = {AddVaultModule.class})
@@ -25,16 +26,18 @@ public interface AddVaultWizardComponent {
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
 	Lazy<Scene> sceneExisting();
 
-	default void showAddNewVaultWizard() {
+	default void showAddNewVaultWizard(ResourceBundle resourceBundle) {
 		Stage stage = window();
 		stage.setScene(sceneNew().get());
+		stage.setTitle(resourceBundle.getString("addvaultwizard.new.title"));
 		stage.sizeToScene();
 		stage.show();
 	}
 
-	default void showAddExistingVaultWizard() {
+	default void showAddExistingVaultWizard(ResourceBundle resourceBundle) {
 		Stage stage = window();
 		stage.setScene(sceneExisting().get());
+		stage.setTitle(resourceBundle.getString("addvaultwizard.existing.title"));
 		stage.sizeToScene();
 		stage.show();
 	}
