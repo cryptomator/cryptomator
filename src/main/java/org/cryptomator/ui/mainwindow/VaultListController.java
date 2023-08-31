@@ -7,8 +7,6 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.controls.FontAwesome5Icon;
-import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +23,7 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
@@ -35,7 +31,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
@@ -146,33 +141,7 @@ public class VaultListController implements FxController {
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
 
-		createAddVaultContextMenu();
-	}
-
-	private void createAddVaultContextMenu() {
-		ContextMenu contextMenu = new ContextMenu();
-		FontAwesome5IconView newIcon = new FontAwesome5IconView();
-		newIcon.setGlyph(FontAwesome5Icon.PLUS);
-		newIcon.setTextAlignment(TextAlignment.CENTER);
-		newIcon.setWrappingWidth(14);
-
-		MenuItem newVaultMenuItem = new MenuItem(resourceBundle.getString("main.vaultlist.addVaultBtn.menuItemNew"), newIcon);
-		newVaultMenuItem.setOnAction(event -> didClickAddNewVault());
-		newVaultMenuItem.getStyleClass().add("add-vault-menu-item");
-
-		FontAwesome5IconView existingIcon = new FontAwesome5IconView();
-		existingIcon.setGlyph(FontAwesome5Icon.FOLDER_OPEN);
-		existingIcon.setTextAlignment(TextAlignment.CENTER);
-		existingIcon.setWrappingWidth(14);
-
-		MenuItem existingVaultMenuItem = new MenuItem(resourceBundle.getString("main.vaultlist.addVaultBtn.menuItemExisting"), existingIcon);
-		existingVaultMenuItem.setOnAction(event -> didClickAddExistingVault());
-		existingVaultMenuItem.getStyleClass().add("add-vault-menu-item");
-
-		contextMenu.getItems().addAll(newVaultMenuItem, existingVaultMenuItem);
-
 		addVaultBtn.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, Event::consume);
-		addVaultBtn.setContextMenu(contextMenu);
 	}
 
 	@FXML
