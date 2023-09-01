@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 public class MainWindowSceneFactory extends DefaultSceneFactory {
 
 	protected static final KeyCodeCombination SHORTCUT_N = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
+	protected static final KeyCodeCombination SHORTCUT_O = new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN);
 
 	private final Lazy<MainWindowTitleController> mainWindowTitleController;
 	private final Lazy<VaultListController> vaultListController;
@@ -34,6 +35,7 @@ public class MainWindowSceneFactory extends DefaultSceneFactory {
 		} else {
 			scene.getAccelerators().put(SHORTCUT_W, mainWindowTitleController.get()::close);
 		}
-		scene.getAccelerators().put(SHORTCUT_N, vaultListController.get()::didClickAddVault);
+		scene.getAccelerators().put(SHORTCUT_N, vaultListController.get()::didClickAddNewVault);
+		scene.getAccelerators().put(SHORTCUT_O, vaultListController.get()::didClickAddExistingVault);
 	}
 }

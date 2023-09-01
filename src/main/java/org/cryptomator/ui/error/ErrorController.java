@@ -47,14 +47,15 @@ public class ErrorController implements FxController {
 	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
 	private static final String SEARCH_ERRORCODE_DELIM = " OR ";
 	private static final String REPORT_BODY_TEMPLATE = """
+			<!-- 💚 Thank you for reporting this error. -->
 			OS: %s / %s
 			App: %s / %s
 			
 			<!-- ✏ Please describe what happened as accurately as possible. -->
-			
-			<!-- 📋 Please also copy and paste the detail text from the error window. -->
-			
-			<!-- ℹ Text enclosed like this (chevrons, exclamation mark, two dashes) is not visible to others! -->
+			Description:
+				
+			<!-- 📋 Please also copy and paste the details from the error window. -->
+			Details:
 			
 			<!-- ❗ If the description or the detail text is missing, the discussion will be deleted. -->
 			""";
