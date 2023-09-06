@@ -8,7 +8,7 @@ updates:
       time: "06:00"
       timezone: "UTC"
     groups:
-      all: # one PR for all dependencies
+      maven-dependencies:
         patterns:
           - "*"
 
@@ -17,7 +17,7 @@ updates:
     schedule:
       interval: "monthly"
     groups:
-      all: # one PR for all actions
+      github-actions:
         patterns:
           - "*"
     labels:
