@@ -43,7 +43,6 @@ jobs:
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk'
           check-latest: true
           cache: 'maven'
       - name: Download and extract JavaFX jmods from Gluon
@@ -248,7 +247,7 @@ jobs:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
-          cache: ${{ env.JAVA_CACHE }}
+          cache: 'maven'
       - name: Generate license for exe
         run: >
           mvn -B license:add-third-party

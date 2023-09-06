@@ -32,7 +32,6 @@ jobs:
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk+fx'
           check-latest: true
           cache: 'maven'
 
