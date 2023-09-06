@@ -165,7 +165,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: appimage
+          name: appimage-${{ matrix.appimage-suffix }}
           path: |
             cryptomator-*.AppImage
             cryptomator-*.AppImage.zsync
