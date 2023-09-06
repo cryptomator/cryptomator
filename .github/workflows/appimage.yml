@@ -10,7 +10,10 @@ on:
         required: false
 
 env:
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: 20
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'f522ac2ae4bdd61f0219b7b8d2058ff72a22f36a44378453bcfdcd82f8f5e08c'
 
 jobs:
   get-version:
@@ -27,20 +30,32 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
           java-package: 'jdk+fx'
           check-latest: true
           cache: 'maven'
-      - name: Ensure major jfx version in pom equals in jdk
-        shell: pwsh
+
+      - name: Download OpenJFX jmods
+        id: download-jmods
         run: |
-          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
-          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
-            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
+          curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-jmods.zip
+          echo "${{ env.OPENJFX_JMODS_AMD64_HASH }} openjfx-jmods.zip" | shasum -a256 --check
+          mkdir -p openjfx-jmods
+          unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+      - name: Ensure major jfx version in pom and in jmods is the same
+        run: |
+          JMOD_VERSION_AMD64=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
+          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
+          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64%%.*}
+          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+          POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+
+          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION_AMD64})"
             exit 1
-          }
+          fi
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
@@ -54,7 +69,7 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${JAVA_HOME}/jmods"
+          --module-path "${JAVA_HOME}/jmods:openjfx-jmods"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net
           --strip-native-commands
           --no-header-files
