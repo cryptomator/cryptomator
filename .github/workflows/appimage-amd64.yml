@@ -39,7 +39,7 @@ jobs:
         id: download-jmods
         run: |
           curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-jmods.zip
-          echo "${{ env.OPENJFX_JMODS_AMD64_HASH }} openjfx-jmods.zip" | shasum -a256 --check
+          echo "${{ env.OPENJFX_JMODS_AMD64_HASH }}  openjfx-jmods.zip" | shasum -a256 --check
           mkdir -p openjfx-jmods
           unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
       - name: Ensure major jfx version in pom and in jmods is the same
