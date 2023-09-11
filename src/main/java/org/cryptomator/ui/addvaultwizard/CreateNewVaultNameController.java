@@ -17,7 +17,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import java.nio.file.Path;
-import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 @AddVaultWizardScoped
@@ -27,16 +26,17 @@ public class CreateNewVaultNameController implements FxController {
 
 	public TextField textField;
 	private final Stage window;
-	private final Lazy<Scene> welcomeScene;
 	private final Lazy<Scene> chooseLocationScene;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
 	private final BooleanBinding validVaultName;
 
 	@Inject
-	CreateNewVaultNameController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultNameController(@AddVaultWizardWindow Stage window, //
+								 @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, //
+								 ObjectProperty<Path> vaultPath, //
+								 @Named("vaultName") StringProperty vaultName) {
 		this.window = window;
-		this.welcomeScene = welcomeScene;
 		this.chooseLocationScene = chooseLocationScene;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
@@ -56,11 +56,6 @@ public class CreateNewVaultNameController implements FxController {
 				vaultPath.set(vaultPath.get().resolveSibling(vaultName.get()));
 			}
 		}
-	}
-
-	@FXML
-	public void back() {
-		window.setScene(welcomeScene.get());
 	}
 
 	@FXML

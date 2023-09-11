@@ -36,8 +36,8 @@ public class FxApplicationStyle {
 	}
 
 	public void initialize() {
-		settings.theme().addListener(this::appThemeChanged);
-		loadSelectedStyleSheet(settings.theme().get());
+		settings.theme.addListener(this::appThemeChanged);
+		loadSelectedStyleSheet(settings.theme.get());
 	}
 
 	private void appThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, @SuppressWarnings("unused") UiTheme oldValue, UiTheme newValue) {

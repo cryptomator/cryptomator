@@ -48,7 +48,7 @@ public class CreateNewVaultLocationController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
-	private final Lazy<Scene> choosePasswordScene;
+	private final Lazy<Scene> chooseExpertSettingsScene;
 	private final List<RadioButton> locationPresetBtns;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
@@ -68,10 +68,15 @@ public class CreateNewVaultLocationController implements FxController {
 	public FontAwesome5IconView badLocation;
 
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, //
+									 @FxmlScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS) Lazy<Scene> chooseExpertSettingsScene, //
+									 ObjectProperty<Path> vaultPath, //
+									 @Named("vaultName") StringProperty vaultName, //
+									 ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
-		this.choosePasswordScene = choosePasswordScene;
+		this.chooseExpertSettingsScene = chooseExpertSettingsScene;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
@@ -151,7 +156,7 @@ public class CreateNewVaultLocationController implements FxController {
 	@FXML
 	public void next() {
 		if (validVaultPath.getValue()) {
-			window.setScene(choosePasswordScene.get());
+			window.setScene(chooseExpertSettingsScene.get());
 		}
 	}
 

@@ -45,21 +45,21 @@ public class GeneralVaultOptionsController implements FxController {
 
 	@FXML
 	public void initialize() {
-		vaultName.textProperty().set(vault.getVaultSettings().displayName().get());
+		vaultName.textProperty().set(vault.getVaultSettings().displayName.get());
 		vaultName.focusedProperty().addListener(this::trimVaultNameOnFocusLoss);
 		vaultName.setTextFormatter(new TextFormatter<>(this::checkVaultNameLength));
-		unlockOnStartupCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().unlockAfterStartup());
+		unlockOnStartupCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().unlockAfterStartup);
 		actionAfterUnlockChoiceBox.getItems().addAll(WhenUnlocked.values());
-		actionAfterUnlockChoiceBox.valueProperty().bindBidirectional(vault.getVaultSettings().actionAfterUnlock());
+		actionAfterUnlockChoiceBox.valueProperty().bindBidirectional(vault.getVaultSettings().actionAfterUnlock);
 		actionAfterUnlockChoiceBox.setConverter(new WhenUnlockedConverter(resourceBundle));
-		lockAfterTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().autoLockWhenIdle());
-		Bindings.bindBidirectional(lockTimeInMinutesTextField.textProperty(), vault.getVaultSettings().autoLockIdleSeconds(), new IdleTimeSecondsConverter());
+		lockAfterTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().autoLockWhenIdle);
+		Bindings.bindBidirectional(lockTimeInMinutesTextField.textProperty(), vault.getVaultSettings().autoLockIdleSeconds, new IdleTimeSecondsConverter());
 	}
 
 	private void trimVaultNameOnFocusLoss(Observable observable, Boolean wasFocussed, Boolean isFocussed) {
 		if (!isFocussed) {
 			var trimmed = vaultName.getText().trim();
-			vault.getVaultSettings().displayName().set(trimmed);
+			vault.getVaultSettings().displayName.set(trimmed);
 		}
 	}
 

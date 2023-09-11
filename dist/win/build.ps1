@@ -12,6 +12,9 @@ Param(
 	[bool] $clean
 )
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
+
 # check preconditions
 if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
 {
@@ -26,7 +29,7 @@ if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
 
 $buildDir = Split-Path -Parent $PSCommandPath
 $version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
-$semVerNo = $version -replace '(\d\.\d\.\d).*','$1'
+$semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
 
 Write-Output "`$version=$version"
@@ -47,11 +50,30 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	Remove-Item -Path $runtimeImagePath -Force -Recurse
 }
 
+## download jfx jmods
+$jmodsVersion='20.0.2'
+$jmodsUrl = "https://download2.gluonhq.com/openjfx/${jmodsVersion}/openjfx-${jmodsVersion}_windows-x64_bin-jmods.zip"
+$jfxJmodsChecksum = '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
+$jfxJmodsZip = '.\resources\jfxJmods.zip'
+if( !(Test-Path -Path $jfxJmodsZip) ) {
+	Write-Output "Downloading ${jmodsUrl}..."
+	Invoke-WebRequest $jmodsUrl -OutFile $jfxJmodsZip # redirects are followed by default
+}
+
+$jmodsChecksumActual = $(Get-FileHash -Path $jfxJmodsZip -Algorithm SHA256).Hash
+if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
+	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $jfxJmodsChecksum, actual: $jmodsChecksumActual"
+	exit 1;	
+}
+Expand-Archive -Path $jfxJmodsZip -DestinationPath ".\resources\"
+Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
+
+
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
-	--module-path "$Env:JAVA_HOME/jmods" `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
+	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
@@ -82,15 +104,16 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
 	--app-version "$semVerNo.$revisionNo" `
 	--java-options "-Dfile.encoding=`"utf-8`"" `
-	--java-options "-Dcryptomator.logDir=`"~/AppData/Roaming/$AppName`"" `
-	--java-options "-Dcryptomator.pluginDir=`"~/AppData/Roaming/$AppName/Plugins`"" `
-	--java-options "-Dcryptomator.settingsPath=`"~/AppData/Roaming/$AppName/settings.json`"" `
-	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/$AppName/ipc.socket`"" `
-	--java-options "-Dcryptomator.p12Path=`"~/AppData/Roaming/$AppName/key.p12`"" `
-	--java-options "-Dcryptomator.mountPointsDir=`"~/$AppName`"" `
+	--java-options "-Djava.net.useSystemProxies=true" `
+	--java-options "-Dcryptomator.logDir=`"@{localappdata}/$AppName`"" `
+	--java-options "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`"" `
+	--java-options "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`"" `
+	--java-options "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`"" `
+	--java-options "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`"" `
+	--java-options "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`"" `
 	--java-options "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`"" `
 	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
-	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"~/AppData/Roaming/$AppName/keychain.json`"" `
+	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
@@ -151,8 +174,6 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
  "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # download Winfsp
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
 $winfspMsiUrl= (Select-String -Path ".\bundle\resources\winFspMetaData.wxi" -Pattern '<\?define BundledWinFspDownloadLink="(.+)".*?>').Matches.Groups[1].Value
 Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default

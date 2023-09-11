@@ -36,7 +36,7 @@ public class AutoUnlocker {
 
 	public void tryUnlockForTimespan(int timespan, TimeUnit timeUnit) {
 		// Unlock all available auto unlock vaults
-		Predicate<Vault> shouldAutoUnlock = v -> v.getVaultSettings().unlockAfterStartup().get();
+		Predicate<Vault> shouldAutoUnlock = v -> v.getVaultSettings().unlockAfterStartup.get();
 		unlockSequentially(vaults.stream().filter(shouldAutoUnlock)).thenRun(() -> startUnlockMissing(timespan, timeUnit));
 	}
 
@@ -80,6 +80,6 @@ public class AutoUnlocker {
 	private Stream<Vault> getMissingAutoUnlockVaults() {
 		return vaults.stream()
 				.filter(Vault::isMissing)
-				.filter(v -> v.getVaultSettings().unlockAfterStartup().get());
+				.filter(v -> v.getVaultSettings().unlockAfterStartup.get());
 	}
 }

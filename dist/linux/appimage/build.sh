@@ -16,7 +16,6 @@ mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 # compile
 mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
 cp ../../../LICENSE.txt ../../../target
-cp ../launcher.sh ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
 # add runtime
@@ -24,7 +23,7 @@ ${JAVA_HOME}/bin/jlink \
     --verbose \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
@@ -44,19 +43,21 @@ ${JAVA_HOME}/bin/jpackage \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
-    --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64" \
+    --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
     --copyright "(C) 2016 - 2023 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
-    --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\"" \
-    --java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\"" \
-    --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
-    --java-options "-Dcryptomator.p12Path=\"~/.config/Cryptomator/key.p12\"" \
-    --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\"" \
-    --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
-    --java-options "-Dcryptomator.showTrayIcon=false" \
+    --java-options "-Djava.net.useSystemProxies=true" \
+    --java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
+    --java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
+    --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json\"" \
+    --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
+    --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
+    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\"" \
+    --java-options "-Dcryptomator.showTrayIcon=true" \
+    --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\"" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
     --add-launcher cryptomator-gtk2=launcher-gtk2.properties \
     --resource-dir ../resources
@@ -68,6 +69,10 @@ envsubst '${REVISION_NO}' < resources/AppDir/bin/cryptomator.sh > Cryptomator.Ap
 cp ../common/org.cryptomator.Cryptomator256.png Cryptomator.AppDir/usr/share/icons/hicolor/256x256/apps/org.cryptomator.Cryptomator.png
 cp ../common/org.cryptomator.Cryptomator512.png Cryptomator.AppDir/usr/share/icons/hicolor/512x512/apps/org.cryptomator.Cryptomator.png
 cp ../common/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg
+cp ../common/org.cryptomator.Cryptomator.tray.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.tray.svg
+cp ../common/org.cryptomator.Cryptomator.tray-unlocked.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.tray-unlocked.svg
+cp ../common/org.cryptomator.Cryptomator.tray.svg Cryptomator.AppDir/usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-symbolic.svg
+cp ../common/org.cryptomator.Cryptomator.tray-unlocked.svg Cryptomator.AppDir/usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-unlocked-symbolic.svg
 cp ../common/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/usr/share/applications/org.cryptomator.Cryptomator.desktop
 cp ../common/org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/metainfo/org.cryptomator.Cryptomator.metainfo.xml
 cp ../common/application-vnd.cryptomator.vault.xml Cryptomator.AppDir/usr/share/mime/packages/application-vnd.cryptomator.vault.xml

@@ -5,6 +5,8 @@ import org.cryptomator.integrations.common.OperatingSystem;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
@@ -15,23 +17,25 @@ import static org.cryptomator.integrations.common.OperatingSystem.Value.WINDOWS;
 @CheckAvailability
 public final class GoogleDriveLocationPresetsProvider implements LocationPresetsProvider {
 
-	private static final Path LOCATION1 = LocationPresetsProvider.resolveLocation("~/GoogleDrive");
-	private static final Path LOCATION2 = LocationPresetsProvider.resolveLocation("~/GoogleDrive/My Drive");
-
+	private static final List<Path> LOCATIONS = Arrays.asList( //
+			LocationPresetsProvider.resolveLocation("~/GoogleDrive/My Drive"), //
+			LocationPresetsProvider.resolveLocation("~/Google Drive/My Drive"), //
+			LocationPresetsProvider.resolveLocation("~/GoogleDrive"), //
+			LocationPresetsProvider.resolveLocation("~/Google Drive") //
+	);
 
 	@CheckAvailability
 	public static boolean isPresent() {
-		return Files.isDirectory(LOCATION1) || Files.isDirectory(LOCATION2);
+		return LOCATIONS.stream().anyMatch(Files::isDirectory);
 	}
 
 	@Override
 	public Stream<LocationPreset> getLocations() {
-		if(Files.isDirectory(LOCATION1)) {
-			return Stream.of(new LocationPreset("Google Drive", LOCATION1));
-		} else if(Files.isDirectory(LOCATION2)) {
-			return Stream.of(new LocationPreset("Google Drive", LOCATION2));
-		} else {
-			return Stream.of();
-		}
+		return LOCATIONS.stream() //
+				.filter(Files::isDirectory) //
+				.map(location -> new LocationPreset("Google Drive", location)) //
+				.findFirst() //
+				.stream();
 	}
+
 }
