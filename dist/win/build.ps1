@@ -65,8 +65,8 @@ if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
 	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $jfxJmodsChecksum, actual: $jmodsChecksumActual"
 	exit 1;	
 }
-Expand-Archive -Force -Path $jfxJmodsZip -DestinationPath ".\resources\"
-Move-Item -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
+Expand-Archive -Path $jfxJmodsZip -DestinationPath ".\resources\"
+Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 
 & "$Env:JAVA_HOME\bin\jlink" `
