@@ -111,7 +111,7 @@ public class MountOptionsController implements FxController {
 		this.settings = settings;
 		this.mountProviders = mountProviders;
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		this.selectedMountService = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
 		this.fuseRestartRequired = selectedMountService.map(s -> {//
 			return firstUsedProblematicFuseMountService.get() != null //
 					&& MountModule.isProblematicFuseService(s) //
@@ -152,15 +152,15 @@ public class MountOptionsController implements FxController {
 		volumeTypeChoiceBox.getItems().add(null);
 		volumeTypeChoiceBox.getItems().addAll(mountProviders);
 		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
-		boolean autoSelected = settings.mountService.get() == null;
+		boolean autoSelected = vaultSettings.mountService.get() == null;
 		volumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue());
 		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvider, newProvider) -> {
 			var toSet = Optional.ofNullable(newProvider).map(nP -> nP.getClass().getName()).orElse(null);
-			settings.mountService.set(toSet);
+			vaultSettings.mountService.set(toSet);
 		});
 
-		loopbackPortField.setText(String.valueOf(settings.port.get()));
-		loopbackPortApplyButton.visibleProperty().bind(settings.port.asString().isNotEqualTo(loopbackPortField.textProperty()));
+		loopbackPortField.setText(String.valueOf(vaultSettings.port.get()));
+		loopbackPortApplyButton.visibleProperty().bind(vaultSettings.port.asString().isNotEqualTo(loopbackPortField.textProperty()));
 		loopbackPortApplyButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateLoopbackPort, loopbackPortField.textProperty()).not());
 
 	}
@@ -297,7 +297,7 @@ public class MountOptionsController implements FxController {
 
 	public void doChangeLoopbackPort() {
 		if (validateLoopbackPort()) {
-			settings.port.set(Integer.parseInt(loopbackPortField.getText()));
+			vaultSettings.port.set(Integer.parseInt(loopbackPortField.getText()));
 		}
 	}
 
