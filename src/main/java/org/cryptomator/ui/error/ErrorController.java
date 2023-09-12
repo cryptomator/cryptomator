@@ -42,7 +42,7 @@ public class ErrorController implements FxController {
 
 	private static final ObjectMapper JSON = new ObjectMapper();
 	private static final Logger LOG = LoggerFactory.getLogger(ErrorController.class);
-	private static final String ERROR_CODES_URL = "https://api.cryptomator.org/desktop/error-codes.json";
+	private static final String ERROR_CODES_URL = "https://api.cryptomator.org/desktop/error-codes.json?error-code=%s";
 	private static final String SEARCH_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/categories/errors?discussions_q=category:Errors+%s";
 	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
 	private static final String SEARCH_ERRORCODE_DELIM = " OR ";
@@ -146,7 +146,7 @@ public class ErrorController implements FxController {
 		askedForLookupDatabasePermission.set(true);
 		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
 		HttpRequest httpRequest = HttpRequest.newBuilder()//
-				.uri(URI.create(ERROR_CODES_URL))//
+				.uri(URI.create(ERROR_CODES_URL.formatted(errorCode.toString())))//
 				.build();
 		httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())//
 				.thenAcceptAsync(this::loadHttpResponse, executorService)//
