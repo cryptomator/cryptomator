@@ -146,7 +146,7 @@ public class ErrorController implements FxController {
 		askedForLookupDatabasePermission.set(true);
 		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
 		HttpRequest httpRequest = HttpRequest.newBuilder()//
-				.uri(URI.create(ERROR_CODES_URL.formatted(errorCode.toString())))//
+				.uri(URI.create(ERROR_CODES_URL.formatted(URLEncoder.encode(errorCode.toString(),StandardCharsets.UTF_8))))//
 				.build();
 		httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())//
 				.thenAcceptAsync(this::loadHttpResponse, executorService)//
