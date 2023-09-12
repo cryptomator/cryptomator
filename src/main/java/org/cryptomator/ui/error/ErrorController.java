@@ -6,6 +6,7 @@ import org.cryptomator.common.Environment;
 import org.cryptomator.common.ErrorCode;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,8 @@ public class ErrorController implements FxController {
 
 	private static final ObjectMapper JSON = new ObjectMapper();
 	private static final Logger LOG = LoggerFactory.getLogger(ErrorController.class);
-	private static final String ERROR_CODES_URL = "https://api.cryptomator.org/desktop/error-codes.json?error-code=%s";
+	private static final String USER_AGENT_VERSION_FORMAT = "Cryptomator/%s";
+	private static final String ERROR_CODES_URL_FORMAT = "https://api.cryptomator.org/desktop/error-codes.json?error-code=%s";
 	private static final String SEARCH_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/categories/errors?discussions_q=category:Errors+%s";
 	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
 	private static final String SEARCH_ERRORCODE_DELIM = " OR ";
@@ -67,6 +69,7 @@ public class ErrorController implements FxController {
 	private final Stage window;
 	private final Environment environment;
 	private final ExecutorService executorService;
+	private final UpdateChecker updateChecker;
 
 	private final BooleanProperty copiedDetails = new SimpleBooleanProperty();
 	private final ObjectProperty<ErrorDiscussion> matchingErrorDiscussion = new SimpleObjectProperty<>();
@@ -75,7 +78,7 @@ public class ErrorController implements FxController {
 	private final BooleanProperty askedForLookupDatabasePermission = new SimpleBooleanProperty();
 
 	@Inject
-	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window, Environment environment, ExecutorService executorService) {
+	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window, Environment environment, ExecutorService executorService, UpdateChecker updateChecker) {
 		this.application = application;
 		this.stackTrace = stackTrace;
 		this.errorCode = errorCode;
@@ -83,6 +86,7 @@ public class ErrorController implements FxController {
 		this.window = window;
 		this.environment = environment;
 		this.executorService = executorService;
+		this.updateChecker = updateChecker;
 	}
 
 	@FXML
@@ -146,7 +150,8 @@ public class ErrorController implements FxController {
 		askedForLookupDatabasePermission.set(true);
 		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
 		HttpRequest httpRequest = HttpRequest.newBuilder()//
-				.uri(URI.create(ERROR_CODES_URL.formatted(URLEncoder.encode(errorCode.toString(),StandardCharsets.UTF_8))))//
+				.header("User-Agent", USER_AGENT_VERSION_FORMAT.formatted(updateChecker.getCurrentVersion()))
+				.uri(URI.create(ERROR_CODES_URL_FORMAT.formatted(URLEncoder.encode(errorCode.toString(),StandardCharsets.UTF_8))))//
 				.build();
 		httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())//
 				.thenAcceptAsync(this::loadHttpResponse, executorService)//
