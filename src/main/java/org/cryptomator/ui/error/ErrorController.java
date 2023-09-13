@@ -42,7 +42,7 @@ public class ErrorController implements FxController {
 
 	private static final ObjectMapper JSON = new ObjectMapper();
 	private static final Logger LOG = LoggerFactory.getLogger(ErrorController.class);
-	private static final String USER_AGENT_VERSION_FORMAT = "Cryptomator/%s";
+	private static final String USER_AGENT_VERSION_FORMAT = "Cryptomator/%s (Build %s)";
 	private static final String ERROR_CODES_URL_FORMAT = "https://api.cryptomator.org/desktop/error-codes.json?error-code=%s";
 	private static final String SEARCH_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/categories/errors?discussions_q=category:Errors+%s";
 	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
@@ -147,7 +147,7 @@ public class ErrorController implements FxController {
 		askedForLookupDatabasePermission.set(true);
 		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
 		HttpRequest httpRequest = HttpRequest.newBuilder()//
-				.header("User-Agent", USER_AGENT_VERSION_FORMAT.formatted(environment.getAppVersion()))
+				.header("User-Agent", USER_AGENT_VERSION_FORMAT.formatted(environment.getAppVersion(),environment.getBuildNumber().orElse("undefined")))
 				.uri(URI.create(ERROR_CODES_URL_FORMAT.formatted(URLEncoder.encode(errorCode.toString(),StandardCharsets.UTF_8))))//
 				.build();
 		httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())//
