@@ -2,6 +2,7 @@ package org.cryptomator.common;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +129,7 @@ public class Environment {
 		return Optional.ofNullable(value).map(Paths::get);
 	}
 
-	// visible for testing
+	@VisibleForTesting
 	Stream<Path> getPaths(String propertyName) {
 		Stream<String> rawSettingsPaths = getRawList(propertyName, System.getProperty("path.separator").charAt(0));
 		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Path::of);

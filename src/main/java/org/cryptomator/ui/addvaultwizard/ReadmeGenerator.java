@@ -1,5 +1,7 @@
 package org.cryptomator.ui.addvaultwizard;
 
+import org.jetbrains.annotations.VisibleForTesting;
+
 import javax.inject.Inject;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -51,7 +53,7 @@ public class ReadmeGenerator {
 				resourceBundle.getString("addvault.new.readme.accessLocation.4")));
 	}
 
-	// visible for testing
+	@VisibleForTesting
 	String createDocument(Iterable<String> paragraphs) {
 		StringBuilder sb = new StringBuilder(RTF_HEADER);
 		for (String p : paragraphs) {
@@ -63,7 +65,7 @@ public class ReadmeGenerator {
 		return sb.toString();
 	}
 
-	// visible for testing
+	@VisibleForTesting
 	String escapeNonAsciiChars(CharSequence input) {
 		StringBuilder sb = new StringBuilder();
 		appendEscaped(sb, input);
