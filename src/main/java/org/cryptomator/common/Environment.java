@@ -43,15 +43,15 @@ public class Environment {
 		logCryptomatorSystemProperty(SETTINGS_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(IPC_SOCKET_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(KEYCHAIN_PATHS_PROP_NAME);
+		logCryptomatorSystemProperty(P12_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(LOG_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(LOOPBACK_ALIAS_PROP_NAME);
-		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(MOUNTPOINT_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(MIN_PW_LENGTH_PROP_NAME);
 		logCryptomatorSystemProperty(APP_VERSION_PROP_NAME);
 		logCryptomatorSystemProperty(BUILD_NUMBER_PROP_NAME);
+		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
-		logCryptomatorSystemProperty(P12_PATH_PROP_NAME);
 	}
 
 	public static Environment getInstance() {
@@ -74,16 +74,16 @@ public class Environment {
 		return getPaths(SETTINGS_PATH_PROP_NAME);
 	}
 
-	public Stream<Path> getP12Path() {
-		return getPaths(P12_PATH_PROP_NAME);
-	}
-
 	public Stream<Path> getIpcSocketPath() {
 		return getPaths(IPC_SOCKET_PATH_PROP_NAME);
 	}
 
 	public Stream<Path> getKeychainPath() {
 		return getPaths(KEYCHAIN_PATHS_PROP_NAME);
+	}
+
+	public Stream<Path> getP12Path() {
+		return getPaths(P12_PATH_PROP_NAME);
 	}
 
 	public Optional<Path> getLogDir() {
@@ -94,12 +94,12 @@ public class Environment {
 		return Optional.ofNullable(System.getProperty(LOOPBACK_ALIAS_PROP_NAME));
 	}
 
-	public Optional<Path> getPluginDir() {
-		return getPath(PLUGIN_DIR_PROP_NAME);
-	}
-
 	public Optional<Path> getMountPointsDir() {
 		return getPath(MOUNTPOINT_DIR_PROP_NAME);
+	}
+
+	public int getMinPwLength() {
+		return Integer.getInteger(MIN_PW_LENGTH_PROP_NAME, DEFAULT_MIN_PW_LENGTH);
 	}
 
 	/**
@@ -115,8 +115,8 @@ public class Environment {
 		return Optional.ofNullable(System.getProperty(BUILD_NUMBER_PROP_NAME));
 	}
 
-	public int getMinPwLength() {
-		return Integer.getInteger(MIN_PW_LENGTH_PROP_NAME, DEFAULT_MIN_PW_LENGTH);
+	public Optional<Path> getPluginDir() {
+		return getPath(PLUGIN_DIR_PROP_NAME);
 	}
 
 	public boolean showTrayIcon() {
