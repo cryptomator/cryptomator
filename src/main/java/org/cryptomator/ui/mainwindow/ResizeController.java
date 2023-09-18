@@ -90,17 +90,17 @@ public class ResizeController implements FxController {
 	}
 
 	private boolean isOutOfDisplayBounds() {
-		final int x = settings.windowXPosition.get();
-		final int y = settings.windowYPosition.get();
-		final int width = settings.windowWidth.get();
-		final int height = settings.windowHeight.get();
-		return isRectangleOutOfScreen(x + 20, y, 0, height) // Left pixel column (+20)
-				|| isRectangleOutOfScreen(x + width - 20, y, 0, height) // Right pixel column (-20)
-				|| isRectangleOutOfScreen(x, y + 5, width, 0) // Top pixel row (+5)
-				|| isRectangleOutOfScreen(x, y + height - 20, width, 0); // Bottom pixel row (-20)
+		final double x = window.getX() + 20;
+		final double y = window.getY() + 5;
+		final double width = window.getWidth() - 40; // Window width - inset right (20px) - inset left (20px)
+		final double height = window.getHeight() - 25; // Window height - inset top (5px) - inset bottom (20px)
+		return isRectangleOutOfScreen(x, y, 0, height) // Left pixel column (+20)
+				|| isRectangleOutOfScreen(x + width, y, 0, height) // Right pixel column (-20)
+				|| isRectangleOutOfScreen(x, y, width, 0) // Top pixel row (+5)
+				|| isRectangleOutOfScreen(x, y + height, width, 0); // Bottom pixel row (-20)
 	}
 
-	private boolean isRectangleOutOfScreen(int x, int y, int width, int height) {
+	private boolean isRectangleOutOfScreen(double x, double y, double width, double height) {
 		return Screen.getScreensForRectangle(x, y, width, height).isEmpty();
 	}
 
