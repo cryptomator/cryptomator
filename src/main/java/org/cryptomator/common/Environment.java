@@ -32,6 +32,7 @@ public class Environment {
 	private static final String BUILD_NUMBER_PROP_NAME = "cryptomator.buildNumber";
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
+	private static final String DISABLE_UPDATE_CHECK_PROP_NAME = "cryptomator.disableUpdateCheck";
 
 	private Environment() {}
 
@@ -53,6 +54,7 @@ public class Environment {
 		logCryptomatorSystemProperty(BUILD_NUMBER_PROP_NAME);
 		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
+		logCryptomatorSystemProperty(DISABLE_UPDATE_CHECK_PROP_NAME);
 	}
 
 	public static Environment getInstance() {
@@ -122,6 +124,10 @@ public class Environment {
 
 	public boolean showTrayIcon() {
 		return Boolean.getBoolean(TRAY_ICON_PROP_NAME);
+	}
+
+	public boolean disableUpdateCheck() {
+		return Boolean.getBoolean(DISABLE_UPDATE_CHECK_PROP_NAME);
 	}
 
 	private Optional<Path> getPath(String propertyName) {
