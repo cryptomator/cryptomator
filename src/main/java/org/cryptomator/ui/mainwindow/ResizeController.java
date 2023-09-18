@@ -90,14 +90,15 @@ public class ResizeController implements FxController {
 	}
 
 	private boolean isOutOfDisplayBounds() {
-		final double x = window.getX() + 20;
-		final double y = window.getY() + 5;
-		final double width = window.getWidth() - 40; // Window width - inset right (20px) - inset left (20px)
-		final double height = window.getHeight() - 25; // Window height - inset top (5px) - inset bottom (20px)
-		return isRectangleOutOfScreen(x, y, 0, height) // Left pixel column (+20)
-				|| isRectangleOutOfScreen(x + width, y, 0, height) // Right pixel column (-20)
-				|| isRectangleOutOfScreen(x, y, width, 0) // Top pixel row (+5)
-				|| isRectangleOutOfScreen(x, y + height, width, 0); // Bottom pixel row (-20)
+		// define a rect which is inset on all sides from the window's rect:
+		final double x = window.getX() + 20; // 20px left
+		final double y = window.getY() + 5; // 5px top
+		final double w = window.getWidth() - 40; // 20px left + 20px right
+		final double h = window.getHeight() - 25; // 5px top + 20px bottom
+		return isRectangleOutOfScreen(x, y, 0, h) // Left pixel column
+				|| isRectangleOutOfScreen(x + w, y, 0, h) // Right pixel column
+				|| isRectangleOutOfScreen(x, y, w, 0) // Top pixel row
+				|| isRectangleOutOfScreen(x, y + h, w, 0); // Bottom pixel row
 	}
 
 	private boolean isRectangleOutOfScreen(double x, double y, double width, double height) {
