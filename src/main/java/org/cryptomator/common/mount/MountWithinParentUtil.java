@@ -1,6 +1,7 @@
 package org.cryptomator.common.mount;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +67,7 @@ public final class MountWithinParentUtil {
 		}
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	static MountPointState getMountPointState(Path path) throws IOException, IllegalMountPointException {
 		if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
 			return MountPointState.NOT_EXISTING;
@@ -82,7 +83,7 @@ public final class MountWithinParentUtil {
 		return MountPointState.BROKEN_JUNCTION;
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	enum MountPointState {
 
 		NOT_EXISTING,
@@ -93,7 +94,7 @@ public final class MountWithinParentUtil {
 
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	static void removeResidualHideaway(Path mountPoint, Path hideaway) throws IOException {
 		checkIsHideawayDirectory(mountPoint, hideaway);
 		Files.delete(hideaway); //Fails if not empty
@@ -155,7 +156,7 @@ public final class MountWithinParentUtil {
 		}
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	static Path getHideaway(Path mountPoint) {
 		return mountPoint.resolveSibling(HIDEAWAY_PREFIX + mountPoint.getFileName().toString() + HIDEAWAY_SUFFIX);
 	}

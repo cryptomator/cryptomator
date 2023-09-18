@@ -8,6 +8,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
@@ -26,10 +28,26 @@
 				<Arc VBox.vgrow="NEVER" styleClass="onboarding-overlay-arc" type="OPEN" centerX="50" centerY="0" radiusY="100" radiusX="50" startAngle="0" length="-60" strokeWidth="1"/>
 			</VBox>
 		</StackPane>
-		<Button styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" onAction="#didClickAddVault" alignment="BASELINE_CENTER" maxWidth="Infinity">
+		<Button fx:id="addVaultBtn" onAction="#showMenu" styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" alignment="BASELINE_CENTER" maxWidth="Infinity" contentDisplay="RIGHT">
 			<graphic>
-				<FontAwesome5IconView glyph="PLUS"/>
+				<FontAwesome5IconView glyph="CARET_DOWN"/>
 			</graphic>
+			<contextMenu>
+				<ContextMenu>
+					<items>
+						<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault" >
+							<graphic>
+								<FontAwesome5IconView glyph="PLUS" textAlignment="CENTER" wrappingWidth="14" />
+							</graphic>
+						</MenuItem>
+						<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault" >
+							<graphic>
+								<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
+							</graphic>
+						</MenuItem>
+					</items>
+				</ContextMenu>
+			</contextMenu>
 		</Button>
 	</VBox>
 	<Region styleClass="drag-n-drop-border" visible="${controller.draggingVaultOver}"/>

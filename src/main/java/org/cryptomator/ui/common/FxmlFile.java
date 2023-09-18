@@ -8,7 +8,6 @@ public enum FxmlFile {
 	ADDVAULT_NEW_PASSWORD("/fxml/addvault_new_password.fxml"), //
 	ADDVAULT_NEW_RECOVERYKEY("/fxml/addvault_new_recoverykey.fxml"), //
 	ADDVAULT_SUCCESS("/fxml/addvault_success.fxml"), //
-	ADDVAULT_WELCOME("/fxml/addvault_welcome.fxml"), //
 	CHANGEPASSWORD("/fxml/changepassword.fxml"), //
 	CONVERTVAULT_HUBTOPASSWORD_START("/fxml/convertvault_hubtopassword_start.fxml"), //
 	CONVERTVAULT_HUBTOPASSWORD_CONVERT("/fxml/convertvault_hubtopassword_convert.fxml"), //

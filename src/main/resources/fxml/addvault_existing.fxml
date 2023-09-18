@@ -24,9 +24,8 @@
 
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<ButtonBar buttonMinWidth="120" buttonOrder="B+X">
+		<ButtonBar buttonMinWidth="120" buttonOrder="+X">
 			<buttons>
-				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
 				<Button fx:id="finishButton" text="%addvaultwizard.existing.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" onAction="#chooseFileAndNext" defaultButton="true"/>
 			</buttons>
 		</ButtonBar>

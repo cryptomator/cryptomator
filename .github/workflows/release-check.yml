@@ -6,9 +6,6 @@ on:
       - 'release/**'
       - 'hotfix/**'
 
-env:
-  JAVA_VERSION: 20
-
 defaults:
   run:
     shell: bash

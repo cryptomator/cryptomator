@@ -20,7 +20,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.DragEvent;
@@ -34,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,12 +62,21 @@ public class VaultListController implements FxController {
 	private final RemoveVaultComponent.Builder removeVaultDialogue;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
+	private final ResourceBundle resourceBundle;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
+	public Button addVaultBtn;
 
 	@Inject
-	VaultListController(@MainWindow Stage mainWindow, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVaultDialogue, VaultListManager vaultListManager) {
+	VaultListController(@MainWindow Stage mainWindow, //
+						ObservableList<Vault> vaults, //
+						ObjectProperty<Vault> selectedVault, //
+						VaultListCellFactory cellFactory, //
+						AddVaultWizardComponent.Builder addVaultWizard, //
+						RemoveVaultComponent.Builder removeVaultDialogue, //
+						VaultListManager vaultListManager, //
+						ResourceBundle resourceBundle) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -72,6 +84,7 @@ public class VaultListController implements FxController {
 		this.addVaultWizard = addVaultWizard;
 		this.removeVaultDialogue = removeVaultDialogue;
 		this.vaultListManager = vaultListManager;
+		this.resourceBundle = resourceBundle;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -127,6 +140,15 @@ public class VaultListController implements FxController {
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
+
+		addVaultBtn.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, Event::consume);
+	}
+
+	@FXML
+	private void showMenu() {
+		double screenX = addVaultBtn.localToScreen(addVaultBtn.getBoundsInLocal()).getMinX();
+		double screenY = addVaultBtn.localToScreen(addVaultBtn.getBoundsInLocal()).getMaxY();
+		addVaultBtn.getContextMenu().show(addVaultBtn, screenX, screenY);
 	}
 
 	private void deselect(MouseEvent released) {
@@ -144,8 +166,13 @@ public class VaultListController implements FxController {
 	}
 
 	@FXML
-	public void didClickAddVault() {
-		addVaultWizard.build().showAddVaultWizard();
+	public void didClickAddNewVault() {
+		addVaultWizard.build().showAddNewVaultWizard(resourceBundle);
+	}
+
+	@FXML
+	public void didClickAddExistingVault() {
+		addVaultWizard.build().showAddExistingVaultWizard(resourceBundle);
 	}
 
 	private void pressedShortcutToRemoveVault() {

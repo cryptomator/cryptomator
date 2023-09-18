@@ -4,6 +4,7 @@ on:
   pull_request:
 
 env:
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: 20
 
 defaults:
@@ -19,7 +20,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
       - name: Build and Test
