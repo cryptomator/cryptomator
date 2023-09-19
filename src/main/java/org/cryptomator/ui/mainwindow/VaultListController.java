@@ -144,8 +144,6 @@ public class VaultListController implements FxController {
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
-
-		addVaultBtn.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, Event::consume);
 	}
 
 	@FXML
