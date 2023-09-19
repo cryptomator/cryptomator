@@ -43,7 +43,7 @@ public class ErrorController implements FxController {
 
 	private static final ObjectMapper JSON = new ObjectMapper();
 	private static final Logger LOG = LoggerFactory.getLogger(ErrorController.class);
-	private static final String USER_AGENT_VERSION_FORMAT = "Cryptomator/%s (Build %s) %s %s (%s)";
+	private static final String USER_AGENT_FORMAT = "Cryptomator/%s (Build %s) (%s %s %s)";
 	private static final String ERROR_CODES_URL_FORMAT = "https://api.cryptomator.org/desktop/error-codes.json?error-code=%s";
 	private static final String SEARCH_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/categories/errors?discussions_q=category:Errors+%s";
 	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
@@ -144,7 +144,7 @@ public class ErrorController implements FxController {
 
 	@FXML
 	public void lookUpSolution() {
-		String userAgent = USER_AGENT_VERSION_FORMAT.formatted( //
+		String userAgent = USER_AGENT_FORMAT.formatted( //
 				environment.getAppVersion(), //
 				environment.getBuildNumber().orElse("undefined"), //
 				SystemUtils.OS_NAME, //
