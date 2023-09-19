@@ -32,23 +32,23 @@
 			<graphic>
 				<FontAwesome5IconView glyph="CARET_DOWN"/>
 			</graphic>
-			<contextMenu>
-				<ContextMenu>
-					<items>
-						<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault" >
-							<graphic>
-								<FontAwesome5IconView glyph="PLUS" textAlignment="CENTER" wrappingWidth="14" />
-							</graphic>
-						</MenuItem>
-						<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault" >
-							<graphic>
-								<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
-							</graphic>
-						</MenuItem>
-					</items>
-				</ContextMenu>
-			</contextMenu>
 		</Button>
+		<fx:define>
+			<ContextMenu fx:id="addVaultContextMenu">
+				<items>
+					<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault" >
+						<graphic>
+							<FontAwesome5IconView glyph="PLUS" textAlignment="CENTER" wrappingWidth="14" />
+						</graphic>
+					</MenuItem>
+					<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault" >
+						<graphic>
+							<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
+						</graphic>
+					</MenuItem>
+				</items>
+			</ContextMenu>
+		</fx:define>
 	</VBox>
 	<Region styleClass="drag-n-drop-border" visible="${controller.draggingVaultOver}"/>
 </StackPane>

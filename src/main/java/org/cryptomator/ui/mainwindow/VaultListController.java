@@ -22,7 +22,9 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.DragEvent;
@@ -67,6 +69,8 @@ public class VaultListController implements FxController {
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	public Button addVaultBtn;
+	@FXML
+	private ContextMenu addVaultContextMenu;
 
 	@Inject
 	VaultListController(@MainWindow Stage mainWindow, //
@@ -146,9 +150,11 @@ public class VaultListController implements FxController {
 
 	@FXML
 	private void showMenu() {
-		double screenX = addVaultBtn.localToScreen(addVaultBtn.getBoundsInLocal()).getMinX();
-		double screenY = addVaultBtn.localToScreen(addVaultBtn.getBoundsInLocal()).getMaxY();
-		addVaultBtn.getContextMenu().show(addVaultBtn, screenX, screenY);
+		if (addVaultContextMenu.isShowing()) {
+			addVaultContextMenu.hide();
+		} else {
+			addVaultContextMenu.show(addVaultBtn, Side.BOTTOM, 0.0, 0.0);
+		}
 	}
 
 	private void deselect(MouseEvent released) {
