@@ -28,7 +28,7 @@
 				<Arc VBox.vgrow="NEVER" styleClass="onboarding-overlay-arc" type="OPEN" centerX="50" centerY="0" radiusY="100" radiusX="50" startAngle="0" length="-60" strokeWidth="1"/>
 			</VBox>
 		</StackPane>
-		<Button fx:id="addVaultBtn" onAction="#showMenu" styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" alignment="BASELINE_CENTER" maxWidth="Infinity" contentDisplay="RIGHT">
+		<Button fx:id="addVaultBtn" onAction="#toggleMenu" styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" alignment="BASELINE_CENTER" maxWidth="Infinity" contentDisplay="RIGHT">
 			<graphic>
 				<FontAwesome5IconView glyph="CARET_DOWN"/>
 			</graphic>

@@ -20,7 +20,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.control.Button;
@@ -147,7 +146,7 @@ public class VaultListController implements FxController {
 	}
 
 	@FXML
-	private void showMenu() {
+	private void toggleMenu() {
 		if (addVaultContextMenu.isShowing()) {
 			addVaultContextMenu.hide();
 		} else {
