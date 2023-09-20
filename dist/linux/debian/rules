@@ -59,6 +59,7 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"/usr/share/icons/hicolor/symbolic/apps\"" \
 		--java-options "-Dcryptomator.buildNumber=\"deb-${REVISION_NUM}\"" \
 		--java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\"" \
+		--java-options "-Dcryptomator.disableUpdateCheck=\"${DISABLE_UPDATE_CHECK}\"" \
 		--app-version "${VERSION_NUM}.${REVISION_NUM}" \
 		--resource-dir resources \
 		--verbose
