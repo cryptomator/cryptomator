@@ -17,10 +17,6 @@ on:
 env:
   JAVA_DIST: 'temurin'
   JAVA_VERSION: 20
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '55b8ff7453d59c89ae129f6c9c5ad7b09a5d359568811b376ac1766c14d6a17c'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: 'c60f5f19aa847e0e620e0b011e5de68f2c6755641c2141cec27a0b89f612beaf'
 
 jobs:
   get-version:
@@ -41,15 +37,15 @@ jobs:
           output-suffix: x64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: macFUSE
-          openjfx-url: ${{ env.OPENJFX_JMODS_AMD64 }}
-          openjfx-sha: ${{ env.OPENJFX_JMODS_AMD64_HASH }}
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-x64_bin-jmods.zip'
+          openjfx-sha: '55b8ff7453d59c89ae129f6c9c5ad7b09a5d359568811b376ac1766c14d6a17c'
         - os: [self-hosted, macOS, ARM64]
           architecture: aarch64
           output-suffix: arm64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: FUSE-T
-          openjfx-url: ${{ env.OPENJFX_JMODS_AARCH64 }}
-          openjfx-sha: ${{ env.OPENJFX_JMODS_AARCH64_HASH }}
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: 'c60f5f19aa847e0e620e0b011e5de68f2c6755641c2141cec27a0b89f612beaf'
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -77,7 +73,7 @@ jobs:
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
           if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
-            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION_AMD64})"
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION})"
             exit 1
           fi
       - name: Set version

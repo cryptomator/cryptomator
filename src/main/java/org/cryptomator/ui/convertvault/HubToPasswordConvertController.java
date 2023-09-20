@@ -16,6 +16,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +117,7 @@ public class HubToPasswordConvertController implements FxController {
 				}, Platform::runLater); //
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	void convertInternal() throws CompletionException, IllegalArgumentException {
 		var passphrase = newPasswordController.getNewPassword();
 		var vaultPath = vault.getPath();
@@ -141,7 +142,7 @@ public class HubToPasswordConvertController implements FxController {
 		}
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	void backupHubConfig(Path hubConfigPath) throws IOException {
 		byte[] hubConfigBytes = Files.readAllBytes(hubConfigPath);
 		Path backupPath = hubConfigPath.resolveSibling(VAULTCONFIG_FILENAME + BackupHelper.generateFileIdSuffix(hubConfigBytes) + MASTERKEY_BACKUP_SUFFIX);
@@ -149,7 +150,7 @@ public class HubToPasswordConvertController implements FxController {
 		LOG.debug("Successfully created hub config backup {}", backupPath.getFileName());
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	Path createPasswordConfig(Path passwordConfigPath, Path masterkeyFile, Passphrase passphrase) throws IOException, MasterkeyLoadingFailedException {
 		var unverifiedVaultConfig = vault.getVaultConfigCache().get();
 		try (var masterkey = masterkeyFileAccess.load(masterkeyFile, passphrase)) {

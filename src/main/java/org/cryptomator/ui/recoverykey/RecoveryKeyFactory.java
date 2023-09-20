@@ -8,6 +8,7 @@ import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -58,7 +59,7 @@ public class RecoveryKeyFactory {
 		}
 	}
 
-	// visible for testing
+	@VisibleForTesting
 	String createRecoveryKey(byte[] rawKey) {
 		Preconditions.checkArgument(rawKey.length == 64, "key should be 64 bytes");
 		byte[] paddedKey = Arrays.copyOf(rawKey, 66);

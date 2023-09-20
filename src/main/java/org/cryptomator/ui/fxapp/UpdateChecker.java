@@ -22,23 +22,23 @@ public class UpdateChecker {
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateChecker.class);
 	private static final Duration AUTOCHECK_DELAY = Duration.seconds(5);
 
+	private final Environment env;
 	private final Settings settings;
-	private final String currentVersion;
 	private final StringProperty latestVersionProperty;
 	private final Comparator<String> semVerComparator;
 	private final ScheduledService<String> updateCheckerService;
 
 	@Inject
 	UpdateChecker(Settings settings, Environment env, @Named("latestVersion") StringProperty latestVersionProperty, @Named("SemVer") Comparator<String> semVerComparator, ScheduledService<String> updateCheckerService) {
+		this.env = env;
 		this.settings = settings;
 		this.latestVersionProperty = latestVersionProperty;
 		this.semVerComparator = semVerComparator;
 		this.updateCheckerService = updateCheckerService;
-		this.currentVersion = env.getAppVersion();
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
-		if (settings.checkForUpdates.get()) {
+		if (!env.disableUpdateCheck() && settings.checkForUpdates.get()) {
 			startCheckingForUpdates(AUTOCHECK_DELAY);
 		}
 	}
@@ -63,9 +63,9 @@ public class UpdateChecker {
 
 	private void checkSucceeded(WorkerStateEvent event) {
 		String latestVersion = updateCheckerService.getValue();
-		LOG.info("Current version: {}, lastest version: {}", currentVersion, latestVersion);
+		LOG.info("Current version: {}, lastest version: {}", getCurrentVersion(), latestVersion);
 
-		if (semVerComparator.compare(currentVersion, latestVersion) < 0) {
+		if (semVerComparator.compare(getCurrentVersion(), latestVersion) < 0) {
 			// update is available
 			latestVersionProperty.set(latestVersion);
 		} else {
@@ -88,7 +88,7 @@ public class UpdateChecker {
 	}
 
 	public String getCurrentVersion() {
-		return currentVersion;
+		return env.getAppVersion();
 	}
 
 }

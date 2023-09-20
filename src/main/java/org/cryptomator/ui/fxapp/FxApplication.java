@@ -1,6 +1,7 @@
 package org.cryptomator.ui.fxapp;
 
 import dagger.Lazy;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ public class FxApplication {
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
 
 	private final long startupTime;
+	private final Environment environment;
 	private final Settings settings;
 	private final AppLaunchEventHandler launchEventHandler;
 	private final Lazy<TrayMenuComponent> trayMenu;
@@ -26,8 +28,9 @@ public class FxApplication {
 	private final AutoUnlocker autoUnlocker;
 
 	@Inject
-	FxApplication(@Named("startupTime") long startupTime, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker) {
+	FxApplication(@Named("startupTime") long startupTime, Environment environment, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker) {
 		this.startupTime = startupTime;
+		this.environment = environment;
 		this.settings = settings;
 		this.launchEventHandler = launchEventHandler;
 		this.trayMenu = trayMenu;
@@ -68,7 +71,9 @@ public class FxApplication {
 			return null;
 		});
 
-		appWindows.checkAndShowUpdateReminderWindow();
+		if (!environment.disableUpdateCheck()) {
+			appWindows.checkAndShowUpdateReminderWindow();
+		}
 
 		launchEventHandler.startHandlingLaunchEvents();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
