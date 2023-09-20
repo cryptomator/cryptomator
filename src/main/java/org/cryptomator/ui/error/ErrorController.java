@@ -2,7 +2,6 @@ package org.cryptomator.ui.error;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.ErrorCode;
 import org.cryptomator.common.Nullable;
@@ -147,9 +146,9 @@ public class ErrorController implements FxController {
 		String userAgent = USER_AGENT_FORMAT.formatted( //
 				environment.getAppVersion(), //
 				environment.getBuildNumber().orElse("undefined"), //
-				SystemUtils.OS_NAME, //
-				SystemUtils.OS_VERSION, //
-				SystemUtils.OS_ARCH); //
+				System.getProperty("os.name"), //
+				System.getProperty("os.version"), //
+				System.getProperty("os.arch"));
 		isLoadingHttpResponse.set(true);
 		askedForLookupDatabasePermission.set(true);
 		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
