@@ -98,7 +98,8 @@ jobs:
         run: |
           cp -r dist/linux/debian/ pkgdir
           export RFC2822_TIMESTAMP=`date --rfc-2822`
-          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
+          export DISABLE_UPDATE_CHECK=${{ inputs.dput }}
+          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM} ${DISABLE_UPDATE_CHECK}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
           mv pkgdir cryptomator_${{ inputs.ppaver }}

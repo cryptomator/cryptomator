@@ -62,7 +62,7 @@ jobs:
           curl -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
           echo "${{ matrix.openjfx-sha }} *openjfx-jmods.zip" | shasum -a256 --check
           mkdir -p openjfx-jmods/
-          unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+          unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
       - name: Ensure major jfx version in pom and in jmods is the same
         run: |
           JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
@@ -72,7 +72,7 @@ jobs:
           POM_JFX_VERSION=${POM_JFX_VERSION#*@}
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
-          if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
+          if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
             >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION})"
             exit 1
           fi
@@ -222,7 +222,6 @@ jobs:
           --app-drop-link 512 245
           --eula "dist/mac/dmg/resources/license.rtf"
           --icon ".background" 128 758
-          --icon ".fseventsd" 320 758
           --icon ".VolumeIcon.icns" 512 758
           Cryptomator-${VERSION_NO}-${{ matrix.output-suffix }}.dmg dmg
         env:
