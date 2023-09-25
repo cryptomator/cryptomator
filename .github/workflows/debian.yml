@@ -17,7 +17,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: 21-ea
+  JAVA_VERSION: 21
   COFFEELIBS_JDK_VERSION: 21
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: 'f522ac2ae4bdd61f0219b7b8d2058ff72a22f36a44378453bcfdcd82f8f5e08c'

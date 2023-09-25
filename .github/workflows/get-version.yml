@@ -23,7 +23,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: 21-ea
+  JAVA_VERSION: 21
 
 jobs:
   determine-version:
