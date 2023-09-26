@@ -1,4 +1,5 @@
-
+$certificate = 'abc'
+$password = 'secret'
 $certificateSHA1 = 5FC94CE149E5B511E621F53A060AC67CBD446B3A
 $description = Cryptomator
 $timestampUrl = 'http://timestamp.digicert.com'
@@ -6,7 +7,14 @@ $folder = ".\appdir\Cryptomator"
 $tmpDir = ".\extract"
 $signtool = $(Get-ChildItem "C:/Program Files (x86)/Windows Kits/10/bin/" -Recurse -File signtool.exe | Where-Object { $_.Directory.ToString().EndsWith("x64")} | Select-Object -Last 1).FullName
 
+# preps
+# does this work on CI?
+Install-Module -Name Microsoft.PowerShell.TextUtility
+
 # import certificate
+$bytes = ConvertFrom-Base64 -EncodedText $certificate -AsByteArray
+Set-Content -Path $certificateFile -AsByteStream -Value $bytes
+& certutil -f -p $password -importpfx $certificateFile
 
 # create directory to extract every jar to
 New-Item -Path $tmpDir -ItemType Directory
