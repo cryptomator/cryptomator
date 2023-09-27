@@ -163,7 +163,7 @@ jobs:
           & certutil -f -p $password -importpfx ".\certFile"
 
           # create directory to extract every jar to
-          New-Item -Path $tmpDir -ItemType Directory
+          New-Item -Path $tmpDir -ItemType Directory > $null
           # iterate over all jars
           Get-ChildItem -Path $folder -Recurse -File *.jar | ForEach-Object {
               $jar = Copy-Item $_ -Destination $tmpDir -PassThru
