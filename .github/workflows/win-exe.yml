@@ -14,7 +14,7 @@ on:
 
 
 env:
-  JAVA_DIST: 'corretto'
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: 20
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
