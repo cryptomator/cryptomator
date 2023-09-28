@@ -184,6 +184,12 @@ jobs:
           # clean up
           Remove-Item -Path $tmpDir
         shell: pwsh
+      - name: Extract wixhelper.dll for Codesigning #see https://github.com/cryptomator/cryptomator/issues/3130
+        run: |
+          New-Item -Path appdir/jpackage-jmod -ItemType Directory
+          & $env:JAVA_HOME\bin\jmod.exe extract --dir jpackage-jmod "${env:JAVA_HOME}\jmods\jdk.jpackage.jmod"
+          Get-ChildItem -Recurse -Path "jpackage-jmod" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
+        shell: pwsh
       - name: Codesign
         uses: skymatic/code-sign-action@v2
         with:
@@ -192,7 +198,7 @@ jobs:
           certificatesha1: 5FC94CE149E5B511E621F53A060AC67CBD446B3A
           description: Cryptomator
           timestampUrl: 'http://timestamp.digicert.com'
-          folder: appdir/Cryptomator
+          folder: appdir
           recursive: true
       - name: Generate license for MSI
         run: >
@@ -227,6 +233,7 @@ jobs:
           --file-associations dist/win/resources/FAvaultFile.properties
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
+          JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
       - name: Codesign MSI
         uses: skymatic/code-sign-action@v2
         with:
