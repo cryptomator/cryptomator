@@ -48,9 +48,9 @@
 		<easybind.version>2.2</easybind.version>
 		<guava.version>32.1.2-jre</guava.version>
 		<jackson.version>2.15.2</jackson.version>
-		<javafx.version>20.0.2</javafx.version>
+		<javafx.version>21</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
-		<nimbus-jose.version>9.31</nimbus-jose.version>
+		<nimbus-jose.version>9.35</nimbus-jose.version>
 		<logback.version>1.4.11</logback.version>
 		<slf4j.version>2.0.9</slf4j.version>
 		<tinyoauth2.version>0.6.0</tinyoauth2.version>
