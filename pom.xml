@@ -44,7 +44,7 @@
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.13.0</commons-lang3.version>
-		<dagger.version>2.48</dagger.version>
+		<dagger.version>2.48.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<guava.version>32.1.2-jre</guava.version>
 		<jackson.version>2.15.2</jackson.version>
