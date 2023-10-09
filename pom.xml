@@ -44,13 +44,13 @@
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.13.0</commons-lang3.version>
-		<dagger.version>2.48</dagger.version>
+		<dagger.version>2.48.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<guava.version>32.1.2-jre</guava.version>
 		<jackson.version>2.15.2</jackson.version>
-		<javafx.version>20.0.2</javafx.version>
+		<javafx.version>21</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
-		<nimbus-jose.version>9.31</nimbus-jose.version>
+		<nimbus-jose.version>9.36</nimbus-jose.version>
 		<logback.version>1.4.11</logback.version>
 		<slf4j.version>2.0.9</slf4j.version>
 		<tinyoauth2.version>0.6.0</tinyoauth2.version>
@@ -58,7 +58,7 @@
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.10.0</junit.jupiter.version>
-		<mockito.version>5.5.0</mockito.version>
+		<mockito.version>5.6.0</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
 
 		<!-- build-time dependencies -->
