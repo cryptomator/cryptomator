@@ -45,9 +45,8 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, ResourceBundle resourceBundle) {
+	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(primaryStage);
@@ -89,13 +88,6 @@ public abstract class AddVaultModule {
 	}
 
 	// ------------------
-
-	@Provides
-	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
-	@AddVaultWizardScoped
-	static Scene provideWelcomeScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_WELCOME);
-	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
@@ -147,11 +139,6 @@ public abstract class AddVaultModule {
 	}
 
 	// ------------------
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(AddVaultWelcomeController.class)
-	abstract FxController bindWelcomeController(AddVaultWelcomeController controller);
 
 	@Binds
 	@IntoMap

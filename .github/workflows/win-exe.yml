@@ -14,11 +14,10 @@ on:
 
 
 env:
-  JAVA_VERSION: 20
   JAVA_DIST: 'temurin'
-  JAVA_CACHE: 'maven'
-  JFX_JMODS_URL: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip'
-  JFX_JMODS_HASH: '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
+  JAVA_VERSION: 20
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
 
 defaults:
   run:
@@ -38,21 +37,20 @@ jobs:
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk'
           check-latest: true
-          cache: ${{ env.JAVA_CACHE }}
+          cache: 'maven'
       - name: Download and extract JavaFX jmods from Gluon
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
-          curl --output jfxjmods.zip -L "${{ env.JFX_JMODS_URL }}"
-          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.JFX_JMODS_HASH }}")) {
-            throw "Wrong checksum of JMOD archive downloaded from ${{ env.JFX_JMODS_URL }}.";
+          curl --output jfxjmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
+          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
+            throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
           }
           Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
           Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
@@ -236,7 +234,7 @@ jobs:
     runs-on: windows-latest
     needs: [get-version, build-msi]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download .msi
         uses: actions/download-artifact@v3
         with:
@@ -249,7 +247,7 @@ jobs:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
-          cache: ${{ env.JAVA_CACHE }}
+          cache: 'maven'
       - name: Generate license for exe
         run: >
           mvn -B license:add-third-party

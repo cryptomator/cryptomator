@@ -63,10 +63,11 @@ if( !(Test-Path -Path $jfxJmodsZip) ) {
 $jmodsChecksumActual = $(Get-FileHash -Path $jfxJmodsZip -Algorithm SHA256).Hash
 if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
 	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $jfxJmodsChecksum, actual: $jmodsChecksumActual"
-	exit 1;	
+	exit 1;
 }
-Expand-Archive -Force -Path $jfxJmodsZip -DestinationPath ".\resources\"
-Move-Item -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
+Expand-Archive -Path $jfxJmodsZip -Force -DestinationPath ".\resources\"
+Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods"
+Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 
 & "$Env:JAVA_HOME\bin\jlink" `

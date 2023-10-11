@@ -6,9 +6,6 @@ on:
       - 'release/**'
       - 'hotfix/**'
 
-env:
-  JAVA_VERSION: 20
-
 defaults:
   run:
     shell: bash
@@ -18,7 +15,7 @@ jobs:
     name: Validate commits pushed to release/hotfix branch to fulfill release requirements
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: validate-pom-version
         name: Validate POM version
         run: |

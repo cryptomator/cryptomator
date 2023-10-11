@@ -16,16 +16,19 @@ on:
         type: boolean
 
 env:
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: 20
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'f522ac2ae4bdd61f0219b7b8d2058ff72a22f36a44378453bcfdcd82f8f5e08c'
   OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: 'c0d80ebbe0aab404ef9ad8b46c05bf533a1e40b39b2720eebd9238d81f6326ca'
 
 jobs:
   build:
     name: Build Debian Package
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: versions
         name: Get version information
         run: |
@@ -43,7 +46,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
           cache: 'maven'
@@ -53,9 +56,11 @@ jobs:
         id: download-jmods
         run: |
           curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
+          echo "${{ env.OPENJFX_JMODS_AMD64_HASH }}  openjfx-amd64.zip" | shasum -a256 --check
           mkdir -p jmods/amd64
           unzip -j openjfx-amd64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/amd64
           curl -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
+          echo "${{ env.OPENJFX_JMODS_AARCH64_HASH }}  openjfx-aarch64.zip" | shasum -a256 --check
           mkdir -p jmods/aarch64
           unzip -j openjfx-aarch64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/aarch64
       - name: Ensure major jfx version in pom and in jmods is the same
@@ -92,7 +97,8 @@ jobs:
         run: |
           cp -r dist/linux/debian/ pkgdir
           export RFC2822_TIMESTAMP=`date --rfc-2822`
-          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
+          export DISABLE_UPDATE_CHECK=${{ inputs.dput }}
+          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM} ${DISABLE_UPDATE_CHECK}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
           mv pkgdir cryptomator_${{ inputs.ppaver }}

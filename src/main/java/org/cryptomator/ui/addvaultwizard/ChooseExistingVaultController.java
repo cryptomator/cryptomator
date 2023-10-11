@@ -35,7 +35,6 @@ public class ChooseExistingVaultController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(ChooseExistingVaultController.class);
 
 	private final Stage window;
-	private final Lazy<Scene> welcomeScene;
 	private final Lazy<Scene> successScene;
 	private final FxApplicationWindows appWindows;
 	private final ObjectProperty<Path> vaultPath;
@@ -45,9 +44,15 @@ public class ChooseExistingVaultController implements FxController {
 	private final ObservableValue<Image> screenshot;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows appWindows, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle, FxApplicationStyle applicationStyle) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, //
+								  @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, //
+								  FxApplicationWindows appWindows, //
+								  ObjectProperty<Path> vaultPath, //
+								  @AddVaultWizardWindow ObjectProperty<Vault> vault, //
+								  VaultListManager vaultListManager, //
+								  ResourceBundle resourceBundle, //
+								  FxApplicationStyle applicationStyle) {
 		this.window = window;
-		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;
 		this.appWindows = appWindows;
 		this.vaultPath = vaultPath;
@@ -68,11 +73,6 @@ public class ChooseExistingVaultController implements FxController {
 			imageResourcePath = "/img/select-masterkey-win.png";
 		}
 		return new Image((Objects.requireNonNull(getClass().getResource(imageResourcePath)).toString()));
-	}
-
-	@FXML
-	public void back() {
-		window.setScene(welcomeScene.get());
 	}
 
 	@FXML

@@ -9,6 +9,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.SystemUtils;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -126,7 +127,7 @@ public class VaultSettings {
 		return json;
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	static String normalizeDisplayName(String original) {
 		if (original.isBlank() || ".".equals(original) || "..".equals(original)) {
 			return "_";

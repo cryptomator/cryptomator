@@ -65,7 +65,6 @@ public class Settings {
 	public final IntegerProperty windowYPosition;
 	public final IntegerProperty windowWidth;
 	public final IntegerProperty windowHeight;
-	public final StringProperty displayConfiguration;
 	public final StringProperty language;
 	public final StringProperty mountService;
 	public final StringProperty lastUpdateCheck;
@@ -103,7 +102,6 @@ public class Settings {
 		this.windowYPosition = new SimpleIntegerProperty(this, "windowYPosition", json.windowYPosition);
 		this.windowWidth = new SimpleIntegerProperty(this, "windowWidth", json.windowWidth);
 		this.windowHeight = new SimpleIntegerProperty(this, "windowHeight", json.windowHeight);
-		this.displayConfiguration = new SimpleStringProperty(this, "displayConfiguration", json.displayConfiguration);
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
 		this.lastUpdateCheck = new SimpleStringProperty(this, "lastUpdateCheck", json.lastUpdateCheck);
@@ -131,7 +129,6 @@ public class Settings {
 		windowYPosition.addListener(this::somethingChanged);
 		windowWidth.addListener(this::somethingChanged);
 		windowHeight.addListener(this::somethingChanged);
-		displayConfiguration.addListener(this::somethingChanged);
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
 		lastUpdateCheck.addListener(this::somethingChanged);
@@ -186,7 +183,6 @@ public class Settings {
 		json.windowYPosition = windowYPosition.get();
 		json.windowWidth = windowWidth.get();
 		json.windowHeight = windowHeight.get();
-		json.displayConfiguration = displayConfiguration.get();
 		json.language = language.get();
 		json.mountService = mountService.get();
 		json.lastUpdateCheck = lastUpdateCheck.get();

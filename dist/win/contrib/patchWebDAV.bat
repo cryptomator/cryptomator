@@ -3,5 +3,5 @@
 ::REPLACE ME
 
 cd %~dp0
-powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -Command .\patchWebDAV.ps1^
+powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -Command .\patchWebDAV.ps1^
  -LoopbackAlias %LOOPBACK_ALIAS%

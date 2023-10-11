@@ -6,6 +6,7 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ class FileOpenRequestHandler {
 		handleLaunchArgs(FileSystems.getDefault(), args);
 	}
 
-	// visible for testing
+	@VisibleForTesting
 	void handleLaunchArgs(FileSystem fs, List<String> args) {
 		Collection<Path> pathsToOpen = args.stream().map(str -> {
 			try {

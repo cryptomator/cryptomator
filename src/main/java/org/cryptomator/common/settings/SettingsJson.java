@@ -31,9 +31,6 @@ class SettingsJson {
 	@JsonProperty("theme")
 	UiTheme theme = Settings.DEFAULT_THEME;
 
-	@JsonProperty("displayConfiguration")
-	String displayConfiguration;
-
 	@JsonProperty("keychainProvider")
 	String keychainProvider = Settings.DEFAULT_KEYCHAIN_PROVIDER;
 

@@ -22,9 +22,8 @@ on:
         value: ${{ jobs.determine-version.outputs.type }}
 
 env:
-  JAVA_VERSION: 20
   JAVA_DIST: 'temurin'
-  JAVA_CACHE: 'maven'
+  JAVA_VERSION: 20
 
 jobs:
   determine-version:
@@ -36,7 +35,7 @@ jobs:
       revNum: ${{ steps.versions.outputs.revNum }}
       type: ${{ steps.versions.outputs.type}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Java
@@ -44,7 +43,7 @@ jobs:
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: ${{ env.JAVA_CACHE }}
+          cache: 'maven'
       - id: versions
         name: Get version information
         run: |

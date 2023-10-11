@@ -15,6 +15,7 @@ on:
         type: boolean
 
 env:
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: 20
 
 jobs:
@@ -36,23 +37,22 @@ jobs:
           output-suffix: x64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: macFUSE
-          openjfx-url: https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-x64_bin-jmods.zip
-          openjfx-sha: 55b8ff7453d59c89ae129f6c9c5ad7b09a5d359568811b376ac1766c14d6a17c
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-x64_bin-jmods.zip'
+          openjfx-sha: '55b8ff7453d59c89ae129f6c9c5ad7b09a5d359568811b376ac1766c14d6a17c'
         - os: [self-hosted, macOS, ARM64]
           architecture: aarch64
           output-suffix: arm64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: FUSE-T
-          openjfx-url: https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-aarch64_bin-jmods.zip
-          openjfx-sha: c60f5f19aa847e0e620e0b011e5de68f2c6755641c2141cec27a0b89f612beaf 
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: 'c60f5f19aa847e0e620e0b011e5de68f2c6755641c2141cec27a0b89f612beaf'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk'
           architecture: ${{ matrix.architecture }}
           check-latest: true
           cache: 'maven'
@@ -62,7 +62,7 @@ jobs:
           curl -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
           echo "${{ matrix.openjfx-sha }} *openjfx-jmods.zip" | shasum -a256 --check
           mkdir -p openjfx-jmods/
-          unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+          unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
       - name: Ensure major jfx version in pom and in jmods is the same
         run: |
           JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
@@ -72,8 +72,8 @@ jobs:
           POM_JFX_VERSION=${POM_JFX_VERSION#*@}
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
-          if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
-            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION_AMD64})"
+          if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION})"
             exit 1
           fi
       - name: Set version
@@ -222,7 +222,6 @@ jobs:
           --app-drop-link 512 245
           --eula "dist/mac/dmg/resources/license.rtf"
           --icon ".background" 128 758
-          --icon ".fseventsd" 320 758
           --icon ".VolumeIcon.icns" 512 758
           Cryptomator-${VERSION_NO}-${{ matrix.output-suffix }}.dmg dmg
         env:
