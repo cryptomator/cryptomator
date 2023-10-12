@@ -2,7 +2,7 @@ name: Update Error Database
 
 on:
   discussion:
-    types: [created, edited, category_changed, answered, unanswered]
+    types: [created, edited, deleted, category_changed, answered, unanswered]
   discussion_comment:
     types: [created, edited, deleted]
 
