@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.Configurator;
+import ch.qos.logback.classic.spi.ConfiguratorRank;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
@@ -19,6 +20,7 @@ import org.cryptomator.common.Environment;
 import java.nio.file.Path;
 import java.util.Map;
 
+@ConfiguratorRank(ConfiguratorRank.CUSTOM_NORMAL_PRIORITY)
 public class LogbackConfigurator extends ContextAwareBase implements Configurator {
 
 	private static final String LOG_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
