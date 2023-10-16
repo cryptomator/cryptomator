@@ -47,7 +47,7 @@
 		<dagger.version>2.48</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<guava.version>32.1.2-jre</guava.version>
-		<jackson.version>2.15.2</jackson.version>
+		<jackson.version>2.15.3</jackson.version>
 		<javafx.version>20.0.2</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.31</nimbus-jose.version>
