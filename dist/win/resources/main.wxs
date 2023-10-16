@@ -70,7 +70,7 @@
     <CustomAction Id="JpDisallowDowngrade" Error="!(loc.DowngradeErrorMessage)" />
     <?endif?>
 
-    <Binary Id="JpCaDll" SourceFile="wixhelper.dll"/>
+    <Binary Id="JpCaDll" SourceFile="$(env.JP_WIXHELPER_DIR)\wixhelper.dll"/>
     <CustomAction Id="JpFindRelatedProducts" BinaryKey="JpCaDll" DllEntry="FindRelatedProductsEx" />
 
     <?ifndef SkipCryptomatorLegacyCheck ?>

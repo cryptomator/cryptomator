@@ -144,6 +144,7 @@ try {
 
 # create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
+$Env:JP_WIXHELPER_DIR = "."
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
 	--type msi `
