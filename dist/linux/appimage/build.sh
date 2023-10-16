@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 cd $(dirname $0)
 REVISION_NO=`git rev-list --count HEAD`
@@ -10,6 +11,7 @@ command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found."; exit 1; }
 
 VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
+MACHINE_TYPE=$(uname -m)
 
 mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 
@@ -83,17 +85,17 @@ ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.App
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
 
 # load AppImageTool
-curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o /tmp/appimagetool.AppImage
+curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-${MACHINE_TYPE}.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage
 
 # create AppImage
 /tmp/appimagetool.AppImage \
     Cryptomator.AppDir \
-    cryptomator-${SEMVER_STR}-x86_64.AppImage  \
-    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
+    cryptomator-${SEMVER_STR}-${MACHINE_TYPE}.AppImage  \
+    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${MACHINE_TYPE}.AppImage.zsync'
 
 echo ""
-echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-x86_64.AppImage"
+echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${MACHINE_TYPE}.AppImage"
 echo ""
 echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir jni runtime squashfs-root; rm launcher-gtk2.properties /tmp/appimagetool.AppImage"
 echo ""

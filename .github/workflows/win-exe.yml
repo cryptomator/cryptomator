@@ -37,7 +37,7 @@ jobs:
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -234,7 +234,7 @@ jobs:
     runs-on: windows-latest
     needs: [get-version, build-msi]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download .msi
         uses: actions/download-artifact@v3
         with:
