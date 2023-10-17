@@ -20,11 +20,8 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Module
 public abstract class UpdateCheckerModule {
