@@ -8,6 +8,8 @@ import io.github.coffeelibs.tinyoauth2client.http.response.Response;
 import javafx.concurrent.Task;
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.function.Consumer;
 
 class AuthFlowTask extends Task<String> {
@@ -37,7 +39,8 @@ class AuthFlowTask extends Task<String> {
 				.authFlow(URI.create(hubConfig.authEndpoint)) //
 				.setSuccessResponse(Response.redirect(URI.create(hubConfig.authSuccessUrl + "&device=" + authFlowContext.deviceId()))) //
 				.setErrorResponse(Response.redirect(URI.create(hubConfig.authErrorUrl + "&device=" + authFlowContext.deviceId()))) //
-				.authorize(redirectUriConsumer);
+				.authorize(HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build(),
+						redirectUriConsumer);
 		if (response.statusCode() != 200) {
 			throw new NotOkResponseException("Authorization returned status code " + response.statusCode());
 		}

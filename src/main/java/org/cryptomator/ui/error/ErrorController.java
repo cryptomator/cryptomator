@@ -31,6 +31,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
@@ -154,6 +155,7 @@ public class ErrorController implements FxController {
 		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
 		HttpRequest httpRequest = HttpRequest.newBuilder()//
 				.header("User-Agent", userAgent)
+				.timeout(Duration.ofSeconds(5))
 				.uri(URI.create(ERROR_CODES_URL_FORMAT.formatted(URLEncoder.encode(errorCode.toString(),StandardCharsets.UTF_8))))//
 				.build();
 		httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())//
