@@ -63,9 +63,10 @@ if( !(Test-Path -Path $jfxJmodsZip) ) {
 $jmodsChecksumActual = $(Get-FileHash -Path $jfxJmodsZip -Algorithm SHA256).Hash
 if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
 	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $jfxJmodsChecksum, actual: $jmodsChecksumActual"
-	exit 1;	
+	exit 1;
 }
-Expand-Archive -Path $jfxJmodsZip -DestinationPath ".\resources\"
+Expand-Archive -Path $jfxJmodsZip -Force -DestinationPath ".\resources\"
+Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods"
 Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 
@@ -143,6 +144,7 @@ try {
 
 # create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
+$Env:JP_WIXHELPER_DIR = "."
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
 	--type msi `
