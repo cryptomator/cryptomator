@@ -108,8 +108,7 @@ public class SetupDeviceController implements FxController {
 	public void register() {
 		workInProgress.set(true);
 
-		var apiRootUrl = URI.create(hubConfig.devicesResourceUrl + "/..").normalize(); // TODO: add url to vault config file, only use this as a fallback for legacy vaults
-		var deviceUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
+		var apiRootUrl = hubConfig.getApiBaseUrl();
 		var deviceKey = deviceKeyPair.getPublic().getEncoded();
 
 		var userReq = HttpRequest.newBuilder(apiRootUrl.resolve("users/me")) //
@@ -137,6 +136,7 @@ public class SetupDeviceController implements FxController {
 					var now = Instant.now().toString();
 					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64().encode(deviceKey), "DESKTOP", jwe.serialize(), now);
 					var json = toJson(dto);
+					var deviceUri = apiRootUrl.resolve("devices/" + deviceId);
 					var putDeviceReq = HttpRequest.newBuilder(deviceUri) //
 							.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 							.header("Authorization", "Bearer " + bearerToken) //

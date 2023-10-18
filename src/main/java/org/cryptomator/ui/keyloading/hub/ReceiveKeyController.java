@@ -111,7 +111,7 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 2 (Request): GET user key for this device
 	 */
 	private void requestUserKey(String encryptedVaultKey) {
-		var deviceTokenUri = appendPath(URI.create(hubConfig.devicesResourceUrl), "/" + deviceId);
+		var deviceTokenUri = URI.create(hubConfig.getApiBaseUrl() + "/devices/" + deviceId);
 		var request = HttpRequest.newBuilder(deviceTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -241,10 +241,10 @@ public class ReceiveKeyController implements FxController {
 
 	private static URI getVaultBaseUri(Vault vault) {
 		try {
-			var kid = vault.getVaultConfigCache().get().getKeyId();
-			assert kid.getScheme().startsWith(SCHEME_PREFIX);
-			var hubUriScheme = kid.getScheme().substring(SCHEME_PREFIX.length());
-			return new URI(hubUriScheme, kid.getSchemeSpecificPart(), kid.getFragment());
+			var url = vault.getVaultConfigCache().get().getKeyId();
+			assert url.getScheme().startsWith(SCHEME_PREFIX);
+			var correctedScheme = url.getScheme().substring(SCHEME_PREFIX.length());
+			return new URI(correctedScheme, url.getSchemeSpecificPart(), url.getFragment());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} catch (URISyntaxException e) {
