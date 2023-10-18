@@ -15,7 +15,7 @@
 <?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.hub.SetupDeviceController"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.RegisterDeviceController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"

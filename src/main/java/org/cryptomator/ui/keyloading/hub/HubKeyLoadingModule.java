@@ -169,8 +169,8 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(SetupDeviceController.class)
-	abstract FxController bindSetupDeviceController(SetupDeviceController controller);
+	@FxControllerKey(RegisterDeviceController.class)
+	abstract FxController bindSetupDeviceController(RegisterDeviceController controller);
 
 	@Binds
 	@IntoMap
