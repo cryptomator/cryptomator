@@ -22,8 +22,8 @@ on:
         value: ${{ jobs.determine-version.outputs.type }}
 
 env:
-  JAVA_DIST: 'temurin'
-  JAVA_VERSION: 20
+  JAVA_DIST: 'zulu'
+  JAVA_VERSION: 21
 
 jobs:
   determine-version:
