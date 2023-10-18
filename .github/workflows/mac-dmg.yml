@@ -15,8 +15,8 @@ on:
         type: boolean
 
 env:
-  JAVA_DIST: 'temurin'
-  JAVA_VERSION: 20
+  JAVA_DIST: 'zulu'
+  JAVA_VERSION: 21
 
 jobs:
   get-version:
