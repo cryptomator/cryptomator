@@ -17,7 +17,7 @@ interface ReceivedKey {
 	Masterkey decryptMasterkey(ECPrivateKey deviceKey);
 
 	/**
-	 * Creates an unlock response object from the received legacy "access token" JWE.
+	 * Creates an unlock response object from the user key + vault key.
 	 *
 	 * @param vaultKeyJwe a JWE containing the symmetric vault key, encrypted for this device's user.
 	 * @param userKeyJwe a JWE containing the user's private key, encrypted for this device.

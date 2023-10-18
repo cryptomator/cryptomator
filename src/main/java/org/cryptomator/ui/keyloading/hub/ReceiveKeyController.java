@@ -98,16 +98,12 @@ public class ReceiveKeyController implements FxController {
 	 */
 	private void receivedVaultMasterkey(HttpResponse<String> response) {
 		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
-		try {
-			switch (response.statusCode()) {
-				case 200 -> requestUserKey(response.body());
-				case 402 -> licenseExceeded();
-				case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
-				case 404 -> requestLegacyAccessToken();
-				default -> throw new IOException("Unexpected response " + response.statusCode());
-			}
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+		switch (response.statusCode()) {
+			case 200 -> requestUserKey(response.body());
+			case 402 -> licenseExceeded();
+			case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
+			case 404 -> requestLegacyAccessToken();
+			default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
 		}
 	}
 
@@ -115,7 +111,7 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 2 (Request): GET user key for this device
 	 */
 	private void requestUserKey(String encryptedVaultKey) {
-		var deviceTokenUri = appendPath(URI.create(hubConfig.devicesResourceUrl), "/%s".formatted(deviceId));
+		var deviceTokenUri = appendPath(URI.create(hubConfig.devicesResourceUrl), "/" + deviceId);
 		var request = HttpRequest.newBuilder(deviceTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -139,7 +135,7 @@ public class ReceiveKeyController implements FxController {
 					receivedBothEncryptedKeys(encryptedVaultKey, device.userPrivateKey);
 				}
 				case 404 -> needsDeviceSetup(); // TODO: using the setup code, we can theoretically immediately unlock
-				default -> throw new IOException("Unexpected response " + response.statusCode());
+				default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
@@ -166,7 +162,7 @@ public class ReceiveKeyController implements FxController {
 	 */
 	@Deprecated
 	private void requestLegacyAccessToken() {
-		var legacyAccessTokenUri = appendPath(vaultBaseUri, "/keys/%s".formatted(deviceId));
+		var legacyAccessTokenUri = appendPath(vaultBaseUri, "/keys/" + deviceId);
 		var request = HttpRequest.newBuilder(legacyAccessTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //

@@ -85,11 +85,13 @@ public class SetupDeviceController implements FxController {
 
 	public void initialize() {
 		deviceNameField.setText(determineHostname());
-		deviceNameField.textProperty().addListener(observable -> deviceNameAlreadyExists.set(false));
+		deviceNameField.textProperty().addListener(_ -> deviceNameAlreadyExists.set(false));
 		deviceNameField.disableProperty().bind(workInProgress);
-		setupCodeField.textProperty().addListener(observable -> invalidSetupCode.set(false));
+		setupCodeField.textProperty().addListener(_ -> invalidSetupCode.set(false));
 		setupCodeField.disableProperty().bind(workInProgress);
-		registerBtn.disableProperty().bind(workInProgress.or(setupCodeField.textProperty().isEmpty()).or(deviceNameField.textProperty().isEmpty()));
+		var missingSetupCode = setupCodeField.textProperty().isEmpty();
+		var missingDeviceName = deviceNameField.textProperty().isEmpty();
+		registerBtn.disableProperty().bind(workInProgress.or(missingSetupCode).or(missingDeviceName));
 		registerBtn.contentDisplayProperty().bind(Bindings.when(workInProgress).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY));
 	}
 
