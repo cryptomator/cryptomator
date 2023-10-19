@@ -115,7 +115,7 @@ public abstract class HubKeyLoadingModule {
 	@Provides
 	@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE)
 	@KeyLoadingScoped
-	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+	static Scene provideHubLegacyRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE);
 	}
 
@@ -136,7 +136,7 @@ public abstract class HubKeyLoadingModule {
 	@Provides
 	@FxmlScene(FxmlFile.HUB_SETUP_DEVICE)
 	@KeyLoadingScoped
-	static Scene provideHubSetupDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_SETUP_DEVICE);
 	}
 
@@ -170,7 +170,7 @@ public abstract class HubKeyLoadingModule {
 	@Binds
 	@IntoMap
 	@FxControllerKey(RegisterDeviceController.class)
-	abstract FxController bindSetupDeviceController(RegisterDeviceController controller);
+	abstract FxController bindRegisterDeviceController(RegisterDeviceController controller);
 
 	@Binds
 	@IntoMap

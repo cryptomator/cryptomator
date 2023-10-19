@@ -109,7 +109,6 @@ public class RegisterDeviceController implements FxController {
 		workInProgress.set(true);
 
 		var apiRootUrl = hubConfig.getApiBaseUrl();
-		var deviceKey = deviceKeyPair.getPublic().getEncoded();
 
 		var userReq = HttpRequest.newBuilder(apiRootUrl.resolve("users/me")) //
 				.GET() //
@@ -135,7 +134,7 @@ public class RegisterDeviceController implements FxController {
 					}
 				}).thenCompose(jwe -> {
 					var now = Instant.now().toString();
-					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64().encode(deviceKey), "DESKTOP", jwe.serialize(), now);
+					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64().encode(deviceKeyPair.getPublic().getEncoded()), "DESKTOP", jwe.serialize(), now);
 					var json = toJson(dto);
 					var deviceUri = apiRootUrl.resolve("devices/" + deviceId);
 					var putDeviceReq = HttpRequest.newBuilder(deviceUri) //
