@@ -37,6 +37,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -49,6 +50,7 @@ public class RegisterDeviceController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RegisterDeviceController.class);
 	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
+	private static final Duration REQ_TIMEOUT = Duration.ofSeconds(10);
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -111,6 +113,7 @@ public class RegisterDeviceController implements FxController {
 
 		var userReq = HttpRequest.newBuilder(apiRootUrl.resolve("users/me")) //
 				.GET() //
+				.timeout(REQ_TIMEOUT) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.header("Content-Type", "application/json") //
 				.build();
@@ -137,6 +140,7 @@ public class RegisterDeviceController implements FxController {
 					var deviceUri = apiRootUrl.resolve("devices/" + deviceId);
 					var putDeviceReq = HttpRequest.newBuilder(deviceUri) //
 							.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
+							.timeout(REQ_TIMEOUT) //
 							.header("Authorization", "Bearer " + bearerToken) //
 							.header("Content-Type", "application/json") //
 							.build();

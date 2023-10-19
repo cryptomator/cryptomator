@@ -31,6 +31,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -43,6 +44,7 @@ public class ReceiveKeyController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(ReceiveKeyController.class);
 	private static final String SCHEME_PREFIX = "hub+";
 	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
+	private static final Duration REQ_TIMEOUT = Duration.ofSeconds(10);
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -85,6 +87,7 @@ public class ReceiveKeyController implements FxController {
 		var request = HttpRequest.newBuilder(accessTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
+				.timeout(REQ_TIMEOUT) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
 				.thenAcceptAsync(this::receivedVaultMasterkey, Platform::runLater) //
@@ -115,6 +118,7 @@ public class ReceiveKeyController implements FxController {
 		var request = HttpRequest.newBuilder(deviceTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
+				.timeout(REQ_TIMEOUT) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
 				.thenAcceptAsync(response -> receivedUserKey(encryptedVaultKey, response), Platform::runLater) //
@@ -166,6 +170,7 @@ public class ReceiveKeyController implements FxController {
 		var request = HttpRequest.newBuilder(legacyAccessTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
+				.timeout(REQ_TIMEOUT) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
 				.thenAcceptAsync(this::receivedLegacyAccessTokenResponse, Platform::runLater) //
