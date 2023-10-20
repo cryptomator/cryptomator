@@ -20,9 +20,10 @@ public enum FxmlFile {
 	HUB_AUTH_FLOW("/fxml/hub_auth_flow.fxml"), //
 	HUB_INVALID_LICENSE("/fxml/hub_invalid_license.fxml"), //
 	HUB_RECEIVE_KEY("/fxml/hub_receive_key.fxml"), //
-	HUB_REGISTER_DEVICE("/fxml/hub_register_device.fxml"), //
+	HUB_LEGACY_REGISTER_DEVICE("/fxml/hub_legacy_register_device.fxml"), //
 	HUB_REGISTER_SUCCESS("/fxml/hub_register_success.fxml"), //
-	HUB_REGISTER_FAILED("/fxml/hub_register_failed.fxml"),
+	HUB_REGISTER_FAILED("/fxml/hub_register_failed.fxml"), //
+	HUB_SETUP_DEVICE("/fxml/hub_setup_device.fxml"), //
 	HUB_UNAUTHORIZED_DEVICE("/fxml/hub_unauthorized_device.fxml"), //
 	LOCK_FORCED("/fxml/lock_forced.fxml"), //
 	LOCK_FAILED("/fxml/lock_failed.fxml"), //

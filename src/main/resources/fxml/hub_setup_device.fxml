@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.RegisterDeviceController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12"
+	  alignment="TOP_LEFT">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<Group>
+			<StackPane>
+				<padding>
+					<Insets topRightBottomLeft="6"/>
+				</padding>
+				<Circle styleClass="glyph-icon-primary" radius="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="INFO" glyphSize="24"/>
+			</StackPane>
+		</Group>
+
+		<VBox HBox.hgrow="ALWAYS">
+			<Label styleClass="label-large" text="%hub.register.message" wrapText="true" textAlignment="LEFT">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
+			<Label text="%hub.register.description" wrapText="true"/>
+			<HBox spacing="6" alignment="CENTER_LEFT">
+				<padding>
+					<Insets top="12"/>
+				</padding>
+				<Label text="%hub.register.setupCodeLabel" labelFor="$setupCodeField"/>
+				<TextField fx:id="setupCodeField" HBox.hgrow="ALWAYS"/>
+			</HBox>
+			<HBox spacing="6" alignment="CENTER_LEFT">
+				<padding>
+					<Insets top="12"/>
+				</padding>
+				<Label text="%hub.register.nameLabel" labelFor="$deviceNameField"/>
+				<TextField fx:id="deviceNameField" HBox.hgrow="ALWAYS"/>
+			</HBox>
+			<HBox alignment="TOP_RIGHT">
+				<Label text="%hub.register.occupiedMsg" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.deviceNameAlreadyExists}" managed="${controller.deviceNameAlreadyExists}" graphicTextGap="6">
+					<padding>
+						<Insets top="6"/>
+					</padding>
+					<graphic>
+						<FontAwesome5IconView glyph="TIMES" styleClass="glyph-icon-red"/>
+					</graphic>
+				</Label>
+
+				<Label text="%hub.register.invalidSetupCode" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.invalidSetupCode}" managed="${controller.invalidSetupCode}" graphicTextGap="6">
+					<padding>
+						<Insets top="6"/>
+					</padding>
+					<graphic>
+						<FontAwesome5IconView glyph="TIMES" styleClass="glyph-icon-red"/>
+					</graphic>
+				</Label>
+			</HBox>
+
+			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CU">
+				<buttons>
+					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
+					<Button fx:id="registerBtn" text="%hub.register.registerBtn" ButtonBar.buttonData="OTHER" defaultButton="true" onAction="#register" contentDisplay="TEXT_ONLY" >
+						<graphic>
+							<FontAwesome5Spinner glyphSize="12" />
+						</graphic>
+					</Button>
+				</buttons>
+			</ButtonBar>
+		</VBox>
+	</children>
+</HBox>

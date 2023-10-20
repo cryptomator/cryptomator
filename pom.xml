@@ -26,7 +26,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>20</project.jdk.version>
+		<project.jdk.version>21</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<!-- remove them, as soon they got modularized or support is dropped (i.e., WebDAV) -->
@@ -35,22 +35,22 @@
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.6.7</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.3.0</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.2.3</cryptomator.integrations.win.version>
+		<cryptomator.integrations.win.version>1.2.4</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.2</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.3.0</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>3.0.0</cryptomator.fuse.version>
+		<cryptomator.integrations.linux.version>1.4.0-beta2</cryptomator.integrations.linux.version>
+		<cryptomator.fuse.version>4.0.0-beta1</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
-		<cryptomator.webdav.version>2.0.4</cryptomator.webdav.version>
+		<cryptomator.webdav.version>2.0.5</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.13.0</commons-lang3.version>
-		<dagger.version>2.48</dagger.version>
+		<dagger.version>2.48.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<guava.version>32.1.2-jre</guava.version>
-		<jackson.version>2.15.2</jackson.version>
+		<guava.version>32.1.3-jre</guava.version>
+		<jackson.version>2.15.3</jackson.version>
 		<javafx.version>20.0.2</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
-		<nimbus-jose.version>9.31</nimbus-jose.version>
+		<nimbus-jose.version>9.36</nimbus-jose.version>
 		<logback.version>1.4.11</logback.version>
 		<slf4j.version>2.0.9</slf4j.version>
 		<tinyoauth2.version>0.6.0</tinyoauth2.version>
@@ -64,7 +64,7 @@
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
 		<dependency-check.version>8.4.0</dependency-check.version>
-		<jacoco.version>0.8.10</jacoco.version>
+		<jacoco.version>0.8.11</jacoco.version>
 		<license-generator.version>2.2.0</license-generator.version>
 		<junit-tree-reporter.version>1.2.1</junit-tree-reporter.version>
 		<mvn-compiler.version>3.11.0</mvn-compiler.version>
