@@ -49,21 +49,22 @@ fi
 # download and check jmods
 curl -L ${OPENJFX_JMODS} -o openjfx-jmods.zip
 mkdir -p openjfx-jmods/
-unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods/
+unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
 JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
 JMOD_VERSION=${JMOD_VERSION#*@}
 JMOD_VERSION=${JMOD_VERSION%%.*}
-POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+POM_JFX_VERSION=$(mvn -f../../../pom.xml help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
 POM_JFX_VERSION=${POM_JFX_VERSION#*@}
 POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
-if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
->&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION})"
-exit 1
+if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
+    >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION})"
+    exit 1
 fi
 
 # compile
 mvn -B -f../../../pom.xml clean package -DskipTests -Pmac
+cp ../../../LICENSE.txt ../../../target
 cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 
 # add runtime
@@ -168,6 +169,5 @@ create-dmg \
     --app-drop-link 512 245 \
     --eula "resources/license.rtf" \
     --icon ".background" 128 758 \
-    --icon ".fseventsd" 320 758 \
     --icon ".VolumeIcon.icns" 512 758 \
     ${APP_NAME}-${VERSION_NO}.dmg dmg

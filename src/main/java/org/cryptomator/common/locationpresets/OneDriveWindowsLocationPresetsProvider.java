@@ -62,7 +62,7 @@ public final class OneDriveWindowsLocationPresetsProvider implements LocationPre
 		ProcessBuilder command = new ProcessBuilder(args);
 		Process p = command.start();
 		waitForSuccess(p, 3, "`reg query`");
-		return p.inputReader(StandardCharsets.UTF_8).lines().filter(outputFilter);
+		return p.inputReader(StandardCharsets.ISO_8859_1).lines().filter(outputFilter);
 	}
 
 

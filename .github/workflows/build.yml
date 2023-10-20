@@ -6,8 +6,8 @@ on:
     types: [labeled]
 
 env:
-  JAVA_DIST: 'temurin'
-  JAVA_VERSION: 20
+  JAVA_DIST: 'zulu'
+  JAVA_VERSION: 21
 
 defaults:
   run:
@@ -18,7 +18,7 @@ jobs:
     name: Compile and Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with:
           distribution: ${{ env.JAVA_DIST }}

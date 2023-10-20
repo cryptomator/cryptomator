@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-JAVA_HOME = /usr/lib/jvm/java-20-coffeelibs
+JAVA_HOME = /usr/lib/jvm/java-21-coffeelibs
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DEB_BUILD_ARCH),amd64)
 JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods
@@ -59,6 +59,7 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"/usr/share/icons/hicolor/symbolic/apps\"" \
 		--java-options "-Dcryptomator.buildNumber=\"deb-${REVISION_NUM}\"" \
 		--java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\"" \
+		--java-options "-Dcryptomator.disableUpdateCheck=\"${DISABLE_UPDATE_CHECK}\"" \
 		--app-version "${VERSION_NUM}.${REVISION_NUM}" \
 		--resource-dir resources \
 		--verbose

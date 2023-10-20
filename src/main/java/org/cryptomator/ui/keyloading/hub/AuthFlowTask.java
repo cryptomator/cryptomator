@@ -8,6 +8,8 @@ import io.github.coffeelibs.tinyoauth2client.http.response.Response;
 import javafx.concurrent.Task;
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.function.Consumer;
 
 class AuthFlowTask extends Task<String> {
@@ -34,6 +36,7 @@ class AuthFlowTask extends Task<String> {
 	protected String call() throws IOException, InterruptedException {
 		var response = TinyOAuth2.client(hubConfig.clientId) //
 				.withTokenEndpoint(URI.create(hubConfig.tokenEndpoint)) //
+				.withRequestTimeout(Duration.ofSeconds(10)) //
 				.authFlow(URI.create(hubConfig.authEndpoint)) //
 				.setSuccessResponse(Response.redirect(URI.create(hubConfig.authSuccessUrl + "&device=" + authFlowContext.deviceId()))) //
 				.setErrorResponse(Response.redirect(URI.create(hubConfig.authErrorUrl + "&device=" + authFlowContext.deviceId()))) //

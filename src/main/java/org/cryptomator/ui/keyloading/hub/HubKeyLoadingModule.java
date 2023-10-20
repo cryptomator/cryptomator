@@ -1,7 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.io.BaseEncoding;
-import com.nimbusds.jose.JWEObject;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -69,7 +68,7 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
-	static CompletableFuture<JWEObject> provideResult() {
+	static CompletableFuture<ReceivedKey> provideResult() {
 		return new CompletableFuture<>();
 	}
 
@@ -114,10 +113,10 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE)
+	@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE)
 	@KeyLoadingScoped
-	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE);
+	static Scene provideHubLegacyRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE);
 	}
 
 	@Provides
@@ -132,6 +131,13 @@ public abstract class HubKeyLoadingModule {
 	@KeyLoadingScoped
 	static Scene provideHubRegisterFailedScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_FAILED);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.HUB_SETUP_DEVICE)
+	@KeyLoadingScoped
+	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_SETUP_DEVICE);
 	}
 
 	@Provides
@@ -165,6 +171,11 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(RegisterDeviceController.class)
 	abstract FxController bindRegisterDeviceController(RegisterDeviceController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(LegacyRegisterDeviceController.class)
+	abstract FxController bindLegacyRegisterDeviceController(LegacyRegisterDeviceController controller);
 
 	@Binds
 	@IntoMap

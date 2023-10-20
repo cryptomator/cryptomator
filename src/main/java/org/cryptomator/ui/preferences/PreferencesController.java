@@ -1,5 +1,6 @@
 package org.cryptomator.ui.preferences;
 
+import org.cryptomator.common.Environment;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class PreferencesController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PreferencesController.class);
 
+	private final Environment env;
 	private final Stage window;
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final BooleanBinding updateAvailable;
@@ -31,7 +33,8 @@ public class PreferencesController implements FxController {
 	public Tab aboutTab;
 
 	@Inject
-	public PreferencesController(@PreferencesWindow Stage window, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, UpdateChecker updateChecker) {
+	public PreferencesController(Environment env, @PreferencesWindow Stage window, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, UpdateChecker updateChecker) {
+		this.env = env;
 		this.window = window;
 		this.selectedTabProperty = selectedTabProperty;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
@@ -42,6 +45,9 @@ public class PreferencesController implements FxController {
 		window.setOnShowing(this::windowWillAppear);
 		selectedTabProperty.addListener(observable -> this.selectChosenTab());
 		tabPane.getSelectionModel().selectedItemProperty().addListener(observable -> this.selectedTabChanged());
+		if (env.disableUpdateCheck()) {
+			tabPane.getTabs().remove(updatesTab);
+		}
 	}
 
 	private void selectChosenTab() {

@@ -8,7 +8,7 @@ package org.cryptomator.common.settings;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
-
+import org.jetbrains.annotations.VisibleForTesting;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
@@ -131,7 +131,7 @@ public class VaultSettings {
 		return json;
 	}
 
-	//visible for testing
+	@VisibleForTesting
 	static String normalizeDisplayName(String original) {
 		if (original.isBlank() || ".".equals(original) || "..".equals(original)) {
 			return "_";
