@@ -35,13 +35,13 @@ public class AuthFlowController implements FxController {
 	private final String deviceId;
 	private final HubConfig hubConfig;
 	private final AtomicReference<String> tokenRef;
-	private final CompletableFuture<JWEObject> result;
+	private final CompletableFuture<ReceivedKey> result;
 	private final Lazy<Scene> receiveKeyScene;
 	private final ObjectProperty<URI> authUri;
 	private AuthFlowTask task;
 
 	@Inject
-	public AuthFlowController(Application application, @KeyLoading Stage window, ExecutorService executor, @Named("deviceId") String deviceId, HubConfig hubConfig, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<JWEObject> result, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene) {
+	public AuthFlowController(Application application, @KeyLoading Stage window, ExecutorService executor, @Named("deviceId") String deviceId, HubConfig hubConfig, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene) {
 		this.application = application;
 		this.window = window;
 		this.executor = executor;

@@ -1,7 +1,7 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -31,14 +32,16 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,7 +50,7 @@ public class RegisterDeviceController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RegisterDeviceController.class);
 	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
-	private static final List<Integer> EXPECTED_RESPONSE_CODES = List.of(201, 409);
+	private static final Duration REQ_TIMEOUT = Duration.ofSeconds(10);
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -55,26 +58,27 @@ public class RegisterDeviceController implements FxController {
 	private final Lazy<Scene> registerSuccessScene;
 	private final Lazy<Scene> registerFailedScene;
 	private final String deviceId;
-	private final P384KeyPair keyPair;
-	private final CompletableFuture<JWEObject> result;
-	private final DecodedJWT jwt;
+	private final P384KeyPair deviceKeyPair;
+	private final CompletableFuture<ReceivedKey> result;
 	private final HttpClient httpClient;
-	private final BooleanProperty deviceNameAlreadyExists = new SimpleBooleanProperty(false);
 
+	private final BooleanProperty deviceNameAlreadyExists = new SimpleBooleanProperty(false);
+	private final BooleanProperty invalidSetupCode = new SimpleBooleanProperty(false);
+	private final BooleanProperty workInProgress = new SimpleBooleanProperty(false);
+	public TextField setupCodeField;
 	public TextField deviceNameField;
 	public Button registerBtn;
 
 	@Inject
-	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<JWEObject> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene) {
+	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<ReceivedKey> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
-		this.keyPair = Objects.requireNonNull(deviceKey.get());
+		this.deviceKeyPair = Objects.requireNonNull(deviceKey.get());
 		this.result = result;
 		this.bearerToken = Objects.requireNonNull(bearerToken.get());
 		this.registerSuccessScene = registerSuccessScene;
 		this.registerFailedScene = registerFailedScene;
-		this.jwt = JWT.decode(this.bearerToken);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
 	}
@@ -82,6 +86,13 @@ public class RegisterDeviceController implements FxController {
 	public void initialize() {
 		deviceNameField.setText(determineHostname());
 		deviceNameField.textProperty().addListener(observable -> deviceNameAlreadyExists.set(false));
+		deviceNameField.disableProperty().bind(workInProgress);
+		setupCodeField.textProperty().addListener(observable -> invalidSetupCode.set(false));
+		setupCodeField.disableProperty().bind(workInProgress);
+		var missingSetupCode = setupCodeField.textProperty().isEmpty();
+		var missingDeviceName = deviceNameField.textProperty().isEmpty();
+		registerBtn.disableProperty().bind(workInProgress.or(missingSetupCode).or(missingDeviceName));
+		registerBtn.contentDisplayProperty().bind(Bindings.when(workInProgress).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY));
 	}
 
 	private String determineHostname() {
@@ -95,33 +106,60 @@ public class RegisterDeviceController implements FxController {
 
 	@FXML
 	public void register() {
-		deviceNameAlreadyExists.set(false);
-		registerBtn.setContentDisplay(ContentDisplay.LEFT);
-		registerBtn.setDisable(true);
+		workInProgress.set(true);
 
-		var keyUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
-		var deviceKey = keyPair.getPublic().getEncoded();
-		var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64Url().omitPadding().encode(deviceKey));
-		var json = toJson(dto);
-		var request = HttpRequest.newBuilder(keyUri) //
+		var apiRootUrl = hubConfig.getApiBaseUrl();
+
+		var userReq = HttpRequest.newBuilder(apiRootUrl.resolve("users/me")) //
+				.GET() //
+				.timeout(REQ_TIMEOUT) //
 				.header("Authorization", "Bearer " + bearerToken) //
-				.header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
+				.header("Content-Type", "application/json") //
 				.build();
-		httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding()) //
+		httpClient.sendAsync(userReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
 				.thenApply(response -> {
-					if (EXPECTED_RESPONSE_CODES.contains(response.statusCode())) {
-						return response;
+					if (response.statusCode() == 200) {
+						var dto = fromJson(response.body());
+						return Objects.requireNonNull(dto, "null or empty response body");
 					} else {
 						throw new RuntimeException("Server answered with unexpected status code " + response.statusCode());
 					}
-				}).handleAsync((response, throwable) -> {
+				}).thenApply(user -> {
+					try {
+						assert user.privateKey != null; // api/vaults/{v}/user-tokens/me would have returned 403, if user wasn't fully set up yet
+						var userKey = JWEHelper.decryptUserKey(JWEObject.parse(user.privateKey), setupCodeField.getText());
+						return JWEHelper.encryptUserKey(userKey, deviceKeyPair.getPublic());
+					} catch (ParseException e) {
+						throw new RuntimeException("Server answered with unparsable user key", e);
+					}
+				}).thenCompose(jwe -> {
+					var now = Instant.now().toString();
+					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64().encode(deviceKeyPair.getPublic().getEncoded()), "DESKTOP", jwe.serialize(), now);
+					var json = toJson(dto);
+					var deviceUri = apiRootUrl.resolve("devices/" + deviceId);
+					var putDeviceReq = HttpRequest.newBuilder(deviceUri) //
+							.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
+							.timeout(REQ_TIMEOUT) //
+							.header("Authorization", "Bearer " + bearerToken) //
+							.header("Content-Type", "application/json") //
+							.build();
+					return httpClient.sendAsync(putDeviceReq, HttpResponse.BodyHandlers.discarding());
+				}).whenCompleteAsync((response, throwable) -> {
 					if (response != null) {
 						this.handleResponse(response);
 					} else {
-						this.registrationFailed(throwable);
+						this.setupFailed(throwable);
 					}
-					return null;
+					workInProgress.set(false);
 				}, Platform::runLater);
+	}
+
+	private UserDto fromJson(String json) {
+		try {
+			return JSON.reader().readValue(json, UserDto.class);
+		} catch (IOException e) {
+			throw new IllegalStateException("Failed to deserialize DTO", e);
+		}
 	}
 
 	private String toJson(CreateDeviceDto dto) {
@@ -132,23 +170,26 @@ public class RegisterDeviceController implements FxController {
 		}
 	}
 
-	private void handleResponse(HttpResponse<Void> voidHttpResponse) {
-		assert EXPECTED_RESPONSE_CODES.contains(voidHttpResponse.statusCode());
-
-		if (voidHttpResponse.statusCode() == 409) {
-			deviceNameAlreadyExists.set(true);
-			registerBtn.setContentDisplay(ContentDisplay.TEXT_ONLY);
-			registerBtn.setDisable(false);
-		} else {
+	private void handleResponse(HttpResponse<Void> response) {
+		if (response.statusCode() == 201) {
 			LOG.debug("Device registration for hub instance {} successful.", hubConfig.authSuccessUrl);
 			window.setScene(registerSuccessScene.get());
+		} else if (response.statusCode() == 409) {
+			deviceNameAlreadyExists.set(true);
+		} else {
+			setupFailed(new IllegalStateException("Unexpected http status code " + response.statusCode()));
 		}
 	}
 
-	private void registrationFailed(Throwable cause) {
-		LOG.warn("Device registration failed.", cause);
-		window.setScene(registerFailedScene.get());
-		result.completeExceptionally(cause);
+	private void setupFailed(Throwable cause) {
+		switch (cause) {
+			case CompletionException e when e.getCause() instanceof JWEHelper.InvalidJweKeyException -> invalidSetupCode.set(true);
+			default -> {
+				LOG.warn("Device setup failed.", cause);
+				window.setScene(registerFailedScene.get());
+				result.completeExceptionally(cause);
+			}
+		}
 	}
 
 	@FXML
@@ -160,13 +201,6 @@ public class RegisterDeviceController implements FxController {
 		result.cancel(true);
 	}
 
-	/* Getter */
-
-	public String getUserName() {
-		return jwt.getClaim("email").asString();
-	}
-
-
 	//--- Getters & Setters
 
 	public BooleanProperty deviceNameAlreadyExistsProperty() {
@@ -177,5 +211,21 @@ public class RegisterDeviceController implements FxController {
 		return deviceNameAlreadyExists.get();
 	}
 
+	public BooleanProperty invalidSetupCodeProperty() {
+		return invalidSetupCode;
+	}
 
+	public boolean isInvalidSetupCode() {
+		return invalidSetupCode.get();
+	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private record UserDto(String id, String name, String publicKey, String privateKey, String setupCode) {}
+
+	private record CreateDeviceDto(@JsonProperty(required = true) String id, //
+								   @JsonProperty(required = true) String name, //
+								   @JsonProperty(required = true) String publicKey, //
+								   @JsonProperty(required = true, defaultValue = "DESKTOP") String type, //
+								   @JsonProperty(required = true) String userPrivateKey, //
+								   @JsonProperty(required = true) String creationTime) {}
 }
