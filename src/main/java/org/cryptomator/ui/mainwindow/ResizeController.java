@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.BooleanBinding;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.input.MouseEvent;
@@ -67,37 +66,7 @@ public class ResizeController implements FxController {
 		return (settings.windowHeight.get() == 0) && (settings.windowWidth.get() == 0) && (settings.windowXPosition.get() == 0) && (settings.windowYPosition.get() == 0);
 	}
 
-	private boolean isWithinDisplayBounds() {
-		// (x1, y1) is the top left corner of the window, (x2, y2) is the bottom right corner
-		final double slack = 10;
-		final double width = window.getWidth() - 2 * slack;
-		final double height = window.getHeight() - 2 * slack;
-		final double x1 = window.getX() + slack;
-		final double y1 = window.getY() + slack;
-		final double x2 = x1 + width;
-		final double y2 = y1 + height;
-
-		final ObservableList<Screen> screens = Screen.getScreensForRectangle(x1, y1, width, height);
-
-		// Find the total visible area of the window
-		double visibleArea = 0;
-		for (Screen screen : screens) {
-			Rectangle2D bounds = screen.getVisualBounds();
-
-			double xOverlap = Math.min(x2, bounds.getMaxX()) - Math.max(x1, bounds.getMinX());
-			double yOverlap = Math.min(y2, bounds.getMaxY()) - Math.max(y1, bounds.getMinY());
-
-			visibleArea += xOverlap * yOverlap;
-		}
-
-		final double windowArea = width * height;
-
-		// Within bounds if the visible area matches the window area
-		return visibleArea == windowArea;
-	}
-
 	private void checkDisplayBounds(WindowEvent evt) {
-
 		// Minimizing a window in Windows and closing it could result in an out of bounds position at (x, y) = (-32000, -32000)
 		// See https://devblogs.microsoft.com/oldnewthing/20041028-00/?p=37453
 		// If the position is (-32000, -32000), restore to the last saved position
@@ -108,8 +77,9 @@ public class ResizeController implements FxController {
 			window.setHeight(settings.windowHeight.get());
 		}
 
-		if (!isWithinDisplayBounds()) {
+		if (isOutOfDisplayBounds()) {
 			// If the position is illegal, then the window appears on the main screen in the middle of the window.
+			LOG.debug("Resetting window position due to insufficient screen overlap");
 			Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
 			window.setX((primaryScreenBounds.getWidth() - window.getMinWidth()) / 2);
 			window.setY((primaryScreenBounds.getHeight() - window.getMinHeight()) / 2);
@@ -117,6 +87,22 @@ public class ResizeController implements FxController {
 			window.setHeight(window.getMinHeight());
 			savePositionalSettings();
 		}
+	}
+
+	private boolean isOutOfDisplayBounds() {
+		// define a rect which is inset on all sides from the window's rect:
+		final double x = window.getX() + 20; // 20px left
+		final double y = window.getY() + 5; // 5px top
+		final double w = window.getWidth() - 40; // 20px left + 20px right
+		final double h = window.getHeight() - 25; // 5px top + 20px bottom
+		return isRectangleOutOfScreen(x, y, 0, h) // Left pixel column
+				|| isRectangleOutOfScreen(x + w, y, 0, h) // Right pixel column
+				|| isRectangleOutOfScreen(x, y, w, 0) // Top pixel row
+				|| isRectangleOutOfScreen(x, y + h, w, 0); // Bottom pixel row
+	}
+
+	private boolean isRectangleOutOfScreen(double x, double y, double width, double height) {
+		return Screen.getScreensForRectangle(x, y, width, height).isEmpty();
 	}
 
 	private void startResize(MouseEvent evt) {
