@@ -5,7 +5,7 @@ on:
     - cron: '0 0 1 * *' # run once a month at the first day of month
 
 env:
-  JDK_VERSION: 21.0.0
+  JDK_VERSION: '21.0.1+12'
   JDK_VENDOR: zulu
 
 jobs:
@@ -17,8 +17,8 @@ jobs:
     steps:
       - uses: actions/setup-java@v3
         with:
-          java-version: 21.0.0
-          distribution: zulu
+          java-version: ${{ env.JDK_VERSION }}
+          distribution: ${{ env.JDK_VENDOR }}
           check-latest: false
       - name: Read JAVA_VERSION_DATE and store in env variable
         id: get-data
@@ -35,7 +35,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           java-version: 21
-          distribution: zulu
+          distribution: ${{ env.JDK_VENDOR }}
           check-latest: true
       - name: Read JAVA_VERSION_DATE and store in env variable
         id: get-data
