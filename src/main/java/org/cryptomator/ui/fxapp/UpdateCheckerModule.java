@@ -63,7 +63,7 @@ public abstract class UpdateCheckerModule {
 		return HttpRequest.newBuilder() //
 				.uri(LATEST_VERSION_URI) //
 				.header("User-Agent", userAgent) //
-				.timeout(java.time.Duration.ofSeconds(3))
+				.timeout(java.time.Duration.ofSeconds(10))
 				.build();
 	}
 

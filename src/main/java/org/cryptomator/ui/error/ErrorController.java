@@ -155,7 +155,7 @@ public class ErrorController implements FxController {
 		HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
 		HttpRequest httpRequest = HttpRequest.newBuilder()//
 				.header("User-Agent", userAgent)
-				.timeout(Duration.ofSeconds(5))
+				.timeout(Duration.ofSeconds(10))
 				.uri(URI.create(ERROR_CODES_URL_FORMAT.formatted(URLEncoder.encode(errorCode.toString(),StandardCharsets.UTF_8))))//
 				.build();
 		httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())//
