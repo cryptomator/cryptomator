@@ -36,11 +36,11 @@ class AuthFlowTask extends Task<String> {
 	protected String call() throws IOException, InterruptedException {
 		var response = TinyOAuth2.client(hubConfig.clientId) //
 				.withTokenEndpoint(URI.create(hubConfig.tokenEndpoint)) //
+				.withRequestTimeout(Duration.ofSeconds(10)) //
 				.authFlow(URI.create(hubConfig.authEndpoint)) //
 				.setSuccessResponse(Response.redirect(URI.create(hubConfig.authSuccessUrl + "&device=" + authFlowContext.deviceId()))) //
 				.setErrorResponse(Response.redirect(URI.create(hubConfig.authErrorUrl + "&device=" + authFlowContext.deviceId()))) //
-				.authorize(HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build(),
-						redirectUriConsumer);
+				.authorize(redirectUriConsumer);
 		if (response.statusCode() != 200) {
 			throw new NotOkResponseException("Authorization returned status code " + response.statusCode());
 		}
