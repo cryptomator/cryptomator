@@ -27,7 +27,7 @@
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.volume.type"/>
-			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
+			<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
 			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
 				<graphic>
 					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
@@ -42,8 +42,8 @@
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">
 			<Label text="%preferences.volume.tcp.port"/>
-			<NumericTextField fx:id="loopbackPortField"/>
-			<Button text="%generic.button.apply" fx:id="loopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
+			<NumericTextField fx:id="vaultLoopbackPortField"/>
+			<Button text="%generic.button.apply" fx:id="vaultLoopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
 		</HBox>
 
 		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly" visible="${controller.readOnlySupported}" managed="${controller.readOnlySupported}"/>

@@ -76,9 +76,9 @@ public class MountOptionsController implements FxController {
 	public RadioButton mountPointDirBtn;
 	public TextField directoryPathField;
 	public ChoiceBox<Path> driveLetterSelection;
-	public ChoiceBox<MountService> volumeTypeChoiceBox;
-	public TextField loopbackPortField;
-	public Button loopbackPortApplyButton;
+	public ChoiceBox<MountService> vaultVolumeTypeChoiceBox;
+	public TextField vaultLoopbackPortField;
+	public Button vaultLoopbackPortApplyButton;
 
 
 	@Inject
@@ -112,11 +112,7 @@ public class MountOptionsController implements FxController {
 		this.mountProviders = mountProviders;
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
 		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
-		this.fuseRestartRequired = selectedMountService.map(s -> {//
-			return firstUsedProblematicFuseMountService.get() != null //
-					&& MountModule.isProblematicFuseService(s) //
-					&& !firstUsedProblematicFuseMountService.get().equals(s);
-		});
+		this.fuseRestartRequired = selectedMountService.map(s -> firstUsedProblematicFuseMountService.get() != null && MountModule.isProblematicFuseService(s) && !firstUsedProblematicFuseMountService.get().equals(s));
 		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
 	}
 
@@ -149,19 +145,19 @@ public class MountOptionsController implements FxController {
 		}
 		mountPointToggleGroup.selectedToggleProperty().addListener(this::selectedToggleChanged);
 
-		volumeTypeChoiceBox.getItems().add(null);
-		volumeTypeChoiceBox.getItems().addAll(mountProviders);
-		volumeTypeChoiceBox.setConverter(new MountServiceConverter());
+		vaultVolumeTypeChoiceBox.getItems().add(null);
+		vaultVolumeTypeChoiceBox.getItems().addAll(mountProviders);
+		vaultVolumeTypeChoiceBox.setConverter(new MountServiceConverter());
 		boolean autoSelected = vaultSettings.mountService.get() == null;
-		volumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue());
-		volumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvider, newProvider) -> {
+		vaultVolumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue());
+		vaultVolumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvider, newProvider) -> {
 			var toSet = Optional.ofNullable(newProvider).map(nP -> nP.getClass().getName()).orElse(null);
 			vaultSettings.mountService.set(toSet);
 		});
 
-		loopbackPortField.setText(String.valueOf(vaultSettings.port.get()));
-		loopbackPortApplyButton.visibleProperty().bind(vaultSettings.port.asString().isNotEqualTo(loopbackPortField.textProperty()));
-		loopbackPortApplyButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateLoopbackPort, loopbackPortField.textProperty()).not());
+		vaultLoopbackPortField.setText(String.valueOf(vaultSettings.port.get()));
+		vaultLoopbackPortApplyButton.visibleProperty().bind(vaultSettings.port.asString().isNotEqualTo(vaultLoopbackPortField.textProperty()));
+		vaultLoopbackPortApplyButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateLoopbackPort, vaultLoopbackPortField.textProperty()).not());
 
 	}
 
@@ -287,7 +283,7 @@ public class MountOptionsController implements FxController {
 
 	private boolean validateLoopbackPort() {
 		try {
-			int port = Integer.parseInt(loopbackPortField.getText());
+			int port = Integer.parseInt(vaultLoopbackPortField.getText());
 			return port == 0 // choose port automatically
 					|| port >= MIN_PORT && port <= MAX_PORT; // port within range
 		} catch (NumberFormatException e) {
@@ -297,7 +293,7 @@ public class MountOptionsController implements FxController {
 
 	public void doChangeLoopbackPort() {
 		if (validateLoopbackPort()) {
-			vaultSettings.port.set(Integer.parseInt(loopbackPortField.getText()));
+			vaultSettings.port.set(Integer.parseInt(vaultLoopbackPortField.getText()));
 		}
 	}
 

@@ -40,8 +40,6 @@ public class VaultModule {
 	static ObservableValue<ActualMountService> provideMountService(VaultSettings vaultSettings, List<MountService> serviceImpls, @Named("FUPFMS") AtomicReference<MountService> fupfms) {
 		var fallbackProvider = serviceImpls.stream().findFirst().orElse(null);
 
-		LOG.debug("fallbackProvider.displayName:" + fallbackProvider.displayName());
-
 		var observableMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, //
 				desiredServiceImpl -> { //
 					var serviceFromSettings = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny(); //
