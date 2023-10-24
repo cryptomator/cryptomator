@@ -10,6 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
+import org.cryptomator.common.mount.ActualMountService;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.VaultSettings;
@@ -38,6 +39,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -69,11 +71,12 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final BooleanProperty showingStats;
+	private final ObservableValue<ActualMountService> actualMountService;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter) {
+	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter, @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -90,6 +93,7 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
+		this.actualMountService = actualMountService;
 	}
 
 	// ******************************************************************************
@@ -147,7 +151,7 @@ public class Vault {
 		try {
 			cryptoFileSystem.set(fs);
 			var rootPath = fs.getRootDirectories().iterator().next();
-			var mountHandle = mounter.mount(vaultSettings, rootPath);
+			var mountHandle = mounter.mount(vaultSettings, rootPath, actualMountService);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
 		} finally {
 			if (!success) {

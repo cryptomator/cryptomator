@@ -27,14 +27,12 @@ public class Mounter {
 	private final Settings settings;
 	private final Environment env;
 	private final WindowsDriveLetters driveLetters;
-	private final ObservableValue<ActualMountService> mountServiceObservable;
 
 	@Inject
-	public Mounter(Settings settings, Environment env, WindowsDriveLetters driveLetters, ObservableValue<ActualMountService> mountServiceObservable) {
+	public Mounter(Settings settings, Environment env, WindowsDriveLetters driveLetters) {
 		this.settings = settings;
 		this.env = env;
 		this.driveLetters = driveLetters;
-		this.mountServiceObservable = mountServiceObservable;
 	}
 
 	private class SettledMounter {
@@ -53,8 +51,7 @@ public class Mounter {
 			for (var capability : service.capabilities()) {
 				switch (capability) {
 					case FILE_SYSTEM_NAME -> builder.setFileSystemName("cryptoFs");
-					case LOOPBACK_PORT ->
-							builder.setLoopbackPort(settings.port.get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
+					case LOOPBACK_PORT -> builder.setLoopbackPort(vaultSettings.port.get());
 					case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
 					case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode.get());
 					case MOUNT_FLAGS -> {
@@ -130,8 +127,8 @@ public class Mounter {
 
 	}
 
-	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot) throws IOException, MountFailedException {
-		var mountService = this.mountServiceObservable.getValue().service();
+	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot, ObservableValue<ActualMountService> actualMountService) throws IOException, MountFailedException {
+		var mountService = actualMountService.getValue().service();
 		var builder = mountService.forFileSystem(cryptoFsRoot);
 		var internal = new SettledMounter(mountService, builder, vaultSettings);
 		var cleanup = internal.prepare();
