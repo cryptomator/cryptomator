@@ -52,7 +52,6 @@ public class MountOptionsController implements FxController {
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
 	private final Lazy<Application> application;
-	private final Settings settings;
 
 	private final ObservableValue<String> defaultMountFlags;
 	private final ObservableValue<Boolean> mountpointDirSupported;
@@ -84,36 +83,34 @@ public class MountOptionsController implements FxController {
 	@Inject
 	MountOptionsController(@VaultOptionsWindow Stage window, //
 						   @VaultOptionsWindow Vault vault, //
-						   ObservableValue<ActualMountService> mountService, //
 						   WindowsDriveLetters windowsDriveLetters, //
 						   ResourceBundle resourceBundle, //
 						   Lazy<Application> application,
-						   Settings settings, //
 						   List<MountService> mountProviders, //
 						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
 		this.window = window;
 		this.vaultSettings = vault.getVaultSettings();
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
-		this.defaultMountFlags = mountService.map(as -> {
-			if (as.service().hasCapability(MountCapability.MOUNT_FLAGS)) {
-				return as.service().getDefaultMountFlags();
-			} else {
-				return "";
-			}
-		});
-		this.mountpointDirSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
-		this.mountpointDriveLetterSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
-		this.mountFlagsSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
-		this.readOnlySupported = mountService.map(as -> as.service().hasCapability(MountCapability.READ_ONLY));
 		this.directoryPath = vault.getVaultSettings().mountPoint.map(p -> isDriveLetter(p) ? null : p.toString());
 		this.application = application;
-		this.settings = settings;
 		this.mountProviders = mountProviders;
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
 		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
 		this.fuseRestartRequired = selectedMountService.map(s -> firstUsedProblematicFuseMountService.get() != null && MountModule.isProblematicFuseService(s) && !firstUsedProblematicFuseMountService.get().equals(s));
 		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
+
+		this.defaultMountFlags = selectedMountService.map(s -> {
+			if (s.hasCapability(MountCapability.MOUNT_FLAGS)) {
+				return s.getDefaultMountFlags();
+			} else {
+				return "";
+			}
+		});
+		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
+		this.readOnlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
+		this.mountpointDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
+		this.mountpointDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 	}
 
 	@FXML
