@@ -39,17 +39,14 @@ public class VaultModule {
 	@PerVault
 	static ObservableValue<ActualMountService> provideMountService(VaultSettings vaultSettings, List<MountService> serviceImpls, @Named("FUPFMS") AtomicReference<MountService> fupfms) {
 		var fallbackProvider = serviceImpls.stream().findFirst().orElse(null);
-
-		var observableMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, //
+		return ObservableUtil.mapWithDefault(vaultSettings.mountService, //
 				desiredServiceImpl -> { //
 					var serviceFromSettings = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny(); //
 					var targetedService = serviceFromSettings.orElse(fallbackProvider);
-					return new ActualMountService(targetedService,false);//return applyWorkaroundForProblematicFuse(targetedService, serviceFromSettings.isPresent(), fupfms);
+					return new ActualMountService(targetedService,false);
 				}, //
-				() -> { //
-					return new ActualMountService(fallbackProvider,false);//return applyWorkaroundForProblematicFuse(fallbackProvider, true, fupfms);
-				});
-		return observableMountService;
+				() -> new ActualMountService(fallbackProvider,false)
+		);
 	}
 
 	@Provides
