@@ -3,6 +3,7 @@ package org.cryptomator.ui.vaultoptions;
 import com.google.common.base.Strings;
 import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.mount.MountServiceConverter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
@@ -141,7 +142,7 @@ public class MountOptionsController implements FxController {
 
 		vaultVolumeTypeChoiceBox.getItems().add(null);
 		vaultVolumeTypeChoiceBox.getItems().addAll(mountProviders);
-		vaultVolumeTypeChoiceBox.setConverter(new MountServiceConverter());
+		vaultVolumeTypeChoiceBox.setConverter(new MountServiceConverter(resourceBundle));
 		boolean autoSelected = vaultSettings.mountService.get() == null;
 		vaultVolumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue());
 		vaultVolumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvider, newProvider) -> {
@@ -353,23 +354,4 @@ public class MountOptionsController implements FxController {
 		return loopbackPortSupported.get();
 	}
 
-	//Helpers
-	/* Helpers */
-
-	private class MountServiceConverter extends StringConverter<MountService> {
-
-		@Override
-		public String toString(MountService provider) {
-			if (provider == null) {
-				return resourceBundle.getString("preferences.volume.type.automatic");
-			} else {
-				return provider.displayName();
-			}
-		}
-
-		@Override
-		public MountService fromString(String string) {
-			throw new UnsupportedOperationException();
-		}
-	}
 }
