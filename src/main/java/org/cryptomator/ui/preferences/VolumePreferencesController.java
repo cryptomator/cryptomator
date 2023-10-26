@@ -2,8 +2,8 @@ package org.cryptomator.ui.preferences;
 
 import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
-import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.vaults.VaultModule;
 import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
@@ -61,7 +61,7 @@ public class VolumePreferencesController implements FxController {
 		this.readonlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 		this.fuseRestartRequired = selectedMountService.map(s -> {//
 			return firstUsedProblematicFuseMountService.get() != null //
-					&& MountModule.isProblematicFuseService(s) //
+					&& VaultModule.isProblematicFuseService(s) //
 					&& !firstUsedProblematicFuseMountService.get().equals(s);
 		});
 
@@ -151,7 +151,7 @@ public class VolumePreferencesController implements FxController {
 
 	/* Helpers */
 
-	private class MountServiceConverter extends StringConverter<MountService> {
+	public class MountServiceConverter extends StringConverter<MountService> {
 
 		@Override
 		public String toString(MountService provider) {

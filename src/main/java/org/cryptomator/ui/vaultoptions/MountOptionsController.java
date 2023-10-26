@@ -3,12 +3,10 @@ package org.cryptomator.ui.vaultoptions;
 import com.google.common.base.Strings;
 import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
-import org.cryptomator.common.mount.ActualMountService;
-import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.mount.WindowsDriveLetters;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultModule;
 import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
@@ -85,8 +83,7 @@ public class MountOptionsController implements FxController {
 						   @VaultOptionsWindow Vault vault, //
 						   WindowsDriveLetters windowsDriveLetters, //
 						   ResourceBundle resourceBundle, //
-						   Lazy<Application> application,
-						   List<MountService> mountProviders, //
+						   Lazy<Application> application, List<MountService> mountProviders, //
 						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
 		this.window = window;
 		this.vaultSettings = vault.getVaultSettings();
@@ -97,7 +94,7 @@ public class MountOptionsController implements FxController {
 		this.mountProviders = mountProviders;
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
 		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
-		this.fuseRestartRequired = selectedMountService.map(s -> firstUsedProblematicFuseMountService.get() != null && MountModule.isProblematicFuseService(s) && !firstUsedProblematicFuseMountService.get().equals(s));
+		this.fuseRestartRequired = selectedMountService.map(s -> firstUsedProblematicFuseMountService.get() != null && VaultModule.isProblematicFuseService(s) && !firstUsedProblematicFuseMountService.get().equals(s));
 		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
 
 		this.defaultMountFlags = selectedMountService.map(s -> {

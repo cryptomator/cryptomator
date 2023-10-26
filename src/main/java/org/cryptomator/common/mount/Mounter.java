@@ -1,7 +1,6 @@
 package org.cryptomator.common.mount;
 
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.integrations.mount.Mount;
 import org.cryptomator.integrations.mount.MountBuilder;
@@ -24,13 +23,11 @@ import static org.cryptomator.integrations.mount.MountCapability.UNMOUNT_FORCED;
 @Singleton
 public class Mounter {
 
-	private final Settings settings;
 	private final Environment env;
 	private final WindowsDriveLetters driveLetters;
 
 	@Inject
-	public Mounter(Settings settings, Environment env, WindowsDriveLetters driveLetters) {
-		this.settings = settings;
+	public Mounter(Environment env, WindowsDriveLetters driveLetters) {
 		this.env = env;
 		this.driveLetters = driveLetters;
 	}
