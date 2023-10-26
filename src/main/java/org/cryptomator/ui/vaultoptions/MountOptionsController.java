@@ -84,7 +84,8 @@ public class MountOptionsController implements FxController {
 						   @VaultOptionsWindow Vault vault, //
 						   WindowsDriveLetters windowsDriveLetters, //
 						   ResourceBundle resourceBundle, //
-						   Lazy<Application> application, List<MountService> mountProviders, //
+						   Lazy<Application> application, //
+						   List<MountService> mountProviders, //
 						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
 		this.window = window;
 		this.vaultSettings = vault.getVaultSettings();
@@ -95,7 +96,11 @@ public class MountOptionsController implements FxController {
 		this.mountProviders = mountProviders;
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
 		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
-		this.fuseRestartRequired = selectedMountService.map(s -> firstUsedProblematicFuseMountService.get() != null && VaultModule.isProblematicFuseService(s) && !firstUsedProblematicFuseMountService.get().equals(s));
+		this.fuseRestartRequired = selectedMountService.map(s -> //
+				firstUsedProblematicFuseMountService.get() != null //
+						&& VaultModule.isProblematicFuseService(s) //
+						&& !firstUsedProblematicFuseMountService.get().equals(s)
+		);
 		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
 
 		this.defaultMountFlags = selectedMountService.map(s -> {

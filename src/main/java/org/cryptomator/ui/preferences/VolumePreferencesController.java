@@ -60,12 +60,11 @@ public class VolumePreferencesController implements FxController {
 		this.mountToDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
 		this.readonlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
-		this.fuseRestartRequired = selectedMountService.map(s -> {//
-			return firstUsedProblematicFuseMountService.get() != null //
+		this.fuseRestartRequired = selectedMountService.map(s -> //
+				firstUsedProblematicFuseMountService.get() != null //
 					&& VaultModule.isProblematicFuseService(s) //
-					&& !firstUsedProblematicFuseMountService.get().equals(s);
-		});
-
+					&& !firstUsedProblematicFuseMountService.get().equals(s)
+		);
 	}
 
 	public void initialize() {
