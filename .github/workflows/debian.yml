@@ -17,8 +17,9 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: 21
-  COFFEELIBS_JDK_VERSION: 21
+  JAVA_VERSION: '21.0.1+12'
+  COFFEELIBS_JDK: 21
+  COFFEELIBS_JDK_VERSION: '21.0.1+12-0ppa1'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: 'f522ac2ae4bdd61f0219b7b8d2058ff72a22f36a44378453bcfdcd82f8f5e08c'
   OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-aarch64_bin-jmods.zip'
@@ -43,7 +44,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:coffeelibs/openjdk
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.COFFEELIBS_JDK_VERSION }} libgtk2.0-0
+          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.COFFEELIBS_JDK }}=${{ env.COFFEELIBS_JDK_VERSION }} libgtk2.0-0
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
