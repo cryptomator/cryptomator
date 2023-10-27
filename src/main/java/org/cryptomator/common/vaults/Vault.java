@@ -10,6 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
+import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.ActualMountService;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
@@ -23,6 +24,7 @@ import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.integrations.mount.MountFailedException;
+import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.slf4j.Logger;
@@ -44,6 +46,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,11 +75,14 @@ public class Vault {
 	private final Mounter mounter;
 	private final BooleanProperty showingStats;
 	private final ObservableValue<ActualMountService> actualMountService;
+	private final List<MountService> mountProviders;
+	private final ObservableValue<MountService> selectedMountService;
+	private final AtomicReference<MountService> firstUsedProblematicFuseMountService;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter, @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService) {
+	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, List<MountService> mountProviders, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter, @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService, @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -94,6 +100,10 @@ public class Vault {
 		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.actualMountService = actualMountService;
+		this.mountProviders = mountProviders;
+		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
+		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		this.firstUsedProblematicFuseMountService = firstUsedProblematicFuseMountService;
 	}
 
 	// ******************************************************************************
@@ -146,6 +156,16 @@ public class Vault {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
 		}
+		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
+		var selMountServ = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		var fuseRestartRequired = selMountServ.map(s -> //
+				firstUsedProblematicFuseMountService.get() != null //
+						&& VaultModule.isProblematicFuseService(s) //
+						&& !firstUsedProblematicFuseMountService.get().equals(s)).getValue();
+		if(fuseRestartRequired){
+			throw new MountFailedException("fuseRestartRequired");
+		}
+
 		CryptoFileSystem fs = createCryptoFileSystem(keyLoader);
 		boolean success = false;
 		try {
