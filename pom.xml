@@ -53,7 +53,7 @@
 		<nimbus-jose.version>9.37</nimbus-jose.version>
 		<logback.version>1.4.11</logback.version>
 		<slf4j.version>2.0.9</slf4j.version>
-		<tinyoauth2.version>0.7.0</tinyoauth2.version>
+		<tinyoauth2.version>0.8.0</tinyoauth2.version>
 		<zxcvbn.version>1.8.2</zxcvbn.version>
 
 		<!-- test dependencies -->

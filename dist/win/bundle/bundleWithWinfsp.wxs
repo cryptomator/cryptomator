@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 
+<!-- For Built in variables, see https://wixtoolset.org/docs/tools/burn/builtin-variables/-->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
     <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/bundle.html-->
     <!-- Attributes explicitly not used:
@@ -10,21 +11,10 @@
      AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="bundle\resources\Cryptomator.ico">
 
         <!-- detect outdated WinFsp installations -->
-        <?include "resources\winFspMetaData.wxi" ?>
         <util:ProductSearch
-            Variable="InstalledWinFspVersion"
+            Variable="InstalledLegacyWinFspVersion"
             Result="version"
-            UpgradeCode="82F812D9-4083-4EF1-8BC8-0F1EDA05B46B"
-        />
-        <!-- Note: The bundle engine takes the Message format literaly -->
-        <bal:Condition Message=
-"The WinFsp driver used by Cryptomator is outdated and must be removed before the installation.
-
-1. Open the view of installed apps
-2. Search for &quot;WinFsp&quot;
-3. Uninstall the listed application
-4. Reboot your device
-5. Restart this installer">(InstalledWinFspVersion = v0.0.0.0) OR ($(var.BundledWinFspVersion) &lt;= InstalledWinFspVersion)</bal:Condition>
+            UpgradeCode="82F812D9-4083-4EF1-8BC8-0F1EDA05B46B"/>
 
         <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
         <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
@@ -36,26 +26,41 @@
                 SuppressOptionsUI="yes"
                 ThemeFile="bundle\customBootstrapperTheme.xml"
                 LocalizationFile="bundle\customBootstrapperTheme.wxl"
-                LogoFile="bundle\resources\logo.png"
-            />
+                LogoFile="bundle\resources\logo.png"/>
             <Payload SourceFile="bundle\resources\logoSide.png" />
         </BootstrapperApplicationRef>
+
         <Chain>
+            <ExePackage Cache="yes" PerMachine="yes" Permanent="no"
+              SourceFile="resources\winfsp-uninstaller.exe"
+              DisplayName="Removing outdated WinFsp Driver"
+              Description="Executable to remove old winfsp"
+              DetectCondition="false"
+              InstallCondition="(InstalledLegacyWinFspVersion &lt;&gt; v0.0.0.0) AND ((WixBundleAction = 7) OR (WixBundleAction = 5))">
+                <CommandLine Condition="WixBundleUILevel &lt;= 3" InstallArgument="-q -l &quot;[WixBundleLog].winfsp-uninstaller.log&quot;" RepairArgument="-q" UninstallArgument="-s" />
+                <!-- XML allows line breaks in attributes, hence keep the line breaks here -->
+                <CommandLine Condition="WixBundleUILevel &gt; 3" InstallArgument="-l &quot;[WixBundleLog].winfsp-uninstaller.log&quot; -t &quot;Cryptomator Installer&quot; -m &quot;Cryptomator requires a newer version of the WinFsp driver. The installer will now uninstall WinFsp, possibly reboot, and afterwards proceed with the installation.
+
+Do you want to continue?&quot;" RepairArgument="-q" UninstallArgument="-s" />
+                <ExitCode Behavior="success" Value="0"/>
+                <ExitCode Behavior="success" Value="1"/>
+                <ExitCode Behavior="error" Value="2"/>
+                <ExitCode Behavior="error" Value="3"/>
+                <ExitCode Behavior="forceReboot" Value="4"/>
+                <ExitCode Behavior="success" Value="5"/>
+            </ExePackage>
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
             <MsiPackage
                 SourceFile="resources\Cryptomator.msi"
                 CacheId="cryptomator-bundle-cryptomator"
                 DisplayInternalUI="no"
-                Visible="no"
-            />
+                Visible="no"/>
             <MsiPackage
                 SourceFile="resources\winfsp.msi"
                 CacheId="cryptomator-bundle-winfsp"
                 Visible="yes"
                 DisplayInternalUI="no"
-                Vital="no"
-                Permanent="yes"
-            />
+                Permanent="yes"/>
         </Chain>
     </Bundle>
 </Wix>
