@@ -41,6 +41,7 @@ public class VaultListManager {
 	private final VaultComponent.Factory vaultComponentFactory;
 	private final ObservableList<Vault> vaultList;
 	private final String defaultVaultName;
+	private final Settings settings;
 
 	@Inject
 	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Factory vaultComponentFactory, ResourceBundle resourceBundle, Settings settings) {
@@ -48,7 +49,8 @@ public class VaultListManager {
 		this.autoLocker = autoLocker;
 		this.vaultComponentFactory = vaultComponentFactory;
 		this.defaultVaultName = resourceBundle.getString("defaults.vault.vaultName");
-
+		this.settings = settings;
+		
 		addAll(settings.directories);
 		vaultList.addListener(new VaultListChangeListener(settings.directories));
 		autoLocker.init();
@@ -71,6 +73,8 @@ public class VaultListManager {
 	private VaultSettings newVaultSettings(Path path) {
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
 		vaultSettings.path.set(path);
+		vaultSettings.mountService.set(settings.mountService.getValue());
+		vaultSettings.port.set(settings.port.getValue());
 		if (path.getFileName() != null) {
 			vaultSettings.displayName.set(path.getFileName().toString());
 		} else {
