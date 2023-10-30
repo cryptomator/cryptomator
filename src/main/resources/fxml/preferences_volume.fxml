@@ -20,7 +20,7 @@
 	</padding>
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
-			<Label text="%preferences.volume.type"/>
+			<Label text="%preferences.volume.defaultVolumeTypeLabel"/>
 			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
 			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
 				<graphic>
@@ -31,8 +31,6 @@
 				</tooltip>
 			</Hyperlink>
 		</HBox>
-
-		<Label styleClass="label-red" text="%preferences.volume.fuseRestartRequired" visible="${controller.fuseRestartRequired}" managed="${controller.fuseRestartRequired}"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">
 			<Label text="%preferences.volume.tcp.port"/>
