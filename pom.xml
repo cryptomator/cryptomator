@@ -65,7 +65,7 @@
 		<jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
 		<dependency-check.version>8.4.0</dependency-check.version>
 		<jacoco.version>0.8.11</jacoco.version>
-		<license-generator.version>2.2.0</license-generator.version>
+		<license-generator.version>2.3.0</license-generator.version>
 		<junit-tree-reporter.version>1.2.1</junit-tree-reporter.version>
 		<mvn-compiler.version>3.11.0</mvn-compiler.version>
 		<mvn-resources.version>3.3.1</mvn-resources.version>
