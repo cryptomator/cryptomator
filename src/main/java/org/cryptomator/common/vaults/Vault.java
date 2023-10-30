@@ -12,6 +12,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.ActualMountService;
+import org.cryptomator.common.mount.FuseRestartRequiredException;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.VaultSettings;
@@ -163,7 +164,7 @@ public class Vault {
 						&& VaultModule.isProblematicFuseService(s) //
 						&& !firstUsedProblematicFuseMountService.get().equals(s)).getValue();
 		if(fuseRestartRequired){
-			throw new MountFailedException("fuseRestartRequired");
+			throw new FuseRestartRequiredException("fuseRestartRequired");
 		}
 
 		CryptoFileSystem fs = createCryptoFileSystem(keyLoader);

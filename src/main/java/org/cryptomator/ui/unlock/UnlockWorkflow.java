@@ -2,6 +2,7 @@ package org.cryptomator.ui.unlock;
 
 import com.google.common.base.Throwables;
 import dagger.Lazy;
+import org.cryptomator.common.mount.FuseRestartRequiredException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -38,17 +39,27 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final VaultService vaultService;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
+	private final Lazy<Scene> fuseRestartRequiredScene;
 	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 	private final ObjectProperty<IllegalMountPointException> illegalMountPointException;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, FxApplicationWindows appWindows, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException) {
+	UnlockWorkflow(@UnlockWindow Stage window, //
+				   @UnlockWindow Vault vault, //
+				   VaultService vaultService, //
+				   @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, //
+				   @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, //
+				   @FxmlScene(FxmlFile.UNLOCK_FUSE_RESTART_REQUIRED) Lazy<Scene> fuseRestartRequiredScene, //
+				   FxApplicationWindows appWindows, //
+				   @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, //
+				   @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
+		this.fuseRestartRequiredScene = fuseRestartRequiredScene;
 		this.appWindows = appWindows;
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.illegalMountPointException = illegalMountPointException;
@@ -85,6 +96,13 @@ public class UnlockWorkflow extends Task<Boolean> {
 		});
 	}
 
+	private void handleFuseRestartRequiredError(FuseRestartRequiredException frre) {
+		Platform.runLater(() -> {
+			window.setScene(fuseRestartRequiredScene.get());
+			window.show();
+		});
+	}
+
 	private void handleGenericError(Throwable e) {
 		LOG.error("Unlock failed for technical reasons.", e);
 		appWindows.showErrorWindow(e, window, null);
@@ -115,6 +133,9 @@ public class UnlockWorkflow extends Task<Boolean> {
 		Throwable throwable = super.getException();
 		if(throwable instanceof IllegalMountPointException impe) {
 			handleIllegalMountPointError(impe);
+		}
+		else if (throwable instanceof FuseRestartRequiredException fRRE) {
+			handleFuseRestartRequiredError(fRRE);
 		} else {
 			handleGenericError(throwable);
 		}
