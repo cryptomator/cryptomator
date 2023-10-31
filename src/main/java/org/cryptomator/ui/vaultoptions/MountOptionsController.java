@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.WindowsDriveLetters;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultModule;
@@ -58,6 +59,7 @@ public class MountOptionsController implements FxController {
 	private final ObservableValue<Boolean> mountFlagsSupported;
 	private final ObservableValue<String> directoryPath;
 	private final List<MountService> mountProviders;
+	private final ObservableValue<MountService> defaultMountService;
 	private final ObservableValue<MountService> selectedMountService;
 	private final ObservableValue<Boolean> fuseRestartRequired;
 	private final BooleanExpression loopbackPortSupported;
@@ -80,6 +82,7 @@ public class MountOptionsController implements FxController {
 
 	@Inject
 	MountOptionsController(@VaultOptionsWindow Stage window, //
+						   Settings settings, //
 						   @VaultOptionsWindow Vault vault, //
 						   WindowsDriveLetters windowsDriveLetters, //
 						   ResourceBundle resourceBundle, //
@@ -94,7 +97,8 @@ public class MountOptionsController implements FxController {
 		this.application = application;
 		this.mountProviders = mountProviders;
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		this.defaultMountService = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(defaultMountService.getValue()), defaultMountService.getValue());
 		this.fuseRestartRequired = selectedMountService.map(s -> //
 				firstUsedProblematicFuseMountService.get() != null //
 						&& VaultModule.isProblematicFuseService(s) //
@@ -363,7 +367,7 @@ public class MountOptionsController implements FxController {
 		@Override
 		public String toString(MountService provider) {
 			if (provider == null) {
-				return resourceBundle.getString("preferences.volume.type.default");
+				return resourceBundle.getString("preferences.volume.type.default") + " (" + defaultMountService.getValue().displayName() + ")";
 			} else {
 				return provider.displayName();
 			}

@@ -96,7 +96,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		});
 	}
 
-	private void handleFuseRestartRequiredError(FuseRestartRequiredException frre) {
+	private void handleFuseRestartRequiredError(FuseRestartRequiredException fRRE) {
 		Platform.runLater(() -> {
 			window.setScene(fuseRestartRequiredScene.get());
 			window.show();
@@ -133,8 +133,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		Throwable throwable = super.getException();
 		if(throwable instanceof IllegalMountPointException impe) {
 			handleIllegalMountPointError(impe);
-		}
-		else if (throwable instanceof FuseRestartRequiredException fRRE) {
+		} else if (throwable instanceof FuseRestartRequiredException fRRE) {
 			handleFuseRestartRequiredError(fRRE);
 		} else {
 			handleGenericError(throwable);

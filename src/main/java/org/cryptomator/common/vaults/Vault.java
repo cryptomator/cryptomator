@@ -14,7 +14,7 @@ import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.ActualMountService;
 import org.cryptomator.common.mount.FuseRestartRequiredException;
 import org.cryptomator.common.mount.Mounter;
-import org.cryptomator.common.mount.WindowsDriveLetters;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -76,14 +76,23 @@ public class Vault {
 	private final Mounter mounter;
 	private final BooleanProperty showingStats;
 	private final ObservableValue<ActualMountService> actualMountService;
-	private final List<MountService> mountProviders;
 	private final ObservableValue<MountService> selectedMountService;
 	private final AtomicReference<MountService> firstUsedProblematicFuseMountService;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, List<MountService> mountProviders, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter, @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService, @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
+	Vault(Settings settings,
+		  VaultSettings vaultSettings,
+		  VaultConfigCache configCache,
+		  AtomicReference<CryptoFileSystem> cryptoFileSystem,
+		  List<MountService> mountProviders,
+		  VaultState state,
+		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException,
+		  VaultStats stats,
+		  Mounter mounter,
+		  @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService,
+		  @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -101,9 +110,9 @@ public class Vault {
 		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.actualMountService = actualMountService;
-		this.mountProviders = mountProviders;
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		var defaultMountService = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(defaultMountService.getValue()), defaultMountService.getValue());
 		this.firstUsedProblematicFuseMountService = firstUsedProblematicFuseMountService;
 	}
 
@@ -157,9 +166,7 @@ public class Vault {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
 		}
-		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		var selMountServ = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
-		var fuseRestartRequired = selMountServ.map(s -> //
+		var fuseRestartRequired = selectedMountService.map(s -> //
 				firstUsedProblematicFuseMountService.get() != null //
 						&& VaultModule.isProblematicFuseService(s) //
 						&& !firstUsedProblematicFuseMountService.get().equals(s)).getValue();

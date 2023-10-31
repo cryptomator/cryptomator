@@ -10,6 +10,7 @@ import dagger.Provides;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.ActualMountService;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.integrations.mount.MountService;
@@ -39,18 +40,17 @@ public class VaultModule {
 	@Provides
 	@Named("vaultMountService")
 	@PerVault
-	static ObservableValue<ActualMountService> provideMountService(VaultSettings vaultSettings, List<MountService> serviceImpls, @Named("FUPFMS") AtomicReference<MountService> fupfms) {
+	static ObservableValue<ActualMountService> provideMountService(Settings settings, VaultSettings vaultSettings, List<MountService> serviceImpls, @Named("FUPFMS") AtomicReference<MountService> fupfms) {
 		var fallbackProvider = serviceImpls.stream().findFirst().orElse(null);
-		var observableMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, //
+		var defaultMountService = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> serviceImpls.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
+		return ObservableUtil.mapWithDefault(vaultSettings.mountService, //
 				desiredServiceImpl -> { //
 					var serviceFromSettings = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny(); //
-					var targetedService = serviceFromSettings.orElse(fallbackProvider);
+					var targetedService = serviceFromSettings.orElse(defaultMountService.getValue());
 					return applyWorkaroundForProblematicFuse(targetedService, serviceFromSettings.isPresent(), fupfms);
 				}, //
-				() -> { //
-					return applyWorkaroundForProblematicFuse(fallbackProvider, true, fupfms);
-				});
-		return observableMountService;
+				() -> applyWorkaroundForProblematicFuse(defaultMountService.getValue(), true, fupfms)
+		);
 	}
 
 	//see https://github.com/cryptomator/cryptomator/issues/2786
