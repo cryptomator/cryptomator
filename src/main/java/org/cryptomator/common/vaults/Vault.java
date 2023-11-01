@@ -59,7 +59,9 @@ public class Vault {
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
+	private final Settings settings;
 	private final VaultSettings vaultSettings;
+	private final List<MountService> mountProviders;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
@@ -76,7 +78,6 @@ public class Vault {
 	private final Mounter mounter;
 	private final BooleanProperty showingStats;
 	private final ObservableValue<ActualMountService> actualMountService;
-	private final ObservableValue<MountService> selectedMountService;
 	private final AtomicReference<MountService> firstUsedProblematicFuseMountService;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -93,9 +94,11 @@ public class Vault {
 		  Mounter mounter,
 		  @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService,
 		  @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
+		this.settings = settings;
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
+		this.mountProviders = mountProviders;
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
@@ -110,9 +113,6 @@ public class Vault {
 		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.actualMountService = actualMountService;
-		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		var defaultMountService = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
-		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(defaultMountService.getValue()), defaultMountService.getValue());
 		this.firstUsedProblematicFuseMountService = firstUsedProblematicFuseMountService;
 	}
 
@@ -166,7 +166,10 @@ public class Vault {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
 		}
-		var fuseRestartRequired = selectedMountService.map(s -> //
+		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
+		var defMntServ = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider).getValue();
+		var selMntServ = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(defMntServ), defMntServ);
+		var fuseRestartRequired = selMntServ.map(s -> //
 				firstUsedProblematicFuseMountService.get() != null //
 						&& VaultModule.isProblematicFuseService(s) //
 						&& !firstUsedProblematicFuseMountService.get().equals(s)).getValue();

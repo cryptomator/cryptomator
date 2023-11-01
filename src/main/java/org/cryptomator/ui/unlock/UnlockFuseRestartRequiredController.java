@@ -16,9 +16,9 @@ public class UnlockFuseRestartRequiredController implements FxController {
 	private final FxApplicationWindows appWindows;
 	private final Vault vault;
 	@Inject
-	UnlockFuseRestartRequiredController(@UnlockWindow Stage window, //
-										FxApplicationWindows appWindows, //
-										@UnlockWindow Vault vault) {
+	UnlockFuseRestartRequiredController(@UnlockWindow Stage window,
+			FxApplicationWindows appWindows,
+			@UnlockWindow Vault vault) {
 		this.window = window;
 		this.appWindows = appWindows;
 		this.vault = vault;
