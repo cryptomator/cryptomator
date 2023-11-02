@@ -53,6 +53,7 @@ public enum FontAwesome5Icon {
 	TIMES("\uF00D"), //
 	TRASH("\uF1F8"), //
 	UNLINK("\uf127"), //
+	USER_COG("\uf4fe"), //
 	WRENCH("\uF0AD"), //
 	WINDOW_MINIMIZE("\uF2D1"), //
 	;

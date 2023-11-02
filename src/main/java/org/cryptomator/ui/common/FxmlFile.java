@@ -25,6 +25,7 @@ public enum FxmlFile {
 	HUB_REGISTER_FAILED("/fxml/hub_register_failed.fxml"), //
 	HUB_SETUP_DEVICE("/fxml/hub_setup_device.fxml"), //
 	HUB_UNAUTHORIZED_DEVICE("/fxml/hub_unauthorized_device.fxml"), //
+	HUB_REQUIRE_ACCOUNT_INIT("/fxml/hub_require_account_init.fxml"), //
 	LOCK_FORCED("/fxml/lock_forced.fxml"), //
 	LOCK_FAILED("/fxml/lock_failed.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //

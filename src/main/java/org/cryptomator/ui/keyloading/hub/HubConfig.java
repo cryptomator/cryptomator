@@ -21,11 +21,16 @@ public class HubConfig {
 
 	public URI getApiBaseUrl() {
 		if (apiBaseUrl != null) {
-			return URI.create(apiBaseUrl);
-		} else {
-			// legacy approach
+			// make sure to end on "/":
+			return URI.create(apiBaseUrl + "/").normalize();
+		} else { // legacy approach
 			assert devicesResourceUrl != null;
+			// make sure to end on "/":
 			return URI.create(devicesResourceUrl + "/..").normalize();
 		}
+	}
+
+	public URI getWebappBaseUrl() {
+		return getApiBaseUrl().resolve("../app/");
 	}
 }
