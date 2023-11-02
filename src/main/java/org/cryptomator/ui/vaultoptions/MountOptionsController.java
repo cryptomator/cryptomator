@@ -367,7 +367,7 @@ public class MountOptionsController implements FxController {
 		@Override
 		public String toString(MountService provider) {
 			if (provider == null) {
-				return resourceBundle.getString("preferences.volume.type.default") + " (" + defaultMountService.getValue().displayName() + ")";
+				return String.format(resourceBundle.getString("vaultOptions.mount.volumeType.default"), defaultMountService.getValue().displayName());
 			} else {
 				return provider.displayName();
 			}

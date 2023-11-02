@@ -23,6 +23,7 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -35,6 +36,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockWorkflow.class);
 
 	private final Stage window;
+	private final ResourceBundle resourceBundle;
 	private final Vault vault;
 	private final VaultService vaultService;
 	private final Lazy<Scene> successScene;
@@ -46,6 +48,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 	@Inject
 	UnlockWorkflow(@UnlockWindow Stage window, //
+				   ResourceBundle resourceBundle,
 				   @UnlockWindow Vault vault, //
 				   VaultService vaultService, //
 				   @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, //
@@ -55,6 +58,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 				   @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, //
 				   @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException) {
 		this.window = window;
+		this.resourceBundle = resourceBundle;
 		this.vault = vault;
 		this.vaultService = vaultService;
 		this.successScene = successScene;
@@ -99,6 +103,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private void handleFuseRestartRequiredError(FuseRestartRequiredException fRRE) {
 		Platform.runLater(() -> {
 			window.setScene(fuseRestartRequiredScene.get());
+			window.setTitle(String.format(resourceBundle.getString("unlock.error.fuseRestartRequired.title"), vault.getDisplayName()));
 			window.show();
 		});
 	}
