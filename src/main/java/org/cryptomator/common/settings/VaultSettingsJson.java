@@ -49,7 +49,7 @@ class VaultSettingsJson {
 	String mountService;
 
 	@JsonProperty("port")
-	int port = Settings.DEFAULT_PORT;
+	int port = VaultSettings.DEFAULT_PORT;
 
 	@Deprecated(since = "1.7.0")
 	@JsonProperty(value = "winDriveLetter", access = JsonProperty.Access.WRITE_ONLY) // WRITE_ONLY means value is "written" into the java object during deserialization. Upvote this: https://github.com/FasterXML/jackson-annotations/issues/233

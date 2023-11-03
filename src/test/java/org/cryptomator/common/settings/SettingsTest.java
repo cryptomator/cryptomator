@@ -24,16 +24,12 @@ public class SettingsTest {
 		Mockito.verify(changeListener, Mockito.times(0)).accept(settings);
 
 		// first change (to property):
-		settings.port.set(42428);
+		settings.directories.add(vaultSettings);
 		Mockito.verify(changeListener, Mockito.times(1)).accept(settings);
 
 		// second change (to list):
-		settings.directories.add(vaultSettings);
-		Mockito.verify(changeListener, Mockito.times(2)).accept(settings);
-
-		// third change (to property of list item):
 		vaultSettings.displayName.set("asd");
-		Mockito.verify(changeListener, Mockito.times(3)).accept(settings);
+		Mockito.verify(changeListener, Mockito.times(2)).accept(settings);
 	}
 
 }

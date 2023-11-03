@@ -46,9 +46,6 @@ class SettingsJson {
 	@JsonProperty("numTrayNotifications")
 	int numTrayNotifications = Settings.DEFAULT_NUM_TRAY_NOTIFICATIONS;
 
-	@JsonProperty("port")
-	int port = Settings.DEFAULT_PORT;
-
 	@JsonProperty("showMinimizeButton")
 	boolean showMinimizeButton = Settings.DEFAULT_SHOW_MINIMIZE_BUTTON;
 

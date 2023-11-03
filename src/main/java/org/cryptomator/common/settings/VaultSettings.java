@@ -38,6 +38,7 @@ public class VaultSettings {
 	static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 	static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
 	static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
+	static final int DEFAULT_PORT = 42427;
 
 	private static final Random RNG = new Random();
 

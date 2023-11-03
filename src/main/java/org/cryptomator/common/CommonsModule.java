@@ -12,6 +12,7 @@ import org.cryptomator.common.keychain.KeychainModule;
 import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
@@ -139,10 +140,10 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static ObservableValue<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
-		return settings.port.map(port -> {
+	static ObservableValue<InetSocketAddress> provideServerSocketAddressBinding(VaultSettings vaultSettings) {
+		return vaultSettings.port.map(port -> {
 			String host = SystemUtils.IS_OS_WINDOWS ? "127.0.0.1" : "localhost";
-			return InetSocketAddress.createUnresolved(host, settings.port.intValue());
+			return InetSocketAddress.createUnresolved(host, vaultSettings.port.intValue());
 		});
 	}
 

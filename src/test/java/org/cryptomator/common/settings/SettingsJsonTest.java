@@ -26,7 +26,6 @@ public class SettingsJsonTest {
 					],
 					"autoCloseVaults" : true,
 					"checkForUpdatesEnabled": true,
-					"port": 8080,
 					"language": "de-DE",
 					"numTrayNotifications": 42
 				}
@@ -39,7 +38,6 @@ public class SettingsJsonTest {
 		Assertions.assertEquals("/vault1", jsonObj.directories.get(0).path);
 		Assertions.assertEquals("/vault2", jsonObj.directories.get(1).path);
 		Assertions.assertEquals("--foo --bar", jsonObj.directories.get(1).mountFlags);
-		Assertions.assertEquals(8080, jsonObj.port);
 		Assertions.assertTrue(jsonObj.autoCloseVaults);
 		Assertions.assertEquals("de-DE", jsonObj.language);
 		Assertions.assertEquals(42, jsonObj.numTrayNotifications);
