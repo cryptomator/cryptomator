@@ -106,6 +106,7 @@ public class Settings {
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
 		migrateLegacySettings(json);
+		migratePortToVaultSettings(json);
 
 		directories.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
@@ -128,6 +129,15 @@ public class Settings {
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
 		lastUpdateCheck.addListener(this::somethingChanged);
+	}
+
+	@SuppressWarnings("deprecation")
+	private void migratePortToVaultSettings(SettingsJson json) {
+		if(json.port != 0){
+			for (VaultSettings vaultSettings : directories) {
+				vaultSettings.port.set(json.port);
+			}
+		}
 	}
 
 	@SuppressWarnings("deprecation")
