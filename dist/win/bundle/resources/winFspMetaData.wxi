@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <!-- A version number MUST be prefixed with letter "v", otherwise it is considered a normal string -->
-  <?define BundledWinFspVersion="v1.12.22339" ?>
-  <?define BundledWinFspDownloadLink="https://github.com/winfsp/winfsp/releases/download/v1.12.22339/winfsp-1.12.22339.msi" ?> <!-- Only used by external build scripts -->
-</Include>

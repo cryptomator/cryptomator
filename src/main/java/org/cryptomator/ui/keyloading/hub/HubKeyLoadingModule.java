@@ -1,7 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.io.BaseEncoding;
-import com.nimbusds.jose.JWEObject;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -69,7 +68,7 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
-	static CompletableFuture<JWEObject> provideResult() {
+	static CompletableFuture<ReceivedKey> provideResult() {
 		return new CompletableFuture<>();
 	}
 
@@ -114,11 +113,12 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE)
+	@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE)
 	@KeyLoadingScoped
-	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE);
+	static Scene provideHubLegacyRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE);
 	}
+
 
 	@Provides
 	@FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS)
@@ -135,10 +135,24 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_SETUP_DEVICE)
+	@KeyLoadingScoped
+	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_SETUP_DEVICE);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE)
 	@KeyLoadingScoped
 	static Scene provideHubUnauthorizedDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT)
+	@KeyLoadingScoped
+	static Scene provideRequireAccountInitScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT);
 	}
 
 	@Binds
@@ -168,6 +182,11 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
+	@FxControllerKey(LegacyRegisterDeviceController.class)
+	abstract FxController bindLegacyRegisterDeviceController(LegacyRegisterDeviceController controller);
+
+	@Binds
+	@IntoMap
 	@FxControllerKey(RegisterSuccessController.class)
 	abstract FxController bindRegisterSuccessController(RegisterSuccessController controller);
 
@@ -180,4 +199,9 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(UnauthorizedDeviceController.class)
 	abstract FxController bindUnauthorizedDeviceController(UnauthorizedDeviceController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RequireAccountInitController.class)
+	abstract FxController bindRequireAccountInitController(RequireAccountInitController controller);
 }

@@ -10,8 +10,8 @@ on:
         required: false
 
 env:
-  JAVA_DIST: 'temurin'
-  JAVA_VERSION: 20
+  JAVA_DIST: 'zulu'
+  JAVA_VERSION: '21.0.1+12'
 
 jobs:
   get-version:
@@ -36,7 +36,7 @@ jobs:
             openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-aarch64_bin-jmods.zip'
             openjfx-sha: 'c0d80ebbe0aab404ef9ad8b46c05bf533a1e40b39b2720eebd9238d81f6326ca'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v3
         with:

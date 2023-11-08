@@ -1,13 +1,14 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.coffeelibs.tinyoauth2client.AuthFlow;
 import io.github.coffeelibs.tinyoauth2client.TinyOAuth2;
 import io.github.coffeelibs.tinyoauth2client.http.response.Response;
 
 import javafx.concurrent.Task;
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.function.Consumer;
 
 class AuthFlowTask extends Task<String> {
@@ -21,7 +22,7 @@ class AuthFlowTask extends Task<String> {
 	/**
 	 * Spawns a server and waits for the redirectUri to be called.
 	 *
-	 * @param hubConfig Configuration object holding parameters required by {@link AuthFlow}
+	 * @param hubConfig Configuration object holding parameters required by {@link io.github.coffeelibs.tinyoauth2client.AuthorizationCodeGrant}
 	 * @param redirectUriConsumer A callback invoked with the redirectUri, as soon as the server has started
 	 */
 	public AuthFlowTask(HubConfig hubConfig, AuthFlowContext authFlowContext, Consumer<URI> redirectUriConsumer) {
@@ -34,10 +35,11 @@ class AuthFlowTask extends Task<String> {
 	protected String call() throws IOException, InterruptedException {
 		var response = TinyOAuth2.client(hubConfig.clientId) //
 				.withTokenEndpoint(URI.create(hubConfig.tokenEndpoint)) //
-				.authFlow(URI.create(hubConfig.authEndpoint)) //
+				.withRequestTimeout(Duration.ofSeconds(10)) //
+				.authorizationCodeGrant(URI.create(hubConfig.authEndpoint)) //
 				.setSuccessResponse(Response.redirect(URI.create(hubConfig.authSuccessUrl + "&device=" + authFlowContext.deviceId()))) //
 				.setErrorResponse(Response.redirect(URI.create(hubConfig.authErrorUrl + "&device=" + authFlowContext.deviceId()))) //
-				.authorize(redirectUriConsumer);
+				.authorize(HttpClient.newHttpClient(), redirectUriConsumer);
 		if (response.statusCode() != 200) {
 			throw new NotOkResponseException("Authorization returned status code " + response.statusCode());
 		}
