@@ -119,6 +119,7 @@ public abstract class HubKeyLoadingModule {
 		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE);
 	}
 
+
 	@Provides
 	@FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS)
 	@KeyLoadingScoped
@@ -145,6 +146,13 @@ public abstract class HubKeyLoadingModule {
 	@KeyLoadingScoped
 	static Scene provideHubUnauthorizedDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT)
+	@KeyLoadingScoped
+	static Scene provideRequireAccountInitScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT);
 	}
 
 	@Binds
@@ -191,4 +199,9 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(UnauthorizedDeviceController.class)
 	abstract FxController bindUnauthorizedDeviceController(UnauthorizedDeviceController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RequireAccountInitController.class)
+	abstract FxController bindRequireAccountInitController(RequireAccountInitController controller);
 }
