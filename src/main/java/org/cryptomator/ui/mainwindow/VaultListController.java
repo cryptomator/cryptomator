@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -114,13 +115,8 @@ public class VaultListController implements FxController {
 
 		//toggle selected vault lock status on double click
 		vaultList.addEventFilter(MouseEvent.MOUSE_CLICKED, click -> {
-			if (click.getClickCount() >= 2 && selectedVault.get() != null) {
-				if (selectedVault.get().isLocked()) {
-					appWindows.startUnlockWorkflow(selectedVault.get(), mainWindow);
-				}
-				if (selectedVault.get().isUnlocked()) {
-					appWindows.startLockWorkflow(selectedVault.get(), mainWindow);
-				}
+			if (click.getClickCount() >= 2) {
+				Optional.ofNullable(selectedVault.get()).ifPresent(this::toggleVaultLockStatus);
 			}
 		});
 
@@ -174,6 +170,15 @@ public class VaultListController implements FxController {
 		if (released.getY() > (vaultList.getItems().size() * vaultList.fixedCellSizeProperty().get())) {
 			vaultList.getSelectionModel().clearSelection();
 			released.consume();
+		}
+	}
+
+	private void toggleVaultLockStatus(Vault selectedVault) {
+		if (selectedVault.isLocked()) {
+			appWindows.startUnlockWorkflow(selectedVault, mainWindow);
+		}
+		if (selectedVault.isUnlocked()) {
+			appWindows.startLockWorkflow(selectedVault, mainWindow);
 		}
 	}
 
