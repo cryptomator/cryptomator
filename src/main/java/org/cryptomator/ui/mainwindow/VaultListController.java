@@ -7,6 +7,7 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,7 @@ public class VaultListController implements FxController {
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
+	private final FxApplicationWindows appWindows;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
@@ -79,7 +81,8 @@ public class VaultListController implements FxController {
 						AddVaultWizardComponent.Builder addVaultWizard, //
 						RemoveVaultComponent.Builder removeVaultDialogue, //
 						VaultListManager vaultListManager, //
-						ResourceBundle resourceBundle) {
+						ResourceBundle resourceBundle, //
+						FxApplicationWindows appWindows) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -88,6 +91,7 @@ public class VaultListController implements FxController {
 		this.removeVaultDialogue = removeVaultDialogue;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
+		this.appWindows = appWindows;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -107,6 +111,18 @@ public class VaultListController implements FxController {
 			}
 		});
 		vaultList.addEventFilter(MouseEvent.MOUSE_RELEASED, this::deselect);
+
+		//toggle selected vault lock status on double click
+		vaultList.addEventFilter(MouseEvent.MOUSE_CLICKED, click -> {
+			if (click.getClickCount() >= 2 && selectedVault.get() != null) {
+				if (selectedVault.get().isLocked()) {
+					appWindows.startUnlockWorkflow(selectedVault.get(), mainWindow);
+				}
+				if (selectedVault.get().isUnlocked()) {
+					appWindows.startLockWorkflow(selectedVault.get(), mainWindow);
+				}
+			}
+		});
 
 		//don't show context menu when no vault selected
 		vaultList.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, request -> {
