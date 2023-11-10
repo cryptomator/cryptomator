@@ -113,10 +113,12 @@ public class VaultListController implements FxController {
 		});
 		vaultList.addEventFilter(MouseEvent.MOUSE_RELEASED, this::deselect);
 
-		//toggle selected vault lock status on double click
+		//unlock vault on double click
 		vaultList.addEventFilter(MouseEvent.MOUSE_CLICKED, click -> {
 			if (click.getClickCount() >= 2) {
-				Optional.ofNullable(selectedVault.get()).ifPresent(this::toggleVaultLockStatus);
+				Optional.ofNullable(selectedVault.get())
+						.filter(Vault::isLocked)
+						.ifPresent(vault -> appWindows.startUnlockWorkflow(vault, mainWindow));
 			}
 		});
 
@@ -170,15 +172,6 @@ public class VaultListController implements FxController {
 		if (released.getY() > (vaultList.getItems().size() * vaultList.fixedCellSizeProperty().get())) {
 			vaultList.getSelectionModel().clearSelection();
 			released.consume();
-		}
-	}
-
-	private void toggleVaultLockStatus(Vault vault) {
-		if (vault.isLocked()) {
-			appWindows.startUnlockWorkflow(vault, mainWindow);
-		}
-		if (vault.isUnlocked()) {
-			appWindows.startLockWorkflow(vault, mainWindow);
 		}
 	}
 
