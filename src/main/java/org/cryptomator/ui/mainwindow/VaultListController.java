@@ -173,12 +173,12 @@ public class VaultListController implements FxController {
 		}
 	}
 
-	private void toggleVaultLockStatus(Vault selectedVault) {
-		if (selectedVault.isLocked()) {
-			appWindows.startUnlockWorkflow(selectedVault, mainWindow);
+	private void toggleVaultLockStatus(Vault vault) {
+		if (vault.isLocked()) {
+			appWindows.startUnlockWorkflow(vault, mainWindow);
 		}
-		if (selectedVault.isUnlocked()) {
-			appWindows.startLockWorkflow(selectedVault, mainWindow);
+		if (vault.isUnlocked()) {
+			appWindows.startLockWorkflow(vault, mainWindow);
 		}
 	}
 
