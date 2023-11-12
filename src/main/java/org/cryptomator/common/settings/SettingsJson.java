@@ -46,7 +46,7 @@ class SettingsJson {
 	@JsonProperty("numTrayNotifications")
 	int numTrayNotifications = Settings.DEFAULT_NUM_TRAY_NOTIFICATIONS;
 
-	@Deprecated(since = "1.10.2")
+	@Deprecated(since = "1.12.0")
 	@JsonProperty(value = "port", access = JsonProperty.Access.WRITE_ONLY) // WRITE_ONLY means value is "written" into the java object during deserialization. Upvote this: https://github.com/FasterXML/jackson-annotations/issues/233
 	int port;
 
