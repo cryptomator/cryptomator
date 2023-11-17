@@ -5,7 +5,6 @@ import org.cryptomator.ui.keyloading.KeyLoading;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;

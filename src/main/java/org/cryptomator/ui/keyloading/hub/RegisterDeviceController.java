@@ -40,7 +40,6 @@ import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -186,7 +185,7 @@ public class RegisterDeviceController implements FxController {
 		switch (cause) {
 			case CompletionException e when e.getCause() instanceof JWEHelper.InvalidJweKeyException -> invalidSetupCode.set(true);
 			default -> {
-				if(cause instanceof DeviceAlreadyExistsException) {
+				if (cause instanceof DeviceAlreadyExistsException) {
 					LOG.debug("Device already registered in hub instance {} for different user", hubConfig.authSuccessUrl);
 				} else {
 					LOG.warn("Device setup failed.", cause);
