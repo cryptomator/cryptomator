@@ -27,6 +27,10 @@ public class ErrorCode {
 	private final Throwable rootCause;
 	private final int rootCauseSpecificFrames;
 
+	// introducing explaining variable to remove magic number code smell
+	private static final int VALUE_MASK = 0xfffff;
+	private static final int SHIFT_BITS = 20;
+
 	private ErrorCode(Throwable throwable, Throwable rootCause, int rootCauseSpecificFrames) {
 		this.throwable = Objects.requireNonNull(throwable);
 		this.rootCause = Objects.requireNonNull(rootCause);
@@ -88,7 +92,7 @@ public class ErrorCode {
 
 	private String format(int value) {
 		// Cut off highest 12 bits (only leave 20 least significant bits) and XOR rest with cutoff
-		value = (value & 0xfffff) ^ (value >>> 20);
+		value = (value & VALUE_MASK) ^ (value >>> SHIFT_BITS); // removing the magic number code smell
 		return Strings.padStart(Integer.toString(value, 32).toUpperCase(Locale.ROOT), 4, '0');
 	}
 
