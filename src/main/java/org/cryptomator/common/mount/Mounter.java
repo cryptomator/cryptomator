@@ -28,6 +28,9 @@ public class Mounter {
 	private final Environment env;
 	private final WindowsDriveLetters driveLetters;
 	private final ObservableValue<ActualMountService> mountServiceObservable;
+	private Runnable cleanup = () -> {};
+	private boolean canMountToSystem;
+
 
 	@Inject
 	public Mounter(Settings settings, Environment env, WindowsDriveLetters driveLetters, ObservableValue<ActualMountService> mountServiceObservable) {
@@ -83,50 +86,76 @@ public class Mounter {
 			var canMountToSystem = service.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH);
 
 			if (userChosenMountPoint == null) {
-				if (canMountToSystem) {
-					// no need to set a mount point
-				} else if (canMountToDriveLetter) {
-					builder.setMountpoint(driveLetters.getFirstDesiredAvailable().orElseThrow()); //TODO: catch exception and translate
-				} else if (canMountToParent) {
-					Files.createDirectories(defaultMountPointBase);
-					builder.setMountpoint(defaultMountPointBase);
-				} else if (canMountToDir) {
-					var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName.get());
-					Files.createDirectories(mountPoint);
-					builder.setMountpoint(mountPoint);
-				}
+				// defining new methods to remove the complex conditional code smell
+				handleNullUserChosenMountPoint(canMountToSystem, canMountToDriveLetter, canMountToParent, canMountToDir, defaultMountPointBase);
 			} else {
-				var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
-				if (mpIsDriveLetter) {
-					if (driveLetters.getOccupied().contains(userChosenMountPoint)) {
-						throw new MountPointInUseException(userChosenMountPoint);
-					}
-				} else if (canMountToParent && !canMountToDir) {
-					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
-					cleanup = () -> {
-						MountWithinParentUtil.cleanup(userChosenMountPoint);
-					};
-				}
-				try {
-					builder.setMountpoint(userChosenMountPoint);
-				} catch (IllegalArgumentException | UnsupportedOperationException e) {
-					var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter) //mounting as driveletter, albeit not supported
-							|| (!canMountToDir && !mpIsDriveLetter) //mounting to directory, albeit not supported
-							|| (!canMountToParent && !mpIsDriveLetter) //
-							|| (!canMountToDir && !canMountToParent && !canMountToSystem && !canMountToDriveLetter);
-					if (configNotSupported) {
-						throw new MountPointNotSupportedException(userChosenMountPoint, e.getMessage());
-					} else if (canMountToDir && !canMountToParent && !Files.exists(userChosenMountPoint)) {
-						//mountpoint must exist
-						throw new MountPointNotExistingException(userChosenMountPoint, e.getMessage());
-					} else {
-						//TODO: add specific exception for !canMountToDir && canMountToParent && !Files.notExists(userChosenMountPoint)
-						throw new IllegalMountPointException(userChosenMountPoint, e.getMessage());
-					}
-				}
+				handleNonNullUserChosenMountPoint(userChosenMountPoint, canMountToDriveLetter, canMountToParent, canMountToDir);
 			}
+
 			return cleanup;
 		}
+
+		private void handleNullUserChosenMountPoint(boolean canMountToSystem, boolean canMountToDriveLetter, boolean canMountToParent, boolean canMountToDir, Path defaultMountPointBase) throws IOException {
+			if (canMountToSystem) {
+				// no need to set a mount point
+			} else if (canMountToDriveLetter) {
+				builder.setMountpoint(driveLetters.getFirstDesiredAvailable().orElseThrow()); //TODO: catch exception and translate
+			} else if (canMountToParent) {
+				Files.createDirectories(defaultMountPointBase);
+				builder.setMountpoint(defaultMountPointBase);
+			} else if (canMountToDir) {
+				var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName.get());
+				Files.createDirectories(mountPoint);
+				builder.setMountpoint(mountPoint);
+			}
+		}
+
+		private void handleNonNullUserChosenMountPoint(Path userChosenMountPoint, boolean canMountToDriveLetter, boolean canMountToParent, boolean canMountToDir) throws IOException {
+			var mpIsDriveLetter = userChosenMountPoint.toString().matches("[A-Z]:\\\\");
+			if (mpIsDriveLetter) {
+				handleDriveLetterMountPoint(userChosenMountPoint);
+			} else if (canMountToParent && !canMountToDir) {
+				handleMountWithinParent(userChosenMountPoint);
+			}
+			setBuilderMountPoint(userChosenMountPoint, mpIsDriveLetter, canMountToDriveLetter, canMountToDir, canMountToParent);
+		}
+
+		private void handleDriveLetterMountPoint(Path userChosenMountPoint) throws MountPointInUseException {
+			if (driveLetters.getOccupied().contains(userChosenMountPoint)) {
+				throw new MountPointInUseException(userChosenMountPoint);
+			}
+		}
+
+		private void handleMountWithinParent(Path userChosenMountPoint) throws IOException {
+			MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
+			cleanup = () -> {
+				MountWithinParentUtil.cleanup(userChosenMountPoint);
+			};
+		}
+
+		private void setBuilderMountPoint(Path userChosenMountPoint, boolean mpIsDriveLetter, boolean canMountToDriveLetter, boolean canMountToDir, boolean canMountToParent) throws IOException {
+			try {
+				builder.setMountpoint(userChosenMountPoint);
+			} catch (IllegalArgumentException | UnsupportedOperationException e) {
+				handleMountPointExceptions(userChosenMountPoint, mpIsDriveLetter, canMountToDriveLetter, canMountToDir, canMountToParent, e);
+			}
+		}
+
+		private void handleMountPointExceptions(Path userChosenMountPoint, boolean mpIsDriveLetter, boolean canMountToDriveLetter, boolean canMountToDir, boolean canMountToParent, Exception e) throws IOException {
+			var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter)
+					|| (!canMountToDir && !mpIsDriveLetter)
+					|| (!canMountToParent && !mpIsDriveLetter)
+					|| (!canMountToDir && !canMountToParent && !canMountToSystem && !canMountToDriveLetter);
+
+			if (configNotSupported) {
+				throw new MountPointNotSupportedException(userChosenMountPoint, e.getMessage());
+			} else if (canMountToDir && !canMountToParent && !Files.exists(userChosenMountPoint)) {
+				throw new MountPointNotExistingException(userChosenMountPoint, e.getMessage());
+			} else {
+				throw new IllegalMountPointException(userChosenMountPoint, e.getMessage());
+			}
+		}
+
 
 	}
 
