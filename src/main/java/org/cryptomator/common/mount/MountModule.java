@@ -4,7 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.integrations.mount.Mount;
 import org.cryptomator.integrations.mount.MountService;
 
 import javax.inject.Named;
@@ -41,24 +40,25 @@ public class MountModule {
 				desiredServiceImpl -> { //
 					var serviceFromSettings = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny(); //
 					var targetedService = serviceFromSettings.orElse(fallbackProvider);
-					return applyWorkaroundForProblematicFuse(targetedService, serviceFromSettings.isPresent(), fupfms);
+					return applyProblematicFuseWorkaround(targetedService, serviceFromSettings.isPresent(), fupfms);
 				}, //
 				() -> { //
-					return applyWorkaroundForProblematicFuse(fallbackProvider, true, fupfms);
+					return applyProblematicFuseWorkaround(fallbackProvider, true, fupfms);
 				});
 		return observableMountService;
 	}
 
 	//see https://github.com/cryptomator/cryptomator/issues/2786
-	private synchronized static ActualMountService applyWorkaroundForProblematicFuse(MountService targetedService, boolean isDesired, AtomicReference<MountService> firstUsedProblematicFuseMountService) {
+	// changed method name and variable name to remove the long identifier smell using Rename method / variable technique
+	private synchronized static ActualMountService applyProblematicFuseWorkaround(MountService targetedService, boolean isDesired, AtomicReference<MountService> firstProblematicFuseService) {
 		//set the first used problematic fuse service if applicable
 		var targetIsProblematicFuse = isProblematicFuseService(targetedService);
-		if (targetIsProblematicFuse && firstUsedProblematicFuseMountService.get() == null) {
-			firstUsedProblematicFuseMountService.set(targetedService);
+		if (targetIsProblematicFuse && firstProblematicFuseService.get() == null) {
+			firstProblematicFuseService.set(targetedService);
 		}
 
 		//do not use the targeted mount service and fallback to former one, if the service is problematic _and_ not the first problematic one used.
-		if (targetIsProblematicFuse && !firstUsedProblematicFuseMountService.get().equals(targetedService)) {
+		if (targetIsProblematicFuse && !firstProblematicFuseService.get().equals(targetedService)) {
 			return new ActualMountService(formerSelectedMountService.get(), false);
 		} else {
 			formerSelectedMountService.set(targetedService);
