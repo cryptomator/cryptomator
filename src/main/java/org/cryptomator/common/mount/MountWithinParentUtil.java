@@ -21,51 +21,68 @@ public final class MountWithinParentUtil {
 
 	private MountWithinParentUtil() {}
 
+	// extracting methods to resolve the complex method smell
 	static void prepareParentNoMountPoint(Path mountPoint) throws IllegalMountPointException, IOException {
 		Path hideaway = getHideaway(mountPoint);
 		var mpState = getMountPointState(mountPoint);
 		var hideExists = Files.exists(hideaway, LinkOption.NOFOLLOW_LINKS);
 
 		if (mpState == MountPointState.BROKEN_JUNCTION) {
-			LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", mountPoint);
-			Files.delete(mountPoint); //Throws if mountPoint is also a non-empty folder
-			mpState = MountPointState.NOT_EXISTING;
-		}
-
-		if (mpState == MountPointState.NOT_EXISTING && !hideExists) { //neither mountpoint nor hideaway exist
-			throw new MountPointNotExistingException(mountPoint);
-		} else if (mpState == MountPointState.NOT_EXISTING) { //only hideaway exists
-			checkIsHideawayDirectory(mountPoint, hideaway);
-			LOG.info("Mountpoint {} seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
-			if (SystemUtils.IS_OS_WINDOWS) {
-				Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
-			}
+			handleBrokenJunction(mountPoint);
+		} else if (mpState == MountPointState.NOT_EXISTING) {
+			handleNotExistingMountPoint(mountPoint, hideExists, hideaway);
 		} else {
 			assert mpState == MountPointState.EMPTY_DIR;
-			try {
-				if (hideExists) { //... with hideaway
-					removeResidualHideaway(mountPoint, hideaway);
-				}
-
-				//... (now) without hideaway
-				Files.move(mountPoint, hideaway);
-				if (SystemUtils.IS_OS_WINDOWS) {
-					Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
-				}
-				int attempts = 0;
-				while (!Files.notExists(mountPoint)) {
-					if (attempts >= 10) {
-						throw new MountPointCleanupFailedException(mountPoint);
-					}
-					Thread.sleep(1000);
-					attempts++;
-				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				throw new RuntimeException(e);
-			}
+			handleExistingEmptyDirectory(mountPoint, hideaway, hideExists);
 		}
 	}
+
+	private static void handleBrokenJunction(Path mountPoint) throws IOException {
+		LOG.info("Mountpoint \"{}\" is still a junction. Deleting it.", mountPoint);
+		Files.delete(mountPoint); // Throws if mountPoint is also a non-empty folder
+	}
+
+	private static void handleNotExistingMountPoint(Path mountPoint, boolean hideExists, Path hideaway) throws IOException {
+		if (!hideExists) {
+			throw new MountPointNotExistingException(mountPoint);
+		}
+
+		checkIsHideawayDirectory(mountPoint, hideaway);
+		LOG.info("Mountpoint {} seems to be not properly cleaned up. Will be fixed on unmount.");
+		if (SystemUtils.IS_OS_WINDOWS) {
+			Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
+		}
+	}
+
+	private static void handleExistingEmptyDirectory(Path mountPoint, Path hideaway, boolean hideExists) throws IOException {
+		try {
+			if (hideExists) {
+				removeResidualHideaway(mountPoint, hideaway);
+			}
+
+			moveMountPointToHideaway(mountPoint, hideaway);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static void moveMountPointToHideaway(Path mountPoint, Path hideaway) throws IOException, InterruptedException {
+		Files.move(mountPoint, hideaway);
+		if (SystemUtils.IS_OS_WINDOWS) {
+			Files.setAttribute(hideaway, WIN_HIDDEN_ATTR, true, LinkOption.NOFOLLOW_LINKS);
+		}
+
+		int attempts = 0;
+		while (!Files.notExists(mountPoint)) {
+			if (attempts >= 10) {
+				throw new MountPointCleanupFailedException(mountPoint);
+			}
+			Thread.sleep(1000);
+			attempts++;
+		}
+	}
+
 
 	@VisibleForTesting
 	static MountPointState getMountPointState(Path path) throws IOException, IllegalMountPointException {
