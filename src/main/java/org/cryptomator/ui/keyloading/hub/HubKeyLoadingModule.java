@@ -72,6 +72,14 @@ public abstract class HubKeyLoadingModule {
 		return new CompletableFuture<>();
 	}
 
+	@Provides
+	@KeyLoadingScoped
+	@Named("registerException")
+	static AtomicReference<Throwable> provideRegisterException() {
+		return new AtomicReference<>();
+	}
+
+
 	@Binds
 	@IntoMap
 	@KeyLoadingScoped

@@ -38,7 +38,8 @@
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="%hub.registerFailed.description" wrapText="true"/>
+			<Label text="%hub.registerFailed.description.generic" wrapText="true" visible="${controller.genericError}" managed="${controller.genericError}"/>
+			<Label text="%hub.registerFailed.description.deviceAlreadyExists" wrapText="true" visible="${controller.deviceAlreadyExisting}" managed="${controller.deviceAlreadyExisting}"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
