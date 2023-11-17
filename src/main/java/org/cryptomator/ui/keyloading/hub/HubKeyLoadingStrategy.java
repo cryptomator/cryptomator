@@ -44,6 +44,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 		this.window = window;
 		this.keychainManager = keychainManager;
 		window.setTitle(windowTitle);
+		window.setOnCloseRequest(_ -> result.cancel(true));
 		this.authFlowScene = authFlowScene;
 		this.noKeychainScene = noKeychainScene;
 		this.result = result;

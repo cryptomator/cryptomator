@@ -193,7 +193,6 @@ public class RegisterDeviceController implements FxController {
 				}
 				registerException.set(cause);
 				window.setScene(registerFailedScene.get());
-				result.completeExceptionally(cause);
 			}
 		}
 	}
