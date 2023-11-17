@@ -23,7 +23,7 @@ public enum FxmlFile {
 	HUB_LEGACY_REGISTER_DEVICE("/fxml/hub_legacy_register_device.fxml"), //
 	HUB_REGISTER_SUCCESS("/fxml/hub_register_success.fxml"), //
 	HUB_REGISTER_FAILED("/fxml/hub_register_failed.fxml"), //
-	HUB_SETUP_DEVICE("/fxml/hub_setup_device.fxml"), //
+	HUB_REGISTER_DEVICE("/fxml/hub_register_device.fxml"), //
 	HUB_UNAUTHORIZED_DEVICE("/fxml/hub_unauthorized_device.fxml"), //
 	HUB_REQUIRE_ACCOUNT_INIT("/fxml/hub_require_account_init.fxml"), //
 	LOCK_FORCED("/fxml/lock_forced.fxml"), //

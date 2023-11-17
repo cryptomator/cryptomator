@@ -135,10 +135,10 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_SETUP_DEVICE)
+	@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE)
 	@KeyLoadingScoped
 	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_SETUP_DEVICE);
+		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE);
 	}
 
 	@Provides
