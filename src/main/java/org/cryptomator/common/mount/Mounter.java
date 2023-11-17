@@ -86,7 +86,7 @@ public class Mounter {
 			var canMountToSystem = service.hasCapability(MOUNT_TO_SYSTEM_CHOSEN_PATH);
 
 			if (userChosenMountPoint == null) {
-				// defining new methods to remove the complex conditional code smell
+				// defining new methods to remove the complex conditional code smell using decompose conditional technique
 				handleNullUserChosenMountPoint(canMountToSystem, canMountToDriveLetter, canMountToParent, canMountToDir, defaultMountPointBase);
 			} else {
 				handleNonNullUserChosenMountPoint(userChosenMountPoint, canMountToDriveLetter, canMountToParent, canMountToDir);
