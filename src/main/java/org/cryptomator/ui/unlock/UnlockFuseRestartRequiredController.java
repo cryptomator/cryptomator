@@ -8,20 +8,29 @@ import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import java.util.ResourceBundle;
 
 @UnlockScoped
 public class UnlockFuseRestartRequiredController implements FxController {
 
 	private final Stage window;
+	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
 	private final Vault vault;
+
 	@Inject
 	UnlockFuseRestartRequiredController(@UnlockWindow Stage window,
+			ResourceBundle resourceBundle,
 			FxApplicationWindows appWindows,
 			@UnlockWindow Vault vault) {
 		this.window = window;
+		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
 		this.vault = vault;
+	}
+
+	public void initialize() {
+		window.setTitle(String.format(resourceBundle.getString("unlock.error.fuseRestartRequired.title"), vault.getDisplayName()));
 	}
 
 	@FXML

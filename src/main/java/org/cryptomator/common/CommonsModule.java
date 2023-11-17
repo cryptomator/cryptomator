@@ -7,12 +7,10 @@ package org.cryptomator.common;
 
 import dagger.Module;
 import dagger.Provides;
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.keychain.KeychainModule;
 import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
-import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
@@ -23,8 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javafx.beans.value.ObservableValue;
-import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Comparator;
@@ -136,15 +132,6 @@ public abstract class CommonsModule {
 
 	private static void handleUncaughtExceptionInBackgroundThread(Thread thread, Throwable throwable) {
 		LOG.error("Uncaught exception in " + thread.getName(), throwable);
-	}
-
-	@Provides
-	@Singleton
-	static ObservableValue<InetSocketAddress> provideServerSocketAddressBinding(VaultSettings vaultSettings) {
-		return vaultSettings.port.map(port -> {
-			String host = SystemUtils.IS_OS_WINDOWS ? "127.0.0.1" : "localhost";
-			return InetSocketAddress.createUnresolved(host, vaultSettings.port.intValue());
-		});
 	}
 
 	@Provides

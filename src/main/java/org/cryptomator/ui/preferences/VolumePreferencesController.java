@@ -3,13 +3,11 @@ package org.cryptomator.ui.preferences;
 import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.vaults.VaultModule;
 import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ChoiceBox;
@@ -17,7 +15,6 @@ import javafx.util.StringConverter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicReference;
 
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
@@ -39,7 +36,6 @@ public class VolumePreferencesController implements FxController {
 	VolumePreferencesController(Settings settings,
 								Lazy<Application> application,
 								List<MountService> mountProviders,
-								@Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService,
 								ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.application = application;
@@ -101,7 +97,7 @@ public class VolumePreferencesController implements FxController {
 
 	/* Helpers */
 
-	public class MountServiceConverter extends StringConverter<MountService> {
+	private class MountServiceConverter extends StringConverter<MountService> {
 
 		@Override
 		public String toString(MountService provider) {

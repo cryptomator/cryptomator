@@ -73,8 +73,6 @@ public class VaultListManager {
 	private VaultSettings newVaultSettings(Path path) {
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
 		vaultSettings.path.set(path);
-		vaultSettings.mountService.set(vaultSettings.mountService.getValue());
-		vaultSettings.port.set(vaultSettings.port.getValue());
 		if (path.getFileName() != null) {
 			vaultSettings.displayName.set(path.getFileName().toString());
 		} else {
