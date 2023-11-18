@@ -41,4 +41,9 @@ public class FontAwesome5Spinner extends FontAwesome5IconView {
 		this.spinning.set(spinning);
 	}
 
+	// using the parent class method here to resolve the Broken Hierarchy code smell
+	@Override
+	public void setGlyph(FontAwesome5Icon glyph) {
+		super.setGlyph(glyph);
+	}
 }
