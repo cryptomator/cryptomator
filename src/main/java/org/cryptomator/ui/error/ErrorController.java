@@ -175,7 +175,7 @@ public class ErrorController implements FxController {
 				Comparator<ErrorDiscussion> comp = this::compareByFullErrorCode;
 				Optional<ErrorDiscussion> value = errorDiscussionMap.values().stream().filter(this::containsMethodCode)//
 						.min(comp//
-								.thenComparing(this::compareByRootCauseCode)//
+								.thenComparing((errorCode::compareByRootCauseCode))//
 								.thenComparing(this::compareIsAnswered)//
 								.thenComparing(this::compareUpvoteCount));
 
@@ -254,26 +254,6 @@ public class ErrorController implements FxController {
 		}
 	}
 
-	/**
-	 * Compares two ErrorDiscussion objects based on the presence of the root cause code in their titles and returns the result.
-	 *
-	 * @param ed1 The first ErrorDiscussion object.
-	 * @param ed2 The second ErrorDiscussion object.
-	 * @return An integer indicating the comparison result based on the presence of the root cause code in the titles:
-	 * - A negative value (-1) if ed1 contains the root cause code in the title and ed2 does not have a match,
-	 * - A positive value (1) if ed1 does not have a match and ed2 contains the root cause code in the title,
-	 * - Or 0 if both ErrorDiscussion objects either contain the root cause code or do not have a match in the titles.
-	 */
-	public int compareByRootCauseCode(ErrorDiscussion ed1, ErrorDiscussion ed2) {
-		String value = " " + errorCode.methodCode() + ErrorCode.DELIM + errorCode.rootCauseCode();
-		if (ed1.title.contains(value) && !ed2.title.contains(value)) {
-			return -1;
-		} else if (!ed1.title.contains(value) && ed2.title.contains(value)) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
 
 	/* Getter/Setter */
 	public boolean isPreviousScenePresent() {

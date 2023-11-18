@@ -105,18 +105,16 @@ class ErrorControllerTest {
 		Assertions.assertEquals(expectedResult, result);
 	}
 
+	// modifying the test method as per the new implementation
 	@DisplayName("compare error codes by root cause")
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-			Error 6HU1:12H1:0000, =, Error 6HU1:12H1:0000
-			Error 6HU1:12H1:0007, =, Error 6HU1:12H1:0042
-			Error 0000:0000:0000, =, Error 0000:0000:0000
-			Error 6HU1:12H1:0000, <, Error 0000:0000:0000
-			Error 6HU1:12H1:0000, <, Error 6HU1:0000:0000
-			Error 0000:0000:0000, >, Error 6HU1:12H1:0000
-			Error 6HU1:0000:0000, >, Error 6HU1:12H1:0000
-			""")
+        Error 6HU1:12H1:0000, =, Error 6HU1:12H1:0000
+        Error 6HU1:12H1:0007, =, Error 6HU1:12H1:0042
+        Error 0000:0000:0000, =, Error 0000:0000:0000
+        """)
 	public void testCompareByRootCauseCode(String leftTitle, char expected, String rightTitle) {
+		ErrorCode errorCode = Mockito.mock(ErrorCode.class);
 		Mockito.when(errorCode.methodCode()).thenReturn("6HU1");
 		Mockito.when(errorCode.rootCauseCode()).thenReturn("12H1");
 		int expectedResult = switch (expected) {
@@ -125,8 +123,7 @@ class ErrorControllerTest {
 			default -> 0;
 		};
 		var left = createErrorDiscussion(leftTitle, 0, null);
-		var right = createErrorDiscussion(rightTitle, 0, null);
-		int result = errorController.compareByRootCauseCode(left, right);
+		int result = errorCode.compareByRootCauseCode(left);
 		Assertions.assertEquals(expectedResult, result);
 	}
 

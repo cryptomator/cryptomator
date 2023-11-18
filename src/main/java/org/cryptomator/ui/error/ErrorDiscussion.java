@@ -19,4 +19,8 @@ public class ErrorDiscussion {
 	static class Answer {
 
 	}
+
+	public String getTitle(){
+		return this.title;
+	}
 }

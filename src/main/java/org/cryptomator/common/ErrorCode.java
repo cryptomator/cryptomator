@@ -3,6 +3,7 @@ package org.cryptomator.common;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import org.cryptomator.ui.error.ErrorDiscussion;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Locale;
@@ -141,4 +142,17 @@ public class ErrorCode {
 		return IntStream.rangeClosed(1, array.length).mapToObj(i -> array[array.length - i]);
 	}
 
+	// moved the method here from ErrorController as this method is mostly using ErrorCode class
+	// this was resulting in Feature Envy code smell
+	// used move method technique to refactor this smell
+	public int compareByRootCauseCode(ErrorDiscussion ed) {
+		String value = " " + methodCode() + DELIM + rootCauseCode();
+		if (ed.getTitle().contains(value)) {
+			return -1;
+		} else if (!ed.getTitle().contains(value)) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
 }
