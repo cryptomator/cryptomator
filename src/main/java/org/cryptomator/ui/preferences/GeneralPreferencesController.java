@@ -53,21 +53,74 @@ public class GeneralPreferencesController implements FxController {
 		this.appWindows = appWindows;
 	}
 
+	// resolved unnecessary abstraction code smell using Inline Class technique
 	@FXML
 	public void initialize() {
+		keychainBackendChoiceBox.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(KeychainAccessProvider provider) {
+				return (provider != null) ? provider.getClass().getName() : null;
+			}
+
+			@Override
+			public KeychainAccessProvider fromString(String string) {
+				return (string != null) ?
+						keychainAccessProviders.stream()
+								.filter(provider -> provider.getClass().getName().equals(string))
+								.findAny().orElse(null)
+						: null;
+			}
+		});
+
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden);
 		autoCloseVaultsCheckbox.selectedProperty().bindBidirectional(settings.autoCloseVaults);
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode);
 		autoStartProvider.ifPresent(autoStart -> autoStartCheckbox.setSelected(autoStart.isEnabled()));
 
-		var keychainSettingsConverter = new KeychainProviderClassNameConverter(keychainAccessProviders);
 		keychainBackendChoiceBox.getItems().addAll(keychainAccessProviders);
-		keychainBackendChoiceBox.setValue(keychainSettingsConverter.fromString(settings.keychainProvider.get()));
-		keychainBackendChoiceBox.setConverter(new KeychainProviderDisplayNameConverter());
-		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
+
+		keychainBackendChoiceBox.setValue(
+				keychainAccessProviders.stream()
+						.filter(provider -> provider.getClass().getName().equals(settings.keychainProvider.get()))
+						.findAny().orElse(null)
+		);
+
+		keychainBackendChoiceBox.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(KeychainAccessProvider provider) {
+				return (provider != null) ? provider.displayName() : null;
+			}
+
+			@Override
+			public KeychainAccessProvider fromString(String string) {
+				return (string != null) ?
+						keychainAccessProviders.stream()
+								.filter(provider -> provider.displayName().equals(string))
+								.findAny().orElse(null)
+						: null;
+			}
+		});
+
+		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), new StringConverter<>() {
+			@Override
+			public String toString(KeychainAccessProvider provider) {
+				return (provider != null) ? provider.getClass().getName() : null;
+			}
+
+			@Override
+			public KeychainAccessProvider fromString(String string) {
+				return (string != null) ?
+						keychainAccessProviders.stream()
+								.filter(provider -> provider.getClass().getName().equals(string))
+								.findAny().orElse(null)
+						: null;
+			}
+		});
+
 		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
 		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
 	}
+
 
 	public boolean isAutoStartSupported() {
 		return autoStartProvider.isPresent();
@@ -116,30 +169,30 @@ public class GeneralPreferencesController implements FxController {
 
 	}
 
-	private static class KeychainProviderClassNameConverter extends StringConverter<KeychainAccessProvider> {
-
-		private final List<KeychainAccessProvider> keychainAccessProviders;
-
-		public KeychainProviderClassNameConverter(List<KeychainAccessProvider> keychainAccessProviders) {
-			this.keychainAccessProviders = keychainAccessProviders;
-		}
-
-		@Override
-		public String toString(KeychainAccessProvider provider) {
-			if (provider == null) {
-				return null;
-			} else {
-				return provider.getClass().getName();
-			}
-		}
-
-		@Override
-		public KeychainAccessProvider fromString(String string) {
-			if (string == null) {
-				return null;
-			} else {
-				return keychainAccessProviders.stream().filter(provider -> provider.getClass().getName().equals(string)).findAny().orElse(null);
-			}
-		}
-	}
+//	private static class KeychainProviderClassNameConverter extends StringConverter<KeychainAccessProvider> {
+//
+//		private final List<KeychainAccessProvider> keychainAccessProviders;
+//
+//		public KeychainProviderClassNameConverter(List<KeychainAccessProvider> keychainAccessProviders) {
+//			this.keychainAccessProviders = keychainAccessProviders;
+//		}
+//
+//		@Override
+//		public String toString(KeychainAccessProvider provider) {
+//			if (provider == null) {
+//				return null;
+//			} else {
+//				return provider.getClass().getName();
+//			}
+//		}
+//
+//		@Override
+//		public KeychainAccessProvider fromString(String string) {
+//			if (string == null) {
+//				return null;
+//			} else {
+//				return keychainAccessProviders.stream().filter(provider -> provider.getClass().getName().equals(string)).findAny().orElse(null);
+//			}
+//		}
+//	}
 }
