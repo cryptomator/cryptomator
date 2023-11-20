@@ -51,17 +51,26 @@ class PropertiesDecorator extends Properties {
 	@Override
 	public void store(OutputStream out, @Nullable String comments) throws IOException {delegate.store(out, comments);}
 
+	// using the XmlHandler class for xml related functions
 	@Override
-	public synchronized void loadFromXML(InputStream in) throws IOException, InvalidPropertiesFormatException {delegate.loadFromXML(in);}
+	public synchronized void loadFromXML(InputStream in) throws IOException, InvalidPropertiesFormatException {
+		new XmlHandler().loadFromXML(this, in);
+	}
 
 	@Override
-	public void storeToXML(OutputStream os, String comment) throws IOException {delegate.storeToXML(os, comment);}
+	public void storeToXML(OutputStream os, String comment) throws IOException {
+		new XmlHandler().storeToXML(this, os, comment);
+	}
 
 	@Override
-	public void storeToXML(OutputStream os, String comment, String encoding) throws IOException {delegate.storeToXML(os, comment, encoding);}
+	public void storeToXML(OutputStream os, String comment, String encoding) throws IOException {
+		new XmlHandler().storeToXML(this, os, comment, encoding);
+	}
 
 	@Override
-	public void storeToXML(OutputStream os, String comment, Charset charset) throws IOException {delegate.storeToXML(os, comment, charset);}
+	public void storeToXML(OutputStream os, String comment, Charset charset) throws IOException {
+		new	XmlHandler().storeToXML(this,os, comment, charset);
+	}
 
 	@Override
 	public Enumeration<?> propertyNames() {return delegate.propertyNames();}
@@ -69,11 +78,16 @@ class PropertiesDecorator extends Properties {
 	@Override
 	public Set<String> stringPropertyNames() {return delegate.stringPropertyNames();}
 
+	// using the PrintHandler class for print related functions
 	@Override
-	public void list(PrintStream out) {delegate.list(out);}
+	public void list(PrintStream out) {
+		new PrintHandler().list(this, out);
+	}
 
 	@Override
-	public void list(PrintWriter out) {delegate.list(out);}
+	public void list(PrintWriter out) {
+		new PrintHandler().list(this, out);
+	}
 
 	@Override
 	public int size() {return delegate.size();}
