@@ -97,12 +97,15 @@ public class MountOptionsController implements FxController {
 		this.application = application;
 		this.mountProviders = mountProviders;
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		this.defaultMountService = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
-		this.selectedMountService = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(defaultMountService.getValue()), defaultMountService.getValue());
-		this.fuseRestartRequired = selectedMountService.map(s -> //
-				firstUsedProblematicFuseMountService.get() != null //
-						&& VaultModule.isProblematicFuseService(s) //
-						&& !firstUsedProblematicFuseMountService.get().equals(s)
+		this.defaultMountService = ObservableUtil.mapWithDefault(settings.mountService, //
+				serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), //
+				fallbackProvider);
+		this.selectedMountService = Bindings.createObjectBinding(this::reselectMountService, defaultMountService, vaultSettings.mountService);
+		this.fuseRestartRequired = selectedMountService.map(s -> {
+					return firstUsedProblematicFuseMountService.get() != null //
+							&& VaultModule.isProblematicFuseService(s) //
+							&& !firstUsedProblematicFuseMountService.get().equals(s);
+				}
 		);
 		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
 
@@ -119,8 +122,16 @@ public class MountOptionsController implements FxController {
 		this.mountpointDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 	}
 
+	private MountService reselectMountService() {
+		var desired = vaultSettings.mountService.getValue();
+		var defaultMS = defaultMountService.getValue();
+		return mountProviders.stream().filter(s -> s.getClass().getName().equals(desired)).findFirst().orElse(defaultMS);
+	}
+
 	@FXML
 	public void initialize() {
+		defaultMountService.addListener((_,_,_) -> vaultVolumeTypeChoiceBox.setConverter(new MountServiceConverter()));
+
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vaultSettings.usesReadOnlyMode);
 
