@@ -10,7 +10,6 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.ActualMountService;
 import org.cryptomator.common.mount.FuseRestartRequiredException;
 import org.cryptomator.common.mount.Mounter;
@@ -83,16 +82,16 @@ public class Vault {
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(Settings settings,
-		  VaultSettings vaultSettings,
-		  VaultConfigCache configCache,
-		  AtomicReference<CryptoFileSystem> cryptoFileSystem,
-		  List<MountService> mountProviders,
-		  VaultState state,
-		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException,
-		  VaultStats stats,
-		  Mounter mounter,
-		  @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService,
+	Vault(Settings settings, //
+		  VaultSettings vaultSettings, //
+		  VaultConfigCache configCache, //
+		  AtomicReference<CryptoFileSystem> cryptoFileSystem, //
+		  List<MountService> mountProviders, //
+		  VaultState state, //
+		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
+		  VaultStats stats, //
+		  Mounter mounter, //
+		  @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService, //
 		  @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
@@ -167,13 +166,12 @@ public class Vault {
 			throw new IllegalStateException("Already unlocked.");
 		}
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		var defMntServ = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider).getValue();
-		var selMntServ = ObservableUtil.mapWithDefault(vaultSettings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(defMntServ), defMntServ);
-		var fuseRestartRequired = selMntServ.map(s -> //
-				firstUsedProblematicFuseMountService.get() != null //
-						&& VaultModule.isProblematicFuseService(s) //
-						&& !firstUsedProblematicFuseMountService.get().equals(s)).getValue();
-		if(fuseRestartRequired){
+		var defMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(settings.mountService.getValue())).findFirst().orElse(fallbackProvider);
+		var selMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(vaultSettings.mountService.getValue())).findFirst().orElse(defMntServ);
+		var fuseRestartRequired = firstUsedProblematicFuseMountService.get() != null //
+				&& VaultModule.isProblematicFuseService(selMntServ) //
+				&& !firstUsedProblematicFuseMountService.get().equals(selMntServ);
+		if (fuseRestartRequired) {
 			throw new FuseRestartRequiredException("fuseRestartRequired");
 		}
 
