@@ -24,4 +24,4 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
       - name: Build and Test
-        run: xvfb-run mvn -B clean install jacoco:report -Pcoverage,dependency-check
+        run: xvfb-run mvn -B clean install jacoco:report -Pcoverage
