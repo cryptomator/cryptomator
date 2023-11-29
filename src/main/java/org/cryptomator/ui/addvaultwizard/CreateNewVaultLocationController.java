@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -34,10 +35,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 
 @AddVaultWizardScoped
 public class CreateNewVaultLocationController implements FxController {
@@ -49,13 +49,14 @@ public class CreateNewVaultLocationController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
 	private final Lazy<Scene> chooseExpertSettingsScene;
-	private final List<RadioButton> locationPresetBtns;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
+	private final ExecutorService backgroundExecutor;
 	private final ResourceBundle resourceBundle;
 	private final ObservableValue<VaultPathStatus> vaultPathStatus;
 	private final ObservableValue<Boolean> validVaultPath;
 	private final BooleanProperty usePresetPath;
+	private final BooleanProperty loadingPresetLocations = new SimpleBooleanProperty(false);
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
 
@@ -73,25 +74,18 @@ public class CreateNewVaultLocationController implements FxController {
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS) Lazy<Scene> chooseExpertSettingsScene, //
 									 ObjectProperty<Path> vaultPath, //
 									 @Named("vaultName") StringProperty vaultName, //
-									 ResourceBundle resourceBundle) {
+									 ExecutorService backgroundExecutor, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
 		this.chooseExpertSettingsScene = chooseExpertSettingsScene;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
+		this.backgroundExecutor = backgroundExecutor;
 		this.resourceBundle = resourceBundle;
 		this.vaultPathStatus = ObservableUtil.mapWithDefault(vaultPath, this::validatePath, new VaultPathStatus(false, "error.message"));
 		this.validVaultPath = ObservableUtil.mapWithDefault(vaultPathStatus, VaultPathStatus::valid, false);
 		this.vaultPathStatus.addListener(this::updateStatusLabel);
 		this.usePresetPath = new SimpleBooleanProperty();
-		this.locationPresetBtns = LocationPresetsProvider.loadAll(LocationPresetsProvider.class) //
-				.flatMap(LocationPresetsProvider::getLocations) //
-				.sorted(Comparator.comparing(LocationPreset::name)) //
-				.map(preset -> { //
-					var btn = new RadioButton(preset.name());
-					btn.setUserData(preset.path());
-					return btn;
-				}).toList();
 	}
 
 	private VaultPathStatus validatePath(Path p) throws NullPointerException {
@@ -137,11 +131,50 @@ public class CreateNewVaultLocationController implements FxController {
 
 	@FXML
 	public void initialize() {
-		radioButtonVBox.getChildren().addAll(1, locationPresetBtns); //first item is the list header
-		locationPresetsToggler.getToggles().addAll(locationPresetBtns);
+		backgroundExecutor.submit(this::loadLocationPresets);
 		locationPresetsToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(locationPresetsToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
 	}
+
+	private void loadLocationPresets() {
+		Platform.runLater(() -> loadingPresetLocations.set(true));
+		LocationPresetsProvider.loadAll(LocationPresetsProvider.class) //
+				.flatMap(LocationPresetsProvider::getLocations) //we do not use sorted(), because it evaluates the stream elements, blocking until all elements are gathered
+				.forEach(this::createRadioButtonFor);
+		Platform.runLater(() -> loadingPresetLocations.set(false));
+	}
+
+	private void createRadioButtonFor(LocationPreset preset) {
+		Platform.runLater(() -> {
+			var btn = new RadioButton(preset.name());
+			btn.setUserData(preset.path());
+
+			//in place sorting
+			var vboxElements = radioButtonVBox.getChildren();
+			boolean added = false;
+			int listIndex = 0; //first item of vbox is the list header
+			while (listIndex < vboxElements.size()) {
+				listIndex++;
+				if (vboxElements.get(listIndex) instanceof RadioButton rb) {
+					//another radio button
+					if (rb.getText().compareTo(preset.name()) > 0) {
+						vboxElements.add(listIndex, btn);
+						added = true;
+						break;
+					}
+				} else {
+					//end of all radiobuttons
+					break;
+				}
+			}
+			if (!added) {
+				vboxElements.add(listIndex, btn);
+			}
+
+			locationPresetsToggler.getToggles().add(btn);
+		});
+	}
+
 
 	private void togglePredefinedLocation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
 		var storagePath = Optional.ofNullable((Path) newValue.getUserData()).orElse(customVaultPath);
@@ -198,6 +231,14 @@ public class CreateNewVaultLocationController implements FxController {
 
 	public boolean isValidVaultPath() {
 		return validVaultPath.getValue();
+	}
+
+	public boolean isLoadingPresetLocations() {
+		return loadingPresetLocations.getValue();
+	}
+
+	public BooleanProperty loadingPresetLocationsProperty() {
+		return loadingPresetLocations;
 	}
 
 	public BooleanProperty usePresetPathProperty() {
