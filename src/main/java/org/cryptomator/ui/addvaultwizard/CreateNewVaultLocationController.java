@@ -131,7 +131,16 @@ public class CreateNewVaultLocationController implements FxController {
 
 	@FXML
 	public void initialize() {
-		backgroundExecutor.submit(this::loadLocationPresets);
+		var task = backgroundExecutor.submit(this::loadLocationPresets);
+		var onHiddenAction = window.getOnHidden();
+		if(onHiddenAction != null) {
+			window.setOnHidden(evt -> {
+				task.cancel(true);
+				onHiddenAction.handle(evt);
+			});
+		} else {
+			window.setOnHidden(_ -> task.cancel(true));
+		}
 		locationPresetsToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(locationPresetsToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
 	}
