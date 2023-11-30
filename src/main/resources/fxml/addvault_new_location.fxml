@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
+<?import javafx.scene.layout.StackPane?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultLocationController"
@@ -41,7 +42,8 @@
 					</graphic>
 				</Button>
 			</HBox>
-			<Label wrapText="true" text="Checking local filesystem for default cloud storage directories..." visible="${controller.loadingPresetLocations}" managed="${controller.loadingPresetLocations}">
+			<Region prefHeight="2"/>
+			<Label wrapText="true" text="%addvaultwizard.new.locationLoading" visible="${controller.loadingPresetLocations}" managed="${controller.loadingPresetLocations}" graphicTextGap="8">
 				<graphic>
 					<FontAwesome5Spinner />
 				</graphic>
