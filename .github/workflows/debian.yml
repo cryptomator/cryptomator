@@ -46,7 +46,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.COFFEELIBS_JDK }}=${{ env.COFFEELIBS_JDK_VERSION }} libgtk2.0-0
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
