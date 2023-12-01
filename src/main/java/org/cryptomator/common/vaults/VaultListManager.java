@@ -37,19 +37,19 @@ public class VaultListManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 
-	private final AutoLocker autoLocker;
 	private final VaultComponent.Factory vaultComponentFactory;
 	private final ObservableList<Vault> vaultList;
 	private final String defaultVaultName;
-	private final Settings settings;
+
 
 	@Inject
-	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Factory vaultComponentFactory, ResourceBundle resourceBundle, Settings settings) {
+	public VaultListManager(ObservableList<Vault> vaultList, //
+							AutoLocker autoLocker, //
+							VaultComponent.Factory vaultComponentFactory, //
+							ResourceBundle resourceBundle, Settings settings) {
 		this.vaultList = vaultList;
-		this.autoLocker = autoLocker;
 		this.vaultComponentFactory = vaultComponentFactory;
 		this.defaultVaultName = resourceBundle.getString("defaults.vault.vaultName");
-		this.settings = settings;
 		
 		addAll(settings.directories);
 		vaultList.addListener(new VaultListChangeListener(settings.directories));

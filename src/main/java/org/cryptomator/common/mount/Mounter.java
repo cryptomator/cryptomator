@@ -1,6 +1,7 @@
 package org.cryptomator.common.mount;
 
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.integrations.mount.Mount;
 import org.cryptomator.integrations.mount.MountBuilder;
@@ -8,11 +9,13 @@ import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.MountService;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
-import javafx.beans.value.ObservableValue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.cryptomator.integrations.mount.MountCapability.MOUNT_AS_DRIVE_LETTER;
 import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_EXISTING_DIR;
@@ -23,13 +26,24 @@ import static org.cryptomator.integrations.mount.MountCapability.UNMOUNT_FORCED;
 @Singleton
 public class Mounter {
 
+	private static final List<String> problematicFuseMountServices = List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider");
+
 	private final Environment env;
 	private final WindowsDriveLetters driveLetters;
+	private final Settings settings;
+	private final List<MountService> mountProviders;
+	private final AtomicReference<MountService> firstUsedProblematicFuseMountService;
 
 	@Inject
-	public Mounter(Environment env, WindowsDriveLetters driveLetters) {
+	public Mounter(Environment env, //
+				   WindowsDriveLetters driveLetters, //
+				   Settings settings, List<MountService> mountProviders, //
+				   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
 		this.env = env;
 		this.driveLetters = driveLetters;
+		this.settings = settings;
+		this.mountProviders = mountProviders;
+		this.firstUsedProblematicFuseMountService = firstUsedProblematicFuseMountService;
 	}
 
 	private class SettledMounter {
@@ -124,12 +138,32 @@ public class Mounter {
 
 	}
 
-	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot, ObservableValue<ActualMountService> actualMountService) throws IOException, MountFailedException {
-		var mountService = actualMountService.getValue().service();
-		var builder = mountService.forFileSystem(cryptoFsRoot);
-		var internal = new SettledMounter(mountService, builder, vaultSettings);
+	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot) throws IOException, MountFailedException {
+		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
+		var defMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(settings.mountService.getValue())).findFirst().orElse(fallbackProvider);
+		var selMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(vaultSettings.mountService.getValue())).findFirst().orElse(defMntServ);
+
+		var targetIsProblematicFuse = isProblematicFuseService(selMntServ);
+		if (targetIsProblematicFuse && firstUsedProblematicFuseMountService.get() == null) {
+			firstUsedProblematicFuseMountService.set(selMntServ);
+		}
+
+		var fuseRestartRequired = firstUsedProblematicFuseMountService.get() != null //
+				&& isProblematicFuseService(selMntServ) //
+				&& !firstUsedProblematicFuseMountService.get().equals(selMntServ);
+
+		if (fuseRestartRequired) {
+			throw new FuseRestartRequiredException("fuseRestartRequired");
+		}
+
+		var builder = selMntServ.forFileSystem(cryptoFsRoot);
+		var internal = new SettledMounter(selMntServ, builder, vaultSettings);
 		var cleanup = internal.prepare();
-		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), cleanup);
+		return new MountHandle(builder.mount(), selMntServ.hasCapability(UNMOUNT_FORCED), cleanup);
+	}
+
+	public static boolean isProblematicFuseService(MountService service) {
+		return problematicFuseMountServices.contains(service.getClass().getName());
 	}
 
 	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, Runnable specialCleanup) {

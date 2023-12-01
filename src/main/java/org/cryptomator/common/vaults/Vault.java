@@ -10,10 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.common.mount.ActualMountService;
-import org.cryptomator.common.mount.FuseRestartRequiredException;
 import org.cryptomator.common.mount.Mounter;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -24,7 +21,6 @@ import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.integrations.mount.MountFailedException;
-import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.slf4j.Logger;
@@ -41,12 +37,10 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,9 +52,7 @@ public class Vault {
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
-	private final Settings settings;
 	private final VaultSettings vaultSettings;
-	private final List<MountService> mountProviders;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
@@ -76,28 +68,20 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final BooleanProperty showingStats;
-	private final ObservableValue<ActualMountService> actualMountService;
-	private final AtomicReference<MountService> firstUsedProblematicFuseMountService;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(Settings settings, //
-		  VaultSettings vaultSettings, //
+	Vault(VaultSettings vaultSettings, //
 		  VaultConfigCache configCache, //
 		  AtomicReference<CryptoFileSystem> cryptoFileSystem, //
-		  List<MountService> mountProviders, //
 		  VaultState state, //
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
-		  Mounter mounter, //
-		  @Named("vaultMountService") ObservableValue<ActualMountService> actualMountService, //
-		  @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
-		this.settings = settings;
+		  Mounter mounter) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
-		this.mountProviders = mountProviders;
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
@@ -111,8 +95,6 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.showingStats = new SimpleBooleanProperty(false);
-		this.actualMountService = actualMountService;
-		this.firstUsedProblematicFuseMountService = firstUsedProblematicFuseMountService;
 	}
 
 	// ******************************************************************************
@@ -165,22 +147,13 @@ public class Vault {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
 		}
-		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		var defMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(settings.mountService.getValue())).findFirst().orElse(fallbackProvider);
-		var selMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(vaultSettings.mountService.getValue())).findFirst().orElse(defMntServ);
-		var fuseRestartRequired = firstUsedProblematicFuseMountService.get() != null //
-				&& VaultModule.isProblematicFuseService(selMntServ) //
-				&& !firstUsedProblematicFuseMountService.get().equals(selMntServ);
-		if (fuseRestartRequired) {
-			throw new FuseRestartRequiredException("fuseRestartRequired");
-		}
 
 		CryptoFileSystem fs = createCryptoFileSystem(keyLoader);
 		boolean success = false;
 		try {
 			cryptoFileSystem.set(fs);
 			var rootPath = fs.getRootDirectories().iterator().next();
-			var mountHandle = mounter.mount(vaultSettings, rootPath, actualMountService);
+			var mountHandle = mounter.mount(vaultSettings, rootPath);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
 		} finally {
 			if (!success) {
