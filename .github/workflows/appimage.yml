@@ -68,7 +68,7 @@ jobs:
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
-        run: mvn -B clean package -Pdependency-check,linux -DskipTests
+        run: mvn -B clean package -Plinux -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
