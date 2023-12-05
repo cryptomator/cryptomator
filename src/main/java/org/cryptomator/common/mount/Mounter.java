@@ -11,6 +11,7 @@ import org.cryptomator.integrations.mount.MountService;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javafx.beans.value.ObservableValue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,27 +31,28 @@ public class Mounter {
 
 	private final Environment env;
 	private final WindowsDriveLetters driveLetters;
-	private final Settings settings;
 	private final List<MountService> mountProviders;
 	private final AtomicReference<MountService> firstUsedProblematicFuseMountService;
+	private final ObservableValue<MountService> defaultMountService;
 
 	@Inject
 	public Mounter(Environment env, //
 				   WindowsDriveLetters driveLetters, //
-				   Settings settings, List<MountService> mountProviders, //
-				   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
+				   List<MountService> mountProviders, //
+				   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService,
+				   ObservableValue<MountService> defaultMountService) {
 		this.env = env;
 		this.driveLetters = driveLetters;
-		this.settings = settings;
 		this.mountProviders = mountProviders;
 		this.firstUsedProblematicFuseMountService = firstUsedProblematicFuseMountService;
+		this.defaultMountService = defaultMountService;
 	}
 
 	private class SettledMounter {
 
-		private MountService service;
-		private MountBuilder builder;
-		private VaultSettings vaultSettings;
+		private final MountService service;
+		private final MountBuilder builder;
+		private final VaultSettings vaultSettings;
 
 		public SettledMounter(MountService service, MountBuilder builder, VaultSettings vaultSettings) {
 			this.service = service;
@@ -139,9 +141,7 @@ public class Mounter {
 	}
 
 	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot) throws IOException, MountFailedException {
-		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		var defMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(settings.mountService.getValue())).findFirst().orElse(fallbackProvider);
-		var selMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(vaultSettings.mountService.getValue())).findFirst().orElse(defMntServ);
+		var selMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(vaultSettings.mountService.getValue())).findFirst().orElse(defaultMountService.getValue());
 
 		var targetIsProblematicFuse = isProblematicFuseService(selMntServ);
 		if (targetIsProblematicFuse && firstUsedProblematicFuseMountService.get() == null) {

@@ -2,7 +2,6 @@ package org.cryptomator.ui.vaultoptions;
 
 import com.google.common.base.Strings;
 import dagger.Lazy;
-import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.Settings;
@@ -88,7 +87,7 @@ public class MountOptionsController implements FxController {
 						   ResourceBundle resourceBundle, //
 						   Lazy<Application> application, //
 						   List<MountService> mountProviders, //
-						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService) {
+						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, ObservableValue<MountService> defaultMountService) {
 		this.window = window;
 		this.vaultSettings = vault.getVaultSettings();
 		this.windowsDriveLetters = windowsDriveLetters;
@@ -96,10 +95,7 @@ public class MountOptionsController implements FxController {
 		this.directoryPath = vault.getVaultSettings().mountPoint.map(p -> isDriveLetter(p) ? null : p.toString());
 		this.application = application;
 		this.mountProviders = mountProviders;
-		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-		this.defaultMountService = ObservableUtil.mapWithDefault(settings.mountService, //
-				serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), //
-				fallbackProvider);
+		this.defaultMountService = defaultMountService;
 		this.selectedMountService = Bindings.createObjectBinding(this::reselectMountService, defaultMountService, vaultSettings.mountService);
 		this.fuseRestartRequired = selectedMountService.map(s -> {
 			return firstUsedProblematicFuseMountService.get() != null //
