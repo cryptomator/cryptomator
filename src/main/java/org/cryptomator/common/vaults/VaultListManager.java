@@ -42,12 +42,8 @@ public class VaultListManager {
 	private final ObservableList<Vault> vaultList;
 	private final String defaultVaultName;
 
-
 	@Inject
-	public VaultListManager(ObservableList<Vault> vaultList, //
-							AutoLocker autoLocker, //
-							VaultComponent.Factory vaultComponentFactory, //
-							ResourceBundle resourceBundle, Settings settings) {
+	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Factory vaultComponentFactory, ResourceBundle resourceBundle, Settings settings) {
 		this.vaultList = vaultList;
 		this.autoLocker = autoLocker;
 		this.vaultComponentFactory = vaultComponentFactory;
