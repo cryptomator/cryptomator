@@ -133,8 +133,8 @@ public class UnlockWorkflow extends Task<Boolean> {
 		Throwable throwable = super.getException();
 		if(throwable instanceof IllegalMountPointException impe) {
 			handleIllegalMountPointError(impe);
-		} else if (throwable instanceof FuseRestartRequiredException fRRE) {
-			handleFuseRestartRequiredError(fRRE);
+		} else if (throwable instanceof FuseRestartRequiredException e) {
+			handleFuseRestartRequiredError(e);
 		} else {
 			handleGenericError(throwable);
 		}

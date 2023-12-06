@@ -9,6 +9,8 @@ import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javafx.beans.property.ObjectProperty;
@@ -17,6 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Module
 public class VaultModule {
+
+	private static final Logger LOG = LoggerFactory.getLogger(VaultModule.class);
 
 	@Provides
 	@PerVault

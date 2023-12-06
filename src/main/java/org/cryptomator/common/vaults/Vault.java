@@ -147,7 +147,6 @@ public class Vault {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
 		}
-
 		CryptoFileSystem fs = createCryptoFileSystem(keyLoader);
 		boolean success = false;
 		try {
