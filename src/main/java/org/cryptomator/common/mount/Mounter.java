@@ -147,12 +147,7 @@ public class Mounter {
 		if (targetIsProblematicFuse && firstUsedProblematicFuseMountService.get() == null) {
 			firstUsedProblematicFuseMountService.set(selMntServ);
 		}
-
-		var fuseRestartRequired = firstUsedProblematicFuseMountService.get() != null //
-				&& isProblematicFuseService(selMntServ) //
-				&& !firstUsedProblematicFuseMountService.get().equals(selMntServ);
-
-		if (fuseRestartRequired) {
+		else if (targetIsProblematicFuse && !firstUsedProblematicFuseMountService.get().equals(selMntServ)) {
 			throw new FuseRestartRequiredException("fuseRestartRequired");
 		}
 
