@@ -36,6 +36,7 @@ public class Settings {
 	static final boolean DEFAULT_START_HIDDEN = false;
 	static final boolean DEFAULT_AUTO_CLOSE_VAULTS = false;
 	static final boolean DEFAULT_USE_KEYCHAIN = true;
+	static final int DEFAULT_PORT = 42427;
 	static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	static final boolean DEFAULT_DEBUG_MODE = false;
 	static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
@@ -51,6 +52,7 @@ public class Settings {
 	public final BooleanProperty startHidden;
 	public final BooleanProperty autoCloseVaults;
 	public final BooleanProperty useKeychain;
+	public final IntegerProperty port;
 	public final IntegerProperty numTrayNotifications;
 	public final BooleanProperty debugMode;
 	public final ObjectProperty<UiTheme> theme;
@@ -87,6 +89,7 @@ public class Settings {
 		this.startHidden = new SimpleBooleanProperty(this, "startHidden", json.startHidden);
 		this.autoCloseVaults = new SimpleBooleanProperty(this, "autoCloseVaults", json.autoCloseVaults);
 		this.useKeychain = new SimpleBooleanProperty(this, "useKeychain", json.useKeychain);
+		this.port = new SimpleIntegerProperty(this, "webDavPort", json.port);
 		this.numTrayNotifications = new SimpleIntegerProperty(this, "numTrayNotifications", json.numTrayNotifications);
 		this.debugMode = new SimpleBooleanProperty(this, "debugMode", json.debugMode);
 		this.theme = new SimpleObjectProperty<>(this, "theme", json.theme);
@@ -106,7 +109,6 @@ public class Settings {
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
 		migrateLegacySettings(json);
-		migratePortToVaultSettings(json);
 
 		directories.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
@@ -114,6 +116,7 @@ public class Settings {
 		startHidden.addListener(this::somethingChanged);
 		autoCloseVaults.addListener(this::somethingChanged);
 		useKeychain.addListener(this::somethingChanged);
+		port.addListener(this::somethingChanged);
 		numTrayNotifications.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
 		theme.addListener(this::somethingChanged);
@@ -129,15 +132,6 @@ public class Settings {
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
 		lastUpdateCheck.addListener(this::somethingChanged);
-	}
-
-	@SuppressWarnings("deprecation")
-	private void migratePortToVaultSettings(SettingsJson json) {
-		if(json.port != 0){
-			for (VaultSettings vaultSettings : directories) {
-				vaultSettings.port.set(json.port);
-			}
-		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -176,6 +170,7 @@ public class Settings {
 		json.startHidden = startHidden.get();
 		json.autoCloseVaults = autoCloseVaults.get();
 		json.useKeychain = useKeychain.get();
+		json.port = port.get();
 		json.numTrayNotifications = numTrayNotifications.get();
 		json.debugMode = debugMode.get();
 		json.theme = theme.get();

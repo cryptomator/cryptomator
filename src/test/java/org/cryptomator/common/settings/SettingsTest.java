@@ -24,7 +24,7 @@ public class SettingsTest {
 		Mockito.verify(changeListener, Mockito.times(0)).accept(settings);
 
 		// first change (to property):
-		settings.windowXPosition.set(100);
+		settings.port.set(42428);
 		Mockito.verify(changeListener, Mockito.times(1)).accept(settings);
 
 		// second change (to list):

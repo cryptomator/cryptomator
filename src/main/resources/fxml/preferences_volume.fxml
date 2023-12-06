@@ -32,6 +32,12 @@
 			</Hyperlink>
 		</HBox>
 
+		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">
+			<Label text="%preferences.volume.tcp.port"/>
+			<NumericTextField fx:id="loopbackPortField"/>
+			<Button text="%generic.button.apply" fx:id="loopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
+		</HBox>
+
 		<Separator orientation="HORIZONTAL"/>
 
 		<Label text="%preferences.volume.supportedFeatures"/>
