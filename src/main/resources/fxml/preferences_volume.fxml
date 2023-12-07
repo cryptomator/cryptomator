@@ -20,7 +20,7 @@
 	</padding>
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
-			<Label text="%preferences.volume.defaultVolumeTypeLabel"/>
+			<Label text="%preferences.volume.type"/>
 			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
 			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
 				<graphic>
