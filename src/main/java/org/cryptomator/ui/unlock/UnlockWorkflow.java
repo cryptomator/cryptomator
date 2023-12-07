@@ -1,6 +1,5 @@
 package org.cryptomator.ui.unlock;
 
-import com.google.common.base.Throwables;
 import dagger.Lazy;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
@@ -29,7 +28,7 @@ import java.io.IOException;
  * This class runs the unlock process and controls when to display which UI.
  */
 @UnlockScoped
-public class UnlockWorkflow extends Task<Boolean> {
+public class UnlockWorkflow extends Task<Void> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockWorkflow.class);
 
@@ -55,39 +54,18 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean call() throws InterruptedException, IOException, CryptoException, MountFailedException {
-		try {
-			attemptUnlock();
-			return true;
-		} catch (UnlockCancelledException e) {
-			cancel(false); // set Tasks state to cancelled
-			return false;
-		}
-	}
-
-	private void attemptUnlock() throws IOException, CryptoException, MountFailedException {
+	protected Void call() throws InterruptedException, IOException, CryptoException, MountFailedException {
 		try {
 			keyLoadingStrategy.use(vault::unlock);
+			return null;
+		} catch (UnlockCancelledException e) {
+			cancel(false); // set Tasks state to cancelled
+			return null;
+		} catch (IOException | RuntimeException | MountFailedException e) {
+			throw e;
 		} catch (Exception e) {
-			Throwables.propagateIfPossible(e, IOException.class);
-			Throwables.propagateIfPossible(e, CryptoException.class);
-			Throwables.propagateIfPossible(e, IllegalMountPointException.class);
-			Throwables.propagateIfPossible(e, MountFailedException.class);
-			throw new IllegalStateException("unexpected exception type", e);
+			throw new IllegalStateException("Unexpected exception type", e);
 		}
-	}
-
-	private void handleIllegalMountPointError(IllegalMountPointException impe) {
-		Platform.runLater(() -> {
-			illegalMountPointException.set(impe);
-			window.setScene(invalidMountPointScene.get());
-			window.show();
-		});
-	}
-
-	private void handleGenericError(Throwable e) {
-		LOG.error("Unlock failed for technical reasons.", e);
-		appWindows.showErrorWindow(e, window, null);
 	}
 
 	@Override
@@ -119,6 +97,19 @@ public class UnlockWorkflow extends Task<Boolean> {
 			handleGenericError(throwable);
 		}
 		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
+	}
+
+	private void handleIllegalMountPointError(IllegalMountPointException impe) {
+		Platform.runLater(() -> {
+			illegalMountPointException.set(impe);
+			window.setScene(invalidMountPointScene.get());
+			window.show();
+		});
+	}
+
+	private void handleGenericError(Throwable e) {
+		LOG.error("Unlock failed for technical reasons.", e);
+		appWindows.showErrorWindow(e, window, null);
 	}
 
 	@Override
