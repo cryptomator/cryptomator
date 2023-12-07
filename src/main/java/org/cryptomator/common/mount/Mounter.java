@@ -148,7 +148,7 @@ public class Mounter {
 			firstUsedProblematicFuseMountService.set(selMntServ);
 		}
 		else if (targetIsProblematicFuse && !firstUsedProblematicFuseMountService.get().equals(selMntServ)) {
-			throw new FuseRestartRequiredException("fuseRestartRequired");
+			throw new FuseRestartRequiredException("Failed to mount the specified mount service.");
 		}
 
 		var builder = selMntServ.forFileSystem(cryptoFsRoot);
