@@ -23,9 +23,9 @@ import java.util.ResourceBundle;
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
 
-	private static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/volume-type/";
-	private static final int MIN_PORT = 1024;
-	private static final int MAX_PORT = 65535;
+	public static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/volume-type/";
+	public static final int MIN_PORT = 1024;
+	public static final int MAX_PORT = 65535;
 
 	private final Settings settings;
 	private final ObservableValue<MountService> selectedMountService;
@@ -42,9 +42,9 @@ public class VolumePreferencesController implements FxController {
 	public Button loopbackPortApplyButton;
 
 	@Inject
-	VolumePreferencesController(Settings settings,
-								Lazy<Application> application,
-								List<MountService> mountProviders,
+	VolumePreferencesController(Settings settings, //
+								Lazy<Application> application, //
+								List<MountService> mountProviders, //
 								ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.application = application;
@@ -101,6 +101,7 @@ public class VolumePreferencesController implements FxController {
 	public boolean isLoopbackPortSupported() {
 		return loopbackPortSupported.get();
 	}
+
 	public ObservableValue<Boolean> readonlySupportedProperty() {
 		return readonlySupported;
 	}

@@ -4,12 +4,14 @@ import com.google.common.base.Strings;
 import dagger.Lazy;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.mount.MountCapability;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.preferences.VolumePreferencesController;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,10 +43,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @VaultOptionsScoped
 public class MountOptionsController implements FxController {
 
-	private static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/volume-type/";
-	private static final int MIN_PORT = 1024;
-	private static final int MAX_PORT = 65535;
-
 	private final Stage window;
 	private final VaultSettings vaultSettings;
 	private final WindowsDriveLetters windowsDriveLetters;
@@ -56,7 +54,9 @@ public class MountOptionsController implements FxController {
 	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
 	private final ObservableValue<Boolean> readOnlySupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
+	private final ObservableValue<Boolean> defaultMountServiceSelected;
 	private final ObservableValue<String> directoryPath;
+	private final FxApplicationWindows applicationWindows;
 	private final List<MountService> mountProviders;
 	private final ObservableValue<MountService> defaultMountService;
 	private final ObservableValue<MountService> selectedMountService;
@@ -81,17 +81,19 @@ public class MountOptionsController implements FxController {
 
 	@Inject
 	MountOptionsController(@VaultOptionsWindow Stage window, //
-						   Settings settings, //
 						   @VaultOptionsWindow Vault vault, //
 						   WindowsDriveLetters windowsDriveLetters, //
 						   ResourceBundle resourceBundle, //
+						   FxApplicationWindows applicationWindows, //
 						   Lazy<Application> application, //
 						   List<MountService> mountProviders, //
-						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, ObservableValue<MountService> defaultMountService) {
+						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, //
+						   ObservableValue<MountService> defaultMountService) {
 		this.window = window;
 		this.vaultSettings = vault.getVaultSettings();
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
+		this.applicationWindows = applicationWindows;
 		this.directoryPath = vault.getVaultSettings().mountPoint.map(p -> isDriveLetter(p) ? null : p.toString());
 		this.application = application;
 		this.mountProviders = mountProviders;
@@ -102,7 +104,7 @@ public class MountOptionsController implements FxController {
 					&& Mounter.isProblematicFuseService(s) //
 					&& !firstUsedProblematicFuseMountService.get().equals(s);
 		});
-		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
+		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null));
 
 		this.defaultMountFlags = selectedMountService.map(s -> {
 			if (s.hasCapability(MountCapability.MOUNT_FLAGS)) {
@@ -112,6 +114,7 @@ public class MountOptionsController implements FxController {
 			}
 		});
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
+		this.defaultMountServiceSelected = selectedMountService.map(_ -> vaultSettings.mountService.getValue() == null);
 		this.readOnlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 		this.mountpointDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
 		this.mountpointDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
@@ -168,6 +171,11 @@ public class MountOptionsController implements FxController {
 		vaultLoopbackPortApplyButton.visibleProperty().bind(vaultSettings.port.asString().isNotEqualTo(vaultLoopbackPortField.textProperty()));
 		vaultLoopbackPortApplyButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateLoopbackPort, vaultLoopbackPortField.textProperty()).not());
 
+	}
+
+	@FXML
+	public void openVolumePreferences() {
+		applicationWindows.showPreferencesWindow(SelectedPreferencesTab.VOLUME);
 	}
 
 	@FXML
@@ -287,14 +295,14 @@ public class MountOptionsController implements FxController {
 	}
 
 	public void openDocs() {
-		application.get().getHostServices().showDocument(DOCS_MOUNTING_URL);
+		application.get().getHostServices().showDocument(VolumePreferencesController.DOCS_MOUNTING_URL);
 	}
 
 	private boolean validateLoopbackPort() {
 		try {
 			int port = Integer.parseInt(vaultLoopbackPortField.getText());
 			return port == 0 // choose port automatically
-					|| port >= MIN_PORT && port <= MAX_PORT; // port within range
+					|| port >= VolumePreferencesController.MIN_PORT && port <= VolumePreferencesController.MAX_PORT; // port within range
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -318,6 +326,14 @@ public class MountOptionsController implements FxController {
 
 	public boolean isMountFlagsSupported() {
 		return mountFlagsSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> defaultMountServiceSelectedProperty() {
+		return defaultMountServiceSelected;
+	}
+
+	public boolean isDefaultMountServiceSelected() {
+		return defaultMountServiceSelected.getValue();
 	}
 
 	public ObservableValue<Boolean> mountpointDirSupportedProperty() {

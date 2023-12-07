@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
@@ -38,10 +39,16 @@
 			</Hyperlink>
 		</HBox>
 
+		<TextFlow visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}">
+			<Label text="%vaultOptions.mount.info"/>
+			<Label text=" "/>
+			<Hyperlink styleClass="hyperlink-underline" text="%vaultOptions.mount.linkToPreferences" onAction="#openVolumePreferences" wrapText="true"/>
+		</TextFlow>
+
 		<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.fuseRestartRequired" visible="${controller.fuseRestartRequired}" managed="${controller.fuseRestartRequired}"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">
-			<Label text="%preferences.volume.tcp.port"/>
+			<Label text="%vaultOptions.mount.volume.tcp.port"/>
 			<NumericTextField fx:id="vaultLoopbackPortField"/>
 			<Button text="%generic.button.apply" fx:id="vaultLoopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
 		</HBox>

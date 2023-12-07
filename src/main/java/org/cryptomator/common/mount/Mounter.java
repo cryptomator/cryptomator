@@ -28,8 +28,8 @@ import static org.cryptomator.integrations.mount.MountCapability.UNMOUNT_FORCED;
 public class Mounter {
 
 	private static final List<String> problematicFuseMountServices = List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider");
-
 	private final Environment env;
+	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
 	private final List<MountService> mountProviders;
 	private final AtomicReference<MountService> firstUsedProblematicFuseMountService;
@@ -37,11 +37,12 @@ public class Mounter {
 
 	@Inject
 	public Mounter(Environment env, //
+				   Settings settings, //
 				   WindowsDriveLetters driveLetters, //
 				   List<MountService> mountProviders, //
-				   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService,
-				   ObservableValue<MountService> defaultMountService) {
+				   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, ObservableValue<MountService> defaultMountService) {
 		this.env = env;
+		this.settings = settings;
 		this.driveLetters = driveLetters;
 		this.mountProviders = mountProviders;
 		this.firstUsedProblematicFuseMountService = firstUsedProblematicFuseMountService;
@@ -64,7 +65,13 @@ public class Mounter {
 			for (var capability : service.capabilities()) {
 				switch (capability) {
 					case FILE_SYSTEM_NAME -> builder.setFileSystemName("cryptoFs");
-					case LOOPBACK_PORT -> builder.setLoopbackPort(vaultSettings.port.get());
+					case LOOPBACK_PORT -> {
+						if (vaultSettings.mountService.getValue() == null) {
+							builder.setLoopbackPort(settings.port.get());
+						} else {
+							builder.setLoopbackPort(vaultSettings.port.get());
+						}
+					}
 					case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
 					case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode.get());
 					case MOUNT_FLAGS -> {
@@ -146,8 +153,7 @@ public class Mounter {
 		var targetIsProblematicFuse = isProblematicFuseService(selMntServ);
 		if (targetIsProblematicFuse && firstUsedProblematicFuseMountService.get() == null) {
 			firstUsedProblematicFuseMountService.set(selMntServ);
-		}
-		else if (targetIsProblematicFuse && !firstUsedProblematicFuseMountService.get().equals(selMntServ)) {
+		} else if (targetIsProblematicFuse && !firstUsedProblematicFuseMountService.get().equals(selMntServ)) {
 			throw new FuseRestartRequiredException("Failed to mount the specified mount service.");
 		}
 
