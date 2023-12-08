@@ -27,7 +27,7 @@
 	</padding>
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.mount.volume.volumeTypeLabel"/>
+			<Label text="%vaultOptions.mount.volume.type"/>
 			<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
 			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
 				<graphic>
