@@ -1,0 +1,54 @@
+name: OWASP Maven Dependency Check
+on:
+  schedule:
+    - cron: '0 7 * * 0'
+  push:
+    branches:
+      - 'release/**'
+  workflow_dispatch:
+
+
+jobs:
+  check-dependencies:
+    name: Check dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'maven'
+      - name: Run org.owasp:dependency-check plugin
+        id: dependency-check
+        continue-on-error: true
+        run: mvn -B verify -Pdependency-check -DskipTests
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      - name: Upload report on failure
+        if: steps.dependency-check.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: target/dependency-check-report.html
+          if-no-files-found: error
+      - name: Slack Notification on regular check
+        if: github.event_name == 'schedule' && steps.dependency-check.outcome == 'failure'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: false
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "Vulnerabilities in ${{ github.event.repository.name }} detected."
+          SLACK_MESSAGE: "Download the <https://github.com/${{ github.repository }}/actions/run/${{ github.run_id }}|report> for more details."
+          SLACK_FOOTER: false
+          MSG_MINIMAL: true
+      - name: Failing workflow on release branch
+        if: github.event_name == 'push' && steps.dependency-check.outcome == 'failure'
+        shell: bash
+        run: exit 1
