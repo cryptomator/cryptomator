@@ -30,7 +30,7 @@ public class VolumePreferencesController implements FxController {
 	private final Settings settings;
 	private final ObservableValue<MountService> selectedMountService;
 	private final ResourceBundle resourceBundle;
-	private final BooleanExpression loopbackPortSupported;
+	private final ObservableValue<Boolean> loopbackPortSupported;
 	private final ObservableValue<Boolean> mountToDirSupported;
 	private final ObservableValue<Boolean> mountToDriveLetterSupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
@@ -53,7 +53,7 @@ public class VolumePreferencesController implements FxController {
 
 		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
 		this.selectedMountService = ObservableUtil.mapWithDefault(settings.mountService, serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), fallbackProvider);
-		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT)));
+		this.loopbackPortSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT));
 		this.mountToDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT) || s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR));
 		this.mountToDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
@@ -94,12 +94,12 @@ public class VolumePreferencesController implements FxController {
 
 	/* Property Getters */
 
-	public BooleanExpression loopbackPortSupportedProperty() {
+	public ObservableValue<Boolean> loopbackPortSupportedProperty() {
 		return loopbackPortSupported;
 	}
 
 	public boolean isLoopbackPortSupported() {
-		return loopbackPortSupported.get();
+		return loopbackPortSupported.getValue();
 	}
 
 	public ObservableValue<Boolean> readonlySupportedProperty() {

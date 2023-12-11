@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -61,7 +60,7 @@ public class MountOptionsController implements FxController {
 	private final ObservableValue<MountService> defaultMountService;
 	private final ObservableValue<MountService> selectedMountService;
 	private final ObservableValue<Boolean> fuseRestartRequired;
-	private final BooleanExpression loopbackPortSupported;
+	private final ObservableValue<Boolean> loopbackPortSupported;
 
 
 	//-- FXML objects --
@@ -104,7 +103,7 @@ public class MountOptionsController implements FxController {
 					&& Mounter.isProblematicFuseService(s) //
 					&& !firstUsedProblematicFuseMountService.get().equals(s);
 		});
-		this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null));
+		//this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null));
 
 		this.defaultMountFlags = selectedMountService.map(s -> {
 			if (s.hasCapability(MountCapability.MOUNT_FLAGS)) {
@@ -118,6 +117,7 @@ public class MountOptionsController implements FxController {
 		this.readOnlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 		this.mountpointDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
 		this.mountpointDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
+		this.loopbackPortSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null);
 	}
 
 	private MountService reselectMountService() {
@@ -376,12 +376,12 @@ public class MountOptionsController implements FxController {
 		return fuseRestartRequired.getValue();
 	}
 
-	public BooleanExpression loopbackPortSupportedProperty() {
+	public ObservableValue<Boolean> loopbackPortSupportedProperty() {
 		return loopbackPortSupported;
 	}
 
 	public boolean isLoopbackPortSupported() {
-		return loopbackPortSupported.get();
+		return loopbackPortSupported.getValue();
 	}
 
 	private class MountServiceConverter extends StringConverter<MountService> {
