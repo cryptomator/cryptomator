@@ -30,7 +30,7 @@ public class UnlockFuseRestartRequiredController implements FxController {
 	}
 
 	public void initialize() {
-		window.setTitle(String.format(resourceBundle.getString("unlock.error.fuseRestartRequired.title"), vault.getDisplayName()));
+		window.setTitle(String.format(resourceBundle.getString("unlock.error.title"), vault.getDisplayName()));
 	}
 
 	@FXML
