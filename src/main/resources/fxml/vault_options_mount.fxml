@@ -29,7 +29,15 @@
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%vaultOptions.mount.volume.type"/>
 			<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}">
+				<graphic>
+					<FontAwesome5IconView glyph="COGS" styleClass="glyph-icon-muted"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%vaultOptions.mount.info" showDelay="100ms"/>
+				</tooltip>
+			</Hyperlink>
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}">
 				<graphic>
 					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 				</graphic>
@@ -38,12 +46,6 @@
 				</tooltip>
 			</Hyperlink>
 		</HBox>
-
-		<TextFlow visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}">
-			<Label text="%vaultOptions.mount.info"/>
-			<Label text=" "/>
-			<Hyperlink styleClass="hyperlink-underline" text="%vaultOptions.mount.linkToPreferences" onAction="#openVolumePreferences" wrapText="true"/>
-		</TextFlow>
 
 		<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.fuseRestartRequired" visible="${controller.fuseRestartRequired}" managed="${controller.fuseRestartRequired}"/>
 
