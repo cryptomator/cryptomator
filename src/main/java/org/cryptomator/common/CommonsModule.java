@@ -21,11 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javafx.beans.value.ObservableValue;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -143,13 +141,4 @@ public abstract class CommonsModule {
 		return new AtomicReference<>(null);
 	}
 
-	@Provides
-	@Singleton
-	static ObservableValue<MountService> provideDefaultMountService(List<MountService> mountProviders, Settings settings) {
-		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-
-		return ObservableUtil.mapWithDefault(settings.mountService, //
-				serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), //
-				fallbackProvider);
-	}
 }

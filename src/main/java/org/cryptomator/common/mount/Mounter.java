@@ -27,7 +27,7 @@ import static org.cryptomator.integrations.mount.MountCapability.UNMOUNT_FORCED;
 @Singleton
 public class Mounter {
 
-	private static final List<String> problematicFuseMountServices = List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider");
+	private static final List<String> CONFLICTING_MOUNT_SERVICES = List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider");
 	private final Environment env;
 	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
@@ -40,7 +40,8 @@ public class Mounter {
 				   Settings settings, //
 				   WindowsDriveLetters driveLetters, //
 				   List<MountService> mountProviders, //
-				   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, ObservableValue<MountService> defaultMountService) {
+				   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, //
+				   ObservableValue<MountService> defaultMountService) {
 		this.env = env;
 		this.settings = settings;
 		this.driveLetters = driveLetters;
@@ -164,7 +165,7 @@ public class Mounter {
 	}
 
 	public static boolean isProblematicFuseService(MountService service) {
-		return problematicFuseMountServices.contains(service.getClass().getName());
+		return CONFLICTING_MOUNT_SERVICES.contains(service.getClass().getName());
 	}
 
 	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, Runnable specialCleanup) {
