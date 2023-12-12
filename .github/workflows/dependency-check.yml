@@ -2,9 +2,6 @@ name: OWASP Maven Dependency Check
 on:
   schedule:
     - cron: '0 7 * * 0'
-  push:
-    branches:
-      - 'release/**'
   workflow_dispatch:
 
 
@@ -48,7 +45,3 @@ jobs:
           SLACK_MESSAGE: "Download the <https://github.com/${{ github.repository }}/actions/run/${{ github.run_id }}|report> for more details."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
-      - name: Failing workflow on release branch
-        if: github.event_name == 'push' && steps.dependency-check.outcome == 'failure'
-        shell: bash
-        run: exit 1
