@@ -11,7 +11,6 @@ package org.cryptomator.common.vaults;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.mount.Mounter;
-import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -73,7 +72,13 @@ public class Vault {
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
 	@Inject
-	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, WindowsDriveLetters windowsDriveLetters, Mounter mounter) {
+	Vault(VaultSettings vaultSettings, //
+		  VaultConfigCache configCache, //
+		  AtomicReference<CryptoFileSystem> cryptoFileSystem, //
+		  VaultState state, //
+		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
+		  VaultStats stats, //
+		  Mounter mounter) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;

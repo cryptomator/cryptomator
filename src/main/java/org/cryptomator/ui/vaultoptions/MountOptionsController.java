@@ -1,18 +1,26 @@
 package org.cryptomator.ui.vaultoptions;
 
 import com.google.common.base.Strings;
-import org.cryptomator.common.mount.ActualMountService;
+import dagger.Lazy;
+import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.mount.MountCapability;
+import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.preferences.VolumePreferencesController;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.RadioButton;
@@ -26,8 +34,11 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 @VaultOptionsScoped
 public class MountOptionsController implements FxController {
@@ -36,14 +47,21 @@ public class MountOptionsController implements FxController {
 	private final VaultSettings vaultSettings;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
+	private final Lazy<Application> application;
 
 	private final ObservableValue<String> defaultMountFlags;
 	private final ObservableValue<Boolean> mountpointDirSupported;
 	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
 	private final ObservableValue<Boolean> readOnlySupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
+	private final ObservableValue<Boolean> defaultMountServiceSelected;
 	private final ObservableValue<String> directoryPath;
 	private final FxApplicationWindows applicationWindows;
+	private final List<MountService> mountProviders;
+	private final ObservableValue<MountService> defaultMountService;
+	private final ObservableValue<MountService> selectedMountService;
+	private final ObservableValue<Boolean> fuseRestartRequired;
+	private final ObservableValue<Boolean> loopbackPortChangeable;
 
 
 	//-- FXML objects --
@@ -56,30 +74,62 @@ public class MountOptionsController implements FxController {
 	public RadioButton mountPointDirBtn;
 	public TextField directoryPathField;
 	public ChoiceBox<Path> driveLetterSelection;
+	public ChoiceBox<MountService> vaultVolumeTypeChoiceBox;
+	public TextField vaultLoopbackPortField;
+	public Button vaultLoopbackPortApplyButton;
+
 
 	@Inject
-	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ObservableValue<ActualMountService> mountService, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, FxApplicationWindows applicationWindows) {
+	MountOptionsController(@VaultOptionsWindow Stage window, //
+						   @VaultOptionsWindow Vault vault, //
+						   WindowsDriveLetters windowsDriveLetters, //
+						   ResourceBundle resourceBundle, //
+						   FxApplicationWindows applicationWindows, //
+						   Lazy<Application> application, //
+						   List<MountService> mountProviders, //
+						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, //
+						   ObservableValue<MountService> defaultMountService) {
 		this.window = window;
 		this.vaultSettings = vault.getVaultSettings();
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
-		this.defaultMountFlags = mountService.map(as -> {
-			if (as.service().hasCapability(MountCapability.MOUNT_FLAGS)) {
-				return as.service().getDefaultMountFlags();
+		this.applicationWindows = applicationWindows;
+		this.directoryPath = vault.getVaultSettings().mountPoint.map(p -> isDriveLetter(p) ? null : p.toString());
+		this.application = application;
+		this.mountProviders = mountProviders;
+		this.defaultMountService = defaultMountService;
+		this.selectedMountService = Bindings.createObjectBinding(this::reselectMountService, defaultMountService, vaultSettings.mountService);
+		this.fuseRestartRequired = selectedMountService.map(s -> {
+			return firstUsedProblematicFuseMountService.get() != null //
+					&& Mounter.isProblematicFuseService(s) //
+					&& !firstUsedProblematicFuseMountService.get().equals(s);
+		});
+
+		this.defaultMountFlags = selectedMountService.map(s -> {
+			if (s.hasCapability(MountCapability.MOUNT_FLAGS)) {
+				return s.getDefaultMountFlags();
 			} else {
 				return "";
 			}
 		});
-		this.mountpointDirSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || as.service().hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
-		this.mountpointDriveLetterSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
-		this.mountFlagsSupported = mountService.map(as -> as.service().hasCapability(MountCapability.MOUNT_FLAGS));
-		this.readOnlySupported = mountService.map(as -> as.service().hasCapability(MountCapability.READ_ONLY));
-		this.directoryPath = vault.getVaultSettings().mountPoint.map(p -> isDriveLetter(p) ? null : p.toString());
-		this.applicationWindows = applicationWindows;
+		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
+		this.defaultMountServiceSelected = ObservableUtil.mapWithDefault(vaultSettings.mountService, _ -> false, true);
+		this.readOnlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
+		this.mountpointDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
+		this.mountpointDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
+		this.loopbackPortChangeable = selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null);
+	}
+
+	private MountService reselectMountService() {
+		var desired = vaultSettings.mountService.getValue();
+		var defaultMS = defaultMountService.getValue();
+		return mountProviders.stream().filter(s -> s.getClass().getName().equals(desired)).findFirst().orElse(defaultMS);
 	}
 
 	@FXML
 	public void initialize() {
+		defaultMountService.addListener((_, _, _) -> vaultVolumeTypeChoiceBox.setConverter(new MountServiceConverter()));
+
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vaultSettings.usesReadOnlyMode);
 
@@ -106,6 +156,20 @@ public class MountOptionsController implements FxController {
 			mountPointToggleGroup.selectToggle(mountPointDirBtn);
 		}
 		mountPointToggleGroup.selectedToggleProperty().addListener(this::selectedToggleChanged);
+
+		vaultVolumeTypeChoiceBox.getItems().add(null);
+		vaultVolumeTypeChoiceBox.getItems().addAll(mountProviders);
+		vaultVolumeTypeChoiceBox.setConverter(new MountServiceConverter());
+		vaultVolumeTypeChoiceBox.getSelectionModel().select(isDefaultMountServiceSelected() ? null : selectedMountService.getValue());
+		vaultVolumeTypeChoiceBox.valueProperty().addListener((_, _, newProvider) -> {
+			var toSet = Optional.ofNullable(newProvider).map(nP -> nP.getClass().getName()).orElse(null);
+			vaultSettings.mountService.set(toSet);
+		});
+
+		vaultLoopbackPortField.setText(String.valueOf(vaultSettings.port.get()));
+		vaultLoopbackPortApplyButton.visibleProperty().bind(vaultSettings.port.asString().isNotEqualTo(vaultLoopbackPortField.textProperty()));
+		vaultLoopbackPortApplyButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateLoopbackPort, vaultLoopbackPortField.textProperty()).not());
+
 	}
 
 	@FXML
@@ -229,6 +293,26 @@ public class MountOptionsController implements FxController {
 
 	}
 
+	public void openDocs() {
+		application.get().getHostServices().showDocument(VolumePreferencesController.DOCS_MOUNTING_URL);
+	}
+
+	private boolean validateLoopbackPort() {
+		try {
+			int port = Integer.parseInt(vaultLoopbackPortField.getText());
+			return port == 0 // choose port automatically
+					|| port >= VolumePreferencesController.MIN_PORT && port <= VolumePreferencesController.MAX_PORT; // port within range
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	public void doChangeLoopbackPort() {
+		if (validateLoopbackPort()) {
+			vaultSettings.port.set(Integer.parseInt(vaultLoopbackPortField.getText()));
+		}
+	}
+
 	//@formatter:off
 	private static class NoDirSelectedException extends Exception {}
 	//@formatter:on
@@ -241,6 +325,14 @@ public class MountOptionsController implements FxController {
 
 	public boolean isMountFlagsSupported() {
 		return mountFlagsSupported.getValue();
+	}
+
+	public ObservableValue<Boolean> defaultMountServiceSelectedProperty() {
+		return defaultMountServiceSelected;
+	}
+
+	public boolean isDefaultMountServiceSelected() {
+		return defaultMountServiceSelected.getValue();
 	}
 
 	public ObservableValue<Boolean> mountpointDirSupportedProperty() {
@@ -273,5 +365,38 @@ public class MountOptionsController implements FxController {
 
 	public String getDirectoryPath() {
 		return directoryPath.getValue();
+	}
+
+	public ObservableValue<Boolean> fuseRestartRequiredProperty() {
+		return fuseRestartRequired;
+	}
+
+	public boolean getFuseRestartRequired() {
+		return fuseRestartRequired.getValue();
+	}
+
+	public ObservableValue<Boolean> loopbackPortChangeableProperty() {
+		return loopbackPortChangeable;
+	}
+
+	public boolean isLoopbackPortChangeable() {
+		return loopbackPortChangeable.getValue();
+	}
+
+	private class MountServiceConverter extends StringConverter<MountService> {
+
+		@Override
+		public String toString(MountService provider) {
+			if (provider == null) {
+				return String.format(resourceBundle.getString("vaultOptions.mount.volumeType.default"), defaultMountService.getValue().displayName());
+			} else {
+				return provider.displayName();
+			}
+		}
+
+		@Override
+		public MountService fromString(String string) {
+			throw new UnsupportedOperationException();
+		}
 	}
 }

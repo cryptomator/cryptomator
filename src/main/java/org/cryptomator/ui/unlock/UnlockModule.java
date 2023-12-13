@@ -81,6 +81,13 @@ abstract class UnlockModule {
 		return fxmlLoaders.createScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.UNLOCK_FUSE_RESTART_REQUIRED)
+	@UnlockScoped
+	static Scene provideFuseRestartRequiredScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.UNLOCK_FUSE_RESTART_REQUIRED);
+	}
+
 	// ------------------
 
 	@Binds
@@ -92,5 +99,10 @@ abstract class UnlockModule {
 	@IntoMap
 	@FxControllerKey(UnlockInvalidMountPointController.class)
 	abstract FxController bindUnlockInvalidMountPointController(UnlockInvalidMountPointController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(UnlockFuseRestartRequiredController.class)
+	abstract FxController bindUnlockFuseRestartRequiredController(UnlockFuseRestartRequiredController controller);
 
 }

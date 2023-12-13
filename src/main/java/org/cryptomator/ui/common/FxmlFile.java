@@ -45,6 +45,7 @@ public enum FxmlFile {
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	UPDATE_REMINDER("/fxml/update_reminder.fxml"), //
 	UNLOCK_ENTER_PASSWORD("/fxml/unlock_enter_password.fxml"),
+	UNLOCK_FUSE_RESTART_REQUIRED("/fxml/unlock_fuse_restart_required.fxml"), //
 	UNLOCK_INVALID_MOUNT_POINT("/fxml/unlock_invalid_mount_point.fxml"), //
 	UNLOCK_SELECT_MASTERKEYFILE("/fxml/unlock_select_masterkeyfile.fxml"), //
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //

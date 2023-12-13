@@ -9,11 +9,14 @@ import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.MountService;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javafx.beans.value.ObservableValue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.cryptomator.integrations.mount.MountCapability.MOUNT_AS_DRIVE_LETTER;
 import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_EXISTING_DIR;
@@ -24,24 +27,34 @@ import static org.cryptomator.integrations.mount.MountCapability.UNMOUNT_FORCED;
 @Singleton
 public class Mounter {
 
-	private final Settings settings;
+	private static final List<String> CONFLICTING_MOUNT_SERVICES = List.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider", "org.cryptomator.frontend.fuse.mount.FuseTMountProvider");
 	private final Environment env;
+	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
-	private final ObservableValue<ActualMountService> mountServiceObservable;
+	private final List<MountService> mountProviders;
+	private final AtomicReference<MountService> firstUsedProblematicFuseMountService;
+	private final ObservableValue<MountService> defaultMountService;
 
 	@Inject
-	public Mounter(Settings settings, Environment env, WindowsDriveLetters driveLetters, ObservableValue<ActualMountService> mountServiceObservable) {
-		this.settings = settings;
+	public Mounter(Environment env, //
+				   Settings settings, //
+				   WindowsDriveLetters driveLetters, //
+				   List<MountService> mountProviders, //
+				   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, //
+				   ObservableValue<MountService> defaultMountService) {
 		this.env = env;
+		this.settings = settings;
 		this.driveLetters = driveLetters;
-		this.mountServiceObservable = mountServiceObservable;
+		this.mountProviders = mountProviders;
+		this.firstUsedProblematicFuseMountService = firstUsedProblematicFuseMountService;
+		this.defaultMountService = defaultMountService;
 	}
 
 	private class SettledMounter {
 
-		private MountService service;
-		private MountBuilder builder;
-		private VaultSettings vaultSettings;
+		private final MountService service;
+		private final MountBuilder builder;
+		private final VaultSettings vaultSettings;
 
 		public SettledMounter(MountService service, MountBuilder builder, VaultSettings vaultSettings) {
 			this.service = service;
@@ -53,8 +66,13 @@ public class Mounter {
 			for (var capability : service.capabilities()) {
 				switch (capability) {
 					case FILE_SYSTEM_NAME -> builder.setFileSystemName("cryptoFs");
-					case LOOPBACK_PORT ->
-							builder.setLoopbackPort(settings.port.get()); //TODO: move port from settings to vaultsettings (see https://github.com/cryptomator/cryptomator/tree/feature/mount-setting-per-vault)
+					case LOOPBACK_PORT -> {
+						if (vaultSettings.mountService.getValue() == null) {
+							builder.setLoopbackPort(settings.port.get());
+						} else {
+							builder.setLoopbackPort(vaultSettings.port.get());
+						}
+					}
 					case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
 					case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode.get());
 					case MOUNT_FLAGS -> {
@@ -131,11 +149,23 @@ public class Mounter {
 	}
 
 	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot) throws IOException, MountFailedException {
-		var mountService = this.mountServiceObservable.getValue().service();
-		var builder = mountService.forFileSystem(cryptoFsRoot);
-		var internal = new SettledMounter(mountService, builder, vaultSettings);
+		var selMntServ = mountProviders.stream().filter(s -> s.getClass().getName().equals(vaultSettings.mountService.getValue())).findFirst().orElse(defaultMountService.getValue());
+
+		var targetIsProblematicFuse = isProblematicFuseService(selMntServ);
+		if (targetIsProblematicFuse && firstUsedProblematicFuseMountService.get() == null) {
+			firstUsedProblematicFuseMountService.set(selMntServ);
+		} else if (targetIsProblematicFuse && !firstUsedProblematicFuseMountService.get().equals(selMntServ)) {
+			throw new FuseRestartRequiredException("Failed to mount the specified mount service.");
+		}
+
+		var builder = selMntServ.forFileSystem(cryptoFsRoot);
+		var internal = new SettledMounter(selMntServ, builder, vaultSettings);
 		var cleanup = internal.prepare();
-		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), cleanup);
+		return new MountHandle(builder.mount(), selMntServ.hasCapability(UNMOUNT_FORCED), cleanup);
+	}
+
+	public static boolean isProblematicFuseService(MountService service) {
+		return CONFLICTING_MOUNT_SERVICES.contains(service.getClass().getName());
 	}
 
 	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, Runnable specialCleanup) {

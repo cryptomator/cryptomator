@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.NumericTextField?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -10,9 +11,9 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
@@ -24,11 +25,35 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<TextFlow>
-			<Label text="%vaultOptions.mount.info"/>
-			<Label text=" "/>
-			<Hyperlink styleClass="hyperlink-underline" text="%vaultOptions.mount.linkToPreferences" onAction="#openVolumePreferences" wrapText="true"/>
-		</TextFlow>
+		<HBox spacing="12" alignment="CENTER_LEFT">
+			<Label text="%vaultOptions.mount.volume.type"/>
+			<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}">
+				<graphic>
+					<FontAwesome5IconView glyph="COGS" styleClass="glyph-icon-muted"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%vaultOptions.mount.info" showDelay="100ms"/>
+				</tooltip>
+			</Hyperlink>
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}">
+				<graphic>
+					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%preferences.volume.docsTooltip" showDelay="100ms"/>
+				</tooltip>
+			</Hyperlink>
+		</HBox>
+
+		<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.fuseRestartRequired" visible="${controller.fuseRestartRequired}" managed="${controller.fuseRestartRequired}"/>
+
+		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortChangeable}" managed="${controller.loopbackPortChangeable}">
+			<Label text="%vaultOptions.mount.volume.tcp.port"/>
+			<NumericTextField fx:id="vaultLoopbackPortField"/>
+			<Button text="%generic.button.apply" fx:id="vaultLoopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
+		</HBox>
+
 		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly" visible="${controller.readOnlySupported}" managed="${controller.readOnlySupported}"/>
 
 		<VBox visible="${controller.mountFlagsSupported}" managed="${controller.mountFlagsSupported}">
