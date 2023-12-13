@@ -103,7 +103,6 @@ public class MountOptionsController implements FxController {
 					&& Mounter.isProblematicFuseService(s) //
 					&& !firstUsedProblematicFuseMountService.get().equals(s);
 		});
-		//this.loopbackPortSupported = BooleanExpression.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null));
 
 		this.defaultMountFlags = selectedMountService.map(s -> {
 			if (s.hasCapability(MountCapability.MOUNT_FLAGS)) {
