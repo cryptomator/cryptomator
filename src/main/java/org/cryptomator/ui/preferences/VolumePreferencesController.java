@@ -10,7 +10,6 @@ import org.cryptomator.ui.common.FxController;
 import javax.inject.Inject;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
