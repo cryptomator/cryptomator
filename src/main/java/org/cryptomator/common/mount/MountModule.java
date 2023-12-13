@@ -22,8 +22,7 @@ public class MountModule {
 	@Provides
 	@Singleton
 	static ObservableValue<MountService> provideDefaultMountService(List<MountService> mountProviders, Settings settings) {
-		var fallbackProvider = mountProviders.stream().findFirst().orElse(null);
-
+		var fallbackProvider = mountProviders.stream().findFirst().get(); //there should always be a mount provider, at least webDAV
 		return ObservableUtil.mapWithDefault(settings.mountService, //
 				serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), //
 				fallbackProvider);

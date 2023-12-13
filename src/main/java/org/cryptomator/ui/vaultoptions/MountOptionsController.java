@@ -2,6 +2,7 @@ package org.cryptomator.ui.vaultoptions;
 
 import com.google.common.base.Strings;
 import dagger.Lazy;
+import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.mount.WindowsDriveLetters;
 import org.cryptomator.common.settings.VaultSettings;
@@ -60,7 +61,7 @@ public class MountOptionsController implements FxController {
 	private final ObservableValue<MountService> defaultMountService;
 	private final ObservableValue<MountService> selectedMountService;
 	private final ObservableValue<Boolean> fuseRestartRequired;
-	private final ObservableValue<Boolean> loopbackPortSupported;
+	private final ObservableValue<Boolean> loopbackPortChangeable;
 
 
 	//-- FXML objects --
@@ -112,11 +113,11 @@ public class MountOptionsController implements FxController {
 			}
 		});
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
-		this.defaultMountServiceSelected = selectedMountService.map(_ -> vaultSettings.mountService.getValue() == null);
+		this.defaultMountServiceSelected = ObservableUtil.mapWithDefault(vaultSettings.mountService, _ -> false, true);
 		this.readOnlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 		this.mountpointDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
 		this.mountpointDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
-		this.loopbackPortSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null);
+		this.loopbackPortChangeable = selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null);
 	}
 
 	private MountService reselectMountService() {
@@ -159,9 +160,8 @@ public class MountOptionsController implements FxController {
 		vaultVolumeTypeChoiceBox.getItems().add(null);
 		vaultVolumeTypeChoiceBox.getItems().addAll(mountProviders);
 		vaultVolumeTypeChoiceBox.setConverter(new MountServiceConverter());
-		boolean autoSelected = vaultSettings.mountService.get() == null;
-		vaultVolumeTypeChoiceBox.getSelectionModel().select(autoSelected ? null : selectedMountService.getValue());
-		vaultVolumeTypeChoiceBox.valueProperty().addListener((observableValue, oldProvider, newProvider) -> {
+		vaultVolumeTypeChoiceBox.getSelectionModel().select(isDefaultMountServiceSelected() ? null : selectedMountService.getValue());
+		vaultVolumeTypeChoiceBox.valueProperty().addListener((_, _, newProvider) -> {
 			var toSet = Optional.ofNullable(newProvider).map(nP -> nP.getClass().getName()).orElse(null);
 			vaultSettings.mountService.set(toSet);
 		});
@@ -375,12 +375,12 @@ public class MountOptionsController implements FxController {
 		return fuseRestartRequired.getValue();
 	}
 
-	public ObservableValue<Boolean> loopbackPortSupportedProperty() {
-		return loopbackPortSupported;
+	public ObservableValue<Boolean> loopbackPortChangeableProperty() {
+		return loopbackPortChangeable;
 	}
 
-	public boolean isLoopbackPortSupported() {
-		return loopbackPortSupported.getValue();
+	public boolean isLoopbackPortChangeable() {
+		return loopbackPortChangeable.getValue();
 	}
 
 	private class MountServiceConverter extends StringConverter<MountService> {
