@@ -31,7 +31,7 @@ jobs:
       - name: Run org.owasp:dependency-check plugin
         id: dependency-check
         continue-on-error: true
-        run: mvn -B verify -Pdependency-check -DskipTests
+        run: mvn -B validate -Pdependency-check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       - name: Upload report on failure

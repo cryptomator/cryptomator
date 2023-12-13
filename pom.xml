@@ -460,6 +460,7 @@
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
 						<configuration>
+							<nvdValidForHours>24</nvdValidForHours>
 							<failBuildOnCVSS>0</failBuildOnCVSS>
 							<skipTestScope>true</skipTestScope>
 							<detail>true</detail>
@@ -471,6 +472,7 @@
 								<goals>
 									<goal>check</goal>
 								</goals>
+								<phase>validate</phase>
 							</execution>
 						</executions>
 					</plugin>
