@@ -46,7 +46,7 @@
 			</Hyperlink>
 		</HBox>
 
-		<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.fuseRestartRequired" visible="${controller.fuseRestartRequired}" managed="${controller.fuseRestartRequired}"/>
+		<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.restartRequired" visible="${controller.selectedMountServiceRequiresRestart}" managed="${controller.selectedMountServiceRequiresRestart}"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortChangeable}" managed="${controller.loopbackPortChangeable}">
 			<Label text="%vaultOptions.mount.volume.tcp.port"/>

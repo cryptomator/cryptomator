@@ -158,8 +158,8 @@ public class Mounter {
 		var mountService = mountProviders.stream().filter(s -> s.getClass().getName().equals(vaultSettings.mountService.getValue())).findFirst().orElse(defaultMountService.getValue());
 
 		if (isConflictingMountService(mountService)) {
-			// TODO: neither message displayed in UI nor exception is specific to FUSE, so rename this class
-			throw new FuseRestartRequiredException("Failed to mount the specified mount service.");
+			var msg = STR."\{mountService.getClass()} unavailable due to conflict with either of \{CONFLICTING_MOUNT_SERVICES.get(mountService.getClass().getName())}";
+			throw new ConflictingMountServiceException(msg);
 		}
 
 		usedMountServices.add(mountService);
