@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 @VaultOptionsScoped
 public class MountOptionsController implements FxController {
@@ -87,7 +86,7 @@ public class MountOptionsController implements FxController {
 						   FxApplicationWindows applicationWindows, //
 						   Lazy<Application> application, //
 						   List<MountService> mountProviders, //
-						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, //
+						   Mounter mounter, //
 						   ObservableValue<MountService> defaultMountService) {
 		this.window = window;
 		this.vaultSettings = vault.getVaultSettings();
@@ -99,11 +98,7 @@ public class MountOptionsController implements FxController {
 		this.mountProviders = mountProviders;
 		this.defaultMountService = defaultMountService;
 		this.selectedMountService = Bindings.createObjectBinding(this::reselectMountService, defaultMountService, vaultSettings.mountService);
-		this.fuseRestartRequired = selectedMountService.map(s -> {
-			return firstUsedProblematicFuseMountService.get() != null //
-					&& Mounter.isProblematicFuseService(s) //
-					&& !firstUsedProblematicFuseMountService.get().equals(s);
-		});
+		this.fuseRestartRequired = selectedMountService.map(mounter::isConflictingMountService);
 
 		this.defaultMountFlags = selectedMountService.map(s -> {
 			if (s.hasCapability(MountCapability.MOUNT_FLAGS)) {

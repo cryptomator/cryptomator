@@ -6,9 +6,12 @@ import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.mount.MountService;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javafx.beans.value.ObservableValue;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Module
 public class MountModule {
@@ -26,6 +29,14 @@ public class MountModule {
 		return ObservableUtil.mapWithDefault(settings.mountService, //
 				serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), //
 				fallbackProvider);
+	}
+
+
+	@Provides
+	@Singleton
+	@Named("usedMountServices")
+	static Set<MountService> provideSetOfUsedMountServices() {
+		return ConcurrentHashMap.newKeySet();
 	}
 
 }
