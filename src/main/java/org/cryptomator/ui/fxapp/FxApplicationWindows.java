@@ -137,14 +137,11 @@ public class FxApplicationWindows {
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
 
 		//Check whether Vault options are open and close the window before unlocking it
-		if (!visibleWindows.isEmpty()) {
-			for (Window theWindow : visibleWindows) {
-				Stage thestage = theWindow instanceof Stage ? ((Stage) theWindow) : null;
-				if (thestage == null) continue;
-				if (thestage.getTitle().equals(vault.getDisplayName())) {
-					thestage.close();
-					break;
-				}
+		for (Window theWindow : visibleWindows) {
+			Stage thestage = theWindow instanceof Stage ? ((Stage) theWindow) : null;
+			if (thestage != null && thestage.getTitle().equals(vault.getDisplayName())) {
+				thestage.close();
+				break;
 			}
 		}
 
