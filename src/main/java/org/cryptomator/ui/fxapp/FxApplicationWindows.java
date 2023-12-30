@@ -135,17 +135,15 @@ public class FxApplicationWindows {
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
-
-		//Check whether Vault options are open and close the window before unlocking it
-		for (Window theWindow : visibleWindows) {
-			Stage thestage = theWindow instanceof Stage ? ((Stage) theWindow) : null;
-			if (thestage != null && thestage.getTitle().equals(vault.getDisplayName())) {
-				thestage.close();
-				break;
-			}
-		}
-
 		return CompletableFuture.supplyAsync(() -> {
+					//Check whether Vault options are open and close the window before unlocking it
+					for (Window theWindow : visibleWindows) {
+						Stage thestage = theWindow instanceof Stage ? ((Stage) theWindow) : null;
+						if (thestage != null && thestage.getTitle().equals(vault.getDisplayName())) {
+							thestage.close();
+							break;
+						}
+					}
 					Preconditions.checkState(vault.stateProperty().transition(VaultState.Value.LOCKED, VaultState.Value.PROCESSING), "Vault not locked.");
 					LOG.debug("Start unlock workflow for {}", vault.getDisplayName());
 					return unlockWorkflowFactory.create(vault, owner).unlockWorkflow();
