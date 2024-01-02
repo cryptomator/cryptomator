@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
 
 @OperatingSystem(MAC)
-public final class GoogleDriveLocationPresetsProvider implements LocationPresetsProvider {
+public final class GoogleDriveMacLocationPresetsProvider implements LocationPresetsProvider {
 	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/Library/CloudStorage/").toAbsolutePath();
 	private static final Predicate<String> PATTERN = Pattern.compile("^GoogleDrive-[^/]+$").asMatchPredicate();
 
