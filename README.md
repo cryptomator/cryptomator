@@ -86,7 +86,7 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ### Dependencies
 
-* JDK 19 (e.g. temurin)
+* JDK 21 (e.g. temurin, zulu)
 * Maven 3
 
 ### Run Maven
