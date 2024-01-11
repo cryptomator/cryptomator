@@ -1,6 +1,5 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.nimbusds.jose.JWEObject;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.keyloading.KeyLoading;
 
@@ -22,8 +21,8 @@ public class RegisterFailedController implements FxController {
 
 	@FXML
 	public void close() {
+		result.cancel(true);
 		window.close();
 	}
-
 
 }

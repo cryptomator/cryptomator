@@ -11,7 +11,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -51,7 +49,7 @@ public class ReceiveKeyController implements FxController {
 	private final String deviceId;
 	private final String bearerToken;
 	private final CompletableFuture<ReceivedKey> result;
-	private final Lazy<Scene> setupDeviceScene;
+	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> legacyRegisterDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
 	private final Lazy<Scene> accountInitializationScene;
@@ -60,13 +58,13 @@ public class ReceiveKeyController implements FxController {
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_SETUP_DEVICE) Lazy<Scene> setupDeviceScene, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.result = result;
-		this.setupDeviceScene = setupDeviceScene;
+		this.registerDeviceScene = registerDeviceScene;
 		this.legacyRegisterDeviceScene = legacyRegisterDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
 		this.accountInitializationScene = accountInitializationScene;
@@ -141,7 +139,7 @@ public class ReceiveKeyController implements FxController {
 					var device = JSON.reader().readValue(response.body(), DeviceDto.class);
 					receivedBothEncryptedKeys(encryptedVaultKey, device.userPrivateKey);
 				}
-				case 404 -> needsDeviceSetup(); // TODO: using the setup code, we can theoretically immediately unlock
+				case 404 -> needsDeviceRegistration(); // TODO: using the setup code, we can theoretically immediately unlock
 				default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
@@ -149,8 +147,8 @@ public class ReceiveKeyController implements FxController {
 		}
 	}
 
-	private void needsDeviceSetup() {
-		window.setScene(setupDeviceScene.get());
+	private void needsDeviceRegistration() {
+		window.setScene(registerDeviceScene.get());
 	}
 
 	private void receivedBothEncryptedKeys(String encryptedVaultKey, String encryptedUserKey) throws IOException {
