@@ -78,8 +78,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
-	--strip-debug `
-	--compress=1
+	--strip-debug
 
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {

@@ -89,7 +89,6 @@ jobs:
           --no-header-files
           --no-man-pages
           --strip-debug
-          --compress=1
       - name: Change win-console flag if debug is active
         if: ${{ inputs.isDebug }}
         run: echo "WIN_CONSOLE_FLAG=--win-console" >> $GITHUB_ENV

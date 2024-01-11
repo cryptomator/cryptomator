@@ -95,7 +95,6 @@ jobs:
           --no-header-files
           --no-man-pages
           --strip-debug
-          --compress=1
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage

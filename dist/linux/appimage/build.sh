@@ -60,8 +60,7 @@ ${JAVA_HOME}/bin/jlink \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
-    --strip-debug \
-    --compress=1
+    --strip-debug
 
 # create app dir
 envsubst '${SEMVER_STR} ${REVISION_NUM}' < ../launcher-gtk2.properties > launcher-gtk2.properties
