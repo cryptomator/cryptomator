@@ -45,6 +45,12 @@ class VaultSettingsJson {
 	@JsonProperty("autoLockIdleSeconds")
 	int autoLockIdleSeconds = VaultSettings.DEFAULT_AUTOLOCK_IDLE_SECONDS;
 
+	@JsonProperty("mountService")
+	String mountService;
+
+	@JsonProperty("port")
+	int port = VaultSettings.DEFAULT_PORT;
+
 	@Deprecated(since = "1.7.0")
 	@JsonProperty(value = "winDriveLetter", access = JsonProperty.Access.WRITE_ONLY) // WRITE_ONLY means value is "written" into the java object during deserialization. Upvote this: https://github.com/FasterXML/jackson-annotations/issues/233
 	String winDriveLetter;

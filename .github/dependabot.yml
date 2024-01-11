@@ -6,7 +6,7 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "06:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     groups:
       java-test-dependencies:
         patterns:

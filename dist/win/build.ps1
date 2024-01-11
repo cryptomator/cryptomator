@@ -78,8 +78,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
-	--strip-debug `
-	--compress=1
+	--strip-debug
 
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
@@ -181,7 +180,7 @@ Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 
 # download legacy-winfsp uninstaller
-$winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0-beta9/winfsp-uninstaller.exe'
+$winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0/winfsp-uninstaller.exe'
 Write-Output "Downloading ${winfspUninstaller}..."
 Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninstaller.exe" # redirects are followed by default
 

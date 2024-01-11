@@ -26,6 +26,7 @@ body:
         Examples:
           - Operating System: Windows 10
           - Cryptomator: 1.5.16
+          - OneDrive: 23.226
           - LibreOffice: 7.1.4
       value: |
           - Operating System: 

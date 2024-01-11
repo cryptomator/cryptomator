@@ -19,7 +19,7 @@ env:
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
-  WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0-beta9/winfsp-uninstaller.exe'
+  WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0/winfsp-uninstaller.exe'
 
 defaults:
   run:
@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -89,7 +89,6 @@ jobs:
           --no-header-files
           --no-man-pages
           --strip-debug
-          --compress=1
       - name: Change win-console flag if debug is active
         if: ${{ inputs.isDebug }}
         run: echo "WIN_CONSOLE_FLAG=--win-console" >> $GITHUB_ENV
@@ -275,7 +274,7 @@ jobs:
           path: dist/win/bundle/resources
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
