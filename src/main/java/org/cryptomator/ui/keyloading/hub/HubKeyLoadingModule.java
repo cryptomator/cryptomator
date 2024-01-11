@@ -72,14 +72,6 @@ public abstract class HubKeyLoadingModule {
 		return new CompletableFuture<>();
 	}
 
-	@Provides
-	@KeyLoadingScoped
-	@Named("registerException")
-	static AtomicReference<Throwable> provideRegisterException() {
-		return new AtomicReference<>();
-	}
-
-
 	@Binds
 	@IntoMap
 	@KeyLoadingScoped
@@ -147,6 +139,13 @@ public abstract class HubKeyLoadingModule {
 	@KeyLoadingScoped
 	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE_ALREADY_EXISTS)
+	@KeyLoadingScoped
+	static Scene provideHubRegisterDeviceAlreadyExistsScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE_ALREADY_EXISTS);
 	}
 
 	@Provides

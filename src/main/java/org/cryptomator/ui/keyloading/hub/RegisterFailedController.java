@@ -4,36 +4,25 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.keyloading.KeyLoading;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CompletableFuture;
 
 public class RegisterFailedController implements FxController {
 
 	private final Stage window;
-	private final Throwable registerException;
-	private final SimpleBooleanProperty deviceAlreadyExisting;
+	private final CompletableFuture<ReceivedKey> result;
 
 	@Inject
-	public RegisterFailedController(@KeyLoading Stage window, @Named("registerException") AtomicReference<Throwable> registerExceptionRef) {
+	public RegisterFailedController(@KeyLoading Stage window, CompletableFuture<ReceivedKey> result) {
 		this.window = window;
-		this.registerException = registerExceptionRef.get();
-		this.deviceAlreadyExisting = new SimpleBooleanProperty(registerException instanceof DeviceAlreadyExistsException);
+		this.result = result;
 	}
 
 	@FXML
 	public void close() {
+		result.cancel(true);
 		window.close();
-	}
-
-	public boolean isDeviceAlreadyExisting() {
-		return deviceAlreadyExisting.get();
-	}
-
-	public boolean isGenericError() {
-		return !deviceAlreadyExisting.get();
 	}
 
 }

@@ -55,9 +55,9 @@ public class RegisterDeviceController implements FxController {
 	private final Stage window;
 	private final HubConfig hubConfig;
 	private final String bearerToken;
-	private final AtomicReference<Throwable> registerException;
 	private final Lazy<Scene> registerSuccessScene;
 	private final Lazy<Scene> registerFailedScene;
+	private final Lazy<Scene> registerDeviceAlreadyExistsScene;
 	private final String deviceId;
 	private final P384KeyPair deviceKeyPair;
 	private final CompletableFuture<ReceivedKey> result;
@@ -70,16 +70,16 @@ public class RegisterDeviceController implements FxController {
 	public Button registerBtn;
 
 	@Inject
-	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<ReceivedKey> result, @Named("bearerToken") AtomicReference<String> bearerToken, @Named("registerException") AtomicReference<Throwable> registerException, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene) {
+	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<ReceivedKey> result, @Named("bearerToken") AtomicReference<String> bearerToken, @FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS) Lazy<Scene> registerSuccessScene, @FxmlScene(FxmlFile.HUB_REGISTER_FAILED) Lazy<Scene> registerFailedScene, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE_ALREADY_EXISTS) Lazy<Scene> registerDeviceAlreadyExistsScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
 		this.deviceKeyPair = Objects.requireNonNull(deviceKey.get());
 		this.result = result;
 		this.bearerToken = Objects.requireNonNull(bearerToken.get());
-		this.registerException = registerException;
 		this.registerSuccessScene = registerSuccessScene;
 		this.registerFailedScene = registerFailedScene;
+		this.registerDeviceAlreadyExistsScene = registerDeviceAlreadyExistsScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
 	}
@@ -184,13 +184,12 @@ public class RegisterDeviceController implements FxController {
 	private void setupFailed(Throwable cause) {
 		switch (cause) {
 			case CompletionException e when e.getCause() instanceof JWEHelper.InvalidJweKeyException -> invalidSetupCode.set(true);
+			case DeviceAlreadyExistsException e -> {
+				LOG.debug("Device already registered in hub instance {} for different user", hubConfig.authSuccessUrl);
+				window.setScene(registerDeviceAlreadyExistsScene.get());
+			}
 			default -> {
-				if (cause instanceof DeviceAlreadyExistsException) {
-					LOG.debug("Device already registered in hub instance {} for different user", hubConfig.authSuccessUrl);
-				} else {
-					LOG.warn("Device setup failed.", cause);
-				}
-				registerException.set(cause);
+				LOG.warn("Device setup failed.", cause);
 				window.setScene(registerFailedScene.get());
 			}
 		}
