@@ -49,7 +49,7 @@ public class ReceiveKeyController implements FxController {
 	private final String deviceId;
 	private final String bearerToken;
 	private final CompletableFuture<ReceivedKey> result;
-	private final Lazy<Scene> registerDeviceScreen;
+	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> legacyRegisterDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
 	private final Lazy<Scene> accountInitializationScene;
@@ -58,13 +58,13 @@ public class ReceiveKeyController implements FxController {
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScreen, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.result = result;
-		this.registerDeviceScreen = registerDeviceScreen;
+		this.registerDeviceScene = registerDeviceScene;
 		this.legacyRegisterDeviceScene = legacyRegisterDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
 		this.accountInitializationScene = accountInitializationScene;
@@ -148,7 +148,7 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	private void needsDeviceRegistration() {
-		window.setScene(registerDeviceScreen.get());
+		window.setScene(registerDeviceScene.get());
 	}
 
 	private void receivedBothEncryptedKeys(String encryptedVaultKey, String encryptedUserKey) throws IOException {
