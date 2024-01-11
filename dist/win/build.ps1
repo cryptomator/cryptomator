@@ -181,7 +181,7 @@ Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 
 # download legacy-winfsp uninstaller
-$winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0-beta9/winfsp-uninstaller.exe'
+$winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0/winfsp-uninstaller.exe'
 Write-Output "Downloading ${winfspUninstaller}..."
 Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninstaller.exe" # redirects are followed by default
 
