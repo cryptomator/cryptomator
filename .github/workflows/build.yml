@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -36,7 +36,7 @@ jobs:
           mvn -B verify
           jacoco:report
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-          -Pcoverage,dependency-check
+          -Pcoverage
           -Dsonar.projectKey=cryptomator_cryptomator
           -Dsonar.organization=cryptomator
           -Dsonar.host.url=https://sonarcloud.io

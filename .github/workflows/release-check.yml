@@ -10,12 +10,22 @@ defaults:
   run:
     shell: bash
 
+env:
+  JAVA_DIST: 'zulu'
+  JAVA_VERSION: 21
+
 jobs:
-  release-check-precondition:
+  check-preconditions:
     name: Validate commits pushed to release/hotfix branch to fulfill release requirements
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ env.JAVA_DIST }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
       - id: validate-pom-version
         name: Validate POM version
         run: |
@@ -38,3 +48,18 @@ jobs:
             echo "Release not set in dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml"
             exit 1
           fi
+      - name: Cache NVD DB
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data/
+          key: dependency-check-${{ github.run_id }}
+          restore-keys: |
+            dependency-check
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
+      - name: Run org.owasp:dependency-check plugin
+        id: dependency-check
+        continue-on-error: true
+        run: mvn -B verify -Pdependency-check -DskipTests
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}

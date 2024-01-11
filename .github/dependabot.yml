@@ -6,11 +6,38 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "06:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     groups:
-      maven-dependencies:
+      java-test-dependencies:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.mockito:*"
+          - "org.hamcrest:*"
+          - "com.google.jimfs:jimfs"
+      maven-build-plugins:
+        patterns:
+          - "org.apache.maven.plugins:*"
+          - "org.jacoco:jacoco-maven-plugin"
+          - "org.owasp:dependency-check-maven"
+          - "me.fabriciorby:maven-surefire-junit5-tree-reporter"
+          - "org.codehaus.mojo:license-maven-plugin"
+      javafx:
+        patterns:
+          - "org.openjfx:*"
+      java-production-dependencies:
         patterns:
           - "*"
+        exclude-patterns:
+          - "org.openjfx:*"
+          - "org.apache.maven.plugins:*"
+          - "org.jacoco:jacoco-maven-plugin"
+          - "org.owasp:dependency-check-maven"
+          - "me.fabriciorby:maven-surefire-junit5-tree-reporter"
+          - "org.codehaus.mojo:license-maven-plugin"
+          - "org.junit.jupiter:*"
+          - "org.mockito:*"
+          - "org.hamcrest:*"
+          - "com.google.jimfs:jimfs"
 
   - package-ecosystem: "github-actions"
     directory: "/" # even for `.github/workflows`

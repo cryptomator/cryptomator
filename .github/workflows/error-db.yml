@@ -14,7 +14,7 @@ jobs:
       - name: Query Discussion Data
         if: github.event_name == 'discussion_comment' || github.event_name == 'discussion' && github.event.action != 'deleted'
         id: query-data
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const query = `query ($owner: String!, $name: String!, $discussionNumber: Int!) {
