@@ -82,10 +82,10 @@ abstract class UnlockModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.UNLOCK_FUSE_RESTART_REQUIRED)
+	@FxmlScene(FxmlFile.UNLOCK_REQUIRES_RESTART)
 	@UnlockScoped
-	static Scene provideFuseRestartRequiredScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.UNLOCK_FUSE_RESTART_REQUIRED);
+	static Scene provideRestartRequiredScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.UNLOCK_REQUIRES_RESTART);
 	}
 
 	// ------------------
@@ -102,7 +102,7 @@ abstract class UnlockModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(UnlockFuseRestartRequiredController.class)
-	abstract FxController bindUnlockFuseRestartRequiredController(UnlockFuseRestartRequiredController controller);
+	@FxControllerKey(UnlockRequiresRestartController.class)
+	abstract FxController bindUnlockRequiresRestartController(UnlockRequiresRestartController controller);
 
 }

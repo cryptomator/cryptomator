@@ -15,7 +15,6 @@ import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.preferences.VolumePreferencesController;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
@@ -38,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 @VaultOptionsScoped
 public class MountOptionsController implements FxController {
@@ -60,7 +58,7 @@ public class MountOptionsController implements FxController {
 	private final List<MountService> mountProviders;
 	private final ObservableValue<MountService> defaultMountService;
 	private final ObservableValue<MountService> selectedMountService;
-	private final ObservableValue<Boolean> fuseRestartRequired;
+	private final ObservableValue<Boolean> selectedMountServiceRequiresRestart;
 	private final ObservableValue<Boolean> loopbackPortChangeable;
 
 
@@ -87,7 +85,7 @@ public class MountOptionsController implements FxController {
 						   FxApplicationWindows applicationWindows, //
 						   Lazy<Application> application, //
 						   List<MountService> mountProviders, //
-						   @Named("FUPFMS") AtomicReference<MountService> firstUsedProblematicFuseMountService, //
+						   Mounter mounter, //
 						   ObservableValue<MountService> defaultMountService) {
 		this.window = window;
 		this.vaultSettings = vault.getVaultSettings();
@@ -99,11 +97,7 @@ public class MountOptionsController implements FxController {
 		this.mountProviders = mountProviders;
 		this.defaultMountService = defaultMountService;
 		this.selectedMountService = Bindings.createObjectBinding(this::reselectMountService, defaultMountService, vaultSettings.mountService);
-		this.fuseRestartRequired = selectedMountService.map(s -> {
-			return firstUsedProblematicFuseMountService.get() != null //
-					&& Mounter.isProblematicFuseService(s) //
-					&& !firstUsedProblematicFuseMountService.get().equals(s);
-		});
+		this.selectedMountServiceRequiresRestart = selectedMountService.map(mounter::isConflictingMountService);
 
 		this.defaultMountFlags = selectedMountService.map(s -> {
 			if (s.hasCapability(MountCapability.MOUNT_FLAGS)) {
@@ -367,12 +361,12 @@ public class MountOptionsController implements FxController {
 		return directoryPath.getValue();
 	}
 
-	public ObservableValue<Boolean> fuseRestartRequiredProperty() {
-		return fuseRestartRequired;
+	public ObservableValue<Boolean> selectedMountServiceRequiresRestartProperty() {
+		return selectedMountServiceRequiresRestart;
 	}
 
-	public boolean getFuseRestartRequired() {
-		return fuseRestartRequired.getValue();
+	public boolean getSelectedMountServiceRequiresRestart() {
+		return selectedMountServiceRequiresRestart.getValue();
 	}
 
 	public ObservableValue<Boolean> loopbackPortChangeableProperty() {

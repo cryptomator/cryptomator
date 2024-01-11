@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import java.util.ResourceBundle;
 
 @UnlockScoped
-public class UnlockFuseRestartRequiredController implements FxController {
+public class UnlockRequiresRestartController implements FxController {
 
 	private final Stage window;
 	private final ResourceBundle resourceBundle;
@@ -19,10 +19,10 @@ public class UnlockFuseRestartRequiredController implements FxController {
 	private final Vault vault;
 
 	@Inject
-	UnlockFuseRestartRequiredController(@UnlockWindow Stage window, //
-										ResourceBundle resourceBundle, //
-										FxApplicationWindows appWindows, //
-										@UnlockWindow Vault vault) {
+	UnlockRequiresRestartController(@UnlockWindow Stage window, //
+									ResourceBundle resourceBundle, //
+									FxApplicationWindows appWindows, //
+									@UnlockWindow Vault vault) {
 		this.window = window;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
