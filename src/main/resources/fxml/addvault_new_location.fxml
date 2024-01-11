@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
-<?import javafx.scene.layout.StackPane?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultLocationController"
@@ -31,24 +31,26 @@
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<VBox fx:id="radioButtonVBox" spacing="6">
-			<Label wrapText="true" text="%addvaultwizard.new.locationInstruction"/>
-			<!-- PLACEHOLDER, more radio buttons are added programmatically via controller -->
-			<HBox spacing="12" alignment="CENTER_LEFT">
-				<RadioButton fx:id="customRadioButton" toggleGroup="${locationPresetsToggler}" text="%addvaultwizard.new.directoryPickerLabel"/>
-				<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">
-					<graphic>
-						<FontAwesome5IconView glyph="FOLDER_OPEN"/>
-					</graphic>
-				</Button>
-			</HBox>
-			<Region prefHeight="2"/>
-			<Label wrapText="true" text="%addvaultwizard.new.locationLoading" visible="${controller.loadingPresetLocations}" managed="${controller.loadingPresetLocations}" graphicTextGap="8">
-				<graphic>
-					<FontAwesome5Spinner />
-				</graphic>
-			</Label>
-		</VBox>
+		<Label wrapText="true" text="%addvaultwizard.new.locationInstruction"/>
+		<ScrollPane hbarPolicy="NEVER">
+			<VBox fx:id="radioButtonVBox" spacing="6">
+				<!-- PLACEHOLDER, more radio buttons are added programmatically via controller -->
+				<HBox spacing="12" alignment="CENTER_LEFT">
+					<RadioButton fx:id="customRadioButton" toggleGroup="${locationPresetsToggler}" text="%addvaultwizard.new.directoryPickerLabel"/>
+					<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">
+						<graphic>
+							<FontAwesome5IconView glyph="FOLDER_OPEN"/>
+						</graphic>
+					</Button>
+				</HBox>
+			</VBox>
+		</ScrollPane>
+		<Region prefHeight="2"/>
+		<Label wrapText="true" text="%addvaultwizard.new.locationLoading" visible="${controller.loadingPresetLocations}" managed="${controller.loadingPresetLocations}" graphicTextGap="8">
+			<graphic>
+				<FontAwesome5Spinner/>
+			</graphic>
+		</Label>
 
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 

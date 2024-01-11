@@ -148,6 +148,8 @@ public class CreateNewVaultLocationController implements FxController {
 	}
 
 	private void createRadioButtonFor(LocationPreset preset) {
+		assert !radioButtonVBox.getChildren().isEmpty();
+
 		Platform.runLater(() -> {
 			var btn = new RadioButton(preset.name());
 			btn.setUserData(preset.path());
@@ -155,9 +157,7 @@ public class CreateNewVaultLocationController implements FxController {
 			//in place sorting
 			var vboxElements = radioButtonVBox.getChildren();
 			boolean added = false;
-			int listIndex = 0; //first item of vbox is the list header
-			while (listIndex < vboxElements.size()) {
-				listIndex++;
+			for (int listIndex = 0; listIndex < vboxElements.size(); listIndex++) {
 				if (vboxElements.get(listIndex) instanceof RadioButton rb) {
 					//another radio button
 					if (rb.getText().compareTo(preset.name()) > 0) {
@@ -165,13 +165,11 @@ public class CreateNewVaultLocationController implements FxController {
 						added = true;
 						break;
 					}
-				} else {
-					//end of all radiobuttons
-					break;
 				}
 			}
+
 			if (!added) {
-				vboxElements.add(listIndex, btn);
+				vboxElements.add(vboxElements.size() - 1, btn); //last element is always the custom location btn
 			}
 
 			locationPresetsToggler.getToggles().add(btn);
