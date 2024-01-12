@@ -69,7 +69,7 @@ Expand-Archive -Path $jfxJmodsZip -Force -DestinationPath ".\resources\"
 Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods"
 Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
-
+## create custom runtime
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
@@ -78,7 +78,8 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
-	--strip-debug
+	--strip-debug `
+	--compress "zip-0" #do not compress to have improved msi compression
 
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {

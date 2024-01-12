@@ -24,6 +24,7 @@ override_dh_auto_clean:
 override_dh_auto_build:
 	mkdir resources
 	ln -s ../common/org.cryptomator.Cryptomator512.png resources/cryptomator.png
+# Remark: no compression is applied for improved build compression later (here deb)
 	$(JAVA_HOME)/bin/jlink \
 		--output runtime \
 		--module-path "${JMODS_PATH}" \
@@ -31,7 +32,8 @@ override_dh_auto_build:
 		--strip-native-commands \
 		--no-header-files \
 		--no-man-pages \
-		--strip-debug
+		--strip-debug \
+		--compress zip-0
 	$(JAVA_HOME)/bin/jpackage \
 		--type app-image \
 		--runtime-image runtime \

@@ -85,6 +85,7 @@ jobs:
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
+        #Remark: no compression is applied for improved build compression later (here dmg)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
@@ -95,6 +96,7 @@ jobs:
           --no-header-files
           --no-man-pages
           --strip-debug
+          --compress zip-0
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
