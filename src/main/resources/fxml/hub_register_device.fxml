@@ -57,15 +57,6 @@
 				<TextField fx:id="deviceNameField" HBox.hgrow="ALWAYS"/>
 			</HBox>
 			<HBox alignment="TOP_RIGHT">
-				<Label text="%hub.register.occupiedMsg" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.deviceNameAlreadyExists}" managed="${controller.deviceNameAlreadyExists}" graphicTextGap="6">
-					<padding>
-						<Insets top="6"/>
-					</padding>
-					<graphic>
-						<FontAwesome5IconView glyph="TIMES" styleClass="glyph-icon-red"/>
-					</graphic>
-				</Label>
-
 				<Label text="%hub.register.invalidAccountKeyLabel" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.invalidSetupCode}" managed="${controller.invalidSetupCode}" graphicTextGap="6">
 					<padding>
 						<Insets top="6"/>

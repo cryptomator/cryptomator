@@ -1,7 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
-import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.keychain.NoKeychainAccessProviderException;
@@ -44,6 +43,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 		this.window = window;
 		this.keychainManager = keychainManager;
 		window.setTitle(windowTitle);
+		window.setOnCloseRequest(_ -> result.cancel(true));
 		this.authFlowScene = authFlowScene;
 		this.noKeychainScene = noKeychainScene;
 		this.result = result;

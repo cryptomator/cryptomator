@@ -74,6 +74,7 @@ jobs:
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
+        #Remark: no compression is applied for improved build compression later (here appimage)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
@@ -84,7 +85,7 @@ jobs:
           --no-header-files
           --no-man-pages
           --strip-debug
-          --compress=1
+          --compress zip-0
       - name: Prepare additional launcher
         run: envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/linux/launcher-gtk2.properties > launcher-gtk2.properties
         env:

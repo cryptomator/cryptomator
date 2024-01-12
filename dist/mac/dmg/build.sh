@@ -76,7 +76,7 @@ ${JAVA_HOME}/bin/jlink \
     --no-header-files \
     --no-man-pages \
     --strip-debug \
-    --compress=1
+    --compress zip-0
 
 # create app dir
 ${JAVA_HOME}/bin/jpackage \
