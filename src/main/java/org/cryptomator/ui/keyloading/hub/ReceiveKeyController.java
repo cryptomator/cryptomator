@@ -46,6 +46,7 @@ public class ReceiveKeyController implements FxController {
 
 	private final Stage window;
 	private final HubConfig hubConfig;
+	private final String vaultId;
 	private final String deviceId;
 	private final String bearerToken;
 	private final CompletableFuture<ReceivedKey> result;
@@ -53,14 +54,15 @@ public class ReceiveKeyController implements FxController {
 	private final Lazy<Scene> legacyRegisterDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
 	private final Lazy<Scene> accountInitializationScene;
-	private final URI vaultBaseUri;
 	private final Lazy<Scene> invalidLicenseScene;
 	private final HttpClient httpClient;
+	private final StringTemplate.Processor<URI, RuntimeException> API_BASE = this::resolveRelativeToApiBase;
 
 	@Inject
 	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
+		this.vaultId = vault.getId();
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.result = result;
@@ -68,7 +70,6 @@ public class ReceiveKeyController implements FxController {
 		this.legacyRegisterDeviceScene = legacyRegisterDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
 		this.accountInitializationScene = accountInitializationScene;
-		this.vaultBaseUri = getVaultBaseUri(vault);
 		this.invalidLicenseScene = invalidLicenseScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
@@ -83,8 +84,8 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 1 (Request): GET vault key for this user
 	 */
 	private void requestVaultMasterkey() {
-		var accessTokenUri = appendPath(vaultBaseUri, "/access-token");
-		var request = HttpRequest.newBuilder(accessTokenUri) //
+		var vaultKeyUri = API_BASE."vaults/\{vaultId}/access-token";
+		var request = HttpRequest.newBuilder(vaultKeyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
 				.timeout(REQ_TIMEOUT) //
@@ -115,8 +116,8 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 2 (Request): GET user key for this device
 	 */
 	private void requestUserKey(String encryptedVaultKey) {
-		var deviceTokenUri = URI.create(hubConfig.getApiBaseUrl() + "/devices/" + deviceId);
-		var request = HttpRequest.newBuilder(deviceTokenUri) //
+		var deviceUri = API_BASE."devices/\{deviceId}";
+		var request = HttpRequest.newBuilder(deviceUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
 				.timeout(REQ_TIMEOUT) //
@@ -167,7 +168,7 @@ public class ReceiveKeyController implements FxController {
 	 */
 	@Deprecated
 	private void requestLegacyAccessToken() {
-		var legacyAccessTokenUri = appendPath(vaultBaseUri, "/keys/" + deviceId);
+		var legacyAccessTokenUri = API_BASE."vaults/\{vaultId}/keys/\{deviceId}";
 		var request = HttpRequest.newBuilder(legacyAccessTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -249,17 +250,10 @@ public class ReceiveKeyController implements FxController {
 		}
 	}
 
-	private static URI getVaultBaseUri(Vault vault) {
-		try {
-			var url = vault.getVaultConfigCache().get().getKeyId();
-			assert url.getScheme().startsWith(SCHEME_PREFIX);
-			var correctedScheme = url.getScheme().substring(SCHEME_PREFIX.length());
-			return new URI(correctedScheme, url.getSchemeSpecificPart(), url.getFragment());
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException("URI constructed from params known to be valid", e);
-		}
+	private URI resolveRelativeToApiBase(StringTemplate template) {
+		var path = template.interpolate();
+		var relPath = path.startsWith("/") ? path.substring(1) : path;
+		return hubConfig.getApiBaseUrl().resolve(relPath);
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
