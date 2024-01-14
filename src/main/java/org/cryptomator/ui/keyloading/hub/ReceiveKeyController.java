@@ -3,6 +3,7 @@ package org.cryptomator.ui.keyloading.hub;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
@@ -77,13 +78,13 @@ public class ReceiveKeyController implements FxController {
 
 	@FXML
 	public void initialize() {
-		requestVaultMasterkey();
+		requestDeviceData();
 	}
 
 	/**
-	 * STEP 1 (Request): GET vault key for this user
+	 * STEP 2 (Request): GET vault key for this user
 	 */
-	private void requestVaultMasterkey() {
+	private void requestVaultMasterkey(String encryptedUserKey) {
 		var vaultKeyUri = API_BASE."vaults/\{vaultId}/access-token";
 		var request = HttpRequest.newBuilder(vaultKeyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
@@ -91,19 +92,19 @@ public class ReceiveKeyController implements FxController {
 				.timeout(REQ_TIMEOUT) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
-				.thenAcceptAsync(this::receivedVaultMasterkey, Platform::runLater) //
+				.thenAcceptAsync(response -> receivedVaultMasterkey(encryptedUserKey, response), Platform::runLater) //
 				.exceptionally(this::retrievalFailed);
 	}
 
 	/**
-	 * STEP 1 (Response): GET vault key for this user
+	 * STEP 2 (Response): GET vault key for this user
 	 *
 	 * @param response Response
 	 */
-	private void receivedVaultMasterkey(HttpResponse<String> response) {
+	private void receivedVaultMasterkey(String encryptedUserKey, HttpResponse<String> response) {
 		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
 		switch (response.statusCode()) {
-			case 200 -> requestUserKey(response.body());
+			case 200 -> receivedBothEncryptedKeys(response.body(), encryptedUserKey);
 			case 402 -> licenseExceeded();
 			case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
 			case 449 -> accountInitializationRequired();
@@ -113,9 +114,9 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	/**
-	 * STEP 2 (Request): GET user key for this device
+	 * STEP 1 (Request): GET user key for this device
 	 */
-	private void requestUserKey(String encryptedVaultKey) {
+	private void requestDeviceData() {
 		var deviceUri = API_BASE."devices/\{deviceId}";
 		var request = HttpRequest.newBuilder(deviceUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
@@ -123,22 +124,22 @@ public class ReceiveKeyController implements FxController {
 				.timeout(REQ_TIMEOUT) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
-				.thenAcceptAsync(response -> receivedUserKey(encryptedVaultKey, response), Platform::runLater) //
+				.thenAcceptAsync(this::receivedDeviceData, Platform::runLater) //
 				.exceptionally(this::retrievalFailed);
 	}
 
 	/**
-	 * STEP 2 (Response): GET user key for this device
+	 * STEP 1 (Response): GET user key for this device
 	 *
 	 * @param response Response
 	 */
-	private void receivedUserKey(String encryptedVaultKey, HttpResponse<String> response) {
+	private void receivedDeviceData(HttpResponse<String> response) {
 		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
 		try {
 			switch (response.statusCode()) {
 				case 200 -> {
 					var device = JSON.reader().readValue(response.body(), DeviceDto.class);
-					receivedBothEncryptedKeys(encryptedVaultKey, device.userPrivateKey);
+					requestVaultMasterkey(device.userPrivateKey);
 				}
 				case 404 -> needsDeviceRegistration(); // TODO: using the setup code, we can theoretically immediately unlock
 				default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
@@ -152,14 +153,14 @@ public class ReceiveKeyController implements FxController {
 		window.setScene(registerDeviceScene.get());
 	}
 
-	private void receivedBothEncryptedKeys(String encryptedVaultKey, String encryptedUserKey) throws IOException {
+	private void receivedBothEncryptedKeys(String encryptedVaultKey, String encryptedUserKey) {
 		try {
 			var vaultKeyJwe = JWEObject.parse(encryptedVaultKey);
 			var userKeyJwe = JWEObject.parse(encryptedUserKey);
 			result.complete(ReceivedKey.vaultKeyAndUserKey(vaultKeyJwe, userKeyJwe));
 			window.close();
 		} catch (ParseException e) {
-			throw new IOException("Failed to parse JWE", e);
+			retrievalFailed(e);
 		}
 	}
 
@@ -264,4 +265,7 @@ public class ReceiveKeyController implements FxController {
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	private record DeviceDto(@JsonProperty(value = "userPrivateKey", required = true) String userPrivateKey) {}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private record ConfigDto(@JsonProperty(value = "apiLevel") int apiLevel) {}
 }
