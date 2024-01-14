@@ -62,7 +62,7 @@ public class ReceiveKeyController implements FxController {
 	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
-		this.vaultId = vault.getId();
+		this.vaultId = extractVaultId(vault.getVaultConfigCache().getUnchecked().getKeyId()); // TODO: access vault config's JTI directly (requires changes in cryptofs)
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.result = result;
@@ -254,6 +254,12 @@ public class ReceiveKeyController implements FxController {
 		var path = template.interpolate();
 		var relPath = path.startsWith("/") ? path.substring(1) : path;
 		return hubConfig.getApiBaseUrl().resolve(relPath);
+	}
+
+	private static String extractVaultId(URI vaultKeyUri) {
+		assert vaultKeyUri.getScheme().startsWith(SCHEME_PREFIX);
+		var path = vaultKeyUri.getPath();
+		return path.substring(path.lastIndexOf('/') + 1);
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
