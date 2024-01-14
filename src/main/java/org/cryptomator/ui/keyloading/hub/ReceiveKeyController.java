@@ -78,7 +78,41 @@ public class ReceiveKeyController implements FxController {
 
 	@FXML
 	public void initialize() {
-		requestDeviceData();
+		requestApiConfig(); // FIXME: only called once - need to restart after returning from register device
+	}
+
+	/**
+	 * STEP 0 (Request): GET /api/config
+	 */
+	private void requestApiConfig() {
+		var configUri = API_BASE."config";
+		var request = HttpRequest.newBuilder(configUri) //
+				.GET() //
+				.timeout(REQ_TIMEOUT) //
+				.build();
+		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
+				.thenAcceptAsync(this::receivedApiConfig, Platform::runLater) //
+				.exceptionally(this::retrievalFailed);
+	}
+
+	/**
+	 * STEP 0 (Response): GET /api/config
+	 *
+	 * @param response Response
+	 */
+	private void receivedApiConfig(HttpResponse<String> response) {
+		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
+		Preconditions.checkState(response.statusCode() == 200, "Unexpected response " + response.statusCode());
+		try {
+			var config = JSON.reader().readValue(response.body(), ConfigDto.class);
+			if (config.apiLevel >= 1) {
+				requestDeviceData();
+			} else {
+				requestLegacyAccessToken();
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	/**
@@ -108,7 +142,6 @@ public class ReceiveKeyController implements FxController {
 			case 402 -> licenseExceeded();
 			case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
 			case 449 -> accountInitializationRequired();
-			case 404 -> requestLegacyAccessToken();
 			default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
 		}
 	}
