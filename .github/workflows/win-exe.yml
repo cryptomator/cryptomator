@@ -16,8 +16,8 @@ on:
 env:
   JAVA_DIST: 'zulu'
   JAVA_VERSION: '21.0.1+12'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'daf8acae631c016c24cfe23f88469400274d3441dd890615a42dfb501f3eb94a'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0/winfsp-uninstaller.exe'
 
