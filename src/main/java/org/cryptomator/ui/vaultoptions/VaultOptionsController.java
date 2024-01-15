@@ -1,6 +1,7 @@
 package org.cryptomator.ui.vaultoptions;
 
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.keyloading.hub.HubKeyLoadingStrategy;
 import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
@@ -48,6 +49,11 @@ public class VaultOptionsController implements FxController {
 		if(!(vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS))){
 			tabPane.getTabs().remove(hubTab);
 		}
+
+		// Fixes: https://github.com/cryptomator/cryptomator/pull/3267
+		vault.stateProperty().addListener(observable -> {
+			tabPane.setDisable(vault.getState().equals(VaultState.Value.UNLOCKED));
+		});
 	}
 
 	private void selectChosenTab() {
