@@ -178,7 +178,7 @@ public class ReceiveKeyController implements FxController {
 					var device = JSON.reader().readValue(response.body(), DeviceDto.class);
 					requestVaultMasterkey(device.userPrivateKey);
 				}
-				case 404 -> needsDeviceRegistration(); // TODO: using the setup code, we can theoretically immediately unlock
+				case 404 -> needsDeviceRegistration();
 				default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
