@@ -250,7 +250,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dmg-${{ matrix.output-suffix }}
           path: Cryptomator-*.dmg
