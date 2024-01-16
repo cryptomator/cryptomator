@@ -50,7 +50,6 @@ public class VaultOptionsController implements FxController {
 			tabPane.getTabs().remove(hubTab);
 		}
 
-		// Fixes: https://github.com/cryptomator/cryptomator/pull/3267
 		vault.stateProperty().addListener(observable -> {
 			tabPane.setDisable(vault.getState().equals(VaultState.Value.UNLOCKED));
 		});
