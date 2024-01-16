@@ -24,6 +24,11 @@
 				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
 			</graphic>
 		</Button>
+		<Button text="%main.vaultDetail.share" minWidth="120" onAction="#share">
+			<graphic>
+				<FontAwesome5IconView glyph="SHARE" glyphSize="15"/>
+			</graphic>
+		</Button>
 		<Hyperlink text="%main.vaultDetail.passwordSavedInKeychain" visible="${controller.passwordSaved}" onAction="#showKeyVaultOptions">
 			<graphic>
 				<FontAwesome5IconView glyph="LOCK"/>

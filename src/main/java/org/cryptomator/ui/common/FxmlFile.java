@@ -44,6 +44,7 @@ public enum FxmlFile {
 	RECOVERYKEY_RESET_PASSWORD_SUCCESS("/fxml/recoverykey_reset_password_success.fxml"), //
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
+	SHARE_VAULT("/fxml/share_vault.fxml"), //
 	UPDATE_REMINDER("/fxml/update_reminder.fxml"), //
 	UNLOCK_ENTER_PASSWORD("/fxml/unlock_enter_password.fxml"),
 	UNLOCK_REQUIRES_RESTART("/fxml/unlock_requires_restart.fxml"), //

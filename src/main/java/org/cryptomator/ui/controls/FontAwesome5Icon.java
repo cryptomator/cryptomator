@@ -47,6 +47,7 @@ public enum FontAwesome5Icon {
 	QUESTION_CIRCLE("\uf059"), //
 	REDO("\uF01E"), //
 	SEARCH("\uF002"), //
+	SHARE("\uF064"), //
 	SPINNER("\uF110"), //
 	STETHOSCOPE("\uF0f1"), //
 	SYNC("\uF021"), //

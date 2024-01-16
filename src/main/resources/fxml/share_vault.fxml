@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.sharevault.ShareVaultController"
+	  prefWidth="600"
+	  spacing="12"
+	  alignment="CENTER_LEFT">
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<HBox spacing="12" VBox.vgrow="NEVER">
+		<StackPane HBox.hgrow="NEVER">
+			<Circle styleClass="glyph-icon-primary" radius="24"/>
+			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="INFO" glyphSize="24"/>
+		</StackPane>
+		<VBox spacing="6" HBox.hgrow="ALWAYS" visible="${controller.hubVault}" managed="${controller.hubVault}">
+			<Label text="%shareVault.hub.message" styleClass="label-extra-large" wrapText="true"/>
+			<Label text="%shareVault.hub.instruction.0" wrapText="true"/>
+			<Label text="%shareVault.hub.instruction.1" wrapText="true"/>
+			<Label text="%shareVault.hub.instruction.2" wrapText="true"/>
+		</VBox>
+		<VBox spacing="12" HBox.hgrow="ALWAYS" visible="${!controller.hubVault}" managed="${!controller.hubVault}">
+			<Label text="%shareVault.message" styleClass="label-extra-large" wrapText="true"/>
+			<Label text="%shareVault.description" wrapText="true"/>
+			<Label text="%shareVault.instruction.0" wrapText="true"/>
+			<Label text="%shareVault.instruction.1" wrapText="true"/>
+			<Label text="%shareVault.more" wrapText="true"/>
+			<HBox spacing="6" style="-fx-padding: 10px; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 2px; -fx-border-radius: 5px;">
+				<VBox spacing="6" alignment="CENTER_LEFT">
+					<Label text="%shareVault.info.1" style="-fx-font-weight: bold;" wrapText="true"/>
+					<Label text="%shareVault.info.2" wrapText="true"/>
+					<Label text="%shareVault.info.3" wrapText="true"/>
+					<Label text="%shareVault.info.4" wrapText="true"/>
+					<Label text="%shareVault.info.5" wrapText="true"/>
+				</VBox>
+				<Region HBox.hgrow="ALWAYS"/>
+				<ImageView HBox.hgrow="ALWAYS" fitWidth="200" preserveRatio="true" cache="true">
+					<Image url="@../img/share-hub-logo.png"/>
+				</ImageView>
+			</HBox>
+		</VBox>
+	</HBox>
+	<Region VBox.vgrow="ALWAYS"/>
+	<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
+		<buttons>
+			<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#close"/>
+			<Button text="%shareVault.hub.openHub" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#openHub" visible="${controller.hubVault}" managed="${controller.hubVault}"/>
+			<Button text="%shareVault.visitHub" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#visitHub" visible="${!controller.hubVault}" managed="${!controller.hubVault}"/>
+		</buttons>
+	</ButtonBar>
+</VBox>
