@@ -78,7 +78,11 @@ public class ReceiveKeyController implements FxController {
 
 	@FXML
 	public void initialize() {
-		requestApiConfig(); // FIXME: only called once - need to restart after returning from register device
+		receiveKey();
+	}
+
+	public void receiveKey() {
+		requestApiConfig();
 	}
 
 	/**
