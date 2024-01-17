@@ -119,6 +119,12 @@ public abstract class HubKeyLoadingModule {
 		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_SUCCESS)
+	@KeyLoadingScoped
+	static Scene provideHubLegacyRegisterSuccessScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_SUCCESS);
+	}
 
 	@Provides
 	@FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS)
@@ -191,6 +197,11 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(LegacyRegisterDeviceController.class)
 	abstract FxController bindLegacyRegisterDeviceController(LegacyRegisterDeviceController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(LegacyRegisterSuccessController.class)
+	abstract FxController bindLegacyRegisterSuccessController(LegacyRegisterSuccessController controller);
 
 	@Binds
 	@IntoMap

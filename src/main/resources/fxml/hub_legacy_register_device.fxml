@@ -41,7 +41,7 @@
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="%hub.register.description" wrapText="true"/>
+			<Label text="%hub.register.legacy.description" wrapText="true"/>
 			<HBox spacing="6" alignment="CENTER_LEFT">
 				<padding>
 					<Insets top="12"/>
@@ -50,7 +50,7 @@
 				<TextField fx:id="deviceNameField" HBox.hgrow="ALWAYS"/>
 			</HBox>
 			<HBox alignment="TOP_RIGHT">
-				<Label text="%hub.register.occupiedMsg" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.deviceNameAlreadyExists}" graphicTextGap="6">
+				<Label text="%hub.register.legacy.occupiedMsg" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.deviceNameAlreadyExists}" graphicTextGap="6">
 					<padding>
 						<Insets top="6"/>
 					</padding>
