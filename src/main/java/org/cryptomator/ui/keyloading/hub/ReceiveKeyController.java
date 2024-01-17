@@ -130,7 +130,7 @@ public class ReceiveKeyController implements FxController {
 				.timeout(REQ_TIMEOUT) //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
-				.thenAcceptAsync(this::receivedDeviceData, Platform::runLater) //
+				.thenAcceptAsync(this::receivedDeviceData) //
 				.exceptionally(this::retrievalFailed);
 	}
 
@@ -147,7 +147,7 @@ public class ReceiveKeyController implements FxController {
 					var device = JSON.reader().readValue(response.body(), DeviceDto.class);
 					requestVaultMasterkey(device.userPrivateKey);
 				}
-				case 404 -> needsDeviceRegistration();
+				case 404 -> Platform.runLater(this::needsDeviceRegistration);
 				default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
