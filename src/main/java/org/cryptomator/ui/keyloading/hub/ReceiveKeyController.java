@@ -120,37 +120,6 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	/**
-	 * STEP 2 (Request): GET vault key for this user
-	 */
-	private void requestVaultMasterkey(String encryptedUserKey) {
-		var vaultKeyUri = API_BASE."vaults/\{vaultId}/access-token";
-		var request = HttpRequest.newBuilder(vaultKeyUri) //
-				.header("Authorization", "Bearer " + bearerToken) //
-				.GET() //
-				.timeout(REQ_TIMEOUT) //
-				.build();
-		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
-				.thenAcceptAsync(response -> receivedVaultMasterkey(encryptedUserKey, response), Platform::runLater) //
-				.exceptionally(this::retrievalFailed);
-	}
-
-	/**
-	 * STEP 2 (Response): GET vault key for this user
-	 *
-	 * @param response Response
-	 */
-	private void receivedVaultMasterkey(String encryptedUserKey, HttpResponse<String> response) {
-		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
-		switch (response.statusCode()) {
-			case 200 -> receivedBothEncryptedKeys(response.body(), encryptedUserKey);
-			case 402 -> licenseExceeded();
-			case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
-			case 449 -> accountInitializationRequired();
-			default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
-		}
-	}
-
-	/**
 	 * STEP 1 (Request): GET user key for this device
 	 */
 	private void requestDeviceData() {
@@ -188,6 +157,37 @@ public class ReceiveKeyController implements FxController {
 
 	private void needsDeviceRegistration() {
 		window.setScene(registerDeviceScene.get());
+	}
+
+	/**
+	 * STEP 2 (Request): GET vault key for this user
+	 */
+	private void requestVaultMasterkey(String encryptedUserKey) {
+		var vaultKeyUri = API_BASE."vaults/\{vaultId}/access-token";
+		var request = HttpRequest.newBuilder(vaultKeyUri) //
+				.header("Authorization", "Bearer " + bearerToken) //
+				.GET() //
+				.timeout(REQ_TIMEOUT) //
+				.build();
+		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.US_ASCII)) //
+				.thenAcceptAsync(response -> receivedVaultMasterkey(encryptedUserKey, response), Platform::runLater) //
+				.exceptionally(this::retrievalFailed);
+	}
+
+	/**
+	 * STEP 2 (Response): GET vault key for this user
+	 *
+	 * @param response Response
+	 */
+	private void receivedVaultMasterkey(String encryptedUserKey, HttpResponse<String> response) {
+		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
+		switch (response.statusCode()) {
+			case 200 -> receivedBothEncryptedKeys(response.body(), encryptedUserKey);
+			case 402 -> licenseExceeded();
+			case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
+			case 449 -> accountInitializationRequired();
+			default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
+		}
 	}
 
 	private void receivedBothEncryptedKeys(String encryptedVaultKey, String encryptedUserKey) {
