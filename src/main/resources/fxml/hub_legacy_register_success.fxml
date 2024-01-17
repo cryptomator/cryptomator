@@ -44,7 +44,6 @@
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
 				<buttons>
 					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" onAction="#close"/>
-					<!-- TODO: add request access button -->
 				</buttons>
 			</ButtonBar>
 		</VBox>
