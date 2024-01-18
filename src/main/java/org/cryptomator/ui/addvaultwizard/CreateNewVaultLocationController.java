@@ -14,19 +14,23 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -59,12 +63,14 @@ public class CreateNewVaultLocationController implements FxController {
 	private final ObservableValue<Boolean> validVaultPath;
 	private final BooleanProperty usePresetPath;
 	private final BooleanProperty loadingPresetLocations = new SimpleBooleanProperty(false);
+	private final ObservableList<Node> radioButtons;
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
 
 	//FXML
 	public ToggleGroup locationPresetsToggler;
 	public VBox radioButtonVBox;
+	public HBox customLocationRadioBtn;
 	public RadioButton customRadioButton;
 	public Label locationStatusLabel;
 	public FontAwesome5IconView goodLocation;
@@ -88,6 +94,7 @@ public class CreateNewVaultLocationController implements FxController {
 		this.validVaultPath = ObservableUtil.mapWithDefault(vaultPathStatus, VaultPathStatus::valid, false);
 		this.vaultPathStatus.addListener(this::updateStatusLabel);
 		this.usePresetPath = new SimpleBooleanProperty();
+		this.radioButtons = FXCollections.observableArrayList();
 	}
 
 	private VaultPathStatus validatePath(Path p) throws NullPointerException {
@@ -137,6 +144,8 @@ public class CreateNewVaultLocationController implements FxController {
 		window.addEventHandler(WindowEvent.WINDOW_HIDING, _ -> task.cancel(true));
 		locationPresetsToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(locationPresetsToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
+		radioButtons.add(customLocationRadioBtn);
+		Bindings.bindContent(radioButtonVBox.getChildren(), radioButtons.sorted(this::compareLocationPresets));
 	}
 
 	private void loadLocationPresets() {
@@ -148,32 +157,22 @@ public class CreateNewVaultLocationController implements FxController {
 	}
 
 	private void createRadioButtonFor(LocationPreset preset) {
-		assert !radioButtonVBox.getChildren().isEmpty();
-
 		Platform.runLater(() -> {
 			var btn = new RadioButton(preset.name());
 			btn.setUserData(preset.path());
-
-			//in place sorting
-			var vboxElements = radioButtonVBox.getChildren();
-			boolean added = false;
-			for (int listIndex = 0; listIndex < vboxElements.size(); listIndex++) {
-				if (vboxElements.get(listIndex) instanceof RadioButton rb) {
-					//another radio button
-					if (rb.getText().compareTo(preset.name()) > 0) {
-						vboxElements.add(listIndex, btn);
-						added = true;
-						break;
-					}
-				}
-			}
-
-			if (!added) {
-				vboxElements.add(vboxElements.size() - 1, btn); //last element is always the custom location btn
-			}
-
+			radioButtons.add(btn);
 			locationPresetsToggler.getToggles().add(btn);
 		});
+	}
+
+	private int compareLocationPresets(Node n1, Node n2) {
+		if (customLocationRadioBtn.getId().equals(n1.getId())) {
+			return 1;
+		} else if (customLocationRadioBtn.getId().equals(n2.getId())) {
+			return -1;
+		} else {
+			return ((RadioButton) n1).getText().compareToIgnoreCase(((RadioButton) n2).getText());
+		}
 	}
 
 

@@ -35,7 +35,7 @@
 		<ScrollPane hbarPolicy="NEVER">
 			<VBox fx:id="radioButtonVBox" spacing="6">
 				<!-- PLACEHOLDER, more radio buttons are added programmatically via controller -->
-				<HBox spacing="12" alignment="CENTER_LEFT">
+				<HBox fx:id="customLocationRadioBtn" spacing="12" alignment="CENTER_LEFT">
 					<RadioButton fx:id="customRadioButton" toggleGroup="${locationPresetsToggler}" text="%addvaultwizard.new.directoryPickerLabel"/>
 					<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">
 						<graphic>
