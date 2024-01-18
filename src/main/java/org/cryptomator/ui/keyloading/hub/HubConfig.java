@@ -1,7 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -19,6 +18,12 @@ public class HubConfig {
 	@Deprecated // use apiBaseUrl + "/devices/"
 	public String devicesResourceUrl;
 
+	/**
+	 * Get the URI pointing to the <code>/api/</code> base resource.
+	 *
+	 * @return <code>/api/</code> URI
+	 * @apiNote URI is guaranteed to end on <code>/</code>
+	 */
 	public URI getApiBaseUrl() {
 		if (apiBaseUrl != null) {
 			// make sure to end on "/":

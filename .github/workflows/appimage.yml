@@ -29,12 +29,12 @@ jobs:
         include:
           - os: ubuntu-latest
             appimage-suffix: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-x64_bin-jmods.zip'
-            openjfx-sha: 'f522ac2ae4bdd61f0219b7b8d2058ff72a22f36a44378453bcfdcd82f8f5e08c'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-jmods.zip'
+            openjfx-sha: '7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
           - os: [self-hosted, Linux, ARM64]
             appimage-suffix: aarch64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-aarch64_bin-jmods.zip'
-            openjfx-sha: 'c0d80ebbe0aab404ef9ad8b46c05bf533a1e40b39b2720eebd9238d81f6326ca'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-aarch64_bin-jmods.zip'
+            openjfx-sha: '871e7b9d7af16aef2e55c1b7830d0e0b2503b13dd8641374ba7e55ecb81d2ef9'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -74,6 +74,7 @@ jobs:
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
+        #Remark: no compression is applied for improved build compression later (here appimage)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
@@ -84,6 +85,7 @@ jobs:
           --no-header-files
           --no-man-pages
           --strip-debug
+          --compress zip-0
       - name: Prepare additional launcher
         run: envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/linux/launcher-gtk2.properties > launcher-gtk2.properties
         env:

@@ -35,7 +35,7 @@ if [ "$(machine)" = "arm64e" ]; then
 else
     ARCH="x64"
 fi
-OPENJFX_JMODS="https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-${ARCH}_bin-jmods.zip"
+OPENJFX_JMODS="https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_osx-${ARCH}_bin-jmods.zip"
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
@@ -76,7 +76,7 @@ ${JAVA_HOME}/bin/jlink \
     --no-header-files \
     --no-man-pages \
     --strip-debug \
-    --compress=1
+    --compress zip-0
 
 # create app dir
 ${JAVA_HOME}/bin/jpackage \
