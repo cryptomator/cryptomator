@@ -150,10 +150,13 @@ public class CreateNewVaultLocationController implements FxController {
 
 	private void loadLocationPresets() {
 		Platform.runLater(() -> loadingPresetLocations.set(true));
-		LocationPresetsProvider.loadAll(LocationPresetsProvider.class) //
-				.flatMap(LocationPresetsProvider::getLocations) //we do not use sorted(), because it evaluates the stream elements, blocking until all elements are gathered
-				.forEach(this::createRadioButtonFor);
-		Platform.runLater(() -> loadingPresetLocations.set(false));
+		try{
+			LocationPresetsProvider.loadAll(LocationPresetsProvider.class) //
+					.flatMap(LocationPresetsProvider::getLocations) //we do not use sorted(), because it evaluates the stream elements, blocking until all elements are gathered
+					.forEach(this::createRadioButtonFor);
+		} finally {
+			Platform.runLater(() -> loadingPresetLocations.set(false));
+		}
 	}
 
 	private void createRadioButtonFor(LocationPreset preset) {
