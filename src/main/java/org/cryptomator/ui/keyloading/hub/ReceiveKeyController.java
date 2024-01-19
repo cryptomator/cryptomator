@@ -57,7 +57,6 @@ public class ReceiveKeyController implements FxController {
 	private final Lazy<Scene> accountInitializationScene;
 	private final Lazy<Scene> invalidLicenseScene;
 	private final HttpClient httpClient;
-	private final StringTemplate.Processor<URI, RuntimeException> API_BASE = this::resolveRelativeToApiBase;
 
 	@Inject
 	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
@@ -89,7 +88,7 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 0 (Request): GET /api/config
 	 */
 	private void requestApiConfig() {
-		var configUri = API_BASE."config";
+		var configUri = hubConfig.URIs.API."config";
 		var request = HttpRequest.newBuilder(configUri) //
 				.GET() //
 				.timeout(REQ_TIMEOUT) //
@@ -123,7 +122,7 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 1 (Request): GET user key for this device
 	 */
 	private void requestDeviceData() {
-		var deviceUri = API_BASE."devices/\{deviceId}";
+		var deviceUri = hubConfig.URIs.API."devices/\{deviceId}";
 		var request = HttpRequest.newBuilder(deviceUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -163,7 +162,7 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 2 (Request): GET vault key for this user
 	 */
 	private void requestVaultMasterkey(String encryptedUserKey) {
-		var vaultKeyUri = API_BASE."vaults/\{vaultId}/access-token";
+		var vaultKeyUri = hubConfig.URIs.API."vaults/\{vaultId}/access-token";
 		var request = HttpRequest.newBuilder(vaultKeyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -206,7 +205,7 @@ public class ReceiveKeyController implements FxController {
 	 */
 	@Deprecated
 	private void requestLegacyAccessToken() {
-		var legacyAccessTokenUri = API_BASE."vaults/\{vaultId}/keys/\{deviceId}";
+		var legacyAccessTokenUri = hubConfig.URIs.API."vaults/\{vaultId}/keys/\{deviceId}";
 		var request = HttpRequest.newBuilder(legacyAccessTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -286,12 +285,6 @@ public class ReceiveKeyController implements FxController {
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Can't append '" + path + "' to URI: " + base, e);
 		}
-	}
-
-	private URI resolveRelativeToApiBase(StringTemplate template) {
-		var path = template.interpolate();
-		var relPath = path.startsWith("/") ? path.substring(1) : path;
-		return hubConfig.getApiBaseUrl().resolve(relPath);
 	}
 
 	private static String extractVaultId(URI vaultKeyUri) {

@@ -63,7 +63,6 @@ public class RegisterDeviceController implements FxController {
 	private final P384KeyPair deviceKeyPair;
 	private final CompletableFuture<ReceivedKey> result;
 	private final HttpClient httpClient;
-	private final StringTemplate.Processor<URI, RuntimeException> API_BASE = this::resolveRelativeToApiBase;
 
 	private final BooleanProperty invalidSetupCode = new SimpleBooleanProperty(false);
 	private final BooleanProperty workInProgress = new SimpleBooleanProperty(false);
@@ -111,7 +110,7 @@ public class RegisterDeviceController implements FxController {
 		workInProgress.set(true);
 
 
-		var userReq = HttpRequest.newBuilder(API_BASE."users/me") //
+		var userReq = HttpRequest.newBuilder(hubConfig.URIs.API."users/me") //
 				.GET() //
 				.timeout(REQ_TIMEOUT) //
 				.header("Authorization", "Bearer " + bearerToken) //
@@ -137,7 +136,7 @@ public class RegisterDeviceController implements FxController {
 					var now = Instant.now().toString();
 					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64().encode(deviceKeyPair.getPublic().getEncoded()), "DESKTOP", jwe.serialize(), now);
 					var json = toJson(dto);
-					var deviceUri = API_BASE."devices/\{deviceId}";
+					var deviceUri = hubConfig.URIs.API."devices/\{deviceId}";
 					var putDeviceReq = HttpRequest.newBuilder(deviceUri) //
 							.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 							.timeout(REQ_TIMEOUT) //
@@ -203,12 +202,6 @@ public class RegisterDeviceController implements FxController {
 
 	private void windowClosed(WindowEvent windowEvent) {
 		result.cancel(true);
-	}
-
-	private URI resolveRelativeToApiBase(StringTemplate template) {
-		var path = template.interpolate();
-		var relPath = path.startsWith("/") ? path.substring(1) : path;
-		return hubConfig.getApiBaseUrl().resolve(relPath);
 	}
 
 	//--- Getters & Setters
