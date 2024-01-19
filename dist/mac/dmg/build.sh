@@ -21,7 +21,7 @@ rm -rf runtime dmg *.app *.dmg
 # set variables
 APP_NAME="Cryptomator"
 VENDOR="Skymatic GmbH"
-COPYRIGHT_YEARS="2016 - 2023"
+COPYRIGHT_YEARS="2016 - 2024"
 PACKAGE_IDENTIFIER="org.cryptomator"
 MAIN_JAR_GLOB="cryptomator-*.jar"
 MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
