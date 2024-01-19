@@ -24,19 +24,17 @@
 				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
 			</graphic>
 		</Button>
+		<Hyperlink text="%main.vaultDetail.passwordSavedInKeychain" visible="${controller.passwordSaved}" managed="${controller.passwordSaved}" onAction="#showKeyVaultOptions">
+			<graphic>
+				<FontAwesome5IconView glyph="LOCK"/>
+			</graphic>
+		</Hyperlink>
 		<Button text="%main.vaultDetail.share" minWidth="120" onAction="#share">
 			<graphic>
 				<FontAwesome5IconView glyph="SHARE" glyphSize="15"/>
 			</graphic>
 		</Button>
-		<Hyperlink text="%main.vaultDetail.passwordSavedInKeychain" visible="${controller.passwordSaved}" onAction="#showKeyVaultOptions">
-			<graphic>
-				<FontAwesome5IconView glyph="LOCK"/>
-			</graphic>
-		</Hyperlink>
-
 		<Region VBox.vgrow="ALWAYS"/>
-
 		<HBox alignment="BOTTOM_RIGHT">
 			<Button text="%main.vaultDetail.optionsBtn" minWidth="120" onAction="#showVaultOptions">
 				<graphic>

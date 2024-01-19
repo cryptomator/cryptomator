@@ -12,20 +12,27 @@
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-<VBox xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.Group?>
+<HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.sharevault.ShareVaultController"
 	  prefWidth="600"
-	  spacing="12"
-	  alignment="CENTER_LEFT">
+	  spacing="12">
 	<padding>
-		<Insets topRightBottomLeft="24"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
-	<HBox spacing="12" VBox.vgrow="NEVER">
-		<StackPane HBox.hgrow="NEVER">
+	<Group>
+		<StackPane>
+			<padding>
+				<Insets topRightBottomLeft="6"/>
+			</padding>
 			<Circle styleClass="glyph-icon-primary" radius="24"/>
 			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="INFO" glyphSize="24"/>
 		</StackPane>
+	</Group>
+	<VBox>
 		<VBox spacing="6" HBox.hgrow="ALWAYS" visible="${controller.hubVault}" managed="${controller.hubVault}">
 			<Label text="%shareVault.hub.message" styleClass="label-extra-large" wrapText="true"/>
 			<Label text="%shareVault.hub.instruction.0" wrapText="true"/>
@@ -35,9 +42,18 @@
 		<VBox spacing="12" HBox.hgrow="ALWAYS" visible="${!controller.hubVault}" managed="${!controller.hubVault}">
 			<Label text="%shareVault.message" styleClass="label-extra-large" wrapText="true"/>
 			<Label text="%shareVault.description" wrapText="true"/>
-			<Label text="%shareVault.instruction.0" wrapText="true"/>
-			<Label text="%shareVault.instruction.1" wrapText="true"/>
-			<Label text="%shareVault.more" wrapText="true"/>
+			<Label text="%shareVault.instruction" wrapText="true"/>
+			<HBox HBox.hgrow="ALWAYS" spacing="6">
+				<Label text="%shareVault.more" wrapText="true" VBox.vgrow="ALWAYS"/>
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices">
+					<graphic>
+						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%shareVault.docsTooltip" showDelay="100ms"/>
+					</tooltip>
+				</Hyperlink>
+			</HBox>
 			<HBox spacing="6" style="-fx-padding: 10px; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 2px; -fx-border-radius: 5px;">
 				<VBox spacing="6" alignment="CENTER_LEFT">
 					<Label text="%shareVault.info.1" style="-fx-font-weight: bold;" wrapText="true"/>
@@ -48,17 +64,17 @@
 				</VBox>
 				<Region HBox.hgrow="ALWAYS"/>
 				<ImageView HBox.hgrow="ALWAYS" fitWidth="200" preserveRatio="true" cache="true">
-					<Image url="@../img/share-hub-logo.png"/>
+					<Image url="@../img/group-magic.png"/>
 				</ImageView>
 			</HBox>
 		</VBox>
-	</HBox>
-	<Region VBox.vgrow="ALWAYS"/>
-	<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
-		<buttons>
-			<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#close"/>
-			<Button text="%shareVault.hub.openHub" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#openHub" visible="${controller.hubVault}" managed="${controller.hubVault}"/>
-			<Button text="%shareVault.visitHub" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#visitHub" visible="${!controller.hubVault}" managed="${!controller.hubVault}"/>
-		</buttons>
-	</ButtonBar>
-</VBox>
+		<Region VBox.vgrow="ALWAYS" minHeight="18"/>
+		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
+			<buttons>
+				<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#close"/>
+				<Button text="%shareVault.hub.openHub" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#openHub" visible="${controller.hubVault}" managed="${controller.hubVault}"/>
+				<Button text="%shareVault.visitHub" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#visitHub" visible="${!controller.hubVault}" managed="${!controller.hubVault}"/>
+			</buttons>
+		</ButtonBar>
+	</VBox>
+</HBox>
