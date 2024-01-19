@@ -37,15 +37,15 @@ jobs:
           output-suffix: x64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-x64_bin-jmods.zip'
-          openjfx-sha: '55b8ff7453d59c89ae129f6c9c5ad7b09a5d359568811b376ac1766c14d6a17c'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_osx-x64_bin-jmods.zip'
+          openjfx-sha: 'bd6abab20da73d5a968dcf2fd915d81b5fb919340e3bb84979ee9a888a829939'
         - os: [self-hosted, macOS, ARM64]
           architecture: aarch64
           output-suffix: arm64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: FUSE-T
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_osx-aarch64_bin-jmods.zip'
-          openjfx-sha: 'c60f5f19aa847e0e620e0b011e5de68f2c6755641c2141cec27a0b89f612beaf'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: '7afaa1c57a6cc3c384d636e597b9a5364693e2db4aaec0a6e63d2fa964400b58'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
