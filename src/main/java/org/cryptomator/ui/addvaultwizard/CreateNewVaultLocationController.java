@@ -165,13 +165,13 @@ public class CreateNewVaultLocationController implements FxController {
 		});
 	}
 
-	private int compareLocationPresets(Node n1, Node n2) {
-		if (customLocationRadioBtn.getId().equals(n1.getId())) {
+	private int compareLocationPresets(Node left, Node right) {
+		if (customLocationRadioBtn.getId().equals(left.getId())) {
 			return 1;
-		} else if (customLocationRadioBtn.getId().equals(n2.getId())) {
+		} else if (customLocationRadioBtn.getId().equals(right.getId())) {
 			return -1;
 		} else {
-			return ((RadioButton) n1).getText().compareToIgnoreCase(((RadioButton) n2).getText());
+			return ((RadioButton) left).getText().compareToIgnoreCase(((RadioButton) right).getText());
 		}
 	}
 
