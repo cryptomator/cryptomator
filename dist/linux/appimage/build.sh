@@ -77,7 +77,7 @@ ${JAVA_HOME}/bin/jpackage \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
     --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
-    --copyright "(C) 2016 - 2023 Skymatic GmbH" \
+    --copyright "(C) 2016 - 2024 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \
