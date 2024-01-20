@@ -31,15 +31,19 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.interfaces.ECPublicKey;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -126,10 +130,12 @@ public class RegisterDeviceController implements FxController {
 					}
 				}).thenApply(user -> {
 					try {
-						assert user.privateKey != null; // api/vaults/{v}/user-tokens/me would have returned 403, if user wasn't fully set up yet
+						assert user.privateKey != null && user.publicKey != null; // api/vaults/{v}/user-tokens/me would have returned 403, if user wasn't fully set up yet
+						var userPublicKey = JWEHelper.decodeECPublicKey(Base64.getDecoder().decode(user.publicKey));
+						migrateLegacyDevices(userPublicKey); // TODO: remove eventually, when most users have migrated to Hub 1.3.x or newer
 						var userKey = JWEHelper.decryptUserKey(JWEObject.parse(user.privateKey), setupCodeField.getText());
 						return JWEHelper.encryptUserKey(userKey, deviceKeyPair.getPublic());
-					} catch (ParseException e) {
+					} catch (ParseException | JWEHelper.KeyDecodeFailedException e) {
 						throw new RuntimeException("Server answered with unparsable user key", e);
 					}
 				}).thenCompose(jwe -> {
@@ -152,6 +158,43 @@ public class RegisterDeviceController implements FxController {
 					}
 					workInProgress.set(false);
 				}, Platform::runLater);
+	}
+
+	private void migrateLegacyDevices(ECPublicKey userPublicKey) {
+		try {
+			var accessibleVaultsUri = hubConfig.URIs.API."vaults/accessible";
+			var getAccessibleDevicesReq = HttpRequest.newBuilder(accessibleVaultsUri).GET().timeout(REQ_TIMEOUT).header("Authorization", "Bearer " + bearerToken).build();
+			var getAccessibleDevicesRes = httpClient.send(getAccessibleDevicesReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+			if (getAccessibleDevicesRes.statusCode() != 200) {
+				throw new IOException(STR."Unexpected response from GET \{getAccessibleDevicesReq.uri()}: \{getAccessibleDevicesRes.statusCode()}");
+			}
+			List<VaultDto> vaults = JSON.readerForListOf(VaultDto.class).readValue(getAccessibleDevicesRes.body());
+			for (var vault : vaults) {
+				LOG.debug("Attempt to migrate legacy access token for vault: {}...", vault.name);
+				var legacyAccessTokenUri = hubConfig.URIs.API."vaults/\{vault.id}/keys/\{deviceId}";
+				var getLegacyAccessTokenReq = HttpRequest.newBuilder(legacyAccessTokenUri).GET().timeout(REQ_TIMEOUT).header("Authorization", "Bearer " + bearerToken).build();
+				var getLegacyAccessTokenRes = httpClient.send(getLegacyAccessTokenReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+				if (getLegacyAccessTokenRes.statusCode() == 200) {
+					migrateLegacyDevice(userPublicKey, vault, getLegacyAccessTokenRes.body());
+				}
+			}
+		} catch (IOException | JWEHelper.KeyDecodeFailedException e) {
+			// log and ignore: this is merely a best-effort attempt of migrating legacy devices. Failure is uncritical as this is merely a convenience feature.
+			LOG.error("Legacy Device Migration failed.", e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new UncheckedIOException(new InterruptedIOException("Legacy Device Migration interrupted"));
+		}
+	}
+
+	private void migrateLegacyDevice(ECPublicKey userPublicKey, VaultDto vault, String legacyAccessToken) {
+		try (var vaultKey = JWEHelper.decryptVaultKey(JWEObject.parse(legacyAccessToken), deviceKeyPair.getPrivate())) {
+			var newToken = JWEHelper.encryptVaultKey(vaultKey, userPublicKey).serialize();
+			// TODO: send new access token to backend
+			LOG.info("POST /api/vaults/{}/access-token {}", vault.id, newToken);
+		} catch (ParseException e) {
+			LOG.warn("Failed to parse legacy access token for vault {}. Skipping migration.", vault.name);
+		}
 	}
 
 	private UserDto fromJson(String json) {
@@ -215,6 +258,9 @@ public class RegisterDeviceController implements FxController {
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	private record UserDto(String id, String name, String publicKey, String privateKey, String setupCode) {}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private record VaultDto(String id, String name) {}
 
 	private record CreateDeviceDto(@JsonProperty(required = true) String id, //
 								   @JsonProperty(required = true) String name, //
