@@ -1,6 +1,7 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.nimbusds.jose.JWEObject;
+import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.junit.jupiter.api.Assertions;
@@ -138,6 +139,33 @@ public class JWEHelperTest {
 		var privateKey = P384KeyPair.create(new X509EncodedKeySpec(Base64.getDecoder().decode(PUB_KEY)), new PKCS8EncodedKeySpec(Base64.getDecoder().decode(PRIV_KEY))).getPrivate();
 
 		Assertions.assertThrows(MasterkeyLoadingFailedException.class, () -> JWEHelper.decryptVaultKey(jwe, privateKey));
+	}
+
+	@Test
+	@DisplayName("decrypt(encrypt(vaultKey, userPublicKey), userPrivateKey) == vaultKey")
+	public void testEncryptAndDecryptVaultKey() {
+		var keyBytes = new byte[64];
+		Arrays.fill(keyBytes, 0, 32, (byte) 0x55);
+		Arrays.fill(keyBytes, 32, 64, (byte) 0x77);
+		var vaultKey = new Masterkey(keyBytes);
+		var userKey = P384KeyPair.generate();
+
+		var encrypted = JWEHelper.encryptVaultKey(vaultKey, userKey.getPublic());
+		var decrypted = JWEHelper.decryptVaultKey(encrypted, userKey.getPrivate());
+
+		Assertions.assertArrayEquals(keyBytes, decrypted.getEncoded());
+	}
+
+	@Test
+	@DisplayName("decrypt(encrypt(userKey, devicePublicKey), devicePrivateKey) == userKey")
+	public void testEncryptAndDecryptUserKey() {
+		var userKey = P384KeyPair.generate();
+		var deviceKey = P384KeyPair.generate();
+
+		var encrypted = JWEHelper.encryptUserKey(userKey.getPrivate(), deviceKey.getPublic());
+		var decrypted = JWEHelper.decryptUserKey(encrypted, deviceKey.getPrivate());
+
+		Assertions.assertArrayEquals(userKey.getPrivate().getEncoded(), decrypted.getEncoded());
 	}
 
 }

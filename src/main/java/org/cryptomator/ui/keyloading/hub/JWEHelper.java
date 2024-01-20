@@ -24,6 +24,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
@@ -92,6 +93,42 @@ class JWEHelper {
 			throw new KeyDecodeFailedException(e);
 		}
 	}
+
+	/**
+	 * Attempts to decode a DER-encoded EC public key.
+	 *
+	 * @param encoded DER-encoded EC public key
+	 * @return the decoded key
+	 * @throws KeyDecodeFailedException On malformed input
+	 */
+	public static ECPublicKey decodeECPublicKey(byte[] encoded) throws KeyDecodeFailedException {
+		try {
+			KeyFactory factory = KeyFactory.getInstance(EC_ALG);
+			var publicKey = factory.generatePublic(new X509EncodedKeySpec(encoded));
+			if (publicKey instanceof ECPublicKey ecPublicKey) {
+				return ecPublicKey;
+			} else {
+				throw new IllegalStateException(EC_ALG + " key factory not generating ECPublicKeys");
+			}
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException(EC_ALG + " not supported");
+		} catch (InvalidKeySpecException e) {
+			throw new KeyDecodeFailedException(e);
+		}
+	}
+
+	public static JWEObject encryptVaultKey(Masterkey vaultKey, ECPublicKey userKey) {
+		try {
+			var encodedVaultKey = Base64.getEncoder().encodeToString(vaultKey.getEncoded());
+			var keyGen = new ECKeyGenerator(Curve.P_384);
+			var ephemeralKeyPair = keyGen.generate();
+			var header = new JWEHeader.Builder(JWEAlgorithm.ECDH_ES, EncryptionMethod.A256GCM).ephemeralPublicKey(ephemeralKeyPair.toPublicJWK()).build();
+			var payload = new Payload(Map.of(JWE_PAYLOAD_KEY_FIELD, encodedVaultKey));
+			var jwe = new JWEObject(header, payload);
+			jwe.encrypt(new ECDHEncrypter(userKey));
+			return jwe;
+		} catch (JOSEException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
