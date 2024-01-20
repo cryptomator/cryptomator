@@ -18,6 +18,7 @@ import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
@@ -39,18 +40,7 @@ class JWEHelper {
 	private JWEHelper() {}
 
 	public static JWEObject encryptUserKey(ECPrivateKey userKey, ECPublicKey deviceKey) {
-		try {
-			var encodedUserKey = Base64.getEncoder().encodeToString(userKey.getEncoded());
-			var keyGen = new ECKeyGenerator(Curve.P_384);
-			var ephemeralKeyPair = keyGen.generate();
-			var header = new JWEHeader.Builder(JWEAlgorithm.ECDH_ES, EncryptionMethod.A256GCM).ephemeralPublicKey(ephemeralKeyPair.toPublicJWK()).build();
-			var payload = new Payload(Map.of(JWE_PAYLOAD_KEY_FIELD, encodedUserKey));
-			var jwe = new JWEObject(header, payload);
-			jwe.encrypt(new ECDHEncrypter(deviceKey));
-			return jwe;
-		} catch (JOSEException e) {
-			throw new RuntimeException(e);
-		}
+		return encryptKey(userKey, deviceKey);
 	}
 
 	public static ECPrivateKey decryptUserKey(JWEObject jwe, String setupCode) throws InvalidJweKeyException {
@@ -118,8 +108,12 @@ class JWEHelper {
 	}
 
 	public static JWEObject encryptVaultKey(Masterkey vaultKey, ECPublicKey userKey) {
+		return encryptKey(vaultKey, userKey);
+	}
+
+	private static JWEObject encryptKey(Key key, ECPublicKey userKey) {
 		try {
-			var encodedVaultKey = Base64.getEncoder().encodeToString(vaultKey.getEncoded());
+			var encodedVaultKey = Base64.getEncoder().encodeToString(key.getEncoded());
 			var keyGen = new ECKeyGenerator(Curve.P_384);
 			var ephemeralKeyPair = keyGen.generate();
 			var header = new JWEHeader.Builder(JWEAlgorithm.ECDH_ES, EncryptionMethod.A256GCM).ephemeralPublicKey(ephemeralKeyPair.toPublicJWK()).build();
