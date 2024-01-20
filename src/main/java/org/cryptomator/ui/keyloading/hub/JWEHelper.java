@@ -1,7 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -108,7 +107,7 @@ class JWEHelper {
 		var keyBytes = new byte[0];
 		try {
 			if (fields.get(keyField) instanceof String key) {
-				keyBytes = BaseEncoding.base64().decode(key);
+				keyBytes = Base64.getDecoder().decode(key);
 				return rawKeyFactory.apply(keyBytes);
 			} else {
 				throw new IllegalArgumentException("JWE payload doesn't contain field " + keyField);
