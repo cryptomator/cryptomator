@@ -5,7 +5,9 @@ import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,6 +31,35 @@ public class JWEHelperTest {
 	// used for JWE generation in frontend: (jwe.spec.ts):
 	private static final String PRIV_KEY = "ME8CAQAwEAYHKoZIzj0CAQYFK4EEACIEODA2AgEBBDEA6QybmBitf94veD5aCLr7nlkF5EZpaXHCfq1AXm57AKQyGOjTDAF9EQB28fMywTDQ";
 	private static final String PUB_KEY = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAERxQR+NRN6Wga01370uBBzr2NHDbKIC56tPUEq2HX64RhITGhii8Zzbkb1HnRmdF0aq6uqmUy4jUhuxnKxsv59A6JeK7Unn+mpmm3pQAygjoGc9wrvoH4HWJSQYUlsXDu";
+
+
+	@Nested
+	@DisplayName("DER decoding")
+	public class Decoders {
+
+		private static P384KeyPair keyPair;
+
+		@BeforeAll
+		public static void setup() throws InvalidKeySpecException {
+			keyPair = P384KeyPair.create(new X509EncodedKeySpec(Base64.getDecoder().decode(DEVICE_PUB_KEY)), new PKCS8EncodedKeySpec(Base64.getDecoder().decode(DEVICE_PRIV_KEY)));
+		}
+
+		@Test
+		@DisplayName("decodeECPublicKey")
+		public void testDecodeECPublicKey() {
+			var decodedPublicKey = JWEHelper.decodeECPublicKey(Base64.getDecoder().decode(DEVICE_PUB_KEY));
+
+			Assertions.assertArrayEquals(keyPair.getPublic().getEncoded(), decodedPublicKey.getEncoded());
+		}
+
+		@Test
+		@DisplayName("decodeECPrivateKey")
+		public void testDecodeECPrivateKey() {
+			var decodedPrivateKey = JWEHelper.decodeECPrivateKey(Base64.getDecoder().decode(DEVICE_PRIV_KEY));
+
+			Assertions.assertArrayEquals(keyPair.getPrivate().getEncoded(), decodedPrivateKey.getEncoded());
+		}
+	}
 
 	@Test
 	@DisplayName("decryptUserKey with device key")
