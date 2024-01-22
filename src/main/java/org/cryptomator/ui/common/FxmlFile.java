@@ -21,6 +21,7 @@ public enum FxmlFile {
 	HUB_INVALID_LICENSE("/fxml/hub_invalid_license.fxml"), //
 	HUB_RECEIVE_KEY("/fxml/hub_receive_key.fxml"), //
 	HUB_LEGACY_REGISTER_DEVICE("/fxml/hub_legacy_register_device.fxml"), //
+	HUB_LEGACY_REGISTER_SUCCESS("/fxml/hub_legacy_register_success.fxml"), //
 	HUB_REGISTER_SUCCESS("/fxml/hub_register_success.fxml"), //
 	HUB_REGISTER_DEVICE_ALREADY_EXISTS("/fxml/hub_register_device_already_exists.fxml"), //
 	HUB_REGISTER_FAILED("/fxml/hub_register_failed.fxml"), //
