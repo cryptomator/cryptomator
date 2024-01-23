@@ -15,10 +15,13 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.Group?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.sharevault.ShareVaultController"
-	  prefWidth="600"
+	  prefWidth="580"
 	  spacing="12">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
@@ -33,16 +36,48 @@
 		</StackPane>
 	</Group>
 	<VBox>
-		<VBox spacing="6" HBox.hgrow="ALWAYS" visible="${controller.hubVault}" managed="${controller.hubVault}">
+		<VBox HBox.hgrow="ALWAYS" visible="${controller.hubVault}" managed="${controller.hubVault}">
 			<Label text="%shareVault.hub.message" styleClass="label-extra-large" wrapText="true"/>
-			<Label text="%shareVault.hub.instruction.0" wrapText="true"/>
-			<Label text="%shareVault.hub.instruction.1" wrapText="true"/>
-			<Label text="%shareVault.hub.instruction.2" wrapText="true"/>
+			<Region minHeight="15"/>
+			<Label text="%shareVault.hub.description" wrapText="true"/>
+			<GridPane alignment="CENTER_LEFT">
+				<padding>
+					<Insets left="6"/>
+				</padding>
+				<columnConstraints>
+					<ColumnConstraints minWidth="20" halignment="LEFT"/>
+				</columnConstraints>
+				<rowConstraints>
+					<RowConstraints valignment="TOP"/>
+					<RowConstraints valignment="TOP"/>
+				</rowConstraints>
+				<Label text="1." GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+				<Label text="%shareVault.hub.instruction.0" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+				<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+				<Label text="%shareVault.hub.instruction.1" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+			</GridPane>
 		</VBox>
-		<VBox spacing="12" HBox.hgrow="ALWAYS" visible="${!controller.hubVault}" managed="${!controller.hubVault}">
+		<VBox HBox.hgrow="ALWAYS" visible="${!controller.hubVault}" managed="${!controller.hubVault}">
 			<Label text="%shareVault.message" styleClass="label-extra-large" wrapText="true"/>
+			<Region minHeight="12"/>
 			<Label text="%shareVault.description" wrapText="true"/>
-			<Label text="%shareVault.instruction" wrapText="true"/>
+			<GridPane alignment="CENTER_LEFT">
+				<padding>
+					<Insets left="6"/>
+				</padding>
+				<columnConstraints>
+					<ColumnConstraints minWidth="20" halignment="LEFT"/>
+				</columnConstraints>
+				<rowConstraints>
+					<RowConstraints valignment="TOP"/>
+					<RowConstraints valignment="TOP"/>
+				</rowConstraints>
+				<Label text="1." GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+				<Label text="%shareVault.instruction.0" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+				<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+				<Label text="%shareVault.instruction.1" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+			</GridPane>
+			<Region minHeight="12"/>
 			<HBox HBox.hgrow="ALWAYS" spacing="6">
 				<Label text="%shareVault.more" wrapText="true" VBox.vgrow="ALWAYS"/>
 				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices">
@@ -54,16 +89,24 @@
 					</tooltip>
 				</Hyperlink>
 			</HBox>
-			<HBox spacing="6" style="-fx-padding: 10px; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 2px; -fx-border-radius: 5px;">
+			<Region minHeight="12"/>
+			<HBox alignment="CENTER_LEFT" spacing="6" style="-fx-padding: 10px; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 2px; -fx-border-radius: 5px;">
 				<VBox spacing="6" alignment="CENTER_LEFT">
+					<ImageView HBox.hgrow="ALWAYS" fitWidth="180" preserveRatio="true" cache="true">
+						<Image url="@../img/hub_logo.png"/>
+					</ImageView>
 					<Label text="%shareVault.info.1" style="-fx-font-weight: bold;" wrapText="true"/>
-					<Label text="%shareVault.info.2" wrapText="true"/>
-					<Label text="%shareVault.info.3" wrapText="true"/>
-					<Label text="%shareVault.info.4" wrapText="true"/>
-					<Label text="%shareVault.info.5" wrapText="true"/>
+					<VBox spacing="6" alignment="CENTER_LEFT">
+						<padding>
+							<Insets left="6"/>
+						</padding>
+						<Label text="%shareVault.info.2" wrapText="true"/>
+						<Label text="%shareVault.info.3" wrapText="true"/>
+						<Label text="%shareVault.info.4" wrapText="true"/>
+					</VBox>
 				</VBox>
 				<Region HBox.hgrow="ALWAYS"/>
-				<ImageView HBox.hgrow="ALWAYS" fitWidth="200" preserveRatio="true" cache="true">
+				<ImageView HBox.hgrow="ALWAYS" fitWidth="180" preserveRatio="true" cache="true">
 					<Image url="@../img/group-magic.png"/>
 				</ImageView>
 			</HBox>
