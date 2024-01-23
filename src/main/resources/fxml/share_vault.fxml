@@ -38,7 +38,7 @@
 	<VBox>
 		<VBox HBox.hgrow="ALWAYS" visible="${controller.hubVault}" managed="${controller.hubVault}">
 			<Label text="%shareVault.hub.message" styleClass="label-extra-large" wrapText="true"/>
-			<Region minHeight="15"/>
+			<Region minHeight="12"/>
 			<Label text="%shareVault.hub.description" wrapText="true"/>
 			<GridPane alignment="CENTER_LEFT">
 				<padding>
@@ -52,9 +52,9 @@
 					<RowConstraints valignment="TOP"/>
 				</rowConstraints>
 				<Label text="1." GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-				<Label text="%shareVault.hub.instruction.0" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+				<Label text="%shareVault.hub.instruction.1" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 				<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-				<Label text="%shareVault.hub.instruction.1" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+				<Label text="%shareVault.hub.instruction.2" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 			</GridPane>
 		</VBox>
 		<VBox HBox.hgrow="ALWAYS" visible="${!controller.hubVault}" managed="${!controller.hubVault}">
@@ -73,13 +73,13 @@
 					<RowConstraints valignment="TOP"/>
 				</rowConstraints>
 				<Label text="1." GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-				<Label text="%shareVault.instruction.0" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+				<Label text="%shareVault.instruction.1" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 				<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-				<Label text="%shareVault.instruction.1" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+				<Label text="%shareVault.instruction.2" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 			</GridPane>
 			<Region minHeight="12"/>
 			<HBox HBox.hgrow="ALWAYS" spacing="6">
-				<Label text="%shareVault.more" wrapText="true" VBox.vgrow="ALWAYS"/>
+				<Label text="%shareVault.remarkBestPractices" wrapText="true" VBox.vgrow="ALWAYS"/>
 				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices">
 					<graphic>
 						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
@@ -95,14 +95,14 @@
 					<ImageView HBox.hgrow="ALWAYS" fitWidth="180" preserveRatio="true" cache="true">
 						<Image url="@../img/hub_logo.png"/>
 					</ImageView>
-					<Label text="%shareVault.info.1" style="-fx-font-weight: bold;" wrapText="true"/>
+					<Label text="%shareVault.hubAd.description" style="-fx-font-weight: bold;" wrapText="true"/>
 					<VBox spacing="6" alignment="CENTER_LEFT">
 						<padding>
 							<Insets left="6"/>
 						</padding>
-						<Label text="%shareVault.info.2" wrapText="true"/>
-						<Label text="%shareVault.info.3" wrapText="true"/>
-						<Label text="%shareVault.info.4" wrapText="true"/>
+						<Label text="%shareVault.hubAd.keyManagement" wrapText="true"/>
+						<Label text="%shareVault.hubAd.authentication" wrapText="true"/>
+						<Label text="%shareVault.hubAd.encryption" wrapText="true"/>
 					</VBox>
 				</VBox>
 				<Region HBox.hgrow="ALWAYS"/>
