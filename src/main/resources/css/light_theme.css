@@ -938,11 +938,11 @@
 
 /*******************************************************************************
  *                                                                             *
- * Add box                                                                   *
+ * Ad box                                                                   *
  *                                                                             *
  ******************************************************************************/
 
-.add-box {
+.ad-box {
 	-fx-padding: 12px;
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;

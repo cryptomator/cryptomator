@@ -75,7 +75,7 @@
 				<Label text="%shareVault.remarkBestPractices" wrapText="true"/>
 			</HBox>
 			<Region minHeight="12"/>
-			<HBox alignment="CENTER_LEFT" spacing="6" styleClass="add-box">
+			<HBox alignment="CENTER_LEFT" spacing="6" styleClass="ad-box">
 				<VBox spacing="6" alignment="CENTER_LEFT">
 					<ImageView HBox.hgrow="ALWAYS" fitWidth="180" preserveRatio="true" cache="true">
 						<Image url="@../img/hub_logo.png"/>
