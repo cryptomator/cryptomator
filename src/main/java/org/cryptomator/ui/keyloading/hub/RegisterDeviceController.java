@@ -43,12 +43,13 @@ import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @KeyLoadingScoped
 public class RegisterDeviceController implements FxController {
@@ -162,38 +163,41 @@ public class RegisterDeviceController implements FxController {
 
 	private void migrateLegacyDevices(ECPublicKey userPublicKey) {
 		try {
-			var accessibleVaultsUri = hubConfig.URIs.API."vaults/accessible";
-			var getAccessibleDevicesReq = HttpRequest.newBuilder(accessibleVaultsUri).GET().timeout(REQ_TIMEOUT).header("Authorization", "Bearer " + bearerToken).build();
-			var getAccessibleDevicesRes = httpClient.send(getAccessibleDevicesReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-			if (getAccessibleDevicesRes.statusCode() != 200) {
-				throw new IOException(STR."Unexpected response from GET \{getAccessibleDevicesReq.uri()}: \{getAccessibleDevicesRes.statusCode()}");
+			// GET legacy access tokens
+			var getUri = hubConfig.URIs.API."devices/\{deviceId}/legacy-access-tokens";
+			var getReq = HttpRequest.newBuilder(getUri).GET().timeout(REQ_TIMEOUT).header("Authorization", "Bearer " + bearerToken).build();
+			var getRes = httpClient.send(getReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+			if (getRes.statusCode() != 200) {
+				LOG.debug("GET {} resulted in status code {}. Skipping migration.", getUri, getRes.statusCode());
+				return;
 			}
-			List<VaultDto> vaults = JSON.readerForListOf(VaultDto.class).readValue(getAccessibleDevicesRes.body());
-			for (var vault : vaults) {
-				LOG.debug("Attempt to migrate legacy access token for vault: {}...", vault.name);
-				var legacyAccessTokenUri = hubConfig.URIs.API."vaults/\{vault.id}/keys/\{deviceId}";
-				var getLegacyAccessTokenReq = HttpRequest.newBuilder(legacyAccessTokenUri).GET().timeout(REQ_TIMEOUT).header("Authorization", "Bearer " + bearerToken).build();
-				var getLegacyAccessTokenRes = httpClient.send(getLegacyAccessTokenReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-				if (getLegacyAccessTokenRes.statusCode() == 200) {
-					migrateLegacyDevice(userPublicKey, vault, getLegacyAccessTokenRes.body());
+			Map<String, String> legacyAccessTokens = JSON.readerForMapOf(String.class).readValue(getRes.body());
+			if (legacyAccessTokens.isEmpty()) {
+				return; // no migration required
+			}
+
+			// POST new access tokens
+			Map<String, String> newAccessTokens = legacyAccessTokens.entrySet().stream().<Map.Entry<String, String>>mapMulti((entry, consumer) -> {
+				try (var vaultKey = JWEHelper.decryptVaultKey(JWEObject.parse(entry.getValue()), deviceKeyPair.getPrivate())) {
+					var newAccessToken = JWEHelper.encryptVaultKey(vaultKey, userPublicKey).serialize();
+					consumer.accept(Map.entry(entry.getKey(), newAccessToken));
+				} catch (ParseException | JWEHelper.InvalidJweKeyException e) {
+					LOG.warn("Failed to decrypt legacy access token for vault {}. Skipping migration.", entry.getKey());
 				}
+			}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+			var postUri = hubConfig.URIs.API."users/me/access-tokens";
+			var postBody = JSON.writer().writeValueAsString(newAccessTokens);
+			var postReq = HttpRequest.newBuilder(postUri).POST(HttpRequest.BodyPublishers.ofString(postBody)).timeout(REQ_TIMEOUT).header("Authorization", "Bearer " + bearerToken).build();
+			var postRes = httpClient.send(postReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+			if (postRes.statusCode() != 200) {
+				throw new IOException(STR."Unexpected response from POST \{postUri}: \{postRes.statusCode()}");
 			}
-		} catch (IOException | JWEHelper.KeyDecodeFailedException e) {
+		} catch (IOException e) {
 			// log and ignore: this is merely a best-effort attempt of migrating legacy devices. Failure is uncritical as this is merely a convenience feature.
 			LOG.error("Legacy Device Migration failed.", e);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UncheckedIOException(new InterruptedIOException("Legacy Device Migration interrupted"));
-		}
-	}
-
-	private void migrateLegacyDevice(ECPublicKey userPublicKey, VaultDto vault, String legacyAccessToken) {
-		try (var vaultKey = JWEHelper.decryptVaultKey(JWEObject.parse(legacyAccessToken), deviceKeyPair.getPrivate())) {
-			var newToken = JWEHelper.encryptVaultKey(vaultKey, userPublicKey).serialize();
-			// TODO: send new access token to backend
-			LOG.info("POST /api/vaults/{}/access-token {}", vault.id, newToken);
-		} catch (ParseException e) {
-			LOG.warn("Failed to parse legacy access token for vault {}. Skipping migration.", vault.name);
 		}
 	}
 
@@ -258,9 +262,6 @@ public class RegisterDeviceController implements FxController {
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	private record UserDto(String id, String name, String publicKey, String privateKey, String setupCode) {}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	private record VaultDto(String id, String name) {}
 
 	private record CreateDeviceDto(@JsonProperty(required = true) String id, //
 								   @JsonProperty(required = true) String name, //
