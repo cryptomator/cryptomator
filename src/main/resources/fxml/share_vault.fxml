@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.Group?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.sharevault.ShareVaultController"
+	  prefWidth="540"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<Group>
+		<StackPane>
+			<padding>
+				<Insets topRightBottomLeft="6"/>
+			</padding>
+			<Circle styleClass="glyph-icon-primary" radius="24"/>
+			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="INFO" glyphSize="24"/>
+		</StackPane>
+	</Group>
+	<VBox>
+		<VBox HBox.hgrow="ALWAYS" visible="${controller.hubVault}" managed="${controller.hubVault}">
+			<Label text="%shareVault.hub.message" styleClass="label-large" wrapText="true">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
+			<Label text="%shareVault.hub.description" wrapText="true"/>
+			<VBox>
+				<padding>
+					<Insets left="6"/>
+				</padding>
+				<Label text="%shareVault.hub.instruction.1" wrapText="true"/>
+				<Label text="%shareVault.hub.instruction.2" wrapText="true"/>
+			</VBox>
+		</VBox>
+		<VBox HBox.hgrow="ALWAYS" visible="${!controller.hubVault}" managed="${!controller.hubVault}">
+			<Label text="%shareVault.message" styleClass="label-large" wrapText="true">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
+			<Label text="%shareVault.description" wrapText="true"/>
+			<VBox>
+				<padding>
+					<Insets left="6"/>
+				</padding>
+				<Label text="%shareVault.instruction.1" wrapText="true"/>
+				<Label text="%shareVault.instruction.2" wrapText="true"/>
+			</VBox>
+			<Region minHeight="6"/>
+			<HBox spacing="6">
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices">
+					<graphic>
+						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%shareVault.docsTooltip" showDelay="100ms"/>
+					</tooltip>
+				</Hyperlink>
+				<Label text="%shareVault.remarkBestPractices" wrapText="true"/>
+			</HBox>
+			<Region minHeight="12"/>
+			<HBox alignment="CENTER_LEFT" spacing="6" styleClass="ad-box">
+				<VBox spacing="6" alignment="CENTER_LEFT">
+					<ImageView HBox.hgrow="ALWAYS" fitWidth="180" preserveRatio="true" cache="true">
+						<Image url="@../img/hub_logo.png"/>
+					</ImageView>
+					<Label text="%shareVault.hubAd.description" style="-fx-font-weight: bold;" wrapText="true"/>
+					<VBox spacing="6" alignment="CENTER_LEFT">
+						<padding>
+							<Insets left="6"/>
+						</padding>
+						<Label text="%shareVault.hubAd.keyManagement" wrapText="true"/>
+						<Label text="%shareVault.hubAd.authentication" wrapText="true"/>
+						<Label text="%shareVault.hubAd.encryption" wrapText="true"/>
+					</VBox>
+				</VBox>
+				<Region HBox.hgrow="ALWAYS"/>
+				<ImageView HBox.hgrow="ALWAYS" fitWidth="180" preserveRatio="true" cache="true">
+					<Image url="@../img/group-magic.png"/>
+				</ImageView>
+			</HBox>
+		</VBox>
+		<Region VBox.vgrow="ALWAYS" minHeight="18"/>
+		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
+			<buttons>
+				<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#close"/>
+				<Button text="%shareVault.hub.openHub" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#openHub" visible="${controller.hubVault}" managed="${controller.hubVault}"/>
+				<Button text="%shareVault.visitHub" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#visitHub" visible="${!controller.hubVault}" managed="${!controller.hubVault}"/>
+			</buttons>
+		</ButtonBar>
+	</VBox>
+</HBox>
