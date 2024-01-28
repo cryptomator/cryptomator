@@ -25,6 +25,7 @@ open module org.cryptomator.desktop {
 	requires org.cryptomator.frontend.fuse;
 	requires org.cryptomator.frontend.webdav;
 	requires org.cryptomator.integrations.api;
+	requires org.cryptomator.integrations.mac;
 	// jdk:
 	requires java.desktop;
 	requires java.net.http;
@@ -41,6 +42,7 @@ open module org.cryptomator.desktop {
 	requires com.fasterxml.jackson.databind;
 	requires com.nimbusds.jose.jwt;
 	requires com.nulabinc.zxcvbn;
+	requires com.sun.jna;
 	requires com.tobiasdiez.easybind;
 	requires dagger;
 	requires io.github.coffeelibs.tinyoauth2client;

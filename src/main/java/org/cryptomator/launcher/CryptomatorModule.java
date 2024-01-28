@@ -3,6 +3,7 @@ package org.cryptomator.launcher;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
+import org.cryptomator.integrations.secondfactor.SecondFactorProvider;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
@@ -40,6 +41,12 @@ class CryptomatorModule {
 	@Singleton
 	static Optional<AutoStartProvider> provideAutostartProvider() {
 		return AutoStartProvider.get();
+	}
+
+	@Provides
+	@Singleton
+	static Optional<SecondFactorProvider> providesSecondFactorProvider() {
+		return SecondFactorProvider.get();
 	}
 
 	@Provides
