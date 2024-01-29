@@ -15,6 +15,8 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.Group?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.sharevault.ShareVaultController"
@@ -63,7 +65,9 @@
 				<Label text="%shareVault.instruction.2" wrapText="true"/>
 			</VBox>
 			<Region minHeight="6"/>
-			<HBox spacing="6">
+			<TextFlow styleClass="text-flow">
+				<Text text="%shareVault.remarkBestPractices"/>
+				<Text text=" "/>
 				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices">
 					<graphic>
 						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
@@ -72,8 +76,7 @@
 						<Tooltip text="%shareVault.docsTooltip" showDelay="100ms"/>
 					</tooltip>
 				</Hyperlink>
-				<Label text="%shareVault.remarkBestPractices" wrapText="true"/>
-			</HBox>
+			</TextFlow>
 			<Region minHeight="12"/>
 			<HBox alignment="CENTER_LEFT" spacing="6" styleClass="ad-box">
 				<VBox spacing="6" alignment="CENTER_LEFT">
