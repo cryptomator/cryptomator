@@ -51,9 +51,9 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$jmodsVersion='21.0.1'
+$jmodsVersion='21.0.2'
 $jmodsUrl = "https://download2.gluonhq.com/openjfx/${jmodsVersion}/openjfx-${jmodsVersion}_windows-x64_bin-jmods.zip"
-$jfxJmodsChecksum = 'daf8acae631c016c24cfe23f88469400274d3441dd890615a42dfb501f3eb94a'
+$jfxJmodsChecksum = 'de0dd27cc237897481f58cfb90855825d0ad36682838eed27b79e061eeb79d68'
 $jfxJmodsZip = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $jfxJmodsZip) ) {
 	Write-Output "Downloading ${jmodsUrl}..."
