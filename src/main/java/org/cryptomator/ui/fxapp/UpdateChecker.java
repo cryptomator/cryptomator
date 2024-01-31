@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
@@ -25,14 +27,20 @@ public class UpdateChecker {
 	private final Environment env;
 	private final Settings settings;
 	private final StringProperty latestVersionProperty;
+	private final BooleanProperty upToDate;
 	private final Comparator<String> semVerComparator;
 	private final ScheduledService<String> updateCheckerService;
 
 	@Inject
-	UpdateChecker(Settings settings, Environment env, @Named("latestVersion") StringProperty latestVersionProperty, @Named("SemVer") Comparator<String> semVerComparator, ScheduledService<String> updateCheckerService) {
+	UpdateChecker(Settings settings, Environment env, //
+				  @Named("latestVersion") StringProperty latestVersionProperty, //
+				  @Named("upToDate") BooleanProperty upToDate, //
+				  @Named("SemVer") Comparator<String> semVerComparator, //
+				  ScheduledService<String> updateCheckerService) {
 		this.env = env;
 		this.settings = settings;
 		this.latestVersionProperty = latestVersionProperty;
+		this.upToDate = upToDate;
 		this.semVerComparator = semVerComparator;
 		this.updateCheckerService = updateCheckerService;
 	}
@@ -68,8 +76,10 @@ public class UpdateChecker {
 		if (semVerComparator.compare(getCurrentVersion(), latestVersion) < 0) {
 			// update is available
 			latestVersionProperty.set(latestVersion);
+			upToDate.set(false);
 		} else {
 			latestVersionProperty.set(null);
+			upToDate.set(true);
 		}
 	}
 
@@ -91,4 +101,7 @@ public class UpdateChecker {
 		return env.getAppVersion();
 	}
 
+	public ReadOnlyBooleanProperty upToDateProperty() {
+		return upToDate;
+	}
 }

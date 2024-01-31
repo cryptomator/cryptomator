@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <VBox xmlns:fx="http://javafx.com/fxml"
@@ -29,7 +30,7 @@
 					<FontAwesome5Spinner fx:id="spinner" glyphSize="12"/>
 				</graphic>
 			</Button>
-
+			<Label text="%preferences.updates.upToDate" managed="${controller.upToDate}" visible="${controller.upToDate}"/>
 			<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}"/>
 		</VBox>
 	</children>

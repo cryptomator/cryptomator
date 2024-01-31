@@ -9,6 +9,7 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -26,7 +27,8 @@ public class UpdatesPreferencesController implements FxController {
 	private final ReadOnlyStringProperty latestVersion;
 	private final String currentVersion;
 	private final BooleanBinding updateAvailable;
-
+	private final ReadOnlyBooleanProperty upToDate;
+	
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
 
@@ -39,6 +41,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.latestVersion = updateChecker.latestVersionProperty();
 		this.updateAvailable = latestVersion.isNotNull();
 		this.currentVersion = updateChecker.getCurrentVersion();
+		this.upToDate = updateChecker.upToDateProperty();
 	}
 
 	public void initialize() {
@@ -84,4 +87,8 @@ public class UpdatesPreferencesController implements FxController {
 	public boolean isUpdateAvailable() {
 		return updateAvailable.get();
 	}
+
+	public ReadOnlyBooleanProperty upToDateProperty(){ return upToDate;}
+
+	public Boolean getUpToDate(){ return upToDate.get();}
 }
