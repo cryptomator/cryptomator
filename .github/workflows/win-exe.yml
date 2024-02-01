@@ -246,7 +246,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: msi
           path: |
@@ -270,7 +270,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download .msi
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: msi
           path: dist/win/bundle/resources
@@ -357,7 +357,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: exe
           path: |
@@ -381,12 +381,12 @@ jobs:
     needs: [build-msi, build-exe]
     steps:
       - name: Download .msi
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: msi
           path: msi
       - name: Download .exe
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: exe
           path: exe
