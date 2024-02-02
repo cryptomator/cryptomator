@@ -25,8 +25,8 @@ cp ../../../target/cryptomator-*.jar ../../../target/mods
 
 
 # download javaFX jmods
-OPENJFX_URL='https://download2.gluonhq.com/openjfx/21.0.2/openjfx-21.0.2_linux-x64_bin-jmods.zip'
-OPENJFX_SHA='49703558356649ef1335d12839f55b4c391d72a2e43a525638f1a38c799a6fdc'
+OPENJFX_URL='https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-jmods.zip'
+OPENJFX_SHA='7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
 OPENJFX_URL_aarch64='https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-aarch64_bin-jmods.zip'
 OPENJFX_SHA_aarch64='871e7b9d7af16aef2e55c1b7830d0e0b2503b13dd8641374ba7e55ecb81d2ef9'
 

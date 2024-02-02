@@ -29,8 +29,8 @@ jobs:
         include:
           - os: ubuntu-latest
             appimage-suffix: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.2/openjfx-21.0.2_linux-x64_bin-jmods.zip'
-            openjfx-sha: '49703558356649ef1335d12839f55b4c391d72a2e43a525638f1a38c799a6fdc'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-jmods.zip'
+            openjfx-sha: '7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
           - os: [self-hosted, Linux, ARM64]
             appimage-suffix: aarch64
             openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-aarch64_bin-jmods.zip'
