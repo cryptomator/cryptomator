@@ -34,9 +34,9 @@
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.6.8</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>1.3.0</cryptomator.integrations.version>
+		<cryptomator.integrations.version>1.4.0-SNAPSHOT</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.4</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.2.2</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.mac.version>1.3.0-SNAPSHOT</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.4.0</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>4.0.0</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
@@ -73,6 +73,17 @@
 		<mvn-surefire.version>3.2.3</mvn-surefire.version>
 		<mvn-jar.version>3.3.0</mvn-jar.version>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/purejava/integrations-api</url>
+		</repository>
+		<repository>
+			<id>github2</id>
+			<url>https://maven.pkg.github.com/purejava/integrations-mac</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<!-- Cryptomator Libs -->

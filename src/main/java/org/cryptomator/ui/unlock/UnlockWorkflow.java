@@ -3,10 +3,13 @@ package org.cryptomator.ui.unlock;
 import dagger.Lazy;
 import org.cryptomator.common.mount.ConflictingMountServiceException;
 import org.cryptomator.common.mount.IllegalMountPointException;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.integrations.mount.MountFailedException;
+import org.cryptomator.integrations.secondfactor.SecondFactorProvider;
+import org.cryptomator.macos.secondfactor.CryptomatorTouchID;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
@@ -18,10 +21,14 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -29,7 +36,7 @@ import java.io.IOException;
  * This class runs the unlock process and controls when to display which UI.
  */
 @UnlockScoped
-public class UnlockWorkflow extends Task<Void> {
+public class UnlockWorkflow extends Task<Void> implements CryptomatorTouchID.AuthCallback {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockWorkflow.class);
 
@@ -42,11 +49,19 @@ public class UnlockWorkflow extends Task<Void> {
 	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 	private final ObjectProperty<IllegalMountPointException> illegalMountPointException;
+	private final Optional<SecondFactorProvider> secondFactorProvider;
+	private CountDownLatch latch = new CountDownLatch(1);
+	private boolean successfullyAuthenticatedSecondFactor = false;
+	private ReadOnlyBooleanProperty touchIDSetting;
+	private final ResourceBundle resourceBundle;
 
 	@Inject
 	UnlockWorkflow(@UnlockWindow Stage window, //
 				   @UnlockWindow Vault vault, //
 				   VaultService vaultService, //
+				   Optional<SecondFactorProvider> secondFactorProvider, //
+				   ResourceBundle resourceBundle, //
+				   Settings settings, //
 				   @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, //
 				   @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, //
 				   @FxmlScene(FxmlFile.UNLOCK_REQUIRES_RESTART) Lazy<Scene> restartRequiredScene, //
@@ -56,6 +71,9 @@ public class UnlockWorkflow extends Task<Void> {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
+		this.secondFactorProvider = secondFactorProvider;
+		this.resourceBundle = resourceBundle;
+		this.touchIDSetting = settings.useTouchID;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.restartRequiredScene = restartRequiredScene;
@@ -67,6 +85,10 @@ public class UnlockWorkflow extends Task<Void> {
 	@Override
 	protected Void call() throws InterruptedException, IOException, CryptoException, MountFailedException {
 		try {
+			if (useTouchID() && isSecondFactorSupported()) {
+				request2ndFactor();;
+				successfullyAuthenticatedSecondFactor = false;
+			}
 			keyLoadingStrategy.use(vault::unlock);
 			return null;
 		} catch (UnlockCancelledException e) {
@@ -76,6 +98,18 @@ public class UnlockWorkflow extends Task<Void> {
 			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException("Unexpected exception type", e);
+		}
+	}
+
+	private void request2ndFactor() throws UnlockCancelledException {
+		secondFactorProvider.get().device_authenticate(resourceBundle.getString("secondFactor.touchID.loadPassword"), this);
+		try {
+			latch.await();
+			if (!successfullyAuthenticatedSecondFactor) {
+				throw new UnlockCancelledException("Second factor failed or was cancelled");
+			}
+		} catch (InterruptedException e) {
+			throw new UnlockCancelledException("Second factor timed out");
 		}
 	}
 
@@ -136,4 +170,21 @@ public class UnlockWorkflow extends Task<Void> {
 		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
+	private boolean useTouchID() {
+		return touchIDSetting.get();
+	}
+
+	private boolean isSecondFactorSupported() {
+		return secondFactorProvider.isPresent() && secondFactorProvider.get().device_supported();
+	}
+
+	@Override
+	public void callback(int result, int laError) {
+		if (result == 1) {
+			successfullyAuthenticatedSecondFactor = true;
+		} else {
+			successfullyAuthenticatedSecondFactor = false;
+		}
+		latch.countDown();
+	}
 }

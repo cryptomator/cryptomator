@@ -64,6 +64,9 @@ class SettingsJson {
 	@JsonProperty("useKeychain")
 	boolean useKeychain = Settings.DEFAULT_USE_KEYCHAIN;
 
+	@JsonProperty("useTouchID")
+	boolean useTouchID = Settings.DEFAULT_USE_TOUCHID;
+
 	@JsonProperty("windowHeight")
 	int windowHeight;
 
