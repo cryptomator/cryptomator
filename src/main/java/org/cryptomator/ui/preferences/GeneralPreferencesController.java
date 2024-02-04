@@ -5,6 +5,7 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
+import org.cryptomator.integrations.secondfactor.SecondFactorProvider;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
@@ -30,11 +31,13 @@ public class GeneralPreferencesController implements FxController {
 	private final Stage window;
 	private final Settings settings;
 	private final Optional<AutoStartProvider> autoStartProvider;
+	private final Optional<SecondFactorProvider> secondFactorProvider;
 	private final Application application;
 	private final Environment environment;
 	private final List<KeychainAccessProvider> keychainAccessProviders;
 	private final FxApplicationWindows appWindows;
 	public CheckBox useKeychainCheckbox;
+	public CheckBox useTouchIDCheckbox;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox autoCloseVaultsCheckbox;
@@ -43,11 +46,12 @@ public class GeneralPreferencesController implements FxController {
 	public ToggleGroup nodeOrientation;
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, Application application, Environment environment, FxApplicationWindows appWindows) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, Optional<SecondFactorProvider> secondFactorProvider, Application application, Environment environment, FxApplicationWindows appWindows) {
 		this.window = window;
 		this.settings = settings;
 		this.autoStartProvider = autoStartProvider;
 		this.keychainAccessProviders = keychainAccessProviders;
+		this.secondFactorProvider = secondFactorProvider;
 		this.application = application;
 		this.environment = environment;
 		this.appWindows = appWindows;
@@ -66,6 +70,8 @@ public class GeneralPreferencesController implements FxController {
 		keychainBackendChoiceBox.setConverter(new KeychainProviderDisplayNameConverter());
 		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
+		secondFactorProvider.ifPresent(factorProvider -> useTouchIDCheckbox.visibleProperty().set(factorProvider.device_supported()));
+		useTouchIDCheckbox.selectedProperty().bindBidirectional(settings.useTouchID);
 		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
 	}
 

@@ -3,6 +3,7 @@ package org.cryptomator.ui.unlock;
 import dagger.Lazy;
 import org.cryptomator.common.mount.ConflictingMountServiceException;
 import org.cryptomator.common.mount.IllegalMountPointException;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.CryptoException;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -50,6 +52,7 @@ public class UnlockWorkflow extends Task<Void> implements CryptomatorTouchID.Aut
 	private final Optional<SecondFactorProvider> secondFactorProvider;
 	private CountDownLatch latch = new CountDownLatch(1);
 	private boolean successfullyAuthenticatedSecondFactor = false;
+	private ReadOnlyBooleanProperty touchIDSetting;
 	private final ResourceBundle resourceBundle;
 
 	@Inject
@@ -58,6 +61,7 @@ public class UnlockWorkflow extends Task<Void> implements CryptomatorTouchID.Aut
 				   VaultService vaultService, //
 				   Optional<SecondFactorProvider> secondFactorProvider, //
 				   ResourceBundle resourceBundle, //
+				   Settings settings, //
 				   @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, //
 				   @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, //
 				   @FxmlScene(FxmlFile.UNLOCK_REQUIRES_RESTART) Lazy<Scene> restartRequiredScene, //
@@ -69,6 +73,7 @@ public class UnlockWorkflow extends Task<Void> implements CryptomatorTouchID.Aut
 		this.vaultService = vaultService;
 		this.secondFactorProvider = secondFactorProvider;
 		this.resourceBundle = resourceBundle;
+		this.touchIDSetting = settings.useTouchID;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.restartRequiredScene = restartRequiredScene;
@@ -166,7 +171,7 @@ public class UnlockWorkflow extends Task<Void> implements CryptomatorTouchID.Aut
 	}
 
 	private boolean useTouchID() {
-		return true;
+		return touchIDSetting.get();
 	}
 
 	private boolean isSecondFactorSupported() {

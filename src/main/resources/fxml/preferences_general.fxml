@@ -30,6 +30,8 @@
 			<ChoiceBox fx:id="keychainBackendChoiceBox"/>
 		</HBox>
 
+		<CheckBox fx:id="useTouchIDCheckbox" text="%preferences.general.useTouchID"/>
+
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT">
