@@ -935,3 +935,16 @@
 	-fx-padding: 0.5px;
 	-fx-background-color: CONTROL_BORDER_NORMAL;
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * Ad box                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.ad-box {
+	-fx-padding: 12px;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+}

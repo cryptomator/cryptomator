@@ -8,7 +8,6 @@ package org.cryptomator.common.settings;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
-import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import javafx.beans.Observable;
@@ -40,6 +39,7 @@ public class VaultSettings {
 	static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 	static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
 	static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
+	static final int DEFAULT_PORT = 42427;
 
 	private static final Random RNG = new Random();
 
@@ -56,6 +56,8 @@ public class VaultSettings {
 	public final IntegerProperty autoLockIdleSeconds;
 	public final ObjectProperty<Path> mountPoint;
 	public final StringExpression mountName;
+	public final StringProperty mountService;
+	public final IntegerProperty port;
 
 	VaultSettings(VaultSettingsJson json) {
 		this.id = json.id;
@@ -70,6 +72,8 @@ public class VaultSettings {
 		this.autoLockWhenIdle = new SimpleBooleanProperty(this, "autoLockWhenIdle", json.autoLockWhenIdle);
 		this.autoLockIdleSeconds = new SimpleIntegerProperty(this, "autoLockIdleSeconds", json.autoLockIdleSeconds);
 		this.mountPoint = new SimpleObjectProperty<>(this, "mountPoint", json.mountPoint == null ? null : Path.of(json.mountPoint));
+		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
+		this.port = new SimpleIntegerProperty(this, "port", json.port);
 		// mount name is no longer an explicit setting, see https://github.com/cryptomator/cryptomator/pull/1318
 		this.mountName = StringExpression.stringExpression(Bindings.createStringBinding(() -> {
 			final String name;
@@ -95,7 +99,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode};
+		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode, port, mountService};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -124,6 +128,8 @@ public class VaultSettings {
 		json.autoLockWhenIdle = autoLockWhenIdle.get();
 		json.autoLockIdleSeconds = autoLockIdleSeconds.get();
 		json.mountPoint = mountPoint.map(Path::toString).getValue();
+		json.mountService = mountService.get();
+		json.port = port.get();
 		return json;
 	}
 

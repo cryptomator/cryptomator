@@ -119,6 +119,12 @@ public abstract class HubKeyLoadingModule {
 		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_SUCCESS)
+	@KeyLoadingScoped
+	static Scene provideHubLegacyRegisterSuccessScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_LEGACY_REGISTER_SUCCESS);
+	}
 
 	@Provides
 	@FxmlScene(FxmlFile.HUB_REGISTER_SUCCESS)
@@ -135,10 +141,17 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_SETUP_DEVICE)
+	@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE)
 	@KeyLoadingScoped
 	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_SETUP_DEVICE);
+		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE_ALREADY_EXISTS)
+	@KeyLoadingScoped
+	static Scene provideHubRegisterDeviceAlreadyExistsScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE_ALREADY_EXISTS);
 	}
 
 	@Provides
@@ -184,6 +197,11 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(LegacyRegisterDeviceController.class)
 	abstract FxController bindLegacyRegisterDeviceController(LegacyRegisterDeviceController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(LegacyRegisterSuccessController.class)
+	abstract FxController bindLegacyRegisterSuccessController(LegacyRegisterSuccessController controller);
 
 	@Binds
 	@IntoMap

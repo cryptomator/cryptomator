@@ -17,13 +17,13 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '21.0.1+12'
+  JAVA_VERSION: '21.0.2+13'
   COFFEELIBS_JDK: 21
-  COFFEELIBS_JDK_VERSION: '21.0.1+12-0ppa1'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: 'f522ac2ae4bdd61f0219b7b8d2058ff72a22f36a44378453bcfdcd82f8f5e08c'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: 'c0d80ebbe0aab404ef9ad8b46c05bf533a1e40b39b2720eebd9238d81f6326ca'
+  COFFEELIBS_JDK_VERSION: '21.0.2+13-0ppa1'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: '871e7b9d7af16aef2e55c1b7830d0e0b2503b13dd8641374ba7e55ecb81d2ef9'
 
 jobs:
   build:
@@ -46,7 +46,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.COFFEELIBS_JDK }}=${{ env.COFFEELIBS_JDK_VERSION }} libgtk2.0-0
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -128,7 +128,7 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-deb-package
           path: |

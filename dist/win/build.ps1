@@ -51,9 +51,9 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$jmodsVersion='20.0.2'
+$jmodsVersion='21.0.1'
 $jmodsUrl = "https://download2.gluonhq.com/openjfx/${jmodsVersion}/openjfx-${jmodsVersion}_windows-x64_bin-jmods.zip"
-$jfxJmodsChecksum = '18625bbc13c57dbf802486564247a8d8cab72ec558c240a401bf6440384ebd77'
+$jfxJmodsChecksum = 'daf8acae631c016c24cfe23f88469400274d3441dd890615a42dfb501f3eb94a'
 $jfxJmodsZip = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $jfxJmodsZip) ) {
 	Write-Output "Downloading ${jmodsUrl}..."
@@ -69,7 +69,7 @@ Expand-Archive -Path $jfxJmodsZip -Force -DestinationPath ".\resources\"
 Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods"
 Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
-
+## create custom runtime
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
@@ -79,7 +79,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--no-header-files `
 	--no-man-pages `
 	--strip-debug `
-	--compress=1
+	--compress "zip-0" #do not compress to have improved msi compression
 
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
@@ -181,7 +181,7 @@ Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 
 # download legacy-winfsp uninstaller
-$winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0-beta9/winfsp-uninstaller.exe'
+$winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/download/1.0.0/winfsp-uninstaller.exe'
 Write-Output "Downloading ${winfspUninstaller}..."
 Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninstaller.exe" # redirects are followed by default
 

@@ -8,10 +8,13 @@ REVISION_NO=`git rev-list --count HEAD`
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
 command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found."; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found."; exit 1; }
+command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip not found."; exit 1; }
 
 VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
 MACHINE_TYPE=$(uname -m)
+
+if [[ ! "${MACHINE_TYPE}" =~ x86_64|aarch64 ]]; then echo "Platform ${MACHINE_TYPE} not supported"; exit 1; fi
 
 mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 
@@ -20,17 +23,45 @@ mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
+
+# download javaFX jmods
+OPENJFX_URL='https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-jmods.zip'
+OPENJFX_SHA='7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
+OPENJFX_URL_aarch64='https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-aarch64_bin-jmods.zip'
+OPENJFX_SHA_aarch64='871e7b9d7af16aef2e55c1b7830d0e0b2503b13dd8641374ba7e55ecb81d2ef9'
+
+if [[ "${MACHINE_TYPE}" = "aarch64" ]]; then
+	OPENJFX_URL="${OPENJFX_URL_aarch64}";
+	OPENJFX_SHA="${OPENJFX_SHA_aarch64}";
+fi
+
+curl -L ${OPENJFX_URL} -o openjfx-jmods.zip
+echo "${OPENJFX_SHA}  openjfx-jmods.zip" | shasum -a256 --check
+mkdir -p openjfx-jmods
+unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
+JMOD_VERSION=${JMOD_VERSION#*@}
+JMOD_VERSION=${JMOD_VERSION%%.*}
+POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
+	>&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION})"
+	exit 1
+fi
+
+
 # add runtime
 ${JAVA_HOME}/bin/jlink \
     --verbose \
     --output runtime \
-    --module-path "${JAVA_HOME}/jmods" \
+    --module-path "${JAVA_HOME}/jmods:openjfx-jmods" \
     --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
     --strip-debug \
-    --compress=1
+    --compress zip-0
 
 # create app dir
 envsubst '${SEMVER_STR} ${REVISION_NUM}' < ../launcher-gtk2.properties > launcher-gtk2.properties
@@ -46,7 +77,7 @@ ${JAVA_HOME}/bin/jpackage \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
     --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
-    --copyright "(C) 2016 - 2023 Skymatic GmbH" \
+    --copyright "(C) 2016 - 2024 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \
@@ -97,5 +128,5 @@ chmod +x /tmp/appimagetool.AppImage
 echo ""
 echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${MACHINE_TYPE}.AppImage"
 echo ""
-echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir jni runtime squashfs-root; rm launcher-gtk2.properties /tmp/appimagetool.AppImage"
+echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir runtime squashfs-root openjfx-jmods; rm launcher-gtk2.properties /tmp/appimagetool.AppImage openjfx-jmods.zip"
 echo ""

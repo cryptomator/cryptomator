@@ -1,7 +1,7 @@
 package org.cryptomator.ui.keyloading.hub;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -19,6 +19,19 @@ public class HubConfig {
 	@Deprecated // use apiBaseUrl + "/devices/"
 	public String devicesResourceUrl;
 
+	/**
+	 * A collection of String template processors to construct URIs related to this Hub instance.
+	 */
+	@JsonIgnore
+	public final URIProcessors URIs = new URIProcessors();
+
+	/**
+	 * Get the URI pointing to the <code>/api/</code> base resource.
+	 *
+	 * @return <code>/api/</code> URI
+	 * @apiNote URI is guaranteed to end on <code>/</code>
+	 * @see #URIs
+	 */
 	public URI getApiBaseUrl() {
 		if (apiBaseUrl != null) {
 			// make sure to end on "/":
@@ -32,5 +45,18 @@ public class HubConfig {
 
 	public URI getWebappBaseUrl() {
 		return getApiBaseUrl().resolve("../app/");
+	}
+
+	public class URIProcessors {
+
+		/**
+		 * Resolves paths relative to the <code>/api/</code> endpoint of this Hub instance.
+		 */
+		public final StringTemplate.Processor<URI, RuntimeException> API = template -> {
+			var path = template.interpolate();
+			var relPath = path.startsWith("/") ? path.substring(1) : path;
+			return getApiBaseUrl().resolve(relPath);
+		};
+
 	}
 }

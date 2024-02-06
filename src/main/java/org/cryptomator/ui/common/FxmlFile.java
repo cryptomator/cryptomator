@@ -21,9 +21,11 @@ public enum FxmlFile {
 	HUB_INVALID_LICENSE("/fxml/hub_invalid_license.fxml"), //
 	HUB_RECEIVE_KEY("/fxml/hub_receive_key.fxml"), //
 	HUB_LEGACY_REGISTER_DEVICE("/fxml/hub_legacy_register_device.fxml"), //
+	HUB_LEGACY_REGISTER_SUCCESS("/fxml/hub_legacy_register_success.fxml"), //
 	HUB_REGISTER_SUCCESS("/fxml/hub_register_success.fxml"), //
+	HUB_REGISTER_DEVICE_ALREADY_EXISTS("/fxml/hub_register_device_already_exists.fxml"), //
 	HUB_REGISTER_FAILED("/fxml/hub_register_failed.fxml"), //
-	HUB_SETUP_DEVICE("/fxml/hub_setup_device.fxml"), //
+	HUB_REGISTER_DEVICE("/fxml/hub_register_device.fxml"), //
 	HUB_UNAUTHORIZED_DEVICE("/fxml/hub_unauthorized_device.fxml"), //
 	HUB_REQUIRE_ACCOUNT_INIT("/fxml/hub_require_account_init.fxml"), //
 	LOCK_FORCED("/fxml/lock_forced.fxml"), //
@@ -43,8 +45,10 @@ public enum FxmlFile {
 	RECOVERYKEY_RESET_PASSWORD_SUCCESS("/fxml/recoverykey_reset_password_success.fxml"), //
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
+	SHARE_VAULT("/fxml/share_vault.fxml"), //
 	UPDATE_REMINDER("/fxml/update_reminder.fxml"), //
 	UNLOCK_ENTER_PASSWORD("/fxml/unlock_enter_password.fxml"),
+	UNLOCK_REQUIRES_RESTART("/fxml/unlock_requires_restart.fxml"), //
 	UNLOCK_INVALID_MOUNT_POINT("/fxml/unlock_invalid_mount_point.fxml"), //
 	UNLOCK_SELECT_MASTERKEYFILE("/fxml/unlock_select_masterkeyfile.fxml"), //
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //

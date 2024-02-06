@@ -11,6 +11,7 @@ import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.quit.QuitComponent;
+import org.cryptomator.ui.sharevault.ShareVaultComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 import org.cryptomator.ui.unlock.UnlockWorkflow;
 import org.cryptomator.ui.updatereminder.UpdateReminderComponent;
@@ -51,6 +52,7 @@ public class FxApplicationWindows {
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
+	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
 
 	@Inject
@@ -64,6 +66,7 @@ public class FxApplicationWindows {
 								LockComponent.Factory lockWorkflowFactory, //
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
+								ShareVaultComponent.Factory shareVaultWindow, //
 								ExecutorService executor) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
@@ -76,6 +79,7 @@ public class FxApplicationWindows {
 		this.errorWindowFactory = errorWindowFactory;
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
+		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
 	}
 
@@ -120,6 +124,10 @@ public class FxApplicationWindows {
 
 	public CompletionStage<Stage> showPreferencesWindow(SelectedPreferencesTab selectedTab) {
 		return CompletableFuture.supplyAsync(() -> preferencesWindow.get().showPreferencesWindow(selectedTab), Platform::runLater).whenComplete(this::reportErrors);
+	}
+
+	public void showShareVaultWindow(Vault vault) {
+		CompletableFuture.runAsync(() -> shareVaultWindow.create(vault).showShareVaultWindow(), Platform::runLater);
 	}
 
 	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {

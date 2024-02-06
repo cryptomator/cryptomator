@@ -32,8 +32,6 @@
 			</Hyperlink>
 		</HBox>
 
-		<Label styleClass="label-red" text="%preferences.volume.fuseRestartRequired" visible="${controller.fuseRestartRequired}" managed="${controller.fuseRestartRequired}"/>
-
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">
 			<Label text="%preferences.volume.tcp.port"/>
 			<NumericTextField fx:id="loopbackPortField"/>
