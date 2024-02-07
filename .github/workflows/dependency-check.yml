@@ -7,7 +7,7 @@ on:
 
 jobs:
   check-dependencies:
-    uses: skymatic/workflows/.github/workflows/run-dependency-check.yml@main
+    uses: skymatic/workflows/.github/workflows/run-dependency-check.yml@v1
     with:
       runner-os: 'ubuntu-latest'
       java-distribution: 'temurin'

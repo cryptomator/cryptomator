@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.12.0</version>
+	<version>1.12.1</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -37,7 +37,7 @@
 		<cryptomator.integrations.version>1.3.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.5</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.3</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.4.2</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.linux.version>1.4.3</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>4.0.0</cryptomator.fuse.version>
 		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>2.0.6</cryptomator.webdav.version>
