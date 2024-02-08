@@ -14,10 +14,9 @@ jobs:
     steps:
       - name: Sync winget-pkgs fork
         run: |
-          gh auth login --with-token $env:SYNC_TOKEN
           gh repo sync cryptomator/winget-pkgs -b master --force
         env:
-          SYNC_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
       - name: Submit package
         uses: vedantmgoyal2009/winget-releaser@v2
         with:
