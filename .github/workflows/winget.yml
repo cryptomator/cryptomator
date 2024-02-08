@@ -1,0 +1,27 @@
+name: Publish  MSI Installer to WinGet Community Repo
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag'
+        required: true
+
+jobs:
+  winget:
+    name: Publish winget package
+    runs-on: windows-latest
+    steps:
+      - name: Sync winget-pkgs fork
+        run: |
+          gh auth login --with-token $env:SYNC_TOKEN
+          gh repo sync cryptomator/winget-pkgs -b master --force
+        env:
+          SYNC_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+      - name: Submit package
+        uses: vedantmgoyal2009/winget-releaser@v2
+        with:
+          identifier: Cryptomator.Cryptomator
+          release-tag: ${{ inputs.tag }}
+          installers-regex: '\.msi$'
+          token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
