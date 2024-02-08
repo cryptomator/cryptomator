@@ -21,6 +21,7 @@ jobs:
         uses: vedantmgoyal2009/winget-releaser@v2
         with:
           identifier: Cryptomator.Cryptomator
+          version: ${{ inputs.tag }}
           release-tag: ${{ inputs.tag }}
           installers-regex: '\.msi$'
           token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
