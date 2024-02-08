@@ -1,4 +1,4 @@
-name: Publish  MSI Installer to WinGet Community Repo
+name: Publish  MSI to winget-pkgs
 
 on:
   workflow_dispatch:
