@@ -66,34 +66,92 @@
 	</content_rating>
 
 	<releases>
-		<release date="2024-02-09" version="1.12.2"/>
-		<release date="2024-02-07" version="1.12.1"/>
-		<release date="2024-02-06" version="1.12.0"/>
-		<release date="2023-12-05" version="1.11.1"/>
-		<release date="2023-11-08" version="1.11.0"/>
-		<release date="2023-09-20" version="1.10.1"/>
-		<release date="2023-09-11" version="1.10.0"/>
-		<release date="2023-08-11" version="1.9.4"/>
-		<release date="2023-08-07" version="1.9.3"/>
-		<release date="2023-07-24" version="1.9.2"/>
-		<release date="2023-06-07" version="1.9.1"/>
-		<release date="2023-05-30" version="1.9.0"/>
-		<release date="2023-04-25" version="1.8.0"/>
-		<release date="2023-04-07" version="1.7.5"/>
-		<release date="2023-04-05" version="1.7.4"/>
-		<release date="2023-03-15" version="1.7.3"/>
-		<release date="2023-03-07" version="1.7.2"/>
-		<release date="2023-03-03" version="1.7.1"/>
-		<release date="2023-03-01" version="1.7.0"/>
-		<release date="2022-12-14" version="1.6.17"/>
-		<release date="2022-12-06" version="1.6.16"/>
-		<release date="2022-10-06" version="1.6.15"/>
-		<release date="2022-08-31" version="1.6.14"/>
-		<release date="2022-07-27" version="1.6.12"/>
-		<release date="2022-07-26" version="1.6.11"/>
-		<release date="2022-05-03" version="1.6.10"/>
-		<release date="2022-04-27" version="1.6.9"/>
-		<release date="2022-03-30" version="1.6.8"/>
-		<release date="2021-12-16" version="1.6.5"/>
+		<release date="2024-02-09" version="1.12.2">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.12.2</url>
+		</release>
+		<release date="2024-02-07" version="1.12.1">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.12.1</url>
+		</release>
+		<release date="2024-02-06" version="1.12.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.12.0</url>
+		</release>
+		<release date="2023-12-05" version="1.11.1">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.11.1</url>
+		</release>
+		<release date="2023-11-08" version="1.11.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.11.0</url>
+		</release>
+		<release date="2023-09-20" version="1.10.1">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.10.1</url>
+		</release>
+		<release date="2023-09-11" version="1.10.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.10.0</url>
+		</release>
+		<release date="2023-08-11" version="1.9.4">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.9.4</url>
+		</release>
+		<release date="2023-08-07" version="1.9.3">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.9.3</url>
+		</release>
+		<release date="2023-07-24" version="1.9.2">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.9.2</url>
+		</release>
+		<release date="2023-06-07" version="1.9.1">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.9.1</url>
+		</release>
+		<release date="2023-05-30" version="1.9.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.9.0</url>
+		</release>
+		<release date="2023-04-25" version="1.8.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.8.0</url>
+		</release>
+		<release date="2023-04-07" version="1.7.5">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.7.5</url>
+		</release>
+		<release date="2023-04-05" version="1.7.4">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.7.4</url>
+		</release>
+		<release date="2023-03-15" version="1.7.3">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.7.3</url>
+		</release>
+		<release date="2023-03-07" version="1.7.2">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.7.2</url>
+		</release>
+		<release date="2023-03-03" version="1.7.1">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.7.1</url>
+		</release>
+		<release date="2023-03-01" version="1.7.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.7.0</url>
+		</release>
+		<release date="2022-12-14" version="1.6.17">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.17</url>
+		</release>
+		<release date="2022-12-06" version="1.6.16">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.16</url>
+		</release>
+		<release date="2022-10-06" version="1.6.15">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.15</url>
+		</release>
+		<release date="2022-08-31" version="1.6.14">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.14</url>
+		</release>
+		<release date="2022-07-27" version="1.6.12">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.12</url>
+		</release>
+		<release date="2022-07-26" version="1.6.11">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.11</url>
+		</release>
+		<release date="2022-05-03" version="1.6.10">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.10</url>
+		</release>
+		<release date="2022-04-27" version="1.6.9">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.9</url>
+		</release>
+		<release date="2022-03-30" version="1.6.8">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.8</url>
+		</release>
+		<release date="2021-12-16" version="1.6.5">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.6.5</url>
+		</release>
 	</releases>
 </component>
