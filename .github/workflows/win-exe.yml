@@ -220,7 +220,7 @@ jobs:
           --win-menu
           --win-dir-chooser
           --win-shortcut-prompt
-          --win-update-url "https:\\cryptomator.org"
+          --win-update-url "https:\\cryptomator.org\downloads"
           --win-menu-group Cryptomator
           --resource-dir dist/win/resources
           --license-file dist/win/resources/license.rtf
