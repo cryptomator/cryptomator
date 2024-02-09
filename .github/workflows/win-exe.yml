@@ -11,6 +11,7 @@ on:
       isDebug:
         description: 'Build debug version with console output'
         type: boolean
+        default: false
 
 
 env:
