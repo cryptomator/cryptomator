@@ -38,14 +38,14 @@ fi
 curl -L ${OPENJFX_URL} -o openjfx-jmods.zip
 echo "${OPENJFX_SHA}  openjfx-jmods.zip" | shasum -a256 --check
 mkdir -p openjfx-jmods
-unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
-JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
+unzip -o -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+JMOD_VERSION=$(jmod describe ./openjfx-jmods/javafx.base.jmod | head -1)
 JMOD_VERSION=${JMOD_VERSION#*@}
 JMOD_VERSION=${JMOD_VERSION%%.*}
-POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout -B -f ../../../pom.xml)
 POM_JFX_VERSION=${POM_JFX_VERSION#*@}
 POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
-if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
+if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
 	>&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION})"
 	exit 1
 fi
