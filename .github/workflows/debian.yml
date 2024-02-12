@@ -145,7 +145,7 @@ jobs:
       
       # If ref is a tag, also upload to GitHub Releases:
       - name: Publish Debian package on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && inputs.dput
         env:
           GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
         run: |
