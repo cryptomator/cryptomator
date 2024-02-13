@@ -11,6 +11,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
@@ -34,15 +35,14 @@ public class UpdateChecker {
 	@Inject
 	UpdateChecker(Settings settings, Environment env, //
 				  @Named("latestVersion") StringProperty latestVersionProperty, //
-				  @Named("upToDate") BooleanProperty upToDate, //
 				  @Named("SemVer") Comparator<String> semVerComparator, //
 				  ScheduledService<String> updateCheckerService) {
 		this.env = env;
 		this.settings = settings;
 		this.latestVersionProperty = latestVersionProperty;
-		this.upToDate = upToDate;
 		this.semVerComparator = semVerComparator;
 		this.updateCheckerService = updateCheckerService;
+		this.upToDate = new SimpleBooleanProperty();
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {

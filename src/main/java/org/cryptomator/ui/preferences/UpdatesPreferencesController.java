@@ -90,5 +90,5 @@ public class UpdatesPreferencesController implements FxController {
 
 	public ReadOnlyBooleanProperty upToDateProperty(){ return upToDate;}
 
-	public Boolean getUpToDate(){ return upToDate.get();}
+	public boolean getUpToDate(){ return upToDate.get();}
 }

@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
@@ -39,13 +37,6 @@ public abstract class UpdateCheckerModule {
 	@FxApplicationScoped
 	static StringProperty provideLatestVersion() {
 		return new SimpleStringProperty();
-	}
-
-	@Provides
-	@Named("upToDate")
-	@FxApplicationScoped
-	static BooleanProperty provideUpToDate() {
-		return new SimpleBooleanProperty();
 	}
 
 	@Provides
