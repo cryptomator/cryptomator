@@ -117,7 +117,7 @@ public class Mounter {
 				} else if (canMountToDir) {
 					var dirName = vaultSettings.mountName.get();
 					//required for https://github.com/cryptomator/cryptomator/issues/3272
-					if(service.getClass().getCanonicalName().equals("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider")) {
+					if(service.getClass().getCanonicalName().equals("org.cryptomator.frontend.fuse.mount.FuseTMountProvider")) {
 						dirName = vaultSettings.id;
 					}
 					var mountPoint = defaultMountPointBase.resolve(dirName);
