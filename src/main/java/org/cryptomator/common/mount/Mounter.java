@@ -7,6 +7,8 @@ import org.cryptomator.integrations.mount.Mount;
 import org.cryptomator.integrations.mount.MountBuilder;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.MountService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,6 +29,8 @@ import static org.cryptomator.integrations.mount.MountCapability.UNMOUNT_FORCED;
 
 @Singleton
 public class Mounter {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Mounter.class);
 
 	// mount providers (key) can not be used if any of the conflicting mount providers (values) are already in use
 	private static final Map<String, Set<String>> CONFLICTING_MOUNT_SERVICES = Map.of(
@@ -121,7 +125,8 @@ public class Mounter {
 						dirName = vaultSettings.id;
 					}
 					var mountPoint = defaultMountPointBase.resolve(dirName);
-					Files.createDirectories(mountPoint);
+					var toDelete = Files.createDirectories(mountPoint);
+					cleanup = () -> removeCreatedDirectory(toDelete);
 					builder.setMountpoint(mountPoint);
 				}
 			} else {
@@ -157,6 +162,14 @@ public class Mounter {
 			return cleanup;
 		}
 
+	}
+
+	private void removeCreatedDirectory(Path toDelete) {
+		try {
+			Files.delete(toDelete);
+		} catch (IOException e) {
+			LOG.warn("Unable to remove {} after unmount: {}.", toDelete, e.getMessage());
+		}
 	}
 
 	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot) throws IOException, MountFailedException {
