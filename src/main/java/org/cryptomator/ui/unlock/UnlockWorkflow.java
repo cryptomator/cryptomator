@@ -104,13 +104,6 @@ public class UnlockWorkflow extends Task<Void> {
 		appWindows.showErrorWindow(e, window, null);
 	}
 
-	private void centerOnPrimaryStage(Window window){
-		double centerXPosition = mainWindow.getX() + (mainWindow.getWidth() - window.getWidth()) / 2;
-		double centerYPosition = mainWindow.getY() + (mainWindow.getHeight() - window.getHeight()) / 2;
-		window.setX(centerXPosition);
-		window.setY(centerYPosition);
-	}
-
 	@Override
 	protected void succeeded() {
 		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayName());
@@ -119,7 +112,8 @@ public class UnlockWorkflow extends Task<Void> {
 			case ASK -> Platform.runLater(() -> {
 				window.setScene(successScene.get());
 				window.show();
-				centerOnPrimaryStage(window);
+				window.setX(mainWindow.getX() + (mainWindow.getWidth() - window.getWidth()) / 2);
+				window.setY(mainWindow.getY() + (mainWindow.getHeight() - window.getHeight()) / 2);
 			});
 			case REVEAL -> {
 				Platform.runLater(window::close);
