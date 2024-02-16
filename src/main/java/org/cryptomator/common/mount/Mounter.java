@@ -125,8 +125,8 @@ public class Mounter {
 						dirName = vaultSettings.id;
 					}
 					var mountPoint = defaultMountPointBase.resolve(dirName);
-					var toDelete = Files.createDirectories(mountPoint);
-					cleanup = () -> removeCreatedDirectory(toDelete);
+					Files.createDirectories(mountPoint);
+					cleanup = () -> removeCreatedDirectory(mountPoint);
 					builder.setMountpoint(mountPoint);
 				}
 			} else {
@@ -137,9 +137,7 @@ public class Mounter {
 					}
 				} else if (canMountToParent && !canMountToDir) {
 					MountWithinParentUtil.prepareParentNoMountPoint(userChosenMountPoint);
-					cleanup = () -> {
-						MountWithinParentUtil.cleanup(userChosenMountPoint);
-					};
+					cleanup = () -> MountWithinParentUtil.cleanup(userChosenMountPoint);
 				}
 				try {
 					builder.setMountpoint(userChosenMountPoint);
