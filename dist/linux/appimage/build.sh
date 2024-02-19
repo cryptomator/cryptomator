@@ -64,7 +64,6 @@ ${JAVA_HOME}/bin/jlink \
     --compress zip-0
 
 # create app dir
-envsubst '${SEMVER_STR} ${REVISION_NUM}' < ../launcher-gtk2.properties > launcher-gtk2.properties
 ${JAVA_HOME}/bin/jpackage \
     --verbose \
     --type app-image \
@@ -92,7 +91,6 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\"" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
-    --add-launcher cryptomator-gtk2=launcher-gtk2.properties \
     --resource-dir ../resources
 
 # transform AppDir
@@ -128,5 +126,5 @@ chmod +x /tmp/appimagetool.AppImage
 echo ""
 echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${MACHINE_TYPE}.AppImage"
 echo ""
-echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir runtime squashfs-root openjfx-jmods; rm launcher-gtk2.properties /tmp/appimagetool.AppImage openjfx-jmods.zip"
+echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir runtime squashfs-root openjfx-jmods; rm /tmp/appimagetool.AppImage openjfx-jmods.zip"
 echo ""
