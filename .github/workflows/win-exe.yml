@@ -416,8 +416,8 @@ jobs:
           local-dir: files/
   notify-winget:
     name: Notify for winget-release
-    if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'published'
-    needs: [build-msi]
+    if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'published' && needs.get-version.outputs.versionType == 'stable'
+    needs: [build-msi, get-version]
     runs-on: ubuntu-latest
     steps:
       - name: Slack Notification
