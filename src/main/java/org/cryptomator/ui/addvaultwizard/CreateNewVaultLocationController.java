@@ -235,7 +235,7 @@ public class CreateNewVaultLocationController implements FxController {
 	}
 
 	public boolean isValidVaultPath() {
-		return validVaultPath.getValue();
+		return Boolean.TRUE.equals(validVaultPath.getValue());
 	}
 
 	public boolean isLoadingPresetLocations() {
