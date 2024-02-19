@@ -20,9 +20,10 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.concurrent.Task;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import java.io.IOException;
 
 /**
@@ -112,8 +113,16 @@ public class UnlockWorkflow extends Task<Void> {
 			case ASK -> Platform.runLater(() -> {
 				window.setScene(successScene.get());
 				window.show();
-				window.setX(mainWindow.getX() + (mainWindow.getWidth() - window.getWidth()) / 2);
-				window.setY(mainWindow.getY() + (mainWindow.getHeight() - window.getHeight()) / 2);
+				double x = mainWindow.getX() + (mainWindow.getWidth() - window.getWidth()) / 2;
+				double y = mainWindow.getY() + (mainWindow.getHeight() - window.getHeight()) / 2;
+				if(!mainWindow.isShowing()) {
+					Screen screen = Screen.getScreensForRectangle(mainWindow.getX(), mainWindow.getY(), mainWindow.getWidth(), mainWindow.getHeight()).get(0);
+					Rectangle2D bounds = screen.getVisualBounds();
+					x = bounds.getMinX() + (bounds.getWidth() - window.getWidth()) / 2;
+					y = bounds.getMinY() + (bounds.getHeight() - window.getHeight()) / 2;
+				}
+				window.setX(x);
+				window.setY(y);
 			});
 			case REVEAL -> {
 				Platform.runLater(window::close);
