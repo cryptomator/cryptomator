@@ -253,7 +253,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dmg-${{ matrix.output-suffix }}
-          path: Cryptomator-*.dmg
+          path: |
+            Cryptomator-*.dmg
+            Cryptomator-*.asc
           if-no-files-found: error
       - name: Publish dmg on GitHub Releases
         if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'published'
