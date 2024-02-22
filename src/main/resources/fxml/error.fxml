@@ -9,86 +9,97 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.Group?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<VBox xmlns:fx="http://javafx.com/fxml"
+<HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.error.ErrorController"
+	  minWidth="450"
+	  minHeight="450"
 	  prefWidth="450"
 	  prefHeight="450"
-	  spacing="18"
-	  alignment="TOP_CENTER">
+	  spacing="12">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
-	<children>
-		<HBox spacing="12" VBox.vgrow="NEVER">
-			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
-			</StackPane>
-			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel styleClass="label-extra-large" format="%error.message" arg1="${controller.errorCode}"/>
-				<VBox visible="${!controller.askedForLookupDatabasePermission}" managed="${!controller.askedForLookupDatabasePermission}">
-					<Label text="%error.lookupPermissionMessage" wrapText="true"/>
-					<Region VBox.vgrow="ALWAYS" minHeight="18"/>
-					<ButtonBar buttonMinWidth="120" buttonOrder="+NY">
-						<buttons>
-							<Button text="%error.dismiss" ButtonBar.buttonData="NO" onAction="#dismiss"/>
-							<Button text="%error.lookUpSolution" ButtonBar.buttonData="YES" defaultButton="true" onAction="#lookUpSolution"/>
-						</buttons>
-					</ButtonBar>
-				</VBox>
-				<VBox visible="${controller.askedForLookupDatabasePermission}" managed="${controller.askedForLookupDatabasePermission}">
-					<FontAwesome5Spinner glyphSize="24" visible="${controller.isLoadingHttpResponse}" managed="${controller.isLoadingHttpResponse}"/>
-					<VBox visible="${!controller.isLoadingHttpResponse}" managed="${!controller.isLoadingHttpResponse}">
-						<Label text="%error.existingSolutionDescription" wrapText="true" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}"/>
-						<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.solution" onAction="#showSolution" contentDisplay="LEFT" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}">
-							<graphic>
-								<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
-							</graphic>
-						</Hyperlink>
-						<Label text="%error.description" wrapText="true" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}"/>
-						<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.lookup" onAction="#searchError" contentDisplay="LEFT" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}">
-							<graphic>
-								<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
-							</graphic>
-						</Hyperlink>
-						<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.report" onAction="#reportError" contentDisplay="LEFT" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}">
-							<graphic>
-								<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
-							</graphic>
-						</Hyperlink>
-					</VBox>
-				</VBox>
-			</VBox>
-		</HBox>
-		<VBox spacing="6" VBox.vgrow="ALWAYS">
-			<HBox>
-				<Label text="%error.technicalDetails"/>
-				<Region HBox.hgrow="ALWAYS"/>
-				<Hyperlink styleClass="hyperlink-underline" text="%generic.button.copy" onAction="#copyDetails" contentDisplay="LEFT" visible="${!controller.copiedDetails}" managed="${!controller.copiedDetails}">
-					<graphic>
-						<FontAwesome5IconView glyph="CLIPBOARD" glyphSize="12"/>
-					</graphic>
-				</Hyperlink>
-				<Hyperlink styleClass="hyperlink-underline" text="%generic.button.copied" onAction="#copyDetails" contentDisplay="LEFT" visible="${controller.copiedDetails}" managed="${controller.copiedDetails}">
-					<graphic>
-						<FontAwesome5IconView glyph="CHECK" glyphSize="12"/>
-					</graphic>
-				</Hyperlink>
-			</HBox>
-			<TextArea VBox.vgrow="ALWAYS" text="${controller.detailText}" prefRowCount="5" editable="false"/>
-		</VBox>
+	<Group>
+		<StackPane>
+			<padding>
+				<Insets topRightBottomLeft="6"/>
+			</padding>
+			<Circle styleClass="glyph-icon-primary" radius="24"/>
+			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
+		</StackPane>
+	</Group>
+	<VBox HBox.hgrow="ALWAYS">
+		<FormattedLabel styleClass="label-extra-large" format="%error.message" arg1="${controller.errorCode}">
+			<padding>
+				<Insets bottom="6" top="6"/>
+			</padding>
+		</FormattedLabel>
 
+		<VBox visible="${!controller.askedForLookupDatabasePermission}" managed="${!controller.askedForLookupDatabasePermission}">
+			<Label text="%error.lookupPermissionMessage" wrapText="true"/>
+			<Region minHeight="12"/>
+			<ButtonBar buttonMinWidth="120" buttonOrder="+NY">
+				<buttons>
+					<Button text="%error.dismiss" ButtonBar.buttonData="NO" onAction="#dismiss"/>
+					<Button text="%error.lookUpSolution" ButtonBar.buttonData="YES" defaultButton="true" onAction="#lookUpSolution"/>
+				</buttons>
+			</ButtonBar>
+		</VBox>
+		<VBox visible="${controller.askedForLookupDatabasePermission}" managed="${controller.askedForLookupDatabasePermission}">
+			<FontAwesome5Spinner glyphSize="24" visible="${controller.isLoadingHttpResponse}" managed="${controller.isLoadingHttpResponse}"/>
+			<VBox visible="${!controller.isLoadingHttpResponse}" managed="${!controller.isLoadingHttpResponse}">
+				<Label text="%error.existingSolutionDescription" wrapText="true" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}"/>
+				<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.solution" onAction="#showSolution" contentDisplay="LEFT" visible="${controller.errorSolutionFound}" managed="${controller.errorSolutionFound}">
+					<graphic>
+						<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
+					</graphic>
+				</Hyperlink>
+				<Label text="%error.description" wrapText="true" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}"/>
+				<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.lookup" onAction="#searchError" contentDisplay="LEFT" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}">
+					<graphic>
+						<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
+					</graphic>
+				</Hyperlink>
+				<Hyperlink styleClass="hyperlink-underline" text="%error.hyperlink.report" onAction="#reportError" contentDisplay="LEFT" visible="${!controller.errorSolutionFound}" managed="${!controller.errorSolutionFound}">
+					<graphic>
+						<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
+					</graphic>
+				</Hyperlink>
+			</VBox>
+		</VBox>
+		<Region minHeight="12"/>
+		<HBox>
+			<padding>
+				<Insets top="6" bottom="6"/>
+			</padding>
+			<Label text="%error.technicalDetails"/>
+			<Region HBox.hgrow="ALWAYS"/>
+			<Hyperlink styleClass="hyperlink-underline" text="%generic.button.copy" onAction="#copyDetails" contentDisplay="LEFT" visible="${!controller.copiedDetails}" managed="${!controller.copiedDetails}">
+				<graphic>
+					<FontAwesome5IconView glyph="CLIPBOARD" glyphSize="12"/>
+				</graphic>
+			</Hyperlink>
+			<Hyperlink styleClass="hyperlink-underline" text="%generic.button.copied" onAction="#copyDetails" contentDisplay="LEFT" visible="${controller.copiedDetails}" managed="${controller.copiedDetails}">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK" glyphSize="12"/>
+				</graphic>
+			</Hyperlink>
+		</HBox>
+		<TextArea VBox.vgrow="ALWAYS" text="${controller.detailText}" prefRowCount="5" editable="false"/>
+
+		<Region minHeight="18"/>
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+C">
 			<buttons>
 				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back" visible="${controller.previousScenePresent}"/>
 				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#close"/>
 			</buttons>
 		</ButtonBar>
-	</children>
-</VBox>
+	</VBox>
+</HBox>
