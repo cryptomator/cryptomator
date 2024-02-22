@@ -119,12 +119,7 @@ public class Mounter {
 					Files.createDirectories(defaultMountPointBase);
 					builder.setMountpoint(defaultMountPointBase);
 				} else if (canMountToDir) {
-					var dirName = vaultSettings.mountName.get();
-					//required for https://github.com/cryptomator/cryptomator/issues/3272
-					if(service.getClass().getCanonicalName().equals("org.cryptomator.frontend.fuse.mount.FuseTMountProvider")) {
-						dirName = vaultSettings.id;
-					}
-					var mountPoint = defaultMountPointBase.resolve(dirName);
+					var mountPoint = defaultMountPointBase.resolve(vaultSettings.id);
 					Files.createDirectories(mountPoint);
 					cleanup = () -> removeCreatedDirectory(mountPoint);
 					builder.setMountpoint(mountPoint);
