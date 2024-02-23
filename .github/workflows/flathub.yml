@@ -1,0 +1,85 @@
+name: Create PR for flathub
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag'
+        required: true
+
+jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ inputs.tag }}
+  tarball:
+    name: Determines tarball url and compute checksum
+    runs-on: ubuntu-latest
+    needs: [get-version]
+    if:  github.event_name == 'workflow_dispatch' || needs.get-version.outputs.versionType == 'stable'
+    outputs:
+      url: ${{ steps.url.outputs.url}}
+      sha512: ${{ steps.sha512.outputs.sha512}}
+    steps:
+      - name: Determine tarball url
+        id: url
+        run: |
+          URL="";
+          if [[ -n "${{ inputs.tag }}"  ]]; then
+            URL="https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ inputs.tag }}.tar.gz"
+          else
+            URL="https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name }}.tar.gz"
+          fi
+          echo "url=${URL} >> "$GITHUB_OUTPUT"
+      - name: Download source tarball and compute checksum
+        id: sha512
+        run: |
+          curl --silent --fail-with-body -L -H "Accept: application/vnd.github+json" ${{ steps.url.outputs.url }} --output cryptomator.tar.gz
+          TARBALL_SHA512=$(sha512sum cryptomator.tar.gz | cut -d ' ' -f1)
+          echo "sha512=${TARBALL_SHA512}" >> "$GITHUB_OUTPUT"
+  flathub:
+    name: Create PR for flathub
+    runs-on: ubuntu-latest
+    needs: [tarball, get-version]
+    env:
+      FLATHUB_PR_URL: tbd
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'flathub/org.cryptomator.Cryptomator'
+      - name: Checkout release branch
+        run: |
+          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+      - name: Download yq
+        run: wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq && chmod +x yq
+      - name: Update build file
+        run: |
+          ./yq -i eval '(.modules[] | select(.name == "cryptomator") | .build-options.env.VERSION) = "${{ needs.get-version.outputs.semVerStr }}"' org.cryptomator.Cryptomator.yaml
+          ./yq -i eval '(.modules[] | select(.name == "cryptomator") | .sources[] | select(.type == "archive" and .url = "https://github.com/cryptomator/cryptomator/archive*") | .url) = "${{ needs.tarball.outputs.url }}"' org.cryptomator.Cryptomator.yaml
+          ./yq -i eval '(.modules[] | select(.name == "cryptomator") | .sources[] | select(.type == "archive" and .url = "https://github.com/cryptomator/cryptomator/archive*") | .sha512) = "${{ needs.tarball.outputs.sha512 }}"' org.cryptomator.Cryptomator.yaml
+      - name: Commit and push
+        run: |
+          git stage .
+          git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
+          git push
+      - name: Create pull request
+        run: |
+          PR_URL=$(gh pr create --head --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body "> [!IMPORTANT]\n> Todos:\n> [ ] Update maven dependencies\n> [ ] Check for JDK update\n> [ ] Check for JFX update")
+          echo "FLATHUB_PR_URL=$PR_URL" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        if: github.event_name == 'release'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: false
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "Flathub release PR created for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
+          SLACK_MESSAGE: "See <${{ env.FLATHUB_PR_URL }}|PR> on how to proceed.>."
+          SLACK_FOOTER: false
+          MSG_MINIMAL: true
