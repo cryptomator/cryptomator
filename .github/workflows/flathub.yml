@@ -70,7 +70,7 @@ jobs:
           git push
       - name: Create pull request
         run: |
-          PR_URL=$(gh pr create --head --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body "> [!IMPORTANT]\n> Todos:\n> [ ] Update maven dependencies\n> [ ] Check for JDK update\n> [ ] Check for JFX update")
+          PR_URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body "> [!IMPORTANT]\n> Todos:\n> - [ ] Update maven dependencies\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update")
           echo "FLATHUB_PR_URL=$PR_URL" >> "$GITHUB_ENV"
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
