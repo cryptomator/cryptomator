@@ -49,16 +49,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: 'flathub/org.cryptomator.Cryptomator'
+          token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
       - name: Checkout release branch
         run: |
           git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
-      - name: Download yq
-        run: wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq && chmod +x yq
-      - name: Update build file
+      - name: Update build file with yq
         run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq && chmod +x yq
           ./yq -i eval '(.modules[] | select(.name == "cryptomator") | .build-options.env.VERSION) = "${{ needs.get-version.outputs.semVerStr }}"' org.cryptomator.Cryptomator.yaml
           ./yq -i eval '(.modules[] | select(.name == "cryptomator") | .sources[] | select(.type == "archive" and .url = "https://github.com/cryptomator/cryptomator/archive*") | .url) = "${{ needs.tarball.outputs.url }}"' org.cryptomator.Cryptomator.yaml
           ./yq -i eval '(.modules[] | select(.name == "cryptomator") | .sources[] | select(.type == "archive" and .url = "https://github.com/cryptomator/cryptomator/archive*") | .sha512) = "${{ needs.tarball.outputs.sha512 }}"' org.cryptomator.Cryptomator.yaml
+          rm yq
       - name: Commit and push
         run: |
           git stage .
