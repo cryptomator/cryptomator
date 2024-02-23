@@ -32,7 +32,7 @@ jobs:
           else
             URL="https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name }}.tar.gz"
           fi
-          echo "url=${URL} >> "$GITHUB_OUTPUT"
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
       - name: Download source tarball and compute checksum
         id: sha512
         run: |
