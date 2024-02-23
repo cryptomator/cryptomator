@@ -62,6 +62,8 @@ jobs:
           rm yq
       - name: Commit and push
         run: |
+          git config --global user.email "${{ github.event.sender.email }}"
+          git config --global user.name "${{ github.event.sender.name }}"
           git stage .
           git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
           git push
