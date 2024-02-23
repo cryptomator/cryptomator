@@ -64,6 +64,7 @@ jobs:
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git config push.autoSetupRemote true
           git stage .
           git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
           git push
