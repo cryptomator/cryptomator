@@ -43,11 +43,11 @@
 	</provides>
 
 	<screenshots>
-		<screenshot type="default" environment="windows:light">
+		<screenshot type="default">
 			<caption>Light theme</caption>
 			<image>https://user-images.githubusercontent.com/11858409/156986109-6e58f59c-8b8c-4501-b33b-bb1e33007cea.png</image>
 		</screenshot>
-		<screenshot environment="windows:dark">
+		<screenshot>
 			<caption>Dark theme</caption>
 			<image>https://user-images.githubusercontent.com/11858409/156986113-6c5d7801-86e0-4643-bc2f-aff9d95d3ce0.png</image>
 		</screenshot>
