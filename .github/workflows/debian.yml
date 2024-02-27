@@ -44,7 +44,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:coffeelibs/openjdk
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.COFFEELIBS_JDK }}=${{ env.COFFEELIBS_JDK_VERSION }} libgtk2.0-0
+          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.COFFEELIBS_JDK }}=${{ env.COFFEELIBS_JDK_VERSION }}
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -142,10 +142,9 @@ jobs:
       - name: Publish on PPA
         if: inputs.dput
         run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_*_source.changes
-      
       # If ref is a tag, also upload to GitHub Releases:
       - name: Publish Debian package on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && inputs.dput
         env:
           GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
         run: |

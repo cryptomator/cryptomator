@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.12.2</version>
+	<version>1.12.3</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -33,8 +33,8 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.6.8</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>1.3.0</cryptomator.integrations.version>
+		<cryptomator.cryptofs.version>2.6.9</cryptomator.cryptofs.version>
+		<cryptomator.integrations.version>1.3.1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.5</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.3</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.4.4</cryptomator.integrations.linux.version>
@@ -51,8 +51,8 @@
 		<javafx.version>21.0.1</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
-		<logback.version>1.4.14</logback.version>
-		<slf4j.version>2.0.11</slf4j.version>
+		<logback.version>1.5.0</logback.version>
+		<slf4j.version>2.0.12</slf4j.version>
 		<tinyoauth2.version>0.8.0</tinyoauth2.version>
 		<zxcvbn.version>1.8.2</zxcvbn.version>
 

@@ -38,14 +38,14 @@ fi
 curl -L ${OPENJFX_URL} -o openjfx-jmods.zip
 echo "${OPENJFX_SHA}  openjfx-jmods.zip" | shasum -a256 --check
 mkdir -p openjfx-jmods
-unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
-JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
+unzip -o -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+JMOD_VERSION=$(jmod describe ./openjfx-jmods/javafx.base.jmod | head -1)
 JMOD_VERSION=${JMOD_VERSION#*@}
 JMOD_VERSION=${JMOD_VERSION%%.*}
-POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout -B -f ../../../pom.xml)
 POM_JFX_VERSION=${POM_JFX_VERSION#*@}
 POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
-if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
+if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
 	>&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION})"
 	exit 1
 fi
@@ -64,7 +64,6 @@ ${JAVA_HOME}/bin/jlink \
     --compress zip-0
 
 # create app dir
-envsubst '${SEMVER_STR} ${REVISION_NUM}' < ../launcher-gtk2.properties > launcher-gtk2.properties
 ${JAVA_HOME}/bin/jpackage \
     --verbose \
     --type app-image \
@@ -92,7 +91,6 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\"" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
-    --add-launcher cryptomator-gtk2=launcher-gtk2.properties \
     --resource-dir ../resources
 
 # transform AppDir
@@ -128,5 +126,5 @@ chmod +x /tmp/appimagetool.AppImage
 echo ""
 echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${MACHINE_TYPE}.AppImage"
 echo ""
-echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir runtime squashfs-root openjfx-jmods; rm launcher-gtk2.properties /tmp/appimagetool.AppImage openjfx-jmods.zip"
+echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir runtime squashfs-root openjfx-jmods; rm /tmp/appimagetool.AppImage openjfx-jmods.zip"
 echo ""

@@ -11,6 +11,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,9 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.concurrent.Task;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.io.IOException;
 
@@ -33,6 +36,7 @@ public class UnlockWorkflow extends Task<Void> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockWorkflow.class);
 
+	private final Stage mainWindow;
 	private final Stage window;
 	private final Vault vault;
 	private final VaultService vaultService;
@@ -44,7 +48,8 @@ public class UnlockWorkflow extends Task<Void> {
 	private final ObjectProperty<IllegalMountPointException> illegalMountPointException;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, //
+	UnlockWorkflow(@PrimaryStage Stage mainWindow, //
+				   @UnlockWindow Stage window, //
 				   @UnlockWindow Vault vault, //
 				   VaultService vaultService, //
 				   @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, //
@@ -53,6 +58,7 @@ public class UnlockWorkflow extends Task<Void> {
 				   FxApplicationWindows appWindows, //
 				   @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, //
 				   @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException) {
+		this.mainWindow = mainWindow;
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -107,6 +113,19 @@ public class UnlockWorkflow extends Task<Void> {
 			case ASK -> Platform.runLater(() -> {
 				window.setScene(successScene.get());
 				window.show();
+				double x = mainWindow.getX() + (mainWindow.getWidth() - window.getWidth()) / 2;
+				double y = mainWindow.getY() + (mainWindow.getHeight() - window.getHeight()) / 2;
+				if(!mainWindow.isShowing()) {
+					Screen screen = Screen.getScreensForRectangle(mainWindow.getX(), mainWindow.getY(), mainWindow.getWidth(), mainWindow.getHeight())
+							.stream()
+							.findFirst()
+							.orElse(Screen.getPrimary());
+					Rectangle2D bounds = screen.getVisualBounds();
+					x = bounds.getMinX() + (bounds.getWidth() - window.getWidth()) / 2;
+					y = bounds.getMinY() + (bounds.getHeight() - window.getHeight()) / 2;
+				}
+				window.setX(x);
+				window.setY(y);
 			});
 			case REVEAL -> {
 				Platform.runLater(window::close);

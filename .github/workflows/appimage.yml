@@ -86,11 +86,6 @@ jobs:
           --no-man-pages
           --strip-debug
           --compress zip-0
-      - name: Prepare additional launcher
-        run: envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/linux/launcher-gtk2.properties > launcher-gtk2.properties
-        env:
-          SEMVER_STR: ${{  needs.get-version.outputs.semVerStr }}
-          REVISION_NUM: ${{  needs.get-version.outputs.revNum }}
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -173,7 +168,7 @@ jobs:
             cryptomator-*.asc
           if-no-files-found: error
       - name: Publish AppImage on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
         uses: softprops/action-gh-release@v1
         with:
           fail_on_unmatched_files: true
