@@ -44,7 +44,7 @@ jobs:
           fi
       - name: Validate release in org.cryptomator.Cryptomator.metainfo.xml file
         run: |
-          if ! grep -q "<release date=\".*\" version=\"${{ steps.validate-pom-version.outputs.semVerStr }}\"/>" dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml; then
+          if ! grep -q "<release date=\".*\" version=\"${{ steps.validate-pom-version.outputs.semVerStr }}\">" dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml; then
             echo "Release not set in dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml"
             exit 1
           fi
