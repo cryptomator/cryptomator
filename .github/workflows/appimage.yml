@@ -168,7 +168,7 @@ jobs:
             cryptomator-*.asc
           if-no-files-found: error
       - name: Publish AppImage on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'published'
+        if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
         uses: softprops/action-gh-release@v1
         with:
           fail_on_unmatched_files: true

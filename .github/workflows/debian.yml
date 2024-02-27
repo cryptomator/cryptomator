@@ -142,7 +142,6 @@ jobs:
       - name: Publish on PPA
         if: inputs.dput
         run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_*_source.changes
-      
       # If ref is a tag, also upload to GitHub Releases:
       - name: Publish Debian package on GitHub Releases
         if: startsWith(github.ref, 'refs/tags/') && inputs.dput

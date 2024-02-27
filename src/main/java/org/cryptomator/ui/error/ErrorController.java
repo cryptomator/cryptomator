@@ -75,6 +75,7 @@ public class ErrorController implements FxController {
 	private final BooleanExpression errorSolutionFound = matchingErrorDiscussion.isNotNull();
 	private final BooleanProperty isLoadingHttpResponse = new SimpleBooleanProperty();
 	private final BooleanProperty askedForLookupDatabasePermission = new SimpleBooleanProperty();
+	private final boolean formerSceneWasResizable;
 
 	@Inject
 	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window, Environment environment, ExecutorService executorService) {
@@ -85,12 +86,14 @@ public class ErrorController implements FxController {
 		this.window = window;
 		this.environment = environment;
 		this.executorService = executorService;
+		this.formerSceneWasResizable = window.isResizable();
 	}
 
 	@FXML
 	public void back() {
 		if (previousScene != null) {
 			window.setScene(previousScene);
+			window.setResizable(formerSceneWasResizable);
 		}
 	}
 

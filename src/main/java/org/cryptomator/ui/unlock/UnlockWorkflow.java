@@ -116,7 +116,10 @@ public class UnlockWorkflow extends Task<Void> {
 				double x = mainWindow.getX() + (mainWindow.getWidth() - window.getWidth()) / 2;
 				double y = mainWindow.getY() + (mainWindow.getHeight() - window.getHeight()) / 2;
 				if(!mainWindow.isShowing()) {
-					Screen screen = Screen.getScreensForRectangle(mainWindow.getX(), mainWindow.getY(), mainWindow.getWidth(), mainWindow.getHeight()).get(0);
+					Screen screen = Screen.getScreensForRectangle(mainWindow.getX(), mainWindow.getY(), mainWindow.getWidth(), mainWindow.getHeight())
+							.stream()
+							.findFirst()
+							.orElse(Screen.getPrimary());
 					Rectangle2D bounds = screen.getVisualBounds();
 					x = bounds.getMinX() + (bounds.getWidth() - window.getWidth()) / 2;
 					y = bounds.getMinY() + (bounds.getHeight() - window.getHeight()) / 2;
