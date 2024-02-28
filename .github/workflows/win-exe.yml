@@ -39,8 +39,6 @@ jobs:
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
-    outputs:
-      download-url: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }} #ónly set on a release
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -256,30 +254,11 @@ jobs:
             Cryptomator-*.msi
             Cryptomator-*.asc
           if-no-files-found: error
-      - name: Publish .msi on GitHub Releases
-        id: publish
-        if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
-        uses: softprops/action-gh-release@v1
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          # do not change ordering of filelist, required for correct job output
-          files: |
-            *.msi
-            *.asc
-
-  allowlist-msi:
-    uses: ./.github/workflows/av-whitelist.yml
-    needs: [build-msi]
-    with:
-      url: ${{ needs.build-msi.outputs.download-url }}
 
   build-exe:
     name: Build .exe installer
     runs-on: windows-latest
     needs: [get-version, build-msi]
-    outputs:
-      download-url: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }} #ónly set on a release
     steps:
       - uses: actions/checkout@v4
       - name: Download .msi
@@ -377,28 +356,48 @@ jobs:
             Cryptomator-*.exe
             Cryptomator-*.asc
           if-no-files-found: error
+
+  publish:
+    name: Publish installers to the github release
+    if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    needs: [build-msi, build-exe]
+    outputs:
+      download-url-msi: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }}
+      download-url-exe: ${{ fromJSON(steps.publish.outputs.assets)[1].browser_download_url }}
+    steps:
+      - name: Download installers
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
       - name: Publish .msi on GitHub Releases
         id: publish
-        if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
         uses: softprops/action-gh-release@v1
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           # do not change ordering of filelist, required for correct job output
           files: |
-            Cryptomator-*.exe
-            Cryptomator-*.asc
+            *.msi
+            *.exe
+            *.asc
+
+  allowlist-msi:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [publish]
+    with:
+      url: ${{ needs.publish.outputs.download-url-msi }}
 
   allowlist-exe:
     uses: ./.github/workflows/av-whitelist.yml
-    needs: [build-exe]
+    needs: [publish]
     with:
-      url: ${{ needs.build-exe.outputs.download-url }}
+      url: ${{ needs.publish.outputs.download-url-exe }}
 
   notify-winget:
     name: Notify for winget-release
-    if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published' && needs.get-version.outputs.versionType == 'stable'
-    needs: [build-msi, get-version]
+    if: needs.get-version.outputs.versionType == 'stable'
+    needs: [publish, get-version]
     runs-on: ubuntu-latest
     steps:
       - name: Slack Notification
