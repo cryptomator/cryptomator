@@ -31,6 +31,7 @@
         </BootstrapperApplicationRef>
 
         <Chain>
+            <!-- WixBundleActions are defined in the BOOTSTRAPPER_ACTION enum, see https://github.com/wixtoolset/wix3/blob/473562c0c3904216f2b6963c0ad244a8cc41e9ee/src/burn/inc/IBootstrapperEngine.h#L15 -->
             <ExePackage Cache="yes" PerMachine="yes" Permanent="no"
               SourceFile="resources\winfsp-uninstaller.exe"
               DisplayName="Removing outdated WinFsp Driver"
@@ -51,11 +52,13 @@ Do you want to continue?&quot;" RepairArgument="-q" UninstallArgument="-s" />
             </ExePackage>
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
             <MsiPackage
+                Cache="yes"
                 SourceFile="resources\Cryptomator.msi"
                 CacheId="cryptomator-bundle-cryptomator"
                 DisplayInternalUI="no"
                 Visible="no"/>
             <MsiPackage
+                Cache="yes"
                 SourceFile="resources\winfsp.msi"
                 CacheId="cryptomator-bundle-winfsp"
                 Visible="yes"
