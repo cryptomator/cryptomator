@@ -68,7 +68,7 @@ jobs:
           git push
       - name: Create pull request
         run: |
-          echo "> [!IMPORTANT]\n> Todos:\n> - [ ] Update maven dependencies\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
+          printf "> [!IMPORTANT]\n> Todos:\n> - [ ] Update maven dependencies\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
           PR_URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
           echo "FLATHUB_PR_URL=$PR_URL" >> "$GITHUB_ENV"
         env:
