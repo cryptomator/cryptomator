@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
+
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -18,19 +19,17 @@
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
-	<children>
-		<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
+	<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
+	<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
-		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
-
-		<VBox alignment="CENTER" spacing="12">
-			<Button text="%preferences.updates.checkNowBtn" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
-				<graphic>
-					<FontAwesome5Spinner fx:id="spinner" glyphSize="12"/>
-				</graphic>
-			</Button>
-
-			<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}"/>
-		</VBox>
-	</children>
+	<VBox alignment="CENTER" spacing="12">
+		<Button text="%preferences.updates.checkNowBtn" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
+			<graphic>
+				<FontAwesome5Spinner glyphSize="12"/>
+			</graphic>
+		</Button>
+		<FormattedLabel fx:id="statusFormattedLabel" format="%preferences.updates.status" wrapText="true"/>
+		<FormattedLabel fx:id="updateCheckDateFormattedLabel" format="%preferences.updates.lastUpdateCheck" textAlignment="CENTER" wrapText="true"/>
+		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
+	</VBox>
 </VBox>
