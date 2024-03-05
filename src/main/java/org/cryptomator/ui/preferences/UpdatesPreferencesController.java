@@ -8,6 +8,7 @@ import org.cryptomator.ui.controls.FormattedLabel;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 
 import javax.inject.Inject;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -17,12 +18,16 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.util.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Comparator;
 import java.util.Locale;
+
+
 
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {
@@ -46,6 +51,7 @@ public class UpdatesPreferencesController implements FxController {
 	public FormattedLabel updateCheckDateFormattedLabel;
 	public HBox checkFailedHBox;
 	public FormattedLabel latestVersionFormattedLabel;
+	public Label upToDateLabel;
 
 	@Inject
 	UpdatesPreferencesController(Application application, Environment environment, Settings settings, UpdateChecker updateChecker) {
@@ -73,11 +79,28 @@ public class UpdatesPreferencesController implements FxController {
 		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 		updateCheckDateFormattedLabel.arg1Property().bind(Bindings.createStringBinding(() -> (updateCheckDateProperty.get() != null) ? updateCheckDateProperty.get().format(formatter) : "-", updateCheckDateProperty));
 
-		checkFailedHBox.managedProperty().bind(updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED));
-		checkFailedHBox.visibleProperty().bind(updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED));
+		BooleanBinding isUpdateCheckFailed = updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED);
+		checkFailedHBox.managedProperty().bind(isUpdateCheckFailed);
+		checkFailedHBox.visibleProperty().bind(isUpdateCheckFailed);
 
 		latestVersionFormattedLabel.arg1Property().bind(Bindings.createStringBinding(() -> (latestVersion.get() != null) ? latestVersion.get() : "-", latestVersion));
 
+		BooleanBinding isUpdateSuccessfulAndCurrent = updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL)
+				.and(latestVersion.isEqualTo(currentVersion));
+
+		updateCheckStateProperty.addListener((_, _, _) -> {
+			if (isUpdateSuccessfulAndCurrent.get()) {
+				upToDateLabel.setVisible(true);
+				upToDateLabel.setManaged(true);
+
+				PauseTransition delay = new PauseTransition(Duration.seconds(5));
+				delay.setOnFinished(_ -> {
+					upToDateLabel.setVisible(false);
+					upToDateLabel.setManaged(false);
+				});
+				delay.play();
+			}
+		});
 	}
 
 	@FXML

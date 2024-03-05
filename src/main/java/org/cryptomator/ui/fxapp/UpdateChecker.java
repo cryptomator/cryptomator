@@ -68,9 +68,9 @@ public class UpdateChecker {
 	private void checkSucceeded(WorkerStateEvent event) {
 		String latestVersion = updateCheckerService.getValue();
 		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersion);
-		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 		updateCheckTimeProperty.set(LocalDateTime.now());
 		latestVersionProperty.set(latestVersion);
+		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 	}
 
 	private void checkFailed(WorkerStateEvent event) {
