@@ -119,9 +119,8 @@ public class Mounter {
 					Files.createDirectories(defaultMountPointBase);
 					builder.setMountpoint(defaultMountPointBase);
 				} else if (canMountToDir) {
-					var mountPoint = defaultMountPointBase.resolve(vaultSettings.id);
+					var mountPoint = defaultMountPointBase.resolve(vaultSettings.mountName.get());
 					Files.createDirectories(mountPoint);
-					cleanup = () -> removeCreatedDirectory(mountPoint);
 					builder.setMountpoint(mountPoint);
 				}
 			} else {
@@ -155,14 +154,6 @@ public class Mounter {
 			return cleanup;
 		}
 
-	}
-
-	private void removeCreatedDirectory(Path toDelete) {
-		try {
-			Files.delete(toDelete);
-		} catch (IOException e) {
-			LOG.warn("Unable to remove {} after unmount: {}.", toDelete, e.getMessage());
-		}
 	}
 
 	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot) throws IOException, MountFailedException {

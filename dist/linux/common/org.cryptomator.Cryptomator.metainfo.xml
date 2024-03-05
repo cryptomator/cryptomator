@@ -5,26 +5,27 @@
 	<metadata_license>FSFAP</metadata_license>
 	<project_license>GPL-3.0-or-later</project_license>
 	<name>Cryptomator</name>
-	<summary>Multi-platform client-side encryption tool optimized for cloud storages</summary>
+	<summary>Encryption made easy and optimized for the cloud</summary>
 
 	<description>
 		<p>
-			Cryptomator provides transparent, client-side encryption for your cloud. Protect your documents from unauthorized
-			access. Cryptomator is free and open source software, so you can rest assured there are no backdoors.
+			Cryptomator provides easy-to-use, transparent, client-side encryption for your cloud.
+			It protects your documents from unauthorized access and prying eyes, while you will still be able to view and edit your documents locally.
+			By not requiring any registration or account and performing all encryption locally, it gives you back control over your data and ensures your privacy.
+			Cryptomator is offered for all major platforms (including Android and iOS).
 		</p>
 		<p>
-			Cryptomator encrypts file contents and names using AES. Your passphrase is protected against bruteforcing attempts
-			using scrypt. Directory structures get obfuscated. The only thing which cannot be encrypted without breaking your
-			cloud synchronization is the modification date of your files.
+			Cryptomator encrypts file contents and names using the widespread industry standard AES.
+			Your passphrase is protected against brute forcing attempts using scrypt.
+			Additionally, directory structures get obfuscated.
+			For more info about the Cryptomator encryption scheme, check out the online documentation.
 		</p>
 		<p>
-			Cryptomator is a free and open source software licensed under the GPLv3. This allows anyone to check our code. It
-			is impossible to introduce backdoors for third parties. Also we cannot hide vulnerabilities. And the best thing
-			is: There is no need to trust us, as you can control us!
-		</p>
-		<p>
-			Vendor lock-ins are impossible. Even if we decided to stop development: The source code is already cloned by
-			hundreds of other developers. As you don't need an account, you will never stand in front of locked doors.
+			Cryptomator is a free and open-source software licensed under the GPLv3.
+			This allows anyone to check our code.
+			Thus, it is impossible to introduce backdoors for third parties or to hide vulnerabilities, so you do not need to trust Cryptomator.
+			Also, vendor lock-ins are impossible.
+			Even if we decided to stop development: The source code is already cloned by hundreds of other developers and development can be picked up by others.
 		</p>
 	</description>
 
@@ -42,7 +43,7 @@
 	</provides>
 
 	<screenshots>
-		<screenshot>
+		<screenshot type="default">
 			<caption>Light theme</caption>
 			<image>https://user-images.githubusercontent.com/11858409/156986109-6e58f59c-8b8c-4501-b33b-bb1e33007cea.png</image>
 		</screenshot>
@@ -56,16 +57,22 @@
 	<url type="bugtracker">https://github.com/cryptomator/cryptomator/issues/</url>
 	<url type="donation">https://cryptomator.org/donate</url>
 	<url type="faq">https://community.cryptomator.org/c/kb/faq</url>
-	<url type="help">https://community.cryptomator.org/</url>
+	<url type="help">https://docs.cryptomator.org/</url>
 	<url type="translate">https://translate.cryptomator.org</url>
 
-	<developer_name>Skymatic GmbH</developer_name>
+	<developer id="de.skymatic">
+		<name>Skymatic GmbH</name>
+	</developer>
+		
 
 	<content_rating type="oars-1.1">
 		<content_attribute id="social-info">mild</content_attribute> <!-- update checker connects to https://api.cryptomator.org/updates/latestVersion.json -->
 	</content_rating>
 
 	<releases>
+		<release date="2024-02-27" version="1.12.3">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.12.3</url>
+		</release>
 		<release date="2024-02-09" version="1.12.2">
 			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.12.2</url>
 		</release>
