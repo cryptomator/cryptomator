@@ -71,6 +71,6 @@ jobs:
           echo "revNum=${REVCOUNT}" >> $GITHUB_OUTPUT
           echo "type=${TYPE}" >> $GITHUB_OUTPUT
       - name: Validate Version
-        uses: skymatic/semver-validation-action@v2
+        uses: skymatic/semver-validation-action@v3
         with:
           version: ${{ steps.versions.outputs.semVerStr }}
