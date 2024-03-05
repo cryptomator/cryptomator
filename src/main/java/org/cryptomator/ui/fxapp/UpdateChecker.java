@@ -2,12 +2,10 @@ package org.cryptomator.ui.fxapp;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.health.Check;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -19,7 +17,6 @@ import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 
 @FxApplicationScoped
 public class UpdateChecker {
@@ -98,12 +95,15 @@ public class UpdateChecker {
 	}
 
 	public String getCurrentVersion() {
-		return "1.12.3"; //env.getAppVersion();
+		return env.getAppVersion();
 	}
 
 	public ObjectProperty<LocalDateTime> updateCheckTimeProperty() {
 		return updateCheckTimeProperty;
 	}
-public ObjectProperty<UpdateCheckState> updateCheckStateProperty() { return state;}
+
+	public ObjectProperty<UpdateCheckState> updateCheckStateProperty() {
+		return state;
+	}
 
 }

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.preferences;
 
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
@@ -16,13 +17,12 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
-
+import javafx.scene.layout.HBox;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Comparator;
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {
@@ -30,8 +30,8 @@ public class UpdatesPreferencesController implements FxController {
 	private static final String DOWNLOADS_URI = "https://cryptomator.org/downloads";
 
 	private final Application application;
+	private final Environment environment;
 	private final Settings settings;
-	private final ResourceBundle resourceBundle;
 	private final UpdateChecker updateChecker;
 	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
 	private final ReadOnlyStringProperty latestVersion;
@@ -44,13 +44,14 @@ public class UpdatesPreferencesController implements FxController {
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
 	public FormattedLabel updateCheckDateFormattedLabel;
-	public FormattedLabel statusFormattedLabel;
+	public HBox checkFailedHBox;
+	public FormattedLabel latestVersionFormattedLabel;
 
 	@Inject
-	UpdatesPreferencesController(Application application, Settings settings, ResourceBundle resourceBundle, UpdateChecker updateChecker) {
+	UpdatesPreferencesController(Application application, Environment environment, Settings settings, UpdateChecker updateChecker) {
 		this.application = application;
+		this.environment = environment;
 		this.settings = settings;
-		this.resourceBundle = resourceBundle;
 		this.updateChecker = updateChecker;
 		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.latestVersion = updateChecker.latestVersionProperty();
@@ -70,21 +71,13 @@ public class UpdatesPreferencesController implements FxController {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
-		updateCheckDateFormattedLabel.arg1Property().bind(Bindings.createStringBinding(() -> {
-			 return (updateCheckDateProperty.get() != null) ? updateCheckDateProperty.get().format(formatter) : "";
-		}, updateCheckDateProperty));
-		updateCheckDateFormattedLabel.managedProperty().bind(updateCheckDateProperty.isNotNull());
-		updateCheckDateFormattedLabel.visibleProperty().bind(updateCheckDateProperty.isNotNull());
+		updateCheckDateFormattedLabel.arg1Property().bind(Bindings.createStringBinding(() -> (updateCheckDateProperty.get() != null) ? updateCheckDateProperty.get().format(formatter) : "-", updateCheckDateProperty));
 
-		statusFormattedLabel.arg1Property().bind(Bindings.createObjectBinding(() ->{
-					return switch (updateCheckStateProperty.get()) {
-						case NOT_CHECKED -> resourceBundle.getString("preferences.updates.status.notChecked");
-						case IS_CHECKING -> resourceBundle.getString("preferences.updates.status.isChecking");
-						case CHECK_SUCCESSFUL -> resourceBundle.getString("preferences.updates.status.checkSuccessful");
-						case CHECK_FAILED -> resourceBundle.getString("preferences.updates.status.checkFailed");
-					};
-				}, updateCheckStateProperty
-				));
+		checkFailedHBox.managedProperty().bind(updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED));
+		checkFailedHBox.visibleProperty().bind(updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED));
+
+		latestVersionFormattedLabel.arg1Property().bind(Bindings.createStringBinding(() -> (latestVersion.get() != null) ? latestVersion.get() : "-", latestVersion));
+
 	}
 
 	@FXML
@@ -95,6 +88,11 @@ public class UpdatesPreferencesController implements FxController {
 	@FXML
 	public void visitDownloadsPage() {
 		application.getHostServices().showDocument(DOWNLOADS_URI);
+	}
+
+	@FXML
+	public void showLogfileDirectory() {
+		environment.getLogDir().ifPresent(logDirPath -> application.getHostServices().showDocument(logDirPath.toUri().toString()));
 	}
 
 	/* Observable Properties */

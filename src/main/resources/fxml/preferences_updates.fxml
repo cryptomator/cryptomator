@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import org.cryptomator.ui.controls.FormattedString?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
-
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -20,6 +22,9 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
+	<FormattedLabel fx:id="latestVersionFormattedLabel" format="%preferences.updates.latestVersion" arg1="-" textAlignment="CENTER" wrapText="true"/>
+	<FormattedLabel fx:id="updateCheckDateFormattedLabel" format="%preferences.updates.lastUpdateCheck" arg1="-" textAlignment="CENTER" wrapText="true"/>
+
 	<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
 	<VBox alignment="CENTER" spacing="12">
@@ -28,8 +33,15 @@
 				<FontAwesome5Spinner glyphSize="12"/>
 			</graphic>
 		</Button>
-		<FormattedLabel fx:id="statusFormattedLabel" format="%preferences.updates.status" wrapText="true"/>
-		<FormattedLabel fx:id="updateCheckDateFormattedLabel" format="%preferences.updates.lastUpdateCheck" textAlignment="CENTER" wrapText="true"/>
+
+		<HBox fx:id="checkFailedHBox" spacing="12" alignment="CENTER">
+			<Label text="%preferences.updates.checkFailed" wrapText="true">
+				<graphic>
+					<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
+				</graphic>
+			</Label>
+			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
+		</HBox>
 		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
 	</VBox>
 </VBox>
