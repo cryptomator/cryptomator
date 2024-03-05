@@ -58,7 +58,7 @@
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.10.2</junit.jupiter.version>
-		<mockito.version>5.10.0</mockito.version>
+		<mockito.version>5.11.0</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
 
 		<!-- build-time dependencies -->
