@@ -44,7 +44,7 @@ public class Settings {
 	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
 	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
-	static final String DEFAULT_LAST_UPDATE_CHECK = "2000-01-01";
+	public static final String DEFAULT_LAST_UPDATE_CHECK = "2000-01-01T10:00:00";
 
 	public final ObservableList<VaultSettings> directories;
 	public final BooleanProperty askedForUpdateCheck;
@@ -68,6 +68,7 @@ public class Settings {
 	public final StringProperty language;
 	public final StringProperty mountService;
 	public final StringProperty lastUpdateCheck;
+	public final StringProperty latestVersion;
 
 	private Consumer<Settings> saveCmd;
 
@@ -105,6 +106,7 @@ public class Settings {
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
 		this.lastUpdateCheck = new SimpleStringProperty(this, "lastUpdateCheck", json.lastUpdateCheck);
+		this.latestVersion = new SimpleStringProperty(this, "latestVersion", json.latestVersion);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
@@ -132,6 +134,7 @@ public class Settings {
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
 		lastUpdateCheck.addListener(this::somethingChanged);
+		latestVersion.addListener(this::somethingChanged);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -186,6 +189,7 @@ public class Settings {
 		json.language = language.get();
 		json.mountService = mountService.get();
 		json.lastUpdateCheck = lastUpdateCheck.get();
+		json.latestVersion = latestVersion.get();
 		return json;
 	}
 

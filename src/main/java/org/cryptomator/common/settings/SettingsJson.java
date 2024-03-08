@@ -83,4 +83,7 @@ class SettingsJson {
 	@JsonProperty("lastUpdateCheck")
 	String lastUpdateCheck = Settings.DEFAULT_LAST_UPDATE_CHECK;
 
+	@JsonProperty("latestVersion")
+	String latestVersion;
+
 }

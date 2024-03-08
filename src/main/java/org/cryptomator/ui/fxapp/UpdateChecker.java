@@ -16,7 +16,10 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @FxApplicationScoped
 public class UpdateChecker {
@@ -38,6 +41,21 @@ public class UpdateChecker {
 		this.env = env;
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
+		this.latestVersionProperty.set(settings.latestVersion.get());
+		var dateTimeString = !settings.lastUpdateCheck.get().isEmpty() ? settings.lastUpdateCheck.get() : Settings.DEFAULT_LAST_UPDATE_CHECK;
+		try {
+			LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ISO_DATE_TIME);
+			this.updateCheckTimeProperty.set(dateTime);
+		} catch (DateTimeParseException e) {
+			try {
+				LocalDate date = LocalDate.parse(dateTimeString, DateTimeFormatter.ISO_DATE);
+				this.updateCheckTimeProperty.set(LocalDateTime.of(date, LocalDate.MIN.atStartOfDay().toLocalTime()));
+			} catch (DateTimeParseException ex) {
+				LOG.error("The date/time format is invalid:" + dateTimeString, ex);
+			}
+		}
+		this.latestVersionProperty().addListener((_, _, newValue) -> settings.latestVersion.set(newValue));
+		this.updateCheckTimeProperty().addListener((_,_,newValue) -> settings.lastUpdateCheck.set(newValue.toString()));
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -69,6 +87,7 @@ public class UpdateChecker {
 		String latestVersion = updateCheckerService.getValue();
 		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersion);
 		updateCheckTimeProperty.set(LocalDateTime.now());
+		//settings.lastUpdateCheck.set(updateCheckTimeProperty.get().toString());
 		latestVersionProperty.set(latestVersion);
 		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 	}
@@ -95,7 +114,7 @@ public class UpdateChecker {
 	}
 
 	public String getCurrentVersion() {
-		return env.getAppVersion();
+		return "1.12.3";//env.getAppVersion();
 	}
 
 	public ObjectProperty<LocalDateTime> updateCheckTimeProperty() {
