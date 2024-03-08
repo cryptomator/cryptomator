@@ -87,7 +87,6 @@ public class UpdateChecker {
 		String latestVersion = updateCheckerService.getValue();
 		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersion);
 		updateCheckTimeProperty.set(LocalDateTime.now());
-		//settings.lastUpdateCheck.set(updateCheckTimeProperty.get().toString());
 		latestVersionProperty.set(latestVersion);
 		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 	}
@@ -114,7 +113,7 @@ public class UpdateChecker {
 	}
 
 	public String getCurrentVersion() {
-		return "1.12.3";//env.getAppVersion();
+		return env.getAppVersion();
 	}
 
 	public ObjectProperty<LocalDateTime> updateCheckTimeProperty() {

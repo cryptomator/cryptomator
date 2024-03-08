@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.Locale;
 
 
-
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {
 
@@ -77,7 +76,7 @@ public class UpdatesPreferencesController implements FxController {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
-		updateCheckDateFormattedLabel.arg1Property().bind(Bindings.createStringBinding(() -> (!updateCheckDateProperty.get().equals(LocalDateTime.parse(Settings.DEFAULT_LAST_UPDATE_CHECK)) && latestVersionProperty().isNotNull().get() ) ? updateCheckDateProperty.get().format(formatter) : "-", updateCheckDateProperty, latestVersionProperty()));
+		updateCheckDateFormattedLabel.arg1Property().bind(Bindings.createStringBinding(() -> (!updateCheckDateProperty.get().equals(LocalDateTime.parse(Settings.DEFAULT_LAST_UPDATE_CHECK)) && latestVersionProperty().isNotNull().get()) ? updateCheckDateProperty.get().format(formatter) : "-", updateCheckDateProperty, latestVersionProperty()));
 
 		BooleanBinding isUpdateCheckFailed = updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED);
 		checkFailedHBox.managedProperty().bind(isUpdateCheckFailed);
@@ -85,8 +84,7 @@ public class UpdatesPreferencesController implements FxController {
 
 		latestVersionFormattedLabel.arg1Property().bind(Bindings.createStringBinding(() -> (latestVersion.get() != null) ? latestVersion.get() : "-", latestVersion));
 
-		BooleanBinding isUpdateSuccessfulAndCurrent = updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL)
-				.and(latestVersion.isEqualTo(currentVersion));
+		BooleanBinding isUpdateSuccessfulAndCurrent = updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 
 		updateCheckStateProperty.addListener((_, _, _) -> {
 			if (isUpdateSuccessfulAndCurrent.get()) {
