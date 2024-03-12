@@ -21,7 +21,6 @@ open module org.cryptomator.desktop {
 
 	requires org.cryptomator.cryptolib;
 	requires org.cryptomator.cryptofs;
-	requires org.cryptomator.frontend.dokany;
 	requires org.cryptomator.frontend.fuse;
 	requires org.cryptomator.frontend.webdav;
 	requires org.cryptomator.integrations.api;
