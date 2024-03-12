@@ -39,7 +39,6 @@
 		<cryptomator.integrations.mac.version>1.2.3</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.4.4</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>4.0.0</cryptomator.fuse.version>
-		<cryptomator.dokany.version>2.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>2.0.6</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
