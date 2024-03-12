@@ -87,11 +87,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>dokany-nio-adapter</artifactId>
-			<version>${cryptomator.dokany.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
 			<artifactId>webdav-nio-adapter</artifactId>
 			<version>${cryptomator.webdav.version}</version>
 		</dependency>
