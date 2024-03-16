@@ -9,13 +9,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
 import static org.cryptomator.integrations.common.OperatingSystem.Value.WINDOWS;
 
 @OperatingSystem(WINDOWS)
-@OperatingSystem(MAC)
 @CheckAvailability
-public final class GoogleDriveLocationPresetsProvider implements LocationPresetsProvider {
+public final class GoogleDriveWindowsLocationPresetsProvider implements LocationPresetsProvider {
 
 	private static final List<Path> LOCATIONS = Arrays.asList( //
 			LocationPresetsProvider.resolveLocation("~/GoogleDrive/My Drive"), //
@@ -37,5 +35,4 @@ public final class GoogleDriveLocationPresetsProvider implements LocationPresets
 				.findFirst() //
 				.stream();
 	}
-
 }
