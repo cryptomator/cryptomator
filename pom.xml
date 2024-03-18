@@ -45,8 +45,8 @@
 		<commons-lang3.version>3.14.0</commons-lang3.version>
 		<dagger.version>2.51</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<guava.version>33.0.0-jre</guava.version>
-		<jackson.version>2.16.2</jackson.version>
+		<guava.version>33.1.0-jre</guava.version>
+		<jackson.version>2.17.0</jackson.version>
 		<javafx.version>21.0.1</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
