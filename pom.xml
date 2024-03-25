@@ -47,7 +47,7 @@
 		<easybind.version>2.2</easybind.version>
 		<guava.version>33.0.0-jre</guava.version>
 		<jackson.version>2.16.2</jackson.version>
-		<javafx.version>21.0.1</javafx.version>
+		<javafx.version>22</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
 		<logback.version>1.5.3</logback.version>
