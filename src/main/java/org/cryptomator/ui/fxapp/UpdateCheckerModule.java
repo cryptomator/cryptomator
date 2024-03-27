@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
@@ -31,13 +29,6 @@ public abstract class UpdateCheckerModule {
 	private static final URI LATEST_VERSION_URI = URI.create("https://api.cryptomator.org/desktop/latest-version.json");
 	private static final Duration UPDATE_CHECK_INTERVAL = Duration.hours(3);
 	private static final Duration DISABLED_UPDATE_CHECK_INTERVAL = Duration.hours(100000); // Duration.INDEFINITE leads to overflows...
-
-	@Provides
-	@Named("latestVersion")
-	@FxApplicationScoped
-	static StringProperty provideLatestVersion() {
-		return new SimpleStringProperty();
-	}
 
 	@Provides
 	@FxApplicationScoped

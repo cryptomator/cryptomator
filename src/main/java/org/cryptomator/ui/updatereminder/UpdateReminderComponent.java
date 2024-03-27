@@ -5,10 +5,11 @@ import dagger.Subcomponent;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.fxapp.UpdateChecker;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @UpdateReminderScoped
 @Subcomponent(modules = {UpdateReminderModule.class})
@@ -21,9 +22,10 @@ public interface UpdateReminderComponent {
 	Lazy<Scene> updateReminderScene();
 
 	Settings settings();
+	UpdateChecker updateChecker();
 
 	default void checkAndShowUpdateReminderWindow() {
-		if (LocalDate.parse(settings().lastUpdateCheck.get()).isBefore(LocalDate.now().minusDays(14)) && !settings().checkForUpdates.getValue()) {
+		if (updateChecker().updateCheckTimeProperty().get().isBefore(LocalDateTime.now().minusDays(14)) && !settings().checkForUpdates.getValue()) {
 			Stage stage = window();
 			stage.setScene(updateReminderScene().get());
 			stage.sizeToScene();
