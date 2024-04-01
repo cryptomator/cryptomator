@@ -23,7 +23,7 @@ jobs:
         run: |
           curl --remote-name ${{ inputs.url }} -L
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
           password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
       - name: Upload to Avast
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           protocol: ftp
           server: whitelisting.avast.com

@@ -375,7 +375,7 @@ jobs:
           merge-multiple: true
       - name: Publish .msi on GitHub Releases
         id: publish
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
