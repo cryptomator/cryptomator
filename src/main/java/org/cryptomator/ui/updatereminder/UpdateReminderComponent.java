@@ -38,7 +38,7 @@ public interface UpdateReminderComponent {
 				stage.show();
 			}
 		} catch (DateTimeParseException e) {
-			LOG.error("The date/time format is invalid:" + settings().lastUpdateCheck.get(), e);
+			LOG.error("Failed to parse last update check time '{}':", settings().lastUpdateCheck.get(), e);
 		}
 	}
 
