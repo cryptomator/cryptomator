@@ -25,6 +25,10 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.function.Consumer;
 
 public class Settings {
@@ -163,6 +167,20 @@ public class Settings {
 				}
 			});
 		}
+
+		var dateTimeString = !lastUpdateCheck.get().isEmpty() ? lastUpdateCheck.get() : DEFAULT_LAST_UPDATE_CHECK;
+		try {
+			LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ISO_DATE_TIME);
+			lastUpdateCheck.set(dateTime.toString());
+		} catch (DateTimeParseException e) {
+			try {
+				LocalDate date = LocalDate.parse(dateTimeString, DateTimeFormatter.ISO_DATE);
+				lastUpdateCheck.set(LocalDateTime.of(date, LocalDate.MIN.atStartOfDay().toLocalTime()).toString());
+			} catch (DateTimeParseException ex) {
+				LOG.error("The date/time format is invalid:" + dateTimeString, ex);
+			}
+		}
+
 	}
 
 	SettingsJson serialized() {

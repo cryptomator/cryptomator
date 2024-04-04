@@ -22,8 +22,8 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
-	<FormattedLabel fx:id="latestVersionFormattedLabel" format="%preferences.updates.latestVersion" arg1="-" textAlignment="CENTER" wrapText="true"/>
-	<FormattedLabel fx:id="updateCheckDateFormattedLabel" format="%preferences.updates.lastUpdateCheck" arg1="-" textAlignment="CENTER" wrapText="true"/>
+	<FormattedLabel format="%preferences.updates.latestVersion" arg1="${controller.latestVersion}" textAlignment="CENTER" wrapText="true"/>
+	<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.updateCheckDate}" textAlignment="CENTER" wrapText="true"/>
 
 	<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
@@ -34,7 +34,7 @@
 			</graphic>
 		</Button>
 
-		<HBox fx:id="checkFailedHBox" spacing="12" alignment="CENTER">
+		<HBox fx:id="checkFailedHBox" spacing="12" alignment="CENTER" visible="${controller.checkFailed}" managed="${controller.checkFailed}">
 			<Label text="%preferences.updates.checkFailed" wrapText="true">
 				<graphic>
 					<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
@@ -42,7 +42,7 @@
 			</Label>
 			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
 		</HBox>
-		<Label fx:id="upToDateLabel" text="%preferences.updates.upToDate" managed="false" visible="false">
+		<Label fx:id="upToDateLabel" text="%preferences.updates.upToDate" visible="${controller.upToDateLabelVisible}" managed="${controller.upToDateLabelVisible}">
 			<graphic>
 				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-primary" glyph="CHECK"/>
 			</graphic>

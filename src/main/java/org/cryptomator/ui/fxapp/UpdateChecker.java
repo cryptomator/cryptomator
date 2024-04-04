@@ -1,11 +1,13 @@
 package org.cryptomator.ui.fxapp;
 
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -16,10 +18,8 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 
 @FxApplicationScoped
 public class UpdateChecker {
@@ -33,6 +33,8 @@ public class UpdateChecker {
 	private final ScheduledService<String> updateCheckerService;
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
 	private final ObjectProperty<LocalDateTime> updateCheckTimeProperty = new SimpleObjectProperty<>();
+	private final Comparator<String> versionComparator = new SemVerComparator();
+	private final BooleanBinding updateAvailable;
 
 	@Inject
 	UpdateChecker(Settings settings, //
@@ -42,20 +44,14 @@ public class UpdateChecker {
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
 		this.latestVersionProperty.set(settings.latestVersion.get());
-		var dateTimeString = !settings.lastUpdateCheck.get().isEmpty() ? settings.lastUpdateCheck.get() : Settings.DEFAULT_LAST_UPDATE_CHECK;
-		try {
-			LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ISO_DATE_TIME);
-			this.updateCheckTimeProperty.set(dateTime);
-		} catch (DateTimeParseException e) {
-			try {
-				LocalDate date = LocalDate.parse(dateTimeString, DateTimeFormatter.ISO_DATE);
-				this.updateCheckTimeProperty.set(LocalDateTime.of(date, LocalDate.MIN.atStartOfDay().toLocalTime()));
-			} catch (DateTimeParseException ex) {
-				LOG.error("The date/time format is invalid:" + dateTimeString, ex);
-			}
-		}
-		this.latestVersionProperty().addListener((_, _, newValue) -> settings.latestVersion.set(newValue));
-		this.updateCheckTimeProperty().addListener((_,_,newValue) -> settings.lastUpdateCheck.set(newValue.toString()));
+		this.updateCheckTimeProperty.set(LocalDateTime.parse(settings.lastUpdateCheck.get()));
+		this.updateAvailable = Bindings.createBooleanBinding(() -> {
+			var latestVersion = latestVersionProperty.get();
+			return latestVersion != null && versionComparator.compare(getCurrentVersion(), latestVersion) < 0;
+		}, latestVersionProperty);
+
+		this.latestVersionProperty.addListener((_, _, newValue) -> settings.latestVersion.set(newValue));
+		this.updateCheckTimeProperty.addListener((_, _, newValue) -> settings.lastUpdateCheck.set(newValue.toString()));
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -112,8 +108,12 @@ public class UpdateChecker {
 		return latestVersionProperty;
 	}
 
-	public String getCurrentVersion() {
-		return env.getAppVersion();
+
+	public BooleanBinding updateAvailableProperty(){
+		return updateAvailable;
+	}
+	public boolean isUpdateAvailable(){
+		return updateAvailable.get();
 	}
 
 	public ObjectProperty<LocalDateTime> updateCheckTimeProperty() {
@@ -124,4 +124,7 @@ public class UpdateChecker {
 		return state;
 	}
 
+	public String getCurrentVersion() {
+		return env.getAppVersion();
+	}
 }
