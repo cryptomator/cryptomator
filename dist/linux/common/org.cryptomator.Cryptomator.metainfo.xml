@@ -54,8 +54,8 @@
 	</screenshots>
 
 	<branding>
-		<color type="primary" scheme_preference="light">#71a0df</color>
-		<color type="primary" scheme_preference="dark">#264268</color>
+		<color type="primary" scheme_preference="light">#EBF5EB</color>
+		<color type="primary" scheme_preference="dark">#2F4858</color>
 	</branding>
 
 	<url type="homepage">https://cryptomator.org/</url>
