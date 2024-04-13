@@ -53,6 +53,11 @@
 		</screenshot>
 	</screenshots>
 
+	<branding>
+		<color type="primary" scheme_preference="light">#EBF5EB</color>
+		<color type="primary" scheme_preference="dark">#2F4858</color>
+	</branding>
+
 	<url type="homepage">https://cryptomator.org/</url>
 	<url type="bugtracker">https://github.com/cryptomator/cryptomator/issues/</url>
 	<url type="donation">https://cryptomator.org/donate</url>
