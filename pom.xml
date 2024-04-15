@@ -70,7 +70,7 @@
 		<mvn-resources.version>3.3.1</mvn-resources.version>
 		<mvn-dependency.version>3.6.1</mvn-dependency.version>
 		<mvn-surefire.version>3.2.5</mvn-surefire.version>
-		<mvn-jar.version>3.3.0</mvn-jar.version>
+		<mvn-jar.version>3.4.0</mvn-jar.version>
 	</properties>
 
 	<dependencies>
