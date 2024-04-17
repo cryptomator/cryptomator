@@ -20,6 +20,7 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.ResourceBundle;
 
 @FxApplicationScoped
 public class UpdateChecker {
@@ -29,29 +30,36 @@ public class UpdateChecker {
 
 	private final Environment env;
 	private final Settings settings;
+	private final ResourceBundle resourceBundle;
 	private final StringProperty latestVersionProperty = new SimpleStringProperty();
 	private final ScheduledService<String> updateCheckerService;
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
 	private final ObjectProperty<LocalDateTime> updateCheckTimeProperty = new SimpleObjectProperty<>();
+	private final StringProperty timeDifferenceMessageProperty = new SimpleStringProperty();
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final BooleanBinding updateAvailable;
 
 	@Inject
 	UpdateChecker(Settings settings, //
 				  Environment env, //
+				  ResourceBundle resourceBundle, //
 				  ScheduledService<String> updateCheckerService) {
 		this.env = env;
 		this.settings = settings;
+		this.resourceBundle = resourceBundle;
 		this.updateCheckerService = updateCheckerService;
 		this.latestVersionProperty.set(settings.latestVersion.get());
-		this.updateCheckTimeProperty.set(LocalDateTime.parse(settings.lastUpdateCheck.get()));
+		this.updateCheckTimeProperty.set(LocalDateTime.parse(settings.lastSuccessfulUpdateCheck.get()));
+
 		this.updateAvailable = Bindings.createBooleanBinding(() -> {
 			var latestVersion = latestVersionProperty.get();
 			return latestVersion != null && versionComparator.compare(getCurrentVersion(), latestVersion) < 0;
 		}, latestVersionProperty);
 
+		updateTimeDifferenceMessage();
+
 		this.latestVersionProperty.addListener((_, _, newValue) -> settings.latestVersion.set(newValue));
-		this.updateCheckTimeProperty.addListener((_, _, newValue) -> settings.lastUpdateCheck.set(newValue.toString()));
+		this.updateCheckTimeProperty.addListener((_, _, newValue) -> settings.lastSuccessfulUpdateCheck.set(newValue.toString()));
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -74,6 +82,27 @@ public class UpdateChecker {
 		updateCheckerService.start();
 	}
 
+	private void updateTimeDifferenceMessage() {
+		LocalDateTime updateCheckDate = updateCheckTimeProperty.get();
+		if (updateCheckDate == null || updateCheckDate.equals(LocalDateTime.parse(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK))) {
+			timeDifferenceMessageProperty.set(resourceBundle.getString("preferences.updates.lastUpdateCheck.never"));
+			return;
+		}
+
+		var duration = java.time.Duration.between(updateCheckDate, LocalDateTime.now());
+
+		var hours = duration.toHours();
+		var days = duration.toDays();
+
+		if (hours < 1) {
+			timeDifferenceMessageProperty.set(resourceBundle.getString("preferences.updates.lastUpdateCheck.recently"));
+		} else if (hours < 24) {
+			timeDifferenceMessageProperty.set(String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.hoursAgo"), hours));
+		} else {
+			timeDifferenceMessageProperty.set(String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.daysAgo"), days));
+		}
+	}
+
 	private void checkStarted(WorkerStateEvent event) {
 		LOG.debug("Checking for updates...");
 		state.set(UpdateCheckState.IS_CHECKING);
@@ -83,13 +112,14 @@ public class UpdateChecker {
 		String latestVersion = updateCheckerService.getValue();
 		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersion);
 		updateCheckTimeProperty.set(LocalDateTime.now());
+		updateTimeDifferenceMessage();
 		latestVersionProperty.set(latestVersion);
 		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 	}
 
 	private void checkFailed(WorkerStateEvent event) {
-		LOG.warn("Error checking for updates", event.getSource().getException());
 		state.set(UpdateCheckState.CHECK_FAILED);
+		LOG.warn("Error checking for updates", event.getSource().getException());
 	}
 
 	public enum UpdateCheckState {
@@ -108,7 +138,6 @@ public class UpdateChecker {
 		return latestVersionProperty;
 	}
 
-
 	public BooleanBinding updateAvailableProperty(){
 		return updateAvailable;
 	}
@@ -118,6 +147,10 @@ public class UpdateChecker {
 
 	public ObjectProperty<LocalDateTime> updateCheckTimeProperty() {
 		return updateCheckTimeProperty;
+	}
+
+	public StringProperty timeDifferenceMessageProperty() {
+		return timeDifferenceMessageProperty;
 	}
 
 	public ObjectProperty<UpdateCheckState> updateCheckStateProperty() {

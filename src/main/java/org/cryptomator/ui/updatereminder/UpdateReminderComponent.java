@@ -10,9 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.time.LocalDate;
 
 @UpdateReminderScoped
 @Subcomponent(modules = {UpdateReminderModule.class})
@@ -29,16 +27,12 @@ public interface UpdateReminderComponent {
 	Settings settings();
 
 	default void checkAndShowUpdateReminderWindow() {
-		try {
-			var dateTime = LocalDateTime.parse(settings().lastUpdateCheck.get(), DateTimeFormatter.ISO_DATE_TIME);
-			if (dateTime.isBefore(LocalDateTime.now().minusDays(14)) && !settings().checkForUpdates.getValue()) {
-				Stage stage = window();
-				stage.setScene(updateReminderScene().get());
-				stage.sizeToScene();
-				stage.show();
-			}
-		} catch (DateTimeParseException e) {
-			LOG.error("Failed to parse last update check time '{}':", settings().lastUpdateCheck.get(), e);
+		if (LocalDate.parse(settings().lastUpdateReminder.get()).isBefore(LocalDate.now().minusDays(14)) && !settings().checkForUpdates.getValue()) {
+			settings().lastUpdateReminder.set(LocalDate.now().toString());
+			Stage stage = window();
+			stage.setScene(updateReminderScene().get());
+			stage.sizeToScene();
+			stage.show();
 		}
 	}
 

@@ -25,10 +25,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.function.Consumer;
 
 public class Settings {
@@ -48,8 +44,8 @@ public class Settings {
 	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
 	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
-	public static final String DEFAULT_LAST_UPDATE_CHECK = "2000-01-01T10:00:00";
-
+	static final String DEFAULT_LAST_UPDATE_REMINDER = "2000-01-01";
+	public static final String DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK = "2000-01-01T00:00:00";
 	public final ObservableList<VaultSettings> directories;
 	public final BooleanProperty askedForUpdateCheck;
 	public final BooleanProperty checkForUpdates;
@@ -71,7 +67,8 @@ public class Settings {
 	public final IntegerProperty windowHeight;
 	public final StringProperty language;
 	public final StringProperty mountService;
-	public final StringProperty lastUpdateCheck;
+	public final StringProperty lastUpdateReminder;
+	public final StringProperty lastSuccessfulUpdateCheck;
 	public final StringProperty latestVersion;
 
 	private Consumer<Settings> saveCmd;
@@ -109,7 +106,8 @@ public class Settings {
 		this.windowHeight = new SimpleIntegerProperty(this, "windowHeight", json.windowHeight);
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
-		this.lastUpdateCheck = new SimpleStringProperty(this, "lastUpdateCheck", json.lastUpdateCheck);
+		this.lastUpdateReminder = new SimpleStringProperty(this, "lastUpdateReminder", json.lastUpdateReminder);
+		this.lastSuccessfulUpdateCheck = new SimpleStringProperty(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
 		this.latestVersion = new SimpleStringProperty(this, "latestVersion", json.latestVersion);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
@@ -137,7 +135,8 @@ public class Settings {
 		windowHeight.addListener(this::somethingChanged);
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
-		lastUpdateCheck.addListener(this::somethingChanged);
+		lastUpdateReminder.addListener(this::somethingChanged);
+		lastSuccessfulUpdateCheck.addListener(this::somethingChanged);
 		latestVersion.addListener(this::somethingChanged);
 	}
 
@@ -168,19 +167,6 @@ public class Settings {
 			});
 		}
 
-		var dateTimeString = !lastUpdateCheck.get().isEmpty() ? lastUpdateCheck.get() : DEFAULT_LAST_UPDATE_CHECK;
-		try {
-			LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ISO_DATE_TIME);
-			lastUpdateCheck.set(dateTime.toString());
-		} catch (DateTimeParseException e) {
-			try {
-				LocalDate date = LocalDate.parse(dateTimeString, DateTimeFormatter.ISO_DATE);
-				lastUpdateCheck.set(LocalDateTime.of(date, LocalDate.MIN.atStartOfDay().toLocalTime()).toString());
-			} catch (DateTimeParseException ex) {
-				LOG.error("The date/time format is invalid:" + dateTimeString, ex);
-			}
-		}
-
 	}
 
 	SettingsJson serialized() {
@@ -206,7 +192,8 @@ public class Settings {
 		json.windowHeight = windowHeight.get();
 		json.language = language.get();
 		json.mountService = mountService.get();
-		json.lastUpdateCheck = lastUpdateCheck.get();
+		json.lastUpdateReminder = lastUpdateReminder.get();
+		json.lastSuccessfulUpdateCheck = lastSuccessfulUpdateCheck.get();
 		json.latestVersion = latestVersion.get();
 		return json;
 	}

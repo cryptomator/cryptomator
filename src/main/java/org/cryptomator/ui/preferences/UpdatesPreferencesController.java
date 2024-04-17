@@ -39,6 +39,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
 	private final ReadOnlyStringProperty latestVersion;
 	private final ObjectProperty<LocalDateTime> updateCheckDate;
+	private final ReadOnlyStringProperty timeDifferenceMessage;
 	private final String currentVersion;
 	private final BooleanBinding updateAvailable;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
@@ -58,6 +59,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.latestVersion = updateChecker.latestVersionProperty();
 		this.updateCheckDate = updateChecker.updateCheckTimeProperty();
+		this.timeDifferenceMessage = updateChecker.timeDifferenceMessageProperty();
 		this.currentVersion = updateChecker.getCurrentVersion();
 		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.updateCheckStateProperty = updateChecker.updateCheckStateProperty();
@@ -68,12 +70,11 @@ public class UpdatesPreferencesController implements FxController {
 
 		BooleanBinding isUpdateSuccessfulAndCurrent = updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 
-
 		updateCheckStateProperty.addListener((_, _, _) -> {
 			if (isUpdateSuccessfulAndCurrent.get()) {
-				upToDateLabelVisibleProperty().set(true);
+				upToDateLabelVisible.set(true);
 				PauseTransition delay = new PauseTransition(Duration.seconds(5));
-				delay.setOnFinished(_ -> upToDateLabelVisibleProperty().set(false));
+				delay.setOnFinished(_ -> upToDateLabelVisible.set(false));
 				delay.play();
 			}
 		});
@@ -122,15 +123,23 @@ public class UpdatesPreferencesController implements FxController {
 
 	public String getUpdateCheckDate() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
-		return !updateCheckDate.get().equals(LocalDateTime.parse(Settings.DEFAULT_LAST_UPDATE_CHECK)) ? updateCheckDate.get().format(formatter) : "-";
+		return !updateCheckDate.get().equals(LocalDateTime.parse(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK)) ? updateCheckDate.get().format(formatter) : "-";
+	}
+
+	public ReadOnlyStringProperty timeDifferenceMessageProperty(){
+		return timeDifferenceMessage;
+	}
+
+	public String getTimeDifferenceMessage() {
+		return timeDifferenceMessage.get();
 	}
 
 	public BooleanProperty upToDateLabelVisibleProperty() {
 		return upToDateLabelVisible;
 	}
 
-	public final boolean isUpToDateLabelVisible() {
-		return upToDateLabelVisibleProperty().get();
+	public boolean isUpToDateLabelVisible() {
+		return upToDateLabelVisible.get();
 	}
 
 	public BooleanBinding updateAvailableProperty() {

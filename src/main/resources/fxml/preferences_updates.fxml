@@ -11,6 +11,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Tooltip?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -22,8 +23,6 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
-	<FormattedLabel format="%preferences.updates.latestVersion" arg1="${controller.latestVersion}" textAlignment="CENTER" wrapText="true"/>
-	<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.updateCheckDate}" textAlignment="CENTER" wrapText="true"/>
 
 	<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
@@ -42,6 +41,11 @@
 			</Label>
 			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
 		</HBox>
+		<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.timeDifferenceMessage}" textAlignment="CENTER" wrapText="true">
+			<tooltip>
+				<Tooltip text="${controller.updateCheckDate}" showDelay="10ms"/>
+			</tooltip>
+		</FormattedLabel>
 		<Label fx:id="upToDateLabel" text="%preferences.updates.upToDate" visible="${controller.upToDateLabelVisible}" managed="${controller.upToDateLabelVisible}">
 			<graphic>
 				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-primary" glyph="CHECK"/>

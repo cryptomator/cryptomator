@@ -28,7 +28,6 @@ public class UpdateReminderController implements FxController {
 
 	@FXML
 	public void cancel() {
-		updateChecker.updateCheckTimeProperty().set(LocalDateTime.now());
 		window.close();
 	}
 
