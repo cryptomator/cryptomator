@@ -63,7 +63,7 @@ public class UpdateChecker {
 
 	private void checkSucceeded(WorkerStateEvent event) {
 		String latestVersion = updateCheckerService.getValue();
-		LOG.info("Current version: {}, lastest version: {}", getCurrentVersion(), latestVersion);
+		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersion);
 
 		if (semVerComparator.compare(getCurrentVersion(), latestVersion) < 0) {
 			// update is available
