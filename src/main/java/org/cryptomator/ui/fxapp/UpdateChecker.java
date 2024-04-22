@@ -18,8 +18,11 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
+
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 @FxApplicationScoped
@@ -31,11 +34,11 @@ public class UpdateChecker {
 	private final Environment env;
 	private final Settings settings;
 	private final ResourceBundle resourceBundle;
-	private final StringProperty latestVersionProperty = new SimpleStringProperty();
+	private final StringProperty latestVersion = new SimpleStringProperty();
 	private final ScheduledService<String> updateCheckerService;
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
-	private final ObjectProperty<LocalDateTime> updateCheckTimeProperty = new SimpleObjectProperty<>();
-	private final StringProperty timeDifferenceMessageProperty = new SimpleStringProperty();
+	private final ObjectProperty<Date> lastSuccessfulUpdateCheck = new SimpleObjectProperty<>();
+	private final StringProperty timeDifferenceMessage = new SimpleStringProperty();
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final BooleanBinding updateAvailable;
 
@@ -48,18 +51,18 @@ public class UpdateChecker {
 		this.settings = settings;
 		this.resourceBundle = resourceBundle;
 		this.updateCheckerService = updateCheckerService;
-		this.latestVersionProperty.set(settings.latestVersion.get());
-		this.updateCheckTimeProperty.set(LocalDateTime.parse(settings.lastSuccessfulUpdateCheck.get()));
+		this.latestVersion.set(settings.latestVersion.get());
+		this.lastSuccessfulUpdateCheck.set(settings.lastSuccessfulUpdateCheck.get());
 
 		this.updateAvailable = Bindings.createBooleanBinding(() -> {
-			var latestVersion = latestVersionProperty.get();
+			var latestVersion = this.latestVersion.get();
 			return latestVersion != null && versionComparator.compare(getCurrentVersion(), latestVersion) < 0;
-		}, latestVersionProperty);
+		}, latestVersion);
 
 		updateTimeDifferenceMessage();
 
-		this.latestVersionProperty.addListener((_, _, newValue) -> settings.latestVersion.set(newValue));
-		this.updateCheckTimeProperty.addListener((_, _, newValue) -> settings.lastSuccessfulUpdateCheck.set(newValue.toString()));
+		this.latestVersion.addListener((_, _, newValue) -> settings.latestVersion.set(newValue));
+		this.lastSuccessfulUpdateCheck.addListener((_, _, newValue) -> settings.lastSuccessfulUpdateCheck.set(newValue));
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -83,23 +86,22 @@ public class UpdateChecker {
 	}
 
 	private void updateTimeDifferenceMessage() {
-		LocalDateTime updateCheckDate = updateCheckTimeProperty.get();
-		if (updateCheckDate == null || updateCheckDate.equals(LocalDateTime.parse(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK))) {
-			timeDifferenceMessageProperty.set(resourceBundle.getString("preferences.updates.lastUpdateCheck.never"));
+		Date updateCheckDate = lastSuccessfulUpdateCheck.get();
+		if (updateCheckDate == null || updateCheckDate.equals(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK)) {
+			timeDifferenceMessage.set(resourceBundle.getString("preferences.updates.lastUpdateCheck.never"));
 			return;
 		}
 
-		var duration = java.time.Duration.between(updateCheckDate, LocalDateTime.now());
+		var duration = java.time.Duration.between(LocalDateTime.ofInstant(updateCheckDate.toInstant(), ZoneId.systemDefault()), LocalDateTime.now());
 
 		var hours = duration.toHours();
-		var days = duration.toDays();
 
 		if (hours < 1) {
-			timeDifferenceMessageProperty.set(resourceBundle.getString("preferences.updates.lastUpdateCheck.recently"));
+			timeDifferenceMessage.set(resourceBundle.getString("preferences.updates.lastUpdateCheck.recently"));
 		} else if (hours < 24) {
-			timeDifferenceMessageProperty.set(String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.hoursAgo"), hours));
+			timeDifferenceMessage.set(String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.hoursAgo"), hours));
 		} else {
-			timeDifferenceMessageProperty.set(String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.daysAgo"), days));
+			timeDifferenceMessage.set(String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.daysAgo"), duration.toDays()));
 		}
 	}
 
@@ -111,9 +113,9 @@ public class UpdateChecker {
 	private void checkSucceeded(WorkerStateEvent event) {
 		String latestVersion = updateCheckerService.getValue();
 		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersion);
-		updateCheckTimeProperty.set(LocalDateTime.now());
+		lastSuccessfulUpdateCheck.set(new Date());
 		updateTimeDifferenceMessage();
-		latestVersionProperty.set(latestVersion);
+		this.latestVersion.set(latestVersion);
 		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 	}
 
@@ -135,7 +137,7 @@ public class UpdateChecker {
 	}
 
 	public ReadOnlyStringProperty latestVersionProperty() {
-		return latestVersionProperty;
+		return latestVersion;
 	}
 
 	public BooleanBinding updateAvailableProperty(){
@@ -145,12 +147,12 @@ public class UpdateChecker {
 		return updateAvailable.get();
 	}
 
-	public ObjectProperty<LocalDateTime> updateCheckTimeProperty() {
-		return updateCheckTimeProperty;
+	public ObjectProperty<Date> lastSuccessfulUpdateCheckProperty() {
+		return lastSuccessfulUpdateCheck;
 	}
 
 	public StringProperty timeDifferenceMessageProperty() {
-		return timeDifferenceMessageProperty;
+		return timeDifferenceMessage;
 	}
 
 	public ObjectProperty<UpdateCheckState> updateCheckStateProperty() {

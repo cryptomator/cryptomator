@@ -22,8 +22,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Date;
 import java.util.Locale;
 
 
@@ -38,12 +40,12 @@ public class UpdatesPreferencesController implements FxController {
 	private final UpdateChecker updateChecker;
 	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
 	private final ReadOnlyStringProperty latestVersion;
-	private final ObjectProperty<LocalDateTime> updateCheckDate;
+	private final ObjectProperty<Date> lastSuccessfulUpdateCheck;
 	private final ReadOnlyStringProperty timeDifferenceMessage;
 	private final String currentVersion;
 	private final BooleanBinding updateAvailable;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
-	private final ObjectProperty<UpdateChecker.UpdateCheckState> updateCheckStateProperty;
+	private final ObjectProperty<UpdateChecker.UpdateCheckState> updateCheckState;
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
@@ -58,19 +60,19 @@ public class UpdatesPreferencesController implements FxController {
 		this.updateChecker = updateChecker;
 		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.latestVersion = updateChecker.latestVersionProperty();
-		this.updateCheckDate = updateChecker.updateCheckTimeProperty();
+		this.lastSuccessfulUpdateCheck = updateChecker.lastSuccessfulUpdateCheckProperty();
 		this.timeDifferenceMessage = updateChecker.timeDifferenceMessageProperty();
 		this.currentVersion = updateChecker.getCurrentVersion();
 		this.updateAvailable = updateChecker.updateAvailableProperty();
-		this.updateCheckStateProperty = updateChecker.updateCheckStateProperty();
+		this.updateCheckState = updateChecker.updateCheckStateProperty();
 	}
 
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 
-		BooleanBinding isUpdateSuccessfulAndCurrent = updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
+		BooleanBinding isUpdateSuccessfulAndCurrent = updateCheckState.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 
-		updateCheckStateProperty.addListener((_, _, _) -> {
+		updateCheckState.addListener((_, _, _) -> {
 			if (isUpdateSuccessfulAndCurrent.get()) {
 				upToDateLabelVisible.set(true);
 				PauseTransition delay = new PauseTransition(Duration.seconds(5));
@@ -117,13 +119,19 @@ public class UpdatesPreferencesController implements FxController {
 		return currentVersion;
 	}
 
-	public ObjectProperty<LocalDateTime> updateCheckDateProperty() {
-		return updateCheckDate;
+	public ObjectProperty<Date> lastSuccessfulUpdateCheckProperty() {
+		return lastSuccessfulUpdateCheck;
 	}
 
-	public String getUpdateCheckDate() {
-		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
-		return !updateCheckDate.get().equals(LocalDateTime.parse(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK)) ? updateCheckDate.get().format(formatter) : "-";
+	public String getLastSuccessfulUpdateCheck() {
+		Date date = lastSuccessfulUpdateCheck.get();
+		if (date != null && !date.equals(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK)) {
+			LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
+			return formatter.format(localDateTime);
+		} else {
+			return "-";
+		}
 	}
 
 	public ReadOnlyStringProperty timeDifferenceMessageProperty(){
@@ -151,7 +159,7 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public BooleanBinding checkFailedProperty() {
-		return updateCheckStateProperty.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED);
+		return updateCheckState.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED);
 	}
 
 	public boolean isCheckFailed() {

@@ -25,6 +25,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.function.Consumer;
 
 public class Settings {
@@ -44,8 +49,8 @@ public class Settings {
 	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
 	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
-	static final String DEFAULT_LAST_UPDATE_REMINDER = "2000-01-01";
-	public static final String DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK = "2000-01-01T00:00:00";
+	static final Date DEFAULT_LAST_UPDATE_REMINDER = Date.from(LocalDate.of(2000,1,1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+	public static final Date DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK = Date.from(LocalDateTime.of(2000,1,1,1,0,0).toInstant(ZoneOffset.UTC));
 	public final ObservableList<VaultSettings> directories;
 	public final BooleanProperty askedForUpdateCheck;
 	public final BooleanProperty checkForUpdates;
@@ -67,8 +72,8 @@ public class Settings {
 	public final IntegerProperty windowHeight;
 	public final StringProperty language;
 	public final StringProperty mountService;
-	public final StringProperty lastUpdateReminder;
-	public final StringProperty lastSuccessfulUpdateCheck;
+	public final ObjectProperty<Date> lastUpdateReminder;
+	public final ObjectProperty<Date> lastSuccessfulUpdateCheck;
 	public final StringProperty latestVersion;
 
 	private Consumer<Settings> saveCmd;
@@ -106,8 +111,8 @@ public class Settings {
 		this.windowHeight = new SimpleIntegerProperty(this, "windowHeight", json.windowHeight);
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
-		this.lastUpdateReminder = new SimpleStringProperty(this, "lastUpdateReminder", json.lastUpdateReminder);
-		this.lastSuccessfulUpdateCheck = new SimpleStringProperty(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
+		this.lastUpdateReminder = new SimpleObjectProperty<>(this, "lastUpdateReminder", json.lastUpdateReminder);
+		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
 		this.latestVersion = new SimpleStringProperty(this, "latestVersion", json.latestVersion);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());

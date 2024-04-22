@@ -1,9 +1,12 @@
 package org.cryptomator.common.settings;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -81,10 +84,12 @@ class SettingsJson {
 	String preferredVolumeImpl;
 
 	@JsonProperty("lastUpdateReminder")
-	String lastUpdateReminder = Settings.DEFAULT_LAST_UPDATE_REMINDER;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	Date lastUpdateReminder = Settings.DEFAULT_LAST_UPDATE_REMINDER;
 
 	@JsonProperty("lastSuccessfulUpdateCheck")
-	String lastSuccessfulUpdateCheck = Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	Date lastSuccessfulUpdateCheck = Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK;
 
 	@JsonProperty("latestVersion")
 	String latestVersion;

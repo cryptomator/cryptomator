@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.time.LocalDate;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 
 @UpdateReminderScoped
 @Subcomponent(modules = {UpdateReminderModule.class})
@@ -27,8 +29,8 @@ public interface UpdateReminderComponent {
 	Settings settings();
 
 	default void checkAndShowUpdateReminderWindow() {
-		if (LocalDate.parse(settings().lastUpdateReminder.get()).isBefore(LocalDate.now().minusDays(14)) && !settings().checkForUpdates.getValue()) {
-			settings().lastUpdateReminder.set(LocalDate.now().toString());
+		if (settings().lastUpdateReminder.get().before(Date.from(Instant.now().minus(Duration.ofDays(14)))) && !settings().checkForUpdates.getValue()) {
+			settings().lastUpdateReminder.set(new Date());
 			Stage stage = window();
 			stage.setScene(updateReminderScene().get());
 			stage.sizeToScene();

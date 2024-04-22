@@ -43,7 +43,7 @@
 		</HBox>
 		<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.timeDifferenceMessage}" textAlignment="CENTER" wrapText="true">
 			<tooltip>
-				<Tooltip text="${controller.updateCheckDate}" showDelay="10ms"/>
+				<Tooltip text="${controller.lastSuccessfulUpdateCheck}" showDelay="10ms"/>
 			</tooltip>
 		</FormattedLabel>
 		<Label fx:id="upToDateLabel" text="%preferences.updates.upToDate" visible="${controller.upToDateLabelVisible}" managed="${controller.upToDateLabelVisible}">
