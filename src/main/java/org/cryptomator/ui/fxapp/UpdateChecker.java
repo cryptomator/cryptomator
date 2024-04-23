@@ -33,7 +33,6 @@ public class UpdateChecker {
 
 	private final Environment env;
 	private final Settings settings;
-	private final ResourceBundle resourceBundle;
 	private final StringProperty latestVersion = new SimpleStringProperty();
 	private final ScheduledService<String> updateCheckerService;
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
@@ -45,11 +44,9 @@ public class UpdateChecker {
 	@Inject
 	UpdateChecker(Settings settings, //
 				  Environment env, //
-				  ResourceBundle resourceBundle, //
 				  ScheduledService<String> updateCheckerService) {
 		this.env = env;
 		this.settings = settings;
-		this.resourceBundle = resourceBundle;
 		this.updateCheckerService = updateCheckerService;
 		this.latestVersion.bindBidirectional(settings.latestVersion);
 		this.lastSuccessfulUpdateCheck.bindBidirectional(settings.lastSuccessfulUpdateCheck);
@@ -58,9 +55,6 @@ public class UpdateChecker {
 			var latestVersion = this.latestVersion.get();
 			return latestVersion != null && versionComparator.compare(getCurrentVersion(), latestVersion) < 0;
 		}, latestVersion);
-
-		//TODO
-		updateTimeDifferenceMessage();
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -83,26 +77,6 @@ public class UpdateChecker {
 		updateCheckerService.start();
 	}
 
-	private void updateTimeDifferenceMessage() {
-		Date updateCheckDate = Date.from(lastSuccessfulUpdateCheck.get());
-		if (updateCheckDate == null || updateCheckDate.equals(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK)) {
-			timeDifferenceMessage.set(resourceBundle.getString("preferences.updates.lastUpdateCheck.never"));
-			return;
-		}
-
-		var duration = java.time.Duration.between(LocalDateTime.ofInstant(updateCheckDate.toInstant(), ZoneId.systemDefault()), LocalDateTime.now());
-
-		var hours = duration.toHours();
-
-		if (hours < 1) {
-			timeDifferenceMessage.set(resourceBundle.getString("preferences.updates.lastUpdateCheck.recently"));
-		} else if (hours < 24) {
-			timeDifferenceMessage.set(String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.hoursAgo"), hours));
-		} else {
-			timeDifferenceMessage.set(String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.daysAgo"), duration.toDays()));
-		}
-	}
-
 	private void checkStarted(WorkerStateEvent event) {
 		LOG.debug("Checking for updates...");
 		state.set(UpdateCheckState.IS_CHECKING);
@@ -112,8 +86,6 @@ public class UpdateChecker {
 		var latestVersionString = updateCheckerService.getValue();
 		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersionString);
 		lastSuccessfulUpdateCheck.set(Instant.now());
-		//TODO refactor
-		updateTimeDifferenceMessage();
 		latestVersion.set(latestVersionString);
 		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 	}
@@ -147,12 +119,8 @@ public class UpdateChecker {
 		return updateAvailable.get();
 	}
 
-	public ObjectProperty<Date> lastSuccessfulUpdateCheckProperty() {
+	public ObjectProperty<Instant> lastSuccessfulUpdateCheckProperty() {
 		return lastSuccessfulUpdateCheck;
-	}
-
-	public StringProperty timeDifferenceMessageProperty() {
-		return timeDifferenceMessage;
 	}
 
 	public ObjectProperty<UpdateCheckState> updateCheckStateProperty() {
