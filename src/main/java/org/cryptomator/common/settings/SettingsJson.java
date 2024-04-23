@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -85,11 +84,11 @@ class SettingsJson {
 
 	@JsonProperty("lastUpdateReminder")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	Date lastUpdateReminder = Settings.DEFAULT_LAST_UPDATE_REMINDER;
+	Date lastUpdateReminder = Date.from(Settings.DEFAULT_LAST_UPDATE_REMINDER);
 
 	@JsonProperty("lastSuccessfulUpdateCheck")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-	Date lastSuccessfulUpdateCheck = Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK;
+	Date lastSuccessfulUpdateCheck = Date.from(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK);
 
 	@JsonProperty("latestVersion")
 	String latestVersion;
