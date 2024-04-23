@@ -87,7 +87,7 @@ class SettingsJson {
 	Date lastUpdateReminder = Date.from(Settings.DEFAULT_LAST_UPDATE_REMINDER);
 
 	@JsonProperty("lastSuccessfulUpdateCheck")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss z")
 	Date lastSuccessfulUpdateCheck = Date.from(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK);
 
 	@JsonProperty("latestVersion")
