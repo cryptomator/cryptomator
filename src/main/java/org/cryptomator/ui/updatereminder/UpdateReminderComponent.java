@@ -29,8 +29,9 @@ public interface UpdateReminderComponent {
 	Settings settings();
 
 	default void checkAndShowUpdateReminderWindow() {
-		if (settings().lastUpdateReminder.get().before(Date.from(Instant.now().minus(Duration.ofDays(14)))) && !settings().checkForUpdates.getValue()) {
-			settings().lastUpdateReminder.set(new Date());
+		var now = Instant.now();
+		if (settings().lastUpdateReminder.get().isBefore(now.minus(Duration.ofDays(14))) && !settings().checkForUpdates.getValue()) {
+			settings().lastUpdateReminder.set(now);
 			Stage stage = window();
 			stage.setScene(updateReminderScene().get());
 			stage.sizeToScene();
