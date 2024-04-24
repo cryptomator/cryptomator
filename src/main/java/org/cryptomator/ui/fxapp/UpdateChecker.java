@@ -19,11 +19,7 @@ import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.ResourceBundle;
 
 @FxApplicationScoped
 public class UpdateChecker {
@@ -37,7 +33,6 @@ public class UpdateChecker {
 	private final ScheduledService<String> updateCheckerService;
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck = new SimpleObjectProperty<>();
-	private final StringProperty timeDifferenceMessage = new SimpleStringProperty();
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final BooleanBinding updateAvailable;
 

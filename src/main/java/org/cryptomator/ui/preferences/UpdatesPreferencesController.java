@@ -49,6 +49,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final BooleanBinding updateAvailable;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final ObjectProperty<UpdateChecker.UpdateCheckState> updateCheckState;
+	private final DateTimeFormatter formatter;
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
@@ -69,6 +70,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.currentVersion = updateChecker.getCurrentVersion();
 		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.updateCheckState = updateChecker.updateCheckStateProperty();
+		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 	}
 
 	public void initialize() {
@@ -130,7 +132,6 @@ public class UpdatesPreferencesController implements FxController {
 	public String getLastSuccessfulUpdateCheck() {
 		Instant lastCheck = lastSuccessfulUpdateCheck.getValue();
 		if (lastCheck != null && !lastCheck.equals(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK)) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 			return formatter.format(LocalDateTime.ofInstant(lastCheck, ZoneId.systemDefault()));
 		} else {
 			return "-";

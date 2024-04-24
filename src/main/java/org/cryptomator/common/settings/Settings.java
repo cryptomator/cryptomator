@@ -168,7 +168,6 @@ public class Settings {
 				}
 			});
 		}
-
 	}
 
 	SettingsJson serialized() {
