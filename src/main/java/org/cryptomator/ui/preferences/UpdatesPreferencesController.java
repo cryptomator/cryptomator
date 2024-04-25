@@ -50,6 +50,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final ObjectProperty<UpdateChecker.UpdateCheckState> updateCheckState;
 	private final DateTimeFormatter formatter;
+	private final BooleanBinding isUpdateSuccessfulAndCurrent;
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
@@ -71,15 +72,14 @@ public class UpdatesPreferencesController implements FxController {
 		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.updateCheckState = updateChecker.updateCheckStateProperty();
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
+		this.isUpdateSuccessfulAndCurrent = updateCheckState.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 	}
 
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 
-		BooleanBinding isUpdateSuccessfulAndCurrent = updateCheckState.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
-
-		updateCheckState.addListener((_, _, _) -> {
-			if (isUpdateSuccessfulAndCurrent.get()) {
+		isUpdateSuccessfulAndCurrent.addListener((_, _, newVal) -> {
+			if (newVal) {
 				upToDateLabelVisible.set(true);
 				PauseTransition delay = new PauseTransition(javafx.util.Duration.seconds(5));
 				delay.setOnFinished(_ -> upToDateLabelVisible.set(false));
