@@ -3,6 +3,7 @@ package org.cryptomator.common.settings;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,7 @@ public class SettingsJsonTest {
 		jsonObj.theme = UiTheme.DARK;
 		jsonObj.showTrayIcon = false;
 
-		var jsonStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
+		var jsonStr = new ObjectMapper().registerModule(new JavaTimeModule()).writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
 
 		MatcherAssert.assertThat(jsonStr, containsString("\"theme\" : \"DARK\""));
 		MatcherAssert.assertThat(jsonStr, containsString("\"showTrayIcon\" : false"));
