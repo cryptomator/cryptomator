@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -83,14 +83,11 @@ class SettingsJson {
 	String preferredVolumeImpl;
 
 	@JsonProperty("lastUpdateReminder")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	Date lastUpdateReminder = Date.from(Settings.DEFAULT_LAST_UPDATE_REMINDER);
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+	Instant lastUpdateReminder = Settings.DEFAULT_TIMESTAMP;
 
 	@JsonProperty("lastSuccessfulUpdateCheck")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss z")
-	Date lastSuccessfulUpdateCheck = Date.from(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK);
-
-	@JsonProperty("latestVersion")
-	String latestVersion;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+	Instant lastSuccessfulUpdateCheck = Settings.DEFAULT_TIMESTAMP;
 
 }

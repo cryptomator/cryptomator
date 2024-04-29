@@ -12,6 +12,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -34,12 +36,13 @@
 		</Button>
 
 		<HBox fx:id="checkFailedHBox" spacing="12" alignment="CENTER" visible="${controller.checkFailed}" managed="${controller.checkFailed}">
-			<Label text="%preferences.updates.checkFailed" wrapText="true">
-				<graphic>
-					<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
-				</graphic>
-			</Label>
-			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
+			<TextFlow styleClass="text-flow" textAlignment="CENTER">
+				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
+				<Text text=" "/>
+				<Text text="%preferences.updates.checkFailed"/>
+				<Text text=" "/>
+				<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
+			</TextFlow>
 		</HBox>
 		<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.timeDifferenceMessage}" textAlignment="CENTER" wrapText="true">
 			<tooltip>

@@ -47,10 +47,11 @@ public class UpdatesPreferencesController implements FxController {
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final String currentVersion;
 	private final BooleanBinding updateAvailable;
+	private final BooleanBinding checkFailed;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final ObjectProperty<UpdateChecker.UpdateCheckState> updateCheckState;
 	private final DateTimeFormatter formatter;
-	private final BooleanBinding isUpdateSuccessfulAndCurrent;
+	private final BooleanBinding upToDate;
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
@@ -72,13 +73,14 @@ public class UpdatesPreferencesController implements FxController {
 		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.updateCheckState = updateChecker.updateCheckStateProperty();
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
-		this.isUpdateSuccessfulAndCurrent = updateCheckState.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
+		this.upToDate = updateCheckState.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
+		this.checkFailed = updateChecker.checkFailedProperty();
 	}
 
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 
-		isUpdateSuccessfulAndCurrent.addListener((_, _, newVal) -> {
+		upToDate.addListener((_, _, newVal) -> {
 			if (newVal) {
 				upToDateLabelVisible.set(true);
 				PauseTransition delay = new PauseTransition(javafx.util.Duration.seconds(5));
@@ -131,7 +133,7 @@ public class UpdatesPreferencesController implements FxController {
 
 	public String getLastSuccessfulUpdateCheck() {
 		Instant lastCheck = lastSuccessfulUpdateCheck.getValue();
-		if (lastCheck != null && !lastCheck.equals(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK)) {
+		if (lastCheck != null && !lastCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
 			return formatter.format(LocalDateTime.ofInstant(lastCheck, ZoneId.systemDefault()));
 		} else {
 			return "-";
@@ -139,7 +141,7 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	private String updateTimeDifferenceMessage(Instant lastSuccessCheck) {
-		if (lastSuccessCheck.equals(Settings.DEFAULT_LAST_SUCCESSFUL_UPDATE_CHECK)) {
+		if (lastSuccessCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
 			return resourceBundle.getString("preferences.updates.lastUpdateCheck.never");
 		}
 
@@ -180,11 +182,11 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public BooleanBinding checkFailedProperty() {
-		return updateCheckState.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED);
+		return checkFailed;
 	}
 
 	public boolean isCheckFailed() {
-		return checkFailedProperty().get();
+		return checkFailed.get();
 	}
 
 }

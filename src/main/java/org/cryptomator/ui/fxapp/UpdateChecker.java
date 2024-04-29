@@ -35,6 +35,7 @@ public class UpdateChecker {
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck = new SimpleObjectProperty<>();
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final BooleanBinding updateAvailable;
+	private final BooleanBinding checkFailed;
 
 	@Inject
 	UpdateChecker(Settings settings, //
@@ -43,13 +44,13 @@ public class UpdateChecker {
 		this.env = env;
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
-		this.latestVersion.bindBidirectional(settings.latestVersion);
 		this.lastSuccessfulUpdateCheck.bindBidirectional(settings.lastSuccessfulUpdateCheck);
 
 		this.updateAvailable = Bindings.createBooleanBinding(() -> {
 			var latestVersion = this.latestVersion.get();
 			return latestVersion != null && versionComparator.compare(getCurrentVersion(), latestVersion) < 0;
 		}, latestVersion);
+		this.checkFailed = Bindings.createBooleanBinding(() -> state.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED).get(), state);
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -87,7 +88,6 @@ public class UpdateChecker {
 
 	private void checkFailed(WorkerStateEvent event) {
 		state.set(UpdateCheckState.CHECK_FAILED);
-		LOG.warn("Error checking for updates", event.getSource().getException());
 	}
 
 	public enum UpdateCheckState {
@@ -108,6 +108,9 @@ public class UpdateChecker {
 
 	public BooleanBinding updateAvailableProperty() {
 		return updateAvailable;
+	}
+	public BooleanBinding checkFailedProperty() {
+		return checkFailed;
 	}
 
 	public boolean isUpdateAvailable() {
