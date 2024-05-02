@@ -16,7 +16,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '21.0.2+13'
+  JAVA_VERSION: '22.0.1+8'
 
 jobs:
   get-version:
