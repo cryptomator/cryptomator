@@ -14,6 +14,7 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
@@ -35,7 +36,8 @@ public class UpdateChecker {
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck = new SimpleObjectProperty<>();
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final BooleanBinding updateAvailable;
-	private final BooleanBinding checkFailed;
+	//private final BooleanBinding checkFailed;
+	private final ObservableValue<Boolean> checkFailed;
 
 	@Inject
 	UpdateChecker(Settings settings, //
@@ -50,7 +52,7 @@ public class UpdateChecker {
 			var latestVersion = this.latestVersion.get();
 			return latestVersion != null && versionComparator.compare(getCurrentVersion(), latestVersion) < 0;
 		}, latestVersion);
-		this.checkFailed = Bindings.createBooleanBinding(() -> state.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_FAILED).get(), state);
+		this.checkFailed = state.map(UpdateCheckState.CHECK_FAILED::equals);
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -109,7 +111,7 @@ public class UpdateChecker {
 	public BooleanBinding updateAvailableProperty() {
 		return updateAvailable;
 	}
-	public BooleanBinding checkFailedProperty() {
+	public ObservableValue<Boolean> checkFailedProperty() {
 		return checkFailed;
 	}
 

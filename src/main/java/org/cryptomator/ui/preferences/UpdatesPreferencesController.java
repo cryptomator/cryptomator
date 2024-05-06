@@ -47,7 +47,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final String currentVersion;
 	private final BooleanBinding updateAvailable;
-	private final BooleanBinding checkFailed;
+	private final ObservableValue<Boolean> checkFailed;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final ObjectProperty<UpdateChecker.UpdateCheckState> updateCheckState;
 	private final DateTimeFormatter formatter;
@@ -181,12 +181,12 @@ public class UpdatesPreferencesController implements FxController {
 		return updateAvailable.get();
 	}
 
-	public BooleanBinding checkFailedProperty() {
+	public ObservableValue<Boolean> checkFailedProperty() {
 		return checkFailed;
 	}
 
 	public boolean isCheckFailed() {
-		return checkFailed.get();
+		return checkFailed.getValue();
 	}
 
 }
