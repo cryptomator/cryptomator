@@ -7,9 +7,6 @@ import org.cryptomator.ui.fxapp.UpdateChecker;
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @UpdateReminderScoped
 public class UpdateReminderController implements FxController {

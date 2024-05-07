@@ -1,13 +1,13 @@
 package org.cryptomator.ui.fxapp;
 
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -35,7 +35,7 @@ public class UpdateChecker {
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck = new SimpleObjectProperty<>();
 	private final Comparator<String> versionComparator = new SemVerComparator();
-	private final BooleanBinding updateAvailable;
+	private final ObservableValue<Boolean> updateAvailable;
 	//private final BooleanBinding checkFailed;
 	private final ObservableValue<Boolean> checkFailed;
 
@@ -47,11 +47,7 @@ public class UpdateChecker {
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
 		this.lastSuccessfulUpdateCheck.bindBidirectional(settings.lastSuccessfulUpdateCheck);
-
-		this.updateAvailable = Bindings.createBooleanBinding(() -> {
-			var latestVersion = this.latestVersion.get();
-			return latestVersion != null && versionComparator.compare(getCurrentVersion(), latestVersion) < 0;
-		}, latestVersion);
+		this.updateAvailable = ObservableUtil.mapWithDefault(latestVersion, latest -> versionComparator.compare(getCurrentVersion(), latest) < 0, false);
 		this.checkFailed = state.map(UpdateCheckState.CHECK_FAILED::equals);
 	}
 
@@ -108,7 +104,7 @@ public class UpdateChecker {
 		return latestVersion;
 	}
 
-	public BooleanBinding updateAvailableProperty() {
+	public ObservableValue<Boolean> updateAvailableProperty() {
 		return updateAvailable;
 	}
 	public ObservableValue<Boolean> checkFailedProperty() {
@@ -116,7 +112,7 @@ public class UpdateChecker {
 	}
 
 	public boolean isUpdateAvailable() {
-		return updateAvailable.get();
+		return updateAvailable.getValue();
 	}
 
 	public ObjectProperty<Instant> lastSuccessfulUpdateCheckProperty() {

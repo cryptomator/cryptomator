@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
@@ -30,7 +31,7 @@ public class MainWindowTitleController implements FxController {
 	private final FxApplicationWindows appWindows;
 	private final boolean trayMenuInitialized;
 	private final UpdateChecker updateChecker;
-	private final BooleanBinding updateAvailable;
+	private final ObservableValue<Boolean> updateAvailable;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
 	private final BooleanBinding showMinimizeButton;
@@ -126,12 +127,12 @@ public class MainWindowTitleController implements FxController {
 		return licenseHolder;
 	}
 
-	public BooleanBinding updateAvailableProperty() {
+	public ObservableValue<Boolean> updateAvailableProperty() {
 		return updateAvailable;
 	}
 
 	public boolean isUpdateAvailable() {
-		return updateAvailable.get();
+		return updateAvailable.getValue();
 	}
 
 	public boolean isTrayIconPresent() {
