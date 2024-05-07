@@ -20,7 +20,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -55,7 +54,6 @@ public class UpdatesPreferencesController implements FxController {
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
-	public HBox checkFailedHBox;
 	public Label upToDateLabel;
 
 	@Inject

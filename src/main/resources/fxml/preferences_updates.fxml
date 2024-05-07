@@ -35,15 +35,13 @@
 			</graphic>
 		</Button>
 
-		<HBox fx:id="checkFailedHBox" spacing="12" alignment="CENTER" visible="${controller.checkFailed}" managed="${controller.checkFailed}">
-			<TextFlow styleClass="text-flow" textAlignment="CENTER">
-				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
-				<Text text=" "/>
-				<Text text="%preferences.updates.checkFailed"/>
-				<Text text=" "/>
-				<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
-			</TextFlow>
-		</HBox>
+		<TextFlow styleClass="text-flow" textAlignment="CENTER" visible="${controller.checkFailed}" managed="${controller.checkFailed}">
+			<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
+			<Text text=" "/>
+			<Text text="%preferences.updates.checkFailed"/>
+			<Text text=" "/>
+			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
+		</TextFlow>
 		<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.timeDifferenceMessage}" textAlignment="CENTER" wrapText="true">
 			<tooltip>
 				<Tooltip text="${controller.lastSuccessfulUpdateCheck}" showDelay="10ms"/>
