@@ -104,7 +104,6 @@ public class Settings {
 		this.windowHeight = new SimpleIntegerProperty(this, "windowHeight", json.windowHeight);
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
-		this.lastUpdateReminder = new SimpleObjectProperty<>(this, "lastUpdateReminder", json.lastUpdateReminder);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
@@ -132,7 +131,6 @@ public class Settings {
 		windowHeight.addListener(this::somethingChanged);
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
-		lastUpdateReminder.addListener(this::somethingChanged);
 		lastSuccessfulUpdateCheck.addListener(this::somethingChanged);
 	}
 
@@ -187,7 +185,6 @@ public class Settings {
 		json.windowHeight = windowHeight.get();
 		json.language = language.get();
 		json.mountService = mountService.get();
-		json.lastUpdateReminder = lastUpdateReminder.get();
 		json.lastSuccessfulUpdateCheck = lastSuccessfulUpdateCheck.get();
 		return json;
 	}
