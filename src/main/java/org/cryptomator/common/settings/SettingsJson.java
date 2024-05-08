@@ -82,10 +82,6 @@ class SettingsJson {
 	@JsonProperty(value = "preferredVolumeImpl", access = JsonProperty.Access.WRITE_ONLY) // WRITE_ONLY means value is "written" into the java object during deserialization. Upvote this: https://github.com/FasterXML/jackson-annotations/issues/233
 	String preferredVolumeImpl;
 
-	@JsonProperty("lastUpdateReminder")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-	Instant lastUpdateReminder = Settings.DEFAULT_TIMESTAMP;
-
 	@JsonProperty("lastSuccessfulUpdateCheck")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
 	Instant lastSuccessfulUpdateCheck = Settings.DEFAULT_TIMESTAMP;

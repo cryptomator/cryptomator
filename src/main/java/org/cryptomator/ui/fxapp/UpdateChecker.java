@@ -36,7 +36,6 @@ public class UpdateChecker {
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck = new SimpleObjectProperty<>();
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final ObservableValue<Boolean> updateAvailable;
-	//private final BooleanBinding checkFailed;
 	private final ObservableValue<Boolean> checkFailed;
 
 	@Inject

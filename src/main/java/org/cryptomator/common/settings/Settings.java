@@ -67,7 +67,6 @@ public class Settings {
 	public final IntegerProperty windowHeight;
 	public final StringProperty language;
 	public final StringProperty mountService;
-	public final ObjectProperty<Instant> lastUpdateReminder;
 	public final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
 
 	private Consumer<Settings> saveCmd;
