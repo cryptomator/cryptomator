@@ -48,7 +48,6 @@ public class UpdatesPreferencesController implements FxController {
 	private final ObservableValue<Boolean> updateAvailable;
 	private final ObservableValue<Boolean> checkFailed;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
-	private final ObjectProperty<UpdateChecker.UpdateCheckState> updateCheckState;
 	private final DateTimeFormatter formatter;
 	private final BooleanBinding upToDate;
 
@@ -69,9 +68,8 @@ public class UpdatesPreferencesController implements FxController {
 		this.timeDifferenceMessage = lastSuccessfulUpdateCheck.map(this::updateTimeDifferenceMessage);
 		this.currentVersion = updateChecker.getCurrentVersion();
 		this.updateAvailable = updateChecker.updateAvailableProperty();
-		this.updateCheckState = updateChecker.updateCheckStateProperty();
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
-		this.upToDate = updateCheckState.isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
+		this.upToDate = updateChecker.updateCheckStateProperty().isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 		this.checkFailed = updateChecker.checkFailedProperty();
 	}
 
