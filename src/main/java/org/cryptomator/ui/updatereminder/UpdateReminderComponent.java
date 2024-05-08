@@ -25,8 +25,7 @@ public interface UpdateReminderComponent {
 
 	default void checkAndShowUpdateReminderWindow() {
 		var now = Instant.now();
-		var twoWeeksAgo = now.minus(Duration.ofDays(14));
-		if (!settings().checkForUpdates.getValue() && settings().lastSuccessfulUpdateCheck.get().isBefore(twoWeeksAgo)) {
+		if (!settings().checkForUpdates.getValue() && settings().lastSuccessfulUpdateCheck.get().isBefore(now.minus(Duration.ofDays(14)))) {
 			Stage stage = window();
 			stage.setScene(updateReminderScene().get());
 			stage.sizeToScene();
