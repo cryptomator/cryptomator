@@ -47,7 +47,7 @@
 				<Tooltip text="${controller.lastSuccessfulUpdateCheck}" showDelay="10ms"/>
 			</tooltip>
 		</FormattedLabel>
-		<Label fx:id="upToDateLabel" text="%preferences.updates.upToDate" visible="${controller.upToDateLabelVisible}" managed="${controller.upToDateLabelVisible}">
+		<Label text="%preferences.updates.upToDate" visible="${controller.upToDateLabelVisible}" managed="${controller.upToDateLabelVisible}">
 			<graphic>
 				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-primary" glyph="CHECK"/>
 			</graphic>

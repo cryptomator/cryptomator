@@ -53,7 +53,6 @@ public class UpdatesPreferencesController implements FxController {
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
-	public Label upToDateLabel;
 
 	@Inject
 	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker) {
