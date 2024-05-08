@@ -12,14 +12,12 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -115,7 +113,7 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public String getLatestVersion() {
-		return latestVersion.isNotNull().get() ? latestVersion.get() : "-";
+		return latestVersion.get();
 	}
 
 	public String getCurrentVersion() {
