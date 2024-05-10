@@ -45,8 +45,8 @@ public class UpdatesPreferencesController implements FxController {
 	private final StringBinding lastUpdateCheckMessage;
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final String currentVersion;
-	private final ObservableValue<Boolean> updateAvailable;
-	private final ObservableValue<Boolean> checkFailed;
+	private final BooleanBinding updateAvailable;
+	private final BooleanBinding checkFailed;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final DateTimeFormatter formatter;
 	private final BooleanBinding upToDate;
@@ -64,7 +64,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.latestVersion = updateChecker.latestVersionProperty();
 		this.lastSuccessfulUpdateCheck = updateChecker.lastSuccessfulUpdateCheckProperty();
-		this.timeDifferenceMessage = lastSuccessfulUpdateCheck.map(this::updateTimeDifferenceMessage);
+		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, lastSuccessfulUpdateCheck);
 		this.currentVersion = updateChecker.getCurrentVersion();
 		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
@@ -126,6 +126,7 @@ public class UpdatesPreferencesController implements FxController {
 	public StringBinding lastUpdateCheckMessageProperty() {
 		return lastUpdateCheckMessage;
 	}
+
 	public String getLastUpdateCheckMessage() {
 		Instant lastCheck = lastSuccessfulUpdateCheck.getValue();
 		if (lastCheck != null && !lastCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
@@ -135,29 +136,23 @@ public class UpdatesPreferencesController implements FxController {
 		}
 	}
 
-	private String updateTimeDifferenceMessage(Instant lastSuccessCheck) {
-		if (lastSuccessCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
-			return resourceBundle.getString("preferences.updates.lastUpdateCheck.never");
-		}
+	public ObservableValue<String> timeDifferenceMessageProperty() {
+		return timeDifferenceMessage;
+	}
 
+	public String getTimeDifferenceMessage() {
+		var lastSuccessCheck = lastSuccessfulUpdateCheck.getValue();
 		var duration = Duration.between(lastSuccessCheck, Instant.now());
 		var hours = duration.toHours();
-		if (hours < 1) {
+		if (lastSuccessCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
+			return resourceBundle.getString("preferences.updates.lastUpdateCheck.never");
+		} else if (hours < 1) {
 			return resourceBundle.getString("preferences.updates.lastUpdateCheck.recently");
 		} else if (hours < 24) {
 			return String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.hoursAgo"), hours);
 		} else {
 			return String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.daysAgo"), duration.toDays());
 		}
-	}
-
-
-	public ObservableValue<String> timeDifferenceMessageProperty() {
-		return timeDifferenceMessage;
-	}
-
-	public String getTimeDifferenceMessage() {
-		return timeDifferenceMessage.getValue();
 	}
 
 	public BooleanProperty upToDateLabelVisibleProperty() {
@@ -168,7 +163,7 @@ public class UpdatesPreferencesController implements FxController {
 		return upToDateLabelVisible.get();
 	}
 
-	public ObservableValue<Boolean> updateAvailableProperty() {
+	public BooleanBinding updateAvailableProperty() {
 		return updateAvailable;
 	}
 
@@ -176,7 +171,7 @@ public class UpdatesPreferencesController implements FxController {
 		return updateAvailable.getValue();
 	}
 
-	public ObservableValue<Boolean> checkFailedProperty() {
+	public BooleanBinding checkFailedProperty() {
 		return checkFailed;
 	}
 

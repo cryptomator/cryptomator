@@ -1,7 +1,6 @@
 package org.cryptomator.ui.fxapp;
 
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
@@ -36,8 +34,8 @@ public class UpdateChecker {
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
 	private final Comparator<String> versionComparator = new SemVerComparator();
-	private final ObservableValue<Boolean> updateAvailable;
-	private final ObservableValue<Boolean> checkFailed;
+	private final BooleanBinding updateAvailable;
+	private final BooleanBinding checkFailed;
 
 	@Inject
 	UpdateChecker(Settings settings, //
@@ -47,7 +45,7 @@ public class UpdateChecker {
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
 		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
-		this.updateAvailable = ObservableUtil.mapWithDefault(latestVersion, latest -> versionComparator.compare(getCurrentVersion(), latest) < 0, false);
+		this.updateAvailable = Bindings.createBooleanBinding(this::isUpdateAvailable, latestVersion);
 		this.checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, state);
 	}
 
@@ -104,15 +102,23 @@ public class UpdateChecker {
 		return latestVersion;
 	}
 
-	public ObservableValue<Boolean> updateAvailableProperty() {
+	public BooleanBinding updateAvailableProperty() {
 		return updateAvailable;
 	}
-	public ObservableValue<Boolean> checkFailedProperty() {
+
+	public BooleanBinding checkFailedProperty() {
 		return checkFailed;
 	}
 
 	public boolean isUpdateAvailable() {
-		return updateAvailable.getValue();
+		String currentVersion = getCurrentVersion();
+		String latestVersionString = latestVersion.get();
+
+		if (currentVersion == null || latestVersionString == null) {
+			return false;
+		} else {
+			return versionComparator.compare(currentVersion, latestVersionString) < 0;
+		}
 	}
 
 	public ObjectProperty<Instant> lastSuccessfulUpdateCheckProperty() {
