@@ -11,6 +11,7 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -41,6 +42,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
 	private final ReadOnlyStringProperty latestVersion;
 	private final ObservableValue<Instant> lastSuccessfulUpdateCheck;
+	private final StringBinding lastUpdateCheckMessage;
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final String currentVersion;
 	private final ObservableValue<Boolean> updateAvailable;
@@ -68,6 +70,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 		this.upToDate = updateChecker.updateCheckStateProperty().isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 		this.checkFailed = updateChecker.checkFailedProperty();
+		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, lastSuccessfulUpdateCheck);
 	}
 
 	public void initialize() {
@@ -120,11 +123,10 @@ public class UpdatesPreferencesController implements FxController {
 		return currentVersion;
 	}
 
-	public ObservableValue<Instant> lastSuccessfulUpdateCheckProperty() {
-		return lastSuccessfulUpdateCheck;
+	public StringBinding lastUpdateCheckMessageProperty() {
+		return lastUpdateCheckMessage;
 	}
-
-	public String getLastSuccessfulUpdateCheck() {
+	public String getLastUpdateCheckMessage() {
 		Instant lastCheck = lastSuccessfulUpdateCheck.getValue();
 		if (lastCheck != null && !lastCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
 			return formatter.format(LocalDateTime.ofInstant(lastCheck, ZoneId.systemDefault()));

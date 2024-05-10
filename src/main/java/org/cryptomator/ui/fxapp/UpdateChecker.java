@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -33,7 +34,7 @@ public class UpdateChecker {
 	private final StringProperty latestVersion = new SimpleStringProperty();
 	private final ScheduledService<String> updateCheckerService;
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
-	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck = new SimpleObjectProperty<>();
+	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final ObservableValue<Boolean> updateAvailable;
 	private final ObservableValue<Boolean> checkFailed;
@@ -45,9 +46,9 @@ public class UpdateChecker {
 		this.env = env;
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
-		this.lastSuccessfulUpdateCheck.bindBidirectional(settings.lastSuccessfulUpdateCheck);
+		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
 		this.updateAvailable = ObservableUtil.mapWithDefault(latestVersion, latest -> versionComparator.compare(getCurrentVersion(), latest) < 0, false);
-		this.checkFailed = state.map(UpdateCheckState.CHECK_FAILED::equals);
+		this.checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, state);
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
