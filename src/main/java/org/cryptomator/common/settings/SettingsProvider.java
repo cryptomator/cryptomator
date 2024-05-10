@@ -10,6 +10,7 @@ package org.cryptomator.common.settings;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Suppliers;
 import org.cryptomator.common.Environment;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 @Singleton
 public class SettingsProvider implements Supplier<Settings> {
 
-	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
+	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true).registerModule(new JavaTimeModule());
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsProvider.class);
 	private static final long SAVE_DELAY_MS = 1000;
 

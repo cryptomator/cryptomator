@@ -8,7 +8,8 @@ import org.cryptomator.ui.common.FxmlScene;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.time.LocalDate;
+import java.time.Duration;
+import java.time.Instant;
 
 @UpdateReminderScoped
 @Subcomponent(modules = {UpdateReminderModule.class})
@@ -23,7 +24,8 @@ public interface UpdateReminderComponent {
 	Settings settings();
 
 	default void checkAndShowUpdateReminderWindow() {
-		if (LocalDate.parse(settings().lastUpdateCheck.get()).isBefore(LocalDate.now().minusDays(14)) && !settings().checkForUpdates.getValue()) {
+		var now = Instant.now();
+		if (!settings().checkForUpdates.getValue() && settings().lastSuccessfulUpdateCheck.get().isBefore(now.minus(Duration.ofDays(14)))) {
 			Stage stage = window();
 			stage.setScene(updateReminderScene().get());
 			stage.sizeToScene();
@@ -33,6 +35,7 @@ public interface UpdateReminderComponent {
 
 	@Subcomponent.Factory
 	interface Factory {
+
 		UpdateReminderComponent create();
 	}
 }
