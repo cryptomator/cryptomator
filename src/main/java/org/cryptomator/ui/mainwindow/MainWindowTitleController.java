@@ -131,7 +131,7 @@ public class MainWindowTitleController implements FxController {
 	}
 
 	public boolean isUpdateAvailable() {
-		return updateAvailable.getValue();
+		return updateAvailable.get();
 	}
 
 	public boolean isTrayIconPresent() {

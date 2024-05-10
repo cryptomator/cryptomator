@@ -168,7 +168,7 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public boolean isUpdateAvailable() {
-		return updateAvailable.getValue();
+		return updateAvailable.get();
 	}
 
 	public BooleanBinding checkFailedProperty() {
