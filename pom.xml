@@ -37,8 +37,8 @@
 		<cryptomator.integrations.version>1.3.1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.2.5</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.3</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.4.4</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>4.0.0</cryptomator.fuse.version>
+		<cryptomator.integrations.linux.version>1.4.5</cryptomator.integrations.linux.version>
+		<cryptomator.fuse.version>5.0.0</cryptomator.fuse.version>
 		<cryptomator.webdav.version>2.0.6</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
