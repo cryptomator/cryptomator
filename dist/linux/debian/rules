@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-JAVA_HOME = /usr/lib/jvm/java-21-coffeelibs
+JAVA_HOME = /usr/lib/jvm/java-22-coffeelibs
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DEB_BUILD_ARCH),amd64)
 JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods
@@ -28,7 +28,7 @@ override_dh_auto_build:
 	$(JAVA_HOME)/bin/jlink \
 		--output runtime \
 		--module-path "${JMODS_PATH}" \
-		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net \
+		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net \
 		--strip-native-commands \
 		--no-header-files \
 		--no-man-pages \

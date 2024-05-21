@@ -31,7 +31,6 @@ open module org.cryptomator.desktop {
 	requires javafx.graphics;
 	requires javafx.controls;
 	requires javafx.fxml;
-	requires jdk.crypto.ec;
 	// 3rd party:
 	requires ch.qos.logback.classic;
 	requires ch.qos.logback.core;
