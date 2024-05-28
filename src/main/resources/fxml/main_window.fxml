@@ -9,11 +9,9 @@
 		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 		   styleClass="main-window">
 	<VBox minWidth="650">
-		<fx:include source="main_window_title.fxml" VBox.vgrow="NEVER"/>
 		<SplitPane dividerPositions="0.33" orientation="HORIZONTAL" VBox.vgrow="ALWAYS">
 			<fx:include source="vault_list.fxml" SplitPane.resizableWithParent="false"/>
 			<fx:include source="vault_detail.fxml" SplitPane.resizableWithParent="true"/>
 		</SplitPane>
 	</VBox>
-	<fx:include source="main_window_resize.fxml"/>
 </StackPane>

@@ -1,38 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Arc?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ScrollPane?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
 		   fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
 		   minWidth="206">
-	<VBox>
-		<StackPane VBox.vgrow="ALWAYS">
-			<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
-				<contextMenu>
-					<fx:include source="vault_list_contextmenu.fxml"/>
-				</contextMenu>
-			</ListView>
-			<VBox visible="${controller.emptyVaultList}" spacing="6" alignment="CENTER">
-				<Region VBox.vgrow="ALWAYS"/>
-				<Label VBox.vgrow="NEVER" text="%main.vaultlist.emptyList.onboardingInstruction" textAlignment="CENTER" wrapText="true"/>
-				<Arc VBox.vgrow="NEVER" styleClass="onboarding-overlay-arc" type="OPEN" centerX="50" centerY="0" radiusY="100" radiusX="50" startAngle="0" length="-60" strokeWidth="1"/>
+	<VBox styleClass="vault-list-box">
+		<ScrollPane fx:id="scrollPane" hbarPolicy="NEVER">
+			<VBox fx:id="vbox">
+				<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
+					<contextMenu>
+						<fx:include source="vault_list_contextmenu.fxml"/>
+					</contextMenu>
+				</ListView>
+				<HBox fx:id="addVaultArea" styleClass="add-vault-btn" spacing="12" onMouseClicked="#toggleMenu">
+					<padding>
+						<Insets topRightBottomLeft="12"/>
+					</padding>
+					<VBox alignment="CENTER" minWidth="20">
+						<FontAwesome5IconView glyph="PLUS" styleClass="icon" HBox.hgrow="NEVER" glyphSize="16"/>
+					</VBox>
+					<VBox spacing="4" HBox.hgrow="ALWAYS" >
+						<Label styleClass="add-vault-btn-label" text="%main.vaultlist.addVaultBtn" />
+					</VBox>
+				</HBox>
 			</VBox>
-		</StackPane>
-		<Button fx:id="addVaultBtn" onAction="#toggleMenu" styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" alignment="BASELINE_CENTER" maxWidth="Infinity" contentDisplay="RIGHT">
-			<graphic>
-				<FontAwesome5IconView glyph="CARET_DOWN"/>
-			</graphic>
-		</Button>
+		</ScrollPane>
+		<Region VBox.vgrow="ALWAYS"/>
+		<HBox spacing="12" styleClass="preferences-btn" onMouseClicked="#showPreferences">
+			<padding>
+				<Insets topRightBottomLeft="12"/>
+			</padding>
+			<VBox alignment="CENTER" minWidth="20">
+				<FontAwesome5IconView glyph="COG" HBox.hgrow="NEVER" glyphSize="16"/>
+			</VBox>
+			<VBox spacing="4" HBox.hgrow="ALWAYS">
+				<Label styleClass="header-label" text="%preferences.title"/>
+			</VBox>
+		</HBox>
 		<fx:define>
 			<ContextMenu fx:id="addVaultContextMenu">
 				<items>

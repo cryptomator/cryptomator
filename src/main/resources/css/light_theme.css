@@ -340,6 +340,26 @@
 	-fx-background-color: CONTROL_BG_ARMED;
 }
 
+.vault-list-box {
+	-fx-background-color: CONTROL_BG_NORMAL;
+}
+
+.add-vault-btn {
+	-fx-background-color: CONTROL_BG_NORMAL;
+}
+.add-vault-btn .icon {
+	-fx-fill: GRAY_4;
+}
+.add-vault-btn-label {
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 1.0em;
+}
+
+.preferences-btn {
+	-fx-border-color: CONTROL_BORDER_NORMAL transparent transparent transparent;
+	-fx-border-width: 1px 0 0 0;
+}
+
 /*******************************************************************************
  *                                                                             *
  * ScrollBar                                                                   *

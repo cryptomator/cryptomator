@@ -9,6 +9,7 @@ import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +28,16 @@ import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
@@ -71,8 +75,11 @@ public class VaultListController implements FxController {
 	private final FxApplicationWindows appWindows;
 
 	public ListView<Vault> vaultList;
+	public ScrollPane scrollPane;
+	public VBox vbox;
 	public StackPane root;
 	public Button addVaultBtn;
+	public HBox addVaultArea;
 	@FXML
 	private ContextMenu addVaultContextMenu;
 
@@ -106,6 +113,21 @@ public class VaultListController implements FxController {
 	public void initialize() {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
+
+		vaultList.prefHeightProperty().bind(vaultList.fixedCellSizeProperty().multiply(vaultList.getItems().size()));
+		vaultList.maxHeightProperty().bind(vaultList.prefHeightProperty());
+		vaultList.prefWidthProperty().bind(scrollPane.widthProperty());
+
+		vbox.heightProperty().addListener((_, oldValue, newValue) -> {
+			if(newValue.doubleValue()>oldValue.doubleValue()){
+				scrollPane.setVvalue(1.0);
+			}
+		});
+
+		vaults.addListener((ListChangeListener<Vault>) c -> {
+			vaultList.prefHeightProperty().bind(vaultList.fixedCellSizeProperty().multiply(vaultList.getItems().size()));
+			});
+
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
 			while (c.next()) {
@@ -171,7 +193,7 @@ public class VaultListController implements FxController {
 		if (addVaultContextMenu.isShowing()) {
 			addVaultContextMenu.hide();
 		} else {
-			addVaultContextMenu.show(addVaultBtn, Side.BOTTOM, 0.0, 0.0);
+			addVaultContextMenu.show(addVaultArea, Side.BOTTOM, 0.0, 0.0);
 		}
 	}
 
@@ -245,6 +267,11 @@ public class VaultListController implements FxController {
 		} catch (IOException e) {
 			LOG.debug("Not a vault: {}", pathToVault);
 		}
+	}
+
+	@FXML
+	public void showPreferences() {
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.ANY);
 	}
 
 	// Getter and Setter
