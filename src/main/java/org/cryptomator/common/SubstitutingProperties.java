@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SubstitutingProperties extends PropertiesDecorator {
@@ -58,7 +59,7 @@ public class SubstitutingProperties extends PropertiesDecorator {
 			LoggerFactory.getLogger(SubstitutingProperties.class).warn("Variable {} used for substitution not found in {}. Replaced with empty string.", key, src);
 			return "";
 		} else {
-			return val.replace("\\", "\\\\");
+			return Matcher.quoteReplacement(val);
 		}
 	}
 
