@@ -1,4 +1,6 @@
-# created during build
+# downloaded/created during build
+openjfx-jmods.zip
+*.jmod
 Cryptomator.AppDir
 *.AppImage
 *.AppImage.zsync
