@@ -29,13 +29,17 @@ REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
-ARCH="undefined"
+JAVAFX_VERISON=21.0.1
+JAVAFX_ARCH="undefined"
+JAVAFX_JMODS_SHA256="undefined"
 if [ "$(machine)" = "arm64e" ]; then
-    ARCH="aarch64"
+    JAVAFX_ARCH="aarch64"
+    JAVAFX_JMODS_SHA256="7afaa1c57a6cc3c384d636e597b9a5364693e2db4aaec0a6e63d2fa964400b58"
 else
-    ARCH="x64"
+    JAVAFX_ARCH="x64"
+    JAVAFX_JMODS_SHA256="bd6abab20da73d5a968dcf2fd915d81b5fb919340e3bb84979ee9a888a829939"
 fi
-OPENJFX_JMODS="https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_osx-${ARCH}_bin-jmods.zip"
+JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_osx-${JAVAFX_ARCH}_bin-jmods.zip"
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
@@ -47,7 +51,8 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
 fi
 
 # download and check jmods
-curl -L ${OPENJFX_JMODS} -o openjfx-jmods.zip
+curl -L ${JAVAFX_JMODS_URL} -o openjfx-jmods.zip
+echo "${JAVAFX_JMODS_SHA256} openjfx-jmods.zip" | shasum -a256 --check
 mkdir -p openjfx-jmods/
 unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
 JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)

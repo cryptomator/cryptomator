@@ -51,21 +51,22 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$jmodsVersion='21.0.1'
-$jmodsUrl = "https://download2.gluonhq.com/openjfx/${jmodsVersion}/openjfx-${jmodsVersion}_windows-x64_bin-jmods.zip"
-$jfxJmodsChecksum = 'daf8acae631c016c24cfe23f88469400274d3441dd890615a42dfb501f3eb94a'
-$jfxJmodsZip = '.\resources\jfxJmods.zip'
-if( !(Test-Path -Path $jfxJmodsZip) ) {
-	Write-Output "Downloading ${jmodsUrl}..."
-	Invoke-WebRequest $jmodsUrl -OutFile $jfxJmodsZip # redirects are followed by default
+$javaFxVersion='21.0.1'
+$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
+$javaFxJmodsSHA256 = 'daf8acae631c016c24cfe23f88469400274d3441dd890615a42dfb501f3eb94a'
+$javaFxJmods = '.\resources\jfxJmods.zip'
+if( !(Test-Path -Path $javaFxJmods) ) {
+	Write-Output "Downloading ${javaFxJmodsUrl}..."
+	Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
 }
 
-$jmodsChecksumActual = $(Get-FileHash -Path $jfxJmodsZip -Algorithm SHA256).Hash
-if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
-	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $jfxJmodsChecksum, actual: $jmodsChecksumActual"
+$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash
+if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
+	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
+, actual: $jmodsChecksumActual"
 	exit 1;
 }
-Expand-Archive -Path $jfxJmodsZip -Force -DestinationPath ".\resources\"
+Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
 Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods"
 Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 

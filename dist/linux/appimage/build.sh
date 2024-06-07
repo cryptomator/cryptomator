@@ -12,9 +12,9 @@ command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip not found."; exit 1; }
 
 VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
-MACHINE_TYPE=$(uname -m)
+CPU_ARCH=$(uname -p)
 
-if [[ ! "${MACHINE_TYPE}" =~ x86_64|aarch64 ]]; then echo "Platform ${MACHINE_TYPE} not supported"; exit 1; fi
+if [[ ! "${CPU_ARCH}" =~ x86_64|aarch64 ]]; then echo "Platform ${CPU_ARCH} not supported"; exit 1; fi
 
 mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 
@@ -23,20 +23,20 @@ mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
-
-# download javaFX jmods
-OPENJFX_URL='https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-jmods.zip'
-OPENJFX_SHA='7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
-OPENJFX_URL_aarch64='https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-aarch64_bin-jmods.zip'
-OPENJFX_SHA_aarch64='871e7b9d7af16aef2e55c1b7830d0e0b2503b13dd8641374ba7e55ecb81d2ef9'
-
-if [[ "${MACHINE_TYPE}" = "aarch64" ]]; then
-	OPENJFX_URL="${OPENJFX_URL_aarch64}";
-	OPENJFX_SHA="${OPENJFX_SHA_aarch64}";
+JAVAFX_VERSION=21.0.1
+JAVAFX_ARCH="x64"
+JAVAFX_JMODS_SHA256='7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
+if [ "${CPU_ARCH}" = "aarch64" ]; then
+    JAVAFX_ARCH="aarch64"
+    JAVAFX_JMODS_SHA256='871e7b9d7af16aef2e55c1b7830d0e0b2503b13dd8641374ba7e55ecb81d2ef9'
 fi
 
-curl -L ${OPENJFX_URL} -o openjfx-jmods.zip
-echo "${OPENJFX_SHA}  openjfx-jmods.zip" | shasum -a256 --check
+# download javaFX jmods
+JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-21.0.1_linux-${JAVAFX_ARCH}_bin-jmods.zip"
+
+
+curl -L ${JAVAFX_JMODS_URL} -o openjfx-jmods.zip
+echo "${JAVAFX_JMODS_SHA256}  openjfx-jmods.zip" | shasum -a256 --check
 mkdir -p openjfx-jmods
 unzip -o -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
 JMOD_VERSION=$(jmod describe ./openjfx-jmods/javafx.base.jmod | head -1)
@@ -114,17 +114,17 @@ ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.App
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
 
 # load AppImageTool
-curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-${MACHINE_TYPE}.AppImage -o /tmp/appimagetool.AppImage
+curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage
 
 # create AppImage
 /tmp/appimagetool.AppImage \
     Cryptomator.AppDir \
-    cryptomator-${SEMVER_STR}-${MACHINE_TYPE}.AppImage  \
-    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${MACHINE_TYPE}.AppImage.zsync'
+    cryptomator-${SEMVER_STR}-${CPU_ARCH}.AppImage  \
+    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${CPU_ARCH}.AppImage.zsync'
 
 echo ""
-echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${MACHINE_TYPE}.AppImage"
+echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${CPU_ARCH}.AppImage"
 echo ""
 echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir runtime squashfs-root openjfx-jmods; rm /tmp/appimagetool.AppImage openjfx-jmods.zip"
 echo ""
