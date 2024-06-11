@@ -74,7 +74,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `

@@ -46,7 +46,7 @@ public class MainWindowTitleController implements FxController {
 		this.appWindows = appWindows;
 		this.trayMenuInitialized = trayMenu.isInitialized();
 		this.updateChecker = updateChecker;
-		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
+		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
 		this.showMinimizeButton = Bindings.createBooleanBinding(this::isShowMinimizeButton, settings.showMinimizeButton, settings.showTrayIcon);

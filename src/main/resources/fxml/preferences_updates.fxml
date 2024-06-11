@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import org.cryptomator.ui.controls.FormattedString?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -18,19 +24,34 @@
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
-	<children>
-		<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
+	<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
 
-		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
+	<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
-		<VBox alignment="CENTER" spacing="12">
-			<Button text="%preferences.updates.checkNowBtn" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
-				<graphic>
-					<FontAwesome5Spinner fx:id="spinner" glyphSize="12"/>
-				</graphic>
-			</Button>
+	<VBox alignment="CENTER" spacing="12">
+		<Button text="%preferences.updates.checkNowBtn" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
+			<graphic>
+				<FontAwesome5Spinner glyphSize="12"/>
+			</graphic>
+		</Button>
 
-			<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}"/>
-		</VBox>
-	</children>
+		<TextFlow styleClass="text-flow" textAlignment="CENTER" visible="${controller.checkFailed}" managed="${controller.checkFailed}">
+			<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
+			<Text text=" "/>
+			<Text text="%preferences.updates.checkFailed"/>
+			<Text text=" "/>
+			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
+		</TextFlow>
+		<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.timeDifferenceMessage}" textAlignment="CENTER" wrapText="true">
+			<tooltip>
+				<Tooltip text="${controller.lastUpdateCheckMessage}" showDelay="10ms"/>
+			</tooltip>
+		</FormattedLabel>
+		<Label text="%preferences.updates.upToDate" visible="${controller.upToDateLabelVisible}" managed="${controller.upToDateLabelVisible}">
+			<graphic>
+				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-primary" glyph="CHECK"/>
+			</graphic>
+		</Label>
+		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
+	</VBox>
 </VBox>

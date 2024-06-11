@@ -1,6 +1,8 @@
-# created during build
+# downloaded/created during build
 Cryptomator.app/
 runtime/
 dmg/
 *.dmg
 license.rtf
+openjfx-jmods.zip
+*.jmod

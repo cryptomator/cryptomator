@@ -6,4 +6,5 @@ installer
 *.msi
 *.exe
 *.jmod
+resources/jfxJmods.zip
 license.rtf
