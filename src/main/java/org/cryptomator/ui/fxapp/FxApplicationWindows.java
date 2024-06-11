@@ -5,6 +5,7 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
+import org.cryptomator.ui.dokanyinfodialog.DokanyInfoDialogComponent;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -48,6 +49,7 @@ public class FxApplicationWindows {
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
 	private final UpdateReminderComponent.Factory updateReminderWindowBuilder;
+	private final DokanyInfoDialogComponent.Factory dokanyInfoWindowBuilder;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
@@ -56,13 +58,14 @@ public class FxApplicationWindows {
 	private final FilteredList<Window> visibleWindows;
 
 	@Inject
-	public FxApplicationWindows(@PrimaryStage Stage primaryStage,
+	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
 								Optional<TrayIntegrationProvider> trayIntegration, //
 								Lazy<MainWindowComponent> mainWindow, //
 								Lazy<PreferencesComponent> preferencesWindow, //
 								QuitComponent.Builder quitWindowBuilder, //
 								UnlockComponent.Factory unlockWorkflowFactory, //
 								UpdateReminderComponent.Factory updateReminderWindowBuilder, //
+								DokanyInfoDialogComponent.Factory dokanyInfoWindowBuilder, //
 								LockComponent.Factory lockWorkflowFactory, //
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
@@ -75,6 +78,7 @@ public class FxApplicationWindows {
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
 		this.updateReminderWindowBuilder = updateReminderWindowBuilder;
+		this.dokanyInfoWindowBuilder = dokanyInfoWindowBuilder;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
 		this.executor = executor;
@@ -141,6 +145,11 @@ public class FxApplicationWindows {
 	public void checkAndShowUpdateReminderWindow() {
 		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.create().checkAndShowUpdateReminderWindow(), Platform::runLater);
 	}
+
+	public void showDokanyInfoWindow() {
+		CompletableFuture.runAsync(() -> dokanyInfoWindowBuilder.create().showDokanyInfoWindow(), Platform::runLater);
+	}
+
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {

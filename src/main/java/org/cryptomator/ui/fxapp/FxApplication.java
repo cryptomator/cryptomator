@@ -3,6 +3,7 @@ package org.cryptomator.ui.fxapp;
 import dagger.Lazy;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +74,23 @@ public class FxApplication {
 
 		if (!environment.disableUpdateCheck()) {
 			appWindows.checkAndShowUpdateReminderWindow();
+		}
+
+		var dokany = "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
+		boolean dokanyInfoWindowShown = false;
+		if (settings.mountService.getValueSafe().equals(dokany)) {
+			appWindows.showDokanyInfoWindow();
+			dokanyInfoWindowShown = true;
+			settings.mountService.set(null);
+		}
+		for (VaultSettings vaultSettings : settings.directories) {
+			if (vaultSettings.mountService.getValueSafe().equals(dokany)) {
+				if (!dokanyInfoWindowShown) {
+					appWindows.showDokanyInfoWindow();
+					dokanyInfoWindowShown = true;
+				}
+				vaultSettings.mountService.set(null);
+			}
 		}
 
 		launchEventHandler.startHandlingLaunchEvents();
