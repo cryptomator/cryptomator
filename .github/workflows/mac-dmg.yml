@@ -79,7 +79,7 @@ jobs:
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
-        run: mvn -B clean package -Pmac -DskipTests
+        run: mvn -B -Djavafx.platform=mac clean package -Pmac -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
@@ -142,7 +142,7 @@ jobs:
           REVISION_NO: ${{ needs.get-version.outputs.revNum }}
       - name: Generate license for dmg
         run: >
-          mvn -B license:add-third-party
+          mvn -B -Djavafx.platform=mac license:add-third-party
           -Dlicense.thirdPartyFilename=license.rtf
           -Dlicense.outputDirectory=dist/mac/dmg/resources
           -Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl

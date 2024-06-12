@@ -41,7 +41,7 @@ Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
-&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
+&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin -Djavafx.platform=win
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -122,7 +122,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--icon resources/$AppName.ico
 
 #Create RTF license for msi
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party -Djavafx.platform=win `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\resources\" `
@@ -167,7 +167,7 @@ $Env:JP_WIXHELPER_DIR = "."
 	--file-associations resources/FAvaultFile.properties
 
 #Create RTF license for bundle
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party -Djavafx.platform=win `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `

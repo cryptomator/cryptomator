@@ -33,7 +33,7 @@ jobs:
       - name: Build and Test
         run: >
           xvfb-run
-          mvn -B verify
+          mvn -B verify -Djavafx.platform=linux
           jacoco:report
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Pcoverage

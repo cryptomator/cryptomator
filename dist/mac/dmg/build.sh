@@ -68,7 +68,7 @@ if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
 fi
 
 # compile
-mvn -B -f../../../pom.xml clean package -DskipTests -Pmac
+mvn -B -Djavafx.platform=mac -f../../../pom.xml clean package -DskipTests -Pmac
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 
@@ -123,7 +123,7 @@ sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 
 # generate license
-mvn -B -f../../../pom.xml license:add-third-party \
+mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
     -Dlicense.outputDirectory=dist/mac/dmg/resources \
     -Dlicense.fileTemplate=resources/licenseTemplate.ftl \
