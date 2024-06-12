@@ -53,7 +53,7 @@ jobs:
           check-latest: true
           cache: 'maven'
       - name: Run maven
-        run: mvn -B clean package -Plinux -DskipTests
+        run: mvn -B clean package -Plinux -Djavafx.platform=linux -DskipTests
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
