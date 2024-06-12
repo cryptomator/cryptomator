@@ -28,7 +28,7 @@
 				<padding>
 					<Insets topRightBottomLeft="6"/>
 				</padding>
-				<Circle styleClass="glyph-icon-orange" radius="24"/>
+				<Circle styleClass="glyph-icon-primary" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
 		</Group>
@@ -43,7 +43,7 @@
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+UC">
 				<buttons>
-					<Button text="%preferences.title" ButtonBar.buttonData="OTHER" cancelButton="true" onAction="#openVolumePreferences"/>
+					<Button text="%dokanyInfo.preferencesBtn" ButtonBar.buttonData="OTHER" cancelButton="true" onAction="#openVolumePreferences"/>
 					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close" defaultButton="true"/>
 				</buttons>
 			</ButtonBar>
