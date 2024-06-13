@@ -76,24 +76,27 @@ public class FxApplication {
 			appWindows.checkAndShowUpdateReminderWindow();
 		}
 
-		var dokany = "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
-		boolean dokanySupportEndWindowShown = false;
-		if (settings.mountService.getValueSafe().equals(dokany)) {
-			appWindows.showDokanySupportEndWindow();
-			dokanySupportEndWindowShown = true;
-			settings.mountService.set(null);
-		}
-		for (VaultSettings vaultSettings : settings.directories) {
-			if (vaultSettings.mountService.getValueSafe().equals(dokany)) {
-				if (!dokanySupportEndWindowShown) {
-					appWindows.showDokanySupportEndWindow();
-					dokanySupportEndWindowShown = true;
-				}
-				vaultSettings.mountService.set(null);
-			}
-		}
+		handleDokanySupportEndAndShowDialog();
 
 		launchEventHandler.startHandlingLaunchEvents();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
+	}
+
+	private void handleDokanySupportEndAndShowDialog() {
+		var dokanyProviderId = "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
+		boolean dokanyFound = false;
+		if (settings.mountService.getValueSafe().contains(dokanyProviderId)) {
+			dokanyFound = true;
+			settings.mountService.set(null);
+		}
+		for (VaultSettings vaultSettings : settings.directories) {
+			if (vaultSettings.mountService.getValueSafe().contains(dokanyProviderId)) {
+				dokanyFound = true;
+				vaultSettings.mountService.set(null);
+			}
+		}
+		if(dokanyFound) {
+			appWindows.showDokanySupportEndWindow();
+		}
 	}
 }
