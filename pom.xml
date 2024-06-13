@@ -43,17 +43,17 @@
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.14.0</commons-lang3.version>
-		<dagger.version>2.51</dagger.version>
+		<dagger.version>2.51.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<guava.version>33.0.0-jre</guava.version>
-		<jackson.version>2.16.2</jackson.version>
+		<guava.version>33.2.1-jre</guava.version>
+		<jackson.version>2.17.1</jackson.version>
 		<javafx.version>21.0.1</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
-		<logback.version>1.5.3</logback.version>
-		<slf4j.version>2.0.12</slf4j.version>
+		<logback.version>1.5.6</logback.version>
+		<slf4j.version>2.0.13</slf4j.version>
 		<tinyoauth2.version>0.8.0</tinyoauth2.version>
-		<zxcvbn.version>1.8.2</zxcvbn.version>
+		<zxcvbn.version>1.9.0</zxcvbn.version>
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.10.2</junit.jupiter.version>
@@ -62,7 +62,7 @@
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>24.1.0</jetbrains.annotations.version>
-		<dependency-check.version>9.1.0</dependency-check.version>
+		<dependency-check.version>9.2.0</dependency-check.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<license-generator.version>2.4.0</license-generator.version>
 		<junit-tree-reporter.version>1.2.1</junit-tree-reporter.version>
@@ -70,7 +70,7 @@
 		<mvn-resources.version>3.3.1</mvn-resources.version>
 		<mvn-dependency.version>3.6.1</mvn-dependency.version>
 		<mvn-surefire.version>3.2.5</mvn-surefire.version>
-		<mvn-jar.version>3.3.0</mvn-jar.version>
+		<mvn-jar.version>3.4.1</mvn-jar.version>
 	</properties>
 
 	<dependencies>

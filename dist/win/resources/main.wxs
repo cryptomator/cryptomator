@@ -139,11 +139,6 @@
             Sequence="execute" Before="PatchWebDAV" />
     <CustomAction Id="PatchWebDAV" BinaryKey="WixCA" DllEntry="WixQuietExec64" Execute="deferred" Return="ignore" Impersonate="no"/>
 
-    <!-- Special Settings migration for 1.7.0,. Should be removed eventually, for more info, see ../contrib/version170-migrate-settings.ps1-->
-    <SetProperty Id="V170MigrateSettings" Value="&quot;[INSTALLDIR]version170-migrate-settings.bat&quot;"
-            Sequence="execute" Before="V170MigrateSettings" />
-    <CustomAction Id="V170MigrateSettings" BinaryKey="WixCA" DllEntry="WixQuietExec64" Execute="deferred" Return="ignore" Impersonate="no"/>
-
     <!-- Running App detection and exit -->
     <Property Id="FOUNDRUNNINGAPP" Admin="yes"/>
     <util:CloseApplication
@@ -195,7 +190,6 @@
       <RemoveExistingProducts After="InstallValidate"/> <!-- Moved from CostInitialize, due to WixCloseApplications -->
 
       <Custom Action="PatchWebDAV" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
-      <Custom Action="V170MigrateSettings" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
     </InstallExecuteSequence>
 
     <InstallUISequence>
