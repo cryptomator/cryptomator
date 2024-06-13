@@ -28,6 +28,7 @@ public class DokanySupportEndDialogController implements FxController {
 
 	public void openVolumePreferences() {
 		applicationWindows.showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+		window.close();
 	}
 
 }
