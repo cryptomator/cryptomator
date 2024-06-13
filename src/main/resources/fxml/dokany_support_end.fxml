@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Circle?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.dokanyinfodialog.DokanyInfoDialogController"
+	  fx:controller="org.cryptomator.ui.dokanysupportenddialog.DokanySupportEndDialogController"
 	  minWidth="500"
 	  prefWidth="500"
 	  minHeight="145"
@@ -34,16 +34,16 @@
 		</Group>
 
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%dokanyInfo.message" wrapText="true">
+			<Label styleClass="label-large" text="%dokanySupportEnd.message" wrapText="true">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="%dokanyInfo.description" wrapText="true"/>
+			<Label text="%dokanySupportEnd.description" wrapText="true"/>
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+UC">
 				<buttons>
-					<Button text="%dokanyInfo.preferencesBtn" ButtonBar.buttonData="OTHER" cancelButton="true" onAction="#openVolumePreferences"/>
+					<Button text="%dokanySupportEnd.preferencesBtn" ButtonBar.buttonData="OTHER" cancelButton="true" onAction="#openVolumePreferences"/>
 					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close" defaultButton="true"/>
 				</buttons>
 			</ButtonBar>

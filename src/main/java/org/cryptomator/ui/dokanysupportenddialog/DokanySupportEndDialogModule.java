@@ -1,4 +1,4 @@
-package org.cryptomator.ui.dokanyinfodialog;
+package org.cryptomator.ui.dokanysupportenddialog;
 
 import dagger.Binds;
 import dagger.Module;
@@ -20,21 +20,21 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 @Module
-abstract class DokanyInfoDialogModule {
+abstract class DokanySupportEndDialogModule {
 
 	@Provides
-	@DokanyInfoDialogWindow
-	@DokanyInfoDialogScoped
+	@DokanySupportEndDialogWindow
+	@DokanySupportEndDialogScoped
 	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
 		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
-	@DokanyInfoDialogWindow
-	@DokanyInfoDialogScoped
+	@DokanySupportEndDialogWindow
+	@DokanySupportEndDialogScoped
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("dokanyInfo.title"));
+		stage.setTitle(resourceBundle.getString("dokanySupportEnd.title"));
 		stage.setMinWidth(500);
 		stage.setMinHeight(100);
 		stage.initModality(Modality.APPLICATION_MODAL);
@@ -42,16 +42,16 @@ abstract class DokanyInfoDialogModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.DOKANY_INFO_DIALOG)
-	@DokanyInfoDialogScoped
-	static Scene provideDokanyInfoDialogScene(@DokanyInfoDialogWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.DOKANY_INFO_DIALOG);
+	@FxmlScene(FxmlFile.DOKANY_SUPPORT_END_DIALOG)
+	@DokanySupportEndDialogScoped
+	static Scene provideDokanySupportEndDialogScene(@DokanySupportEndDialogWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.DOKANY_SUPPORT_END_DIALOG);
 	}
 
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(DokanyInfoDialogController.class)
-	abstract FxController bindDokanyInfoDialogController(DokanyInfoDialogController controller);
+	@FxControllerKey(DokanySupportEndDialogController.class)
+	abstract FxController bindDokanySupportEndDialogController(DokanySupportEndDialogController controller);
 
 }

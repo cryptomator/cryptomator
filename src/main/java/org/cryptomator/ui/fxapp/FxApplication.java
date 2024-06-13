@@ -77,17 +77,17 @@ public class FxApplication {
 		}
 
 		var dokany = "org.cryptomator.frontend.dokany.mount.DokanyMountProvider";
-		boolean dokanyInfoWindowShown = false;
+		boolean dokanySupportEndWindowShown = false;
 		if (settings.mountService.getValueSafe().equals(dokany)) {
-			appWindows.showDokanyInfoWindow();
-			dokanyInfoWindowShown = true;
+			appWindows.showDokanySupportEndWindow();
+			dokanySupportEndWindowShown = true;
 			settings.mountService.set(null);
 		}
 		for (VaultSettings vaultSettings : settings.directories) {
 			if (vaultSettings.mountService.getValueSafe().equals(dokany)) {
-				if (!dokanyInfoWindowShown) {
-					appWindows.showDokanyInfoWindow();
-					dokanyInfoWindowShown = true;
+				if (!dokanySupportEndWindowShown) {
+					appWindows.showDokanySupportEndWindow();
+					dokanySupportEndWindowShown = true;
 				}
 				vaultSettings.mountService.set(null);
 			}
