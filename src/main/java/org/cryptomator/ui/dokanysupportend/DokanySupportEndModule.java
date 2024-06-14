@@ -1,4 +1,4 @@
-package org.cryptomator.ui.dokanysupportenddialog;
+package org.cryptomator.ui.dokanysupportend;
 
 import dagger.Binds;
 import dagger.Module;
@@ -20,18 +20,18 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 @Module
-abstract class DokanySupportEndDialogModule {
+abstract class DokanySupportEndModule {
 
 	@Provides
-	@DokanySupportEndDialogWindow
-	@DokanySupportEndDialogScoped
+	@DokanySupportEndWindow
+	@DokanySupportEndScoped
 	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
 		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
-	@DokanySupportEndDialogWindow
-	@DokanySupportEndDialogScoped
+	@DokanySupportEndWindow
+	@DokanySupportEndScoped
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("dokanySupportEnd.title"));
@@ -42,16 +42,16 @@ abstract class DokanySupportEndDialogModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.DOKANY_SUPPORT_END_DIALOG)
-	@DokanySupportEndDialogScoped
-	static Scene provideDokanySupportEndDialogScene(@DokanySupportEndDialogWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.DOKANY_SUPPORT_END_DIALOG);
+	@FxmlScene(FxmlFile.DOKANY_SUPPORT_END)
+	@DokanySupportEndScoped
+	static Scene provideDokanySupportEndScene(@DokanySupportEndWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.DOKANY_SUPPORT_END);
 	}
 
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(DokanySupportEndDialogController.class)
-	abstract FxController bindDokanySupportEndDialogController(DokanySupportEndDialogController controller);
+	@FxControllerKey(DokanySupportEndController.class)
+	abstract FxController bindDokanySupportEndController(DokanySupportEndController controller);
 
 }

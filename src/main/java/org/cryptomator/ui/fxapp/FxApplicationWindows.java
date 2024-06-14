@@ -5,7 +5,7 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.ui.dokanysupportenddialog.DokanySupportEndDialogComponent;
+import org.cryptomator.ui.dokanysupportend.DokanySupportEndComponent;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -49,7 +49,7 @@ public class FxApplicationWindows {
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
 	private final UpdateReminderComponent.Factory updateReminderWindowBuilder;
-	private final DokanySupportEndDialogComponent.Factory dokanySupportEndWindowBuilder;
+	private final DokanySupportEndComponent.Factory dokanySupportEndWindowBuilder;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
@@ -65,7 +65,7 @@ public class FxApplicationWindows {
 								QuitComponent.Builder quitWindowBuilder, //
 								UnlockComponent.Factory unlockWorkflowFactory, //
 								UpdateReminderComponent.Factory updateReminderWindowBuilder, //
-								DokanySupportEndDialogComponent.Factory dokanySupportEndWindowBuilder, //
+								DokanySupportEndComponent.Factory dokanySupportEndWindowBuilder, //
 								LockComponent.Factory lockWorkflowFactory, //
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //

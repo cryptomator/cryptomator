@@ -1,4 +1,4 @@
-package org.cryptomator.ui.dokanysupportenddialog;
+package org.cryptomator.ui.dokanysupportend;
 
 import javax.inject.Scope;
 import java.lang.annotation.Documented;
@@ -8,6 +8,6 @@ import java.lang.annotation.RetentionPolicy;
 @Scope
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@interface DokanySupportEndDialogScoped {
+@interface DokanySupportEndScoped {
 
 }

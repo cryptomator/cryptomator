@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Circle?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.dokanysupportenddialog.DokanySupportEndDialogController"
+	  fx:controller="org.cryptomator.ui.dokanysupportend.DokanySupportEndController"
 	  minWidth="500"
 	  prefWidth="500"
 	  minHeight="145"

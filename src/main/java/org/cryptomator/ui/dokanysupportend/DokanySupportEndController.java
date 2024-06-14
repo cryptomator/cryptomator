@@ -1,4 +1,4 @@
-package org.cryptomator.ui.dokanysupportenddialog;
+package org.cryptomator.ui.dokanysupportend;
 
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
@@ -9,14 +9,14 @@ import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
 
-@DokanySupportEndDialogScoped
-public class DokanySupportEndDialogController implements FxController {
+@DokanySupportEndScoped
+public class DokanySupportEndController implements FxController {
 
 	private final Stage window;
 	private final FxApplicationWindows applicationWindows;
 
 	@Inject
-	DokanySupportEndDialogController(@DokanySupportEndDialogWindow Stage window, FxApplicationWindows applicationWindows) {
+	DokanySupportEndController(@DokanySupportEndWindow Stage window, FxApplicationWindows applicationWindows) {
 		this.window = window;
 		this.applicationWindows = applicationWindows;
 	}

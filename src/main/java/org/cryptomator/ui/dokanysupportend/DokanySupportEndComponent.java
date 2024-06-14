@@ -1,4 +1,4 @@
-package org.cryptomator.ui.dokanysupportenddialog;
+package org.cryptomator.ui.dokanysupportend;
 
 import dagger.Lazy;
 import dagger.Subcomponent;
@@ -8,14 +8,14 @@ import org.cryptomator.ui.common.FxmlScene;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-@DokanySupportEndDialogScoped
-@Subcomponent(modules = {DokanySupportEndDialogModule.class})
-public interface DokanySupportEndDialogComponent {
+@DokanySupportEndScoped
+@Subcomponent(modules = {DokanySupportEndModule.class})
+public interface DokanySupportEndComponent {
 
-	@DokanySupportEndDialogWindow
+	@DokanySupportEndWindow
 	Stage window();
 
-	@FxmlScene(FxmlFile.DOKANY_SUPPORT_END_DIALOG)
+	@FxmlScene(FxmlFile.DOKANY_SUPPORT_END)
 	Lazy<Scene> dokanySupportEndScene();
 
 
@@ -29,6 +29,6 @@ public interface DokanySupportEndDialogComponent {
 	@Subcomponent.Factory
 	interface Factory {
 
-		DokanySupportEndDialogComponent create();
+		DokanySupportEndComponent create();
 	}
 }
