@@ -20,10 +20,10 @@ env:
   JAVA_VERSION: '22.0.1+8'
   COFFEELIBS_JDK: 22
   COFFEELIBS_JDK_VERSION: '22.0.1+8-0ppa1'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: '871e7b9d7af16aef2e55c1b7830d0e0b2503b13dd8641374ba7e55ecb81d2ef9'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'fbb22f35951c2e049cc2554dd03c2c56b4f5adc4b2ae9248872f46175ac103d8'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: '1982ad168a5e8d7cf4a9458a7d088b4f0552d0ac3f24f23fb88f8bc7e8d69a13'
 
 jobs:
   build:
