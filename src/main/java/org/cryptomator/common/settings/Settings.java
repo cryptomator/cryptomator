@@ -41,6 +41,7 @@ public class Settings {
 	static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	static final boolean DEFAULT_DEBUG_MODE = false;
 	static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
+	static final boolean DEFAULT_ADD_TO_QUICK_ACCESS = true;
 	@Deprecated // to be changed to "whatever is available" eventually
 	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
@@ -52,6 +53,7 @@ public class Settings {
 	public final BooleanProperty startHidden;
 	public final BooleanProperty autoCloseVaults;
 	public final BooleanProperty useKeychain;
+	public final BooleanProperty addToQuickAccess; //TODO: for now, we only support Sidebar integration per System (GNOME Nautilus for Linux)
 	public final IntegerProperty port;
 	public final IntegerProperty numTrayNotifications;
 	public final BooleanProperty debugMode;
@@ -89,6 +91,7 @@ public class Settings {
 		this.startHidden = new SimpleBooleanProperty(this, "startHidden", json.startHidden);
 		this.autoCloseVaults = new SimpleBooleanProperty(this, "autoCloseVaults", json.autoCloseVaults);
 		this.useKeychain = new SimpleBooleanProperty(this, "useKeychain", json.useKeychain);
+		this.addToQuickAccess = new SimpleBooleanProperty(this, "addToQuickAccess", json.addToQuickAccess);
 		this.port = new SimpleIntegerProperty(this, "webDavPort", json.port);
 		this.numTrayNotifications = new SimpleIntegerProperty(this, "numTrayNotifications", json.numTrayNotifications);
 		this.debugMode = new SimpleBooleanProperty(this, "debugMode", json.debugMode);
@@ -116,6 +119,7 @@ public class Settings {
 		startHidden.addListener(this::somethingChanged);
 		autoCloseVaults.addListener(this::somethingChanged);
 		useKeychain.addListener(this::somethingChanged);
+		addToQuickAccess.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
 		numTrayNotifications.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
@@ -170,6 +174,7 @@ public class Settings {
 		json.startHidden = startHidden.get();
 		json.autoCloseVaults = autoCloseVaults.get();
 		json.useKeychain = useKeychain.get();
+		json.addToQuickAccess = addToQuickAccess.get();
 		json.port = port.get();
 		json.numTrayNotifications = numTrayNotifications.get();
 		json.debugMode = debugMode.get();

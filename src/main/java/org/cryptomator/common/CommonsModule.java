@@ -14,6 +14,7 @@ import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +127,12 @@ public abstract class CommonsModule {
 		});
 		shutdownHook.runOnShutdown(executorService::shutdown);
 		return executorService;
+	}
+
+	@Provides
+	@Singleton
+	static Optional<QuickAccessService> provideQuickAccessService() {
+		return QuickAccessService.get().findFirst();
 	}
 
 	private static void handleUncaughtExceptionInBackgroundThread(Thread thread, Throwable throwable) {
