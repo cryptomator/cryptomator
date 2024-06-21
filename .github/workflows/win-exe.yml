@@ -199,7 +199,7 @@ jobs:
           }
       - name: Generate license for MSI
         run: >
-          mvn -B license:add-third-party -Djavafx.platform=win
+          mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.outputDirectory=dist/win/resources"
           "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
@@ -279,7 +279,7 @@ jobs:
           cache: 'maven'
       - name: Generate license for exe
         run: >
-          mvn -B license:add-third-party -Djavafx.platform=win
+          mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
           "-Dlicense.outputDirectory=dist/win/bundle/resources"
