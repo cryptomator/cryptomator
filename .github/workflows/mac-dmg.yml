@@ -175,7 +175,7 @@ jobs:
         run: |
           echo "Codesigning jdk files..."
           find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ \( -name 'jspawnhelper' -o -name 'pauseengine' -o -name 'simengine' \) -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
           echo "Codesigning jar contents..."
           find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
           for JAR_PATH in `find Cryptomator.app -name "*.jar"`; do
