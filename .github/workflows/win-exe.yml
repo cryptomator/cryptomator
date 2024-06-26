@@ -17,8 +17,8 @@ on:
 env:
   JAVA_DIST: 'zulu'
   JAVA_VERSION: '22.0.1+8'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_windows-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: 'daf8acae631c016c24cfe23f88469400274d3441dd890615a42dfb501f3eb94a'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'de82e53179032a49bec005deb4438e8f261d08c4b58864a5c17e1d87286b09dd'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
 
@@ -199,7 +199,7 @@ jobs:
           }
       - name: Generate license for MSI
         run: >
-          mvn -B license:add-third-party -Djavafx.platform=win
+          mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.outputDirectory=dist/win/resources"
           "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
@@ -279,7 +279,7 @@ jobs:
           cache: 'maven'
       - name: Generate license for exe
         run: >
-          mvn -B license:add-third-party -Djavafx.platform=win
+          mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
           "-Dlicense.outputDirectory=dist/win/bundle/resources"
