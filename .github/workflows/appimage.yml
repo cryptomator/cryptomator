@@ -11,7 +11,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '21.0.2+13'
+  JAVA_VERSION: '22.0.1+8'
 
 jobs:
   get-version:
@@ -29,12 +29,12 @@ jobs:
         include:
           - os: ubuntu-latest
             appimage-suffix: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-jmods.zip'
-            openjfx-sha: '7baed11ca56d5fee85995fa6612d4299f1e8b7337287228f7f12fd50407c56f8'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-x64_bin-jmods.zip'
+            openjfx-sha: 'fbb22f35951c2e049cc2554dd03c2c56b4f5adc4b2ae9248872f46175ac103d8'
           - os: [self-hosted, Linux, ARM64]
             appimage-suffix: aarch64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-aarch64_bin-jmods.zip'
-            openjfx-sha: '871e7b9d7af16aef2e55c1b7830d0e0b2503b13dd8641374ba7e55ecb81d2ef9'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-aarch64_bin-jmods.zip'
+            openjfx-sha: '1982ad168a5e8d7cf4a9458a7d088b4f0552d0ac3f24f23fb88f8bc7e8d69a13'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -68,7 +68,7 @@ jobs:
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
-        run: mvn -B clean package -Plinux -DskipTests
+        run: mvn -B clean package -Plinux -DskipTests -Djavafx.platform=linux
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
@@ -80,7 +80,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods:openjfx-jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -169,7 +169,7 @@ jobs:
           if-no-files-found: error
       - name: Publish AppImage on GitHub Releases
         if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}

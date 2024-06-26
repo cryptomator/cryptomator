@@ -33,7 +33,6 @@ Cryptomator is provided free of charge as an open-source project despite the hig
       <td><a href="https://mowcapital.com/"><img src="https://cryptomator.org/img/sponsors/mowcapital.svg" alt="Mow Capital" height="28"></a></td>
       <td><a href="https://www.easeus.com/"><img src="https://cryptomator.org/img/sponsors/easeus.png" alt="EaseUS" height="40"></a></td>
       <td><a href="https://www.hassmann-it-forensik.de/"><img src="https://cryptomator.org/img/sponsors/hassmannitforensik.png" alt="Hassmann IT-Forensik" height="40"></a></td>
-      <td><a href="https://ente.io/"><img src="https://cryptomator.org/img/sponsors/ente.svg" alt="Ente" height="58"></a></td>
     </tr>
   </tbody>
 </table>

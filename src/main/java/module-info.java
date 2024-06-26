@@ -21,7 +21,6 @@ open module org.cryptomator.desktop {
 
 	requires org.cryptomator.cryptolib;
 	requires org.cryptomator.cryptofs;
-	requires org.cryptomator.frontend.dokany;
 	requires org.cryptomator.frontend.fuse;
 	requires org.cryptomator.frontend.webdav;
 	requires org.cryptomator.integrations.api;
@@ -32,13 +31,13 @@ open module org.cryptomator.desktop {
 	requires javafx.graphics;
 	requires javafx.controls;
 	requires javafx.fxml;
-	requires jdk.crypto.ec;
 	// 3rd party:
 	requires ch.qos.logback.classic;
 	requires ch.qos.logback.core;
 	requires com.auth0.jwt;
 	requires com.google.common;
 	requires com.fasterxml.jackson.databind;
+	requires com.fasterxml.jackson.datatype.jsr310;
 	requires com.nimbusds.jose.jwt;
 	requires com.nulabinc.zxcvbn;
 	requires com.tobiasdiez.easybind;

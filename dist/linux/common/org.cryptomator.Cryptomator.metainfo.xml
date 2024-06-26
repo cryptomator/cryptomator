@@ -53,6 +53,11 @@
 		</screenshot>
 	</screenshots>
 
+	<branding>
+		<color type="primary" scheme_preference="light">#EBF5EB</color>
+		<color type="primary" scheme_preference="dark">#2F4858</color>
+	</branding>
+
 	<url type="homepage">https://cryptomator.org/</url>
 	<url type="bugtracker">https://github.com/cryptomator/cryptomator/issues/</url>
 	<url type="donation">https://cryptomator.org/donate</url>
@@ -70,6 +75,9 @@
 	</content_rating>
 
 	<releases>
+		<release date="2024-06-26" version="1.13.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.13.0</url>
+		</release>
 		<release date="2024-03-27" version="1.12.4">
 			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.12.4</url>
 		</release>

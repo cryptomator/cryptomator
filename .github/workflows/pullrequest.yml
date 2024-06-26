@@ -5,7 +5,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: 21
+  JAVA_VERSION: 22
 
 defaults:
   run:
@@ -24,4 +24,4 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
       - name: Build and Test
-        run: xvfb-run mvn -B clean install jacoco:report -Pcoverage
+        run: xvfb-run mvn -B clean install jacoco:report -Pcoverage -Djavafx.platform=linux

@@ -41,7 +41,7 @@ Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
-&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
+&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin -Djavafx.platform=win
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -51,21 +51,22 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$jmodsVersion='21.0.1'
-$jmodsUrl = "https://download2.gluonhq.com/openjfx/${jmodsVersion}/openjfx-${jmodsVersion}_windows-x64_bin-jmods.zip"
-$jfxJmodsChecksum = 'daf8acae631c016c24cfe23f88469400274d3441dd890615a42dfb501f3eb94a'
-$jfxJmodsZip = '.\resources\jfxJmods.zip'
-if( !(Test-Path -Path $jfxJmodsZip) ) {
-	Write-Output "Downloading ${jmodsUrl}..."
-	Invoke-WebRequest $jmodsUrl -OutFile $jfxJmodsZip # redirects are followed by default
+$javaFxVersion='22.0.1'
+$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
+$javaFxJmodsSHA256 = 'de82e53179032a49bec005deb4438e8f261d08c4b58864a5c17e1d87286b09dd'
+$javaFxJmods = '.\resources\jfxJmods.zip'
+if( !(Test-Path -Path $javaFxJmods) ) {
+	Write-Output "Downloading ${javaFxJmodsUrl}..."
+	Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
 }
 
-$jmodsChecksumActual = $(Get-FileHash -Path $jfxJmodsZip -Algorithm SHA256).Hash
-if( $jmodsChecksumActual -ne $jfxJmodsChecksum ) {
-	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $jfxJmodsChecksum, actual: $jmodsChecksumActual"
+$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash
+if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
+	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
+, actual: $jmodsChecksumActual"
 	exit 1;
 }
-Expand-Archive -Path $jfxJmodsZip -Force -DestinationPath ".\resources\"
+Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
 Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods"
 Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
@@ -74,7 +75,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
@@ -121,7 +122,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--icon resources/$AppName.ico
 
 #Create RTF license for msi
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party -Djavafx.platform=win `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\resources\" `
@@ -166,7 +167,7 @@ $Env:JP_WIXHELPER_DIR = "."
 	--file-associations resources/FAvaultFile.properties
 
 #Create RTF license for bundle
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party -Djavafx.platform=win `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `

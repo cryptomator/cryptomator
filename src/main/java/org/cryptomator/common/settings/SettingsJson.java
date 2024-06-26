@@ -1,9 +1,11 @@
 package org.cryptomator.common.settings;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.Instant;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -80,7 +82,8 @@ class SettingsJson {
 	@JsonProperty(value = "preferredVolumeImpl", access = JsonProperty.Access.WRITE_ONLY) // WRITE_ONLY means value is "written" into the java object during deserialization. Upvote this: https://github.com/FasterXML/jackson-annotations/issues/233
 	String preferredVolumeImpl;
 
-	@JsonProperty("lastUpdateCheck")
-	String lastUpdateCheck = Settings.DEFAULT_LAST_UPDATE_CHECK;
+	@JsonProperty("lastSuccessfulUpdateCheck")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+	Instant lastSuccessfulUpdateCheck = Settings.DEFAULT_TIMESTAMP;
 
 }

@@ -7,6 +7,7 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
@@ -58,6 +59,7 @@ public class VaultListController implements FxController {
 
 	private final Stage mainWindow;
 	private final ObservableList<Vault> vaults;
+	private final VaultService vaultService;
 	private final ObjectProperty<Vault> selectedVault;
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
@@ -79,6 +81,7 @@ public class VaultListController implements FxController {
 						ObservableList<Vault> vaults, //
 						ObjectProperty<Vault> selectedVault, //
 						VaultListCellFactory cellFactory, //
+						VaultService vaultService, //
 						AddVaultWizardComponent.Builder addVaultWizard, //
 						RemoveVaultComponent.Builder removeVaultDialogue, //
 						VaultListManager vaultListManager, //
@@ -88,6 +91,7 @@ public class VaultListController implements FxController {
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
+		this.vaultService = vaultService;
 		this.addVaultWizard = addVaultWizard;
 		this.removeVaultDialogue = removeVaultDialogue;
 		this.vaultListManager = vaultListManager;
@@ -119,6 +123,9 @@ public class VaultListController implements FxController {
 				Optional.ofNullable(selectedVault.get())
 						.filter(Vault::isLocked)
 						.ifPresent(vault -> appWindows.startUnlockWorkflow(vault, mainWindow));
+				Optional.ofNullable(selectedVault.get())
+						.filter(Vault::isUnlocked)
+						.ifPresent(vaultService::reveal);
 			}
 		});
 

@@ -11,7 +11,8 @@ jobs:
     with:
       runner-os: 'ubuntu-latest'
       java-distribution: 'temurin'
-      java-version: 21
+      java-version: 22
+      check-command: 'mvn -B validate -Pdependency-check -Djavafx.platform=linux'
     secrets:
       nvd-api-key: ${{ secrets.NVD_API_KEY }}
       slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}

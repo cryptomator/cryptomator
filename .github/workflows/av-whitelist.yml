@@ -1,0 +1,40 @@
+name: AntiVirus Whitelisting
+
+on:
+  workflow_call:
+    inputs:
+      url:
+        description: "Url to the file to upload"
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Url to the file to upload"
+        required: true
+        type: string
+
+jobs:
+  allowlist:
+    name: Anti Virus Allowlisting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download file
+        run: |
+          curl --remote-name ${{ inputs.url }} -L
+      - name: Upload to Kaspersky
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          protocol: ftps
+          server: allowlist.kaspersky-labs.com
+          port: 990
+          username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
+          password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+      - name: Upload to Avast
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          protocol: ftp
+          server: whitelisting.avast.com
+          port: 21
+          username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
+          password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}

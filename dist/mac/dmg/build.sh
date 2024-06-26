@@ -29,13 +29,17 @@ REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
-ARCH="undefined"
+JAVAFX_VERISON=22.0.1
+JAVAFX_ARCH="undefined"
+JAVAFX_JMODS_SHA256="undefined"
 if [ "$(machine)" = "arm64e" ]; then
-    ARCH="aarch64"
+    JAVAFX_ARCH="aarch64"
+    JAVAFX_JMODS_SHA256="572fce94b9b09d316b960a49e3c2b5d35231ed0463e3b1c4020b8de89783b51d"
 else
-    ARCH="x64"
+    JAVAFX_ARCH="x64"
+    JAVAFX_JMODS_SHA256="e07a11c112abbdebe7c058b44c151e1e475de748671d896aef3d73f32453c248"
 fi
-OPENJFX_JMODS="https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_osx-${ARCH}_bin-jmods.zip"
+JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_osx-${JAVAFX_ARCH}_bin-jmods.zip"
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
@@ -47,7 +51,8 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
 fi
 
 # download and check jmods
-curl -L ${OPENJFX_JMODS} -o openjfx-jmods.zip
+curl -L ${JAVAFX_JMODS_URL} -o openjfx-jmods.zip
+echo "${JAVAFX_JMODS_SHA256} openjfx-jmods.zip" | shasum -a256 --check
 mkdir -p openjfx-jmods/
 unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
 JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
@@ -63,7 +68,7 @@ if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
 fi
 
 # compile
-mvn -B -f../../../pom.xml clean package -DskipTests -Pmac
+mvn -B -Djavafx.platform=mac -f../../../pom.xml clean package -DskipTests -Pmac
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 
@@ -71,7 +76,7 @@ cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods:openjfx-jmods" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
@@ -118,7 +123,7 @@ sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 
 # generate license
-mvn -B -f../../../pom.xml license:add-third-party \
+mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
     -Dlicense.outputDirectory=dist/mac/dmg/resources \
     -Dlicense.fileTemplate=resources/licenseTemplate.ftl \

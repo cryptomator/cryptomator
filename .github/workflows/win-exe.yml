@@ -16,9 +16,9 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '21.0.2+13'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_windows-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: 'daf8acae631c016c24cfe23f88469400274d3441dd890615a42dfb501f3eb94a'
+  JAVA_VERSION: '22.0.1+8'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'de82e53179032a49bec005deb4438e8f261d08c4b58864a5c17e1d87286b09dd'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
 
@@ -77,7 +77,7 @@ jobs:
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
-        run: mvn -B clean package -Pwin -DskipTests
+        run: mvn -B clean package -Pwin -DskipTests -Djavafx.platform=win
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
@@ -89,7 +89,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "jfxjmods;${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.accessibility,jdk.management.jfr
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -199,7 +199,7 @@ jobs:
           }
       - name: Generate license for MSI
         run: >
-          mvn -B license:add-third-party
+          mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.outputDirectory=dist/win/resources"
           "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
@@ -257,15 +257,6 @@ jobs:
             Cryptomator-*.msi
             Cryptomator-*.asc
           if-no-files-found: error
-      - name: Publish .msi on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
-        uses: softprops/action-gh-release@v1
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          files: |
-            *.msi
-            *.asc
 
   build-exe:
     name: Build .exe installer
@@ -288,7 +279,7 @@ jobs:
           cache: 'maven'
       - name: Generate license for exe
         run: >
-          mvn -B license:add-third-party
+          mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
           "-Dlicense.outputDirectory=dist/win/bundle/resources"
@@ -368,59 +359,48 @@ jobs:
             Cryptomator-*.exe
             Cryptomator-*.asc
           if-no-files-found: error
-      - name: Publish .msi on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
-        uses: softprops/action-gh-release@v1
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          files: |
-            Cryptomator-*.exe
-            Cryptomator-*.asc
 
-  allowlist:
-    name: Anti Virus Allowlisting
+  publish:
+    name: Publish installers to the github release
     if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
     runs-on: ubuntu-latest
     needs: [build-msi, build-exe]
+    outputs:
+      download-url-msi: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }}
+      download-url-exe: ${{ fromJSON(steps.publish.outputs.assets)[1].browser_download_url }}
     steps:
-      - name: Download .msi
+      - name: Download installers
         uses: actions/download-artifact@v4
         with:
-          name: msi
-          path: msi
-      - name: Download .exe
-        uses: actions/download-artifact@v4
+          merge-multiple: true
+      - name: Publish .msi on GitHub Releases
+        id: publish
+        uses: softprops/action-gh-release@v2
         with:
-          name: exe
-          path: exe
-      - name: Collect files
-        run: |
-          mkdir files
-          cp msi/*.msi files
-          cp exe/*.exe files
-      - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          protocol: ftps
-          server: allowlist.kaspersky-labs.com
-          port: 990
-          username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
-          password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
-          local-dir: files/
-      - name: Upload to Avast
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          protocol: ftp
-          server: whitelisting.avast.com
-          port: 21
-          username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
-          password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
-          local-dir: files/
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          # do not change ordering of filelist, required for correct job output
+          files: |
+            *.msi
+            *.exe
+            *.asc
+
+  allowlist-msi:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [publish]
+    with:
+      url: ${{ needs.publish.outputs.download-url-msi }}
+
+  allowlist-exe:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [publish]
+    with:
+      url: ${{ needs.publish.outputs.download-url-exe }}
+
   notify-winget:
     name: Notify for winget-release
-    if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published' && needs.get-version.outputs.versionType == 'stable'
-    needs: [build-msi, get-version]
+    if: needs.get-version.outputs.versionType == 'stable'
+    needs: [publish, get-version]
     runs-on: ubuntu-latest
     steps:
       - name: Slack Notification

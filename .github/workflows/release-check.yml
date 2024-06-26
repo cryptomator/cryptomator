@@ -12,7 +12,7 @@ defaults:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: 21
+  JAVA_VERSION: 22
 
 jobs:
   check-preconditions:
@@ -60,6 +60,6 @@ jobs:
       - name: Run org.owasp:dependency-check plugin
         id: dependency-check
         continue-on-error: true
-        run: mvn -B verify -Pdependency-check -DskipTests
+        run: mvn -B verify -Pdependency-check -DskipTests -Djavafx.platform=linux
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
