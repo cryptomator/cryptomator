@@ -3,15 +3,26 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
 		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 		   styleClass="main-window">
 	<VBox minWidth="650">
+		<HBox onMouseClicked="#showUpdatePreferences" alignment="CENTER" styleClass="notification-update" VBox.vgrow="ALWAYS" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}">
+			<Label text="%main.notification.updateAvailable" styleClass="notification-label" />
+		</HBox>
+		<HBox onMouseClicked="#showContributePreferences" alignment="CENTER" styleClass="notification-support" VBox.vgrow="ALWAYS" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}">
+			<Label text="%main.notification.support" styleClass="notification-label"/>
+		</HBox>
 		<SplitPane dividerPositions="0.33" orientation="HORIZONTAL" VBox.vgrow="ALWAYS">
 			<fx:include source="vault_list.fxml" SplitPane.resizableWithParent="false"/>
 			<fx:include source="vault_detail.fxml" SplitPane.resizableWithParent="true"/>
 		</SplitPane>
+		<HBox onMouseClicked="#showGeneralPreferences" alignment="CENTER" styleClass="notification-debug" VBox.vgrow="ALWAYS" visible="${controller.debugModeEnabled}" managed="${controller.debugModeEnabled}">
+			<Label text="%main.notification.debugMode" styleClass="notification-label"/>
+		</HBox>
 	</VBox>
 </StackPane>

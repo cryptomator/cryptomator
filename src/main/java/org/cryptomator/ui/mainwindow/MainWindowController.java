@@ -1,16 +1,22 @@
 package org.cryptomator.ui.mainwindow;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.Observable;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.layout.StackPane;
@@ -24,14 +30,25 @@ public class MainWindowController implements FxController {
 	private final Stage window;
 	private final ReadOnlyObjectProperty<Vault> selectedVault;
 	private final Settings settings;
+	private final FxApplicationWindows appWindows;
+	private final BooleanBinding updateAvailable;
+	private final LicenseHolder licenseHolder;
 
 	public StackPane root;
 
 	@Inject
-	public MainWindowController(@MainWindow Stage window, ObjectProperty<Vault> selectedVault, Settings settings) {
+	public MainWindowController(@MainWindow Stage window, //
+								ObjectProperty<Vault> selectedVault, //
+								Settings settings, //
+								FxApplicationWindows appWindows, //
+								UpdateChecker updateChecker, //
+								LicenseHolder licenseHolder) {
 		this.window = window;
 		this.selectedVault = selectedVault;
 		this.settings = settings;
+		this.appWindows = appWindows;
+		this.updateAvailable = updateChecker.updateAvailableProperty();
+		this.licenseHolder = licenseHolder;
 	}
 
 	@FXML
@@ -48,10 +65,10 @@ public class MainWindowController implements FxController {
 			window.setX(settings.windowXPosition.get());
 			window.setY(settings.windowYPosition.get());
 		}
-		window.widthProperty().addListener((_,_,_) -> savePositionalSettings());
-		window.heightProperty().addListener((_,_,_) -> savePositionalSettings());
-		window.xProperty().addListener((_,_,_) -> savePositionalSettings());
-		window.yProperty().addListener((_,_,_) -> savePositionalSettings());
+		window.widthProperty().addListener((_, _, _) -> savePositionalSettings());
+		window.heightProperty().addListener((_, _, _) -> savePositionalSettings());
+		window.xProperty().addListener((_, _, _) -> savePositionalSettings());
+		window.yProperty().addListener((_, _, _) -> savePositionalSettings());
 	}
 
 	private boolean neverTouched() {
@@ -71,6 +88,41 @@ public class MainWindowController implements FxController {
 		if (v != null) {
 			VaultListManager.redetermineVaultState(v);
 		}
+	}
+
+	@FXML
+	public void showGeneralPreferences() {
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.GENERAL);
+	}
+
+	@FXML
+	public void showContributePreferences() {
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.CONTRIBUTE);
+	}
+
+	@FXML
+	public void showUpdatePreferences() {
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.UPDATES);
+	}
+
+	public LicenseHolder getLicenseHolder() {
+		return licenseHolder;
+	}
+
+	public ReadOnlyBooleanProperty debugModeEnabledProperty() {
+		return settings.debugMode;
+	}
+
+	public boolean isDebugModeEnabled() {
+		return debugModeEnabledProperty().get();
+	}
+
+	public BooleanBinding updateAvailableProperty() {
+		return updateAvailable;
+	}
+
+	public boolean isUpdateAvailable() {
+		return updateAvailable.get();
 	}
 
 }
