@@ -124,9 +124,7 @@ public class VaultListController implements FxController {
 			}
 		});
 
-		vaults.addListener((ListChangeListener<Vault>) c -> {
-			vaultList.prefHeightProperty().bind(vaultList.fixedCellSizeProperty().multiply(vaultList.getItems().size()));
-			});
+		vaults.addListener((ListChangeListener<Vault>) _ -> vaultList.prefHeightProperty().bind(vaultList.fixedCellSizeProperty().multiply(vaultList.getItems().size())));
 
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {

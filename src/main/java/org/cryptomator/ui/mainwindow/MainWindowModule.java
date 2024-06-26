@@ -15,7 +15,6 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.common.StageInitializer;
 import org.cryptomator.ui.fxapp.PrimaryStage;
-import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
@@ -28,7 +27,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import java.util.Map;
 import java.util.ResourceBundle;
 
