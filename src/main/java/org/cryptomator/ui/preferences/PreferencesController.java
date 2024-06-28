@@ -31,6 +31,7 @@ public class PreferencesController implements FxController {
 	public Tab updatesTab;
 	public Tab contributeTab;
 	public Tab aboutTab;
+	public Tab networkTab;
 
 	@Inject
 	public PreferencesController(Environment env, @PreferencesWindow Stage window, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, UpdateChecker updateChecker) {
@@ -63,6 +64,7 @@ public class PreferencesController implements FxController {
 			case UPDATES -> updatesTab;
 			case CONTRIBUTE -> contributeTab;
 			case ABOUT -> aboutTab;
+			case NETWORK -> networkTab;
 			case ANY -> updateAvailable.get() ? updatesTab : generalTab;
 		};
 	}

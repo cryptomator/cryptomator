@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import org.cryptomator.ui.controls.NumericTextField?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.preferences.NetworkPreferencesController"
+	  spacing="24">
+	<fx:define>
+		<ToggleGroup fx:id="proxyToggleGroup"/>
+	</fx:define>
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<VBox>
+		<Label text="Configure Proxy Access to the Internet"/>
+		<RadioButton fx:id="noProxyBtn" text="No Proxy" toggleGroup="${proxyToggleGroup}" />
+		<RadioButton fx:id="systemSettingsBtn" text="Use system proxy settings" toggleGroup="${proxyToggleGroup}" />
+		<RadioButton fx:id="manualProxyBtn" text="Manual proxy configuration" toggleGroup="${proxyToggleGroup}" />
+		<VBox fx:id="manualProxyBox">
+			<padding>
+				<Insets left="24"/>
+			</padding>
+			<HBox  spacing="12" alignment="CENTER_LEFT">
+				<Label text="HTTP Proxy" minWidth="90" />
+				<TextField fx:id="httpProxy" HBox.hgrow="ALWAYS" />
+				<Label text="Port"/>
+				<NumericTextField fx:id="httpProxyPort" prefWidth="60" promptText="0" />
+			</HBox>
+			<CheckBox text="Also use this proxy for HTTPS"/>
+			<HBox spacing="12" alignment="CENTER_LEFT">
+				<Label text="HTTPS Proxy" minWidth="90"/>
+				<TextField fx:id="httpsProxy" HBox.hgrow="ALWAYS" />
+				<Label text="Port"/>
+				<NumericTextField fx:id="httpsProxyPort" prefWidth="60" promptText="0"/>
+			</HBox>
+		</VBox>
+
+	</VBox>
+
+
+</VBox>

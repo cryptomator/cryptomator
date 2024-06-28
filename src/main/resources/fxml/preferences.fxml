@@ -46,6 +46,14 @@
 				<fx:include source="preferences_updates.fxml"/>
 			</content>
 		</Tab>
+		<Tab fx:id="network" id="NETWORK" text="%preferences.network">
+			<graphic>
+				<FontAwesome5IconView glyph="NETWORK"/>
+			</graphic>
+			<content>
+				<fx:include source="preferences_network.fxml"/>
+			</content>
+		</Tab>
 		<Tab fx:id="contributeTab" id="CONTRIBUTE" text="%preferences.contribute">
 			<graphic>
 				<FontAwesome5IconView glyph="HEART"/>

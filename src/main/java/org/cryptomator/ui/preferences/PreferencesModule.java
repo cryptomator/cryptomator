@@ -89,4 +89,9 @@ abstract class PreferencesModule {
 	@FxControllerKey(AboutController.class)
 	abstract FxController bindAboutController(AboutController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(NetworkPreferencesController.class)
+	abstract FxController bindNetworkPreferencesController(NetworkPreferencesController controller);
+
 }

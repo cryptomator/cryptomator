@@ -40,6 +40,7 @@ public enum FontAwesome5Icon {
 	LOCK("\uF023"), //
 	LOCK_OPEN("\uF3C1"), //
 	MAGIC("\uF0D0"), //
+	NETWORK("\uF6FF"), //
 	PENCIL("\uF303"), //
 	PLUS("\uF067"), //
 	PRINT("\uF02F"), //

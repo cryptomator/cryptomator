@@ -35,4 +35,8 @@ public enum SelectedPreferencesTab {
 	 * Show about tab
 	 */
 	ABOUT,
+	/**
+	 * Show network tab
+	 */
+	NETWORK
 }
