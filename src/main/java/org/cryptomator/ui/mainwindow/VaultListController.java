@@ -118,7 +118,7 @@ public class VaultListController implements FxController {
 		vaultList.maxHeightProperty().bind(vaultList.prefHeightProperty());
 		vaultList.prefWidthProperty().bind(scrollPane.widthProperty());
 
-		vbox.heightProperty().addListener((_, oldValue, newValue) -> {
+		scrollPane.heightProperty().addListener((_, oldValue, newValue) -> {
 			if(newValue.doubleValue()>oldValue.doubleValue()){
 				scrollPane.setVvalue(1.0);
 			}

@@ -16,9 +16,9 @@
 		   fx:id="root"
 		   fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
 		   minWidth="206">
-	<VBox styleClass="vault-list-box">
+	<VBox styleClass="left-side-panel">
 		<ScrollPane fx:id="scrollPane" hbarPolicy="NEVER">
-			<VBox fx:id="vbox">
+			<VBox>
 				<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
 					<contextMenu>
 						<fx:include source="vault_list_contextmenu.fxml"/>
