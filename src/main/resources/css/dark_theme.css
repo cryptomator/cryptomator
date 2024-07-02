@@ -364,6 +364,35 @@
 
 /*******************************************************************************
  *                                                                             *
+ * NotificationBar                                                             *
+ *                                                                             *
+ ******************************************************************************/
+
+.notification-label {
+	-fx-text-fill: white;
+	-fx-font-weight: bold;
+}
+
+.notification-debug {
+	-fx-min-height:24px;
+	-fx-max-height:24px;
+	-fx-background-color: RED_5;
+}
+
+.notification-update {
+	-fx-min-height:24px;
+	-fx-max-height:24px;
+	-fx-background-color: YELLOW_5;
+}
+
+.notification-support {
+	-fx-min-height:24px;
+	-fx-max-height:24px;
+	-fx-background-color: PRIMARY;
+}
+
+/*******************************************************************************
+ *                                                                             *
  * ScrollBar                                                                   *
  *                                                                             *
  ******************************************************************************/
