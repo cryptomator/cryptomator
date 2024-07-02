@@ -356,6 +356,7 @@
 }
 
 .preferences-btn {
+	-fx-background-color: MAIN_BG;
 	-fx-border-color: CONTROL_BORDER_NORMAL transparent transparent transparent;
 	-fx-border-width: 1px 0 0 0;
 }
