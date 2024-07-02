@@ -5,24 +5,34 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Button?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
 		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 		   styleClass="main-window">
 	<VBox minWidth="650">
-		<HBox onMouseClicked="#showUpdatePreferences" alignment="CENTER" styleClass="notification-update" VBox.vgrow="ALWAYS" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}">
+		<HBox onMouseClicked="#showUpdatePreferences" alignment="CENTER" styleClass="notification-update" VBox.vgrow="ALWAYS" visible="${controller.updateNotificationHidden}" managed="${controller.updateNotificationHidden}">
+			<Region minWidth="40"/>
+			<Region HBox.hgrow="ALWAYS"/>
 			<Label text="%main.notification.updateAvailable" styleClass="notification-label" />
+			<Region HBox.hgrow="ALWAYS"/>
+			<Button minWidth="40" text="X" onMouseClicked="#hideUpdateNotification" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
 		</HBox>
-		<HBox onMouseClicked="#showContributePreferences" alignment="CENTER" styleClass="notification-support" VBox.vgrow="ALWAYS" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}">
-			<Label text="%main.notification.support" styleClass="notification-label"/>
+		<HBox onMouseClicked="#showContributePreferences" alignment="CENTER" styleClass="notification-support" VBox.vgrow="ALWAYS" visible="${controller.supportNotificationHidden}" managed="${controller.supportNotificationHidden}">
+			<Region minWidth="40"/>
+			<Region HBox.hgrow="ALWAYS"/>
+			<Label text="%main.notification.support" styleClass="notification-label" />
+			<Region HBox.hgrow="ALWAYS"/>
+			<Button minWidth="40" text="X" onMouseClicked="#hideSupportNotification" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
 		</HBox>
 		<SplitPane dividerPositions="0.33" orientation="HORIZONTAL" VBox.vgrow="ALWAYS">
 			<fx:include source="vault_list.fxml" SplitPane.resizableWithParent="false"/>
 			<fx:include source="vault_detail.fxml" SplitPane.resizableWithParent="true"/>
 		</SplitPane>
 		<HBox onMouseClicked="#showGeneralPreferences" alignment="CENTER" styleClass="notification-debug" VBox.vgrow="ALWAYS" visible="${controller.debugModeEnabled}" managed="${controller.debugModeEnabled}">
-			<Label text="%main.notification.debugMode" styleClass="notification-label"/>
+			<Label text="DEBUG MODE" styleClass="notification-label"/>
 		</HBox>
 	</VBox>
 </StackPane>

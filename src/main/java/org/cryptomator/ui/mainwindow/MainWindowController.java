@@ -14,10 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -33,6 +36,10 @@ public class MainWindowController implements FxController {
 	private final FxApplicationWindows appWindows;
 	private final BooleanBinding updateAvailable;
 	private final LicenseHolder licenseHolder;
+	private final BooleanProperty hideSupportNotificationClicked = new SimpleBooleanProperty(false);
+	private final BooleanProperty supportNotificationHidden = new SimpleBooleanProperty();
+	private final BooleanProperty hideUpdateNotificationClicked = new SimpleBooleanProperty(false);
+	private final BooleanProperty updateNotificationHidden = new SimpleBooleanProperty();
 
 	public StackPane root;
 
@@ -69,6 +76,9 @@ public class MainWindowController implements FxController {
 		window.heightProperty().addListener((_, _, _) -> savePositionalSettings());
 		window.xProperty().addListener((_, _, _) -> savePositionalSettings());
 		window.yProperty().addListener((_, _, _) -> savePositionalSettings());
+
+		supportNotificationHidden.bind(Bindings.createBooleanBinding(() -> !licenseHolder.isValidLicense() && !hideSupportNotificationClicked.get(), hideSupportNotificationClicked));
+		updateNotificationHidden.bind(Bindings.createBooleanBinding(() -> updateAvailable.get() && !hideUpdateNotificationClicked.get(), hideUpdateNotificationClicked));
 	}
 
 	private boolean neverTouched() {
@@ -105,6 +115,16 @@ public class MainWindowController implements FxController {
 		appWindows.showPreferencesWindow(SelectedPreferencesTab.UPDATES);
 	}
 
+	@FXML
+	public void hideSupportNotification() {
+		this.hideSupportNotificationClicked.setValue(true);
+	}
+
+	@FXML
+	public void hideUpdateNotification() {
+		this.hideUpdateNotificationClicked.setValue(true);
+	}
+
 	public LicenseHolder getLicenseHolder() {
 		return licenseHolder;
 	}
@@ -123,6 +143,38 @@ public class MainWindowController implements FxController {
 
 	public boolean isUpdateAvailable() {
 		return updateAvailable.get();
+	}
+
+	public BooleanProperty hideSupportNotificationClickedProperty() {
+		return hideSupportNotificationClicked;
+	}
+
+	public boolean isHideSupportNotificationClicked() {
+		return hideSupportNotificationClicked.get();
+	}
+
+	public BooleanProperty supportNotificationHiddenProperty() {
+		return supportNotificationHidden;
+	}
+
+	public boolean isSupportNotificationHidden() {
+		return supportNotificationHidden.get();
+	}
+
+	public BooleanProperty hideUpdateNotificationClickedProperty() {
+		return hideUpdateNotificationClicked;
+	}
+
+	public boolean isHideUpdateNotificationClicked() {
+		return hideUpdateNotificationClicked.get();
+	}
+
+	public BooleanProperty updateNotificationHiddenProperty() {
+		return updateNotificationHidden;
+	}
+
+	public boolean isUpdateNotificationHidden() {
+		return updateNotificationHidden.get();
 	}
 
 }
