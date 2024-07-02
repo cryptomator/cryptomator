@@ -34,6 +34,7 @@ public class MainWindowController implements FxController {
 	private final ReadOnlyObjectProperty<Vault> selectedVault;
 	private final Settings settings;
 	private final FxApplicationWindows appWindows;
+	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
 	private final LicenseHolder licenseHolder;
 	private final BooleanProperty hideSupportNotificationClicked = new SimpleBooleanProperty(false);
@@ -54,6 +55,7 @@ public class MainWindowController implements FxController {
 		this.selectedVault = selectedVault;
 		this.settings = settings;
 		this.appWindows = appWindows;
+		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.licenseHolder = licenseHolder;
 	}
@@ -61,6 +63,8 @@ public class MainWindowController implements FxController {
 	@FXML
 	public void initialize() {
 		LOG.trace("init MainWindowController");
+		updateChecker.automaticallyCheckForUpdatesIfEnabled();
+
 		if (SystemUtils.IS_OS_WINDOWS) {
 			root.getStyleClass().add("os-windows");
 		}
@@ -77,8 +81,8 @@ public class MainWindowController implements FxController {
 		window.xProperty().addListener((_, _, _) -> savePositionalSettings());
 		window.yProperty().addListener((_, _, _) -> savePositionalSettings());
 
-		supportNotificationHidden.bind(Bindings.createBooleanBinding(() -> !licenseHolder.isValidLicense() && !hideSupportNotificationClicked.get(), hideSupportNotificationClicked));
-		updateNotificationHidden.bind(Bindings.createBooleanBinding(() -> updateAvailable.get() && !hideUpdateNotificationClicked.get(), hideUpdateNotificationClicked));
+		supportNotificationHidden.bind(Bindings.createBooleanBinding(() -> !licenseHolder.isValidLicense() && !hideSupportNotificationClicked.get(), hideSupportNotificationClicked, licenseHolder.validLicenseProperty()));
+		updateNotificationHidden.bind(Bindings.createBooleanBinding(() -> updateAvailable.get() && !hideUpdateNotificationClicked.get(), hideUpdateNotificationClicked, updateAvailable));
 	}
 
 	private boolean neverTouched() {
