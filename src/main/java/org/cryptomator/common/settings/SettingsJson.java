@@ -15,6 +15,9 @@ class SettingsJson {
 	@JsonProperty("directories")
 	List<VaultSettingsJson> directories = List.of();
 
+	@JsonProperty("networkSettings")
+	NetworkSettingsJson networkSettings = new NetworkSettingsJson();
+
 	@JsonProperty("writtenByVersion")
 	String writtenByVersion;
 

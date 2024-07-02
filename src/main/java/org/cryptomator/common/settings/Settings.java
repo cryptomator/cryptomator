@@ -47,6 +47,7 @@ public class Settings {
 	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
 	public static final Instant DEFAULT_TIMESTAMP = Instant.parse("2000-01-01T00:00:00Z");
 	public final ObservableList<VaultSettings> directories;
+	public final ObjectProperty<NetworkSettings> networkSettings;
 	public final BooleanProperty askedForUpdateCheck;
 	public final BooleanProperty checkForUpdates;
 	public final BooleanProperty startHidden;
@@ -84,6 +85,7 @@ public class Settings {
 	 */
 	Settings(SettingsJson json) {
 		this.directories = FXCollections.observableArrayList(VaultSettings::observables);
+		this.networkSettings = new SimpleObjectProperty<>(this, "networkSettings", new NetworkSettings(json.networkSettings));
 		this.askedForUpdateCheck = new SimpleBooleanProperty(this, "askedForUpdateCheck", json.askedForUpdateCheck);
 		this.checkForUpdates = new SimpleBooleanProperty(this, "checkForUpdates", json.checkForUpdatesEnabled);
 		this.startHidden = new SimpleBooleanProperty(this, "startHidden", json.startHidden);
@@ -111,6 +113,7 @@ public class Settings {
 		migrateLegacySettings(json);
 
 		directories.addListener(this::somethingChanged);
+		networkSettings.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
 		checkForUpdates.addListener(this::somethingChanged);
 		startHidden.addListener(this::somethingChanged);
@@ -165,6 +168,7 @@ public class Settings {
 	SettingsJson serialized() {
 		var json = new SettingsJson();
 		json.directories = directories.stream().map(VaultSettings::serialized).toList();
+		json.networkSettings = networkSettings.get().serialized();
 		json.askedForUpdateCheck = askedForUpdateCheck.get();
 		json.checkForUpdatesEnabled = checkForUpdates.get();
 		json.startHidden = startHidden.get();
