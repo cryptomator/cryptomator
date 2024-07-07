@@ -32,7 +32,7 @@ if [ "${CPU_ARCH}" = "aarch64" ]; then
 fi
 
 # download javaFX jmods
-JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-21.0.1_linux-${JAVAFX_ARCH}_bin-jmods.zip"
+JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_linux-${JAVAFX_ARCH}_bin-jmods.zip"
 
 
 curl -L ${JAVAFX_JMODS_URL} -o openjfx-jmods.zip
