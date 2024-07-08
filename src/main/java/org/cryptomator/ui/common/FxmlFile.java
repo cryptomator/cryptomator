@@ -36,6 +36,7 @@ public enum FxmlFile {
 	MIGRATION_RUN("/fxml/migration_run.fxml"), //
 	MIGRATION_START("/fxml/migration_start.fxml"), //
 	MIGRATION_SUCCESS("/fxml/migration_success.fxml"), //
+	NOTIFICATION("/fxml/notification.fxml"),
 	PREFERENCES("/fxml/preferences.fxml"), //
 	QUIT("/fxml/quit.fxml"), //
 	QUIT_FORCED("/fxml/quit_forced.fxml"), //

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+
+<?import javafx.scene.layout.VBox?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  alignment="CENTER"
+	  style="-fx-alignment: center;">
+	<Region minWidth="40"/>
+	<Region HBox.hgrow="ALWAYS"/>
+	<VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+		<Label fx:id="notificationLabel" styleClass="notification-label" style="-fx-alignment: center;"/>
+	</VBox>
+	<Region HBox.hgrow="ALWAYS"/>
+
+	<Button fx:id="closeButton" minWidth="40" text="X" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
+</HBox>
