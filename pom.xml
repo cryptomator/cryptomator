@@ -62,15 +62,15 @@
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>24.1.0</jetbrains.annotations.version>
-		<dependency-check.version>9.2.0</dependency-check.version>
+		<dependency-check.version>10.0.2</dependency-check.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<license-generator.version>2.4.0</license-generator.version>
 		<junit-tree-reporter.version>1.2.1</junit-tree-reporter.version>
 		<mvn-compiler.version>3.13.0</mvn-compiler.version>
 		<mvn-resources.version>3.3.1</mvn-resources.version>
-		<mvn-dependency.version>3.7.0</mvn-dependency.version>
+		<mvn-dependency.version>3.7.1</mvn-dependency.version>
 		<mvn-surefire.version>3.3.0</mvn-surefire.version>
-		<mvn-jar.version>3.4.1</mvn-jar.version>
+		<mvn-jar.version>3.4.2</mvn-jar.version>
 	</properties>
 
 	<dependencies>
