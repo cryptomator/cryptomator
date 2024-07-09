@@ -7,8 +7,6 @@
 		 xmlns="http://javafx.com/javafx"
 		 fx:id="tabPane"
 		 fx:controller="org.cryptomator.ui.preferences.PreferencesController"
-		 minWidth="-Infinity"
-		 maxWidth="-Infinity"
 		 prefWidth="650"
 		 tabMinWidth="60"
 		 tabClosingPolicy="UNAVAILABLE"
