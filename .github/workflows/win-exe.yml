@@ -390,12 +390,14 @@ jobs:
     needs: [publish]
     with:
       url: ${{ needs.publish.outputs.download-url-msi }}
+    secrets: inherit
 
   allowlist-exe:
     uses: ./.github/workflows/av-whitelist.yml
     needs: [publish]
     with:
       url: ${{ needs.publish.outputs.download-url-exe }}
+    secrets: inherit
 
   notify-winget:
     name: Notify for winget-release
