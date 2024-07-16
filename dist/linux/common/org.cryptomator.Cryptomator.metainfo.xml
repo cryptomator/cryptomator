@@ -68,13 +68,15 @@
 	<developer id="de.skymatic">
 		<name>Skymatic GmbH</name>
 	</developer>
-		
 
 	<content_rating type="oars-1.1">
 		<content_attribute id="social-info">mild</content_attribute> <!-- update checker connects to https://api.cryptomator.org/updates/latestVersion.json -->
 	</content_rating>
 
 	<releases>
+		<release date="2024-06-26" version="1.13.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.13.0</url>
+		</release>
 		<release date="2024-03-27" version="1.12.4">
 			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.12.4</url>
 		</release>

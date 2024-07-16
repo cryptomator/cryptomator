@@ -6,7 +6,6 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
-import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -14,8 +13,8 @@ import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.common.StageInitializer;
+import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.fxapp.PrimaryStage;
-import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
@@ -28,7 +27,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -83,16 +81,6 @@ abstract class MainWindowModule {
 	@IntoMap
 	@FxControllerKey(MainWindowController.class)
 	abstract FxController bindMainWindowController(MainWindowController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(MainWindowTitleController.class)
-	abstract FxController bindMainWindowTitleController(MainWindowTitleController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(ResizeController.class)
-	abstract FxController bindResizeController(ResizeController controller);
 
 	@Binds
 	@IntoMap

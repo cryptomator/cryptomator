@@ -37,9 +37,6 @@
 			<RadioButton fx:id="nodeOrientationRtl" text="%preferences.interface.interfaceOrientation.rtl" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
 		</HBox>
 
-
-		<CheckBox fx:id="showMinimizeButtonCheckbox" text="%preferences.interface.showMinimizeButton" visible="${controller.trayMenuInitialized}" managed="${controller.trayMenuInitialized}"/>
-
 		<CheckBox fx:id="showTrayIconCheckbox" text="%preferences.interface.showTrayIcon" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
 	</children>
 </VBox>

@@ -25,10 +25,8 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
@@ -75,11 +73,9 @@ public class VaultListController implements FxController {
 	private final FxApplicationWindows appWindows;
 
 	public ListView<Vault> vaultList;
-	public ScrollPane scrollPane;
 	public VBox vbox;
 	public StackPane root;
-	public Button addVaultBtn;
-	public HBox addVaultArea;
+	public HBox addVaultButton;
 	@FXML
 	private ContextMenu addVaultContextMenu;
 
@@ -113,20 +109,6 @@ public class VaultListController implements FxController {
 	public void initialize() {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
-
-		vaultList.prefHeightProperty().bind(vaultList.fixedCellSizeProperty().multiply(vaultList.getItems().size()));
-		vaultList.maxHeightProperty().bind(vaultList.prefHeightProperty());
-		vaultList.prefWidthProperty().bind(scrollPane.widthProperty());
-
-		vbox.heightProperty().addListener((_, oldValue, newValue) -> {
-			if(newValue.doubleValue()>oldValue.doubleValue()){
-				scrollPane.setVvalue(1.0);
-			}
-		});
-
-		vaults.addListener((ListChangeListener<Vault>) c -> {
-			vaultList.prefHeightProperty().bind(vaultList.fixedCellSizeProperty().multiply(vaultList.getItems().size()));
-			});
 
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
@@ -193,7 +175,7 @@ public class VaultListController implements FxController {
 		if (addVaultContextMenu.isShowing()) {
 			addVaultContextMenu.hide();
 		} else {
-			addVaultContextMenu.show(addVaultArea, Side.BOTTOM, 0.0, 0.0);
+			addVaultContextMenu.show(addVaultButton, Side.BOTTOM, 0.0, 0.0);
 		}
 	}
 
