@@ -45,8 +45,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -74,7 +74,7 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final Settings settings;
-	private final Optional<QuickAccessService> quickAccessService;
+	private final List<QuickAccessService> quickAccessServices;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -86,7 +86,7 @@ public class Vault {
 		  VaultState state, //
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
-		  Mounter mounter, Settings settings, Optional<QuickAccessService> quickAccessService) {
+		  Mounter mounter, Settings settings, List<QuickAccessService> quickAccessServices) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -103,7 +103,7 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.settings = settings;
-		this.quickAccessService = quickAccessService;
+		this.quickAccessServices = quickAccessServices;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -165,7 +165,7 @@ public class Vault {
 			var rootPath = fs.getRootDirectories().iterator().next();
 			var mountHandle = mounter.mount(vaultSettings, rootPath);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
-			if (settings.addToQuickAccess.getValue()) {
+			if (settings.useQuickAccess.getValue()) {
 				addToQuickAccess();
 			}
 		} finally {
@@ -207,9 +207,15 @@ public class Vault {
 			return;
 
 		}
-		quickAccessService.ifPresentOrElse( //
-				this::addToQuickAccessInternal, //
-				() -> LOG.warn("Unable to add Vault to quick access area: No implementation available."));
+
+		quickAccessServices.stream() //
+				.filter(s -> s.getClass().getName().equals(settings.quickAccessService.getValue())) //
+				.findFirst() //
+				.ifPresentOrElse( //
+						this::addToQuickAccessInternal, //
+						() -> LOG.warn("Unable to add Vault to quick access area: Desired implementation not available.") //
+				);
+
 	}
 
 	private void addToQuickAccessInternal(@NotNull QuickAccessService s) {

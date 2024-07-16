@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -131,8 +132,8 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static Optional<QuickAccessService> provideQuickAccessService() {
-		return QuickAccessService.get().findFirst();
+	static List<QuickAccessService> provideQuickAccessServices() {
+		return QuickAccessService.get().toList();
 	}
 
 	private static void handleUncaughtExceptionInBackgroundThread(Thread thread, Throwable throwable) {

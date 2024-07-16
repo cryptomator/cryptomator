@@ -86,6 +86,9 @@ class SettingsJson {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
 	Instant lastSuccessfulUpdateCheck = Settings.DEFAULT_TIMESTAMP;
 
-	@JsonProperty("addToQuickAccess")
-	boolean addToQuickAccess = Settings.DEFAULT_ADD_TO_QUICK_ACCESS;
+	@JsonProperty("useQuickAccess")
+	boolean useQuickAccess = Settings.DEFAULT_USE_QUICKACCESS;
+
+	@JsonProperty("quickAccessService")
+	String quickAccessService;
 }
