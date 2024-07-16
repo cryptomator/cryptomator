@@ -30,6 +30,10 @@
 			<ChoiceBox fx:id="keychainBackendChoiceBox"/>
 		</HBox>
 
+		<HBox spacing="12" alignment="CENTER_LEFT">
+			<CheckBox fx:id="useQuickAccessCheckbox" text="TODO Quick access"/>
+			<ChoiceBox fx:id="quickAccessServiceChoiceBox"/>
+		</HBox>
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT">

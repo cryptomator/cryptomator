@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Suppliers;
 import org.cryptomator.common.Environment;
+import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -45,11 +47,13 @@ public class SettingsProvider implements Supplier<Settings> {
 	private final Supplier<Settings> settings = Suppliers.memoize(this::load);
 	private final Environment env;
 	private final ScheduledExecutorService scheduler;
+	private final Optional<QuickAccessService> quickAccessService;
 
 	@Inject
-	public SettingsProvider(Environment env, ScheduledExecutorService scheduler) {
+	public SettingsProvider(Environment env, ScheduledExecutorService scheduler, List<QuickAccessService> quickAccessServices) {
 		this.env = env;
 		this.scheduler = scheduler;
+		this.quickAccessService = quickAccessServices.stream().findFirst();
 	}
 
 	@Override
@@ -58,7 +62,13 @@ public class SettingsProvider implements Supplier<Settings> {
 	}
 
 	private Settings load() {
-		Settings settings = env.getSettingsPath().flatMap(this::tryLoad).findFirst().orElseGet(() -> Settings.create(env));
+		Settings settings = env.getSettingsPath() //
+				.flatMap(this::tryLoad) //
+				.findFirst() //
+				.orElseGet(() -> Settings.create(env));
+		if (settings.quickAccessService.getValue() == null) {
+			quickAccessService.ifPresent(s -> settings.quickAccessService.setValue(s.getClass().getName()));
+		}
 		settings.setSaveCmd(this::scheduleSave);
 		return settings;
 	}
