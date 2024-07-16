@@ -192,7 +192,7 @@ public class Vault {
 			mountHandle.mountObj().close();
 			mountHandle.specialCleanup().run();
 		} finally {
-			removeFromSidebar();
+			removeFromQuickAccess();
 			destroyCryptoFileSystem();
 		}
 
@@ -231,9 +231,9 @@ public class Vault {
 		}
 	}
 
-	private synchronized void removeFromSidebar() {
+	private synchronized void removeFromQuickAccess() {
 		if (quickAccessEntry.get() == null) {
-			LOG.info("Removing vault from quick access area: Entry not found, nothing to do.");
+			LOG.debug("Removing vault from quick access area: Entry not found, nothing to do.");
 			return;
 		}
 		removeFromSidebarInternal();
