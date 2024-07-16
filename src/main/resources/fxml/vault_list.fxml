@@ -10,61 +10,62 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.shape.Arc?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
 		   fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
 		   minWidth="206">
-	<VBox styleClass="left-side-panel">
-		<ScrollPane fx:id="scrollPane" hbarPolicy="NEVER">
-			<VBox>
-				<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
-					<contextMenu>
-						<fx:include source="vault_list_contextmenu.fxml"/>
-					</contextMenu>
-				</ListView>
-				<HBox fx:id="addVaultArea" styleClass="add-vault-btn" spacing="12" onMouseClicked="#toggleMenu">
-					<padding>
-						<Insets topRightBottomLeft="12"/>
-					</padding>
-					<VBox alignment="CENTER" minWidth="20">
-						<FontAwesome5IconView glyph="PLUS" styleClass="icon" HBox.hgrow="NEVER" glyphSize="16"/>
-					</VBox>
-					<VBox spacing="4" HBox.hgrow="ALWAYS" >
-						<Label styleClass="add-vault-btn-label" text="%main.vaultlist.addVaultBtn" />
-					</VBox>
+	<VBox>
+		<StackPane VBox.vgrow="ALWAYS">
+			<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
+				<contextMenu>
+					<fx:include source="vault_list_contextmenu.fxml"/>
+				</contextMenu>
+			</ListView>
+			<VBox visible="${controller.emptyVaultList}" spacing="6" alignment="CENTER">
+				<Region VBox.vgrow="ALWAYS"/>
+				<Label VBox.vgrow="NEVER" text="%main.vaultlist.emptyList.onboardingInstruction" textAlignment="CENTER" wrapText="true"/>
+				<HBox>
+					<Arc styleClass="onboarding-overlay-arc" translateX="20" radiusY="100" radiusX="50" length="-60"/>
 				</HBox>
 			</VBox>
-		</ScrollPane>
-		<Region VBox.vgrow="ALWAYS"/>
-		<HBox spacing="12" styleClass="preferences-btn" onMouseClicked="#showPreferences">
-			<padding>
-				<Insets topRightBottomLeft="12"/>
-			</padding>
-			<VBox alignment="CENTER" minWidth="20">
-				<FontAwesome5IconView glyph="COG" HBox.hgrow="NEVER" glyphSize="16"/>
-			</VBox>
-			<VBox spacing="4" HBox.hgrow="ALWAYS">
-				<Label styleClass="header-label" text="%preferences.title"/>
-			</VBox>
+		</StackPane>
+		<HBox styleClass="button-bar">
+			<HBox fx:id="addVaultButton" spacing="12" onMouseClicked="#toggleMenu" styleClass="button-left">
+				<padding>
+					<Insets topRightBottomLeft="12"/>
+				</padding>
+				<VBox alignment="CENTER" minWidth="20">
+					<FontAwesome5IconView glyph="PLUS" HBox.hgrow="NEVER" glyphSize="16"/>
+				</VBox>
+			</HBox>
+			<Region HBox.hgrow="ALWAYS"/>
+			<HBox spacing="12" onMouseClicked="#showPreferences" styleClass="button-right">
+				<padding>
+					<Insets topRightBottomLeft="12"/>
+				</padding>
+				<VBox alignment="CENTER" minWidth="20">
+					<FontAwesome5IconView glyph="COG" HBox.hgrow="NEVER" glyphSize="16"/>
+				</VBox>
+			</HBox>
 		</HBox>
-		<fx:define>
-			<ContextMenu fx:id="addVaultContextMenu">
-				<items>
-					<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault" >
-						<graphic>
-							<FontAwesome5IconView glyph="PLUS" textAlignment="CENTER" wrappingWidth="14" />
-						</graphic>
-					</MenuItem>
-					<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault" >
-						<graphic>
-							<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
-						</graphic>
-					</MenuItem>
-				</items>
-			</ContextMenu>
-		</fx:define>
 	</VBox>
 	<Region styleClass="drag-n-drop-border" visible="${controller.draggingVaultOver}"/>
+	<fx:define>
+		<ContextMenu fx:id="addVaultContextMenu">
+			<items>
+				<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault" >
+					<graphic>
+						<FontAwesome5IconView glyph="PLUS" textAlignment="CENTER" wrappingWidth="14" />
+					</graphic>
+				</MenuItem>
+				<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault" >
+					<graphic>
+						<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
+					</graphic>
+				</MenuItem>
+			</items>
+		</ContextMenu>
+	</fx:define>
 </StackPane>
