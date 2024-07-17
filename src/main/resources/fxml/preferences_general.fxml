@@ -31,7 +31,7 @@
 		</HBox>
 
 		<HBox spacing="12" alignment="CENTER_LEFT">
-			<CheckBox fx:id="useQuickAccessCheckbox" text="TODO Quick access"/>
+			<CheckBox fx:id="useQuickAccessCheckbox" text="%preferences.general.quickAccessService"/>
 			<ChoiceBox fx:id="quickAccessServiceChoiceBox"/>
 		</HBox>
 		<Region VBox.vgrow="ALWAYS"/>
