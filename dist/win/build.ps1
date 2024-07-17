@@ -41,7 +41,7 @@ Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
-&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin -Djavafx.platform=win
+&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin "-Djavafx.platform=win"
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -53,7 +53,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 ## download jfx jmods
 $javaFxVersion='22.0.1'
 $javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-$javaFxJmodsSHA256 = 'de82e53179032a49bec005deb4438e8f261d08c4b58864a5c17e1d87286b09dd'
+$javaFxJmodsSHA256 = 'DE82E53179032A49BEC005DEB4438E8F261D08C4B58864A5C17E1D87286B09DD'
 $javaFxJmods = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $javaFxJmods) ) {
 	Write-Output "Downloading ${javaFxJmodsUrl}..."
@@ -122,7 +122,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--icon resources/$AppName.ico
 
 #Create RTF license for msi
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party -Djavafx.platform=win `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\resources\" `
@@ -167,7 +167,7 @@ $Env:JP_WIXHELPER_DIR = "."
 	--file-associations resources/FAvaultFile.properties
 
 #Create RTF license for bundle
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party -Djavafx.platform=win `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `
