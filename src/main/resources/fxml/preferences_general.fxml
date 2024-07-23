@@ -30,7 +30,7 @@
 			<ChoiceBox fx:id="keychainBackendChoiceBox"/>
 		</HBox>
 
-		<HBox spacing="12" alignment="CENTER_LEFT">
+		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.someQuickAccessServiceAvailable}" managed="${controller.someQuickAccessServiceAvailable}">
 			<CheckBox fx:id="useQuickAccessCheckbox" text="%preferences.general.quickAccessService"/>
 			<ChoiceBox fx:id="quickAccessServiceChoiceBox"/>
 		</HBox>

@@ -105,6 +105,10 @@ public class GeneralPreferencesController implements FxController {
 		});
 	}
 
+	public boolean isSomeQuickAccessServiceAvailable() {
+		return !quickAccessServices.isEmpty();
+	}
+
 	@FXML
 	public void showLogfileDirectory() {
 		environment.getLogDir().ifPresent(logDirPath -> application.getHostServices().showDocument(logDirPath.toUri().toString()));
