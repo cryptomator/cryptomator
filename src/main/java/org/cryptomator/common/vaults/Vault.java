@@ -236,10 +236,10 @@ public class Vault {
 			LOG.debug("Removing vault from quick access area: Entry not found, nothing to do.");
 			return;
 		}
-		removeFromSidebarInternal();
+		removeFromQuickAccessInternal();
 	}
 
-	private void removeFromSidebarInternal() {
+	private void removeFromQuickAccessInternal() {
 		try {
 			quickAccessEntry.get().remove();
 			quickAccessEntry.set(null);
