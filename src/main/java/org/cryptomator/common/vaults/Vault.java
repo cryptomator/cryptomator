@@ -205,7 +205,6 @@ public class Vault {
 			//we don't throw an exception since we don't wanna block unlocking
 			LOG.warn("Vault already added to quick access area. Will be removed on next lock operation.");
 			return;
-
 		}
 
 		quickAccessServices.stream() //
@@ -215,7 +214,6 @@ public class Vault {
 						this::addToQuickAccessInternal, //
 						() -> LOG.warn("Unable to add Vault to quick access area: Desired implementation not available.") //
 				);
-
 	}
 
 	private void addToQuickAccessInternal(@NotNull QuickAccessService s) {
