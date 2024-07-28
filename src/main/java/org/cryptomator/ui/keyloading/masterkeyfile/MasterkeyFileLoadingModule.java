@@ -28,7 +28,7 @@ public interface MasterkeyFileLoadingModule {
 			return Optional.empty();
 		} else {
 			try {
-				return Optional.ofNullable(keychain.loadPassphrase(vault.getId()));
+				return vault.getVaultSettings().useTouchID.get() ? Optional.ofNullable(keychain.loadPassphraseForAuthenticatedUser(vault.getId())) : Optional.ofNullable(keychain.loadPassphrase(vault.getId()));
 			} catch (KeychainAccessException e) {
 				LoggerFactory.getLogger(MasterkeyFileLoadingModule.class).error("Failed to load entry from system keychain.", e);
 				return Optional.empty();
