@@ -47,6 +47,11 @@ public class MasterkeyOptionsController implements FxController {
 	}
 
 	@FXML
+	public void initialize() {
+		useTouchIDheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().useTouchID);
+	}
+
+	@FXML
 	public void changePassword() {
 		changePasswordWindow.vault(vault).owner(window).build().showChangePasswordWindow();
 	}
