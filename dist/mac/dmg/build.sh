@@ -29,7 +29,7 @@ REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
-JAVAFX_VERISON=22.0.1
+JAVAFX_VERSION=22.0.1
 JAVAFX_ARCH="undefined"
 JAVAFX_JMODS_SHA256="undefined"
 if [ "$(machine)" = "arm64e" ]; then
@@ -52,7 +52,7 @@ fi
 
 # download and check jmods
 curl -L ${JAVAFX_JMODS_URL} -o openjfx-jmods.zip
-echo "${JAVAFX_JMODS_SHA256} openjfx-jmods.zip" | shasum -a256 --check
+echo "${JAVAFX_JMODS_SHA256}  openjfx-jmods.zip" | shasum -a256 --check
 mkdir -p openjfx-jmods/
 unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
 JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
