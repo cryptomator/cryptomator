@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # parse options
-usage() { echo "Usage: $0 [-s <codesign-identity>]" 1>&2; exit 1; }
-while getopts ":s:" o; do
+usage() { echo "Usage: $0 [-s <codesign-identity>] [-t <team-identifier>]" 1>&2; exit 1; }
+while getopts ":s:t:" o; do
     case "${o}" in
         s)
             CODESIGN_IDENTITY=${OPTARG}
+            ;;
+        t)
+            TEAM_IDENTIFIER=${OPTARG}
             ;;
         *)
             usage
@@ -121,6 +124,7 @@ ${JAVA_HOME}/bin/jpackage \
 cp ../resources/${APP_NAME}-Vault.icns ${APP_NAME}.app/Contents/Resources/
 sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
+cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
 # generate license
 mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
@@ -133,7 +137,7 @@ mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
     -Dlicense.licenseMergesUrl=file://$(pwd)/../../../license/merges
 
 # codesign
-if [ -n "${CODESIGN_IDENTITY}" ]; then
+if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     for JAR_PATH in `find ${APP_NAME}.app -name "*.jar"`; do
     if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
@@ -151,7 +155,10 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
     fi
     done
     echo "Codesigning ${APP_NAME}.app..."
-    codesign --force --deep --entitlements ../${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
+    cp ../${APP_NAME}.entitlements .
+    sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" ${APP_NAME}.entitlements
+    sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" ${APP_NAME}.entitlements
+    codesign --force --deep --entitlements ${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
 fi
 
 # prepare dmg contents

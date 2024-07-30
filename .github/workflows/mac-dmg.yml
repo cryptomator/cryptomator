@@ -137,9 +137,11 @@ jobs:
           mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
+          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output Cryptomator.app/Contents/embedded.provisionprofile
         env:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NO: ${{ needs.get-version.outputs.revNum }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
       - name: Generate license for dmg
         run: >
           mvn -B -Djavafx.platform=mac license:add-third-party
@@ -194,9 +196,12 @@ jobs:
             fi
           done
           echo "Codesigning Cryptomator.app..."
+          sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" dist/mac/Cryptomator.entitlements
+          sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" dist/mac/Cryptomator.entitlements
           codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+          TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
       - name: Prepare .dmg contents
         run: |
           mkdir dmg
