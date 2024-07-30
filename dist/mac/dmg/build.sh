@@ -138,6 +138,10 @@ mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
 
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
+    echo "Codesigning jdk files..."
+    find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+    find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+    echo "Codesigning jar contents..."
     find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     for JAR_PATH in `find ${APP_NAME}.app -name "*.jar"`; do
     if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
