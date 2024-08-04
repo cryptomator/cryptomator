@@ -1,5 +1,6 @@
 package org.cryptomator.ui.vaultoptions;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -53,6 +54,9 @@ public class MasterkeyOptionsController implements FxController {
 	public void initialize() {
 		useTouchIDheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().useTouchID);
 		useTouchIDheckbox.selectedProperty().addListener(this::useTouchIDheckboxToggled);
+		if (!SystemUtils.IS_OS_MAC) {
+			useTouchIDheckbox.visibleProperty().set(false);
+		}
 	}
 
 	/**
