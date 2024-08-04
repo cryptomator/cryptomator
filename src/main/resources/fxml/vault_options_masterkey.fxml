@@ -32,7 +32,7 @@
 		</VBox>
 
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<CheckBox text="%vaultOptions.masterkey.useTouchID" fx:id="useTouchIDheckbox"/>
+			<CheckBox text="%vaultOptions.masterkey.needAuthenticatedUser" fx:id="needAuthenticatedUserCheckbox"/>
 		</HBox>
 
 		<Region VBox.vgrow="ALWAYS"/>

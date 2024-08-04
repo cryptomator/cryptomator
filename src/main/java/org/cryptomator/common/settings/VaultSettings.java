@@ -40,7 +40,7 @@ public class VaultSettings {
 	static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
 	static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
 	static final int DEFAULT_PORT = 42427;
-	static final boolean DEFAULT_USE_TOUCH_ID = false;
+	static final boolean DEFAULT_NEED_AUTHENTICATED_USER = false;
 
 	private static final Random RNG = new Random();
 
@@ -59,7 +59,7 @@ public class VaultSettings {
 	public final StringExpression mountName;
 	public final StringProperty mountService;
 	public final IntegerProperty port;
-	public final BooleanProperty useTouchID;
+	public final BooleanProperty needAuthenticatedUser;
 
 	VaultSettings(VaultSettingsJson json) {
 		this.id = json.id;
@@ -86,7 +86,7 @@ public class VaultSettings {
 			}
 			return normalizeDisplayName(name);
 		}, displayName, path));
-		this.useTouchID = new SimpleBooleanProperty(this, "useTouchID", json.useTouchID);
+		this.needAuthenticatedUser = new SimpleBooleanProperty(this, "needAuthenticatedUser", json.needAuthenticatedUser);
 
 		migrateLegacySettings(json);
 	}
@@ -102,7 +102,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode, port, mountService, useTouchID};
+		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode, port, mountService, needAuthenticatedUser};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -133,7 +133,7 @@ public class VaultSettings {
 		json.mountPoint = mountPoint.map(Path::toString).getValue();
 		json.mountService = mountService.get();
 		json.port = port.get();
-		json.useTouchID = useTouchID.get();
+		json.needAuthenticatedUser = needAuthenticatedUser.get();
 		return json;
 	}
 

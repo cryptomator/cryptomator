@@ -65,6 +65,6 @@ class VaultSettingsJson {
 	@JsonAlias("individualMountPath")
 	String customMountPath;
 
-	@JsonProperty("useTouchID")
-	boolean useTouchID = VaultSettings.DEFAULT_USE_TOUCH_ID;
+	@JsonProperty("needAuthenticatedUser")
+	boolean needAuthenticatedUser = VaultSettings.DEFAULT_NEED_AUTHENTICATED_USER;
 }
