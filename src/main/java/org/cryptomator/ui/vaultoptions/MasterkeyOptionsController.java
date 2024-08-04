@@ -1,7 +1,9 @@
 package org.cryptomator.ui.vaultoptions;
 
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -49,6 +52,32 @@ public class MasterkeyOptionsController implements FxController {
 	@FXML
 	public void initialize() {
 		useTouchIDheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().useTouchID);
+		useTouchIDheckbox.selectedProperty().addListener(this::useTouchIDheckboxToggled);
+	}
+
+	/**
+	 * Existing keychain items get changed, depending on an additional user authentication is required or not.
+	 * This is needed as the user authentication is tied to the keychain itself.
+	 *
+	 * @param observable
+	 * @param wasSet
+	 * @param isSet		 <code>true</code>, when the checkbox is ticked, <code>false</code> otherwise
+	 */
+	private void useTouchIDheckboxToggled(Observable observable, Boolean wasSet, Boolean isSet) {
+		try {
+			var vautID = vault.getId();
+			if (keychain.isPassphraseStored(vautID)) {
+				var passphrase = keychain.loadPassphrase(vautID);
+				keychain.deletePassphrase(vautID);
+				if (isSet) {
+					keychain.storePassphraseForAuthenticatedUser(vautID, vault.getId(), new Passphrase(passphrase));
+				} else {
+					keychain.storePassphrase(vautID, vault.getId(), new Passphrase(passphrase));
+				}
+			}
+		} catch (KeychainAccessException e) {
+			LOG.error("Failed to migrate item in system keychain due to access control change.", e);
+		}
 	}
 
 	@FXML
