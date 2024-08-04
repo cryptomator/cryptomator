@@ -54,10 +54,9 @@ public class MasterkeyOptionsController implements FxController {
 	public void initialize() {
 		needAuthenticatedUserCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().needAuthenticatedUser);
 		needAuthenticatedUserCheckbox.selectedProperty().addListener(this::needAuthenticatedUserCheckboxToggled);
-		// ToDo Remove or adjust, as soon as there are implementations for integrations-api
-		//  KeychainAccessProvider:storePassphraseForAuthenticatedUser for other OSes
+		// ToDo Remove or adjust, as soon as there are implementations for integrations-api KeychainAccessProvider:storePassphraseForAuthenticatedUser for other OSes
 		if (!SystemUtils.IS_OS_MAC) {
-			needAuthenticatedUserCheckbox.visibleProperty().set(false);
+			needAuthenticatedUserCheckbox.setVisible(false);
 		}
 	}
 
@@ -71,14 +70,14 @@ public class MasterkeyOptionsController implements FxController {
 	 */
 	private void needAuthenticatedUserCheckboxToggled(Observable observable, Boolean wasSet, Boolean isSet) {
 		try {
-			var vautID = vault.getId();
-			if (keychain.isPassphraseStored(vautID)) {
-				var passphrase = keychain.loadPassphrase(vautID);
-				keychain.deletePassphrase(vautID);
+			var vaultId = vault.getId();
+			if (keychain.isPassphraseStored(vaultId)) {
+				var passphrase = keychain.loadPassphrase(vaultId);
+				keychain.deletePassphrase(vaultId);
 				if (isSet) {
-					keychain.storePassphraseForAuthenticatedUser(vautID, vault.getId(), new Passphrase(passphrase));
+					keychain.storePassphraseForAuthenticatedUser(vaultId, vault.getId(), new Passphrase(passphrase));
 				} else {
-					keychain.storePassphrase(vautID, vault.getId(), new Passphrase(passphrase));
+					keychain.storePassphrase(vaultId, vault.getId(), new Passphrase(passphrase));
 				}
 			}
 		} catch (KeychainAccessException e) {
