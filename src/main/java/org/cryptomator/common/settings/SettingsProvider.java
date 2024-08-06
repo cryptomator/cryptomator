@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Suppliers;
 import org.cryptomator.common.Environment;
-import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +26,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
