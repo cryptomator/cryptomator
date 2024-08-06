@@ -74,7 +74,6 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final Settings settings;
-	private final List<QuickAccessService> quickAccessServices;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -86,7 +85,7 @@ public class Vault {
 		  VaultState state, //
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
-		  Mounter mounter, Settings settings, List<QuickAccessService> quickAccessServices) {
+		  Mounter mounter, Settings settings) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -103,7 +102,6 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.settings = settings;
-		this.quickAccessServices = quickAccessServices;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -207,7 +205,7 @@ public class Vault {
 			return;
 		}
 
-		quickAccessServices.stream() //
+		QuickAccessService.get() //
 				.filter(s -> s.getClass().getName().equals(settings.quickAccessService.getValue())) //
 				.findFirst() //
 				.ifPresentOrElse( //

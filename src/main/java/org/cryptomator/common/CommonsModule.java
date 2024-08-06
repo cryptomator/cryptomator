@@ -130,12 +130,6 @@ public abstract class CommonsModule {
 		return executorService;
 	}
 
-	@Provides
-	@Singleton
-	static List<QuickAccessService> provideQuickAccessServices() {
-		return QuickAccessService.get().toList();
-	}
-
 	private static void handleUncaughtExceptionInBackgroundThread(Thread thread, Throwable throwable) {
 		LOG.error("Uncaught exception in " + thread.getName(), throwable);
 	}

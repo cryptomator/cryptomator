@@ -48,12 +48,12 @@ public class GeneralPreferencesController implements FxController {
 	public ToggleGroup nodeOrientation;
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, List<QuickAccessService> quickAccessServices, Application application, Environment environment, FxApplicationWindows appWindows) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, Application application, Environment environment, FxApplicationWindows appWindows) {
 		this.window = window;
 		this.settings = settings;
 		this.autoStartProvider = autoStartProvider;
 		this.keychainAccessProviders = keychainAccessProviders;
-		this.quickAccessServices = quickAccessServices;
+		this.quickAccessServices = QuickAccessService.get().toList();
 		this.application = application;
 		this.environment = environment;
 		this.appWindows = appWindows;
