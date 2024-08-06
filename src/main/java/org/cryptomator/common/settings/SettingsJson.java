@@ -90,5 +90,5 @@ class SettingsJson {
 	boolean useQuickAccess = Settings.DEFAULT_USE_QUICKACCESS;
 
 	@JsonProperty("quickAccessService")
-	String quickAccessService;
+	String quickAccessService = Settings.DEFAULT_QUICKACCESS_SERVICE;
 }

@@ -47,13 +47,11 @@ public class SettingsProvider implements Supplier<Settings> {
 	private final Supplier<Settings> settings = Suppliers.memoize(this::load);
 	private final Environment env;
 	private final ScheduledExecutorService scheduler;
-	private final Optional<QuickAccessService> quickAccessService;
 
 	@Inject
-	public SettingsProvider(Environment env, ScheduledExecutorService scheduler, List<QuickAccessService> quickAccessServices) {
+	public SettingsProvider(Environment env, ScheduledExecutorService scheduler) {
 		this.env = env;
 		this.scheduler = scheduler;
-		this.quickAccessService = quickAccessServices.stream().findFirst();
 	}
 
 	@Override
@@ -66,9 +64,6 @@ public class SettingsProvider implements Supplier<Settings> {
 				.flatMap(this::tryLoad) //
 				.findFirst() //
 				.orElseGet(() -> Settings.create(env));
-		if (settings.quickAccessService.getValue() == null) {
-			quickAccessService.ifPresent(s -> settings.quickAccessService.setValue(s.getClass().getName()));
-		}
 		settings.setSaveCmd(this::scheduleSave);
 		return settings;
 	}
