@@ -471,7 +471,7 @@
 							<skipTestScope>true</skipTestScope>
 							<detail>true</detail>
 							<suppressionFile>suppression.xml</suppressionFile>
-							<nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+							<nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
 						</configuration>
 						<executions>
 							<execution>
