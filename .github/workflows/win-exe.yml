@@ -16,7 +16,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '22.0.1+8'
+  JAVA_VERSION: '22.0.2+9'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_windows-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: 'de82e53179032a49bec005deb4438e8f261d08c4b58864a5c17e1d87286b09dd'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
