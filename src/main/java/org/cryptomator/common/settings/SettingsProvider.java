@@ -58,7 +58,10 @@ public class SettingsProvider implements Supplier<Settings> {
 	}
 
 	private Settings load() {
-		Settings settings = env.getSettingsPath().flatMap(this::tryLoad).findFirst().orElseGet(() -> Settings.create(env));
+		Settings settings = env.getSettingsPath() //
+				.flatMap(this::tryLoad) //
+				.findFirst() //
+				.orElseGet(() -> Settings.create(env));
 		settings.setSaveCmd(this::scheduleSave);
 		return settings;
 	}

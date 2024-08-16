@@ -75,7 +75,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
@@ -100,7 +100,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--vendor $Vendor `
 	--copyright $copyright `
 	--java-options "--enable-preview" `
-	--java-options "--enable-native-access=org.cryptomator.jfuse.win" `
+	--java-options "--enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win" `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
