@@ -236,7 +236,8 @@ public class CreateNewVaultPasswordController implements FxController {
 		}
 	}
 
-	@Deprecated
+	//due to https://github.com/cryptomator/cryptomator/issues/2880#issuecomment-1680313498
+	@Deprecated()
 	private void postProcessVaultSettings(VaultSettings vaultSettings) {
 		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
 		if (SystemUtils.IS_OS_WINDOWS //
