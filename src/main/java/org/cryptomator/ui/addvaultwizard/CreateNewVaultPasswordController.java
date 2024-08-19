@@ -1,8 +1,6 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -12,7 +10,6 @@ import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
-import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -46,7 +43,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
@@ -65,7 +61,6 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final Lazy<Scene> successScene;
 	private final FxApplicationWindows appWindows;
 	private final ExecutorService executor;
-	private final List<MountService> mountProviders;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final StringProperty vaultNameProperty;
 	private final ObjectProperty<Path> vaultPathProperty;
@@ -94,7 +89,7 @@ public class CreateNewVaultPasswordController implements FxController {
 									 @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, //
 									 FxApplicationWindows appWindows, //
 									 ExecutorService executor, //
-									 List<MountService> mountProviders, RecoveryKeyFactory recoveryKeyFactory, //
+									 RecoveryKeyFactory recoveryKeyFactory, //
 									 @Named("vaultName") StringProperty vaultName, //
 									 ObjectProperty<Path> vaultPath, //
 									 @AddVaultWizardWindow ObjectProperty<Vault> vault, //
@@ -111,7 +106,6 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.successScene = successScene;
 		this.appWindows = appWindows;
 		this.executor = executor;
-		this.mountProviders = mountProviders;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.vaultNameProperty = vaultName;
 		this.vaultPathProperty = vaultPath;
@@ -229,23 +223,10 @@ public class CreateNewVaultPasswordController implements FxController {
 	private void creationSucceeded(Path pathToVault) {
 		try {
 			Vault newVault = vaultListManager.add(pathToVault);
-			postProcessVaultSettings(newVault.getVaultSettings());
 			vaultProperty.set(newVault);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-	}
-
-	//due to https://github.com/cryptomator/cryptomator/issues/2880#issuecomment-1680313498
-	@Deprecated()
-	private void postProcessVaultSettings(VaultSettings vaultSettings) {
-		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
-		if (SystemUtils.IS_OS_WINDOWS //
-				&& vaultSettings.path.get().toString().contains("Dropbox") //
-				&& mountProviders.stream().anyMatch(s -> s.getClass().getName().equals(nameOfWinfspLocalMounter))) {
-			vaultSettings.mountService.setValue(nameOfWinfspLocalMounter);
-		}
-
 	}
 
 	/* Getter/Setter */
