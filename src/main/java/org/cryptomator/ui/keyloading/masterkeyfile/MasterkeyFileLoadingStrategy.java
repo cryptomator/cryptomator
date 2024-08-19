@@ -114,7 +114,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private void savePasswordToSystemkeychain(Passphrase passphrase) {
 		if (keychain.isSupported()) {
 			try {
-				keychain.storePassphrase(vault.getId(), vault.getDisplayName(), passphrase);
+				keychain.storePassphrase(vault.getId(), vault.getDisplayName(), passphrase, vault.getVaultSettings().needAuthenticatedUser.get());
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to store passphrase in system keychain.", e);
 			}

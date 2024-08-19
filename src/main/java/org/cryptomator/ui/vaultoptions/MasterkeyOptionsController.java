@@ -1,7 +1,10 @@
 package org.cryptomator.ui.vaultoptions;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
@@ -10,9 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 
 @VaultOptionsScoped
@@ -25,6 +30,7 @@ public class MasterkeyOptionsController implements FxController {
 	private final ChangePasswordComponent.Builder changePasswordWindow;
 	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
+	public CheckBox needAuthenticatedUserCheckbox;
 	private final KeychainManager keychain;
 	private final ObservableValue<Boolean> passwordSaved;
 
@@ -41,6 +47,33 @@ public class MasterkeyOptionsController implements FxController {
 			this.passwordSaved = keychain.getPassphraseStoredProperty(vault.getId()).orElse(false);
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
+		}
+	}
+
+	@FXML
+	public void initialize() {
+		needAuthenticatedUserCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().needAuthenticatedUser);
+		needAuthenticatedUserCheckbox.selectedProperty().addListener(this::needAuthenticatedUserCheckboxToggled);
+	}
+
+	/**
+	 * Existing keychain items get changed, depending on an additional user authentication is required or not.
+	 * This is needed as the user authentication is tied to the keychain itself.
+	 *
+	 * @param observable
+	 * @param wasSet
+	 * @param isSet		 <code>true</code>, when the checkbox is ticked, <code>false</code> otherwise
+	 */
+	private void needAuthenticatedUserCheckboxToggled(Observable observable, Boolean wasSet, Boolean isSet) {
+		try {
+			var vaultId = vault.getId();
+			if (keychain.isPassphraseStored(vaultId)) {
+				var passphrase = keychain.loadPassphrase(vaultId);
+				keychain.deletePassphrase(vaultId);
+				keychain.storePassphrase(vaultId, vault.getId(), new Passphrase(passphrase), isSet);
+			}
+		} catch (KeychainAccessException e) {
+			LOG.error("Failed to migrate item in system keychain due to access control change.", e);
 		}
 	}
 

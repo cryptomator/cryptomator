@@ -21,6 +21,11 @@ class MapKeychainAccess implements KeychainAccessProvider {
 
 	@Override
 	public void storePassphrase(String key, String displayName,CharSequence passphrase) {
+		storePassphrase(key, displayName, passphrase, false);
+	}
+
+	@Override
+	public void storePassphrase(String key, String displayName,CharSequence passphrase, boolean requireOsAuthentication) {
 		char[] pw = new char[passphrase.length()];
 		for (int i = 0; i < passphrase.length(); i++) {
 			pw[i] = passphrase.charAt(i);

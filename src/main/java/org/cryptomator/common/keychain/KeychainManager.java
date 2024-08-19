@@ -49,6 +49,11 @@ public class KeychainManager implements KeychainAccessProvider {
 		setPassphraseStored(key, true);
 	}
 
+	public void storePassphrase(String key, String displayName, CharSequence passphrase, boolean requireOsAuthentication) throws KeychainAccessException {
+		getKeychainOrFail().storePassphrase(key, displayName, passphrase, requireOsAuthentication);
+		setPassphraseStored(key, true);
+	}
+
 	@Override
 	public char[] loadPassphrase(String key) throws KeychainAccessException {
 		char[] passphrase = getKeychainOrFail().loadPassphrase(key);
