@@ -31,7 +31,7 @@ public interface PreferencesComponent {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.setMinWidth(420);
-		stage.setMinHeight(300);
+		stage.setMinHeight(400);
 		stage.show();
 		stage.requestFocus();
 		return stage;

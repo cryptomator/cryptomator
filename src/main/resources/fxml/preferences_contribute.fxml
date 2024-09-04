@@ -10,6 +10,11 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.Region?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.SupporterCertificateController"
@@ -18,31 +23,49 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<StackPane VBox.vgrow="NEVER" prefHeight="60">
-			<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.licenseHolder.validLicense}">
-				<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-					<Circle styleClass="glyph-icon-primary" radius="24"/>
-					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CROWN" glyphSize="24"/>
-				</StackPane>
+		<StackPane VBox.vgrow="NEVER" prefHeight="60" alignment="TOP_CENTER">
+			<VBox alignment="TOP_CENTER" visible="${controller.licenseHolder.validLicense}">
+				<Text styleClass="label-extra-large" text="Thank you for supporting Cryptomator’s open-source development!" wrappingWidth="400" textAlignment="CENTER"/>
+				<ImageView fitHeight="180">
+					<Image url="@../img/supporter_cert_stemp.png"/>
+				</ImageView>
 				<FormattedLabel format="%preferences.contribute.registeredFor" arg1="${controller.licenseHolder.licenseSubject}" wrapText="true"/>
-			</HBox>
-
-			<HBox spacing="12" alignment="CENTER_LEFT" visible="${!controller.licenseHolder.validLicense}">
-				<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-					<Circle styleClass="glyph-icon-primary" radius="24"/>
-					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="HAND_HOLDING_HEART" glyphSize="24"/>
-				</StackPane>
-				<VBox HBox.hgrow="ALWAYS" spacing="6">
-					<Label text="%preferences.contribute.noCertificate" wrapText="true" VBox.vgrow="ALWAYS"/>
-					<Hyperlink text="%preferences.contribute.getCertificate" onAction="#getSupporterCertificate" contentDisplay="LEFT">
+				<Region minHeight="12"/>
+				<HBox alignment="BOTTOM_CENTER" spacing="6">
+					<Button fx:id="trashButton">
 						<graphic>
-							<FontAwesome5IconView glyph="LINK"/>
+							<FontAwesome5IconView glyph="TRASH"/>
 						</graphic>
-					</Hyperlink>
-				</VBox>
-			</HBox>
+					</Button>
+					<Button text="Donate" minWidth="100" onAction="#showDonate">
+						<graphic>
+							<FontAwesome5IconView glyph="DONATE"/>
+						</graphic>
+					</Button>
+					<Button text="Sponsors" minWidth="100" onAction="#showSponsors">
+						<graphic>
+							<FontAwesome5IconView glyph="SPONSORS"/>
+						</graphic>
+					</Button>
+				</HBox>
+			</VBox>
+			<VBox spacing="12" visible="${!controller.licenseHolder.validLicense}">
+				<HBox spacing="12" alignment="CENTER_LEFT" >
+					<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+						<Circle styleClass="glyph-icon-primary" radius="24"/>
+						<FontAwesome5IconView styleClass="glyph-icon-white" glyph="HAND_HOLDING_HEART" glyphSize="24"/>
+					</StackPane>
+					<VBox HBox.hgrow="ALWAYS" spacing="6">
+						<Label text="%preferences.contribute.noCertificate" wrapText="true" VBox.vgrow="ALWAYS"/>
+						<Hyperlink text="%preferences.contribute.getCertificate" onAction="#getSupporterCertificate" contentDisplay="LEFT">
+							<graphic>
+								<FontAwesome5IconView glyph="LINK"/>
+							</graphic>
+						</Hyperlink>
+					</VBox>
+				</HBox>
+				<TextArea fx:id="supporterCertificateField" promptText="%preferences.contribute.promptText" wrapText="true" VBox.vgrow="ALWAYS" prefRowCount="6"/>
+			</VBox>
 		</StackPane>
-
-		<TextArea fx:id="supporterCertificateField" promptText="%preferences.contribute.promptText" wrapText="true" VBox.vgrow="ALWAYS" prefRowCount="6"/>
 	</children>
 </VBox>
