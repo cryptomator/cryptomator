@@ -13,12 +13,13 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
 
 @OperatingSystem(MAC)
 public final class GoogleDriveMacLocationPresetsProvider implements LocationPresetsProvider {
-	private static final Path LOCATION = LocationPresetsProvider.resolveLocation("~/Library/CloudStorage/").toAbsolutePath();
+	private static final Path ROOT_LOCATION = LocationPresetsProvider.resolveLocation("~/Library/CloudStorage/").toAbsolutePath();
 	private static final Predicate<String> PATTERN = Pattern.compile("^GoogleDrive-[^/]+$").asMatchPredicate();
 
 	private static final List<Path> FALLBACK_LOCATIONS = Arrays.asList( //
@@ -30,24 +31,22 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 
 	@Override
 	public Stream<LocationPreset> getLocations() {
-		if(isLocationPresent()) {
+		if(isRootLocationPresent()) {
 			return getCloudStorageDirLocations();
-		} else if(FALLBACK_LOCATIONS.stream().anyMatch(Files::isDirectory)) {
-			return getFallbackLocation();
 		} else {
-			return Stream.of();
+			return getFallbackLocation();
 		}
 	}
 
 	@CheckAvailability
 	public static boolean isPresent() {
-		return isLocationPresent() || FALLBACK_LOCATIONS.stream().anyMatch(Files::isDirectory);
+		return isRootLocationPresent() || FALLBACK_LOCATIONS.stream().anyMatch(Files::isDirectory);
 	}
 
-	public static boolean isLocationPresent() {
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(LOCATION, "GoogleDrive-*")) {
-			return stream.iterator().hasNext();
-		} catch (IOException e) {
+	public static boolean isRootLocationPresent() {
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(ROOT_LOCATION, "GoogleDrive-*")) {
+			return StreamSupport.stream(stream.spliterator(), false).anyMatch(Files::isDirectory);
+		} catch (IOException | UncheckedIOException e) {
 			return false;
 		}
 	}
@@ -66,28 +65,23 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 		return STR."Google Drive - \{accountName} - \{driveName}";
 	}
 
-	/**
-	 * Handles searching through {@code ~/Library/CloudStorage/} for directories with the "{@code GoogleDrive-*}" pattern,
-	 * and returns the corresponding presets.
-	 *
-	 * @return {@code Stream<LocationPreset>}. Displays as "{@code Google Drive - username - drive_name}"
-	 */
 	private Stream<LocationPreset> getCloudStorageDirLocations() {
-		try (var dirStream = Files.list(LOCATION)) {
-			var presets = dirStream.filter(path -> Files.isDirectory(path) && PATTERN.test(path.getFileName().toString()))
-					.flatMap(accountPath -> {
-						try {
-							return Files.list(accountPath)
-									.filter(Files::isDirectory)
-									.map(drivePath -> new LocationPreset(getDriveLocationString(accountPath, drivePath), drivePath));
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}).toList();
-			return presets.stream();
+		try (var dirStream = Files.list(ROOT_LOCATION)) {
+			return dirStream.filter(path -> Files.isDirectory(path) && PATTERN.test(path.getFileName().toString()))
+					.flatMap(this::getPresetsFromAccountPath)
+					.toList().stream();
+		} catch (IOException | UncheckedIOException e) {
+			return Stream.empty();
 		}
-		catch (IOException | UncheckedIOException e) {
-			return Stream.of();
+	}
+
+	private Stream<LocationPreset> getPresetsFromAccountPath(Path accountPath) {
+		try (var driveStream = Files.newDirectoryStream(accountPath, Files::isDirectory)) {
+			List<Path> directories = StreamSupport.stream(driveStream.spliterator(), false).toList();
+			return directories.stream()
+					.map(drivePath -> new LocationPreset(getDriveLocationString(accountPath, drivePath), drivePath));
+		} catch (IOException e) {
+			return Stream.empty();
 		}
 	}
 
