@@ -32,7 +32,7 @@
 				<FormattedLabel format="%preferences.contribute.registeredFor" arg1="${controller.licenseHolder.licenseSubject}" wrapText="true"/>
 				<Region minHeight="12"/>
 				<HBox alignment="BOTTOM_CENTER" spacing="6">
-					<Button fx:id="trashButton">
+					<Button fx:id="trashButton" onAction="#didClickRemoveCert">
 						<graphic>
 							<FontAwesome5IconView glyph="TRASH"/>
 						</graphic>

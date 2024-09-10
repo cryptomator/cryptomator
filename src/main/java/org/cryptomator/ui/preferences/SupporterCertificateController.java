@@ -5,17 +5,14 @@ import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.removecert.RemoveCertComponent;
 
 import javax.inject.Inject;
 import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
-import java.util.ResourceBundle;
 
 @PreferencesScoped
 public class SupporterCertificateController implements FxController {
@@ -27,19 +24,17 @@ public class SupporterCertificateController implements FxController {
 	private final Application application;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final ResourceBundle resourceBundle;
+	private final RemoveCertComponent.Builder removeCert;
 
 	@FXML
 	private TextArea supporterCertificateField;
-	@FXML
-	private Button trashButton;
 
 	@Inject
-	SupporterCertificateController(Application application, LicenseHolder licenseHolder, Settings settings, ResourceBundle resourceBundle) {
+	SupporterCertificateController(Application application, LicenseHolder licenseHolder, Settings settings, RemoveCertComponent.Builder removeCert) {
 		this.application = application;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.resourceBundle = resourceBundle;
+		this.removeCert = removeCert;
 	}
 
 	@FXML
@@ -47,20 +42,7 @@ public class SupporterCertificateController implements FxController {
 		supporterCertificateField.setText(licenseHolder.getLicenseKey().orElse(null));
 		supporterCertificateField.textProperty().addListener(this::registrationKeyChanged);
 		supporterCertificateField.setTextFormatter(new TextFormatter<>(this::removeWhitespaces));
-
-		trashButton.setOnAction(_ -> {
-			Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-			alert.setTitle(resourceBundle.getString("removeLicenseKeyDialog.title"));
-			alert.setHeaderText(resourceBundle.getString("removeLicenseKeyDialog.header"));
-			alert.setContentText(resourceBundle.getString("removeLicenseKeyDialog.content"));
-
-			alert.showAndWait().ifPresent(response -> {
-				if (response == ButtonType.OK) {
-					supporterCertificateField.setText(null);
-					settings.licenseKey.set(null);
-				}
-			});
-		});
+		settings.licenseKey.addListener(this::licenseKeySettingsChanged);
 	}
 
 	private TextFormatter.Change removeWhitespaces(TextFormatter.Change change) {
@@ -69,6 +51,11 @@ public class SupporterCertificateController implements FxController {
 			change.setText(strippedText);
 		}
 		return change;
+	}
+
+	private void licenseKeySettingsChanged(@SuppressWarnings("unused") ObservableValue<? extends String> observable, @SuppressWarnings("unused") String oldValue, String newValue){
+		if(newValue == null)
+			supporterCertificateField.setText(null);
 	}
 
 	private void registrationKeyChanged(@SuppressWarnings("unused") ObservableValue<? extends String> observable, @SuppressWarnings("unused") String oldValue, String newValue) {
@@ -91,6 +78,11 @@ public class SupporterCertificateController implements FxController {
 	@FXML
 	public void showSponsors() {
 		application.getHostServices().showDocument(SPONSORS_URI);
+	}
+
+	@FXML
+	void didClickRemoveCert() {
+		removeCert.build().showRemoveCert();
 	}
 
 	public LicenseHolder getLicenseHolder() {
