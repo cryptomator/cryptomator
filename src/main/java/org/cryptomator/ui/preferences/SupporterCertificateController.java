@@ -13,6 +13,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
+import javafx.stage.Stage;
 
 @PreferencesScoped
 public class SupporterCertificateController implements FxController {
