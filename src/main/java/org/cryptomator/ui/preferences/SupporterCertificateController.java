@@ -82,7 +82,8 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		removeCert.build().showRemoveCert();
+		Stage pref = (Stage) supporterCertificateField.getScene().getWindow();
+		removeCert.build().showRemoveCert(pref);
 	}
 
 	public LicenseHolder getLicenseHolder() {

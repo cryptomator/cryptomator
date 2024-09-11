@@ -18,10 +18,11 @@ public interface RemoveCertComponent {
 	@FxmlScene(FxmlFile.REMOVE_CERT)
 	Lazy<Scene> scene();
 
-	default void showRemoveCert() {
+	default void showRemoveCert(Stage owner) {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.sizeToScene();
+		stage.initOwner(owner);
 		stage.show();
 	}
 
