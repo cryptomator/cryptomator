@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.Animations;
@@ -9,6 +10,8 @@ import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -18,6 +21,7 @@ public class VaultListCellController implements FxController {
 
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private final ObservableValue<FontAwesome5Icon> glyph;
+	private final BooleanBinding useCondensedMode;
 
 	private AutoAnimator spinAnimation;
 
@@ -25,8 +29,9 @@ public class VaultListCellController implements FxController {
 	public FontAwesome5IconView vaultStateView;
 
 	@Inject
-	VaultListCellController() {
+	VaultListCellController(Settings settings) {
 		this.glyph = vault.flatMap(Vault::stateProperty).map(this::getGlyphForVaultState);
+		this.useCondensedMode = Bindings.createBooleanBinding(settings.useCondensedMode::get, settings.useCondensedMode);
 	}
 
 	public void initialize() {
@@ -66,6 +71,13 @@ public class VaultListCellController implements FxController {
 
 	public Vault getVault() {
 		return vault.get();
+	}
+
+	public BooleanBinding useCondensedModeProperty() {
+		return useCondensedMode;
+	}
+	public boolean isUseCondensedMode() {
+		return useCondensedMode.get();
 	}
 
 	public void setVault(Vault value) {

@@ -38,5 +38,6 @@
 		</HBox>
 
 		<CheckBox fx:id="showTrayIconCheckbox" text="%preferences.interface.showTrayIcon" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
+		<CheckBox fx:id="useCondensedModeCheckbox" text="%preferences.interface.condensedVaultList"/>
 	</children>
 </VBox>

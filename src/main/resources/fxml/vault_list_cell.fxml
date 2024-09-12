@@ -23,7 +23,7 @@
 		</VBox>
 		<VBox spacing="4" HBox.hgrow="ALWAYS">
 			<Label styleClass="header-label" text="${controller.vault.displayName}"/>
-			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS">
+			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" visible="${!controller.useCondensedMode}" managed="${!controller.useCondensedMode}">
 				<tooltip>
 					<Tooltip text="${controller.vault.displayablePath}"/>
 				</tooltip>

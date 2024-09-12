@@ -1,6 +1,7 @@
 package org.cryptomator.ui.mainwindow;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
@@ -71,6 +72,7 @@ public class VaultListController implements FxController {
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
+	private final BooleanBinding useCondensedMode;
 
 	public ListView<Vault> vaultList;
 	public VBox vbox;
@@ -89,7 +91,8 @@ public class VaultListController implements FxController {
 						RemoveVaultComponent.Builder removeVaultDialogue, //
 						VaultListManager vaultListManager, //
 						ResourceBundle resourceBundle, //
-						FxApplicationWindows appWindows) {
+						FxApplicationWindows appWindows, //
+						Settings settings) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -102,6 +105,7 @@ public class VaultListController implements FxController {
 		this.appWindows = appWindows;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
+		this.useCondensedMode = Bindings.createBooleanBinding(settings.useCondensedMode::get, settings.useCondensedMode);
 
 		selectedVault.addListener(this::selectedVaultDidChange);
 	}
@@ -109,6 +113,9 @@ public class VaultListController implements FxController {
 	public void initialize() {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
+
+		vaultList.fixedCellSizeProperty().bind(Bindings.createDoubleBinding(() ->
+				useCondensedMode.get() ? 30.0 : 60.0, useCondensedMode));
 
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
