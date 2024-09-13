@@ -100,6 +100,7 @@
 
 .label-extra-large {
 	-fx-font-family: 'Open Sans SemiBold';
+	-fx-fill: TEXT_FILL;
 	-fx-font-size: 1.5em;
 }
 
@@ -264,26 +265,6 @@
 .split-pane:horizontal > .split-pane-divider {
 	-fx-background-color: MAIN_BG, CONTROL_BORDER_NORMAL;
 	-fx-background-insets: 0, 0 1 0 0;
-}
-
-/*******************************************************************************
- *                                                                             *
- * Alert-Dialogs                                                               *
- *                                                                             *
- ******************************************************************************/
-
-.dialog-pane {
-    -fx-padding: 12px;
-}
-
-.dialog-pane .header-panel {
-	-fx-font-family: 'Open Sans SemiBold';
-	-fx-font-size: 1.2em;
-}
-
-.dialog-pane .content {
-	-fx-font-family: 'Open Sans';
-    -fx-padding: 12 0 12 0;
 }
 
 /*******************************************************************************
