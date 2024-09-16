@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.common.keychain;
 
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
 import java.util.HashMap;
@@ -20,7 +21,7 @@ class MapKeychainAccess implements KeychainAccessProvider {
 	}
 
 	@Override
-	public void storePassphrase(String key, String displayName,CharSequence passphrase) {
+	public void storePassphrase(String key, String displayName,CharSequence passphrase, boolean ignored) {
 		char[] pw = new char[passphrase.length()];
 		for (int i = 0; i < passphrase.length(); i++) {
 			pw[i] = passphrase.charAt(i);
@@ -39,7 +40,7 @@ class MapKeychainAccess implements KeychainAccessProvider {
 	}
 
 	@Override
-	public void changePassphrase(String key, String displayName, CharSequence passphrase) {
+	public void changePassphrase(String key, String displayName, CharSequence passphrase) throws KeychainAccessException {
 		map.get(key);
 		storePassphrase(key, displayName, passphrase);
 	}
