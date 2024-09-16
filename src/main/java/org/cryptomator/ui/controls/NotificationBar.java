@@ -4,8 +4,6 @@ import org.cryptomator.ui.common.FxmlFile;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -21,7 +19,6 @@ public class NotificationBar extends HBox {
 	@FXML
 	private Button closeButton;
 
-	private final StringProperty textProperty = new SimpleStringProperty();
 	private final BooleanProperty dismissable = new SimpleBooleanProperty();
 	private final BooleanProperty notify = new SimpleBooleanProperty();
 
@@ -29,7 +26,6 @@ public class NotificationBar extends HBox {
 	public NotificationBar() {
 		loadFXML();
 		closeButton.visibleProperty().bind(dismissable);
-		notificationLabel.textProperty().bind(textProperty);
 
 		visibleProperty().bind(notifyProperty());
 		managedProperty().bind(notifyProperty());
@@ -54,15 +50,11 @@ public class NotificationBar extends HBox {
 	}
 
 	public String getText() {
-		return textProperty.get();
+		return notificationLabel.getText();
 	}
 
 	public void setText(String text) {
-		textProperty.set(text);
-	}
-
-	public StringProperty textProperty() {
-		return textProperty;
+		notificationLabel.setText(text);
 	}
 
 	public void setStyleClass(String styleClass) {
@@ -75,10 +67,6 @@ public class NotificationBar extends HBox {
 
 	public void setDismissable(boolean value) {
 		dismissable.set(value);
-	}
-
-	public BooleanProperty dismissableProperty() {
-		return dismissable;
 	}
 
 	public boolean getNotify() {
