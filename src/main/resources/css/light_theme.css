@@ -177,8 +177,8 @@
 
 /* windows needs an explicit border: */
 .main-window.os-windows {
-	-fx-border-color: TITLE_BG;
-	-fx-border-width: 1px;
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-width: 1px 0 0 0;
 }
 
 .main-window .button-bar {
