@@ -35,7 +35,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
@@ -73,9 +72,9 @@ public class VaultListController implements FxController {
 	private final FxApplicationWindows appWindows;
 
 	public ListView<Vault> vaultList;
-	public VBox vbox;
 	public StackPane root;
-	public HBox addVaultButton;
+	@FXML
+	private HBox addVaultButton;
 	@FXML
 	private ContextMenu addVaultContextMenu;
 
