@@ -18,7 +18,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
       - name: Submit package
-        uses: vedantmgoyal2009/winget-releaser@v2
+        uses: vedantmgoyal2009/winget-releaser@main
         with:
           identifier: Cryptomator.Cryptomator
           version: ${{ inputs.tag }}
