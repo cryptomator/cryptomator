@@ -69,6 +69,7 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 		try (var dirStream = Files.list(ROOT_LOCATION)) {
 			return dirStream.filter(path -> Files.isDirectory(path) && PATTERN.test(path.getFileName().toString()))
 					.flatMap(this::getPresetsFromAccountPath)
+					.filter(preset -> Files.isWritable(preset.path()))
 					.toList().stream();
 		} catch (IOException | UncheckedIOException e) {
 			return Stream.empty();
