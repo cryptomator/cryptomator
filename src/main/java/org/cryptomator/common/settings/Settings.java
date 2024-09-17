@@ -37,12 +37,18 @@ public class Settings {
 	static final boolean DEFAULT_START_HIDDEN = false;
 	static final boolean DEFAULT_AUTO_CLOSE_VAULTS = false;
 	static final boolean DEFAULT_USE_KEYCHAIN = true;
+	static final boolean DEFAULT_USE_QUICKACCESS = true;
 	static final int DEFAULT_PORT = 42427;
 	static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	static final boolean DEFAULT_DEBUG_MODE = false;
 	static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	@Deprecated // to be changed to "whatever is available" eventually
-	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
+	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : //
+			SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : //
+					"org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
+	static final String DEFAULT_QUICKACCESS_SERVICE = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.quickaccess.ExplorerQuickAccessService" : //
+			SystemUtils.IS_OS_LINUX ? "org.cryptomator.linux.quickaccess.NautilusBookmarks" : null;
+
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
 	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
 	public static final Instant DEFAULT_TIMESTAMP = Instant.parse("2000-01-01T00:00:00Z");
@@ -57,6 +63,8 @@ public class Settings {
 	public final BooleanProperty debugMode;
 	public final ObjectProperty<UiTheme> theme;
 	public final StringProperty keychainProvider;
+	public final BooleanProperty useQuickAccess;
+	public final StringProperty quickAccessService;
 	public final ObjectProperty<NodeOrientation> userInterfaceOrientation;
 	public final StringProperty licenseKey;
 	public final BooleanProperty showMinimizeButton;
@@ -89,6 +97,7 @@ public class Settings {
 		this.startHidden = new SimpleBooleanProperty(this, "startHidden", json.startHidden);
 		this.autoCloseVaults = new SimpleBooleanProperty(this, "autoCloseVaults", json.autoCloseVaults);
 		this.useKeychain = new SimpleBooleanProperty(this, "useKeychain", json.useKeychain);
+		this.useQuickAccess = new SimpleBooleanProperty(this, "addToQuickAccess", json.useQuickAccess);
 		this.port = new SimpleIntegerProperty(this, "webDavPort", json.port);
 		this.numTrayNotifications = new SimpleIntegerProperty(this, "numTrayNotifications", json.numTrayNotifications);
 		this.debugMode = new SimpleBooleanProperty(this, "debugMode", json.debugMode);
@@ -104,6 +113,7 @@ public class Settings {
 		this.windowHeight = new SimpleIntegerProperty(this, "windowHeight", json.windowHeight);
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
+		this.quickAccessService = new SimpleStringProperty(this, "quickAccessService", json.quickAccessService);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
@@ -116,6 +126,7 @@ public class Settings {
 		startHidden.addListener(this::somethingChanged);
 		autoCloseVaults.addListener(this::somethingChanged);
 		useKeychain.addListener(this::somethingChanged);
+		useQuickAccess.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
 		numTrayNotifications.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
@@ -131,6 +142,7 @@ public class Settings {
 		windowHeight.addListener(this::somethingChanged);
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
+		quickAccessService.addListener(this::somethingChanged);
 		lastSuccessfulUpdateCheck.addListener(this::somethingChanged);
 	}
 
@@ -170,6 +182,7 @@ public class Settings {
 		json.startHidden = startHidden.get();
 		json.autoCloseVaults = autoCloseVaults.get();
 		json.useKeychain = useKeychain.get();
+		json.useQuickAccess = useQuickAccess.get();
 		json.port = port.get();
 		json.numTrayNotifications = numTrayNotifications.get();
 		json.debugMode = debugMode.get();
@@ -185,6 +198,7 @@ public class Settings {
 		json.windowHeight = windowHeight.get();
 		json.language = language.get();
 		json.mountService = mountService.get();
+		json.quickAccessService = quickAccessService.get();
 		json.lastSuccessfulUpdateCheck = lastSuccessfulUpdateCheck.get();
 		return json;
 	}

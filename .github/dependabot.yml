@@ -7,6 +7,9 @@ updates:
       day: "monday"
       time: "06:00"
       timezone: "Etc/UTC"
+    ignore:
+      - dependency-name: "org.cryptomator:integrations-api"
+        versions: ["2.0.0-alpha1"]
     groups:
       java-test-dependencies:
         patterns:
