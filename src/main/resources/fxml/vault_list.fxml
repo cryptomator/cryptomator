@@ -32,22 +32,18 @@
 			</VBox>
 		</StackPane>
 		<HBox styleClass="button-bar">
-			<HBox fx:id="addVaultButton" spacing="12" onMouseClicked="#toggleMenu" styleClass="button-left">
+			<HBox fx:id="addVaultButton" onMouseClicked="#toggleMenu" styleClass="button-left" alignment="CENTER" minWidth="20">
 				<padding>
 					<Insets topRightBottomLeft="12"/>
 				</padding>
-				<VBox alignment="CENTER" minWidth="20">
-					<FontAwesome5IconView glyph="PLUS" HBox.hgrow="NEVER" glyphSize="16"/>
-				</VBox>
+				<FontAwesome5IconView glyph="PLUS" HBox.hgrow="NEVER" glyphSize="16"/>
 			</HBox>
 			<Region HBox.hgrow="ALWAYS"/>
-			<HBox spacing="12" onMouseClicked="#showPreferences" styleClass="button-right">
+			<HBox onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20">
 				<padding>
 					<Insets topRightBottomLeft="12"/>
 				</padding>
-				<VBox alignment="CENTER" minWidth="20">
-					<FontAwesome5IconView glyph="COG" HBox.hgrow="NEVER" glyphSize="16"/>
-				</VBox>
+				<FontAwesome5IconView glyph="COG" HBox.hgrow="NEVER" glyphSize="16"/>
 			</HBox>
 		</HBox>
 	</VBox>
