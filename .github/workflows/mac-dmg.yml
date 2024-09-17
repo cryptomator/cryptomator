@@ -32,7 +32,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: macos-11
+        - os: macos-12
           architecture: x64
           output-suffix: x64
           xcode-path: '/Applications/Xcode_13.2.1.app'
