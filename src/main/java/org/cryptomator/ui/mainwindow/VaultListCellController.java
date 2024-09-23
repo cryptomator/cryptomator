@@ -21,7 +21,7 @@ public class VaultListCellController implements FxController {
 
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private final ObservableValue<FontAwesome5Icon> glyph;
-	private final BooleanBinding useCondensedMode;
+	private final BooleanBinding compactMode;
 
 	private AutoAnimator spinAnimation;
 
@@ -31,7 +31,7 @@ public class VaultListCellController implements FxController {
 	@Inject
 	VaultListCellController(Settings settings) {
 		this.glyph = vault.flatMap(Vault::stateProperty).map(this::getGlyphForVaultState);
-		this.useCondensedMode = Bindings.createBooleanBinding(settings.useCondensedMode::get, settings.useCondensedMode);
+		this.compactMode = Bindings.createBooleanBinding(settings.compactMode::get, settings.compactMode);
 	}
 
 	public void initialize() {
@@ -73,11 +73,11 @@ public class VaultListCellController implements FxController {
 		return vault.get();
 	}
 
-	public BooleanBinding useCondensedModeProperty() {
-		return useCondensedMode;
+	public BooleanBinding compactModeProperty() {
+		return compactMode;
 	}
-	public boolean isUseCondensedMode() {
-		return useCondensedMode.get();
+	public boolean getCompactMode() {
+		return compactMode.get();
 	}
 
 	public void setVault(Vault value) {

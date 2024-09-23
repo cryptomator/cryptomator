@@ -37,7 +37,7 @@ public class InterfacePreferencesController implements FxController {
 	private final SupportedLanguages supportedLanguages;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox showTrayIconCheckbox;
-	public CheckBox useCondensedModeCheckbox;
+	public CheckBox compactModeCheckbox;
 	public ChoiceBox<String> preferredLanguageChoiceBox;
 	public ToggleGroup nodeOrientation;
 	public RadioButton nodeOrientationLtr;
@@ -64,7 +64,7 @@ public class InterfacePreferencesController implements FxController {
 		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
 
 		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon);
-		useCondensedModeCheckbox.selectedProperty().bindBidirectional(settings.useCondensedMode);
+		compactModeCheckbox.selectedProperty().bindBidirectional(settings.compactMode);
 
 		preferredLanguageChoiceBox.getItems().addAll(supportedLanguages.getLanguageTags());
 		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.language);

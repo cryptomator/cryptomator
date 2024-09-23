@@ -71,7 +71,7 @@ public class VaultListController implements FxController {
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
-	private final BooleanBinding useCondensedMode;
+	private final BooleanBinding compactMode;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
@@ -104,7 +104,7 @@ public class VaultListController implements FxController {
 		this.appWindows = appWindows;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
-		this.useCondensedMode = Bindings.createBooleanBinding(settings.useCondensedMode::get, settings.useCondensedMode);
+		this.compactMode = Bindings.createBooleanBinding(settings.compactMode::get, settings.compactMode);
 
 		selectedVault.addListener(this::selectedVaultDidChange);
 	}
@@ -114,7 +114,7 @@ public class VaultListController implements FxController {
 		vaultList.setCellFactory(cellFactory);
 
 		vaultList.fixedCellSizeProperty().bind(Bindings.createDoubleBinding(() ->
-				useCondensedMode.get() ? 30.0 : 60.0, useCondensedMode));
+				compactMode.get() ? 30.0 : 60.0, compactMode));
 
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
