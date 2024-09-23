@@ -42,7 +42,7 @@
 							<FontAwesome5IconView glyph="DONATE"/>
 						</graphic>
 					</Button>
-					<Button text="%preferences.contribute.sponsors" minWidth="100" onAction="#showSponsors">
+					<Button text="%preferences.contribute.sponsor" minWidth="100" onAction="#showSponsors">
 						<graphic>
 							<FontAwesome5IconView glyph="SPONSORS"/>
 						</graphic>

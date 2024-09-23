@@ -43,7 +43,11 @@ public class SupporterCertificateController implements FxController {
 		supporterCertificateField.setText(licenseHolder.getLicenseKey().orElse(null));
 		supporterCertificateField.textProperty().addListener(this::registrationKeyChanged);
 		supporterCertificateField.setTextFormatter(new TextFormatter<>(this::removeWhitespaces));
-		settings.licenseKey.addListener(this::licenseKeySettingsChanged);
+		settings.licenseKey.addListener((_, _, newValue) -> {
+			if (newValue == null) {
+				supporterCertificateField.setText(null);
+			}
+		});
 	}
 
 	private TextFormatter.Change removeWhitespaces(TextFormatter.Change change) {
@@ -52,11 +56,6 @@ public class SupporterCertificateController implements FxController {
 			change.setText(strippedText);
 		}
 		return change;
-	}
-
-	private void licenseKeySettingsChanged(@SuppressWarnings("unused") ObservableValue<? extends String> observable, @SuppressWarnings("unused") String oldValue, String newValue){
-		if(newValue == null)
-			supporterCertificateField.setText(null);
 	}
 
 	private void registrationKeyChanged(@SuppressWarnings("unused") ObservableValue<? extends String> observable, @SuppressWarnings("unused") String oldValue, String newValue) {
