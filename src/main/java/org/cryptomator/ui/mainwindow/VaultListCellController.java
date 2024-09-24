@@ -21,7 +21,7 @@ public class VaultListCellController implements FxController {
 
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private final ObservableValue<FontAwesome5Icon> glyph;
-	private final BooleanBinding compactMode;
+	private final ObservableValue<Boolean> compactMode;
 
 	private AutoAnimator spinAnimation;
 
@@ -31,7 +31,7 @@ public class VaultListCellController implements FxController {
 	@Inject
 	VaultListCellController(Settings settings) {
 		this.glyph = vault.flatMap(Vault::stateProperty).map(this::getGlyphForVaultState);
-		this.compactMode = Bindings.createBooleanBinding(settings.compactMode::get, settings.compactMode);
+		this.compactMode = settings.compactMode;
 	}
 
 	public void initialize() {
@@ -73,11 +73,12 @@ public class VaultListCellController implements FxController {
 		return vault.get();
 	}
 
-	public BooleanBinding compactModeProperty() {
+	public ObservableValue<Boolean> compactModeProperty() {
 		return compactMode;
 	}
+
 	public boolean getCompactMode() {
-		return compactMode.get();
+		return compactMode.getValue();
 	}
 
 	public void setVault(Vault value) {
