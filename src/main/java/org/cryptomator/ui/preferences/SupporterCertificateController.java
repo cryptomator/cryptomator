@@ -23,6 +23,7 @@ public class SupporterCertificateController implements FxController {
 	private static final String SUPPORTER_URI = "https://store.cryptomator.org/desktop";
 
 	private final Application application;
+	private final Stage window;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
 	private final RemoveCertComponent.Builder removeCert;
@@ -31,8 +32,9 @@ public class SupporterCertificateController implements FxController {
 	private TextArea supporterCertificateField;
 
 	@Inject
-	SupporterCertificateController(Application application, LicenseHolder licenseHolder, Settings settings, RemoveCertComponent.Builder removeCert) {
+	SupporterCertificateController(Application application, @PreferencesWindow Stage window, LicenseHolder licenseHolder, Settings settings, RemoveCertComponent.Builder removeCert) {
 		this.application = application;
+		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
 		this.removeCert = removeCert;
@@ -82,8 +84,7 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		Stage pref = (Stage) supporterCertificateField.getScene().getWindow();
-		removeCert.build().showRemoveCert(pref);
+		removeCert.build().showRemoveCert((Stage)window.getScene().getWindow());
 	}
 
 	public LicenseHolder getLicenseHolder() {
