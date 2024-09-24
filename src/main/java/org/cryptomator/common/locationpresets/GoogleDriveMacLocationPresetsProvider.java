@@ -18,6 +18,7 @@ import java.util.stream.StreamSupport;
 import static org.cryptomator.integrations.common.OperatingSystem.Value.MAC;
 
 @OperatingSystem(MAC)
+@CheckAvailability
 public final class GoogleDriveMacLocationPresetsProvider implements LocationPresetsProvider {
 	private static final Path ROOT_LOCATION = LocationPresetsProvider.resolveLocation("~/Library/CloudStorage/").toAbsolutePath();
 	private static final Predicate<String> PATTERN = Pattern.compile("^GoogleDrive-[^/]+$").asMatchPredicate();
@@ -82,9 +83,13 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 			return directories.stream()
 					.filter(drivePath -> {
 						try {
+							// Check if the directory is hidden. We want to exclude hidden directories
+							// from the results because they typically contain system or configuration
+							// files that are not relevant for the user.
 							return !Files.isHidden(drivePath);
 						} catch (IOException e) {
-							throw new RuntimeException(e);
+							LOG.debug("Could not determine if the path is hidden: {}", drivePath);
+							return false;
 						}
 					})
 					.map(drivePath -> new LocationPreset(getDriveLocationString(accountPath, drivePath), drivePath));
