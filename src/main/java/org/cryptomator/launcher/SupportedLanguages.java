@@ -20,7 +20,7 @@ public class SupportedLanguages {
 	// "en" is not part of this list - it is always inserted at the top.
 	public static final List<String> LANGUAGE_TAGS = List.of("ar", "be", "bn", "bs", "ca", "cs", "da", "de", "el", "es", "fr", "gl", "he", //
 			"hi", "hr", "hu", "id", "it", "ja", "ko", "lv", "nb", "nl", "nn", "pa", "pl", "pt", "pt-BR", "ro", "ru", "sk", "sr", "sr-Latn", "sv", "sw", //
-			"ta", "th", "tr", "uk", "vi", "zh", "zh-HK", "zh-TW");
+			"ta", "th", "tr", "ug", "uk", "vi", "zh", "zh-HK", "zh-TW");
 	public static final String ENGLISH = "en";
 
 	private final List<String> sortedLanguageTags;
