@@ -6,9 +6,12 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import java.io.IOException;
 
 public class NotificationBar extends HBox {
@@ -24,11 +27,31 @@ public class NotificationBar extends HBox {
 
 
 	public NotificationBar() {
-		loadFXML();
-		closeButton.visibleProperty().bind(dismissable);
+		setAlignment(Pos.CENTER);
+		setStyle("-fx-alignment: center;");
 
-		visibleProperty().bind(notifyProperty());
-		managedProperty().bind(notifyProperty());
+		Region spacer = new Region();
+		spacer.setMinWidth(40);
+
+		Region leftRegion = new Region();
+		HBox.setHgrow(leftRegion, javafx.scene.layout.Priority.ALWAYS);
+
+		Region rightRegion = new Region();
+		HBox.setHgrow(rightRegion, javafx.scene.layout.Priority.ALWAYS);
+
+				VBox vbox = new VBox();
+		vbox.setAlignment(Pos.CENTER);
+		HBox.setHgrow(vbox, javafx.scene.layout.Priority.ALWAYS);
+
+		notificationLabel = new Label();
+		notificationLabel.getStyleClass().add("notification-label");
+		notificationLabel.setStyle("-fx-alignment: center;");
+		vbox.getChildren().add(notificationLabel);
+
+		closeButton = new Button("X");
+		closeButton.setMinWidth(40);
+		closeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;");
+		closeButton.visibleProperty().bind(dismissable);
 
 		closeButton.setOnAction(_ -> {
 			visibleProperty().unbind();
@@ -36,17 +59,19 @@ public class NotificationBar extends HBox {
 			visibleProperty().set(false);
 			managedProperty().set(false);
 		});
-	}
+		closeButton.visibleProperty().bind(dismissable);
 
-	private void loadFXML() {
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FxmlFile.NOTIFICATION.getRessourcePathString()));
-		fxmlLoader.setController(this);
-		try {
-			HBox content = fxmlLoader.load();
-			this.getChildren().addAll(content.getChildren());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		closeButton.setOnAction(_ -> {
+			visibleProperty().unbind();
+			managedProperty().unbind();
+			visibleProperty().set(false);
+			managedProperty().set(false);
+		});
+
+		getChildren().addAll(spacer, leftRegion, vbox, rightRegion, closeButton);
+
+		visibleProperty().bind(notifyProperty());
+		managedProperty().bind(notifyProperty());
 	}
 
 	public String getText() {
