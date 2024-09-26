@@ -1,26 +1,19 @@
 package org.cryptomator.ui.controls;
 
-import org.cryptomator.ui.common.FxmlFile;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import java.io.IOException;
 
 public class NotificationBar extends HBox {
 
 	@FXML
 	private Label notificationLabel;
-
-	@FXML
-	private Button closeButton;
 
 	private final BooleanProperty dismissable = new SimpleBooleanProperty();
 	private final BooleanProperty notify = new SimpleBooleanProperty();
@@ -39,7 +32,7 @@ public class NotificationBar extends HBox {
 		Region rightRegion = new Region();
 		HBox.setHgrow(rightRegion, javafx.scene.layout.Priority.ALWAYS);
 
-				VBox vbox = new VBox();
+		VBox vbox = new VBox();
 		vbox.setAlignment(Pos.CENTER);
 		HBox.setHgrow(vbox, javafx.scene.layout.Priority.ALWAYS);
 
@@ -48,7 +41,7 @@ public class NotificationBar extends HBox {
 		notificationLabel.setStyle("-fx-alignment: center;");
 		vbox.getChildren().add(notificationLabel);
 
-		closeButton = new Button("X");
+		Button closeButton = new Button("X");
 		closeButton.setMinWidth(40);
 		closeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;");
 		closeButton.visibleProperty().bind(dismissable);
