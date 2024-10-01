@@ -42,14 +42,14 @@
 		<cryptomator.webdav.version>2.0.6</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
-		<commons-lang3.version>3.16.0</commons-lang3.version>
+		<commons-lang3.version>3.17.0</commons-lang3.version>
 		<dagger.version>2.52</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.17.2</jackson.version>
+		<jackson.version>2.18.0</jackson.version>
 		<javafx.version>22.0.2</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
-		<logback.version>1.5.7</logback.version>
+		<logback.version>1.5.8</logback.version>
 		<slf4j.version>2.0.16</slf4j.version>
 		<tinyoauth2.version>0.8.0</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
@@ -60,7 +60,7 @@
 		<hamcrest.version>3.0</hamcrest.version>
 
 		<!-- build-time dependencies -->
-		<jetbrains.annotations.version>24.1.0</jetbrains.annotations.version>
+		<jetbrains.annotations.version>25.0.0</jetbrains.annotations.version>
 		<dependency-check.version>10.0.3</dependency-check.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<license-generator.version>2.4.0</license-generator.version>
