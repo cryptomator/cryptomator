@@ -42,13 +42,13 @@ open module org.cryptomator.desktop {
 	requires com.nulabinc.zxcvbn;
 	requires com.tobiasdiez.easybind;
 	requires dagger;
-	requires java.compiler;
 	requires io.github.coffeelibs.tinyoauth2client;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
 
-	/* TODO: filename-based modules: */
-	requires static javax.inject; /* ugly dagger/guava crap */
+	/* dagger bs */
+	requires jakarta.inject;
+	requires java.compiler;
 
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
 
