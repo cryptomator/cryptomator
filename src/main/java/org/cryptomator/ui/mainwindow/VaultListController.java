@@ -71,8 +71,7 @@ public class VaultListController implements FxController {
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
-	private final Settings settings;
-
+	private final ObservableValue<Double> cellSize;
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
@@ -102,19 +101,16 @@ public class VaultListController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
-		this.settings = settings;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
 		selectedVault.addListener(this::selectedVaultDidChange);
+		cellSize = settings.compactMode.map(compact -> compact ? 30.0 : 60.0);
 	}
 
 	public void initialize() {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
-
-		vaultList.fixedCellSizeProperty().bind(Bindings.createDoubleBinding(() ->
-				settings.compactMode.get() ? 30.0 : 60.0, settings.compactMode));
 
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
@@ -280,5 +276,12 @@ public class VaultListController implements FxController {
 		return draggingVaultOver.get();
 	}
 
+	public ObservableValue<Double> cellSizeProperty() {
+		return cellSize;
+	}
+
+	public Double getCellSize() {
+		return cellSize.getValue();
+	}
 
 }

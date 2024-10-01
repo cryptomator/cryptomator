@@ -18,7 +18,7 @@
 		   minWidth="206">
 	<VBox>
 		<StackPane VBox.vgrow="ALWAYS">
-			<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
+			<ListView fx:id="vaultList" editable="true" fixedCellSize="${controller.cellSize}">
 				<contextMenu>
 					<fx:include source="vault_list_contextmenu.fxml"/>
 				</contextMenu>
