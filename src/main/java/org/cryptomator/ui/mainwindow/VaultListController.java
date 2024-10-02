@@ -1,6 +1,7 @@
 package org.cryptomator.ui.mainwindow;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
@@ -70,7 +71,7 @@ public class VaultListController implements FxController {
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
-
+	private final ObservableValue<Double> cellSize;
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
@@ -88,7 +89,8 @@ public class VaultListController implements FxController {
 						RemoveVaultComponent.Builder removeVaultDialogue, //
 						VaultListManager vaultListManager, //
 						ResourceBundle resourceBundle, //
-						FxApplicationWindows appWindows) {
+						FxApplicationWindows appWindows, //
+						Settings settings) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -103,6 +105,7 @@ public class VaultListController implements FxController {
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
 		selectedVault.addListener(this::selectedVaultDidChange);
+		cellSize = settings.compactMode.map(compact -> compact ? 30.0 : 60.0);
 	}
 
 	public void initialize() {
@@ -273,5 +276,12 @@ public class VaultListController implements FxController {
 		return draggingVaultOver.get();
 	}
 
+	public ObservableValue<Double> cellSizeProperty() {
+		return cellSize;
+	}
+
+	public Double getCellSize() {
+		return cellSize.getValue();
+	}
 
 }

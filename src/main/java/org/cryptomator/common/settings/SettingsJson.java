@@ -54,6 +54,9 @@ class SettingsJson {
 	@JsonProperty("showTrayIcon")
 	boolean showTrayIcon;
 
+	@JsonProperty("compactMode")
+	boolean compactMode;
+
 	@JsonProperty("startHidden")
 	boolean startHidden = Settings.DEFAULT_START_HIDDEN;
 

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.Animations;
@@ -18,6 +19,7 @@ public class VaultListCellController implements FxController {
 
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private final ObservableValue<FontAwesome5Icon> glyph;
+	private final ObservableValue<Boolean> compactMode;
 
 	private AutoAnimator spinAnimation;
 
@@ -25,8 +27,9 @@ public class VaultListCellController implements FxController {
 	public FontAwesome5IconView vaultStateView;
 
 	@Inject
-	VaultListCellController() {
+	VaultListCellController(Settings settings) {
 		this.glyph = vault.flatMap(Vault::stateProperty).map(this::getGlyphForVaultState);
+		this.compactMode = settings.compactMode;
 	}
 
 	public void initialize() {
@@ -66,6 +69,14 @@ public class VaultListCellController implements FxController {
 
 	public Vault getVault() {
 		return vault.get();
+	}
+
+	public ObservableValue<Boolean> compactModeProperty() {
+		return compactMode;
+	}
+
+	public boolean getCompactMode() {
+		return compactMode.getValue();
 	}
 
 	public void setVault(Vault value) {

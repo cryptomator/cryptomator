@@ -38,5 +38,6 @@
 		</HBox>
 
 		<CheckBox fx:id="showTrayIconCheckbox" text="%preferences.interface.showTrayIcon" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
+		<CheckBox fx:id="compactModeCheckbox" text="%preferences.interface.compactMode"/>
 	</children>
 </VBox>
