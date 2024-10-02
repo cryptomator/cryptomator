@@ -69,6 +69,7 @@ public class NotificationBar extends HBox {
 	}
 
 	public void setStyleClass(String styleClass) {
+		getStyleClass().clear();
 		getStyleClass().add(styleClass);
 	}
 
