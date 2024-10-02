@@ -40,7 +40,7 @@ abstract class MainWindowModule {
 		initializer.accept(stage);
 		stage.setTitle("Cryptomator");
 		stage.setMinWidth(650);
-		stage.setMinHeight(440);
+		stage.setMinHeight(498);
 		return stage;
 	}
 
