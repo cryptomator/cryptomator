@@ -54,13 +54,6 @@ public class NotificationBar extends HBox {
 		});
 		closeButton.visibleProperty().bind(dismissable);
 
-		closeButton.setOnAction(_ -> {
-			visibleProperty().unbind();
-			managedProperty().unbind();
-			visibleProperty().set(false);
-			managedProperty().set(false);
-		});
-
 		getChildren().addAll(spacer, leftRegion, vbox, rightRegion, closeButton);
 
 		visibleProperty().bind(notifyProperty());
