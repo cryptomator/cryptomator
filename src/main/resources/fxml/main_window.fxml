@@ -10,7 +10,7 @@
 		   fx:id="root"
 		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 		   styleClass="main-window">
-	<VBox minWidth="650">
+	<VBox minWidth="600">
 		<NotificationBar onMouseClicked="#showUpdatePreferences"
 						 text="%main.notification.updateAvailable"
 						 dismissable="true"

@@ -30,9 +30,7 @@ public class MainWindowSceneFactory extends DefaultSceneFactory {
 
 	@Override
 	protected void setupDefaultAccelerators(Scene scene, Stage stage) {
-		if (SystemUtils.IS_OS_WINDOWS) {
-			scene.getAccelerators().put(ALT_F4, window::close);
-		} else {
+		if (!SystemUtils.IS_OS_WINDOWS) {
 			scene.getAccelerators().put(SHORTCUT_W, window::close);
 		}
 		scene.getAccelerators().put(SHORTCUT_N, vaultListController.get()::didClickAddNewVault);
