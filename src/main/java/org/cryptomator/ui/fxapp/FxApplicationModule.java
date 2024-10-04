@@ -14,6 +14,7 @@ import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.quit.QuitComponent;
+import org.cryptomator.ui.removecert.RemoveCertComponent;
 import org.cryptomator.ui.sharevault.ShareVaultComponent;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
@@ -35,6 +36,7 @@ import java.io.InputStream;
 		HealthCheckComponent.class, //
 		UpdateReminderComponent.class, //
 		DokanySupportEndComponent.class, //
+		RemoveCertComponent.class, //
 		ShareVaultComponent.class})
 abstract class FxApplicationModule {
 

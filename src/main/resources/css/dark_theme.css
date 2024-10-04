@@ -100,6 +100,7 @@
 
 .label-extra-large {
 	-fx-font-family: 'Open Sans SemiBold';
+	-fx-fill: TEXT_FILL;
 	-fx-font-size: 1.5em;
 }
 
