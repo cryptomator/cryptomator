@@ -51,11 +51,11 @@ class SettingsJson {
 	@JsonProperty("port")
 	int port = Settings.DEFAULT_PORT;
 
-	@JsonProperty("showMinimizeButton")
-	boolean showMinimizeButton = Settings.DEFAULT_SHOW_MINIMIZE_BUTTON;
-
 	@JsonProperty("showTrayIcon")
 	boolean showTrayIcon;
+
+	@JsonProperty("compactMode")
+	boolean compactMode;
 
 	@JsonProperty("startHidden")
 	boolean startHidden = Settings.DEFAULT_START_HIDDEN;

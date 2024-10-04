@@ -67,8 +67,8 @@ public class Settings {
 	public final StringProperty quickAccessService;
 	public final ObjectProperty<NodeOrientation> userInterfaceOrientation;
 	public final StringProperty licenseKey;
-	public final BooleanProperty showMinimizeButton;
 	public final BooleanProperty showTrayIcon;
+	public final BooleanProperty compactMode;
 	public final IntegerProperty windowXPosition;
 	public final IntegerProperty windowYPosition;
 	public final IntegerProperty windowWidth;
@@ -105,8 +105,8 @@ public class Settings {
 		this.keychainProvider = new SimpleStringProperty(this, "keychainProvider", json.keychainProvider);
 		this.userInterfaceOrientation = new SimpleObjectProperty<>(this, "userInterfaceOrientation", parseEnum(json.uiOrientation, NodeOrientation.class, NodeOrientation.LEFT_TO_RIGHT));
 		this.licenseKey = new SimpleStringProperty(this, "licenseKey", json.licenseKey);
-		this.showMinimizeButton = new SimpleBooleanProperty(this, "showMinimizeButton", json.showMinimizeButton);
 		this.showTrayIcon = new SimpleBooleanProperty(this, "showTrayIcon", json.showTrayIcon);
+		this.compactMode = new SimpleBooleanProperty(this, "compactMode", json.compactMode);
 		this.windowXPosition = new SimpleIntegerProperty(this, "windowXPosition", json.windowXPosition);
 		this.windowYPosition = new SimpleIntegerProperty(this, "windowYPosition", json.windowYPosition);
 		this.windowWidth = new SimpleIntegerProperty(this, "windowWidth", json.windowWidth);
@@ -134,8 +134,8 @@ public class Settings {
 		keychainProvider.addListener(this::somethingChanged);
 		userInterfaceOrientation.addListener(this::somethingChanged);
 		licenseKey.addListener(this::somethingChanged);
-		showMinimizeButton.addListener(this::somethingChanged);
 		showTrayIcon.addListener(this::somethingChanged);
+		compactMode.addListener(this::somethingChanged);
 		windowXPosition.addListener(this::somethingChanged);
 		windowYPosition.addListener(this::somethingChanged);
 		windowWidth.addListener(this::somethingChanged);
@@ -190,8 +190,8 @@ public class Settings {
 		json.keychainProvider = keychainProvider.get();
 		json.uiOrientation = userInterfaceOrientation.get().name();
 		json.licenseKey = licenseKey.get();
-		json.showMinimizeButton = showMinimizeButton.get();
 		json.showTrayIcon = showTrayIcon.get();
+		json.compactMode = compactMode.get();
 		json.windowXPosition = windowXPosition.get();
 		json.windowYPosition = windowYPosition.get();
 		json.windowWidth = windowWidth.get();
