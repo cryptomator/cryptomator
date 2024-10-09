@@ -106,7 +106,13 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 	private Stream<LocationPreset> getPresetsFromAccountPath(Path accountPath) {
 		try (var driveStream = Files.list(accountPath)) {
 			List<Path> directories = StreamSupport.stream(driveStream.spliterator(), false).toList();
-			return directories.stream().filter(preset -> MY_DRIVE_TRANSLATIONS.stream().anyMatch(translation -> preset.getFileName().toString().equalsIgnoreCase(translation))).map(drivePath -> new LocationPreset(getDriveLocationString(accountPath, drivePath), drivePath));
+			return directories.stream()
+					.filter(preset -> MY_DRIVE_TRANSLATIONS
+							.contains(preset.getFileName().toString()))
+					.map(drivePath -> new LocationPreset(
+							getDriveLocationString(accountPath, drivePath),
+							drivePath
+					));
 		} catch (IOException e) {
 			return Stream.empty();
 		}
