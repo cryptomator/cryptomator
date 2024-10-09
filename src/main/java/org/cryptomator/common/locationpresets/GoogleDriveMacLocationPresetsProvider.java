@@ -69,7 +69,7 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 	 * @param accountPath The path to the Google Drive account directory (e.g. {@code ~/Library/CloudStorage/GoogleDrive-username})
 	 * @return {@code String}. For example: "Google Drive - username"
 	 */
-	private String getDriveLocationString(Path accountPath, Path drivePath) {
+	private String getDriveLocationString(Path accountPath) {
 		String accountName = accountPath.getFileName().toString().replace("GoogleDrive-", "");
 		return STR."Google Drive - \{accountName}";
 	}
@@ -110,7 +110,7 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 					.filter(preset -> MY_DRIVE_TRANSLATIONS
 							.contains(preset.getFileName().toString()))
 					.map(drivePath -> new LocationPreset(
-							getDriveLocationString(accountPath, drivePath),
+							getDriveLocationString(accountPath),
 							drivePath
 					));
 		} catch (IOException e) {
