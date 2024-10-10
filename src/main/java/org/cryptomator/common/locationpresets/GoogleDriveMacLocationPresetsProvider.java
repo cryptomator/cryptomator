@@ -94,22 +94,19 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 	 * <p>
 	 * This method lists all directories within the provided {@code accountPath} and filters them
 	 * to identify folders whose names match any of the translations defined in {@code MY_DRIVE_TRANSLATIONS}.
-	 * <p>
-	 * Each matching folder is then converted into a {@code LocationPreset} object.
 	 *
 	 * @param accountPath the root path of the Google Drive account to scan.
 	 * @return a stream of {@code LocationPreset} objects representing matching directories.
 	 */
 	private Stream<LocationPreset> getPresetsFromAccountPath(Path accountPath) {
 		try (var driveStream = Files.list(accountPath)) {
-			List<Path> directories = StreamSupport.stream(driveStream.spliterator(), false).toList();
-			return directories.stream()
+			return driveStream
 					.filter(preset -> MY_DRIVE_TRANSLATIONS
 							.contains(preset.getFileName().toString()))
 					.map(drivePath -> new LocationPreset(
 							getDriveLocationString(accountPath),
 							drivePath
-					));
+					)).toList().stream();
 		} catch (IOException e) {
 			return Stream.empty();
 		}
