@@ -25,7 +25,7 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 	private static final Path ROOT_LOCATION = LocationPresetsProvider.resolveLocation("~/Library/CloudStorage/").toAbsolutePath();
 	private static final Predicate<String> PATTERN = Pattern.compile("^GoogleDrive-[^/]+$").asMatchPredicate();
 
-	private static final List<Path> FALLBACK_LOCATIONS = Arrays.asList( //
+	private static final List<Path> FALLBACK_LOCATIONS = List.of( //
 			LocationPresetsProvider.resolveLocation("~/GoogleDrive/My Drive"), //
 			LocationPresetsProvider.resolveLocation("~/Google Drive/My Drive"), //
 			LocationPresetsProvider.resolveLocation("~/GoogleDrive"), //
