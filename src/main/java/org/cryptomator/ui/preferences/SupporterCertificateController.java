@@ -5,7 +5,8 @@ import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.removecert.RemoveCertComponent;
+import org.cryptomator.ui.controls.CustomDialogBuilder;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
 import javafx.application.Application;
@@ -14,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 import javafx.stage.Stage;
+import java.util.ResourceBundle;
 
 @PreferencesScoped
 public class SupporterCertificateController implements FxController {
@@ -26,18 +28,18 @@ public class SupporterCertificateController implements FxController {
 	private final Stage window;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final RemoveCertComponent.Builder removeCert;
+	private final ResourceBundle resourceBundle;
 
 	@FXML
 	private TextArea supporterCertificateField;
 
 	@Inject
-	SupporterCertificateController(Application application, @PreferencesWindow Stage window, LicenseHolder licenseHolder, Settings settings, RemoveCertComponent.Builder removeCert) {
+	 SupporterCertificateController(Application application, @PreferencesWindow Stage window, LicenseHolder licenseHolder, Settings settings, ResourceBundle resourceBundle) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.removeCert = removeCert;
+		this.resourceBundle = resourceBundle;
 	}
 
 	@FXML
@@ -84,7 +86,13 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		removeCert.build().showRemoveCert(window);
+		new CustomDialogBuilder().showDialog(resourceBundle, window, //
+				FontAwesome5Icon.QUESTION, //
+				resourceBundle.getString("removeCert.title"), //
+				resourceBundle.getString("removeCert.message"), //
+				resourceBundle.getString("removeCert.description"), //
+ 				() -> settings.licenseKey.set(null), //
+				resourceBundle.getString("removeCert.confirmBtn"));
 	}
 
 	public LicenseHolder getLicenseHolder() {

@@ -9,6 +9,8 @@ import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.controls.CustomDialogBuilder;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
@@ -208,7 +210,16 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			removeVaultDialogue.vault(vault).build().showRemoveVault();
+			new CustomDialogBuilder().showDialog(resourceBundle, mainWindow, //
+					FontAwesome5Icon.CROWN, //
+					String.format(resourceBundle.getString("removeVault.title"), vault.getDisplayName()), //
+					resourceBundle.getString("removeVault.message"), //
+					resourceBundle.getString("removeVault.description"), //
+					() -> {
+						vaults.remove(vault);
+						LOG.debug("Removing vault {}.", vault.getDisplayName());
+					}, //
+					resourceBundle.getString("removeVault.confirmBtn"));
 		}
 	}
 
