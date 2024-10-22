@@ -214,8 +214,8 @@ public class VaultListController implements FxController {
 					.setOkButtonText(resourceBundle.getString("removeVault.confirmBtn")) //
 					.setCancelButtonText(resourceBundle.getString("generic.button.cancel")) //
 					.setOkAction(v -> {
-						vaults.remove(vault);
 						LOG.debug("Removing vault {}.", vault.getDisplayName());
+						vaults.remove(vault);
 						v.close();
 					}) //
 					.setCancelAction(Stage::close) //
