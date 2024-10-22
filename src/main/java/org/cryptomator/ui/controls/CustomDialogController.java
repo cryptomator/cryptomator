@@ -1,48 +1,51 @@
 package org.cryptomator.ui.controls;
 
-import org.cryptomator.ui.common.FxController;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.stage.Stage;
 
-public class CustomDialogController implements FxController {
+public class CustomDialogController {
 
 	@FXML
-	private Label message;
+	private Label messageLabel;
 	@FXML
-	private Label description;
+	private Label descriptionLabel;
 	@FXML
-	private FontAwesome5IconView icon;
+	private FontAwesome5IconView iconView;
 	@FXML
 	private Button okButton;
+	@FXML
+	private Button cancelButton;
 
-	private Stage dialogStage;
 	private Runnable okAction;
-
-	public void setDialogStage(Stage stage) {
-		this.dialogStage = stage;
-	}
-
-	public void setIcon(FontAwesome5Icon glyph) {
-		icon.setGlyph(glyph);
-	}
+	private Runnable cancelAction;
 
 	public void setMessage(String message) {
-		this.message.setText(message);
+		messageLabel.setText(message);
 	}
 
-	public void setDescription(String desc) {
-		this.description.setText(desc);
+	public void setDescription(String description) {
+		descriptionLabel.setText(description);
+	}
+
+	public void setIcon(FontAwesome5Icon icon) {
+		iconView.setGlyph(icon);
+	}
+
+	public void setOkButtonText(String text) {
+		okButton.setText(text);
+	}
+
+	public void setCancelButtonText(String text) {
+		cancelButton.setText(text);
 	}
 
 	public void setOkAction(Runnable action) {
 		this.okAction = action;
 	}
 
-	public void setOkButtonText(String text) {
-		okButton.setText(text);
+	public void setCancelAction(Runnable action) {
+		this.cancelAction = action;
 	}
 
 	@FXML
@@ -50,12 +53,12 @@ public class CustomDialogController implements FxController {
 		if (okAction != null) {
 			okAction.run();
 		}
-		dialogStage.close();
 	}
 
 	@FXML
 	private void handleCancel() {
-		dialogStage.close();
+		if (cancelAction != null) {
+			cancelAction.run();
+		}
 	}
-
 }

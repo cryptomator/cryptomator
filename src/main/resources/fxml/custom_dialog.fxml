@@ -28,21 +28,21 @@
 					<Insets topRightBottomLeft="6"/>
 				</padding>
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView fx:id="icon" styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
+				<FontAwesome5IconView fx:id="iconView" styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label fx:id="message" styleClass="label-large" wrapText="true">
+			<Label fx:id="messageLabel" styleClass="label-large" wrapText="true">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label fx:id="description" wrapText="true"/>
+			<Label fx:id="descriptionLabel" wrapText="true"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
-					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#handleCancel"/>
+					<Button fx:id="cancelButton" text="CANCEL" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#handleCancel"/>
 					<Button fx:id="okButton" text="OK" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#handleOk"/>
 				</buttons>
 			</ButtonBar>

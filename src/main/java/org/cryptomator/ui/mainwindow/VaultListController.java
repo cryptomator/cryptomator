@@ -13,7 +13,6 @@ import org.cryptomator.ui.controls.CustomDialogBuilder;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
-import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,6 @@ public class VaultListController implements FxController {
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
-	private final RemoveVaultComponent.Builder removeVaultDialogue;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
@@ -88,7 +86,6 @@ public class VaultListController implements FxController {
 						VaultListCellFactory cellFactory, //
 						VaultService vaultService, //
 						AddVaultWizardComponent.Builder addVaultWizard, //
-						RemoveVaultComponent.Builder removeVaultDialogue, //
 						VaultListManager vaultListManager, //
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
@@ -99,7 +96,6 @@ public class VaultListController implements FxController {
 		this.cellFactory = cellFactory;
 		this.vaultService = vaultService;
 		this.addVaultWizard = addVaultWizard;
-		this.removeVaultDialogue = removeVaultDialogue;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
@@ -210,16 +206,20 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			new CustomDialogBuilder().showDialog(resourceBundle, mainWindow, //
-					FontAwesome5Icon.CROWN, //
-					String.format(resourceBundle.getString("removeVault.title"), vault.getDisplayName()), //
-					resourceBundle.getString("removeVault.message"), //
-					resourceBundle.getString("removeVault.description"), //
-					() -> {
+			new CustomDialogBuilder() //
+					.setTitle(String.format(resourceBundle.getString("removeVault.title"), vault.getDisplayName())) //
+					.setMessage(resourceBundle.getString("removeVault.message")) //
+					.setDescription(resourceBundle.getString("removeVault.description")) //
+					.setIcon(FontAwesome5Icon.QUESTION) //
+					.setOkButtonText(resourceBundle.getString("removeVault.confirmBtn")) //
+					.setCancelButtonText(resourceBundle.getString("generic.button.cancel")) //
+					.setOkAction(v -> {
 						vaults.remove(vault);
 						LOG.debug("Removing vault {}.", vault.getDisplayName());
-					}, //
-					resourceBundle.getString("removeVault.confirmBtn"));
+						v.close();
+					}) //
+					.setCancelAction(Stage::close) //
+					.buildAndShow(mainWindow);
 		}
 	}
 

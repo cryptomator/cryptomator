@@ -86,13 +86,19 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		new CustomDialogBuilder().showDialog(resourceBundle, window, //
-				FontAwesome5Icon.QUESTION, //
-				resourceBundle.getString("removeCert.title"), //
-				resourceBundle.getString("removeCert.message"), //
-				resourceBundle.getString("removeCert.description"), //
- 				() -> settings.licenseKey.set(null), //
-				resourceBundle.getString("removeCert.confirmBtn"));
+		new CustomDialogBuilder()
+				.setTitle(resourceBundle.getString("removeCert.title"))
+				.setMessage(resourceBundle.getString("removeCert.message"))
+				.setDescription(resourceBundle.getString("removeCert.description"))
+				.setIcon(FontAwesome5Icon.BUG)
+				.setOkButtonText(resourceBundle.getString("removeCert.confirmBtn"))
+				.setCancelButtonText(resourceBundle.getString("generic.button.cancel"))
+				.setOkAction(v -> {
+					settings.licenseKey.set(null);
+					v.close();
+				})
+				.setCancelAction(Stage::close)
+				.buildAndShow(window);
 	}
 
 	public LicenseHolder getLicenseHolder() {
