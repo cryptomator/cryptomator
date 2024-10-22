@@ -37,7 +37,7 @@ public class PreferencesController implements FxController {
 		this.env = env;
 		this.window = window;
 		this.selectedTabProperty = selectedTabProperty;
-		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
+		this.updateAvailable = updateChecker.updateAvailableProperty();
 	}
 
 	@FXML

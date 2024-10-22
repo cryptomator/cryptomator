@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # parse options
-usage() { echo "Usage: $0 [-s <codesign-identity>]" 1>&2; exit 1; }
-while getopts ":s:" o; do
+usage() { echo "Usage: $0 [-s <codesign-identity>] [-t <team-identifier>]" 1>&2; exit 1; }
+while getopts ":s:t:" o; do
     case "${o}" in
         s)
             CODESIGN_IDENTITY=${OPTARG}
+            ;;
+        t)
+            TEAM_IDENTIFIER=${OPTARG}
             ;;
         *)
             usage
@@ -29,15 +32,15 @@ REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
-JAVAFX_VERISON=22.0.1
+JAVAFX_VERSION=22.0.2
 JAVAFX_ARCH="undefined"
 JAVAFX_JMODS_SHA256="undefined"
 if [ "$(machine)" = "arm64e" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256="572fce94b9b09d316b960a49e3c2b5d35231ed0463e3b1c4020b8de89783b51d"
+    JAVAFX_JMODS_SHA256="813c6748f7c99cb7a579d48b48a087b4682b1fad1fc1a4fe5f9b21cf872b15a7"
 else
     JAVAFX_ARCH="x64"
-    JAVAFX_JMODS_SHA256="e07a11c112abbdebe7c058b44c151e1e475de748671d896aef3d73f32453c248"
+    JAVAFX_JMODS_SHA256="115cb08bb59d880cfff6e51e0bf0dcc45785ed9d456b8b8425597b04da6ab3d4"
 fi
 JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_osx-${JAVAFX_ARCH}_bin-jmods.zip"
 
@@ -52,7 +55,7 @@ fi
 
 # download and check jmods
 curl -L ${JAVAFX_JMODS_URL} -o openjfx-jmods.zip
-echo "${JAVAFX_JMODS_SHA256} openjfx-jmods.zip" | shasum -a256 --check
+echo "${JAVAFX_JMODS_SHA256}  openjfx-jmods.zip" | shasum -a256 --check
 mkdir -p openjfx-jmods/
 unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
 JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
@@ -76,7 +79,7 @@ cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods:openjfx-jmods" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,java.compiler \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
@@ -121,6 +124,7 @@ ${JAVA_HOME}/bin/jpackage \
 cp ../resources/${APP_NAME}-Vault.icns ${APP_NAME}.app/Contents/Resources/
 sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
+cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
 # generate license
 mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
@@ -133,7 +137,11 @@ mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
     -Dlicense.licenseMergesUrl=file://$(pwd)/../../../license/merges
 
 # codesign
-if [ -n "${CODESIGN_IDENTITY}" ]; then
+if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
+    echo "Codesigning jdk files..."
+    find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+    find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+    echo "Codesigning jar contents..."
     find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     for JAR_PATH in `find ${APP_NAME}.app -name "*.jar"`; do
     if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
@@ -151,7 +159,10 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
     fi
     done
     echo "Codesigning ${APP_NAME}.app..."
-    codesign --force --deep --entitlements ../${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
+    cp ../${APP_NAME}.entitlements .
+    sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" ${APP_NAME}.entitlements
+    sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" ${APP_NAME}.entitlements
+    codesign --force --deep --entitlements ${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
 fi
 
 # prepare dmg contents

@@ -11,7 +11,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '22.0.1+8'
+  JAVA_VERSION: '22.0.2+9'
 
 jobs:
   get-version:
@@ -29,12 +29,12 @@ jobs:
         include:
           - os: ubuntu-latest
             appimage-suffix: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-x64_bin-jmods.zip'
-            openjfx-sha: 'fbb22f35951c2e049cc2554dd03c2c56b4f5adc4b2ae9248872f46175ac103d8'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_linux-x64_bin-jmods.zip'
+            openjfx-sha: 'd44bff3b94d5668fdee18a938d7b1269026d663d44765f02d29a9bdfd3fa1eb0'
           - os: [self-hosted, Linux, ARM64]
             appimage-suffix: aarch64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_linux-aarch64_bin-jmods.zip'
-            openjfx-sha: '1982ad168a5e8d7cf4a9458a7d088b4f0552d0ac3f24f23fb88f8bc7e8d69a13'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_linux-aarch64_bin-jmods.zip'
+            openjfx-sha: '3d5457136690c4f5bb9522d38b45218e045bdac13c24aa4c808c7c8d17d039c7'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -80,7 +80,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods:openjfx-jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages

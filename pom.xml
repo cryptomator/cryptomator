@@ -33,44 +33,44 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.6.9</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>1.3.1</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.2.5</cryptomator.integrations.win.version>
+		<cryptomator.cryptofs.version>2.7.0-beta1</cryptomator.cryptofs.version>
+		<cryptomator.integrations.version>1.4.0-beta2</cryptomator.integrations.version>
+		<cryptomator.integrations.win.version>1.3.0-beta1</cryptomator.integrations.win.version> <!-- TODO update to 1.3.0 once released -->
 		<cryptomator.integrations.mac.version>1.2.4</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.4.5</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.linux.version>1.5.0-beta4</cryptomator.integrations.linux.version> <!-- TODO update to 1.5.0 once released -->
 		<cryptomator.fuse.version>5.0.0</cryptomator.fuse.version>
 		<cryptomator.webdav.version>2.0.6</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
-		<commons-lang3.version>3.14.0</commons-lang3.version>
+		<commons-lang3.version>3.16.0</commons-lang3.version>
 		<dagger.version>2.51.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<guava.version>33.2.1-jre</guava.version>
-		<jackson.version>2.17.1</jackson.version>
-		<javafx.version>22.0.1</javafx.version>
+		<guava.version>33.3.0-jre</guava.version>
+		<jackson.version>2.17.2</jackson.version>
+		<javafx.version>22.0.2</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
-		<logback.version>1.5.6</logback.version>
-		<slf4j.version>2.0.13</slf4j.version>
+		<logback.version>1.5.7</logback.version>
+		<slf4j.version>2.0.16</slf4j.version>
 		<tinyoauth2.version>0.8.0</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.10.2</junit.jupiter.version>
+		<junit.jupiter.version>5.11.0</junit.jupiter.version>
 		<mockito.version>5.12.0</mockito.version>
-		<hamcrest.version>2.2</hamcrest.version>
+		<hamcrest.version>3.0</hamcrest.version>
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>24.1.0</jetbrains.annotations.version>
-		<dependency-check.version>9.2.0</dependency-check.version>
+		<dependency-check.version>10.0.3</dependency-check.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<license-generator.version>2.4.0</license-generator.version>
-		<junit-tree-reporter.version>1.2.1</junit-tree-reporter.version>
+		<junit-tree-reporter.version>1.3.0</junit-tree-reporter.version>
 		<mvn-compiler.version>3.13.0</mvn-compiler.version>
 		<mvn-resources.version>3.3.1</mvn-resources.version>
-		<mvn-dependency.version>3.7.0</mvn-dependency.version>
-		<mvn-surefire.version>3.3.0</mvn-surefire.version>
-		<mvn-jar.version>3.4.1</mvn-jar.version>
+		<mvn-dependency.version>3.7.1</mvn-dependency.version>
+		<mvn-surefire.version>3.4.0</mvn-surefire.version>
+		<mvn-jar.version>3.4.2</mvn-jar.version>
 	</properties>
 
 	<dependencies>
@@ -471,7 +471,7 @@
 							<skipTestScope>true</skipTestScope>
 							<detail>true</detail>
 							<suppressionFile>suppression.xml</suppressionFile>
-							<nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+							<nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
 						</configuration>
 						<executions>
 							<execution>

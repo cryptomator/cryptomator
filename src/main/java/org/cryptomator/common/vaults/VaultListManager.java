@@ -8,11 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.migration.Migrators;
+import org.cryptomator.integrations.mount.MountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -38,14 +41,21 @@ public class VaultListManager {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 
 	private final AutoLocker autoLocker;
+	private final List<MountService> mountServices;
 	private final VaultComponent.Factory vaultComponentFactory;
 	private final ObservableList<Vault> vaultList;
 	private final String defaultVaultName;
 
 	@Inject
-	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Factory vaultComponentFactory, ResourceBundle resourceBundle, Settings settings) {
+	public VaultListManager(ObservableList<Vault> vaultList, //
+							AutoLocker autoLocker, //
+							List<MountService> mountServices,
+							VaultComponent.Factory vaultComponentFactory,
+							ResourceBundle resourceBundle,
+							Settings settings) {
 		this.vaultList = vaultList;
 		this.autoLocker = autoLocker;
+		this.mountServices = mountServices;
 		this.vaultComponentFactory = vaultComponentFactory;
 		this.defaultVaultName = resourceBundle.getString("defaults.vault.vaultName");
 
@@ -76,6 +86,15 @@ public class VaultListManager {
 		} else {
 			vaultSettings.displayName.set(defaultVaultName);
 		}
+
+		//due to https://github.com/cryptomator/cryptomator/issues/2880#issuecomment-1680313498
+		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
+		if (SystemUtils.IS_OS_WINDOWS //
+				&& vaultSettings.path.get().toString().contains("Dropbox") //
+				&& mountServices.stream().anyMatch(s -> s.getClass().getName().equals(nameOfWinfspLocalMounter))) {
+			vaultSettings.mountService.setValue(nameOfWinfspLocalMounter);
+		}
+
 		return vaultSettings;
 	}
 

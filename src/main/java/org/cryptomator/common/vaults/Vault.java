@@ -11,6 +11,7 @@ package org.cryptomator.common.vaults;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.common.mount.Mounter;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -23,6 +24,9 @@ import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
+import org.cryptomator.integrations.quickaccess.QuickAccessService;
+import org.cryptomator.integrations.quickaccess.QuickAccessServiceException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +58,7 @@ public class Vault {
 
 	private final VaultSettings vaultSettings;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
+	private final AtomicReference<QuickAccessService.QuickAccessEntry> quickAccessEntry;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
 	private final VaultConfigCache configCache;
@@ -67,6 +72,7 @@ public class Vault {
 	private final BooleanBinding unknownError;
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
+	private final Settings settings;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -78,7 +84,7 @@ public class Vault {
 		  VaultState state, //
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
-		  Mounter mounter) {
+		  Mounter mounter, Settings settings) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -94,7 +100,9 @@ public class Vault {
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
+		this.settings = settings;
 		this.showingStats = new SimpleBooleanProperty(false);
+		this.quickAccessEntry = new AtomicReference<>(null);
 	}
 
 	// ******************************************************************************
@@ -154,6 +162,9 @@ public class Vault {
 			var rootPath = fs.getRootDirectories().iterator().next();
 			var mountHandle = mounter.mount(vaultSettings, rootPath);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
+			if (settings.useQuickAccess.getValue()) {
+				addToQuickAccess();
+			}
 		} finally {
 			if (!success) {
 				destroyCryptoFileSystem();
@@ -178,11 +189,58 @@ public class Vault {
 			mountHandle.mountObj().close();
 			mountHandle.specialCleanup().run();
 		} finally {
+			removeFromQuickAccess();
 			destroyCryptoFileSystem();
 		}
 
 		this.mountHandle.set(null);
 		LOG.info("Locked vault '{}'", getDisplayName());
+	}
+
+	private synchronized void addToQuickAccess() {
+		if (quickAccessEntry.get() != null) {
+			//we don't throw an exception since we don't wanna block unlocking
+			LOG.warn("Vault already added to quick access area. Will be removed on next lock operation.");
+			return;
+		}
+
+		QuickAccessService.get() //
+				.filter(s -> s.getClass().getName().equals(settings.quickAccessService.getValue())) //
+				.findFirst() //
+				.ifPresentOrElse( //
+						this::addToQuickAccessInternal, //
+						() -> LOG.warn("Unable to add Vault to quick access area: Desired implementation not available.") //
+				);
+	}
+
+	private void addToQuickAccessInternal(@NotNull QuickAccessService s) {
+		if (getMountPoint() instanceof Mountpoint.WithPath mp) {
+			try {
+				var entry = s.add(mp.path(), getDisplayName());
+				quickAccessEntry.set(entry);
+			} catch (QuickAccessServiceException e) {
+				LOG.error("Adding vault to quick access area failed", e);
+			}
+		} else {
+			LOG.warn("Unable to add vault to quick access area: Vault is not mounted to local system path.");
+		}
+	}
+
+	private synchronized void removeFromQuickAccess() {
+		if (quickAccessEntry.get() == null) {
+			LOG.debug("Removing vault from quick access area: Entry not found, nothing to do.");
+			return;
+		}
+		removeFromQuickAccessInternal();
+	}
+
+	private void removeFromQuickAccessInternal() {
+		try {
+			quickAccessEntry.get().remove();
+			quickAccessEntry.set(null);
+		} catch (QuickAccessServiceException e) {
+			LOG.error("Removing vault from quick access area failed", e);
+		}
 	}
 
 	// ******************************************************************************

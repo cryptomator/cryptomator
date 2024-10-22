@@ -16,7 +16,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '22.0.1+8'
+  JAVA_VERSION: '22.0.2+9'
 
 jobs:
   get-version:
@@ -37,15 +37,15 @@ jobs:
           output-suffix: x64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_osx-x64_bin-jmods.zip'
-          openjfx-sha: 'e07a11c112abbdebe7c058b44c151e1e475de748671d896aef3d73f32453c248'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_osx-x64_bin-jmods.zip'
+          openjfx-sha: '115cb08bb59d880cfff6e51e0bf0dcc45785ed9d456b8b8425597b04da6ab3d4'
         - os: [self-hosted, macOS, ARM64]
           architecture: aarch64
           output-suffix: arm64
           xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: FUSE-T
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.1/openjfx-22.0.1_osx-aarch64_bin-jmods.zip'
-          openjfx-sha: '572fce94b9b09d316b960a49e3c2b5d35231ed0463e3b1c4020b8de89783b51d'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: '813c6748f7c99cb7a579d48b48a087b4682b1fad1fc1a4fe5f9b21cf872b15a7'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -91,7 +91,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods:openjfx-jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.accessibility,jdk.management.jfr
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -137,9 +137,11 @@ jobs:
           mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
+          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output Cryptomator.app/Contents/embedded.provisionprofile
         env:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NO: ${{ needs.get-version.outputs.revNum }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
       - name: Generate license for dmg
         run: >
           mvn -B -Djavafx.platform=mac license:add-third-party
@@ -194,9 +196,12 @@ jobs:
             fi
           done
           echo "Codesigning Cryptomator.app..."
+          sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" dist/mac/Cryptomator.entitlements
+          sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" dist/mac/Cryptomator.entitlements
           codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+          TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
       - name: Prepare .dmg contents
         run: |
           mkdir dmg

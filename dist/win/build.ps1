@@ -41,7 +41,7 @@ Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
-&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin -Djavafx.platform=win
+&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin "-Djavafx.platform=win"
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -51,9 +51,9 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$javaFxVersion='22.0.1'
+$javaFxVersion='22.0.2'
 $javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-$javaFxJmodsSHA256 = 'de82e53179032a49bec005deb4438e8f261d08c4b58864a5c17e1d87286b09dd'
+$javaFxJmodsSHA256 = 'f9376d200f5c5b85327d575c1ec1482e6455f19916577f7e2fc9be2f48bb29b6'
 $javaFxJmods = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $javaFxJmods) ) {
 	Write-Output "Downloading ${javaFxJmodsUrl}..."
@@ -75,7 +75,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
@@ -100,7 +100,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--vendor $Vendor `
 	--copyright $copyright `
 	--java-options "--enable-preview" `
-	--java-options "--enable-native-access=org.cryptomator.jfuse.win" `
+	--java-options "--enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win" `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
@@ -122,7 +122,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--icon resources/$AppName.ico
 
 #Create RTF license for msi
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party -Djavafx.platform=win `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\resources\" `
@@ -167,7 +167,7 @@ $Env:JP_WIXHELPER_DIR = "."
 	--file-associations resources/FAvaultFile.properties
 
 #Create RTF license for bundle
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party -Djavafx.platform=win `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `
