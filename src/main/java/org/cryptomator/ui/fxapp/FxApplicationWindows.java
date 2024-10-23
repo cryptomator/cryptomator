@@ -5,6 +5,8 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
+import org.cryptomator.ui.controls.CustomDialogBuilder;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.dokanysupportend.DokanySupportEndComponent;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
@@ -33,6 +35,7 @@ import java.awt.Desktop;
 import java.awt.desktop.AppReopenedListener;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
@@ -56,6 +59,7 @@ public class FxApplicationWindows {
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
+	private final ResourceBundle resourceBundle;
 
 	@Inject
 	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
@@ -70,7 +74,8 @@ public class FxApplicationWindows {
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
-								ExecutorService executor) {
+								ExecutorService executor, //
+								ResourceBundle resourceBundle) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -85,6 +90,8 @@ public class FxApplicationWindows {
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
+		this.resourceBundle = resourceBundle;
+
 	}
 
 	public void initialize() {
@@ -147,9 +154,22 @@ public class FxApplicationWindows {
 	}
 
 	public void showDokanySupportEndWindow() {
-		CompletableFuture.runAsync(() -> dokanySupportEndWindowBuilder.create().showDokanySupportEndWindow(), Platform::runLater);
+		CompletableFuture.runAsync(() -> {
+					new CustomDialogBuilder() //
+							.setTitle(resourceBundle.getString("dokanySupportEnd.title")) //
+							.setMessage(resourceBundle.getString("dokanySupportEnd.message")) //
+							.setDescription(resourceBundle.getString("dokanySupportEnd.description")) //
+							.setIcon(FontAwesome5Icon.EXCLAMATION) //
+							.setOkButtonText(resourceBundle.getString("generic.button.close")) //
+							.setCancelButtonText(resourceBundle.getString("dokanySupportEnd.preferencesBtn")) //
+							.setOkAction(Stage::close) //
+							.setCancelAction(v -> {
+								showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+								v.close();
+							}) //
+							.buildAndShow(mainWindow.get().window());
+		}, Platform::runLater);
 	}
-
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {

@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.control.ButtonBar?>
-<?import javafx.scene.layout.AnchorPane?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.controls.CustomDialogController"
@@ -38,9 +37,7 @@
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<AnchorPane>
-				<Label fx:id="descriptionLabel" wrapText="true" maxWidth="300"/>
-			</AnchorPane>
+			<Label fx:id="descriptionLabel" wrapText="true"/>
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>

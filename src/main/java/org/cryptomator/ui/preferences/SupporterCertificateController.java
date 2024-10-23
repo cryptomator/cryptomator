@@ -90,7 +90,7 @@ public class SupporterCertificateController implements FxController {
 				.setTitle(resourceBundle.getString("removeCert.title"))
 				.setMessage(resourceBundle.getString("removeCert.message"))
 				.setDescription(resourceBundle.getString("removeCert.description"))
-				.setIcon(FontAwesome5Icon.BUG)
+				.setIcon(FontAwesome5Icon.QUESTION)
 				.setOkButtonText(resourceBundle.getString("removeCert.confirmBtn"))
 				.setCancelButtonText(resourceBundle.getString("generic.button.cancel"))
 				.setOkAction(v -> {
