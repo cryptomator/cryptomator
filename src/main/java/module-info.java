@@ -49,6 +49,7 @@ open module org.cryptomator.desktop {
 
 	/* dagger bs */
 	requires jakarta.inject;
+	requires static javax.inject;
 	requires java.compiler;
 
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
