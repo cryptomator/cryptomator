@@ -18,14 +18,8 @@ class SettingsJson {
 	@JsonProperty("writtenByVersion")
 	String writtenByVersion;
 
-	@JsonProperty("askedForUpdateCheck")
-	boolean askedForUpdateCheck = Settings.DEFAULT_ASKED_FOR_UPDATE_CHECK;
-
 	@JsonProperty("autoCloseVaults")
 	boolean autoCloseVaults = Settings.DEFAULT_AUTO_CLOSE_VAULTS;
-
-	@JsonProperty("checkForUpdatesEnabled")
-	boolean checkForUpdatesEnabled = Settings.DEFAULT_CHECK_FOR_UPDATES;
 
 	@JsonProperty("debugMode")
 	boolean debugMode = Settings.DEFAULT_DEBUG_MODE;
@@ -81,6 +75,13 @@ class SettingsJson {
 	@Deprecated(since = "1.7.0")
 	@JsonProperty(value = "preferredVolumeImpl", access = JsonProperty.Access.WRITE_ONLY) // WRITE_ONLY means value is "written" into the java object during deserialization. Upvote this: https://github.com/FasterXML/jackson-annotations/issues/233
 	String preferredVolumeImpl;
+
+	@JsonProperty("checkForUpdatesEnabled")
+	boolean checkForUpdatesEnabled = Settings.DEFAULT_CHECK_FOR_UPDATES;
+
+	@JsonProperty("lastReminderForUpdateCheck")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+	Instant lastReminderForUpdateCheck = Settings.DEFAULT_TIMESTAMP;
 
 	@JsonProperty("lastSuccessfulUpdateCheck")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")

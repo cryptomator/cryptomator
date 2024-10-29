@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
@@ -72,8 +74,12 @@ public class FxApplication {
 			return null;
 		});
 
-		if (!environment.disableUpdateCheck()) {
-			appWindows.checkAndShowUpdateReminderWindow();
+		var time14DaysAgo = Instant.now().minus(Duration.ofDays(14));
+		if (!environment.disableUpdateCheck() //
+				&& !settings.checkForUpdatesEnabled.getValue() //
+				&& settings.lastSuccessfulUpdateCheck.get().isBefore(time14DaysAgo) //
+				&& settings.lastReminderForUpdateCheck.get().isBefore(time14DaysAgo)) {
+			appWindows.showUpdateReminderWindow();
 		}
 
 		migrateAndInformDokanyRemoval();

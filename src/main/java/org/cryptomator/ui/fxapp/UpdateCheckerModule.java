@@ -62,7 +62,7 @@ public abstract class UpdateCheckerModule {
 	@Named("checkForUpdatesInterval")
 	@FxApplicationScoped
 	static ObjectBinding<Duration> provideCheckForUpdateInterval(Settings settings) {
-		return Bindings.when(settings.checkForUpdates).then(UPDATE_CHECK_INTERVAL).otherwise(DISABLED_UPDATE_CHECK_INTERVAL);
+		return Bindings.when(settings.checkForUpdatesEnabled).then(UPDATE_CHECK_INTERVAL).otherwise(DISABLED_UPDATE_CHECK_INTERVAL);
 	}
 
 	@Provides

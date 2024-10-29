@@ -32,7 +32,6 @@ public class Settings {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Settings.class);
 
-	static final boolean DEFAULT_ASKED_FOR_UPDATE_CHECK = false;
 	static final boolean DEFAULT_CHECK_FOR_UPDATES = false;
 	static final boolean DEFAULT_START_HIDDEN = false;
 	static final boolean DEFAULT_AUTO_CLOSE_VAULTS = false;
@@ -51,9 +50,8 @@ public class Settings {
 
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
 	public static final Instant DEFAULT_TIMESTAMP = Instant.parse("2000-01-01T00:00:00Z");
+
 	public final ObservableList<VaultSettings> directories;
-	public final BooleanProperty askedForUpdateCheck;
-	public final BooleanProperty checkForUpdates;
 	public final BooleanProperty startHidden;
 	public final BooleanProperty autoCloseVaults;
 	public final BooleanProperty useKeychain;
@@ -74,6 +72,8 @@ public class Settings {
 	public final IntegerProperty windowHeight;
 	public final StringProperty language;
 	public final StringProperty mountService;
+	public final BooleanProperty checkForUpdatesEnabled;
+	public final ObjectProperty<Instant> lastReminderForUpdateCheck;
 	public final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
 
 	private Consumer<Settings> saveCmd;
@@ -91,8 +91,6 @@ public class Settings {
 	 */
 	Settings(SettingsJson json) {
 		this.directories = FXCollections.observableArrayList(VaultSettings::observables);
-		this.askedForUpdateCheck = new SimpleBooleanProperty(this, "askedForUpdateCheck", json.askedForUpdateCheck);
-		this.checkForUpdates = new SimpleBooleanProperty(this, "checkForUpdates", json.checkForUpdatesEnabled);
 		this.startHidden = new SimpleBooleanProperty(this, "startHidden", json.startHidden);
 		this.autoCloseVaults = new SimpleBooleanProperty(this, "autoCloseVaults", json.autoCloseVaults);
 		this.useKeychain = new SimpleBooleanProperty(this, "useKeychain", json.useKeychain);
@@ -113,6 +111,8 @@ public class Settings {
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
 		this.quickAccessService = new SimpleStringProperty(this, "quickAccessService", json.quickAccessService);
+		this.checkForUpdatesEnabled = new SimpleBooleanProperty(this, "checkForUpdatesEnabled", json.checkForUpdatesEnabled);
+		this.lastReminderForUpdateCheck = new SimpleObjectProperty<>(this, "lastReminderForUpdateCheck", json.lastReminderForUpdateCheck);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
@@ -120,8 +120,6 @@ public class Settings {
 		migrateLegacySettings(json);
 
 		directories.addListener(this::somethingChanged);
-		askedForUpdateCheck.addListener(this::somethingChanged);
-		checkForUpdates.addListener(this::somethingChanged);
 		startHidden.addListener(this::somethingChanged);
 		autoCloseVaults.addListener(this::somethingChanged);
 		useKeychain.addListener(this::somethingChanged);
@@ -142,6 +140,8 @@ public class Settings {
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
 		quickAccessService.addListener(this::somethingChanged);
+		checkForUpdatesEnabled.addListener(this::somethingChanged);
+		lastReminderForUpdateCheck.addListener(this::somethingChanged);
 		lastSuccessfulUpdateCheck.addListener(this::somethingChanged);
 	}
 
@@ -176,8 +176,6 @@ public class Settings {
 	SettingsJson serialized() {
 		var json = new SettingsJson();
 		json.directories = directories.stream().map(VaultSettings::serialized).toList();
-		json.askedForUpdateCheck = askedForUpdateCheck.get();
-		json.checkForUpdatesEnabled = checkForUpdates.get();
 		json.startHidden = startHidden.get();
 		json.autoCloseVaults = autoCloseVaults.get();
 		json.useKeychain = useKeychain.get();
@@ -198,6 +196,8 @@ public class Settings {
 		json.language = language.get();
 		json.mountService = mountService.get();
 		json.quickAccessService = quickAccessService.get();
+		json.checkForUpdatesEnabled = checkForUpdatesEnabled.get();
+		json.lastReminderForUpdateCheck = lastReminderForUpdateCheck.get();
 		json.lastSuccessfulUpdateCheck = lastSuccessfulUpdateCheck.get();
 		return json;
 	}

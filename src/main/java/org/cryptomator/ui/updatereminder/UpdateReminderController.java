@@ -7,6 +7,7 @@ import org.cryptomator.ui.fxapp.UpdateChecker;
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import java.time.Instant;
 
 @UpdateReminderScoped
 public class UpdateReminderController implements FxController {
@@ -24,6 +25,11 @@ public class UpdateReminderController implements FxController {
 	}
 
 	@FXML
+	public void initialize() {
+		settings.lastReminderForUpdateCheck.set(Instant.now());
+	}
+
+	@FXML
 	public void cancel() {
 		window.close();
 	}
@@ -37,7 +43,7 @@ public class UpdateReminderController implements FxController {
 	@FXML
 	public void automatically() {
 		updateChecker.checkForUpdatesNow();
-		settings.checkForUpdates.set(true);
+		settings.checkForUpdatesEnabled.set(true);
 		window.close();
 	}
 

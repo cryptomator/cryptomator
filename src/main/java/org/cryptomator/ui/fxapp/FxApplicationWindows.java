@@ -48,7 +48,7 @@ public class FxApplicationWindows {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
-	private final UpdateReminderComponent.Factory updateReminderWindowBuilder;
+	private final UpdateReminderComponent.Factory updateReminderWindowFactory;
 	private final DokanySupportEndComponent.Factory dokanySupportEndWindowBuilder;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
@@ -64,7 +64,7 @@ public class FxApplicationWindows {
 								Lazy<PreferencesComponent> preferencesWindow, //
 								QuitComponent.Builder quitWindowBuilder, //
 								UnlockComponent.Factory unlockWorkflowFactory, //
-								UpdateReminderComponent.Factory updateReminderWindowBuilder, //
+								UpdateReminderComponent.Factory updateReminderWindowFactory, //
 								DokanySupportEndComponent.Factory dokanySupportEndWindowBuilder, //
 								LockComponent.Factory lockWorkflowFactory, //
 								ErrorComponent.Factory errorWindowFactory, //
@@ -77,7 +77,7 @@ public class FxApplicationWindows {
 		this.preferencesWindow = preferencesWindow;
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
-		this.updateReminderWindowBuilder = updateReminderWindowBuilder;
+		this.updateReminderWindowFactory = updateReminderWindowFactory;
 		this.dokanySupportEndWindowBuilder = dokanySupportEndWindowBuilder;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
@@ -142,8 +142,8 @@ public class FxApplicationWindows {
 			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
 	}
 
-	public void checkAndShowUpdateReminderWindow() {
-		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.create().checkAndShowUpdateReminderWindow(), Platform::runLater);
+	public void showUpdateReminderWindow() {
+		CompletableFuture.runAsync(() -> updateReminderWindowFactory.create().showUpdateReminderWindow(), Platform::runLater);
 	}
 
 	public void showDokanySupportEndWindow() {
