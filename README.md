@@ -17,20 +17,14 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Gold Sponsors
 
-<table>
-  <tbody>
-    <tr>
-      <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="80"></a></td>
-    </tr>
-  </tbody>
-</table>
+Become our Gold Sponsor and showcase your brand to a targeted audience! Please contact us if you are interested.
 
 ### Silver Sponsors
 
 <table>
   <tbody>
     <tr>
-      <td><a href="https://mowcapital.com/"><img src="https://cryptomator.org/img/sponsors/mowcapital.svg" alt="Mow Capital" height="28"></a></td>
+      <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="56"></a></td>
       <td><a href="https://www.route4me.com/"><img src="https://cryptomator.org/img/sponsors/route4me.svg" alt="Route4Me" height="56"></a></td>
     </tr>
   </tbody>
