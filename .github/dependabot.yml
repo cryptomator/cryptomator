@@ -10,6 +10,10 @@ updates:
     ignore:
       - dependency-name: "org.cryptomator:integrations-api"
         versions: ["2.0.0-alpha1"]
+      - dependency-name: "jakarta.inject:jakarta.inject-api"
+        versions: ["2.0.1.MR"]
+      - dependency-name: "org.openjfx:*"
+        update-types: ["version-update:semver-major"]
     groups:
       java-test-dependencies:
         patterns:
