@@ -5,7 +5,7 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.ui.controls.CustomDialogBuilder;
+import org.cryptomator.ui.controls.CustomDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.dokanysupportend.DokanySupportEndComponent;
 import org.cryptomator.ui.error.ErrorComponent;
@@ -155,19 +155,21 @@ public class FxApplicationWindows {
 
 	public void showDokanySupportEndWindow() {
 		CompletableFuture.runAsync(() -> {
-					new CustomDialogBuilder() //
-							.setTitle(resourceBundle.getString("dokanySupportEnd.title")) //
-							.setMessage(resourceBundle.getString("dokanySupportEnd.message")) //
-							.setDescription(resourceBundle.getString("dokanySupportEnd.description")) //
-							.setIcon(FontAwesome5Icon.EXCLAMATION) //
-							.setOkButtonText(resourceBundle.getString("generic.button.close")) //
-							.setCancelButtonText(resourceBundle.getString("dokanySupportEnd.preferencesBtn")) //
-							.setOkAction(Stage::close) //
-							.setCancelAction(v -> {
+			new CustomDialog.Builder()
+					.setOwner(mainWindow.get().window())
+					.resourceBundle(resourceBundle)
+					.titleKey("dokanySupportEnd.title")
+					.messageKey("dokanySupportEnd.message")
+					.descriptionKey("dokanySupportEnd.description")
+					.icon(FontAwesome5Icon.QUESTION)
+					.okButtonKey("generic.button.close")
+					.cancelButtonKey("dokanySupportEnd.preferencesBtn")
+					.okAction(Stage::close) //
+					.cancelAction(v -> {
 								showPreferencesWindow(SelectedPreferencesTab.VOLUME);
 								v.close();
 							}) //
-							.buildAndShow(mainWindow.get().window());
+					.build();
 		}, Platform::runLater);
 	}
 

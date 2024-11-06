@@ -5,7 +5,7 @@ import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.controls.CustomDialogBuilder;
+import org.cryptomator.ui.controls.CustomDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
@@ -86,19 +86,21 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		new CustomDialogBuilder()
-				.setTitle(resourceBundle.getString("removeCert.title"))
-				.setMessage(resourceBundle.getString("removeCert.message"))
-				.setDescription(resourceBundle.getString("removeCert.description"))
-				.setIcon(FontAwesome5Icon.QUESTION)
-				.setOkButtonText(resourceBundle.getString("removeCert.confirmBtn"))
-				.setCancelButtonText(resourceBundle.getString("generic.button.cancel"))
-				.setOkAction(v -> {
+		new CustomDialog.Builder()
+				.setOwner(window)
+				.resourceBundle(resourceBundle)
+				.titleKey("removeCert.title")
+				.messageKey("removeCert.message")
+				.descriptionKey("removeCert.description")
+				.icon(FontAwesome5Icon.QUESTION)
+				.okButtonKey("removeCert.confirmBtn")
+				.cancelButtonKey("generic.button.cancel")
+				.okAction(v -> {
 					settings.licenseKey.set(null);
 					v.close();
-				})
-				.setCancelAction(Stage::close)
-				.buildAndShow(window);
+				}) //
+				.cancelAction(Stage::close) //
+				.build();
 	}
 
 	public LicenseHolder getLicenseHolder() {

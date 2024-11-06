@@ -1,10 +1,12 @@
 package org.cryptomator.ui.controls;
 
+import org.cryptomator.ui.common.FxController;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
-public class CustomDialogController {
+public class CustomDialogController implements FxController {
 
 	@FXML
 	private Label messageLabel;

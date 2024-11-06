@@ -3,7 +3,7 @@ package org.cryptomator.ui.mainwindow;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.controls.CustomDialogBuilder;
+import org.cryptomator.ui.controls.CustomDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
@@ -54,19 +54,22 @@ public class VaultDetailUnknownErrorController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		new CustomDialogBuilder() //
-				.setTitle(String.format(resourceBundle.getString("removeVault.title"), vault.get().getDisplayName())) //
-				.setMessage(resourceBundle.getString("removeVault.message")) //
-				.setDescription(resourceBundle.getString("removeVault.description")) //
-				.setIcon(FontAwesome5Icon.QUESTION) //
-				.setOkButtonText(resourceBundle.getString("removeVault.confirmBtn")) //
-				.setCancelButtonText(resourceBundle.getString("generic.button.cancel")) //
-				.setOkAction(v -> {
-					LOG.debug("Removing vault {}.", vault.get().getDisplayName());
-					vaults.remove(vault.get());
-					v.close();
-				}) //
-				.setCancelAction(Stage::close) //
-				.buildAndShow(mainWindow);
+		new CustomDialog.Builder()
+			.setOwner(mainWindow)
+			.resourceBundle(resourceBundle)
+			.titleKey("removeVault.title", vault.get().getDisplayName())
+			.messageKey("removeVault.message")
+			.descriptionKey("removeVault.description")
+			.icon(FontAwesome5Icon.QUESTION)
+			.okButtonKey("removeVault.confirmBtn")
+			.cancelButtonKey("generic.button.cancel")
+			.okAction(v -> {
+				LOG.debug("Removing vault {}.", vault.get().getDisplayName());
+				vaults.remove(vault.get());
+				v.close();
+			}) //
+			.cancelAction(Stage::close) //
+			.build();
+
 	}
 }
