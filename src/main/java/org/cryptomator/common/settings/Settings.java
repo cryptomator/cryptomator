@@ -50,7 +50,6 @@ public class Settings {
 			SystemUtils.IS_OS_LINUX ? "org.cryptomator.linux.quickaccess.NautilusBookmarks" : null;
 
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
-	static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
 	public static final Instant DEFAULT_TIMESTAMP = Instant.parse("2000-01-01T00:00:00Z");
 	public final ObservableList<VaultSettings> directories;
 	public final BooleanProperty askedForUpdateCheck;
