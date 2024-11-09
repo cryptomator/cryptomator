@@ -76,6 +76,8 @@ public class ReadmeGenerator {
 		input.chars().forEachOrdered(c -> {
 			if (c < 128) {
 				sb.append((char) c);
+			} else if (c <= 0xFF) {
+				sb.append("\\'").append(String.format("%02X", c));
 			} else if (c < 0xFFFF) {
 				sb.append("\\u").append(c);
 			}
