@@ -72,8 +72,8 @@ public class Settings {
 	public final IntegerProperty windowHeight;
 	public final StringProperty language;
 	public final StringProperty mountService;
-	public final BooleanProperty checkForUpdatesEnabled;
-	public final ObjectProperty<Instant> lastReminderForUpdateCheck;
+	public final BooleanProperty checkForUpdates;
+	public final ObjectProperty<Instant> lastUpdateCheckReminder;
 	public final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
 
 	private Consumer<Settings> saveCmd;
@@ -111,8 +111,8 @@ public class Settings {
 		this.language = new SimpleStringProperty(this, "language", json.language);
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
 		this.quickAccessService = new SimpleStringProperty(this, "quickAccessService", json.quickAccessService);
-		this.checkForUpdatesEnabled = new SimpleBooleanProperty(this, "checkForUpdatesEnabled", json.checkForUpdatesEnabled);
-		this.lastReminderForUpdateCheck = new SimpleObjectProperty<>(this, "lastReminderForUpdateCheck", json.lastReminderForUpdateCheck);
+		this.checkForUpdates = new SimpleBooleanProperty(this, "checkForUpdates", json.checkForUpdatesEnabled);
+		this.lastUpdateCheckReminder = new SimpleObjectProperty<>(this, "lastUpdateCheckReminder", json.lastReminderForUpdateCheck);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
@@ -140,8 +140,8 @@ public class Settings {
 		language.addListener(this::somethingChanged);
 		mountService.addListener(this::somethingChanged);
 		quickAccessService.addListener(this::somethingChanged);
-		checkForUpdatesEnabled.addListener(this::somethingChanged);
-		lastReminderForUpdateCheck.addListener(this::somethingChanged);
+		checkForUpdates.addListener(this::somethingChanged);
+		lastUpdateCheckReminder.addListener(this::somethingChanged);
 		lastSuccessfulUpdateCheck.addListener(this::somethingChanged);
 	}
 
@@ -196,8 +196,8 @@ public class Settings {
 		json.language = language.get();
 		json.mountService = mountService.get();
 		json.quickAccessService = quickAccessService.get();
-		json.checkForUpdatesEnabled = checkForUpdatesEnabled.get();
-		json.lastReminderForUpdateCheck = lastReminderForUpdateCheck.get();
+		json.checkForUpdatesEnabled = checkForUpdates.get();
+		json.lastReminderForUpdateCheck = lastUpdateCheckReminder.get();
 		json.lastSuccessfulUpdateCheck = lastSuccessfulUpdateCheck.get();
 		return json;
 	}

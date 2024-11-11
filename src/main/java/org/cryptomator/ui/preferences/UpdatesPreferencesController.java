@@ -74,7 +74,7 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public void initialize() {
-		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdatesEnabled);
+		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 
 		upToDate.addListener((_, _, newVal) -> {
 			if (newVal) {

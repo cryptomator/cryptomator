@@ -50,7 +50,7 @@ public class UpdateChecker {
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
-		if (!env.disableUpdateCheck() && settings.checkForUpdatesEnabled.get()) {
+		if (!env.disableUpdateCheck() && settings.checkForUpdates.get()) {
 			startCheckingForUpdates(AUTO_CHECK_DELAY);
 		}
 	}

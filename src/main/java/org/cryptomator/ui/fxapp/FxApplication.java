@@ -76,9 +76,9 @@ public class FxApplication {
 
 		var time14DaysAgo = Instant.now().minus(Duration.ofDays(14));
 		if (!environment.disableUpdateCheck() //
-				&& !settings.checkForUpdatesEnabled.getValue() //
+				&& !settings.checkForUpdates.getValue() //
 				&& settings.lastSuccessfulUpdateCheck.get().isBefore(time14DaysAgo) //
-				&& settings.lastReminderForUpdateCheck.get().isBefore(time14DaysAgo)) {
+				&& settings.lastUpdateCheckReminder.get().isBefore(time14DaysAgo)) {
 			appWindows.showUpdateReminderWindow();
 		}
 

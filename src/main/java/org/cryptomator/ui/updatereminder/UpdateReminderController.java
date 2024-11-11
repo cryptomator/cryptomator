@@ -26,7 +26,7 @@ public class UpdateReminderController implements FxController {
 
 	@FXML
 	public void initialize() {
-		settings.lastReminderForUpdateCheck.set(Instant.now());
+		settings.lastUpdateCheckReminder.set(Instant.now());
 	}
 
 	@FXML
@@ -43,7 +43,7 @@ public class UpdateReminderController implements FxController {
 	@FXML
 	public void automatically() {
 		updateChecker.checkForUpdatesNow();
-		settings.checkForUpdatesEnabled.set(true);
+		settings.checkForUpdates.set(true);
 		window.close();
 	}
 
