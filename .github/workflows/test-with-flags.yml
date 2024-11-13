@@ -1,0 +1,46 @@
+name: Test with Different JVM Flags
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        flag:
+          - "-XX:+UseG1GC"
+          - "-XX:+AlwaysPreTouch"
+          - "-XX:+TieredCompilation"
+          - "-XX:+PrintGCDetails"
+          - "-XX:MaxInlineLevel=15"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '22'
+
+      - name: Set JVM Flag and Run Tests
+        env:
+          MAVEN_OPTS: ${{ matrix.flag }}
+        run: |
+          echo "Running tests with JVM flag: $MAVEN_OPTS"
+          mvn clean test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.flag }}
+          path: target/surefire-reports
