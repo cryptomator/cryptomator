@@ -72,6 +72,8 @@ public class VaultListController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
 	private final ObservableValue<Double> cellSize;
+	private final CustomDialog.Builder customDialog;
+
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
@@ -89,7 +91,8 @@ public class VaultListController implements FxController {
 						VaultListManager vaultListManager, //
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
-						Settings settings) {
+						Settings settings,
+						CustomDialog.Builder customDialog) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -99,6 +102,7 @@ public class VaultListController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
+		this.customDialog = customDialog;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -206,22 +210,21 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			new CustomDialog.Builder()
-					.setOwner(mainWindow)
-					.resourceBundle(resourceBundle)
-					.titleKey("removeVault.title", vault.getDisplayName())
-					.messageKey("removeVault.message")
-					.descriptionKey("removeVault.description")
-					.icon(FontAwesome5Icon.QUESTION)
-					.okButtonKey("removeVault.confirmBtn")
-					.cancelButtonKey("generic.button.cancel")
-					.okAction(v -> {
+			customDialog.setOwner(mainWindow)
+					.setTitleKey("removeVault.title", vault.getDisplayName())
+					.setMessageKey("removeVault.message")
+					.setDescriptionKey("removeVault.description")
+					.setIcon(FontAwesome5Icon.QUESTION)
+					.setOkButtonKey("removeVault.confirmBtn")
+					.setCancelButtonKey("generic.button.cancel")
+					.setOkAction(v -> {
 						LOG.debug("Removing vault {}.", vault.getDisplayName());
 						vaults.remove(vault);
 						v.close();
 					}) //
-					.cancelAction(Stage::close) //
-					.build();
+					.setCancelAction(Stage::close) //
+					.build()
+					.showAndWait();
 		}
 	}
 

@@ -15,7 +15,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-import java.util.ResourceBundle;
 
 @MainWindowScoped
 public class VaultDetailUnknownErrorController implements FxController {
@@ -26,20 +25,21 @@ public class VaultDetailUnknownErrorController implements FxController {
 	private final FxApplicationWindows appWindows;
 	private final Stage errorWindow;
 	private final ObservableList<Vault> vaults;
-	private final ResourceBundle resourceBundle;
 	private final Stage mainWindow;
+	private final CustomDialog.Builder customDialog;
 
 	@Inject
 	public VaultDetailUnknownErrorController(@MainWindow Stage mainWindow,
 											 ObjectProperty<Vault> vault, ObservableList<Vault> vaults, //
-											 ResourceBundle resourceBundle, //
-											 FxApplicationWindows appWindows, @Named("errorWindow") Stage errorWindow) {
+											 FxApplicationWindows appWindows, //
+											 @Named("errorWindow") Stage errorWindow, //
+											 CustomDialog.Builder customDialog) {
 		this.mainWindow = mainWindow;
 		this.vault = vault;
 		this.vaults = vaults;
-		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
 		this.errorWindow = errorWindow;
+		this.customDialog = customDialog;
 	}
 
 	@FXML
@@ -54,22 +54,22 @@ public class VaultDetailUnknownErrorController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		new CustomDialog.Builder()
+		customDialog
 			.setOwner(mainWindow)
-			.resourceBundle(resourceBundle)
-			.titleKey("removeVault.title", vault.get().getDisplayName())
-			.messageKey("removeVault.message")
-			.descriptionKey("removeVault.description")
-			.icon(FontAwesome5Icon.QUESTION)
-			.okButtonKey("removeVault.confirmBtn")
-			.cancelButtonKey("generic.button.cancel")
-			.okAction(v -> {
+			.setTitleKey("removeVault.title", vault.get().getDisplayName())
+			.setMessageKey("removeVault.message")
+			.setDescriptionKey("removeVault.description")
+			.setIcon(FontAwesome5Icon.QUESTION)
+			.setOkButtonKey("removeVault.confirmBtn")
+			.setCancelButtonKey("generic.button.cancel")
+			.setOkAction(v -> {
 				LOG.debug("Removing vault {}.", vault.get().getDisplayName());
 				vaults.remove(vault.get());
 				v.close();
 			}) //
-			.cancelAction(Stage::close) //
-			.build();
+			.setCancelAction(Stage::close) //
+			.build()
+				.showAndWait();
 
 	}
 }

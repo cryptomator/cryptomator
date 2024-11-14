@@ -22,7 +22,6 @@ import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import java.util.EnumSet;
 import java.util.Objects;
-import java.util.ResourceBundle;
 
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
@@ -48,22 +47,26 @@ public class VaultListContextMenuController implements FxController {
 	private final ObservableValue<Boolean> selectedVaultUnlockable;
 	private final ObservableValue<Boolean> selectedVaultLockable;
 	private final ObservableList<Vault> vaults;
-	private final ResourceBundle resourceBundle;
+	private final CustomDialog.Builder customDialog;
 
 
 	@Inject
 	VaultListContextMenuController(ObjectProperty<Vault> selectedVault,
 								   ObservableList<Vault> vaults, //
-								   ResourceBundle resourceBundle, //
-								   @MainWindow Stage mainWindow, FxApplicationWindows appWindows, VaultService vaultService, KeychainManager keychain, VaultOptionsComponent.Factory vaultOptionsWindow) {
+								   @MainWindow Stage mainWindow, //
+								   FxApplicationWindows appWindows, //
+								   VaultService vaultService, //
+								   KeychainManager keychain, //
+								   VaultOptionsComponent.Factory vaultOptionsWindow, //
+								   CustomDialog.Builder customDialog) {
 		this.selectedVault = selectedVault;
 		this.vaults = vaults;
-		this.resourceBundle = resourceBundle;
 		this.mainWindow = mainWindow;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
 		this.keychain = keychain;
 		this.vaultOptionsWindow = vaultOptionsWindow;
+		this.customDialog = customDialog;
 
 		this.selectedVaultState = selectedVault.flatMap(Vault::stateProperty).orElse(null);
 		this.selectedVaultPassphraseStored = selectedVault.map(this::isPasswordStored).orElse(false);
@@ -79,23 +82,20 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickRemoveVault() {
 		var vault = Objects.requireNonNull(selectedVault.get());
-
-		new CustomDialog.Builder()
-				.setOwner(mainWindow)
-				.resourceBundle(resourceBundle)
-				.titleKey("removeVault.title", vault.getDisplayName())
-				.messageKey("removeVault.message")
-				.descriptionKey("removeVault.description")
-				.icon(FontAwesome5Icon.QUESTION)
-				.okButtonKey("removeVault.confirmBtn")
-				.cancelButtonKey("generic.button.cancel")
-				.okAction(v -> {
-					LOG.debug("Removing vault {}.", vault.getDisplayName());
-					vaults.remove(vault);
-					v.close();
-				}) //
-				.cancelAction(Stage::close) //
-				.build();
+		customDialog.setOwner(mainWindow)
+			.setTitleKey("removeVault.title", vault.getDisplayName())
+			.setMessageKey("removeVault.message")
+			.setDescriptionKey("removeVault.description")
+			.setIcon(FontAwesome5Icon.QUESTION)
+			.setOkButtonKey("removeVault.confirmBtn")
+			.setCancelButtonKey("generic.button.cancel")
+			.setOkAction(v -> {
+				LOG.debug("Removing vault {}.", vault.getDisplayName());
+				vaults.remove(vault);
+				v.close();
+			}) //
+			.build()
+			.showAndWait();
 	}
 
 	@FXML

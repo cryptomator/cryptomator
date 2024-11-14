@@ -28,17 +28,20 @@ public class VaultDetailMissingVaultController implements FxController {
 	private final ObservableList<Vault> vaults;
 	private final ResourceBundle resourceBundle;
 	private final Stage window;
+	private final CustomDialog.Builder customDialog;
 
 
 	@Inject
 	public VaultDetailMissingVaultController(ObjectProperty<Vault> vault, //
 											 ObservableList<Vault> vaults, //
 											 ResourceBundle resourceBundle, //
-											 @MainWindow Stage window) {
+											 @MainWindow Stage window, //
+											 CustomDialog.Builder customDialog) {
 		this.vault = vault;
 		this.vaults = vaults;
 		this.resourceBundle = resourceBundle;
 		this.window = window;
+		this.customDialog = customDialog;
 	}
 
 	@FXML
@@ -48,23 +51,23 @@ public class VaultDetailMissingVaultController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-
-		new CustomDialog.Builder()
+		customDialog
 				.setOwner(window)
-				.resourceBundle(resourceBundle)
-				.titleKey("removeVault.title", vault.get().getDisplayName())
-				.messageKey("removeVault.message")
-				.descriptionKey("removeVault.description")
-				.icon(FontAwesome5Icon.QUESTION)
-				.okButtonKey("removeVault.confirmBtn")
-				.cancelButtonKey("generic.button.cancel")
-				.okAction(v -> {
+				.setTitleKey("removeVault.title", vault.get().getDisplayName())
+				.setMessageKey("removeVault.message")
+				.setDescriptionKey("removeVault.description")
+				.setIcon(FontAwesome5Icon.QUESTION)
+				.setOkButtonKey("removeVault.confirmBtn")
+				.setCancelButtonKey("generic.button.cancel")
+				.setOkAction(v -> {
 					LOG.debug("Removing vault {}.", vault.get().getDisplayName());
 					vaults.remove(vault.get());
 					v.close();
 				}) //
-				.cancelAction(Stage::close) //
-				.build();
+				.setCancelAction(Stage::close) //
+				.build()
+				.showAndWait();
+		;
 	}
 
 

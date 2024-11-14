@@ -15,7 +15,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 import javafx.stage.Stage;
-import java.util.ResourceBundle;
 
 @PreferencesScoped
 public class SupporterCertificateController implements FxController {
@@ -28,18 +27,18 @@ public class SupporterCertificateController implements FxController {
 	private final Stage window;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final ResourceBundle resourceBundle;
+	private final CustomDialog.Builder customDialog;
 
 	@FXML
 	private TextArea supporterCertificateField;
 
 	@Inject
-	 SupporterCertificateController(Application application, @PreferencesWindow Stage window, LicenseHolder licenseHolder, Settings settings, ResourceBundle resourceBundle) {
+	 SupporterCertificateController(Application application, @PreferencesWindow Stage window, LicenseHolder licenseHolder, Settings settings, CustomDialog.Builder customDialog) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.resourceBundle = resourceBundle;
+		this.customDialog = customDialog;
 	}
 
 	@FXML
@@ -86,21 +85,21 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		new CustomDialog.Builder()
-				.setOwner(window)
-				.resourceBundle(resourceBundle)
-				.titleKey("removeCert.title")
-				.messageKey("removeCert.message")
-				.descriptionKey("removeCert.description")
-				.icon(FontAwesome5Icon.QUESTION)
-				.okButtonKey("removeCert.confirmBtn")
-				.cancelButtonKey("generic.button.cancel")
-				.okAction(v -> {
-					settings.licenseKey.set(null);
-					v.close();
-				}) //
-				.cancelAction(Stage::close) //
-				.build();
+		customDialog.setOwner(window)
+			.setTitleKey("removeCert.title")
+			.setMessageKey("removeCert.message")
+			.setDescriptionKey("removeCert.description")
+			.setIcon(FontAwesome5Icon.QUESTION)
+			.setOkButtonKey("removeCert.confirmBtn")
+			.setCancelButtonKey("generic.button.cancel")
+			.setOkAction(v -> {
+				settings.licenseKey.set(null);
+				v.close();
+			}) //
+			.setCancelAction(Stage::close) //
+			.build()
+				.showAndWait();
+
 	}
 
 	public LicenseHolder getLicenseHolder() {
