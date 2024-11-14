@@ -13,7 +13,6 @@ public enum FxmlFile {
 	CONVERTVAULT_HUBTOPASSWORD_CONVERT("/fxml/convertvault_hubtopassword_convert.fxml"), //
 	CONVERTVAULT_HUBTOPASSWORD_SUCCESS("/fxml/convertvault_hubtopassword_success.fxml"), //
 	CUSTOM_DIALOG("/fxml/custom_dialog.fxml"), //
-	DOKANY_SUPPORT_END("/fxml/dokany_support_end.fxml"), //
 	ERROR("/fxml/error.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
 	HEALTH_START("/fxml/health_start.fxml"), //
@@ -46,8 +45,6 @@ public enum FxmlFile {
 	RECOVERYKEY_RESET_PASSWORD("/fxml/recoverykey_reset_password.fxml"), //
 	RECOVERYKEY_RESET_PASSWORD_SUCCESS("/fxml/recoverykey_reset_password_success.fxml"), //
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
-	REMOVE_CERT("/fxml/remove_cert.fxml"), //
-	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	SHARE_VAULT("/fxml/share_vault.fxml"), //
 	UPDATE_REMINDER("/fxml/update_reminder.fxml"), //
 	UNLOCK_ENTER_PASSWORD("/fxml/unlock_enter_password.fxml"),
