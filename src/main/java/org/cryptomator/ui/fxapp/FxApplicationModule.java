@@ -73,7 +73,6 @@ abstract class FxApplicationModule {
 	}
 
 	@Provides
-	@FxApplicationScoped
 	static CustomDialog.Builder provideCustomDialog(ResourceBundle resourceBundle) {
 		return new CustomDialog.Builder(resourceBundle);
 	}

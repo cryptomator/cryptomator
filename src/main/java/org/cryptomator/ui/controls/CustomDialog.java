@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.util.IllegalFormatException;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -19,7 +20,7 @@ public class CustomDialog {
 	private static final Logger LOG = LoggerFactory.getLogger(CustomDialog.class);
 	private final ResourceBundle resourceBundle;
 
-	private Stage dialogStage;
+	private final Stage dialogStage;
 
 	CustomDialog(Builder builder) {
 		this.resourceBundle = builder.resourceBundle;
@@ -56,10 +57,14 @@ public class CustomDialog {
 	}
 
 	private String resolveText(String key, String[] args) {
-		String text = (key == null || key.isEmpty() || !resourceBundle.containsKey(key))
-				? String.format("N/A - Key '%s' not found", key)
-				: resourceBundle.getString(key);
-		return args != null && args.length > 0 ? String.format(text, (Object[]) args) : text;
+		if (key == null || key.isEmpty() || !resourceBundle.containsKey(key)) {
+			throw new IllegalArgumentException(String.format("Invalid key: '%s'. Key not found in ResourceBundle.", key));		}
+		String text = resourceBundle.getString(key);
+		try {
+			return args != null && args.length > 0 ? String.format(text, (Object[]) args) : text;
+		} catch (IllegalFormatException e) {
+			throw new IllegalArgumentException("Formatting error: Check if arguments match placeholders in the text.", e);
+		}
 	}
 
 	public static class Builder {
@@ -77,7 +82,6 @@ public class CustomDialog {
 		private Consumer<Stage> okAction = Stage::close;
 		private Consumer<Stage> cancelAction = Stage::close;
 
-		@Inject
 		public Builder(ResourceBundle resourceBundle) {
 			this.resourceBundle = resourceBundle;
 		}
