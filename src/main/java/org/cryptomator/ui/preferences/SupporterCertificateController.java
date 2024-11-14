@@ -33,7 +33,11 @@ public class SupporterCertificateController implements FxController {
 	private TextArea supporterCertificateField;
 
 	@Inject
-	 SupporterCertificateController(Application application, @PreferencesWindow Stage window, LicenseHolder licenseHolder, Settings settings, CustomDialog.Builder customDialog) {
+	SupporterCertificateController(Application application, //
+								   @PreferencesWindow Stage window,  //
+								   LicenseHolder licenseHolder, //
+								   Settings settings, //
+								   CustomDialog.Builder customDialog) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
@@ -85,21 +89,19 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		customDialog.setOwner(window)
-			.setTitleKey("removeCert.title")
-			.setMessageKey("removeCert.message")
-			.setDescriptionKey("removeCert.description")
-			.setIcon(FontAwesome5Icon.QUESTION)
-			.setOkButtonKey("removeCert.confirmBtn")
+		customDialog.setOwner(window) //
+			.setTitleKey("removeCert.title") //
+			.setMessageKey("removeCert.message") //
+			.setDescriptionKey("removeCert.description") //
+			.setIcon(FontAwesome5Icon.QUESTION) //
+			.setOkButtonKey("removeCert.confirmBtn") //
 			.setCancelButtonKey("generic.button.cancel")
 			.setOkAction(v -> {
 				settings.licenseKey.set(null);
 				v.close();
 			}) //
 			.setCancelAction(Stage::close) //
-			.build()
-				.showAndWait();
-
+			.build().showAndWait();
 	}
 
 	public LicenseHolder getLicenseHolder() {

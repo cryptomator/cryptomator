@@ -29,8 +29,9 @@ public class VaultDetailUnknownErrorController implements FxController {
 	private final CustomDialog.Builder customDialog;
 
 	@Inject
-	public VaultDetailUnknownErrorController(@MainWindow Stage mainWindow,
-											 ObjectProperty<Vault> vault, ObservableList<Vault> vaults, //
+	public VaultDetailUnknownErrorController(@MainWindow Stage mainWindow, //
+											 ObjectProperty<Vault> vault, //
+											 ObservableList<Vault> vaults, //
 											 FxApplicationWindows appWindows, //
 											 @Named("errorWindow") Stage errorWindow, //
 											 CustomDialog.Builder customDialog) {
@@ -54,22 +55,19 @@ public class VaultDetailUnknownErrorController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		customDialog
-			.setOwner(mainWindow)
-			.setTitleKey("removeVault.title", vault.get().getDisplayName())
-			.setMessageKey("removeVault.message")
-			.setDescriptionKey("removeVault.description")
-			.setIcon(FontAwesome5Icon.QUESTION)
-			.setOkButtonKey("removeVault.confirmBtn")
-			.setCancelButtonKey("generic.button.cancel")
+		customDialog.setOwner(mainWindow) //
+			.setTitleKey("removeVault.title", vault.get().getDisplayName()) //
+			.setMessageKey("removeVault.message") //
+			.setDescriptionKey("removeVault.description") //
+			.setIcon(FontAwesome5Icon.QUESTION) //
+			.setOkButtonKey("removeVault.confirmBtn") //
+			.setCancelButtonKey("generic.button.cancel") //
 			.setOkAction(v -> {
 				LOG.debug("Removing vault {}.", vault.get().getDisplayName());
 				vaults.remove(vault.get());
 				v.close();
 			}) //
 			.setCancelAction(Stage::close) //
-			.build()
-				.showAndWait();
-
+			.build().showAndWait();
 	}
 }

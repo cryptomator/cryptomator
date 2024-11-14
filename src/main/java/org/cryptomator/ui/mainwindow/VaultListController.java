@@ -91,7 +91,7 @@ public class VaultListController implements FxController {
 						VaultListManager vaultListManager, //
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
-						Settings settings,
+						Settings settings, //
 						CustomDialog.Builder customDialog) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
@@ -210,21 +210,20 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			customDialog.setOwner(mainWindow)
-					.setTitleKey("removeVault.title", vault.getDisplayName())
-					.setMessageKey("removeVault.message")
-					.setDescriptionKey("removeVault.description")
-					.setIcon(FontAwesome5Icon.QUESTION)
-					.setOkButtonKey("removeVault.confirmBtn")
-					.setCancelButtonKey("generic.button.cancel")
-					.setOkAction(v -> {
-						LOG.debug("Removing vault {}.", vault.getDisplayName());
-						vaults.remove(vault);
-						v.close();
-					}) //
-					.setCancelAction(Stage::close) //
-					.build()
-					.showAndWait();
+			customDialog.setOwner(mainWindow) //
+				.setTitleKey("removeVault.title", vault.getDisplayName()) //
+				.setMessageKey("removeVault.message") //
+				.setDescriptionKey("removeVault.description") //
+				.setIcon(FontAwesome5Icon.QUESTION) //
+				.setOkButtonKey("removeVault.confirmBtn") //
+				.setCancelButtonKey("generic.button.cancel") //
+				.setOkAction(v -> {
+					LOG.debug("Removing vault {}.", vault.getDisplayName());
+					vaults.remove(vault);
+					v.close();
+				}) //
+				.setCancelAction(Stage::close) //
+				.build().showAndWait();
 		}
 	}
 

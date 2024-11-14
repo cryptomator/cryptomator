@@ -149,20 +149,19 @@ public class FxApplicationWindows {
 
 	public void showDokanySupportEndWindow() {
 		CompletableFuture.runAsync(() -> {
-			customDialog.setOwner(mainWindow.get().window())
-					.setTitleKey("dokanySupportEnd.title")
-					.setMessageKey("dokanySupportEnd.message")
-					.setDescriptionKey("dokanySupportEnd.description")
-					.setIcon(FontAwesome5Icon.QUESTION)
-					.setOkButtonKey("generic.button.close")
-					.setCancelButtonKey("dokanySupportEnd.preferencesBtn")
-					.setOkAction(Stage::close) //
-					.setCancelAction(v -> {
-								showPreferencesWindow(SelectedPreferencesTab.VOLUME);
-								v.close();
-							}) //
-					.build()
-					.showAndWait();
+			customDialog.setOwner(mainWindow.get().window()) //
+				.setTitleKey("dokanySupportEnd.title") //
+				.setMessageKey("dokanySupportEnd.message") //
+				.setDescriptionKey("dokanySupportEnd.description") //
+				.setIcon(FontAwesome5Icon.QUESTION) //
+				.setOkButtonKey("generic.button.close") //
+				.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
+				.setOkAction(Stage::close) //
+				.setCancelAction(v -> {
+							showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+							v.close();
+						}) //
+				.build().showAndWait();
 		}, Platform::runLater);
 	}
 

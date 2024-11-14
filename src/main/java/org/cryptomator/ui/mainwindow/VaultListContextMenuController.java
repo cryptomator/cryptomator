@@ -82,20 +82,19 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickRemoveVault() {
 		var vault = Objects.requireNonNull(selectedVault.get());
-		customDialog.setOwner(mainWindow)
-			.setTitleKey("removeVault.title", vault.getDisplayName())
-			.setMessageKey("removeVault.message")
-			.setDescriptionKey("removeVault.description")
-			.setIcon(FontAwesome5Icon.QUESTION)
-			.setOkButtonKey("removeVault.confirmBtn")
-			.setCancelButtonKey("generic.button.cancel")
+		customDialog.setOwner(mainWindow) //
+			.setTitleKey("removeVault.title", vault.getDisplayName()) //
+			.setMessageKey("removeVault.message") //
+			.setDescriptionKey("removeVault.description") //
+			.setIcon(FontAwesome5Icon.QUESTION) //
+			.setOkButtonKey("removeVault.confirmBtn") //
+			.setCancelButtonKey("generic.button.cancel") //
 			.setOkAction(v -> {
 				LOG.debug("Removing vault {}.", vault.getDisplayName());
 				vaults.remove(vault);
 				v.close();
 			}) //
-			.build()
-			.showAndWait();
+			.build().showAndWait();
 	}
 
 	@FXML

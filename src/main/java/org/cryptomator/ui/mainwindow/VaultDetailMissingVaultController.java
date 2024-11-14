@@ -51,25 +51,22 @@ public class VaultDetailMissingVaultController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		customDialog
-				.setOwner(window)
-				.setTitleKey("removeVault.title", vault.get().getDisplayName())
-				.setMessageKey("removeVault.message")
-				.setDescriptionKey("removeVault.description")
-				.setIcon(FontAwesome5Icon.QUESTION)
-				.setOkButtonKey("removeVault.confirmBtn")
-				.setCancelButtonKey("generic.button.cancel")
-				.setOkAction(v -> {
-					LOG.debug("Removing vault {}.", vault.get().getDisplayName());
-					vaults.remove(vault.get());
-					v.close();
-				}) //
-				.setCancelAction(Stage::close) //
-				.build()
-				.showAndWait();
+		customDialog.setOwner(window) //
+			.setTitleKey("removeVault.title", vault.get().getDisplayName()) //
+			.setMessageKey("removeVault.message") //
+			.setDescriptionKey("removeVault.description") //
+			.setIcon(FontAwesome5Icon.QUESTION) //
+			.setOkButtonKey("removeVault.confirmBtn") //
+			.setCancelButtonKey("generic.button.cancel") //
+			.setOkAction(v -> {
+				LOG.debug("Removing vault {}.", vault.get().getDisplayName());
+				vaults.remove(vault.get());
+				v.close();
+			}) //
+			.setCancelAction(Stage::close) //
+			.build().showAndWait();
 		;
 	}
-
 
 	@FXML
 	void changeLocation() {
