@@ -28,6 +28,7 @@ public class CustomDialog {
 		dialogStage.initOwner(builder.owner);
 		dialogStage.initModality(Modality.WINDOW_MODAL);
 		dialogStage.setTitle(resolveText(builder.titleKey, builder.titleArgs));
+		dialogStage.setResizable(false);
 
 		try {
 			FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(new CustomDialogController(), Scene::new, builder.resourceBundle);
