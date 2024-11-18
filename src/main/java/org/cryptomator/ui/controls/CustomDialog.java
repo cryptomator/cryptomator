@@ -5,7 +5,6 @@ import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -59,7 +58,8 @@ public class CustomDialog {
 
 	private String resolveText(String key, String[] args) {
 		if (key == null || key.isEmpty() || !resourceBundle.containsKey(key)) {
-			throw new IllegalArgumentException(String.format("Invalid key: '%s'. Key not found in ResourceBundle.", key));		}
+			throw new IllegalArgumentException(String.format("Invalid key: '%s'. Key not found in ResourceBundle.", key));
+		}
 		String text = resourceBundle.getString(key);
 		try {
 			return args != null && args.length > 0 ? String.format(text, (Object[]) args) : text;
