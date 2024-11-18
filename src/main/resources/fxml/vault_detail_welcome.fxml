@@ -10,8 +10,8 @@
 	  alignment="CENTER"
 	  spacing="9">
 	<children>
-		<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" smooth="true" cache="true">
-			<Image url="@../img/logo.png"/>
+		<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" cache="true">
+			<Image url="@../img/logo128.png"/>
 		</ImageView>
 
 		<TextFlow styleClass="text-flow" prefWidth="-Infinity" visible="${controller.noVaultPresent}" managed="${controller.noVaultPresent}">
