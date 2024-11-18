@@ -49,7 +49,7 @@ public class FxApplicationWindows {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
-	private final UpdateReminderComponent.Factory updateReminderWindowBuilder;
+	private final UpdateReminderComponent.Factory updateReminderWindowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
@@ -65,7 +65,7 @@ public class FxApplicationWindows {
 								Lazy<PreferencesComponent> preferencesWindow, //
 								QuitComponent.Builder quitWindowBuilder, //
 								UnlockComponent.Factory unlockWorkflowFactory, //
-								UpdateReminderComponent.Factory updateReminderWindowBuilder, //
+								UpdateReminderComponent.Factory updateReminderWindowFactory, //
 								LockComponent.Factory lockWorkflowFactory, //
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
@@ -78,7 +78,7 @@ public class FxApplicationWindows {
 		this.preferencesWindow = preferencesWindow;
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
-		this.updateReminderWindowBuilder = updateReminderWindowBuilder;
+		this.updateReminderWindowFactory = updateReminderWindowFactory;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
 		this.executor = executor;
@@ -143,8 +143,8 @@ public class FxApplicationWindows {
 			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
 	}
 
-	public void checkAndShowUpdateReminderWindow() {
-		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.create().checkAndShowUpdateReminderWindow(), Platform::runLater);
+	public void showUpdateReminderWindow() {
+		CompletableFuture.runAsync(() -> updateReminderWindowFactory.create().showUpdateReminderWindow(), Platform::runLater);
 	}
 
 	public void showDokanySupportEndWindow() {

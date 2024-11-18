@@ -32,17 +32,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: macos-12
+        - os: macos-15-large
           architecture: x64
           output-suffix: x64
-          xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: macFUSE
           openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_osx-x64_bin-jmods.zip'
           openjfx-sha: '115cb08bb59d880cfff6e51e0bf0dcc45785ed9d456b8b8425597b04da6ab3d4'
-        - os: [self-hosted, macOS, ARM64]
+        - os: macos-15
           architecture: aarch64
           output-suffix: arm64
-          xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: FUSE-T
           openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_osx-aarch64_bin-jmods.zip'
           openjfx-sha: '813c6748f7c99cb7a579d48b48a087b4682b1fad1fc1a4fe5f9b21cf872b15a7'
@@ -240,7 +238,7 @@ jobs:
           apple-id: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
           password: ${{ secrets.MACOS_NOTARIZATION_PW }}
           team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
-          xcode-path: ${{ matrix.xcode-path }}
+          xcode-path: '/Applications/Xcode_16.app'
       - name: Add possible alpha/beta tags to installer name
         run: mv Cryptomator-*.dmg Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.output-suffix }}.dmg
       - name: Create detached GPG signature with key 615D449FE6E6A235
