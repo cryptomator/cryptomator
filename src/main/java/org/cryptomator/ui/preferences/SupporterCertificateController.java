@@ -5,7 +5,8 @@ import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.removecert.RemoveCertComponent;
+import org.cryptomator.ui.controls.CustomDialog;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
 import javafx.application.Application;
@@ -26,18 +27,22 @@ public class SupporterCertificateController implements FxController {
 	private final Stage window;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final RemoveCertComponent.Builder removeCert;
+	private final CustomDialog.Builder customDialog;
 
 	@FXML
 	private TextArea supporterCertificateField;
 
 	@Inject
-	SupporterCertificateController(Application application, @PreferencesWindow Stage window, LicenseHolder licenseHolder, Settings settings, RemoveCertComponent.Builder removeCert) {
+	SupporterCertificateController(Application application, //
+								   @PreferencesWindow Stage window,  //
+								   LicenseHolder licenseHolder, //
+								   Settings settings, //
+								   CustomDialog.Builder customDialog) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.removeCert = removeCert;
+		this.customDialog = customDialog;
 	}
 
 	@FXML
@@ -84,7 +89,19 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		removeCert.build().showRemoveCert(window);
+		customDialog.setOwner(window) //
+			.setTitleKey("removeCert.title") //
+			.setMessageKey("removeCert.message") //
+			.setDescriptionKey("removeCert.description") //
+			.setIcon(FontAwesome5Icon.QUESTION) //
+			.setOkButtonKey("removeCert.confirmBtn") //
+			.setCancelButtonKey("generic.button.cancel")
+			.setOkAction(v -> {
+				settings.licenseKey.set(null);
+				v.close();
+			}) //
+			.setCancelAction(Stage::close) //
+			.build().showAndWait();
 	}
 
 	public LicenseHolder getLicenseHolder() {

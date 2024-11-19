@@ -7,14 +7,13 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
-import org.cryptomator.ui.dokanysupportend.DokanySupportEndComponent;
+import org.cryptomator.ui.controls.CustomDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.quit.QuitComponent;
-import org.cryptomator.ui.removecert.RemoveCertComponent;
 import org.cryptomator.ui.sharevault.ShareVaultComponent;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
@@ -24,6 +23,7 @@ import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ResourceBundle;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, //
 		MainWindowComponent.class, //
@@ -35,8 +35,6 @@ import java.io.InputStream;
 		ErrorComponent.class, //
 		HealthCheckComponent.class, //
 		UpdateReminderComponent.class, //
-		DokanySupportEndComponent.class, //
-		RemoveCertComponent.class, //
 		ShareVaultComponent.class})
 abstract class FxApplicationModule {
 
@@ -68,6 +66,11 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	static QuitComponent provideQuitComponent(QuitComponent.Builder builder) {
 		return builder.build();
+	}
+
+	@Provides
+	static CustomDialog.Builder provideCustomDialog(ResourceBundle resourceBundle) {
+		return new CustomDialog.Builder(resourceBundle);
 	}
 
 }

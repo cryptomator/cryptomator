@@ -5,7 +5,8 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.ui.dokanysupportend.DokanySupportEndComponent;
+import org.cryptomator.ui.controls.CustomDialog;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -49,13 +50,13 @@ public class FxApplicationWindows {
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
 	private final UpdateReminderComponent.Factory updateReminderWindowFactory;
-	private final DokanySupportEndComponent.Factory dokanySupportEndWindowBuilder;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
+	private final CustomDialog.Builder customDialog;
 
 	@Inject
 	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
@@ -65,12 +66,12 @@ public class FxApplicationWindows {
 								QuitComponent.Builder quitWindowBuilder, //
 								UnlockComponent.Factory unlockWorkflowFactory, //
 								UpdateReminderComponent.Factory updateReminderWindowFactory, //
-								DokanySupportEndComponent.Factory dokanySupportEndWindowBuilder, //
 								LockComponent.Factory lockWorkflowFactory, //
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
-								ExecutorService executor) {
+								ExecutorService executor, //
+								CustomDialog.Builder customDialog) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -78,13 +79,13 @@ public class FxApplicationWindows {
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
 		this.updateReminderWindowFactory = updateReminderWindowFactory;
-		this.dokanySupportEndWindowBuilder = dokanySupportEndWindowBuilder;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
+		this.customDialog = customDialog;
 	}
 
 	public void initialize() {
@@ -147,9 +148,22 @@ public class FxApplicationWindows {
 	}
 
 	public void showDokanySupportEndWindow() {
-		CompletableFuture.runAsync(() -> dokanySupportEndWindowBuilder.create().showDokanySupportEndWindow(), Platform::runLater);
+		CompletableFuture.runAsync(() -> {
+			customDialog.setOwner(mainWindow.get().window()) //
+				.setTitleKey("dokanySupportEnd.title") //
+				.setMessageKey("dokanySupportEnd.message") //
+				.setDescriptionKey("dokanySupportEnd.description") //
+				.setIcon(FontAwesome5Icon.QUESTION) //
+				.setOkButtonKey("generic.button.close") //
+				.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
+				.setOkAction(Stage::close) //
+				.setCancelAction(v -> {
+							showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+							v.close();
+						}) //
+				.build().showAndWait();
+		}, Platform::runLater);
 	}
-
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {

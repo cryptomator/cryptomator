@@ -5,15 +5,19 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.controls.CustomDialog;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
-import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import java.util.EnumSet;
@@ -28,28 +32,41 @@ import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
 @MainWindowScoped
 public class VaultListContextMenuController implements FxController {
 
+	private static final Logger LOG = LoggerFactory.getLogger(VaultListContextMenuController.class);
+
+
 	private final ReadOnlyObjectProperty<Vault> selectedVault;
 	private final Stage mainWindow;
 	private final FxApplicationWindows appWindows;
 	private final VaultService vaultService;
 	private final KeychainManager keychain;
-	private final RemoveVaultComponent.Builder removeVault;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ObservableValue<VaultState.Value> selectedVaultState;
 	private final ObservableValue<Boolean> selectedVaultPassphraseStored;
 	private final ObservableValue<Boolean> selectedVaultRemovable;
 	private final ObservableValue<Boolean> selectedVaultUnlockable;
 	private final ObservableValue<Boolean> selectedVaultLockable;
+	private final ObservableList<Vault> vaults;
+	private final CustomDialog.Builder customDialog;
+
 
 	@Inject
-	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, @MainWindow Stage mainWindow, FxApplicationWindows appWindows, VaultService vaultService, KeychainManager keychain, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Factory vaultOptionsWindow) {
+	VaultListContextMenuController(ObjectProperty<Vault> selectedVault,
+								   ObservableList<Vault> vaults, //
+								   @MainWindow Stage mainWindow, //
+								   FxApplicationWindows appWindows, //
+								   VaultService vaultService, //
+								   KeychainManager keychain, //
+								   VaultOptionsComponent.Factory vaultOptionsWindow, //
+								   CustomDialog.Builder customDialog) {
 		this.selectedVault = selectedVault;
+		this.vaults = vaults;
 		this.mainWindow = mainWindow;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
 		this.keychain = keychain;
-		this.removeVault = removeVault;
 		this.vaultOptionsWindow = vaultOptionsWindow;
+		this.customDialog = customDialog;
 
 		this.selectedVaultState = selectedVault.flatMap(Vault::stateProperty).orElse(null);
 		this.selectedVaultPassphraseStored = selectedVault.map(this::isPasswordStored).orElse(false);
@@ -65,7 +82,19 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickRemoveVault() {
 		var vault = Objects.requireNonNull(selectedVault.get());
-		removeVault.vault(vault).build().showRemoveVault();
+		customDialog.setOwner(mainWindow) //
+			.setTitleKey("removeVault.title", vault.getDisplayName()) //
+			.setMessageKey("removeVault.message") //
+			.setDescriptionKey("removeVault.description") //
+			.setIcon(FontAwesome5Icon.QUESTION) //
+			.setOkButtonKey("removeVault.confirmBtn") //
+			.setCancelButtonKey("generic.button.cancel") //
+			.setOkAction(v -> {
+				LOG.debug("Removing vault {}.", vault.getDisplayName());
+				vaults.remove(vault);
+				v.close();
+			}) //
+			.build().showAndWait();
 	}
 
 	@FXML
