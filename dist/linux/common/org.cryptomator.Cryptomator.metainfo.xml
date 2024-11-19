@@ -74,6 +74,9 @@
 	</content_rating>
 
 	<releases>
+		<release date="2024-11-19" version="1.14.2">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.14.2</url>
+		</release>
 		<release date="2024-09-17" version="1.14.0">
 			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.14.0</url>
 		</release>
