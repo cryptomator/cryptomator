@@ -43,7 +43,7 @@
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" cancelButton="true" onAction="#close"/>
-					<Button text="%removeCert.confirmBtn" ButtonBar.buttonData="FINISH" onAction="#remove"/>
+					<Button text="%generic.button.remove" ButtonBar.buttonData="FINISH" onAction="#remove"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>
