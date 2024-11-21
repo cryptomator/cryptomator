@@ -2,26 +2,25 @@ package org.cryptomator.ui.controls;
 
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.IllegalFormatException;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 public class CustomDialog {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CustomDialog.class);
 	private final ResourceBundle resourceBundle;
 
 	private final Stage dialogStage;
 
-	CustomDialog(Builder builder) {
+	CustomDialog(Builder builder) throws IOException {
 		this.resourceBundle = builder.resourceBundle;
 		dialogStage = new Stage();
 		dialogStage.initOwner(builder.owner);
@@ -29,27 +28,21 @@ public class CustomDialog {
 		dialogStage.setTitle(resolveText(builder.titleKey, builder.titleArgs));
 		dialogStage.setResizable(false);
 
-		try {
-			FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(new CustomDialogController(), Scene::new, builder.resourceBundle);
-			FXMLLoader loader = loaderFactory.load(FxmlFile.CUSTOM_DIALOG.getRessourcePathString());
-			Parent root = loader.getRoot();
-			CustomDialogController controller = loader.getController();
+		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(new CustomDialogController(), Scene::new, builder.resourceBundle);
+		FXMLLoader loader = loaderFactory.load(FxmlFile.CUSTOM_DIALOG.getRessourcePathString());
+		Parent root = loader.getRoot();
+		CustomDialogController controller = loader.getController();
 
-			controller.setMessage(resolveText(builder.messageKey, null));
-			controller.setDescription(resolveText(builder.descriptionKey, null));
-			controller.setIcon(builder.icon);
-			controller.setOkButtonText(resolveText(builder.okButtonKey, null));
-			controller.setCancelButtonText(resolveText(builder.cancelButtonKey, null));
+		controller.setMessage(resolveText(builder.messageKey, null));
+		controller.setDescription(resolveText(builder.descriptionKey, null));
+		controller.setIcon(builder.icon);
+		controller.setOkButtonText(resolveText(builder.okButtonKey, null));
+		controller.setCancelButtonText(resolveText(builder.cancelButtonKey, null));
 
-			controller.setOkAction(() -> builder.okAction.accept(dialogStage));
-			controller.setCancelAction(() -> builder.cancelAction.accept(dialogStage));
+		controller.setOkAction(() -> builder.okAction.accept(dialogStage));
+		controller.setCancelAction(() -> builder.cancelAction.accept(dialogStage));
 
-			dialogStage.setScene(new Scene(root));
-
-		} catch (Exception e) {
-			LOG.error("Failed to build and show dialog stage.", e);
-		}
-
+		dialogStage.setScene(new Scene(root));
 	}
 
 	public void showAndWait() {
@@ -134,7 +127,11 @@ public class CustomDialog {
 		}
 
 		public CustomDialog build() {
-			return new CustomDialog(this);
+			try {
+				return new CustomDialog(this);
+			} catch (IOException e) {
+				throw new UncheckedIOException("Failed to create CustomDialog.", e);
+			}
 		}
 	}
 }
