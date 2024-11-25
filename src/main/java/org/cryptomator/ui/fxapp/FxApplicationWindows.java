@@ -5,7 +5,7 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.ui.controls.CustomDialog;
+import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
@@ -57,7 +57,7 @@ public class FxApplicationWindows {
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
-	private final Provider<CustomDialog.Builder> customDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
 
 	@Inject
 	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
@@ -72,7 +72,7 @@ public class FxApplicationWindows {
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
 								ExecutorService executor, //
-								Provider<CustomDialog.Builder> customDialogProvider) {
+								Provider<SimpleDialog.Builder> simpleDialogProvider) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -86,7 +86,7 @@ public class FxApplicationWindows {
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
-		this.customDialogProvider = customDialogProvider;
+		this.simpleDialogProvider = simpleDialogProvider;
 	}
 
 	public void initialize() {
@@ -150,7 +150,7 @@ public class FxApplicationWindows {
 
 	public void showDokanySupportEndWindow() {
 		CompletableFuture.runAsync(() -> {
-			customDialogProvider.get().setOwner(mainWindow.get().window()) //
+			simpleDialogProvider.get().setOwner(mainWindow.get().window()) //
 					.setTitleKey("dokanySupportEnd.title") //
 					.setMessageKey("dokanySupportEnd.message") //
 					.setDescriptionKey("dokanySupportEnd.description") //

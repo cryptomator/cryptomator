@@ -1,12 +1,14 @@
-package org.cryptomator.ui.controls;
+package org.cryptomator.ui.dialogs;
 
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
-public class CustomDialogController implements FxController {
+public class SimpleDialogController implements FxController {
 
 	@FXML
 	private Label messageLabel;

@@ -9,7 +9,7 @@ import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.controls.CustomDialog;
+import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
@@ -73,7 +73,7 @@ public class VaultListController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
 	private final ObservableValue<Double> cellSize;
-	private final Provider<CustomDialog.Builder> customDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
@@ -93,7 +93,7 @@ public class VaultListController implements FxController {
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
 						Settings settings, //
-						Provider<CustomDialog.Builder> customDialogProvider) {
+						Provider<SimpleDialog.Builder> simpleDialogProvider) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -103,7 +103,7 @@ public class VaultListController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
-		this.customDialogProvider = customDialogProvider;
+		this.simpleDialogProvider = simpleDialogProvider;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -211,7 +211,7 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			customDialogProvider.get().setOwner(mainWindow) //
+			simpleDialogProvider.get().setOwner(mainWindow) //
 					.setTitleKey("removeVault.title", vault.getDisplayName()) //
 					.setMessageKey("removeVault.message") //
 					.setDescriptionKey("removeVault.description") //

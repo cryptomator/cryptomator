@@ -7,7 +7,7 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
-import org.cryptomator.ui.controls.CustomDialog;
+import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
@@ -69,8 +69,8 @@ abstract class FxApplicationModule {
 	}
 
 	@Provides
-	static CustomDialog.Builder provideCustomDialog(ResourceBundle resourceBundle) {
-		return new CustomDialog.Builder(resourceBundle);
+	static SimpleDialog.Builder provideSimpleDialog(ResourceBundle resourceBundle) {
+		return new SimpleDialog.Builder(resourceBundle);
 	}
 
 }

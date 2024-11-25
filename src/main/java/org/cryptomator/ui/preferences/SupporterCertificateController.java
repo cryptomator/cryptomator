@@ -5,7 +5,7 @@ import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.controls.CustomDialog;
+import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
@@ -28,7 +28,7 @@ public class SupporterCertificateController implements FxController {
 	private final Stage window;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final Provider<CustomDialog.Builder> customDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
 
 	@FXML
 	private TextArea supporterCertificateField;
@@ -38,12 +38,12 @@ public class SupporterCertificateController implements FxController {
 								   @PreferencesWindow Stage window,  //
 								   LicenseHolder licenseHolder, //
 								   Settings settings, //
-								   Provider<CustomDialog.Builder> customDialogProvider) {
+								   Provider<SimpleDialog.Builder> simpleDialogProvider) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.customDialogProvider = customDialogProvider;
+		this.simpleDialogProvider = simpleDialogProvider;
 	}
 
 	@FXML
@@ -90,7 +90,7 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		customDialogProvider.get().setOwner(window) //
+		simpleDialogProvider.get().setOwner(window) //
 				.setTitleKey("removeCert.title") //
 				.setMessageKey("removeCert.message") //
 				.setDescriptionKey("removeCert.description") //

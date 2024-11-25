@@ -1,7 +1,8 @@
-package org.cryptomator.ui.controls;
+package org.cryptomator.ui.dialogs;
 
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,13 +15,13 @@ import java.util.IllegalFormatException;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-public class CustomDialog {
+public class SimpleDialog {
 
 	private final ResourceBundle resourceBundle;
 
 	private final Stage dialogStage;
 
-	CustomDialog(Builder builder) throws IOException {
+	SimpleDialog(Builder builder) throws IOException {
 		this.resourceBundle = builder.resourceBundle;
 		dialogStage = new Stage();
 		dialogStage.initOwner(builder.owner);
@@ -28,10 +29,10 @@ public class CustomDialog {
 		dialogStage.setTitle(resolveText(builder.titleKey, builder.titleArgs));
 		dialogStage.setResizable(false);
 
-		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(new CustomDialogController(), Scene::new, builder.resourceBundle);
+		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(new SimpleDialogController(), Scene::new, builder.resourceBundle);
 		FXMLLoader loader = loaderFactory.load(FxmlFile.CUSTOM_DIALOG.getRessourcePathString());
 		Parent root = loader.getRoot();
-		CustomDialogController controller = loader.getController();
+		SimpleDialogController controller = loader.getController();
 
 		controller.setMessage(resolveText(builder.messageKey, null));
 		controller.setDescription(resolveText(builder.descriptionKey, null));
@@ -126,9 +127,9 @@ public class CustomDialog {
 			return this;
 		}
 
-		public CustomDialog build() {
+		public SimpleDialog build() {
 			try {
-				return new CustomDialog(this);
+				return new SimpleDialog(this);
 			} catch (IOException e) {
 				throw new UncheckedIOException("Failed to create CustomDialog.", e);
 			}

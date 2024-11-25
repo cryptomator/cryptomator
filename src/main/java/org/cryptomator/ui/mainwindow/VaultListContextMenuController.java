@@ -5,7 +5,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.controls.CustomDialog;
+import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
@@ -48,7 +48,7 @@ public class VaultListContextMenuController implements FxController {
 	private final ObservableValue<Boolean> selectedVaultUnlockable;
 	private final ObservableValue<Boolean> selectedVaultLockable;
 	private final ObservableList<Vault> vaults;
-	private final Provider<CustomDialog.Builder> customDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
 
 
 	@Inject
@@ -59,7 +59,7 @@ public class VaultListContextMenuController implements FxController {
 								   VaultService vaultService, //
 								   KeychainManager keychain, //
 								   VaultOptionsComponent.Factory vaultOptionsWindow, //
-								   Provider<CustomDialog.Builder> customDialogProvider) {
+								   Provider<SimpleDialog.Builder> simpleDialogProvider) {
 		this.selectedVault = selectedVault;
 		this.vaults = vaults;
 		this.mainWindow = mainWindow;
@@ -67,7 +67,7 @@ public class VaultListContextMenuController implements FxController {
 		this.vaultService = vaultService;
 		this.keychain = keychain;
 		this.vaultOptionsWindow = vaultOptionsWindow;
-		this.customDialogProvider = customDialogProvider;
+		this.simpleDialogProvider = simpleDialogProvider;
 
 		this.selectedVaultState = selectedVault.flatMap(Vault::stateProperty).orElse(null);
 		this.selectedVaultPassphraseStored = selectedVault.map(this::isPasswordStored).orElse(false);
@@ -83,7 +83,7 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickRemoveVault() {
 		var vault = Objects.requireNonNull(selectedVault.get());
-		customDialogProvider.get().setOwner(mainWindow) //
+		simpleDialogProvider.get().setOwner(mainWindow) //
 				.setTitleKey("removeVault.title", vault.getDisplayName()) //
 				.setMessageKey("removeVault.message") //
 				.setDescriptionKey("removeVault.description") //

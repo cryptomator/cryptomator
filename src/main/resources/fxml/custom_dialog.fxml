@@ -13,7 +13,7 @@
 <?import javafx.scene.control.ButtonBar?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.controls.CustomDialogController"
+	  fx:controller="org.cryptomator.ui.dialogs.SimpleDialogController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
