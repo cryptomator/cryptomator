@@ -9,6 +9,7 @@ import org.cryptomator.ui.controls.CustomDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -27,7 +28,7 @@ public class SupporterCertificateController implements FxController {
 	private final Stage window;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final CustomDialog.Builder customDialog;
+	private final Provider<CustomDialog.Builder> customDialogProvider;
 
 	@FXML
 	private TextArea supporterCertificateField;
@@ -37,12 +38,12 @@ public class SupporterCertificateController implements FxController {
 								   @PreferencesWindow Stage window,  //
 								   LicenseHolder licenseHolder, //
 								   Settings settings, //
-								   CustomDialog.Builder customDialog) {
+								   Provider<CustomDialog.Builder> customDialogProvider) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.customDialog = customDialog;
+		this.customDialogProvider = customDialogProvider;
 	}
 
 	@FXML
@@ -89,19 +90,18 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		customDialog.setOwner(window) //
-			.setTitleKey("removeCert.title") //
-			.setMessageKey("removeCert.message") //
-			.setDescriptionKey("removeCert.description") //
-			.setIcon(FontAwesome5Icon.QUESTION) //
-			.setOkButtonKey("removeCert.confirmBtn") //
-			.setCancelButtonKey("generic.button.cancel")
-			.setOkAction(v -> {
-				settings.licenseKey.set(null);
-				v.close();
-			}) //
-			.setCancelAction(Stage::close) //
-			.build().showAndWait();
+		customDialogProvider.get().setOwner(window) //
+				.setTitleKey("removeCert.title") //
+				.setMessageKey("removeCert.message") //
+				.setDescriptionKey("removeCert.description") //
+				.setIcon(FontAwesome5Icon.QUESTION) //
+				.setOkButtonKey("removeCert.confirmBtn") //
+				.setCancelButtonKey("generic.button.cancel").setOkAction(v -> {
+					settings.licenseKey.set(null);
+					v.close();
+				}) //
+				.setCancelAction(Stage::close) //
+				.build().showAndWait();
 	}
 
 	public LicenseHolder getLicenseHolder() {

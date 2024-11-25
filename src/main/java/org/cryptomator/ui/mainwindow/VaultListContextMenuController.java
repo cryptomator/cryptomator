@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -47,18 +48,18 @@ public class VaultListContextMenuController implements FxController {
 	private final ObservableValue<Boolean> selectedVaultUnlockable;
 	private final ObservableValue<Boolean> selectedVaultLockable;
 	private final ObservableList<Vault> vaults;
-	private final CustomDialog.Builder customDialog;
+	private final Provider<CustomDialog.Builder> customDialogProvider;
 
 
 	@Inject
-	VaultListContextMenuController(ObjectProperty<Vault> selectedVault,
+	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, //
 								   ObservableList<Vault> vaults, //
 								   @MainWindow Stage mainWindow, //
 								   FxApplicationWindows appWindows, //
 								   VaultService vaultService, //
 								   KeychainManager keychain, //
 								   VaultOptionsComponent.Factory vaultOptionsWindow, //
-								   CustomDialog.Builder customDialog) {
+								   Provider<CustomDialog.Builder> customDialogProvider) {
 		this.selectedVault = selectedVault;
 		this.vaults = vaults;
 		this.mainWindow = mainWindow;
@@ -66,7 +67,7 @@ public class VaultListContextMenuController implements FxController {
 		this.vaultService = vaultService;
 		this.keychain = keychain;
 		this.vaultOptionsWindow = vaultOptionsWindow;
-		this.customDialog = customDialog;
+		this.customDialogProvider = customDialogProvider;
 
 		this.selectedVaultState = selectedVault.flatMap(Vault::stateProperty).orElse(null);
 		this.selectedVaultPassphraseStored = selectedVault.map(this::isPasswordStored).orElse(false);
@@ -82,19 +83,19 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickRemoveVault() {
 		var vault = Objects.requireNonNull(selectedVault.get());
-		customDialog.setOwner(mainWindow) //
-			.setTitleKey("removeVault.title", vault.getDisplayName()) //
-			.setMessageKey("removeVault.message") //
-			.setDescriptionKey("removeVault.description") //
-			.setIcon(FontAwesome5Icon.QUESTION) //
-			.setOkButtonKey("removeVault.confirmBtn") //
-			.setCancelButtonKey("generic.button.cancel") //
-			.setOkAction(v -> {
-				LOG.debug("Removing vault {}.", vault.getDisplayName());
-				vaults.remove(vault);
-				v.close();
-			}) //
-			.build().showAndWait();
+		customDialogProvider.get().setOwner(mainWindow) //
+				.setTitleKey("removeVault.title", vault.getDisplayName()) //
+				.setMessageKey("removeVault.message") //
+				.setDescriptionKey("removeVault.description") //
+				.setIcon(FontAwesome5Icon.QUESTION) //
+				.setOkButtonKey("removeVault.confirmBtn") //
+				.setCancelButtonKey("generic.button.cancel") //
+				.setOkAction(v -> {
+					LOG.debug("Removing vault {}.", vault.getDisplayName());
+					vaults.remove(vault);
+					v.close();
+				}) //
+				.build().showAndWait();
 	}
 
 	@FXML
@@ -154,4 +155,6 @@ public class VaultListContextMenuController implements FxController {
 	public boolean isSelectedVaultPassphraseStored() {
 		return selectedVaultPassphraseStored.getValue();
 	}
+
+
 }

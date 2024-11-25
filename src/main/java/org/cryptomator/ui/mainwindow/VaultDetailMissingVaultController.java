@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -28,20 +29,19 @@ public class VaultDetailMissingVaultController implements FxController {
 	private final ObservableList<Vault> vaults;
 	private final ResourceBundle resourceBundle;
 	private final Stage window;
-	private final CustomDialog.Builder customDialog;
-
+	private final Provider<CustomDialog.Builder> customDialogProvider;
 
 	@Inject
 	public VaultDetailMissingVaultController(ObjectProperty<Vault> vault, //
 											 ObservableList<Vault> vaults, //
 											 ResourceBundle resourceBundle, //
 											 @MainWindow Stage window, //
-											 CustomDialog.Builder customDialog) {
+											 Provider<CustomDialog.Builder> customDialogProvider) {
 		this.vault = vault;
 		this.vaults = vaults;
 		this.resourceBundle = resourceBundle;
 		this.window = window;
-		this.customDialog = customDialog;
+		this.customDialogProvider = customDialogProvider;
 	}
 
 	@FXML
@@ -51,20 +51,20 @@ public class VaultDetailMissingVaultController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		customDialog.setOwner(window) //
-			.setTitleKey("removeVault.title", vault.get().getDisplayName()) //
-			.setMessageKey("removeVault.message") //
-			.setDescriptionKey("removeVault.description") //
-			.setIcon(FontAwesome5Icon.QUESTION) //
-			.setOkButtonKey("removeVault.confirmBtn") //
-			.setCancelButtonKey("generic.button.cancel") //
-			.setOkAction(v -> {
-				LOG.debug("Removing vault {}.", vault.get().getDisplayName());
-				vaults.remove(vault.get());
-				v.close();
-			}) //
-			.setCancelAction(Stage::close) //
-			.build().showAndWait();
+		customDialogProvider.get().setOwner(window) //
+				.setTitleKey("removeVault.title", vault.get().getDisplayName()) //
+				.setMessageKey("removeVault.message") //
+				.setDescriptionKey("removeVault.description") //
+				.setIcon(FontAwesome5Icon.QUESTION) //
+				.setOkButtonKey("removeVault.confirmBtn") //
+				.setCancelButtonKey("generic.button.cancel") //
+				.setOkAction(v -> {
+					LOG.debug("Removing vault {}.", vault.get().getDisplayName());
+					vaults.remove(vault.get());
+					v.close();
+				}) //
+				.setCancelAction(Stage::close) //
+				.build().showAndWait();
 		;
 	}
 

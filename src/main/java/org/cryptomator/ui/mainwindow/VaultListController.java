@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -72,7 +73,7 @@ public class VaultListController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
 	private final ObservableValue<Double> cellSize;
-	private final CustomDialog.Builder customDialog;
+	private final Provider<CustomDialog.Builder> customDialogProvider;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
@@ -92,7 +93,7 @@ public class VaultListController implements FxController {
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
 						Settings settings, //
-						CustomDialog.Builder customDialog) {
+						Provider<CustomDialog.Builder> customDialogProvider) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -102,7 +103,7 @@ public class VaultListController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
-		this.customDialog = customDialog;
+		this.customDialogProvider = customDialogProvider;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -210,20 +211,20 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			customDialog.setOwner(mainWindow) //
-				.setTitleKey("removeVault.title", vault.getDisplayName()) //
-				.setMessageKey("removeVault.message") //
-				.setDescriptionKey("removeVault.description") //
-				.setIcon(FontAwesome5Icon.QUESTION) //
-				.setOkButtonKey("removeVault.confirmBtn") //
-				.setCancelButtonKey("generic.button.cancel") //
-				.setOkAction(v -> {
-					LOG.debug("Removing vault {}.", vault.getDisplayName());
-					vaults.remove(vault);
-					v.close();
-				}) //
-				.setCancelAction(Stage::close) //
-				.build().showAndWait();
+			customDialogProvider.get().setOwner(mainWindow) //
+					.setTitleKey("removeVault.title", vault.getDisplayName()) //
+					.setMessageKey("removeVault.message") //
+					.setDescriptionKey("removeVault.description") //
+					.setIcon(FontAwesome5Icon.QUESTION) //
+					.setOkButtonKey("removeVault.confirmBtn") //
+					.setCancelButtonKey("generic.button.cancel") //
+					.setOkAction(v -> {
+						LOG.debug("Removing vault {}.", vault.getDisplayName());
+						vaults.remove(vault);
+						v.close();
+					}) //
+					.setCancelAction(Stage::close) //
+					.build().showAndWait();
 		}
 	}
 

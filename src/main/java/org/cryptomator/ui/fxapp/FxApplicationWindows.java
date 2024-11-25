@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
@@ -56,7 +57,7 @@ public class FxApplicationWindows {
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
-	private final CustomDialog.Builder customDialog;
+	private final Provider<CustomDialog.Builder> customDialogProvider;
 
 	@Inject
 	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
@@ -71,7 +72,7 @@ public class FxApplicationWindows {
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
 								ExecutorService executor, //
-								CustomDialog.Builder customDialog) {
+								Provider<CustomDialog.Builder> customDialogProvider) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -85,7 +86,7 @@ public class FxApplicationWindows {
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
-		this.customDialog = customDialog;
+		this.customDialogProvider = customDialogProvider;
 	}
 
 	public void initialize() {
@@ -149,19 +150,19 @@ public class FxApplicationWindows {
 
 	public void showDokanySupportEndWindow() {
 		CompletableFuture.runAsync(() -> {
-			customDialog.setOwner(mainWindow.get().window()) //
-				.setTitleKey("dokanySupportEnd.title") //
-				.setMessageKey("dokanySupportEnd.message") //
-				.setDescriptionKey("dokanySupportEnd.description") //
-				.setIcon(FontAwesome5Icon.QUESTION) //
-				.setOkButtonKey("generic.button.close") //
-				.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
-				.setOkAction(Stage::close) //
-				.setCancelAction(v -> {
-							showPreferencesWindow(SelectedPreferencesTab.VOLUME);
-							v.close();
-						}) //
-				.build().showAndWait();
+			customDialogProvider.get().setOwner(mainWindow.get().window()) //
+					.setTitleKey("dokanySupportEnd.title") //
+					.setMessageKey("dokanySupportEnd.message") //
+					.setDescriptionKey("dokanySupportEnd.description") //
+					.setIcon(FontAwesome5Icon.QUESTION) //
+					.setOkButtonKey("generic.button.close") //
+					.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
+					.setOkAction(Stage::close) //
+					.setCancelAction(v -> {
+						showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+						v.close();
+					}) //
+					.build().showAndWait();
 		}, Platform::runLater);
 	}
 
