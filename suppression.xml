@@ -70,4 +70,13 @@
 		<packageUrl regex="true">^pkg:maven/org\.apache\.jackrabbit/jackrabbit\-webdav@.*$</packageUrl>
 		<cve>CVE-2023-37895</cve>
 	</suppress>
+	<suppress>
+   		<notes><![CDATA[
+			The project does not use the HttpURI class at all, so no decoded user data is passed to it.
+			See also https://github.com/jetty/jetty.project/security/advisories/GHSA-qh8g-58pp-2wxh.
+		]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-(http|server|io)@.*$</packageUrl>   	
+   		<vulnerabilityName>CVE-2024-6763</vulnerabilityName>
+		<cve>CVE-2024-6763</cve>
+	</suppress>
 </suppressions>
