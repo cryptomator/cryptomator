@@ -4,13 +4,20 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
+import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.CryptorProvider;
+import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +46,10 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -47,6 +57,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_EXT;
+import static org.cryptomator.common.Constants.DEFAULT_KEY_ID;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
@@ -66,12 +77,15 @@ public class VaultListController implements FxController {
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
+	private final SecureRandom csprng;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final RemoveVaultComponent.Builder removeVaultDialogue;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
 	private final ObservableValue<Double> cellSize;
+	private final RecoveryKeyFactory recoveryKeyFactory;
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
@@ -90,8 +104,12 @@ public class VaultListController implements FxController {
 						VaultListManager vaultListManager, //
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
+						RecoveryKeyFactory recoveryKeyFactory, //
+						SecureRandom csprng, //
+						MasterkeyFileAccess masterkeyFileAccess, //
 						Settings settings) {
 		this.mainWindow = mainWindow;
+		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
@@ -103,6 +121,8 @@ public class VaultListController implements FxController {
 		this.appWindows = appWindows;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
+		this.csprng = csprng;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 
 		selectedVault.addListener(this::selectedVaultDidChange);
 		cellSize = settings.compactMode.map(compact -> compact ? 30.0 : 60.0);
@@ -202,6 +222,48 @@ public class VaultListController implements FxController {
 	@FXML
 	public void didClickAddNewVault() {
 		addVaultWizard.build().showAddNewVaultWizard(resourceBundle);
+	}
+
+	@FXML
+	public void didClickRecoverVault() {
+		Path vaultPath = Path.of("T:\\vaultFormat8");
+		Path recoveryPath = vaultPath.resolve("r");
+		String recoveryKey = "exotic ghost cooperate rain writing purple bicycle fixed first elite treaty friendly screen pull middle seventeen passport correctly bored remains give profound ultimate charm haunt retired viable ray delegate indicator race cause aluminium obesity site tactical root rumour theology glory consist comic terribly substance";
+		try {
+			Files.createDirectory(recoveryPath);
+			recoveryKeyFactory.newMasterkeyFileWithPassphrase(recoveryPath, recoveryKey, "qweqweqwe");
+		} catch (IOException e) {
+			LOG.error("Creating directory or recovering masterkey failed", e);
+		}
+
+		Path masterkeyFilePath = recoveryPath.resolve(MASTERKEY_FILENAME);
+		try (Masterkey masterkey = masterkeyFileAccess.load(masterkeyFilePath, "qweqweqwe")) {
+			try {
+				MasterkeyLoader loader = ignored -> masterkey.copy();
+				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
+						.withCipherCombo(CryptorProvider.Scheme.SIV_CTRMAC) //
+						.withKeyLoader(loader) //
+						.withShorteningThreshold(220) //
+						.build();
+				CryptoFileSystemProvider.initialize(recoveryPath, fsProps, DEFAULT_KEY_ID);
+			} catch (CryptoException | IOException e) {
+				LOG.error("Recovering vault failed", e);
+			}
+			Files.move(masterkeyFilePath, vaultPath.resolve(MASTERKEY_FILENAME));
+			Files.move(recoveryPath.resolve(VAULTCONFIG_FILENAME), vaultPath.resolve(VAULTCONFIG_FILENAME));
+			try (var paths = Files.walk(recoveryPath)) {
+				paths.sorted(Comparator.reverseOrder()).forEach(p -> {
+					try {
+						Files.delete(p);
+					} catch (IOException e) {
+						LOG.info("Unable to delete {}. Please delete it manually.", p);
+					}
+				});
+			}
+		} catch (IOException e) {
+			LOG.error("Moving recovered files failed");
+		}
+
 	}
 
 	@FXML

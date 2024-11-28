@@ -64,6 +64,11 @@
 						<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
 					</graphic>
 				</MenuItem>
+				<MenuItem styleClass="add-vault-menu-item" text="TODO RECOVER" onAction="#didClickRecoverVault" >
+					<graphic>
+						<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
+					</graphic>
+				</MenuItem>
 			</items>
 		</ContextMenu>
 	</fx:define>
