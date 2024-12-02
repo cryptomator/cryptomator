@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 
 @VaultOptionsScoped
@@ -26,7 +25,6 @@ public class MasterkeyOptionsController implements FxController {
 	private final ChangePasswordComponent.Builder changePasswordWindow;
 	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
-	public CheckBox useTouchIDheckbox;
 	private final KeychainManager keychain;
 	private final ObservableValue<Boolean> passwordSaved;
 
