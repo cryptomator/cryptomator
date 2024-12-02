@@ -1,5 +1,6 @@
 package org.cryptomator.ui.vaultoptions;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -63,7 +64,7 @@ public class MasterkeyOptionsController implements FxController {
 	 * @param wasSet
 	 * @param isSet		 <code>true</code>, when the checkbox is ticked, <code>false</code> otherwise
 	 */
-	 public synchronized void needAuthenticatedUserCheckboxToggled(Observable observable, Boolean wasSet, Boolean isSet) {
+	private void needAuthenticatedUserCheckboxToggled(Observable observable, Boolean wasSet, Boolean isSet) {
 		try {
 			var vaultId = vault.getId();
 			if (keychain.isPassphraseStored(vaultId)) {
