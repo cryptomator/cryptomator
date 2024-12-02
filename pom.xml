@@ -45,7 +45,7 @@
 		<commons-lang3.version>3.17.0</commons-lang3.version>
 		<dagger.version>2.52</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.18.1</jackson.version>
+		<jackson.version>2.18.2</jackson.version>
 		<javafx.version>22.0.2</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
