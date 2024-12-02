@@ -113,13 +113,8 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 
 	private void savePasswordToSystemkeychain(Passphrase passphrase) {
 		if (keychain.isSupported()) {
-			LOG.info(vault.getVaultSettings().useTouchID.get() ? "Using store WITH fingerprint" : "Using store WITH OUT fingerprint");
 			try {
-				if (vault.getVaultSettings().useTouchID.get()) {
-					keychain.storePassphraseForAuthenticatedUser(vault.getId(), vault.getDisplayName(), passphrase);
-				} else {
-					keychain.storePassphrase(vault.getId(), vault.getDisplayName(), passphrase);
-				}
+				keychain.storePassphrase(vault.getId(), vault.getDisplayName(), passphrase);
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to store passphrase in system keychain.", e);
 			}
