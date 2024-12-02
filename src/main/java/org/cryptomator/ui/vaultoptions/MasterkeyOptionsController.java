@@ -30,7 +30,7 @@ public class MasterkeyOptionsController implements FxController {
 	private final ChangePasswordComponent.Builder changePasswordWindow;
 	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
-	public CheckBox needAuthenticatedUserCheckbox;
+	public CheckBox useTouchIDheckbox;
 	private final KeychainManager keychain;
 	private final ObservableValue<Boolean> passwordSaved;
 
@@ -52,12 +52,10 @@ public class MasterkeyOptionsController implements FxController {
 
 	@FXML
 	public void initialize() {
-		needAuthenticatedUserCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().needAuthenticatedUser);
-		needAuthenticatedUserCheckbox.selectedProperty().addListener(this::needAuthenticatedUserCheckboxToggled);
-		// ToDo Remove or adjust, as soon as there are implementations for integrations-api
-		//  KeychainAccessProvider:storePassphraseForAuthenticatedUser for other OSes
+		useTouchIDheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().useTouchID);
+		useTouchIDheckbox.selectedProperty().addListener(this::useTouchIDheckboxToggled);
 		if (!SystemUtils.IS_OS_MAC) {
-			needAuthenticatedUserCheckbox.visibleProperty().set(false);
+			useTouchIDheckbox.visibleProperty().set(false);
 		}
 	}
 
@@ -69,7 +67,7 @@ public class MasterkeyOptionsController implements FxController {
 	 * @param wasSet
 	 * @param isSet		 <code>true</code>, when the checkbox is ticked, <code>false</code> otherwise
 	 */
-	private void needAuthenticatedUserCheckboxToggled(Observable observable, Boolean wasSet, Boolean isSet) {
+	private void useTouchIDheckboxToggled(Observable observable, Boolean wasSet, Boolean isSet) {
 		try {
 			var vautID = vault.getId();
 			if (keychain.isPassphraseStored(vautID)) {
