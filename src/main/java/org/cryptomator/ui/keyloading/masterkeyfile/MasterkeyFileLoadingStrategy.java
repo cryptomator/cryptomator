@@ -56,7 +56,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		this.keychain = keychain;
 		this.resourceBundle = resourceBundle;
 		this.passphrase = savedPassphrase.map(Passphrase::new).orElse(null);
-		this.savePassphrase = false;
+		this.savePassphrase = savedPassphrase.isPresent();
 	}
 
 	@Override
