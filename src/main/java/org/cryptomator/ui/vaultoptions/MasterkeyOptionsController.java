@@ -54,6 +54,10 @@ public class MasterkeyOptionsController implements FxController {
 	public void initialize() {
 		needAuthenticatedUserCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().needAuthenticatedUser);
 		needAuthenticatedUserCheckbox.selectedProperty().addListener(this::needAuthenticatedUserCheckboxToggled);
+		// ToDo Remove or adjust, as soon as there are implementations for integrations-api KeychainAccessProvider:storePassphraseForAuthenticatedUser for other OSes
+		if (!SystemUtils.IS_OS_MAC) {
+			needAuthenticatedUserCheckbox.setVisible(false);
+		}
 	}
 
 	/**
@@ -70,7 +74,11 @@ public class MasterkeyOptionsController implements FxController {
 			if (keychain.isPassphraseStored(vaultId)) {
 				var passphrase = keychain.loadPassphrase(vaultId);
 				keychain.deletePassphrase(vaultId);
-				keychain.storePassphrase(vaultId, vault.getId(), new Passphrase(passphrase), isSet);
+				if (isSet) {
+					keychain.storePassphraseForAuthenticatedUser(vaultId, vault.getId(), new Passphrase(passphrase));
+				} else {
+					keychain.storePassphrase(vaultId, vault.getId(), new Passphrase(passphrase));
+				}
 			}
 		} catch (KeychainAccessException e) {
 			LOG.error("Failed to migrate item in system keychain due to access control change.", e);
