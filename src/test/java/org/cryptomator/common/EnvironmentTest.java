@@ -121,6 +121,13 @@ public class EnvironmentTest {
 			env.getKeychainPath();
 			Mockito.verify(env).getPaths("cryptomator.integrationsWin.keychainPaths");
 		}
+
+		@Test
+		public void testWindowsHelloKeychainPath() {
+			Mockito.doReturn(Stream.of()).when(env).getPaths(Mockito.anyString());
+			env.getWindowsHelloKeychainPath();
+			Mockito.verify(env).getPaths("cryptomator.integrationsWin.windowsHelloKeychainPaths");
+		}
 	}
 
 }
