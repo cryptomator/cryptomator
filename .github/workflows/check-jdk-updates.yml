@@ -5,7 +5,7 @@ on:
     - cron: '0 0 1 * *' # run once a month at the first day of month
 
 env:
-  JDK_VERSION: '22.0.1+8'
+  JDK_VERSION: '23.0.1+11'
   JDK_VENDOR: zulu
 
 jobs:
@@ -28,13 +28,18 @@ jobs:
   jdk-latest:
     name: Checkout latest jdk version
     runs-on: ubuntu-latest
+    env:
+        JDK_MAJOR_VERSION: 23
     outputs:
       jdk-date: ${{ steps.get-data.outputs.jdk-date}}
       jdk-version: ${{ steps.get-data.outputs.jdk-version}}
     steps:
+      - name: Extract major version
+        run: echo 'JDK_MAJOR_VERSION=${{ env.JDK_VERSION }}'.substring(0,20) >> "$env:GITHUB_ENV"
+        shell: pwsh
       - uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: ${{ env.JDK_MAJOR_VERSION}}
           distribution: ${{ env.JDK_VENDOR }}
           check-latest: true
       - name: Read JAVA_VERSION_DATE and store in env variable
