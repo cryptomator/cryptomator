@@ -49,13 +49,20 @@ public class HubConfig {
 
 	public class URIProcessors {
 
+		public final URIProcessor API = this::fromApiEndpoint;
+
 		/**
 		 * Resolves paths relative to the <code>/api/</code> endpoint of this Hub instance.
 		 */
-		public URI getApi(String path) {
+		public URI fromApiEndpoint(String path) {
 			var relPath = path.startsWith("/") ? path.substring(1) : path;
 			return getApiBaseUrl().resolve(relPath);
-		};
+		}
+	}
 
+	@FunctionalInterface
+	public interface URIProcessor {
+
+		URI resolve(String path);
 	}
 }

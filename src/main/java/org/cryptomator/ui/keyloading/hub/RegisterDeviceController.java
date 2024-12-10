@@ -115,7 +115,7 @@ public class RegisterDeviceController implements FxController {
 		workInProgress.set(true);
 
 
-		var userReq = HttpRequest.newBuilder(hubConfig.URIs.getApi("users/me")) //
+		var userReq = HttpRequest.newBuilder(hubConfig.URIs.API.resolve("users/me")) //
 				.GET() //
 				.timeout(REQ_TIMEOUT) //
 				.header("Authorization", "Bearer " + bearerToken) //
@@ -143,7 +143,7 @@ public class RegisterDeviceController implements FxController {
 					var now = Instant.now().toString();
 					var dto = new CreateDeviceDto(deviceId, deviceNameField.getText(), BaseEncoding.base64().encode(deviceKeyPair.getPublic().getEncoded()), "DESKTOP", jwe.serialize(), now);
 					var json = toJson(dto);
-					var deviceUri = hubConfig.URIs.getApi("devices/" + deviceId);
+					var deviceUri = hubConfig.URIs.fromApiEndpoint("devices/" + deviceId);
 					var putDeviceReq = HttpRequest.newBuilder(deviceUri) //
 							.PUT(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8)) //
 							.timeout(REQ_TIMEOUT) //
@@ -164,7 +164,7 @@ public class RegisterDeviceController implements FxController {
 	private void migrateLegacyDevices(ECPublicKey userPublicKey) {
 		try {
 			// GET legacy access tokens
-			var getUri = hubConfig.URIs.getApi("devices/" + deviceId + "/legacy-access-tokens");
+			var getUri = hubConfig.URIs.API.resolve("devices/" + deviceId + "/legacy-access-tokens");
 			var getReq = HttpRequest.newBuilder(getUri).GET().timeout(REQ_TIMEOUT).header("Authorization", "Bearer " + bearerToken).build();
 			var getRes = httpClient.send(getReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 			if (getRes.statusCode() != 200) {
@@ -185,7 +185,7 @@ public class RegisterDeviceController implements FxController {
 					LOG.warn("Failed to decrypt legacy access token for vault {}. Skipping migration.", entry.getKey());
 				}
 			}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-			var postUri = hubConfig.URIs.getApi("users/me/access-tokens");
+			var postUri = hubConfig.URIs.fromApiEndpoint("users/me/access-tokens");
 			var postBody = JSON.writer().writeValueAsString(newAccessTokens);
 			var postReq = HttpRequest.newBuilder(postUri).POST(HttpRequest.BodyPublishers.ofString(postBody)).timeout(REQ_TIMEOUT).header("Authorization", "Bearer " + bearerToken).build();
 			var postRes = httpClient.send(postReq, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
