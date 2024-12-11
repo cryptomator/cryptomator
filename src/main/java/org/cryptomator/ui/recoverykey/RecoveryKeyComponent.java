@@ -38,6 +38,13 @@ public interface RecoveryKeyComponent {
 		stage.show();
 	}
 
+	default void showRecoveryKeyRecoverWindow(String title) {
+		Stage stage = window();
+		stage.setScene(recoverScene().get());
+		stage.setTitle(title);
+		stage.sizeToScene();
+		stage.show();
+	}
 
 	@Subcomponent.Factory
 	interface Factory {

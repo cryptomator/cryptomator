@@ -3,6 +3,7 @@ package org.cryptomator.ui.mainwindow;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 
 import javax.inject.Inject;
@@ -22,14 +23,17 @@ public class VaultDetailMissingVaultController implements FxController {
 	private final RemoveVaultComponent.Builder removeVault;
 	private final ResourceBundle resourceBundle;
 	private final Stage window;
+	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
+
 
 
 	@Inject
-	public VaultDetailMissingVaultController(ObjectProperty<Vault> vault, RemoveVaultComponent.Builder removeVault, ResourceBundle resourceBundle, @MainWindow Stage window) {
+	public VaultDetailMissingVaultController(ObjectProperty<Vault> vault, RemoveVaultComponent.Builder removeVault, ResourceBundle resourceBundle, @MainWindow Stage window, RecoveryKeyComponent.Factory recoveryKeyWindow) {
 		this.vault = vault;
 		this.removeVault = removeVault;
 		this.resourceBundle = resourceBundle;
 		this.window = window;
+		this.recoveryKeyWindow = recoveryKeyWindow;
 	}
 
 	@FXML
@@ -40,6 +44,15 @@ public class VaultDetailMissingVaultController implements FxController {
 	@FXML
 	void didClickRemoveVault() {
 		removeVault.vault(vault.get()).build().showRemoveVault();
+	}
+
+	@FXML
+	void restoreVaultConfig(){
+		recoveryKeyWindow.create(vault.get(), window).showRecoveryKeyRecoverWindow("Recover VaultConfig");
+	}
+	@FXML
+	void restoreMasterkey(){
+		recoveryKeyWindow.create(vault.get(), window).showRecoveryKeyRecoverWindow("Recover Masterkey");
 	}
 
 	@FXML

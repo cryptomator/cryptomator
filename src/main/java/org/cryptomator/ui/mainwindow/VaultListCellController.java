@@ -47,6 +47,8 @@ public class VaultListCellController implements FxController {
 				case PROCESSING -> FontAwesome5Icon.SPINNER;
 				case UNLOCKED -> FontAwesome5Icon.LOCK_OPEN;
 				case NEEDS_MIGRATION, MISSING, ERROR -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+				case VAULT_CONFIG_MISSING -> FontAwesome5Icon.COGS;
+				case MASTERKEY_MISSING -> FontAwesome5Icon.KEY;
 			};
 		} else {
 			return FontAwesome5Icon.EXCLAMATION_TRIANGLE;

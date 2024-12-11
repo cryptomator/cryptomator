@@ -25,15 +25,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 @Singleton
 public class VaultListManager {
@@ -129,7 +134,7 @@ public class VaultListManager {
 		VaultState state = vault.stateProperty();
 		VaultState.Value previousState = state.getValue();
 		return switch (previousState) {
-			case LOCKED, NEEDS_MIGRATION, MISSING -> {
+			case LOCKED, NEEDS_MIGRATION, MISSING, VAULT_CONFIG_MISSING, MASTERKEY_MISSING -> {
 				try {
 					var determinedState = determineVaultState(vault.getPath());
 					if (determinedState == LOCKED) {
@@ -149,7 +154,56 @@ public class VaultListManager {
 	}
 
 	private static VaultState.Value determineVaultState(Path pathToVault) throws IOException {
-		if (!Files.exists(pathToVault)) {
+		Path pathToVaultConfig = Path.of(pathToVault.toString(),"vault.cryptomator");
+		Path pathToMasterkey = Path.of(pathToVault.toString(),"masterkey.cryptomator");
+		if (!Files.exists(pathToVaultConfig)) {
+			try (Stream<Path> files = Files.list(pathToVaultConfig.getParent())) {
+				Path backupFile = files.filter(file -> {
+					String fileName = file.getFileName().toString();
+					return fileName.startsWith("vault.cryptomator") && fileName.endsWith(".bkup");
+				}).findFirst().orElse(null);
+
+				if (backupFile != null) {
+					try {
+						Files.copy(backupFile, pathToVaultConfig, StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {
+						LOG.error("error",e);
+						return VAULT_CONFIG_MISSING;
+					}
+				} else {
+					return VAULT_CONFIG_MISSING;
+				}
+			} catch (IOException e) {
+				LOG.error("error",e);
+				return VAULT_CONFIG_MISSING;
+			}
+
+		}
+		else if (!Files.exists(pathToMasterkey)) {
+			//return VaultState.Value.MASTERKEY_MISSING;
+			try (Stream<Path> files = Files.list(pathToMasterkey.getParent())) {
+				Path backupFile = files.filter(file -> {
+					String fileName = file.getFileName().toString();
+					return fileName.startsWith("masterkey.cryptomator") && fileName.endsWith(".bkup");
+				}).findFirst().orElse(null);
+
+				if (backupFile != null) {
+					try {
+						Files.copy(backupFile, pathToMasterkey, StandardCopyOption.REPLACE_EXISTING);
+						return MASTERKEY_MISSING;
+					} catch (IOException e) {
+						LOG.error("error",e);
+						return MASTERKEY_MISSING;
+					}
+				} else {
+					return MASTERKEY_MISSING;
+				}
+			} catch (IOException e) {
+				LOG.error("error",e);
+				return MASTERKEY_MISSING;
+			}
+		}
+		else if (!Files.exists(pathToVault)) {
 			return VaultState.Value.MISSING;
 		}
 		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {

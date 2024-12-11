@@ -70,6 +70,8 @@ public class Vault {
 	private final BooleanBinding missing;
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
+	private final BooleanBinding missingMasterkey;
+	private final BooleanBinding missingVaultConfig;
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final Settings settings;
@@ -96,6 +98,8 @@ public class Vault {
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
 		this.missing = Bindings.createBooleanBinding(this::isMissing, state);
+		this.missingMasterkey = Bindings.createBooleanBinding(this::isMissingMasterkey, state);
+		this.missingVaultConfig = Bindings.createBooleanBinding(this::isMissingVaultConfig, state);
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
@@ -313,6 +317,22 @@ public class Vault {
 
 	public boolean isUnknownError() {
 		return state.get() == VaultState.Value.ERROR;
+	}
+
+	public BooleanBinding missingMasterkeyProperty() {
+		return missingMasterkey;
+	}
+
+	public boolean isMissingMasterkey() {
+		return state.get() == VaultState.Value.MASTERKEY_MISSING;
+	}
+
+	public BooleanBinding missingVaultConfigProperty() {
+		return missingVaultConfig;
+	}
+
+	public boolean isMissingVaultConfig() {
+		return state.get() == VaultState.Value.VAULT_CONFIG_MISSING;
 	}
 
 	public ReadOnlyStringProperty displayNameProperty() {

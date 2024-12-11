@@ -25,6 +25,10 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		 */
 		MISSING,
 
+		VAULT_CONFIG_MISSING,
+
+		MASTERKEY_MISSING,
+
 		/**
 		 * Vault requires migration to a newer vault format
 		 */
