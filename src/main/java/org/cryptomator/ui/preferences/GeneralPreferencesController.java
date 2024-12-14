@@ -1,10 +1,14 @@
 package org.cryptomator.ui.preferences;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.Passphrase;
+import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.common.NamedServiceProvider;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.cryptomator.ui.common.FxController;
@@ -14,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Application;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -36,6 +41,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Application application;
 	private final Environment environment;
 	private final List<KeychainAccessProvider> keychainAccessProviders;
+	private final KeychainManager keychain;
 	private final FxApplicationWindows appWindows;
 	public CheckBox useKeychainCheckbox;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
@@ -48,11 +54,12 @@ public class GeneralPreferencesController implements FxController {
 	public ToggleGroup nodeOrientation;
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, Application application, Environment environment, FxApplicationWindows appWindows) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, KeychainManager keychain, Application application, Environment environment, FxApplicationWindows appWindows) {
 		this.window = window;
 		this.settings = settings;
 		this.autoStartProvider = autoStartProvider;
 		this.keychainAccessProviders = keychainAccessProviders;
+		this.keychain = keychain;
 		this.quickAccessServices = QuickAccessService.get().toList();
 		this.application = application;
 		this.environment = environment;
@@ -73,6 +80,7 @@ public class GeneralPreferencesController implements FxController {
 		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
 		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
+		keychainBackendChoiceBox.valueProperty().addListener(this::migrateKeychainEntriesOnMac);
 
 		useQuickAccessCheckbox.selectedProperty().bindBidirectional(settings.useQuickAccess);
 		var quickAccessSettingsConverter = new ServiceToSettingsConverter<>(quickAccessServices);
@@ -81,6 +89,35 @@ public class GeneralPreferencesController implements FxController {
 		quickAccessServiceChoiceBox.setConverter(new NamedServiceConverter<>());
 		Bindings.bindBidirectional(settings.quickAccessService, quickAccessServiceChoiceBox.valueProperty(), quickAccessSettingsConverter);
 		quickAccessServiceChoiceBox.disableProperty().bind(useQuickAccessCheckbox.selectedProperty().not());
+	}
+
+	public void migrateKeychainEntriesOnMac(Observable observable) {
+		if (!SystemUtils.IS_OS_MAC) {
+			return;
+		}
+
+		var provider = keychainBackendChoiceBox.getSelectionModel().getSelectedItem();
+		var providerId = "org.cryptomator.macos.keychain.MacSystemKeychainAccess";
+		var isSystemKeychain = provider.getClass().getName().equals(providerId);
+
+		List<String> vaults = settings.directories.stream()
+				.map(vault -> vault.id)
+				.toList();
+
+		if (!vaults.isEmpty()) {
+			LOG.info("Migrating keychain entries for vaults: {}", vaults);
+		}
+		for (String vaultId :vaults) {
+			try {
+				if (keychain.isPassphraseStored(vaultId)) {
+					var passphrase = keychain.loadPassphrase(vaultId);
+					keychain.deletePassphrase(vaultId);
+					keychain.storePassphrase(vaultId, vaultId, new Passphrase(passphrase), !isSystemKeychain);
+				}
+			} catch (KeychainAccessException e) {
+				LOG.error("Failed to migrate keychain entries.", e);
+			}
+		}
 	}
 
 	public boolean isAutoStartSupported() {
