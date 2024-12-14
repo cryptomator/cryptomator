@@ -160,7 +160,7 @@ public class Mounter {
 		var mountService = mountProviders.stream().filter(s -> s.getClass().getName().equals(vaultSettings.mountService.getValue())).findFirst().orElse(defaultMountService.getValue());
 
 		if (isConflictingMountService(mountService)) {
-			var msg = STR."\{mountService.getClass()} unavailable due to conflict with either of \{CONFLICTING_MOUNT_SERVICES.get(mountService.getClass().getName())}";
+			var msg = mountService.getClass() + " unavailable due to conflict with either of " + CONFLICTING_MOUNT_SERVICES.get(mountService.getClass().getName());
 			throw new ConflictingMountServiceException(msg);
 		}
 

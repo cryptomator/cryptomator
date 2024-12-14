@@ -11,7 +11,7 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '22.0.2+9'
+  JAVA_VERSION: '23.0.1+11'
 
 jobs:
   get-version:
@@ -116,7 +116,6 @@ jobs:
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\""
           --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
-          --add-launcher Cryptomator-gtk2=launcher-gtk2.properties
           --resource-dir dist/linux/resources
       - name: Patch Cryptomator.AppDir
         run: |

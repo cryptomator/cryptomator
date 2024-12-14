@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-JAVA_HOME = /usr/lib/jvm/java-22-coffeelibs
+JAVA_HOME = /usr/lib/jvm/java-23-coffeelibs
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DEB_BUILD_ARCH),amd64)
 JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods

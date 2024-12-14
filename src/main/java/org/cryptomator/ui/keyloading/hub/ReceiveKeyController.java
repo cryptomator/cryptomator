@@ -88,7 +88,7 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 0 (Request): GET /api/config
 	 */
 	private void requestApiConfig() {
-		var configUri = hubConfig.URIs.API."config";
+		var configUri = hubConfig.URIs.API.resolve("config");
 		var request = HttpRequest.newBuilder(configUri) //
 				.GET() //
 				.timeout(REQ_TIMEOUT) //
@@ -122,7 +122,7 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 1 (Request): GET user key for this device
 	 */
 	private void requestDeviceData() {
-		var deviceUri = hubConfig.URIs.API."devices/\{deviceId}";
+		var deviceUri = hubConfig.URIs.API.resolve("devices/" + deviceId);
 		var request = HttpRequest.newBuilder(deviceUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -162,7 +162,7 @@ public class ReceiveKeyController implements FxController {
 	 * STEP 2 (Request): GET vault key for this user
 	 */
 	private void requestVaultMasterkey(String encryptedUserKey) {
-		var vaultKeyUri = hubConfig.URIs.API."vaults/\{vaultId}/access-token";
+		var vaultKeyUri = hubConfig.URIs.API.resolve("vaults/" + vaultId + "/access-token");
 		var request = HttpRequest.newBuilder(vaultKeyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -205,7 +205,7 @@ public class ReceiveKeyController implements FxController {
 	 */
 	@Deprecated
 	private void requestLegacyAccessToken() {
-		var legacyAccessTokenUri = hubConfig.URIs.API."vaults/\{vaultId}/keys/\{deviceId}";
+		var legacyAccessTokenUri = hubConfig.URIs.API.resolve("vaults/" + vaultId + "/keys/" + deviceId);
 		var request = HttpRequest.newBuilder(legacyAccessTokenUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
