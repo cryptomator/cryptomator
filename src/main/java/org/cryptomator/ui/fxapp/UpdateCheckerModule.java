@@ -5,6 +5,7 @@ import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.integrations.common.IntegrationsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
