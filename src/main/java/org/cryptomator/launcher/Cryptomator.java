@@ -48,6 +48,7 @@ public class Cryptomator {
 				System.out.println("Setting default provider successful");
 			} catch (SSLContextProvider.SSLContextBuildException e) {
 				//TODO: Log
+				System.out.println(e.getCause().getMessage());
 			}
 		});
 	}
