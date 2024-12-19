@@ -14,19 +14,21 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
+/**
+ * SSLContextProvider for Windows using the Windows certificate store
+ * <p>
+ * Provided by jdk.crypto.mscapi jmod
+ */
 @OperatingSystem(OperatingSystem.Value.WINDOWS)
 public class WindowsCertStore implements SSLContextProvider {
 
 	@Override
 	public SSLContext getContext(SecureRandom csprng) throws SSLContextBuildException {
-		//KeyStore truststore = KeyStore.getInstance("Windows-MY");
-		KeyStore truststore = null;
 		try {
-			truststore = KeyStore.getInstance("WINDOWS-ROOT");
+			KeyStore truststore = KeyStore.getInstance("WINDOWS-ROOT");
 			truststore.load(null, null);
 
 			KeyStore keystore;
-			//keystore = KeyStore.getInstance("WINDOWS-ROOT");
 			keystore = KeyStore.getInstance("Windows-MY");
 			keystore.load(null, null);
 			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
