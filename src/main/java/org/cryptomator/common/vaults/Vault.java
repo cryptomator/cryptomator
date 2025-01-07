@@ -44,6 +44,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.ReadOnlyFileSystemException;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
@@ -111,11 +112,19 @@ public class Vault {
 
 	private CryptoFileSystem createCryptoFileSystem(MasterkeyLoader keyLoader) throws IOException, MasterkeyLoadingFailedException {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
-		if (vaultSettings.usesReadOnlyMode.get()) {
+		var checker = new FileSystemCapabilityChecker();
+		var createReadOnly = vaultSettings.usesReadOnlyMode.get();
+		try {
+			checker.assertWriteAccess(getPath());
+		} catch (FileSystemCapabilityChecker.MissingCapabilityException e) {
+			if (!createReadOnly) {
+				throw new ReadOnlyFileSystemException();
+			}
+		}
+		if (createReadOnly) {
 			flags.add(FileSystemFlags.READONLY);
 		} else if (vaultSettings.maxCleartextFilenameLength.get() == -1) {
 			LOG.debug("Determining cleartext filename length limitations...");
-			var checker = new FileSystemCapabilityChecker();
 			int shorteningThreshold = configCache.get().allegedShorteningThreshold();
 			int ciphertextLimit = checker.determineSupportedCiphertextFileNameLength(getPath());
 			if (ciphertextLimit < shorteningThreshold) {

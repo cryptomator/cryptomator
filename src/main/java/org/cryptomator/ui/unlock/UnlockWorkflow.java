@@ -25,6 +25,7 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.nio.file.ReadOnlyFileSystemException;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -144,9 +145,14 @@ public class UnlockWorkflow extends Task<Void> {
 		switch (throwable) {
 			case IllegalMountPointException e -> handleIllegalMountPointError(e);
 			case ConflictingMountServiceException _ -> handleConflictingMountServiceException();
+			case ReadOnlyFileSystemException _ -> handleReadOnlyFileSystem();
 			default -> handleGenericError(throwable);
 		}
 		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
+	}
+
+	private void handleReadOnlyFileSystem() {
+		//TODO show retry dialog
 	}
 
 	@Override
