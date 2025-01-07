@@ -6,6 +6,7 @@ import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
@@ -83,19 +84,7 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickRemoveVault() {
 		var vault = Objects.requireNonNull(selectedVault.get());
-		simpleDialogProvider.get().setOwner(mainWindow) //
-				.setTitleKey("removeVault.title", vault.getDisplayName()) //
-				.setMessageKey("removeVault.message") //
-				.setDescriptionKey("removeVault.description") //
-				.setIcon(FontAwesome5Icon.QUESTION) //
-				.setOkButtonKey("removeVault.confirmBtn") //
-				.setCancelButtonKey("generic.button.cancel") //
-				.setOkAction(v -> {
-					LOG.debug("Removing vault {}.", vault.getDisplayName());
-					vaults.remove(vault);
-					v.close();
-				}) //
-				.build().showAndWait();
+		Dialogs.showRemoveVaultDialog(simpleDialogProvider.get(),mainWindow,vault,vaults);
 	}
 
 	@FXML

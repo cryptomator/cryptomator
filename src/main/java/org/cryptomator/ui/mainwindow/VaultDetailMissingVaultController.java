@@ -3,6 +3,7 @@ package org.cryptomator.ui.mainwindow;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.slf4j.Logger;
@@ -51,21 +52,7 @@ public class VaultDetailMissingVaultController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		simpleDialogProvider.get().setOwner(window) //
-				.setTitleKey("removeVault.title", vault.get().getDisplayName()) //
-				.setMessageKey("removeVault.message") //
-				.setDescriptionKey("removeVault.description") //
-				.setIcon(FontAwesome5Icon.QUESTION) //
-				.setOkButtonKey("removeVault.confirmBtn") //
-				.setCancelButtonKey("generic.button.cancel") //
-				.setOkAction(v -> {
-					LOG.debug("Removing vault {}.", vault.get().getDisplayName());
-					vaults.remove(vault.get());
-					v.close();
-				}) //
-				.setCancelAction(Stage::close) //
-				.build().showAndWait();
-		;
+		Dialogs.showRemoveVaultDialog(simpleDialogProvider.get(),window,vault.get(),vaults);
 	}
 
 	@FXML
