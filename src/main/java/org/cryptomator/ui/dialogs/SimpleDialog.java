@@ -31,7 +31,7 @@ public class SimpleDialog {
 		dialogStage.setResizable(false);
 
 		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(new SimpleDialogController(), Scene::new, builder.resourceBundle);
-		FXMLLoader loader = loaderFactory.load(FxmlFile.CUSTOM_DIALOG.getRessourcePathString());
+		FXMLLoader loader = loaderFactory.load(FxmlFile.SIMPLE_DIALOG.getRessourcePathString());
 		Parent root = loader.getRoot();
 		SimpleDialogController controller = loader.getController();
 
