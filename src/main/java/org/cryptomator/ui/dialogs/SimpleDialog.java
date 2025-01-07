@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.IllegalFormatException;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -128,10 +129,16 @@ public class SimpleDialog {
 		}
 
 		public SimpleDialog build() {
+			Objects.requireNonNull(titleKey,"SimpleDialog titleKey must be set.");
+			Objects.requireNonNull(messageKey,"SimpleDialog messageKey must be set.");
+			Objects.requireNonNull(descriptionKey,"SimpleDialog descriptionKey must be set.");
+			Objects.requireNonNull(okButtonKey,"SimpleDialog okButtonKey must be set.");
+			Objects.requireNonNull(cancelButtonKey,"SimpleDialog cancelButtonKey must be set.");
+
 			try {
 				return new SimpleDialog(this);
 			} catch (IOException e) {
-				throw new UncheckedIOException("Failed to create CustomDialog.", e);
+				throw new UncheckedIOException("Failed to create SimpleDialog.", e);
 			}
 		}
 	}
