@@ -3,6 +3,7 @@ name: Checks JDK version for minor updates
 on:
   schedule:
     - cron: '0 0 1 * *' # run once a month at the first day of month
+  workflow_dispatch:
 
 env:
   JDK_VERSION: '23.0.1+11'
