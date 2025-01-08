@@ -5,8 +5,8 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
-import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -57,7 +57,7 @@ public class FxApplicationWindows {
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
-	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
 
 	@Inject
 	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
@@ -72,7 +72,7 @@ public class FxApplicationWindows {
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
 								ExecutorService executor, //
-								Provider<SimpleDialog.Builder> simpleDialogProvider) {
+								Provider<SimpleDialog.Builder> simpleDialogBuilder) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -86,7 +86,7 @@ public class FxApplicationWindows {
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
-		this.simpleDialogProvider = simpleDialogProvider;
+		this.simpleDialogBuilder = simpleDialogBuilder;
 	}
 
 	public void initialize() {
@@ -150,19 +150,14 @@ public class FxApplicationWindows {
 
 	public void showDokanySupportEndWindow() {
 		CompletableFuture.runAsync(() -> {
-			simpleDialogProvider.get().setOwner(mainWindow.get().window()) //
-					.setTitleKey("dokanySupportEnd.title") //
-					.setMessageKey("dokanySupportEnd.message") //
-					.setDescriptionKey("dokanySupportEnd.description") //
-					.setIcon(FontAwesome5Icon.QUESTION) //
-					.setOkButtonKey("generic.button.close") //
-					.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
-					.setOkAction(Stage::close) //
-					.setCancelAction(v -> {
+			Dialogs.buildDokanySupportEndDialog(
+					simpleDialogBuilder.get(),
+					mainWindow.get().window(),
+					v -> {
 						showPreferencesWindow(SelectedPreferencesTab.VOLUME);
 						v.close();
-					}) //
-					.build().showAndWait();
+					}
+			).showAndWait();
 		}, Platform::runLater);
 	}
 

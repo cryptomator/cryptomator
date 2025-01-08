@@ -11,7 +11,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
-import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.slf4j.Logger;
@@ -74,7 +73,7 @@ public class VaultListController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
 	private final ObservableValue<Double> cellSize;
-	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
@@ -94,7 +93,7 @@ public class VaultListController implements FxController {
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
 						Settings settings, //
-						Provider<SimpleDialog.Builder> simpleDialogProvider) {
+						Provider<SimpleDialog.Builder> simpleDialogBuilder) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -104,7 +103,7 @@ public class VaultListController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
-		this.simpleDialogProvider = simpleDialogProvider;
+		this.simpleDialogBuilder = simpleDialogBuilder;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -212,7 +211,7 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			Dialogs.showRemoveVaultDialog(simpleDialogProvider.get(),mainWindow,vault,vaults);
+			Dialogs.buildRemoveVaultDialog(simpleDialogBuilder.get(),mainWindow,vault,vaults).showAndWait();
 		}
 	}
 

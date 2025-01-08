@@ -5,7 +5,6 @@ import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
-import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,19 +29,19 @@ public class VaultDetailMissingVaultController implements FxController {
 	private final ObservableList<Vault> vaults;
 	private final ResourceBundle resourceBundle;
 	private final Stage window;
-	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
 
 	@Inject
 	public VaultDetailMissingVaultController(ObjectProperty<Vault> vault, //
 											 ObservableList<Vault> vaults, //
 											 ResourceBundle resourceBundle, //
 											 @MainWindow Stage window, //
-											 Provider<SimpleDialog.Builder> simpleDialogProvider) {
+											 Provider<SimpleDialog.Builder> simpleDialogBuilder) {
 		this.vault = vault;
 		this.vaults = vaults;
 		this.resourceBundle = resourceBundle;
 		this.window = window;
-		this.simpleDialogProvider = simpleDialogProvider;
+		this.simpleDialogBuilder = simpleDialogBuilder;
 	}
 
 	@FXML
@@ -52,7 +51,7 @@ public class VaultDetailMissingVaultController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		Dialogs.showRemoveVaultDialog(simpleDialogProvider.get(),window,vault.get(),vaults);
+		Dialogs.buildRemoveVaultDialog(simpleDialogBuilder.get(),window,vault.get(),vaults).showAndWait();
 	}
 
 	@FXML

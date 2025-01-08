@@ -5,7 +5,6 @@ import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
-import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ public class VaultDetailUnknownErrorController implements FxController {
 	private final Stage errorWindow;
 	private final ObservableList<Vault> vaults;
 	private final Stage mainWindow;
-	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
 
 	@Inject
 	public VaultDetailUnknownErrorController(@MainWindow Stage mainWindow, //
@@ -36,13 +35,13 @@ public class VaultDetailUnknownErrorController implements FxController {
 											 ObservableList<Vault> vaults, //
 											 FxApplicationWindows appWindows, //
 											 @Named("errorWindow") Stage errorWindow, //
-											 Provider<SimpleDialog.Builder> simpleDialogProvider) {
+											 Provider<SimpleDialog.Builder> simpleDialogBuilder) {
 		this.mainWindow = mainWindow;
 		this.vault = vault;
 		this.vaults = vaults;
 		this.appWindows = appWindows;
 		this.errorWindow = errorWindow;
-		this.simpleDialogProvider = simpleDialogProvider;
+		this.simpleDialogBuilder = simpleDialogBuilder;
 	}
 
 	@FXML
@@ -57,6 +56,6 @@ public class VaultDetailUnknownErrorController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		Dialogs.showRemoveVaultDialog(simpleDialogProvider.get(),mainWindow,vault.get(),vaults);
+		Dialogs.buildRemoveVaultDialog(simpleDialogBuilder.get(),mainWindow,vault.get(),vaults).showAndWait();
 	}
 }

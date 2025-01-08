@@ -5,7 +5,6 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
@@ -49,7 +48,7 @@ public class VaultListContextMenuController implements FxController {
 	private final ObservableValue<Boolean> selectedVaultUnlockable;
 	private final ObservableValue<Boolean> selectedVaultLockable;
 	private final ObservableList<Vault> vaults;
-	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
 
 
 	@Inject
@@ -60,7 +59,7 @@ public class VaultListContextMenuController implements FxController {
 								   VaultService vaultService, //
 								   KeychainManager keychain, //
 								   VaultOptionsComponent.Factory vaultOptionsWindow, //
-								   Provider<SimpleDialog.Builder> simpleDialogProvider) {
+								   Provider<SimpleDialog.Builder> simpleDialogBuilder) {
 		this.selectedVault = selectedVault;
 		this.vaults = vaults;
 		this.mainWindow = mainWindow;
@@ -68,7 +67,7 @@ public class VaultListContextMenuController implements FxController {
 		this.vaultService = vaultService;
 		this.keychain = keychain;
 		this.vaultOptionsWindow = vaultOptionsWindow;
-		this.simpleDialogProvider = simpleDialogProvider;
+		this.simpleDialogBuilder = simpleDialogBuilder;
 
 		this.selectedVaultState = selectedVault.flatMap(Vault::stateProperty).orElse(null);
 		this.selectedVaultPassphraseStored = selectedVault.map(this::isPasswordStored).orElse(false);
@@ -84,7 +83,7 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickRemoveVault() {
 		var vault = Objects.requireNonNull(selectedVault.get());
-		Dialogs.showRemoveVaultDialog(simpleDialogProvider.get(),mainWindow,vault,vaults);
+		Dialogs.buildRemoveVaultDialog(simpleDialogBuilder.get(),mainWindow,vault,vaults).showAndWait();
 	}
 
 	@FXML

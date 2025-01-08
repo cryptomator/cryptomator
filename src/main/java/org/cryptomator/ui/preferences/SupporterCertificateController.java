@@ -5,8 +5,8 @@ import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
-import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -28,7 +28,7 @@ public class SupporterCertificateController implements FxController {
 	private final Stage window;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final Provider<SimpleDialog.Builder> simpleDialogProvider;
+	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
 
 	@FXML
 	private TextArea supporterCertificateField;
@@ -38,12 +38,12 @@ public class SupporterCertificateController implements FxController {
 								   @PreferencesWindow Stage window,  //
 								   LicenseHolder licenseHolder, //
 								   Settings settings, //
-								   Provider<SimpleDialog.Builder> simpleDialogProvider) {
+								   Provider<SimpleDialog.Builder> simpleDialogBuilder) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.simpleDialogProvider = simpleDialogProvider;
+		this.simpleDialogBuilder = simpleDialogBuilder;
 	}
 
 	@FXML
@@ -90,18 +90,7 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		simpleDialogProvider.get().setOwner(window) //
-				.setTitleKey("removeCert.title") //
-				.setMessageKey("removeCert.message") //
-				.setDescriptionKey("removeCert.description") //
-				.setIcon(FontAwesome5Icon.QUESTION) //
-				.setOkButtonKey("removeCert.confirmBtn") //
-				.setCancelButtonKey("generic.button.cancel").setOkAction(v -> {
-					settings.licenseKey.set(null);
-					v.close();
-				}) //
-				.setCancelAction(Stage::close) //
-				.build().showAndWait();
+		Dialogs.buildRemoveCertDialog(simpleDialogBuilder.get(),window,settings).showAndWait();
 	}
 
 	public LicenseHolder getLicenseHolder() {
