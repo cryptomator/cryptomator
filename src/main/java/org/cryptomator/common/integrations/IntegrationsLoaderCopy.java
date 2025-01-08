@@ -1,6 +1,5 @@
-package org.cryptomator.common.sslcontext;
+package org.cryptomator.common.integrations;
 
-import org.cryptomator.common.locationpresets.LocationPresetsProvider;
 import org.cryptomator.integrations.common.CheckAvailability;
 import org.cryptomator.integrations.common.IntegrationsLoader;
 import org.cryptomator.integrations.common.OperatingSystem;
@@ -8,34 +7,28 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
-public interface SSLContextProvider {
+/**
+ * Copy of {@link IntegrationsLoader} due to module visibility problems
+ */
+public class IntegrationsLoaderCopy {
 
-	Logger LOG = LoggerFactory.getLogger(SSLContextProvider.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IntegrationsLoaderCopy.class);
 
-	SSLContext getContext(SecureRandom csprng) throws SSLContextBuildException;
+	private IntegrationsLoaderCopy() {}
 
-	class SSLContextBuildException extends Exception {
-
-		SSLContextBuildException(Throwable t) {
-			super(t);
-		}
-	}
-
-	static Stream<SSLContextProvider> loadAll() {
-		return ServiceLoader.load(SSLContextProvider.class)
-				.stream()
-				.filter(SSLContextProvider::isSupportedOperatingSystem)
-				.filter(SSLContextProvider::passesStaticAvailabilityCheck)
-				.map(ServiceLoader.Provider::get)
-				.peek(impl -> logServiceIsAvailable(SSLContextProvider.class, impl.getClass()));
+	public static <T> Stream<T> loadAll(Class<T> clazz) {
+		return ServiceLoader.load(clazz) //
+				.stream() //
+				.filter(IntegrationsLoaderCopy::isSupportedOperatingSystem) //
+				.filter(IntegrationsLoaderCopy::passesStaticAvailabilityCheck) //
+				.map(ServiceLoader.Provider::get) //
+				.peek(impl -> logServiceIsAvailable(clazz, impl.getClass()));
 	}
 
 
@@ -66,9 +59,7 @@ public interface SSLContextProvider {
 			LOG.error("Can't run @CheckAvailability tests for class {}. Make sure to export {} to {}!", type.getName(), type.getPackageName(), IntegrationsLoader.class.getPackageName());
 			return false;
 		}
-		return Arrays.stream(type.getMethods())
-				.filter(m -> isAvailabilityCheck(m, instance == null))
-				.allMatch(m -> passesAvailabilityCheck(m, instance));
+		return Arrays.stream(type.getMethods()).filter(m -> isAvailabilityCheck(m, instance == null)).allMatch(m -> passesAvailabilityCheck(m, instance));
 	}
 
 	private static boolean passesAvailabilityCheck(Method m, @Nullable Object instance) {
@@ -82,9 +73,6 @@ public interface SSLContextProvider {
 	}
 
 	private static boolean isAvailabilityCheck(Method m, boolean isStatic) {
-		return m.isAnnotationPresent(CheckAvailability.class)
-				&& Boolean.TYPE.equals(m.getReturnType())
-				&& m.getParameterCount() == 0
-				&& Modifier.isStatic(m.getModifiers()) == isStatic;
+		return m.isAnnotationPresent(CheckAvailability.class) && Boolean.TYPE.equals(m.getReturnType()) && m.getParameterCount() == 0 && Modifier.isStatic(m.getModifiers()) == isStatic;
 	}
 }

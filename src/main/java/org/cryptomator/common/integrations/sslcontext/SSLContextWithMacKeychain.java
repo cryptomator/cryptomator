@@ -1,4 +1,4 @@
-package org.cryptomator.common.sslcontext;
+package org.cryptomator.common.integrations.sslcontext;
 
 import org.cryptomator.integrations.common.OperatingSystem;
 
@@ -18,7 +18,7 @@ import java.security.cert.CertificateException;
  * Provided by java.base module/jmod
  */
 @OperatingSystem(OperatingSystem.Value.MAC)
-public class MacKeychainStore implements SSLContextProvider {
+public class SSLContextWithMacKeychain implements SSLContextProvider {
 
 	@Override
 	public SSLContext getContext(SecureRandom csprng) throws SSLContextBuildException {

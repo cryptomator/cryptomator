@@ -13,9 +13,9 @@ import org.cryptomator.common.locationpresets.OneDriveLinuxLocationPresetsProvid
 import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
-import org.cryptomator.common.sslcontext.MacKeychainStore;
-import org.cryptomator.common.sslcontext.SSLContextProvider;
-import org.cryptomator.common.sslcontext.WindowsCertStore;
+import org.cryptomator.common.integrations.sslcontext.SSLContextWithMacKeychain;
+import org.cryptomator.common.integrations.sslcontext.SSLContextProvider;
+import org.cryptomator.common.integrations.sslcontext.SSLContextWithWindowsCertStore;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
@@ -60,7 +60,7 @@ open module org.cryptomator.desktop {
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
-	provides SSLContextProvider with WindowsCertStore, MacKeychainStore;
+	provides SSLContextProvider with SSLContextWithWindowsCertStore, SSLContextWithMacKeychain;
 	provides LocationPresetsProvider with //
 			DropboxWindowsLocationPresetsProvider, DropboxMacLocationPresetsProvider, DropboxLinuxLocationPresetsProvider, //
 			GoogleDriveMacLocationPresetsProvider, GoogleDriveWindowsLocationPresetsProvider, //

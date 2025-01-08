@@ -1,4 +1,4 @@
-package org.cryptomator.common.sslcontext;
+package org.cryptomator.common.integrations.sslcontext;
 
 import org.cryptomator.integrations.common.OperatingSystem;
 
@@ -18,7 +18,7 @@ import java.security.cert.CertificateException;
  * Provided by jdk.crypto.mscapi jmod
  */
 @OperatingSystem(OperatingSystem.Value.WINDOWS)
-public class WindowsCertStore implements SSLContextProvider {
+public class SSLContextWithWindowsCertStore implements SSLContextProvider {
 
 	@Override
 	public SSLContext getContext(SecureRandom csprng) throws SSLContextBuildException {
