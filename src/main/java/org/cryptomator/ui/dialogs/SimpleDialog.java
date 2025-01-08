@@ -4,8 +4,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -30,20 +28,16 @@ public class SimpleDialog {
 		dialogStage.setTitle(resolveText(builder.titleKey, builder.titleArgs));
 		dialogStage.setResizable(false);
 
-		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(new SimpleDialogController(), Scene::new, builder.resourceBundle);
-		FXMLLoader loader = loaderFactory.load(FxmlFile.SIMPLE_DIALOG.getRessourcePathString());
-		SimpleDialogController controller = loader.getController();
+		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(
+				new SimpleDialogController(resolveText(builder.messageKey, null),
+						resolveText(builder.descriptionKey, null),
+						builder.icon,resolveText(builder.okButtonKey, null),
+						resolveText(builder.cancelButtonKey, null),
+						() -> builder.okAction.accept(dialogStage),
+						() -> builder.cancelAction.accept(dialogStage)),
+				Scene::new, builder.resourceBundle);
 
-		controller.setMessage(resolveText(builder.messageKey, null));
-		controller.setDescription(resolveText(builder.descriptionKey, null));
-		controller.setIcon(builder.icon);
-		controller.setOkButtonText(resolveText(builder.okButtonKey, null));
-		controller.setCancelButtonText(resolveText(builder.cancelButtonKey, null));
-
-		controller.setOkAction(() -> builder.okAction.accept(dialogStage));
-		controller.setCancelAction(() -> builder.cancelAction.accept(dialogStage));
-
-		dialogStage.setScene(new Scene(loader.getRoot()));
+		dialogStage.setScene(new Scene(loaderFactory.load(FxmlFile.SIMPLE_DIALOG.getRessourcePathString()).getRoot()));
 	}
 
 	public void showAndWait() {
