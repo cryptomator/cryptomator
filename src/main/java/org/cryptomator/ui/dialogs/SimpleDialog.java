@@ -32,7 +32,6 @@ public class SimpleDialog {
 
 		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(new SimpleDialogController(), Scene::new, builder.resourceBundle);
 		FXMLLoader loader = loaderFactory.load(FxmlFile.SIMPLE_DIALOG.getRessourcePathString());
-		Parent root = loader.getRoot();
 		SimpleDialogController controller = loader.getController();
 
 		controller.setMessage(resolveText(builder.messageKey, null));
@@ -44,7 +43,7 @@ public class SimpleDialog {
 		controller.setOkAction(() -> builder.okAction.accept(dialogStage));
 		controller.setCancelAction(() -> builder.cancelAction.accept(dialogStage));
 
-		dialogStage.setScene(new Scene(root));
+		dialogStage.setScene(new Scene(loader.getRoot()));
 	}
 
 	public void showAndWait() {
