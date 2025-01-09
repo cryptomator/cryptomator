@@ -6,7 +6,6 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.ui.dialogs.Dialogs;
-import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -57,7 +56,7 @@ public class FxApplicationWindows {
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
-	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
+	private final Dialogs dialogs;
 
 	@Inject
 	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
@@ -72,7 +71,7 @@ public class FxApplicationWindows {
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
 								ExecutorService executor, //
-								Provider<SimpleDialog.Builder> simpleDialogBuilder) {
+								Provider<Dialogs> dialogsProvider) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -86,7 +85,7 @@ public class FxApplicationWindows {
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
-		this.simpleDialogBuilder = simpleDialogBuilder;
+		this.dialogs = dialogsProvider.get();
 	}
 
 	public void initialize() {
@@ -149,16 +148,13 @@ public class FxApplicationWindows {
 	}
 
 	public void showDokanySupportEndWindow() {
-		CompletableFuture.runAsync(() -> {
-			Dialogs.buildDokanySupportEndDialog(
-					simpleDialogBuilder.get(),
-					mainWindow.get().window(),
-					stage -> {
-						showPreferencesWindow(SelectedPreferencesTab.VOLUME);
-						stage.close();
-					}
-			).showAndWait();
-		}, Platform::runLater);
+		CompletableFuture.runAsync(() -> dialogs.prepareDokanySupportEndDialog(
+				mainWindow.get().window(),
+				stage -> {
+					showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+					stage.close();
+				}
+		).build().showAndWait(), Platform::runLater);
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {

@@ -10,7 +10,6 @@ import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
-import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.slf4j.Logger;
@@ -73,7 +72,7 @@ public class VaultListController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
 	private final ObservableValue<Double> cellSize;
-	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
+	private final Dialogs dialogs;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
@@ -93,7 +92,7 @@ public class VaultListController implements FxController {
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
 						Settings settings, //
-						Provider<SimpleDialog.Builder> simpleDialogBuilder) {
+						Provider<Dialogs> dialogsProvider) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -103,7 +102,7 @@ public class VaultListController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
-		this.simpleDialogBuilder = simpleDialogBuilder;
+		this.dialogs = dialogsProvider.get();
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -211,7 +210,7 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			Dialogs.buildRemoveVaultDialog(simpleDialogBuilder.get(),mainWindow,vault,vaults).showAndWait();
+			dialogs.prepareRemoveVaultDialog(mainWindow, vault, vaults).build().showAndWait();
 		}
 	}
 

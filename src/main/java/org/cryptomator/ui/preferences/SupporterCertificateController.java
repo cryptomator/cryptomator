@@ -6,7 +6,6 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
-import org.cryptomator.ui.dialogs.SimpleDialog;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -16,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 import javafx.stage.Stage;
+
 
 @PreferencesScoped
 public class SupporterCertificateController implements FxController {
@@ -28,7 +28,7 @@ public class SupporterCertificateController implements FxController {
 	private final Stage window;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final Provider<SimpleDialog.Builder> simpleDialogBuilder;
+	private final Dialogs dialogs;
 
 	@FXML
 	private TextArea supporterCertificateField;
@@ -38,12 +38,12 @@ public class SupporterCertificateController implements FxController {
 								   @PreferencesWindow Stage window,  //
 								   LicenseHolder licenseHolder, //
 								   Settings settings, //
-								   Provider<SimpleDialog.Builder> simpleDialogBuilder) {
+								   Provider<Dialogs> dialogsProvider) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.simpleDialogBuilder = simpleDialogBuilder;
+		this.dialogs = dialogsProvider.get();
 	}
 
 	@FXML
@@ -90,10 +90,11 @@ public class SupporterCertificateController implements FxController {
 
 	@FXML
 	void didClickRemoveCert() {
-		Dialogs.buildRemoveCertDialog(simpleDialogBuilder.get(),window,settings).showAndWait();
+		dialogs.prepareRemoveCertDialog(window, settings).build().showAndWait();
 	}
 
 	public LicenseHolder getLicenseHolder() {
 		return licenseHolder;
 	}
+
 }

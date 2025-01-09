@@ -6,17 +6,30 @@ import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 
 public class Dialogs {
 
+	private final ResourceBundle resourceBundle;
+
+	@Inject
+	public Dialogs(ResourceBundle resourceBundle) {
+		this.resourceBundle = resourceBundle;
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(Dialogs.class);
 
-	public static SimpleDialog buildRemoveVaultDialog(SimpleDialog.Builder simpleDialogBuilder, Stage window, Vault vault, ObservableList<Vault> vaults) {
-		return simpleDialogBuilder.setOwner(window) //
+	private SimpleDialog.Builder createDialogBuilder() {
+		return new SimpleDialog.Builder(resourceBundle);
+	}
+
+	public SimpleDialog.Builder prepareRemoveVaultDialog(Stage window, Vault vault, ObservableList<Vault> vaults) {
+		return createDialogBuilder().setOwner(window) //
 				.setTitleKey("removeVault.title", vault.getDisplayName()) //
 				.setMessageKey("removeVault.message") //
 				.setDescriptionKey("removeVault.description") //
@@ -27,27 +40,27 @@ public class Dialogs {
 					LOG.debug("Removing vault {}.", vault.getDisplayName());
 					vaults.remove(vault);
 					stage.close();
-				}) //
-				.build();
+				});
 	}
 
-	public static SimpleDialog buildRemoveCertDialog(SimpleDialog.Builder simpleDialogBuilder, Stage window, Settings settings) {
-		return simpleDialogBuilder.setOwner(window) //
+	public SimpleDialog.Builder prepareRemoveCertDialog(Stage window, Settings settings) {
+		return createDialogBuilder() //
+				.setOwner(window) //
 				.setTitleKey("removeCert.title") //
 				.setMessageKey("removeCert.message") //
 				.setDescriptionKey("removeCert.description") //
 				.setIcon(FontAwesome5Icon.QUESTION) //
 				.setOkButtonKey("removeCert.confirmBtn") //
-				.setCancelButtonKey("generic.button.cancel").setOkAction(stage -> {
+				.setCancelButtonKey("generic.button.cancel") //
+				.setOkAction(stage -> {
 					settings.licenseKey.set(null);
 					stage.close();
-				}) //
-				.setCancelAction(Stage::close) //
-				.build();
+				});
 	}
 
-	public static SimpleDialog buildDokanySupportEndDialog(SimpleDialog.Builder simpleDialogBuilder, Stage window, Consumer<Stage> cancelAction) {
-		return simpleDialogBuilder.setOwner(window) //
+	public SimpleDialog.Builder prepareDokanySupportEndDialog(Stage window, Consumer<Stage> cancelAction) {
+		return createDialogBuilder() //
+				.setOwner(window) //
 				.setTitleKey("dokanySupportEnd.title") //
 				.setMessageKey("dokanySupportEnd.message") //
 				.setDescriptionKey("dokanySupportEnd.description") //
@@ -55,8 +68,7 @@ public class Dialogs {
 				.setOkButtonKey("generic.button.close") //
 				.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
 				.setOkAction(Stage::close) //
-				.setCancelAction(cancelAction) //
-				.build();
+				.setCancelAction(cancelAction);
 	}
 
 }
