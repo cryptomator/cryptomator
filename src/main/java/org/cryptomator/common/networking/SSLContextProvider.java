@@ -1,11 +1,12 @@
 package org.cryptomator.common.networking;
 
-import org.cryptomator.common.integrations.IntegrationsLoaderCopy;
+import org.cryptomator.integrations.common.IntegrationsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import java.security.SecureRandom;
+import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
 public interface SSLContextProvider {
@@ -22,6 +23,6 @@ public interface SSLContextProvider {
 	}
 
 	static Stream<SSLContextProvider> loadAll() {
-		return IntegrationsLoaderCopy.loadAll(SSLContextProvider.class);
+		return IntegrationsLoader.loadAll(ServiceLoader.load(SSLContextProvider.class), SSLContextProvider.class);
 	}
 }
