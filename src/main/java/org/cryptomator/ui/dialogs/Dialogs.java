@@ -38,9 +38,9 @@ public class Dialogs {
 				.setDescriptionKey("removeCert.description") //
 				.setIcon(FontAwesome5Icon.QUESTION) //
 				.setOkButtonKey("removeCert.confirmBtn") //
-				.setCancelButtonKey("generic.button.cancel").setOkAction(v -> {
+				.setCancelButtonKey("generic.button.cancel").setOkAction(stage -> {
 					settings.licenseKey.set(null);
-					v.close();
+					stage.close();
 				}) //
 				.setCancelAction(Stage::close) //
 				.build();

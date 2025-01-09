@@ -153,9 +153,9 @@ public class FxApplicationWindows {
 			Dialogs.buildDokanySupportEndDialog(
 					simpleDialogBuilder.get(),
 					mainWindow.get().window(),
-					v -> {
+					stage -> {
 						showPreferencesWindow(SelectedPreferencesTab.VOLUME);
-						v.close();
+						stage.close();
 					}
 			).showAndWait();
 		}, Platform::runLater);
