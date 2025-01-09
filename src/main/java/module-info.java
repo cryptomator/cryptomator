@@ -1,4 +1,5 @@
 import ch.qos.logback.classic.spi.Configurator;
+import org.cryptomator.common.integrations.sslcontext.SSLContextWithPKCS12File;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
@@ -60,7 +61,7 @@ open module org.cryptomator.desktop {
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
-	provides SSLContextProvider with SSLContextWithWindowsCertStore, SSLContextWithMacKeychain;
+	provides SSLContextProvider with SSLContextWithWindowsCertStore, SSLContextWithMacKeychain, SSLContextWithPKCS12File;
 	provides LocationPresetsProvider with //
 			DropboxWindowsLocationPresetsProvider, DropboxMacLocationPresetsProvider, DropboxLinuxLocationPresetsProvider, //
 			GoogleDriveMacLocationPresetsProvider, GoogleDriveWindowsLocationPresetsProvider, //
