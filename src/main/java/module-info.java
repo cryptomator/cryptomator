@@ -1,5 +1,5 @@
 import ch.qos.logback.classic.spi.Configurator;
-import org.cryptomator.common.integrations.sslcontext.SSLContextWithPKCS12File;
+import org.cryptomator.common.networking.SSLContextWithPKCS12File;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
@@ -14,9 +14,9 @@ import org.cryptomator.common.locationpresets.OneDriveLinuxLocationPresetsProvid
 import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
-import org.cryptomator.common.integrations.sslcontext.SSLContextWithMacKeychain;
-import org.cryptomator.common.integrations.sslcontext.SSLContextProvider;
-import org.cryptomator.common.integrations.sslcontext.SSLContextWithWindowsCertStore;
+import org.cryptomator.common.networking.SSLContextWithMacKeychain;
+import org.cryptomator.common.networking.SSLContextProvider;
+import org.cryptomator.common.networking.SSLContextWithWindowsCertStore;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;

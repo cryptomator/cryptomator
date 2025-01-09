@@ -1,4 +1,4 @@
-package org.cryptomator.common.integrations.sslcontext;
+package org.cryptomator.common.networking;
 
 import org.cryptomator.integrations.common.CheckAvailability;
 import org.cryptomator.integrations.common.OperatingSystem;

@@ -1,4 +1,4 @@
-package org.cryptomator.common.integrations.sslcontext;
+package org.cryptomator.common.networking;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;

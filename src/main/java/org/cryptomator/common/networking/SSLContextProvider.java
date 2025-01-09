@@ -1,4 +1,4 @@
-package org.cryptomator.common.integrations.sslcontext;
+package org.cryptomator.common.networking;
 
 import org.cryptomator.common.integrations.IntegrationsLoaderCopy;
 import org.slf4j.Logger;
