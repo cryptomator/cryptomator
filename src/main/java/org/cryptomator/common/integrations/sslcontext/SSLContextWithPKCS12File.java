@@ -10,6 +10,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
+/**
+ * SSLContextProvider for Linux using a PKCS#12 file as trust store
+ */
 @OperatingSystem(OperatingSystem.Value.LINUX)
 public class SSLContextWithPKCS12File extends SSLContextDifferentTrustStoreBase implements SSLContextProvider {
 
