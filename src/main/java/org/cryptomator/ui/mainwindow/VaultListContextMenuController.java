@@ -10,8 +10,6 @@ import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -32,9 +30,6 @@ import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
 
 @MainWindowScoped
 public class VaultListContextMenuController implements FxController {
-
-	private static final Logger LOG = LoggerFactory.getLogger(VaultListContextMenuController.class);
-
 
 	private final ReadOnlyObjectProperty<Vault> selectedVault;
 	private final Stage mainWindow;

@@ -5,8 +5,6 @@ import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -22,8 +20,6 @@ import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
 
 @MainWindowScoped
 public class VaultDetailMissingVaultController implements FxController {
-
-	private static final Logger LOG = LoggerFactory.getLogger(VaultDetailMissingVaultController.class);
 
 	private final ObjectProperty<Vault> vault;
 	private final ObservableList<Vault> vaults;

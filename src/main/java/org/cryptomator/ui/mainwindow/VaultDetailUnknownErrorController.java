@@ -6,8 +6,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,8 +17,6 @@ import javafx.stage.Stage;
 
 @MainWindowScoped
 public class VaultDetailUnknownErrorController implements FxController {
-
-	private static final Logger LOG = LoggerFactory.getLogger(VaultDetailUnknownErrorController.class);
 
 	private final ObjectProperty<Vault> vault;
 	private final FxApplicationWindows appWindows;

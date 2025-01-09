@@ -23,10 +23,10 @@ public class Dialogs {
 				.setIcon(FontAwesome5Icon.QUESTION) //
 				.setOkButtonKey("removeVault.confirmBtn") //
 				.setCancelButtonKey("generic.button.cancel") //
-				.setOkAction(v -> {
+				.setOkAction(stage -> {
 					LOG.debug("Removing vault {}.", vault.getDisplayName());
 					vaults.remove(vault);
-					v.close();
+					stage.close();
 				}) //
 				.build();
 	}
