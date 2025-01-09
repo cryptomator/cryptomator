@@ -8,7 +8,7 @@ import java.security.KeyStoreException;
 /**
  * SSLContextProvider for Windows using the Windows certificate store
  * <p>
- * Provided by jdk.crypto.mscapi jmod
+ * In order to work, the jdk.crypto.mscapi jmod is needed
  */
 @OperatingSystem(OperatingSystem.Value.WINDOWS)
 public class SSLContextWithWindowsCertStore extends SSLContextDifferentTrustStoreBase implements SSLContextProvider {
