@@ -20,7 +20,7 @@ public class HubConfig {
 	public String devicesResourceUrl;
 
 	/**
-	 * A collection of String template processors to construct URIs related to this Hub instance.
+	 * A collection of functions to construct URIs related to this Hub instance.
 	 */
 	@JsonIgnore
 	public final URIProcessors URIs = new URIProcessors();
@@ -49,14 +49,20 @@ public class HubConfig {
 
 	public class URIProcessors {
 
+		public final URIProcessor API = this::fromApiEndpoint;
+
 		/**
 		 * Resolves paths relative to the <code>/api/</code> endpoint of this Hub instance.
 		 */
-		public final StringTemplate.Processor<URI, RuntimeException> API = template -> {
-			var path = template.interpolate();
+		public URI fromApiEndpoint(String path) {
 			var relPath = path.startsWith("/") ? path.substring(1) : path;
 			return getApiBaseUrl().resolve(relPath);
-		};
+		}
+	}
 
+	@FunctionalInterface
+	public interface URIProcessor {
+
+		URI resolve(String path);
 	}
 }

@@ -18,11 +18,14 @@
 		   minWidth="206">
 	<VBox>
 		<StackPane VBox.vgrow="ALWAYS">
-			<ListView fx:id="vaultList" editable="true" fixedCellSize="${controller.cellSize}">
-				<contextMenu>
-					<fx:include source="vault_list_contextmenu.fxml"/>
-				</contextMenu>
-			</ListView>
+			<VBox>
+				<ListView fx:id="vaultList" editable="true" fixedCellSize="${controller.cellSize}">
+					<contextMenu>
+						<fx:include source="vault_list_contextmenu.fxml"/>
+					</contextMenu>
+				</ListView>
+				<Region VBox.vgrow="ALWAYS" styleClass="list-view"/>
+			</VBox>
 			<VBox visible="${controller.emptyVaultList}" spacing="6" alignment="CENTER">
 				<Region VBox.vgrow="ALWAYS"/>
 				<Label VBox.vgrow="NEVER" text="%main.vaultlist.emptyList.onboardingInstruction" textAlignment="CENTER" wrapText="true"/>

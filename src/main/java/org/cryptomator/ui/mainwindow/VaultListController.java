@@ -113,6 +113,10 @@ public class VaultListController implements FxController {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
 
+		vaultList.prefHeightProperty().bind(
+				vaultList.fixedCellSizeProperty().multiply(Bindings.size(vaultList.getItems()))
+		);
+
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
 			while (c.next()) {

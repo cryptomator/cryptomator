@@ -25,8 +25,8 @@
 	<children>
 		<HBox VBox.vgrow="ALWAYS">
 			<VBox alignment="CENTER" minWidth="175" maxWidth="175">
-				<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" smooth="true" cache="true">
-					<Image url="@../img/logo.png"/>
+				<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" cache="true">
+					<Image url="@../img/logo128.png"/>
 				</ImageView>
 			</VBox>
 			<VBox HBox.hgrow="ALWAYS" alignment="CENTER">

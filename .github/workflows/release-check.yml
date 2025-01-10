@@ -12,7 +12,7 @@ defaults:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: 22
+  JAVA_VERSION: 23
 
 jobs:
   check-preconditions:
