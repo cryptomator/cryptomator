@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -92,7 +91,7 @@ public class VaultListController implements FxController {
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
 						Settings settings, //
-						Provider<Dialogs> dialogsProvider) {
+						Dialogs dialogs) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -102,7 +101,7 @@ public class VaultListController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
-		this.dialogs = dialogsProvider.get();
+		this.dialogs = dialogs;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 

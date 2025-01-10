@@ -6,7 +6,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,12 +30,12 @@ public class VaultDetailMissingVaultController implements FxController {
 											 ObservableList<Vault> vaults, //
 											 ResourceBundle resourceBundle, //
 											 @MainWindow Stage window, //
-											 Provider<Dialogs> dialogsProvider) {
+											 Dialogs dialogs) {
 		this.vault = vault;
 		this.vaults = vaults;
 		this.resourceBundle = resourceBundle;
 		this.window = window;
-		this.dialogs = dialogsProvider.get();
+		this.dialogs = dialogs;
 	}
 
 	@FXML

@@ -8,7 +8,6 @@ import org.cryptomator.ui.fxapp.FxApplicationWindows;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -30,13 +29,13 @@ public class VaultDetailUnknownErrorController implements FxController {
 											 ObservableList<Vault> vaults, //
 											 FxApplicationWindows appWindows, //
 											 @Named("errorWindow") Stage errorWindow, //
-											 Provider<Dialogs> dialogsProvider) {
+											 Dialogs dialogs) {
 		this.mainWindow = mainWindow;
 		this.vault = vault;
 		this.vaults = vaults;
 		this.appWindows = appWindows;
 		this.errorWindow = errorWindow;
-		this.dialogs = dialogsProvider.get();
+		this.dialogs = dialogs;
 	}
 
 	@FXML

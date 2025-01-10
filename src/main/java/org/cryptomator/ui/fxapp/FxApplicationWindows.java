@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
@@ -71,7 +70,7 @@ public class FxApplicationWindows {
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
 								ExecutorService executor, //
-								Provider<Dialogs> dialogsProvider) {
+								Dialogs dialogs) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -85,7 +84,7 @@ public class FxApplicationWindows {
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
-		this.dialogs = dialogsProvider.get();
+		this.dialogs = dialogs;
 	}
 
 	public void initialize() {

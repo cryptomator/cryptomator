@@ -7,12 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-
+@Singleton
 public class Dialogs {
 
 	private final ResourceBundle resourceBundle;

@@ -8,7 +8,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -38,12 +37,12 @@ public class SupporterCertificateController implements FxController {
 								   @PreferencesWindow Stage window,  //
 								   LicenseHolder licenseHolder, //
 								   Settings settings, //
-								   Provider<Dialogs> dialogsProvider) {
+								   Dialogs dialogs) {
 		this.application = application;
 		this.window = window;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.dialogs = dialogsProvider.get();
+		this.dialogs = dialogs;
 	}
 
 	@FXML

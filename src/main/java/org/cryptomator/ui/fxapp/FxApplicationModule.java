@@ -7,7 +7,6 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
-import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
@@ -23,7 +22,6 @@ import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ResourceBundle;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, //
 		MainWindowComponent.class, //
@@ -66,12 +64,6 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	static QuitComponent provideQuitComponent(QuitComponent.Builder builder) {
 		return builder.build();
-	}
-
-	@Provides
-	@FxApplicationScoped
-	static Dialogs provideDialogs(ResourceBundle resourceBundle) {
-		return new Dialogs(resourceBundle);
 	}
 
 }

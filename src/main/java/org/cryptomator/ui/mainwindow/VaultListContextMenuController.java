@@ -11,7 +11,6 @@ import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -52,7 +51,7 @@ public class VaultListContextMenuController implements FxController {
 								   VaultService vaultService, //
 								   KeychainManager keychain, //
 								   VaultOptionsComponent.Factory vaultOptionsWindow, //
-								   Provider<Dialogs> dialogsProvider) {
+								   Dialogs dialogs) {
 		this.selectedVault = selectedVault;
 		this.vaults = vaults;
 		this.mainWindow = mainWindow;
@@ -60,7 +59,7 @@ public class VaultListContextMenuController implements FxController {
 		this.vaultService = vaultService;
 		this.keychain = keychain;
 		this.vaultOptionsWindow = vaultOptionsWindow;
-		this.dialogs = dialogsProvider.get();
+		this.dialogs = dialogs;
 
 		this.selectedVaultState = selectedVault.flatMap(Vault::stateProperty).orElse(null);
 		this.selectedVaultPassphraseStored = selectedVault.map(this::isPasswordStored).orElse(false);
