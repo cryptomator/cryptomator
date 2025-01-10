@@ -11,7 +11,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.common.SubstitutingProperties;
-import org.cryptomator.common.networking.SSLContextProvider;
+import org.cryptomator.networking.SSLContextProvider;
 import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;

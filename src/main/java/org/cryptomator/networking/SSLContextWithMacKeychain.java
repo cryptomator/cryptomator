@@ -1,4 +1,4 @@
-package org.cryptomator.common.networking;
+package org.cryptomator.networking;
 
 import org.cryptomator.integrations.common.OperatingSystem;
 
