@@ -9,9 +9,9 @@ import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
-import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +66,13 @@ public class VaultListController implements FxController {
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
-	private final RemoveVaultComponent.Builder removeVaultDialogue;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationWindows appWindows;
 	private final ObservableValue<Double> cellSize;
+	private final Dialogs dialogs;
+
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
@@ -86,21 +87,21 @@ public class VaultListController implements FxController {
 						VaultListCellFactory cellFactory, //
 						VaultService vaultService, //
 						AddVaultWizardComponent.Builder addVaultWizard, //
-						RemoveVaultComponent.Builder removeVaultDialogue, //
 						VaultListManager vaultListManager, //
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
-						Settings settings) {
+						Settings settings, //
+						Dialogs dialogs) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
 		this.vaultService = vaultService;
 		this.addVaultWizard = addVaultWizard;
-		this.removeVaultDialogue = removeVaultDialogue;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
+		this.dialogs = dialogs;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 
@@ -212,7 +213,7 @@ public class VaultListController implements FxController {
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
 		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
-			removeVaultDialogue.vault(vault).build().showRemoveVault();
+			dialogs.prepareRemoveVaultDialog(mainWindow, vault, vaults).build().showAndWait();
 		}
 	}
 
