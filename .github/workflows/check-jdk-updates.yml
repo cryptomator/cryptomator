@@ -7,7 +7,7 @@ on:
 
 env:
   JDK_VERSION: '23.0.1+11'
-  JDK_VENDOR: zulu
+  JDK_VENDOR: temurin
   RUNTIME_VERSION_HELPER: >
     public class Test {
       public static void main(String[]  args) {
