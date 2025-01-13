@@ -47,19 +47,29 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final ExecutorService executor;
 	private final StringProperty recoveryKey;
 	private final Lazy<Scene> recoverResetPasswordSuccessScene;
+	private final Lazy<Scene> recoverResetVaultConfigSuccessScene;
 	private final FxApplicationWindows appWindows;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	public NewPasswordController newPasswordController;
 
 	@Inject
-	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS) Lazy<Scene> recoverResetPasswordSuccessScene, FxApplicationWindows appWindows, MasterkeyFileAccess masterkeyFileAccess) {
+	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, //
+											  @RecoveryKeyWindow Vault vault, //
+											  RecoveryKeyFactory recoveryKeyFactory, //
+											  ExecutorService executor, //
+											  @RecoveryKeyWindow StringProperty recoveryKey, //
+											  @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS) Lazy<Scene> recoverResetPasswordSuccessScene, //
+											  @FxmlScene(FxmlFile.RECOVERYKEY_RESET_VAULT_CONFIG_SUCCESS) Lazy<Scene> recoverResetVaultConfigSuccessScene, //
+											  FxApplicationWindows appWindows, //
+											  MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.executor = executor;
 		this.recoveryKey = recoveryKey;
 		this.recoverResetPasswordSuccessScene = recoverResetPasswordSuccessScene;
+		this.recoverResetVaultConfigSuccessScene = recoverResetVaultConfigSuccessScene;
 		this.appWindows = appWindows;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 	}
@@ -105,7 +115,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 						}
 					});
 				}
-				window.setScene(recoverResetPasswordSuccessScene.get());
+				window.setScene(recoverResetVaultConfigSuccessScene.get());
 			} catch (IOException e) {
 				LOG.error("Moving recovered files failed", e);
 			}
