@@ -15,7 +15,7 @@ on:
         type: boolean
 
 env:
-  JAVA_DIST: 'zulu'
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: '23.0.1+11'
 
 jobs:
