@@ -135,4 +135,8 @@ public class KeychainManager implements KeychainAccessProvider {
 		}
 	}
 
+	public ObjectExpression<KeychainAccessProvider> getKeychainImplementation() {
+		return this.keychain;
+	}
+
 }
