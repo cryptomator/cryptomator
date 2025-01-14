@@ -15,6 +15,7 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.ui.keyloading.hub.HubKeyLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,6 +106,10 @@ public class VaultListManager {
 
 	private void addAll(Collection<VaultSettings> vaultSettings) {
 		Collection<Vault> vaults = vaultSettings.stream().map(this::create).toList();
+		vaults.forEach(vault -> {
+			VaultState.Value newState = redetermineVaultState(vault);
+			LOG.info("New state for vault at {}: {}", vault.getPath(), newState);
+		});
 		vaultList.addAll(vaults);
 	}
 
@@ -137,6 +142,12 @@ public class VaultListManager {
 			case LOCKED, NEEDS_MIGRATION, MISSING, VAULT_CONFIG_MISSING, MASTERKEY_MISSING -> {
 				try {
 					var determinedState = determineVaultState(vault.getPath());
+					if(determinedState == MASTERKEY_MISSING){
+						var vaultScheme = vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme();
+						if((vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS))){
+							determinedState = LOCKED;
+						}
+					}
 					if (determinedState == LOCKED) {
 						vault.getVaultConfigCache().reloadConfig();
 					}
@@ -180,7 +191,6 @@ public class VaultListManager {
 
 		}
 		else if (!Files.exists(pathToMasterkey)) {
-			//return VaultState.Value.MASTERKEY_MISSING;
 			try (Stream<Path> files = Files.list(pathToMasterkey.getParent())) {
 				Path backupFile = files.filter(file -> {
 					String fileName = file.getFileName().toString();
