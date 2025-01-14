@@ -1,8 +1,7 @@
 package org.cryptomator.common.keychain;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
@@ -24,9 +23,9 @@ public class KeychainManager implements KeychainAccessProvider {
 	@Inject
 	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain) {
 		this.keychain = selectedKeychain;
-		this.passphraseStoredProperties = CacheBuilder.newBuilder() //
+		this.passphraseStoredProperties = Caffeine.newBuilder() //
 				.weakValues() //
-				.build(CacheLoader.from(this::createStoredPassphraseProperty));
+				.build(this::createStoredPassphraseProperty);
 		keychain.addListener(ignored -> passphraseStoredProperties.invalidateAll());
 	}
 
@@ -124,7 +123,7 @@ public class KeychainManager implements KeychainAccessProvider {
 	 * @see #isPassphraseStored(String)
 	 */
 	public ReadOnlyBooleanProperty getPassphraseStoredProperty(String key) {
-		return passphraseStoredProperties.getUnchecked(key);
+		return passphraseStoredProperties.get(key);
 	}
 
 	private BooleanProperty createStoredPassphraseProperty(String key) {
