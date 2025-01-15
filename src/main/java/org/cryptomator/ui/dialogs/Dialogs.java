@@ -78,7 +78,7 @@ public class Dialogs {
 				.setTitleKey("retryIfReadonly.title") //
 				.setMessageKey("retryIfReadonly.message") //
 				.setDescriptionKey("retryIfReadonly.description") //
-				.setIcon(FontAwesome5Icon.QUESTION) //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
 				.setOkButtonKey("retryIfReadonly.retry") //
 				.setCancelButtonKey("generic.button.close") //
 				.setOkAction(okAction) //
