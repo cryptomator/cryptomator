@@ -16,7 +16,7 @@ import java.security.cert.CertificateException;
 @OperatingSystem(OperatingSystem.Value.LINUX)
 public class SSLContextWithPKCS12File extends SSLContextDifferentTrustStoreBase implements SSLContextProvider {
 
-	private static final String CERT_FILE_LOCATION_PROPERTY = "org.cryptomator.networking.pkcs12file";
+	private static final String CERT_FILE_LOCATION_PROPERTY = "cryptomator.networking.pkcs12FilePath";
 
 	@Override
 	KeyStore getTruststore() throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
