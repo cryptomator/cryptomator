@@ -48,8 +48,9 @@ public class VaultDetailMissingVaultController implements FxController {
 
 	@FXML
 	void restoreVaultConfig(){
-		recoveryKeyWindow.create(vault.get(), window).showRecoveryKeyRecoverWindow("Recover VaultConfig");
+		recoveryKeyWindow.create(vault.get(), window).showIsHubVaultDialogWindow();
 	}
+
 	@FXML
 	void restoreMasterkey(){
 		recoveryKeyWindow.create(vault.get(), window).showRecoveryKeyRecoverWindow("Recover Masterkey");

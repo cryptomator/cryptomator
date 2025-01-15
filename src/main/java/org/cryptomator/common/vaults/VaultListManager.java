@@ -38,7 +38,6 @@ import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
-import static org.cryptomator.common.vaults.VaultState.Value.MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 @Singleton
@@ -167,7 +166,10 @@ public class VaultListManager {
 	private static VaultState.Value determineVaultState(Path pathToVault) throws IOException {
 		Path pathToVaultConfig = Path.of(pathToVault.toString(),"vault.cryptomator");
 		Path pathToMasterkey = Path.of(pathToVault.toString(),"masterkey.cryptomator");
-		if (!Files.exists(pathToVaultConfig)) {
+		if (!Files.exists(pathToVault)) {
+			return VaultState.Value.MISSING;
+		}
+		else if (!Files.exists(pathToVaultConfig)) {
 			try (Stream<Path> files = Files.list(pathToVaultConfig.getParent())) {
 				Path backupFile = files.filter(file -> {
 					String fileName = file.getFileName().toString();
@@ -212,9 +214,6 @@ public class VaultListManager {
 				LOG.error("error",e);
 				return MASTERKEY_MISSING;
 			}
-		}
-		else if (!Files.exists(pathToVault)) {
-			return VaultState.Value.MISSING;
 		}
 		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
 			case VAULT -> VaultState.Value.LOCKED;

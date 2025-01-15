@@ -2,6 +2,7 @@ package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
@@ -127,7 +128,12 @@ public class RecoveryKeyResetPasswordController implements FxController {
 			});
 			task.setOnSucceeded(event -> {
 				LOG.info("Used recovery key to reset password for {}.", vault.getDisplayablePath());
-				window.setScene(recoverResetPasswordSuccessScene.get());
+				if(vault.getState().equals(VaultState.Value.VAULT_CONFIG_MISSING)){
+					window.setScene(recoverResetVaultConfigSuccessScene.get());
+				}
+				else {
+					window.setScene(recoverResetPasswordSuccessScene.get());
+				}
 			});
 			task.setOnFailed(event -> {
 				LOG.error("Resetting password failed.", task.getException());

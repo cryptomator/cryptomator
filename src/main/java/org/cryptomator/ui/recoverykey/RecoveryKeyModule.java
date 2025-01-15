@@ -112,6 +112,12 @@ abstract class RecoveryKeyModule {
 		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_RESET_VAULT_CONFIG_SUCCESS);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_IS_HUB_VAULT)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyIsHubVaultScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_IS_HUB_VAULT);
+	}
 
 	// ------------------
 
@@ -126,6 +132,11 @@ abstract class RecoveryKeyModule {
 	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, ResourceBundle localization) {
 		return new RecoveryKeyDisplayController(window, vault.getDisplayName(), recoveryKey.get(), localization);
 	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyIsHubVaultController.class)
+	abstract FxController provideRecoveryKeyIsHubVaultController(RecoveryKeyIsHubVaultController controller);
 
 	@Binds
 	@IntoMap
