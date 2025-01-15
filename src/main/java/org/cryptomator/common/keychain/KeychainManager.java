@@ -101,7 +101,7 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	private void setPassphraseStored(String key, boolean value) {
-		BooleanProperty property = passphraseStoredProperties.getIfPresent(key);
+		BooleanProperty property = passphraseStoredProperties.get(key, _ -> new SimpleBooleanProperty(value));
 		if (property != null) {
 			if (Platform.isFxApplicationThread()) {
 				property.set(value);
