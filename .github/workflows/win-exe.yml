@@ -15,7 +15,7 @@ on:
 
 
 env:
-  JAVA_DIST: 'zulu'
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: '23.0.1+11'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_windows-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: 'f9376d200f5c5b85327d575c1ec1482e6455f19916577f7e2fc9be2f48bb29b6'
@@ -110,7 +110,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2024 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
@@ -218,7 +218,7 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2024 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           --win-menu
           --win-dir-chooser
@@ -304,7 +304,7 @@ jobs:
           -out dist/win/bundle/
           -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           -dBundleVendor="Skymatic GmbH"
-          -dBundleCopyright="(C) 2016 - 2024 Skymatic GmbH"
+          -dBundleCopyright="(C) 2016 - 2025 Skymatic GmbH"
           -dAboutUrl="https://cryptomator.org"
           -dHelpUrl="https://cryptomator.org/contact"
           -dUpdateUrl="https://cryptomator.org/downloads/"

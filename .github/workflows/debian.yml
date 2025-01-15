@@ -16,7 +16,7 @@ on:
         type: boolean
 
 env:
-  JAVA_DIST: 'zulu'
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: '23.0.1+11'
   COFFEELIBS_JDK: 23
   COFFEELIBS_JDK_VERSION: '23.0.1+11-0ppa1'

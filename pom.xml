@@ -49,7 +49,7 @@
 		<javafx.version>22.0.2</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
-		<logback.version>1.5.12</logback.version>
+		<logback.version>1.5.13</logback.version>
 		<slf4j.version>2.0.16</slf4j.version>
 		<tinyoauth2.version>0.8.0</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
@@ -201,6 +201,12 @@
 			<version>2.0.1</version>
 		</dependency>
 
+		<!-- Caffeine -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<version>3.1.8</version>
+		</dependency>
 		<!-- JUnit / Mockito / Hamcrest -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
