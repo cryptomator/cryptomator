@@ -10,6 +10,7 @@ import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
@@ -47,6 +48,7 @@ public class UnlockWorkflow extends Task<Void> {
 	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 	private final ObjectProperty<IllegalMountPointException> illegalMountPointException;
+	private final Dialogs dialogs;
 
 	@Inject
 	UnlockWorkflow(@PrimaryStage Stage mainWindow, //
@@ -58,7 +60,8 @@ public class UnlockWorkflow extends Task<Void> {
 				   @FxmlScene(FxmlFile.UNLOCK_REQUIRES_RESTART) Lazy<Scene> restartRequiredScene, //
 				   FxApplicationWindows appWindows, //
 				   @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, //
-				   @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException) {
+				   @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException, //
+				   Dialogs dialogs) {
 		this.mainWindow = mainWindow;
 		this.window = window;
 		this.vault = vault;
@@ -69,6 +72,7 @@ public class UnlockWorkflow extends Task<Void> {
 		this.appWindows = appWindows;
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.illegalMountPointException = illegalMountPointException;
+		this.dialogs = dialogs;
 	}
 
 	@Override
@@ -152,7 +156,13 @@ public class UnlockWorkflow extends Task<Void> {
 	}
 
 	private void handleReadOnlyFileSystem() {
-		//TODO show retry dialog
+		Platform.runLater(() -> {
+			dialogs.prepareRetryIfReadonlyDialog(mainWindow, stage -> {
+				vault.getVaultSettings().usesReadOnlyMode.set(true);
+				appWindows.startUnlockWorkflow(vault,mainWindow);
+				stage.close();
+			}).build().showAndWait();
+		});
 	}
 
 	@Override
