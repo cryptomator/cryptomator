@@ -24,7 +24,7 @@ public class KeychainManager implements KeychainAccessProvider {
 	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain) {
 		this.keychain = selectedKeychain;
 		this.passphraseStoredProperties = Caffeine.newBuilder() //
-				.weakValues() //
+				.softValues() //
 				.build(this::createStoredPassphraseProperty);
 		keychain.addListener(ignored -> passphraseStoredProperties.invalidateAll());
 	}
