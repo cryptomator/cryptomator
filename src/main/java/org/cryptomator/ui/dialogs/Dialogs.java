@@ -65,7 +65,7 @@ public class Dialogs {
 				.setTitleKey("dokanySupportEnd.title") //
 				.setMessageKey("dokanySupportEnd.message") //
 				.setDescriptionKey("dokanySupportEnd.description") //
-				.setIcon(FontAwesome5Icon.QUESTION) //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
 				.setOkButtonKey("generic.button.close") //
 				.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
 				.setOkAction(Stage::close) //
