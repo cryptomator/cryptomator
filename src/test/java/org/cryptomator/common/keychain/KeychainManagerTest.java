@@ -19,6 +19,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KeychainManagerTest {
 
+	@BeforeAll
+	public static void startup() throws InterruptedException {
+		CountDownLatch latch = new CountDownLatch(1);
+		Platform.startup(latch::countDown);
+		var javafxStarted = latch.await(5, TimeUnit.SECONDS);
+		Assumptions.assumeTrue(javafxStarted);
+	}
+
 	@Test
 	public void testStoreAndLoad() throws KeychainAccessException {
 		KeychainManager keychainManager = new KeychainManager(new SimpleObjectProperty<>(new MapKeychainAccess()));
@@ -27,15 +35,7 @@ public class KeychainManagerTest {
 	}
 
 	@Nested
-	public static class WhenObservingProperties {
-
-		@BeforeAll
-		public static void startup() throws InterruptedException {
-			CountDownLatch latch = new CountDownLatch(1);
-			Platform.startup(latch::countDown);
-			var javafxStarted = latch.await(5, TimeUnit.SECONDS);
-			Assumptions.assumeTrue(javafxStarted);
-		}
+	public class WhenObservingProperties {
 
 		@Test
 		public void testPropertyChangesWhenStoringPassword() throws KeychainAccessException, InterruptedException {
@@ -43,7 +43,7 @@ public class KeychainManagerTest {
 			ReadOnlyBooleanProperty property = keychainManager.getPassphraseStoredProperty("test");
 			Assertions.assertFalse(property.get());
 
-			keychainManager.storePassphrase("test", null,"bar");
+			keychainManager.storePassphrase("test", null, "bar");
 
 			AtomicBoolean result = new AtomicBoolean(false);
 			CountDownLatch latch = new CountDownLatch(1);
