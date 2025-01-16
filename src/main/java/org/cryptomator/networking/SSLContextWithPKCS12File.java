@@ -4,6 +4,7 @@ import org.cryptomator.integrations.common.CheckAvailability;
 import org.cryptomator.integrations.common.OperatingSystem;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -22,7 +23,11 @@ public class SSLContextWithPKCS12File extends SSLContextDifferentTrustStoreBase 
 	@Override
 	KeyStore getTruststore() throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
 		var pkcs12FilePath = Path.of(System.getProperty(CERT_FILE_LOCATION_PROPERTY));
-		return KeyStore.getInstance(pkcs12FilePath.toFile(), new char[]{});
+		try {
+			return KeyStore.getInstance(pkcs12FilePath.toFile(), new char[]{});
+		} catch (IllegalArgumentException e) {
+			throw new NoSuchFileException(pkcs12FilePath.toString());
+		}
 	}
 
 	@CheckAvailability
