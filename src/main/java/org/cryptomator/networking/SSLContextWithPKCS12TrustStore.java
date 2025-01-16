@@ -16,7 +16,7 @@ import java.security.cert.CertificateException;
  */
 @OperatingSystem(OperatingSystem.Value.LINUX)
 @CheckAvailability
-public class SSLContextWithPKCS12File extends SSLContextDifferentTrustStoreBase implements SSLContextProvider {
+public class SSLContextWithPKCS12TrustStore extends SSLContextDifferentTrustStoreBase implements SSLContextProvider {
 
 	private static final String CERT_FILE_LOCATION_PROPERTY = "cryptomator.networking.truststore.p12Path";
 
