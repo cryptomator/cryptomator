@@ -62,7 +62,7 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\"" \
 		--java-options "-Dcryptomator.disableUpdateCheck=\"${DISABLE_UPDATE_CHECK}\"" \
 		--java-options "-Dcryptomator.integrationsLinux.autoStartCmd=\"cryptomator\"" \
-		--java-options "-Dcryptomator.networking.pkcs12FilePath=\"/etc/cryptomator/certs.pkcs12\"" \
+		--java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
 		--app-version "${VERSION_NUM}.${REVISION_NUM}" \
 		--resource-dir resources \
 		--verbose
