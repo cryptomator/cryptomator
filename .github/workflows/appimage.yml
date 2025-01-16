@@ -116,7 +116,7 @@ jobs:
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\""
           --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
-          --java-options "-Dcryptomator.networking.pkcs12FilePath=\"/etc/cryptomator/certs.pkcs12\"" \
+          --java-options "-Dcryptomator.networking.pkcs12FilePath=\"/etc/cryptomator/certs.pkcs12\""
           --resource-dir dist/linux/resources
       - name: Patch Cryptomator.AppDir
         run: |
