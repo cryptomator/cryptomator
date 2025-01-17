@@ -4,12 +4,14 @@ import org.cryptomator.integrations.common.CheckAvailability;
 import org.cryptomator.integrations.common.OperatingSystem;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Optional;
 
 /**
  * SSLContextProvider for Linux using a PKCS#12 file as trust store
@@ -32,6 +34,9 @@ public class SSLContextWithPKCS12TrustStore extends SSLContextDifferentTrustStor
 
 	@CheckAvailability
 	public static boolean isSupported() {
-		return System.getProperty(CERT_FILE_LOCATION_PROPERTY) != null;
+		var pkcs12Path = System.getProperty(CERT_FILE_LOCATION_PROPERTY);
+		return Optional.ofNullable(pkcs12Path) //
+				.map(Path::of) //
+				.map(Files::exists).orElse(false);
 	}
 }
