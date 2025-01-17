@@ -15,7 +15,7 @@ on:
         type: boolean
 
 env:
-  JAVA_DIST: 'zulu'
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: '23.0.1+11'
 
 jobs:
@@ -101,7 +101,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2024 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.mac"

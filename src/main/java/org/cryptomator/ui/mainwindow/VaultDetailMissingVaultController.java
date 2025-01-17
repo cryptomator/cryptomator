@@ -3,10 +3,11 @@ package org.cryptomator.ui.mainwindow;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.removevault.RemoveVaultComponent;
+import org.cryptomator.ui.dialogs.Dialogs;
 
 import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -19,17 +20,22 @@ import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
 public class VaultDetailMissingVaultController implements FxController {
 
 	private final ObjectProperty<Vault> vault;
-	private final RemoveVaultComponent.Builder removeVault;
+	private final ObservableList<Vault> vaults;
 	private final ResourceBundle resourceBundle;
 	private final Stage window;
-
+	private final Dialogs dialogs;
 
 	@Inject
-	public VaultDetailMissingVaultController(ObjectProperty<Vault> vault, RemoveVaultComponent.Builder removeVault, ResourceBundle resourceBundle, @MainWindow Stage window) {
+	public VaultDetailMissingVaultController(ObjectProperty<Vault> vault, //
+											 ObservableList<Vault> vaults, //
+											 ResourceBundle resourceBundle, //
+											 @MainWindow Stage window, //
+											 Dialogs dialogs) {
 		this.vault = vault;
-		this.removeVault = removeVault;
+		this.vaults = vaults;
 		this.resourceBundle = resourceBundle;
 		this.window = window;
+		this.dialogs = dialogs;
 	}
 
 	@FXML
@@ -39,7 +45,7 @@ public class VaultDetailMissingVaultController implements FxController {
 
 	@FXML
 	void didClickRemoveVault() {
-		removeVault.vault(vault.get()).build().showRemoveVault();
+		dialogs.prepareRemoveVaultDialog(window, vault.get(), vaults).build().showAndWait();
 	}
 
 	@FXML

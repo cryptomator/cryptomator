@@ -55,6 +55,7 @@ open module org.cryptomator.desktop {
 	requires jakarta.inject;
 	requires static javax.inject;
 	requires java.compiler;
+	requires com.github.benmanes.caffeine;
 
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
 	uses SSLContextProvider;

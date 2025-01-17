@@ -10,7 +10,7 @@ on:
         required: false
 
 env:
-  JAVA_DIST: 'zulu'
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: '23.0.1+11'
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
             appimage-suffix: x86_64
             openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_linux-x64_bin-jmods.zip'
             openjfx-sha: 'd44bff3b94d5668fdee18a938d7b1269026d663d44765f02d29a9bdfd3fa1eb0'
-          - os: [self-hosted, Linux, ARM64]
+          - os: ubuntu-24.04-arm
             appimage-suffix: aarch64
             openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_linux-aarch64_bin-jmods.zip'
             openjfx-sha: '3d5457136690c4f5bb9522d38b45218e045bdac13c24aa4c808c7c8d17d039c7'
@@ -98,7 +98,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2024 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{  needs.get-version.outputs.semVerNum }}.${{  needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator"

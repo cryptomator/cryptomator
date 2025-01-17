@@ -1,61 +1,75 @@
-name: Checks JDK version for minor updates
+name: Check JDK for non-major updates
 
 on:
   schedule:
     - cron: '0 0 1 * *' # run once a month at the first day of month
+  workflow_dispatch:
 
 env:
   JDK_VERSION: '23.0.1+11'
-  JDK_VENDOR: zulu
+  JDK_VENDOR: temurin
+  RUNTIME_VERSION_HELPER: >
+    public class Test {
+      public static void main(String[]  args) {
+          System.out.println(Runtime.version());
+      }
+    }
 
 jobs:
-  jdk-current:
-    name: Check out current version
-    runs-on: ubuntu-latest
-    outputs:
-      jdk-date: ${{ steps.get-data.outputs.jdk-date}}
-    steps:
-      - uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JDK_VERSION }}
-          distribution: ${{ env.JDK_VENDOR }}
-          check-latest: false
-      - name: Read JAVA_VERSION_DATE and store in env variable
-        id: get-data
-        run: |
-          date=$(cat ${JAVA_HOME}/release | grep "JAVA_VERSION_DATE=\"" | awk -F'=' '{print $2}' | tr -d '"')
-          echo "jdk-date=${date}" >> "$GITHUB_OUTPUT"
-  jdk-latest:
+  check-version:
     name: Checkout latest jdk version
     runs-on: ubuntu-latest
     env:
-        JDK_MAJOR_VERSION: 23
-    outputs:
-      jdk-date: ${{ steps.get-data.outputs.jdk-date}}
-      jdk-version: ${{ steps.get-data.outputs.jdk-version}}
+        JDK_MAJOR_VERSION: 'toBeFilled'
     steps:
-      - name: Extract major version
+      - name: Determine current major version
         run: echo 'JDK_MAJOR_VERSION=${{ env.JDK_VERSION }}'.substring(0,20) >> "$env:GITHUB_ENV"
         shell: pwsh
-      - uses: actions/setup-java@v4
+      - name: Checkout latest JDK ${{ env.JDK_MAJOR_VERSION }}
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JDK_MAJOR_VERSION}}
           distribution: ${{ env.JDK_VENDOR }}
           check-latest: true
-      - name: Read JAVA_VERSION_DATE and store in env variable
-        id: get-data
+      - name: Determine if update is available
+        id: determine
+        shell: pwsh
         run: |
-          date=$(cat ${JAVA_HOME}/release | grep "JAVA_VERSION_DATE=\"" | awk -F'=' '{print $2}' | tr -d '"')
-          echo "jdk-date=${date}" >> "$GITHUB_OUTPUT"
-          version=$(cat ${JAVA_HOME}/release | grep "JAVA_RUNTIME_VERSION=\"" | awk -F'=' '{print $2}' | tr -d '"')
-          echo "jdk-version=${version}" >> "$GITHUB_OUTPUT"
-  notify:
-    name: Notifies for jdk update
-    runs-on: ubuntu-latest
-    needs: [jdk-current, jdk-latest]
-    if: ${{ needs.jdk-latest.outputs.jdk-date }} > ${{ needs.jdk-current.outputs.jdk-date }}
-    steps:
-      - name: Slack Notification
+          $latestVersion = 0,0,0,0 #INTERIM, UPDATE, PATCH and BUILD
+          $currentVersion = 0,0,0,0
+
+          # Get the latest JDK runtime version
+          "${env:RUNTIME_VERSION_HELPER}" | Set-Content -Path "GetRuntimeVersion.java"
+          $latestVersionString = & java GetRuntimeVersion.java
+          $runtimeVersionAndBuild = $latestVersionString.Split('+')
+          if($runtimeVersionAndBuild.Length -eq 2) {
+            $latestVersion[3]=$runtimeVersionAndBuild[1];
+          }
+          $tmp=$runtimeVersionAndBuild[0].Split('.')
+          for($i=0;$i -lt $latestVersion.Length; $i++) {
+            $latestVersion[$i]=$tmp[$i+1];
+          }
+
+          # Get the current JDK version
+          $runtimeVersionAndBuild = '${{ env.JDK_VERSION}}'.Split('+')
+          if($runtimeVersionAndBuild.Length -eq 2) {
+            $currentVersion[3]=$runtimeVersionAndBuild[1];
+          }
+          $tmp=$runtimeVersionAndBuild[0].Split('.')
+          for($i=0;$i -lt $currentVersion.Length; $i++) {
+            $currentVersion[$i]=$tmp[$i+1];
+          }
+
+          # compare
+          for($i=0; $i -lt $currentVersion.Length ; $i++) {
+            if($latestVersion[$i] -gt  $currentVersion[$i]){
+              echo 'UPDATE_AVAILABLE=true' >> "$env:GITHUB_OUTPUT"
+              echo "LATEST_JDK_VERSION='${latestVersionString}'" >> "$env:GITHUB_OUTPUT"
+              return 0;
+            }
+          }
+      - name: Notify
+        if: steps.determine.outputs.UPDATE_AVAILABLE == 'true'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -64,6 +78,6 @@ jobs:
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
           SLACK_TITLE: "JDK update available"
-          SLACK_MESSAGE: "Cryptomator-CI JDK can be upgraded to ${{ needs.jdk-latest.outputs.jdk-version }}. See https://github.com/cryptomator/cryptomator/wiki/How-to-update-the-build-JDK for instructions."
+          SLACK_MESSAGE: "Cryptomator-CI JDK can be upgraded to ${{ steps.determine.outputs.LATEST_JDK_VERSION }}. Check the Nextcloud collective for instructions."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
