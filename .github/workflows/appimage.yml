@@ -153,7 +153,7 @@ jobs:
         run: >
           ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{  needs.get-version.outputs.semVerStr }}-${{ matrix.appimage-suffix }}.AppImage
           -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${{ matrix.appimage-suffix }}.AppImage.zsync'
-          --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
+          --sign --sign-key=615D449FE6E6A235
       - name: Create detached GPG signatures
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
