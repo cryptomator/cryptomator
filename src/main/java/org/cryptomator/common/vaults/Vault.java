@@ -115,11 +115,10 @@ public class Vault {
 			flags.add(FileSystemFlags.READONLY);
 		} else if (vaultSettings.maxCleartextFilenameLength.get() == -1) {
 			LOG.debug("Determining cleartext filename length limitations...");
-			var checker = new FileSystemCapabilityChecker();
 			int shorteningThreshold = configCache.get().allegedShorteningThreshold();
-			int ciphertextLimit = checker.determineSupportedCiphertextFileNameLength(getPath());
+			int ciphertextLimit = FileSystemCapabilityChecker.determineSupportedCiphertextFileNameLength(getPath());
 			if (ciphertextLimit < shorteningThreshold) {
-				int cleartextLimit = checker.determineSupportedCleartextFileNameLength(getPath());
+				int cleartextLimit = FileSystemCapabilityChecker.determineSupportedCleartextFileNameLength(getPath());
 				vaultSettings.maxCleartextFilenameLength.set(cleartextLimit);
 			} else {
 				vaultSettings.maxCleartextFilenameLength.setValue(UNLIMITED_FILENAME_LENGTH);

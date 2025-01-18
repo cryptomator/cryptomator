@@ -5,7 +5,7 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.ui.dokanysupportend.DokanySupportEndComponent;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -48,14 +48,14 @@ public class FxApplicationWindows {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
-	private final UpdateReminderComponent.Factory updateReminderWindowBuilder;
-	private final DokanySupportEndComponent.Factory dokanySupportEndWindowBuilder;
+	private final UpdateReminderComponent.Factory updateReminderWindowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
+	private final Dialogs dialogs;
 
 	@Inject
 	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
@@ -64,27 +64,27 @@ public class FxApplicationWindows {
 								Lazy<PreferencesComponent> preferencesWindow, //
 								QuitComponent.Builder quitWindowBuilder, //
 								UnlockComponent.Factory unlockWorkflowFactory, //
-								UpdateReminderComponent.Factory updateReminderWindowBuilder, //
-								DokanySupportEndComponent.Factory dokanySupportEndWindowBuilder, //
+								UpdateReminderComponent.Factory updateReminderWindowFactory, //
 								LockComponent.Factory lockWorkflowFactory, //
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
-								ExecutorService executor) {
+								ExecutorService executor, //
+								Dialogs dialogs) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
-		this.updateReminderWindowBuilder = updateReminderWindowBuilder;
-		this.dokanySupportEndWindowBuilder = dokanySupportEndWindowBuilder;
+		this.updateReminderWindowFactory = updateReminderWindowFactory;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
+		this.dialogs = dialogs;
 	}
 
 	public void initialize() {
@@ -142,14 +142,19 @@ public class FxApplicationWindows {
 			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
 	}
 
-	public void checkAndShowUpdateReminderWindow() {
-		CompletableFuture.runAsync(() -> updateReminderWindowBuilder.create().checkAndShowUpdateReminderWindow(), Platform::runLater);
+	public void showUpdateReminderWindow() {
+		CompletableFuture.runAsync(() -> updateReminderWindowFactory.create().showUpdateReminderWindow(), Platform::runLater);
 	}
 
 	public void showDokanySupportEndWindow() {
-		CompletableFuture.runAsync(() -> dokanySupportEndWindowBuilder.create().showDokanySupportEndWindow(), Platform::runLater);
+		CompletableFuture.runAsync(() -> dialogs.prepareDokanySupportEndDialog(
+				mainWindow.get().window(),
+				stage -> {
+					showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+					stage.close();
+				}
+		).build().showAndWait(), Platform::runLater);
 	}
-
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {

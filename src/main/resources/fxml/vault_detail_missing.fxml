@@ -9,7 +9,7 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailMissingVaultController"
 	  alignment="TOP_CENTER"
-	  spacing="24">
+	  spacing="9">
 	<children>
 		<VBox spacing="9" alignment="CENTER">
 			<StackPane alignment="CENTER">

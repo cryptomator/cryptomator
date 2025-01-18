@@ -11,8 +11,8 @@ defaults:
     shell: bash
 
 env:
-  JAVA_DIST: 'zulu'
-  JAVA_VERSION: 22
+  JAVA_DIST: 'temurin'
+  JAVA_VERSION: 23
 
 jobs:
   check-preconditions:

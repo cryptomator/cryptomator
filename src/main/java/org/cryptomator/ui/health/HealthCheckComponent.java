@@ -25,6 +25,8 @@ public interface HealthCheckComponent {
 	default Stage showHealthCheckWindow() {
 		Stage stage = window();
 		stage.setScene(startScene().get());
+		stage.setMinWidth(420);
+		stage.setMinHeight(300);
 		stage.show();
 		return stage;
 	}
