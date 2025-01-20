@@ -55,8 +55,8 @@
 		<zxcvbn.version>1.9.0</zxcvbn.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.11.3</junit.jupiter.version>
-		<mockito.version>5.14.2</mockito.version>
+		<junit.jupiter.version>5.11.4</junit.jupiter.version>
+		<mockito.version>5.15.2</mockito.version>
 		<hamcrest.version>3.0</hamcrest.version>
 
 		<!-- build-time dependencies -->
