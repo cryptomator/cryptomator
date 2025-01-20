@@ -25,10 +25,10 @@ cp ../../../target/cryptomator-*.jar ../../../target/mods
 
 JAVAFX_VERSION=22.0.2
 JAVAFX_ARCH="x64"
-JAVAFX_JMODS_SHA256='d44bff3b94d5668fdee18a938d7b1269026d663d44765f02d29a9bdfd3fa1eb0'
+JAVAFX_JMODS_SHA256='2164bca470bf70a5e2764645e2078ba7f787b274e5be3d7df30d87c5bb62bba6'
 if [ "${CPU_ARCH}" = "aarch64" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256='3d5457136690c4f5bb9522d38b45218e045bdac13c24aa4c808c7c8d17d039c7'
+    JAVAFX_JMODS_SHA256='09c92fa9fa0b82adefd88640a14ebb2a49e5f3f733a57d1542f5590d060ffe1b'
 fi
 
 # download javaFX jmods
