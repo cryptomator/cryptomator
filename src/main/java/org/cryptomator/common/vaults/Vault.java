@@ -112,10 +112,9 @@ public class Vault {
 
 	private CryptoFileSystem createCryptoFileSystem(MasterkeyLoader keyLoader) throws IOException, MasterkeyLoadingFailedException {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
-		var checker = new FileSystemCapabilityChecker();
 		var createReadOnly = vaultSettings.usesReadOnlyMode.get();
 		try {
-			checker.assertWriteAccess(getPath());
+			FileSystemCapabilityChecker.assertWriteAccess(getPath());
 		} catch (FileSystemCapabilityChecker.MissingCapabilityException e) {
 			if (!createReadOnly) {
 				throw new ReadOnlyFileSystemException();
