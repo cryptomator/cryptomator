@@ -22,7 +22,12 @@ public class KeychainManagerTest {
 	@BeforeAll
 	public static void startup() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
-		Platform.startup(latch::countDown);
+		try {
+			Platform.startup(latch::countDown);
+		} catch (IllegalStateException e) {
+			//already initialized
+			latch.countDown();
+		}
 		var javafxStarted = latch.await(5, TimeUnit.SECONDS);
 		Assumptions.assumeTrue(javafxStarted);
 	}
