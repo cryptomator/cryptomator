@@ -32,9 +32,9 @@ Become our Gold Sponsor and showcase your brand to a targeted audience! Please c
 
 ### Special Shoutout
 
-Continuous integration hosting for ARM64 builds is provided by [MacStadium](https://www.macstadium.com/opensource).
+Continuous integration hosting for ARM64 builds is provided by [MacStadium](https://www.macstadium.com/company/opensource).
 
-<a href="https://www.macstadium.com/opensource"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="MacStadium" height="100"></a>
+<a href="https://www.macstadium.com/company/opensource"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="MacStadium" height="100"></a>
 
 ---
 
