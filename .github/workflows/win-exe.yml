@@ -15,7 +15,7 @@ on:
 
 
 env:
-  JAVA_DIST: 'temurin'
+  JAVA_DIST: 'zulu'
   JAVA_VERSION: '23.0.1+11'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_windows-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
