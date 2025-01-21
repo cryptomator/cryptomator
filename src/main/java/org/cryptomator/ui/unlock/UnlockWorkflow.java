@@ -27,7 +27,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.ReadOnlyFileSystemException;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -158,22 +157,27 @@ public class UnlockWorkflow extends Task<Void> {
 	}
 
 	private void handleReadOnlyFileSystem() {
-		CompletableFuture.runAsync(() -> {
-			try {
-				vault.stateProperty().awaitState(VaultState.Value.LOCKED, 5, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		}).thenRunAsync(() -> {
-			dialogs.prepareRetryIfReadonlyDialog(mainWindow, stage -> {
-				vault.getVaultSettings().usesReadOnlyMode.set(true);
+		var readOnlyDialog = dialogs.prepareRetryIfReadonlyDialog(mainWindow, stage -> {
+			stage.close();
+			this.retry();
+		}).build();
+
+		Platform.runLater(readOnlyDialog::showAndWait);
+	}
+
+	private void retry() {
+		try {
+			vault.getVaultSettings().usesReadOnlyMode.set(true);
+			var isLocked = vault.stateProperty().awaitState(VaultState.Value.LOCKED, 5, TimeUnit.SECONDS);
+			if (!isLocked) {
+				LOG.error("Vault did not changed to LOCKED state within 5 seconds. Aborting unlock retry.");
+			} else {
 				appWindows.startUnlockWorkflow(vault, mainWindow);
-				stage.close();
-			}).build().showAndWait();
-		}, Platform::runLater).exceptionally(_ -> {
-			LOG.error("Couldn't display retry dialog.");
-			return null;
-		});
+			}
+		} catch (InterruptedException e) {
+			LOG.error("Waiting for LOCKED vault state was interrupted. Aborting unlock retry.", e);
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	@Override
