@@ -60,14 +60,14 @@ if( !(Test-Path -Path $javaFxJmods) ) {
 	Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
 }
 
-$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash
+$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
 if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
 	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
 , actual: $jmodsChecksumActual"
 	exit 1;
 }
 Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
-Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods"
+Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
 Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 ## create custom runtime
