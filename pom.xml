@@ -70,6 +70,9 @@
 		<mvn-dependency.version>3.8.1</mvn-dependency.version>
 		<mvn-surefire.version>3.5.2</mvn-surefire.version>
 		<mvn-jar.version>3.4.2</mvn-jar.version>
+
+		<!-- Property used by surefire to determine jacoco engine -->
+		<surefire.jacoco.args></surefire.jacoco.args>
 	</properties>
 
 	<dependencies>
@@ -326,6 +329,18 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>jar-paths-to-properties</id>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<dependencies>
 					<dependency>
@@ -340,6 +355,7 @@
 					<consoleOutputReporter>
 						<disable>true</disable>
 					</consoleOutputReporter>
+					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar}</argLine>
 					<statelessTestsetInfoReporter
 							implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
 					</statelessTestsetInfoReporter>
@@ -421,6 +437,9 @@
 								<goals>
 									<goal>prepare-agent</goal>
 								</goals>
+								<configuration>
+									<propertyName>surefire.jacoco.args</propertyName>
+								</configuration>
 							</execution>
 							<execution>
 								<id>report</id>
