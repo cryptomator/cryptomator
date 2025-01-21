@@ -9,8 +9,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.SubstitutingProperties;
 import org.cryptomator.common.ShutdownHook;
+import org.cryptomator.common.SubstitutingProperties;
+import org.cryptomator.networking.SSLContextProvider;
 import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
@@ -19,8 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.net.ssl.SSLContext;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -48,14 +51,16 @@ public class Cryptomator {
 	private final Environment env;
 	private final Lazy<IpcMessageHandler> ipcMessageHandler;
 	private final ShutdownHook shutdownHook;
+	private final SecureRandom csprng;
 
 	@Inject
-	Cryptomator(DebugMode debugMode, SupportedLanguages supportedLanguages, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook) {
+	Cryptomator(DebugMode debugMode, SupportedLanguages supportedLanguages, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook, SecureRandom csprng) {
 		this.debugMode = debugMode;
 		this.supportedLanguages = supportedLanguages;
 		this.env = env;
 		this.ipcMessageHandler = ipcMessageHandler;
 		this.shutdownHook = shutdownHook;
+		this.csprng = csprng;
 	}
 
 	public static void main(String[] args) {
@@ -89,7 +94,7 @@ public class Cryptomator {
 		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion(), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 		debugMode.initialize();
 		supportedLanguages.applyPreferred();
-
+		changeDefaultSSLContext();
 		/*
 		 * Attempts to create an IPC connection to a running Cryptomator instance and sends it the given args.
 		 * If no external process could be reached, the args will be handled by the loopback IPC endpoint.
@@ -113,6 +118,17 @@ public class Cryptomator {
 			LOG.error("Running application failed", e);
 			return 1;
 		}
+	}
+
+	private void changeDefaultSSLContext() {
+		SSLContextProvider.loadAll().findFirst().ifPresent(p -> {
+			try {
+				var context = p.getContext(csprng);
+				SSLContext.setDefault(context);
+			} catch (SSLContextProvider.SSLContextBuildException e) {
+				LOG.warn("Failed to change default SSL context with provider {}", p.getClass().getName(), e);
+			}
+		});
 	}
 
 	/**

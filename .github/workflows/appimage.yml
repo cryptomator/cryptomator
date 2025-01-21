@@ -29,12 +29,12 @@ jobs:
         include:
           - os: ubuntu-latest
             appimage-suffix: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_linux-x64_bin-jmods.zip'
-            openjfx-sha: 'd44bff3b94d5668fdee18a938d7b1269026d663d44765f02d29a9bdfd3fa1eb0'
-          - os: [self-hosted, Linux, ARM64]
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_linux-x64_bin-jmods.zip'
+            openjfx-sha: '2164bca470bf70a5e2764645e2078ba7f787b274e5be3d7df30d87c5bb62bba6'
+          - os: ubuntu-24.04-arm
             appimage-suffix: aarch64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_linux-aarch64_bin-jmods.zip'
-            openjfx-sha: '3d5457136690c4f5bb9522d38b45218e045bdac13c24aa4c808c7c8d17d039c7'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_linux-aarch64_bin-jmods.zip'
+            openjfx-sha: '09c92fa9fa0b82adefd88640a14ebb2a49e5f3f733a57d1542f5590d060ffe1b'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -116,6 +116,7 @@ jobs:
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\""
           --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
+          --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\""
           --resource-dir dist/linux/resources
       - name: Patch Cryptomator.AppDir
         run: |
@@ -132,13 +133,13 @@ jobs:
           cp dist/linux/common/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/usr/share/applications/org.cryptomator.Cryptomator.desktop
           cp dist/linux/common/application-vnd.cryptomator.vault.xml Cryptomator.AppDir/usr/share/mime/packages/application-vnd.cryptomator.vault.xml
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
-          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
-          ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
+          ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/org.cryptomator.Cryptomator.desktop
+          ln -s org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/metainfo/org.cryptomator.Cryptomator.appdata.xml
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
       - name: Download AppImageKit
         run: |
-          curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-${{ matrix.appimage-suffix }}.AppImage -o appimagetool.AppImage
+          curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.appimage-suffix }}.AppImage -o appimagetool.AppImage
           chmod +x appimagetool.AppImage
           ./appimagetool.AppImage --appimage-extract
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
@@ -152,7 +153,7 @@ jobs:
         run: >
           ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{  needs.get-version.outputs.semVerStr }}-${{ matrix.appimage-suffix }}.AppImage
           -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${{ matrix.appimage-suffix }}.AppImage.zsync'
-          --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
+          --sign --sign-key=615D449FE6E6A235
       - name: Create detached GPG signatures
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
