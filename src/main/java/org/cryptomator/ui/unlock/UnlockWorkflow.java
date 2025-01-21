@@ -27,6 +27,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.ReadOnlyFileSystemException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -156,12 +158,21 @@ public class UnlockWorkflow extends Task<Void> {
 	}
 
 	private void handleReadOnlyFileSystem() {
-		Platform.runLater(() -> {
+		CompletableFuture.runAsync(() -> {
+			try {
+				vault.stateProperty().awaitState(VaultState.Value.LOCKED, 5, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}).thenRunAsync(() -> {
 			dialogs.prepareRetryIfReadonlyDialog(mainWindow, stage -> {
 				vault.getVaultSettings().usesReadOnlyMode.set(true);
-				appWindows.startUnlockWorkflow(vault,mainWindow);
+				appWindows.startUnlockWorkflow(vault, mainWindow);
 				stage.close();
 			}).build().showAndWait();
+		}, Platform::runLater).exceptionally(_ -> {
+			LOG.error("Couldn't display retry dialog.");
+			return null;
 		});
 	}
 
