@@ -1,6 +1,7 @@
 package org.cryptomator.common.keychain;
 
 
+import org.cryptomator.JavaFXUtil;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -21,15 +22,8 @@ public class KeychainManagerTest {
 
 	@BeforeAll
 	public static void startup() throws InterruptedException {
-		CountDownLatch latch = new CountDownLatch(1);
-		try {
-			Platform.startup(latch::countDown);
-		} catch (IllegalStateException e) {
-			//already initialized
-			latch.countDown();
-		}
-		var javafxStarted = latch.await(5, TimeUnit.SECONDS);
-		Assumptions.assumeTrue(javafxStarted);
+		var isRunning = JavaFXUtil.startPlatform();
+		Assumptions.assumeTrue(isRunning);
 	}
 
 	@Test
