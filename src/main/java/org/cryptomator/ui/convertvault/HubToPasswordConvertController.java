@@ -15,6 +15,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
@@ -108,6 +109,7 @@ public class HubToPasswordConvertController implements FxController {
 				.thenRunAsync(this::convertInternal, backgroundExecutorService) //
 				.whenCompleteAsync((result, exception) -> {
 					if (exception == null) {
+						vault.getVaultSettings().keyLoader.set(MasterkeyFileLoadingStrategy.SCHEME);
 						LOG.info("Conversion of vault {} succeeded.", vault.getPath());
 						window.setScene(successScene.get());
 					} else {

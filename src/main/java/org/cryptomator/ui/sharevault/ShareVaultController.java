@@ -33,8 +33,8 @@ public class ShareVaultController implements FxController {
 		this.window = window;
 		this.application = application;
 		this.vault = vault;
-		var vaultScheme = vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme();
-		this.hubVault = (vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS));
+		var vaultKeyLoader = vault.getVaultSettings().keyLoader.get();
+		this.hubVault = (vaultKeyLoader.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultKeyLoader.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS));
 	}
 
 	@FXML

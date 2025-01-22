@@ -27,6 +27,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -73,9 +74,25 @@ public class VaultListManager {
 		return get(normalizedPathToVault) //
 				.orElseGet(() -> {
 					Vault newVault = create(newVaultSettings(normalizedPathToVault));
+					setVaultScheme(newVault);
 					vaultList.add(newVault);
 					return newVault;
 				});
+	}
+
+	private void setVaultScheme(Vault vault) {
+		try {
+			var keyLoader = vault.getVaultSettings().keyLoader;
+			if (Objects.isNull(keyLoader.get())) {
+				var vaultConfig = vault.getVaultConfigCache().get();
+				var keyIdScheme = vaultConfig.getKeyId().getScheme();
+				keyLoader.set(keyIdScheme);
+			}
+		} catch (NoSuchFileException e) {
+			LOG.error("NoSuchFileException", e);
+		} catch (IOException e) {
+			throw new RuntimeException("Unexpected Exception", e);
+		}
 	}
 
 	private VaultSettings newVaultSettings(Path path) {
@@ -101,6 +118,7 @@ public class VaultListManager {
 	private void addAll(Collection<VaultSettings> vaultSettings) {
 		Collection<Vault> vaults = vaultSettings.stream().map(this::create).toList();
 		vaultList.addAll(vaults);
+		vaults.forEach(this::setVaultScheme);
 	}
 
 	private Optional<Vault> get(Path vaultPath) {
