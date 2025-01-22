@@ -2,6 +2,7 @@ package org.cryptomator.ui.dialogs;
 
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javafx.scene.Scene;
@@ -22,7 +23,7 @@ public class SimpleDialog {
 
 	SimpleDialog(Builder builder) throws IOException {
 		this.resourceBundle = builder.resourceBundle;
-		dialogStage = new Stage();
+		dialogStage = builder.stageFactory.create();
 		dialogStage.initOwner(builder.owner);
 		dialogStage.initModality(Modality.WINDOW_MODAL);
 		dialogStage.setTitle(resolveText(builder.titleKey, builder.titleArgs));
@@ -60,6 +61,7 @@ public class SimpleDialog {
 
 		private Stage owner;
 		private final ResourceBundle resourceBundle;
+		private final StageFactory stageFactory;
 		private String titleKey;
 		private String[] titleArgs;
 		private String messageKey;
@@ -71,8 +73,9 @@ public class SimpleDialog {
 		private Consumer<Stage> okAction = Stage::close;
 		private Consumer<Stage> cancelAction = Stage::close;
 
-		public Builder(ResourceBundle resourceBundle) {
+		public Builder(ResourceBundle resourceBundle, StageFactory stageFactory) {
 			this.resourceBundle = resourceBundle;
+			this.stageFactory = stageFactory;
 		}
 
 		public Builder setOwner(Stage owner) {

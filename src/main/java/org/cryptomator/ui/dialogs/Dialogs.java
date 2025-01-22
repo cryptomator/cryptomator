@@ -2,31 +2,34 @@ package org.cryptomator.ui.dialogs;
 
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-@Singleton
+@FxApplicationScoped
 public class Dialogs {
 
 	private final ResourceBundle resourceBundle;
+	private final StageFactory stageFactory;
 
 	@Inject
-	public Dialogs(ResourceBundle resourceBundle) {
+	public Dialogs(ResourceBundle resourceBundle, StageFactory stageFactory) {
 		this.resourceBundle = resourceBundle;
+		this.stageFactory = stageFactory;
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(Dialogs.class);
 
 	private SimpleDialog.Builder createDialogBuilder() {
-		return new SimpleDialog.Builder(resourceBundle);
+		return new SimpleDialog.Builder(resourceBundle, stageFactory);
 	}
 
 	public SimpleDialog.Builder prepareRemoveVaultDialog(Stage window, Vault vault, ObservableList<Vault> vaults) {
