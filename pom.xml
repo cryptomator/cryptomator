@@ -311,7 +311,6 @@
 					<compilerArgs>
 						<arg>-Adagger.fastInit=enabled</arg>
 						<arg>-Adagger.formatGeneratedSource=enabled</arg>
-						<arg>--enable-preview</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>
@@ -329,18 +328,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>jar-paths-to-properties</id>
-						<goals>
-							<goal>properties</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<dependencies>
 					<dependency>
@@ -350,7 +337,6 @@
 					</dependency>
 				</dependencies>
 				<configuration>
-					<argLine>--enable-preview</argLine>
 					<reportFormat>plain</reportFormat>
 					<consoleOutputReporter>
 						<disable>true</disable>
@@ -365,6 +351,13 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
+					<execution>
+						<id>jar-paths-to-properties</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
 					<!-- sort jars into two buckets (classpath and modulepath). exclude openjfx, which gets jlinked separately -->
 					<execution>
 						<id>copy-mods</id>
