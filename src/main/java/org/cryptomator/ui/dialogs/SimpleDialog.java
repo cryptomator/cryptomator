@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 public class SimpleDialog {
 
 	private final ResourceBundle resourceBundle;
-
 	private final Stage dialogStage;
 
 	SimpleDialog(Builder builder) throws IOException {
@@ -29,13 +28,13 @@ public class SimpleDialog {
 		dialogStage.setTitle(resolveText(builder.titleKey, builder.titleArgs));
 		dialogStage.setResizable(false);
 
-		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(
-				new SimpleDialogController(resolveText(builder.messageKey, null),
-						resolveText(builder.descriptionKey, null),
-						builder.icon,resolveText(builder.okButtonKey, null),
-						resolveText(builder.cancelButtonKey, null),
-						() -> builder.okAction.accept(dialogStage),
-						() -> builder.cancelAction.accept(dialogStage)),
+		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController( //
+				new SimpleDialogController(resolveText(builder.messageKey, null), //
+						resolveText(builder.descriptionKey, null), //
+						builder.icon, resolveText(builder.okButtonKey, null), //
+						resolveText(builder.cancelButtonKey, null), //
+						() -> builder.okAction.accept(dialogStage), //
+						() -> builder.cancelAction.accept(dialogStage)), //
 				Scene::new, builder.resourceBundle);
 
 		dialogStage.setScene(new Scene(loaderFactory.load(FxmlFile.SIMPLE_DIALOG.getRessourcePathString()).getRoot()));
@@ -125,11 +124,11 @@ public class SimpleDialog {
 		}
 
 		public SimpleDialog build() {
-			Objects.requireNonNull(titleKey,"SimpleDialog titleKey must be set.");
-			Objects.requireNonNull(messageKey,"SimpleDialog messageKey must be set.");
-			Objects.requireNonNull(descriptionKey,"SimpleDialog descriptionKey must be set.");
-			Objects.requireNonNull(okButtonKey,"SimpleDialog okButtonKey must be set.");
-			Objects.requireNonNull(cancelButtonKey,"SimpleDialog cancelButtonKey must be set.");
+			Objects.requireNonNull(titleKey, "SimpleDialog titleKey must be set.");
+			Objects.requireNonNull(messageKey, "SimpleDialog messageKey must be set.");
+			Objects.requireNonNull(descriptionKey, "SimpleDialog descriptionKey must be set.");
+			Objects.requireNonNull(okButtonKey, "SimpleDialog okButtonKey must be set.");
+			Objects.requireNonNull(cancelButtonKey, "SimpleDialog cancelButtonKey must be set.");
 
 			try {
 				return new SimpleDialog(this);
