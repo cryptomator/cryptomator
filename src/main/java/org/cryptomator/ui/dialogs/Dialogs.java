@@ -72,4 +72,16 @@ public class Dialogs {
 				.setCancelAction(cancelAction);
 	}
 
+	public SimpleDialog.Builder prepareRetryIfReadonlyDialog(Stage window, Consumer<Stage> okAction) {
+		return createDialogBuilder() //
+				.setOwner(window) //
+				.setTitleKey("retryIfReadonly.title") //
+				.setMessageKey("retryIfReadonly.message") //
+				.setDescriptionKey("retryIfReadonly.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
+				.setOkButtonKey("retryIfReadonly.retry") //
+				.setCancelButtonKey("generic.button.close") //
+				.setOkAction(okAction) //
+				.setCancelAction(Stage::close);
+	}
 }

@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -50,7 +49,7 @@ public class CreateNewVaultLocationController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultLocationController.class);
 	private static final Path DEFAULT_CUSTOM_VAULT_PATH = Paths.get(System.getProperty("user.home"));
-	private static final String TEMP_FILE_FORMAT = ".locationTest.cryptomator.tmp";
+	private static final String TEMP_FILE_PREFIX = ".locationTest.cryptomator";
 
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
@@ -126,16 +125,19 @@ public class CreateNewVaultLocationController implements FxController {
 
 
 	private boolean isActuallyWritable(Path p) {
-		Path tmpFile = p.resolve(TEMP_FILE_FORMAT);
-		try (var chan = Files.newByteChannel(tmpFile, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE, StandardOpenOption.DELETE_ON_CLOSE)) {
+		Path tmpDir = null;
+		try {
+			tmpDir = Files.createTempDirectory(p, TEMP_FILE_PREFIX );
 			return true;
 		} catch (IOException e) {
 			return false;
 		} finally {
-			try {
-				Files.deleteIfExists(tmpFile);
-			} catch (IOException e) {
-				LOG.warn("Unable to delete temporary file {}. Needs to be deleted manually.", tmpFile);
+			if (tmpDir != null) {
+				try {
+					Files.deleteIfExists(tmpDir);
+				} catch (IOException e) {
+					LOG.warn("Unable to delete temporary directory {}. Needs to be deleted manually.", tmpDir);
+				}
 			}
 		}
 	}

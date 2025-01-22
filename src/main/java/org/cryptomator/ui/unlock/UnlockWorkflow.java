@@ -10,6 +10,7 @@ import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
@@ -25,6 +26,8 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.nio.file.ReadOnlyFileSystemException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -46,6 +49,7 @@ public class UnlockWorkflow extends Task<Void> {
 	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 	private final ObjectProperty<IllegalMountPointException> illegalMountPointException;
+	private final Dialogs dialogs;
 
 	@Inject
 	UnlockWorkflow(@PrimaryStage Stage mainWindow, //
@@ -57,7 +61,8 @@ public class UnlockWorkflow extends Task<Void> {
 				   @FxmlScene(FxmlFile.UNLOCK_REQUIRES_RESTART) Lazy<Scene> restartRequiredScene, //
 				   FxApplicationWindows appWindows, //
 				   @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, //
-				   @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException) {
+				   @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException, //
+				   Dialogs dialogs) {
 		this.mainWindow = mainWindow;
 		this.window = window;
 		this.vault = vault;
@@ -68,6 +73,7 @@ public class UnlockWorkflow extends Task<Void> {
 		this.appWindows = appWindows;
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.illegalMountPointException = illegalMountPointException;
+		this.dialogs = dialogs;
 	}
 
 	@Override
@@ -144,9 +150,34 @@ public class UnlockWorkflow extends Task<Void> {
 		switch (throwable) {
 			case IllegalMountPointException e -> handleIllegalMountPointError(e);
 			case ConflictingMountServiceException _ -> handleConflictingMountServiceException();
+			case ReadOnlyFileSystemException _ -> handleReadOnlyFileSystem();
 			default -> handleGenericError(throwable);
 		}
 		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
+	}
+
+	private void handleReadOnlyFileSystem() {
+		var readOnlyDialog = dialogs.prepareRetryIfReadonlyDialog(mainWindow, stage -> {
+			stage.close();
+			this.retry();
+		}).build();
+
+		Platform.runLater(readOnlyDialog::showAndWait);
+	}
+
+	private void retry() {
+		try {
+			vault.getVaultSettings().usesReadOnlyMode.set(true);
+			var isLocked = vault.stateProperty().awaitState(VaultState.Value.LOCKED, 5, TimeUnit.SECONDS);
+			if (!isLocked) {
+				LOG.error("Vault did not changed to LOCKED state within 5 seconds. Aborting unlock retry.");
+			} else {
+				appWindows.startUnlockWorkflow(vault, mainWindow);
+			}
+		} catch (InterruptedException e) {
+			LOG.error("Waiting for LOCKED vault state was interrupted. Aborting unlock retry.", e);
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	@Override
