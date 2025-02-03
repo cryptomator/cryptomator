@@ -13,9 +13,15 @@ import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.layout.HBox;
 
 // unscoped because each cell needs its own controller
 public class VaultListCellController implements FxController {
+
+	private static final Insets COMPACT_INSETS = new Insets(6, 12, 6, 12);
+	private static final Insets DEFAULT_INSETS = new Insets(12);
 
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private final ObservableValue<FontAwesome5Icon> glyph;
@@ -25,6 +31,8 @@ public class VaultListCellController implements FxController {
 
 	/* FXML */
 	public FontAwesome5IconView vaultStateView;
+	@FXML
+	public HBox vaultListCell;
 
 	@Inject
 	VaultListCellController(Settings settings) {
@@ -37,6 +45,7 @@ public class VaultListCellController implements FxController {
 				.onCondition(vault.flatMap(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals).orElse(false)) //
 				.afterStop(() -> vaultStateView.setRotate(0)) //
 				.build();
+		this.vaultListCell.paddingProperty().bind(compactMode.map(c -> c ? COMPACT_INSETS : DEFAULT_INSETS));
 	}
 
 	// TODO deduplicate w/ VaultDetailController
