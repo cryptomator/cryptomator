@@ -22,7 +22,7 @@ import java.util.ResourceBundle;
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
 
-	public static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/en/1.7/desktop/volume-type/";
+	public static final String DOCS_MOUNTING_URL = "https://docs.cryptomator.org/desktop/volume-type/";
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
 

@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 
 public class MigrationImpossibleController implements FxController {
 
-	private static final String HELP_URI = "https://docs.cryptomator.org/en/1.7/help/manual-migration/";
+	private static final String HELP_URI = "https://docs.cryptomator.org/help/manual-migration/";
 
 	private final Application application;
 	private final Stage window;
