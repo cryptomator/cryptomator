@@ -2,6 +2,7 @@ package org.cryptomator.ui.dialogs;
 
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javafx.scene.Scene;
@@ -17,24 +18,23 @@ import java.util.function.Consumer;
 public class SimpleDialog {
 
 	private final ResourceBundle resourceBundle;
-
 	private final Stage dialogStage;
 
 	SimpleDialog(Builder builder) throws IOException {
 		this.resourceBundle = builder.resourceBundle;
-		dialogStage = new Stage();
+		dialogStage = builder.stageFactory.create();
 		dialogStage.initOwner(builder.owner);
 		dialogStage.initModality(Modality.WINDOW_MODAL);
 		dialogStage.setTitle(resolveText(builder.titleKey, builder.titleArgs));
 		dialogStage.setResizable(false);
 
-		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController(
-				new SimpleDialogController(resolveText(builder.messageKey, null),
-						resolveText(builder.descriptionKey, null),
-						builder.icon,resolveText(builder.okButtonKey, null),
-						resolveText(builder.cancelButtonKey, null),
-						() -> builder.okAction.accept(dialogStage),
-						() -> builder.cancelAction.accept(dialogStage)),
+		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController( //
+				new SimpleDialogController(resolveText(builder.messageKey, null), //
+						resolveText(builder.descriptionKey, null), //
+						builder.icon, resolveText(builder.okButtonKey, null), //
+						resolveText(builder.cancelButtonKey, null), //
+						() -> builder.okAction.accept(dialogStage), //
+						() -> builder.cancelAction.accept(dialogStage)), //
 				Scene::new, builder.resourceBundle);
 
 		dialogStage.setScene(new Scene(loaderFactory.load(FxmlFile.SIMPLE_DIALOG.getRessourcePathString()).getRoot()));
@@ -60,6 +60,7 @@ public class SimpleDialog {
 
 		private Stage owner;
 		private final ResourceBundle resourceBundle;
+		private final StageFactory stageFactory;
 		private String titleKey;
 		private String[] titleArgs;
 		private String messageKey;
@@ -71,8 +72,9 @@ public class SimpleDialog {
 		private Consumer<Stage> okAction = Stage::close;
 		private Consumer<Stage> cancelAction = Stage::close;
 
-		public Builder(ResourceBundle resourceBundle) {
+		public Builder(ResourceBundle resourceBundle, StageFactory stageFactory) {
 			this.resourceBundle = resourceBundle;
+			this.stageFactory = stageFactory;
 		}
 
 		public Builder setOwner(Stage owner) {
@@ -122,11 +124,11 @@ public class SimpleDialog {
 		}
 
 		public SimpleDialog build() {
-			Objects.requireNonNull(titleKey,"SimpleDialog titleKey must be set.");
-			Objects.requireNonNull(messageKey,"SimpleDialog messageKey must be set.");
-			Objects.requireNonNull(descriptionKey,"SimpleDialog descriptionKey must be set.");
-			Objects.requireNonNull(okButtonKey,"SimpleDialog okButtonKey must be set.");
-			Objects.requireNonNull(cancelButtonKey,"SimpleDialog cancelButtonKey must be set.");
+			Objects.requireNonNull(titleKey, "SimpleDialog titleKey must be set.");
+			Objects.requireNonNull(messageKey, "SimpleDialog messageKey must be set.");
+			Objects.requireNonNull(descriptionKey, "SimpleDialog descriptionKey must be set.");
+			Objects.requireNonNull(okButtonKey, "SimpleDialog okButtonKey must be set.");
+			Objects.requireNonNull(cancelButtonKey, "SimpleDialog cancelButtonKey must be set.");
 
 			try {
 				return new SimpleDialog(this);
