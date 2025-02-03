@@ -6,8 +6,8 @@ on:
     types: [labeled]
 
 env:
-  JAVA_DIST: 'zulu'
-  JAVA_VERSION: 22
+  JAVA_DIST: 'temurin'
+  JAVA_VERSION: 23
 
 defaults:
   run:
@@ -53,10 +53,25 @@ jobs:
           generate_release_notes: true
           body: |-
             :construction: Work in Progress
+            ### What's New 🎉
             
-            ⏳ Please be patient, the builds are still [running](https://github.com/cryptomator/cryptomator/actions). New versions of Cryptomator can be found here in a few moments. ⏳
+            ### Bugfixes 🐛
             
-            As usual, the GPG signatures can be checked using [our public key `5811 7AFA 1F85 B3EE C154  677D 615D 449F E6E6 A235`](https://gist.github.com/cryptobot/211111cf092037490275f39d408f461a).
+            ### Other Changes 📎
             
             ---
-            <!-- Don't forget to include the 💾 SHA-256 checksums of release artifacts: -->
+            
+            TODO FULL CHANGELOG
+            
+            📜 List of closed issues is available [here](TODO)
+            
+            ---
+            ⏳ Please be patient, the builds are still [running](https://github.com/cryptomator/cryptomator/actions). New versions of Cryptomator can be found here in a few moments. ⏳
+            
+            <!-- Don't forget to include the
+            💾 SHA-256 checksums of release artifacts:
+            ```
+            ```
+            -->
+            
+            As usual, the GPG signatures can be checked using [our public key `5811 7AFA 1F85 B3EE C154  677D 615D 449F E6E6 A235`](https://gist.github.com/cryptobot/211111cf092037490275f39d408f461a).

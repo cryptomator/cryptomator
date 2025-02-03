@@ -57,9 +57,14 @@ public class GeneralVaultOptionsController implements FxController {
 	}
 
 	private void trimVaultNameOnFocusLoss(Observable observable, Boolean wasFocussed, Boolean isFocussed) {
+		var displayNameSetting = vault.getVaultSettings().displayName;
 		if (!isFocussed) {
 			var trimmed = vaultName.getText().trim();
-			vault.getVaultSettings().displayName.set(trimmed);
+			if (!trimmed.isEmpty()) {
+				displayNameSetting.set(trimmed); //persist changes
+			} else {
+				vaultName.setText(displayNameSetting.get()); //revert changes
+			}
 		}
 	}
 

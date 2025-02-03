@@ -7,7 +7,6 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
-import org.cryptomator.ui.dokanysupportend.DokanySupportEndComponent;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
@@ -34,7 +33,6 @@ import java.io.InputStream;
 		ErrorComponent.class, //
 		HealthCheckComponent.class, //
 		UpdateReminderComponent.class, //
-		DokanySupportEndComponent.class, //
 		ShareVaultComponent.class})
 abstract class FxApplicationModule {
 

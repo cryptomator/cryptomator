@@ -51,23 +51,23 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$javaFxVersion='22.0.2'
+$javaFxVersion='23.0.1'
 $javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-$javaFxJmodsSHA256 = 'f9376d200f5c5b85327d575c1ec1482e6455f19916577f7e2fc9be2f48bb29b6'
+$javaFxJmodsSHA256 = 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
 $javaFxJmods = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $javaFxJmods) ) {
 	Write-Output "Downloading ${javaFxJmodsUrl}..."
 	Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
 }
 
-$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash
+$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
 if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
 	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
 , actual: $jmodsChecksumActual"
 	exit 1;
 }
 Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
-Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods"
+Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
 Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 ## create custom runtime
@@ -75,7 +75,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `

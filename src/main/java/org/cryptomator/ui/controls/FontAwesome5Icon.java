@@ -17,6 +17,7 @@ public enum FontAwesome5Icon {
 	COGS("\uF085"), //
 	COPY("\uF0C5"), //
 	CROWN("\uF521"), //
+	DONATE("\uF4B9"), //
 	EDIT("\uF044"), //
 	EXCHANGE_ALT("\uF362"), //
 	EXCLAMATION("\uF12A"), //
@@ -49,6 +50,7 @@ public enum FontAwesome5Icon {
 	SEARCH("\uF002"), //
 	SHARE("\uF064"), //
 	SPINNER("\uF110"), //
+	SPONSORS("\uF2B5"), //
 	STETHOSCOPE("\uF0f1"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //

@@ -16,14 +16,14 @@ on:
         type: boolean
 
 env:
-  JAVA_DIST: 'zulu'
-  JAVA_VERSION: '22.0.2+9'
-  COFFEELIBS_JDK: 22
-  COFFEELIBS_JDK_VERSION: '22.0.2+9-0ppa1'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: 'd44bff3b94d5668fdee18a938d7b1269026d663d44765f02d29a9bdfd3fa1eb0'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: '3d5457136690c4f5bb9522d38b45218e045bdac13c24aa4c808c7c8d17d039c7'
+  JAVA_DIST: 'temurin'
+  JAVA_VERSION: '23.0.1+11'
+  COFFEELIBS_JDK: 23
+  COFFEELIBS_JDK_VERSION: '23.0.1+11-0ppa1'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '2164bca470bf70a5e2764645e2078ba7f787b274e5be3d7df30d87c5bb62bba6'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: '09c92fa9fa0b82adefd88640a14ebb2a49e5f3f733a57d1542f5590d060ffe1b'
 
 jobs:
   build:

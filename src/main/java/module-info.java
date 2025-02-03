@@ -1,8 +1,10 @@
 import ch.qos.logback.classic.spi.Configurator;
+import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
-import org.cryptomator.common.locationpresets.GoogleDriveLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.GoogleDriveMacLocationPresetsProvider;
+import org.cryptomator.common.locationpresets.GoogleDriveWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.ICloudMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.ICloudWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.LeitzcloudLocationPresetsProvider;
@@ -12,6 +14,9 @@ import org.cryptomator.common.locationpresets.OneDriveLinuxLocationPresetsProvid
 import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
+import org.cryptomator.networking.SSLContextWithMacKeychain;
+import org.cryptomator.networking.SSLContextProvider;
+import org.cryptomator.networking.SSLContextWithWindowsCertStore;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
@@ -42,21 +47,25 @@ open module org.cryptomator.desktop {
 	requires com.nulabinc.zxcvbn;
 	requires com.tobiasdiez.easybind;
 	requires dagger;
-	requires java.compiler;
 	requires io.github.coffeelibs.tinyoauth2client;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
 
-	/* TODO: filename-based modules: */
-	requires static javax.inject; /* ugly dagger/guava crap */
+	/* dagger bs */
+	requires jakarta.inject;
+	requires static javax.inject;
+	requires java.compiler;
+	requires com.github.benmanes.caffeine;
 
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
+	uses SSLContextProvider;
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
+	provides SSLContextProvider with SSLContextWithWindowsCertStore, SSLContextWithMacKeychain, SSLContextWithPKCS12TrustStore;
 	provides LocationPresetsProvider with //
 			DropboxWindowsLocationPresetsProvider, DropboxMacLocationPresetsProvider, DropboxLinuxLocationPresetsProvider, //
-			GoogleDriveLocationPresetsProvider, //
+			GoogleDriveMacLocationPresetsProvider, GoogleDriveWindowsLocationPresetsProvider, //
 			ICloudWindowsLocationPresetsProvider, ICloudMacLocationPresetsProvider, //
 			LeitzcloudLocationPresetsProvider, //
 			MegaLocationPresetsProvider, //

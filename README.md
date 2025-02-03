@@ -3,7 +3,7 @@
 [![Build](https://github.com/cryptomator/cryptomator/workflows/Build/badge.svg)](https://github.com/cryptomator/cryptomator/actions?query=workflow%3ABuild)
 [![Known Vulnerabilities](https://snyk.io/test/github/cryptomator/cryptomator/badge.svg)](https://snyk.io/test/github/cryptomator/cryptomator)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=cryptomator_cryptomator&metric=alert_status)](https://sonarcloud.io/dashboard?id=cryptomator_cryptomator)
-[![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
+[![Mastodon](https://img.shields.io/mastodon/follow/176112?domain=mastodon.online&style=flat)](https://mastodon.online/@cryptomator)
 [![Crowdin](https://badges.crowdin.net/cryptomator/localized.svg)](https://translate.cryptomator.org/)
 [![Latest Release](https://img.shields.io/github/release/cryptomator/cryptomator.svg)](https://github.com/cryptomator/cryptomator/releases/latest)
 [![Community](https://img.shields.io/badge/help-Community-orange.svg)](https://community.cryptomator.org)
@@ -17,20 +17,14 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Gold Sponsors
 
-<table>
-  <tbody>
-    <tr>
-      <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="80"></a></td>
-    </tr>
-  </tbody>
-</table>
+Become our Gold Sponsor and showcase your brand to a targeted audience! Please contact us if you are interested.
 
 ### Silver Sponsors
 
 <table>
   <tbody>
     <tr>
-      <td><a href="https://mowcapital.com/"><img src="https://cryptomator.org/img/sponsors/mowcapital.svg" alt="Mow Capital" height="28"></a></td>
+      <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="56"></a></td>
       <td><a href="https://www.route4me.com/"><img src="https://cryptomator.org/img/sponsors/route4me.svg" alt="Route4Me" height="56"></a></td>
     </tr>
   </tbody>
@@ -38,9 +32,9 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Special Shoutout
 
-Continuous integration hosting for ARM64 builds is provided by [MacStadium](https://www.macstadium.com/opensource).
+Continuous integration hosting for ARM64 builds is provided by [MacStadium](https://www.macstadium.com/company/opensource).
 
-<a href="https://www.macstadium.com/opensource"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="MacStadium" height="100"></a>
+<a href="https://www.macstadium.com/company/opensource"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="MacStadium" height="100"></a>
 
 ---
 
@@ -60,7 +54,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 - File names get encrypted
 - Folder structure gets obfuscated
 - Use as many vaults in your Dropbox as you want, each having individual passwords
-- Four thousand commits for the security of your data!! :tada:
+- More than Five thousand commits for the security of your data!! :tada:
 
 ### Privacy
 
@@ -84,7 +78,7 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ### Dependencies
 
-* JDK 22 (e.g. temurin, zulu)
+* JDK 23 (e.g. temurin, zulu)
 * Maven 3
 
 ### Run Maven

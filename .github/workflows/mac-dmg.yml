@@ -1,4 +1,4 @@
-name: Build macOS .dmg
+name: Build macOS .dmg for arm64
 
 on:
   release:
@@ -15,8 +15,8 @@ on:
         type: boolean
 
 env:
-  JAVA_DIST: 'zulu'
-  JAVA_VERSION: '22.0.2+9'
+  JAVA_DIST: 'temurin'
+  JAVA_VERSION: '23.0.1+11'
 
 jobs:
   get-version:
@@ -32,20 +32,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: macos-12
-          architecture: x64
-          output-suffix: x64
-          xcode-path: '/Applications/Xcode_13.2.1.app'
-          fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_osx-x64_bin-jmods.zip'
-          openjfx-sha: '115cb08bb59d880cfff6e51e0bf0dcc45785ed9d456b8b8425597b04da6ab3d4'
-        - os: [self-hosted, macOS, ARM64]
+        - os: macos-15
           architecture: aarch64
           output-suffix: arm64
-          xcode-path: '/Applications/Xcode_13.2.1.app'
           fuse-lib: FUSE-T
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_osx-aarch64_bin-jmods.zip'
-          openjfx-sha: '813c6748f7c99cb7a579d48b48a087b4682b1fad1fc1a4fe5f9b21cf872b15a7'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: 'a800724a1f3e6757ecfa0bd5bf7ed64d2e6a7a3f5b3522650a70b8cfc7782fb6'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -109,7 +101,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2024 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.mac"
@@ -240,7 +232,7 @@ jobs:
           apple-id: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
           password: ${{ secrets.MACOS_NOTARIZATION_PW }}
           team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
-          xcode-path: ${{ matrix.xcode-path }}
+          xcode-path: '/Applications/Xcode_16.app'
       - name: Add possible alpha/beta tags to installer name
         run: mv Cryptomator-*.dmg Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.output-suffix }}.dmg
       - name: Create detached GPG signature with key 615D449FE6E6A235

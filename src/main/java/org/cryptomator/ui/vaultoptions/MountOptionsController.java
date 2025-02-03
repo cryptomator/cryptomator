@@ -17,6 +17,8 @@ import org.cryptomator.ui.preferences.VolumePreferencesController;
 import javax.inject.Inject;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -50,7 +52,6 @@ public class MountOptionsController implements FxController {
 	private final ObservableValue<String> defaultMountFlags;
 	private final ObservableValue<Boolean> mountpointDirSupported;
 	private final ObservableValue<Boolean> mountpointDriveLetterSupported;
-	private final ObservableValue<Boolean> readOnlySupported;
 	private final ObservableValue<Boolean> mountFlagsSupported;
 	private final ObservableValue<Boolean> defaultMountServiceSelected;
 	private final ObservableValue<String> directoryPath;
@@ -60,6 +61,7 @@ public class MountOptionsController implements FxController {
 	private final ObservableValue<MountService> selectedMountService;
 	private final ObservableValue<Boolean> selectedMountServiceRequiresRestart;
 	private final ObservableValue<Boolean> loopbackPortChangeable;
+	private final ObservableBooleanValue readOnlyOptionAllowed;
 
 
 	//-- FXML objects --
@@ -108,10 +110,10 @@ public class MountOptionsController implements FxController {
 		});
 		this.mountFlagsSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_FLAGS));
 		this.defaultMountServiceSelected = ObservableUtil.mapWithDefault(vaultSettings.mountService, _ -> false, true);
-		this.readOnlySupported = selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY));
 		this.mountpointDirSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_TO_EXISTING_DIR) || s.hasCapability(MountCapability.MOUNT_WITHIN_EXISTING_PARENT));
 		this.mountpointDriveLetterSupported = selectedMountService.map(s -> s.hasCapability(MountCapability.MOUNT_AS_DRIVE_LETTER));
 		this.loopbackPortChangeable = selectedMountService.map(s -> s.hasCapability(MountCapability.LOOPBACK_PORT) && vaultSettings.mountService.getValue() != null);
+		this.readOnlyOptionAllowed = BooleanBinding.booleanExpression(selectedMountService.map(s -> s.hasCapability(MountCapability.READ_ONLY))).or(vaultSettings.usesReadOnlyMode);
 	}
 
 	private MountService reselectMountService() {
@@ -345,12 +347,12 @@ public class MountOptionsController implements FxController {
 		return mountpointDriveLetterSupported.getValue();
 	}
 
-	public ObservableValue<Boolean> readOnlySupportedProperty() {
-		return readOnlySupported;
+	public ObservableValue<Boolean> readOnlyOptionAllowedProperty() {
+		return readOnlyOptionAllowed;
 	}
 
-	public boolean isReadOnlySupported() {
-		return readOnlySupported.getValue();
+	public boolean isReadOnlyOptionAllowed() {
+		return readOnlyOptionAllowed.getValue();
 	}
 
 	public ObservableValue<String> directoryPathProperty() {

@@ -177,34 +177,24 @@
 
 /* windows needs an explicit border: */
 .main-window.os-windows {
-	-fx-border-color: TITLE_BG;
-	-fx-border-width: 1px;
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-width: 1px 0 0 0;
 }
 
-.main-window .title {
-	-fx-background-color: TITLE_BG;
+.main-window .button-bar {
+	-fx-background-color: MAIN_BG;
+	-fx-border-color: CONTROL_BORDER_NORMAL transparent transparent transparent;
+	-fx-border-width: 1px 0 0 0;
 }
 
-.main-window .title .button {
-	-fx-pref-height: 30px;
-	-fx-pref-width: 30px;
-	-fx-background-color: none;
-	-fx-padding: 0;
+.main-window .button-bar .button-left {
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-width: 0 1px 0 0;
 }
 
-.main-window .title .button .glyph-icon {
-	-fx-fill: white;
-}
-
-.main-window .title .button:armed .glyph-icon {
-	-fx-fill: GRAY_8;
-}
-
-.main-window .update-indicator {
-	-fx-background-color: white, RED_5;
-	-fx-background-insets: 1px, 2px;
-	-fx-background-radius: 6px, 5px;
-	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 2, 0, 0, 0);
+.main-window .button-bar .button-right {
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-width: 0 0 0 1px;
 }
 
 /*******************************************************************************
@@ -321,23 +311,33 @@
 	-fx-fill: transparent;
 }
 
-.button.toolbar-button {
-	-fx-min-height: 40px;
-	-fx-background-color: transparent;
-	-fx-background-insets: 0;
-	-fx-background-radius: 0;
-	-fx-border-color: CONTROL_BORDER_NORMAL transparent transparent transparent;
-	-fx-border-width: 1px 0 0 0;
-	-fx-padding: 0;
+/*******************************************************************************
+ *                                                                             *
+ * NotificationBar                                                             *
+ *                                                                             *
+ ******************************************************************************/
+
+.notification-label {
+	-fx-text-fill: white;
+	-fx-font-weight: bold;
 }
 
-.button.toolbar-button:focused {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
-	-fx-background-insets: 0, 2px 1px 1px 1px;
+.notification-debug {
+	-fx-min-height:24px;
+	-fx-max-height:24px;
+	-fx-background-color: RED_5;
 }
 
-.button.toolbar-button:armed {
-	-fx-background-color: CONTROL_BG_ARMED;
+.notification-update {
+	-fx-min-height:24px;
+	-fx-max-height:24px;
+	-fx-background-color: YELLOW_5;
+}
+
+.notification-support {
+	-fx-min-height:24px;
+	-fx-max-height:24px;
+	-fx-background-color: PRIMARY;
 }
 
 /*******************************************************************************
@@ -391,16 +391,6 @@
 .badge-muted {
 	-fx-text-fill: white;
 	-fx-background-color: MUTED_BG;
-}
-
-/* Note: These values below are kinda random such that it looks ok. I'm pretty sure there is room for improvement. Additionally, fx-text-fill does not work*/
-.badge-debug {
-	-fx-font-family: 'Open Sans Bold';
-	-fx-font-size: 1.0em;
-	-fx-background-radius: 8px;
-	-fx-padding: 0.3em 0.55em 0.3em 0.55em;
-	-fx-background-color: RED_5;
-	-fx-background-radius: 2em;
 }
 
 /*******************************************************************************
