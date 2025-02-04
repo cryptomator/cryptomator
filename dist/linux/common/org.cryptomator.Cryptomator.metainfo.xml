@@ -5,7 +5,7 @@
 	<metadata_license>FSFAP</metadata_license>
 	<project_license>GPL-3.0-or-later</project_license>
 	<name>Cryptomator</name>
-	<summary>Encryption made easy and optimized for the cloud</summary>
+	<summary>Encryption for your cloud made easy</summary>
 
 	<description>
 		<p>
@@ -45,11 +45,11 @@
 	<screenshots>
 		<screenshot type="default">
 			<caption>Light theme</caption>
-			<image>https://user-images.githubusercontent.com/11858409/156986109-6e58f59c-8b8c-4501-b33b-bb1e33007cea.png</image>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/mainWindowUnlock_light.png</image>
 		</screenshot>
 		<screenshot>
 			<caption>Dark theme</caption>
-			<image>https://user-images.githubusercontent.com/11858409/156986113-6c5d7801-86e0-4643-bc2f-aff9d95d3ce0.png</image>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/mainWindowUnlock_dark.png</image>
 		</screenshot>
 	</screenshots>
 
