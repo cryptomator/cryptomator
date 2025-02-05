@@ -72,7 +72,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 
 ### Security Architecture
 
-For more information on the security details visit [cryptomator.org](https://docs.cryptomator.org/en/latest/security/architecture/).
+For more information on the security details visit [cryptomator.org](https://docs.cryptomator.org/security/architecture/).
 
 ## Building
 
