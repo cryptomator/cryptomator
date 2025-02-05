@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2018 Armin Schrenk <armin.schrenk@zoho.eu> -->
 <component type="desktop-application">
 	<id>org.cryptomator.Cryptomator</id>
 	<metadata_license>FSFAP</metadata_license>
