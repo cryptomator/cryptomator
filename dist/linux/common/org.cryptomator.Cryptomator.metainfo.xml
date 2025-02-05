@@ -44,12 +44,16 @@
 
 	<screenshots>
 		<screenshot type="default">
-			<caption>Light theme</caption>
-			<image>https://static.cryptomator.org/desktop/flathubScreenshots/mainWindowUnlock_light.png</image>
+			<caption>Encrypt your data, protect your privacy</caption>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlocked_light.png</image>
 		</screenshot>
 		<screenshot>
-			<caption>Dark theme</caption>
-			<image>https://static.cryptomator.org/desktop/flathubScreenshots/mainWindowUnlock_dark.png</image>
+			<caption>Dark theme available</caption>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlock_dark.png</image>
+		</screenshot>
+		<screenshot>
+			<caption>Uses AES-GCM 256 - an industry standardized, quantum resistant encryption</caption>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlockDialog_light.png</image>
 		</screenshot>
 	</screenshots>
 
