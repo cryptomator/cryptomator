@@ -8,8 +8,13 @@
  ******************************************************************************/
 package org.cryptomator.ui.controls;
 
-import com.google.common.base.Strings;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
+import java.util.Arrays;
+
 import org.cryptomator.common.Passphrase;
+
+import com.google.common.base.Strings;
 
 import javafx.application.Platform;
 import javafx.beans.NamedArg;
@@ -29,9 +34,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
-import java.util.Arrays;
 
 /**
  * Patched PasswordField that doesn't create String copies of the password in memory (unless explicitly revealed). Instead the password is stored in a char[] that can be swiped.
