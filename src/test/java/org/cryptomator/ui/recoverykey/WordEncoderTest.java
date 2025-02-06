@@ -83,12 +83,7 @@ public class WordEncoderTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> encoder.decode(corruptEncoded), "Decoding corrupted data should throw an exception");
     }
 
-    /**
-     * Pads the input byte array to a length that is a multiple of three.
-     *
-     * @param input The input byte array.
-     * @return A new byte array padded to a multiple of three.
-     */
+
     private byte[] padToMultipleOfThree(byte[] input) {
         int remainder = input.length % 3;
         if (remainder == 0) {
