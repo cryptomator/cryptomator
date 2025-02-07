@@ -1,13 +1,5 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.fxml.FXML;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
@@ -21,6 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.Observable;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.fxml.FXML;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -63,27 +64,40 @@ public class MainWindowController implements FxController {
 		}
 		window.focusedProperty().addListener(this::mainWindowFocusChanged);
 
-		if (!neverTouched()) {
-			window.setHeight(settings.windowHeight.get() > window.getMinHeight() ? settings.windowHeight.get() : window.getMinHeight());
-			window.setWidth(settings.windowWidth.get() > window.getMinWidth() ? settings.windowWidth.get() : window.getMinWidth());
-			window.setX(settings.windowXPosition.get());
-			window.setY(settings.windowYPosition.get());
+		int x = settings.windowXPosition.get();
+		int y = settings.windowYPosition.get();
+		int width = settings.windowWidth.get();
+		int height = settings.windowHeight.get();
+		if (windowPositionSaved(x, y, width, height) && isWithinDisplayBounds(x, y, width, height)) {
+			window.setX(x);
+			window.setY(y);
+			window.setWidth(width);
+			window.setHeight(height);
 		}
-		window.widthProperty().addListener((_, _, _) -> savePositionalSettings());
-		window.heightProperty().addListener((_, _, _) -> savePositionalSettings());
-		window.xProperty().addListener((_, _, _) -> savePositionalSettings());
-		window.yProperty().addListener((_, _, _) -> savePositionalSettings());
+		settings.windowXPosition.bind(window.xProperty());
+		settings.windowYPosition.bind(window.yProperty());
+		settings.windowWidth.bind(window.widthProperty());
+		settings.windowHeight.bind(window.heightProperty());
 	}
 
-	private boolean neverTouched() {
-		return (settings.windowHeight.get() == 0) && (settings.windowWidth.get() == 0) && (settings.windowXPosition.get() == 0) && (settings.windowYPosition.get() == 0);
+	private boolean windowPositionSaved(int x, int y, int width, int height) {
+		return x != 0 || y != 0 || width != 0 || height != 0;
 	}
 
-	public void savePositionalSettings() {
-		settings.windowWidth.setValue(window.getWidth());
-		settings.windowHeight.setValue(window.getHeight());
-		settings.windowXPosition.setValue(window.getX());
-		settings.windowYPosition.setValue(window.getY());
+	private boolean isWithinDisplayBounds(int x, int y, int width, int height) {
+		// define a rect which is inset on all sides from the window's rect:
+		final double slackedX = x + 20; // 20px left
+		final double slackedY = y + 5; // 5px top
+		final double slackedWidth = width - 40; // 20px left + 20px right
+		final double slackedHeight = height - 25; // 5px top + 20px bottom
+		return isRectangleWithinBounds(slackedX, slackedY, 0, slackedHeight) // Left pixel column
+				&& isRectangleWithinBounds(slackedX + slackedWidth, slackedY, 0, slackedHeight) // Right pixel column
+				&& isRectangleWithinBounds(slackedX, slackedY, slackedWidth, 0) // Top pixel row
+				&& isRectangleWithinBounds(slackedX, slackedY + slackedHeight, slackedWidth, 0); // Bottom pixel row
+	}
+
+	private boolean isRectangleWithinBounds(double x, double y, double width, double height) {
+		return !Screen.getScreensForRectangle(x, y, width, height).isEmpty();
 	}
 
 	private void mainWindowFocusChanged(Observable observable) {
