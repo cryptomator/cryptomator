@@ -71,8 +71,8 @@ public class MainWindowController implements FxController {
 		if (windowPositionSaved(x, y, width, height) && isWithinDisplayBounds(x, y, width, height)) {
 			window.setX(x);
 			window.setY(y);
-			window.setWidth(width);
-			window.setHeight(height);
+			window.setWidth(Math.min(Math.max(width, window.getMinWidth()), window.getMaxWidth()));
+			window.setHeight(Math.min(Math.max(height, window.getMinHeight()), window.getMaxHeight()));
 		}
 		settings.windowXPosition.bind(window.xProperty());
 		settings.windowYPosition.bind(window.yProperty());
