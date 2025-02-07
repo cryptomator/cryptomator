@@ -71,8 +71,8 @@ public class MainWindowController implements FxController {
 		if (windowPositionSaved(x, y, width, height) && isWithinDisplayBounds(x, y, width, height)) {
 			window.setX(x);
 			window.setY(y);
-			window.setWidth(Math.min(Math.max(width, window.getMinWidth()), window.getMaxWidth()));
-			window.setHeight(Math.min(Math.max(height, window.getMinHeight()), window.getMaxHeight()));
+			window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
+			window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
 		}
 		settings.windowXPosition.bind(window.xProperty());
 		settings.windowYPosition.bind(window.yProperty());
@@ -86,17 +86,17 @@ public class MainWindowController implements FxController {
 
 	private boolean isWithinDisplayBounds(int x, int y, int width, int height) {
 		// define a rect which is inset on all sides from the window's rect:
-		final double slackedX = x + 20; // 20px left
-		final double slackedY = y + 5; // 5px top
-		final double slackedWidth = width - 40; // 20px left + 20px right
-		final double slackedHeight = height - 25; // 5px top + 20px bottom
-		return isRectangleWithinBounds(slackedX, slackedY, 0, slackedHeight) // Left pixel column
-				&& isRectangleWithinBounds(slackedX + slackedWidth, slackedY, 0, slackedHeight) // Right pixel column
-				&& isRectangleWithinBounds(slackedX, slackedY, slackedWidth, 0) // Top pixel row
-				&& isRectangleWithinBounds(slackedX, slackedY + slackedHeight, slackedWidth, 0); // Bottom pixel row
+		final int shrinkedX = x + 20; // 20px left
+		final int shrinkedY = y + 5; // 5px top
+		final int shrinkedWidth = width - 40; // 20px left + 20px right
+		final int shrinkedHeigth = height - 25; // 5px top + 20px bottom
+		return isRectangleWithinBounds(shrinkedX, shrinkedY, 0, shrinkedHeigth) // Left pixel column
+				&& isRectangleWithinBounds(shrinkedX + shrinkedWidth, shrinkedY, 0, shrinkedHeigth) // Right pixel column
+				&& isRectangleWithinBounds(shrinkedX, shrinkedY, shrinkedWidth, 0) // Top pixel row
+				&& isRectangleWithinBounds(shrinkedX, shrinkedY + shrinkedHeigth, shrinkedWidth, 0); // Bottom pixel row
 	}
 
-	private boolean isRectangleWithinBounds(double x, double y, double width, double height) {
+	private boolean isRectangleWithinBounds(int x, int y, int width, int height) {
 		return !Screen.getScreensForRectangle(x, y, width, height).isEmpty();
 	}
 
