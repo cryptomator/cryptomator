@@ -3,6 +3,7 @@ package org.cryptomator.ui.vaultoptions;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.keyloading.hub.HubKeyLoadingStrategy;
 import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class VaultOptionsController implements FxController {
 		if(!vaultKeyLoader.equals(MasterkeyFileLoadingStrategy.SCHEME)){
 			tabPane.getTabs().remove(keyTab);
 		}
-		if(!(vaultKeyLoader.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultKeyLoader.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS))){
+		if(!KeyLoadingStrategy.isHubVault(vaultKeyLoader)){
 			tabPane.getTabs().remove(hubTab);
 		}
 
