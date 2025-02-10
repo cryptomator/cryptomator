@@ -26,6 +26,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.input.ContextMenuEvent;
@@ -76,7 +77,7 @@ public class VaultListController implements FxController {
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
-	private HBox addVaultButton;
+	private Button addVaultButton;
 	@FXML
 	private ContextMenu addVaultContextMenu;
 

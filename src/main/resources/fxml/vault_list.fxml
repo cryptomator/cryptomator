@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.Arc?>
+<?import javafx.scene.control.Button?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
@@ -35,19 +36,17 @@
 			</VBox>
 		</StackPane>
 		<HBox styleClass="button-bar">
-			<HBox fx:id="addVaultButton" onMouseClicked="#toggleMenu" styleClass="button-left" alignment="CENTER" minWidth="20">
-				<padding>
-					<Insets topRightBottomLeft="12"/>
-				</padding>
-				<FontAwesome5IconView glyph="PLUS" HBox.hgrow="NEVER" glyphSize="16"/>
-			</HBox>
+			<Button fx:id="addVaultButton" onMouseClicked="#toggleMenu" styleClass="button-left" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
+				<graphic>
+					<FontAwesome5IconView glyph="PLUS" glyphSize="16"/>
+				</graphic>
+			</Button>
 			<Region HBox.hgrow="ALWAYS"/>
-			<HBox onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20">
-				<padding>
-					<Insets topRightBottomLeft="12"/>
-				</padding>
-				<FontAwesome5IconView glyph="COG" HBox.hgrow="NEVER" glyphSize="16"/>
-			</HBox>
+			<Button onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
+				<graphic>
+					<FontAwesome5IconView glyph="COG" glyphSize="16"/>
+				</graphic>
+			</Button>
 		</HBox>
 	</VBox>
 	<Region styleClass="drag-n-drop-border" visible="${controller.draggingVaultOver}"/>
