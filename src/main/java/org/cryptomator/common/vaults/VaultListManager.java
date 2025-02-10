@@ -74,13 +74,17 @@ public class VaultListManager {
 		return get(normalizedPathToVault) //
 				.orElseGet(() -> {
 					Vault newVault = create(newVaultSettings(normalizedPathToVault));
-					setVaultScheme(newVault);
+					try {
+						setVaultScheme(newVault);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
 					vaultList.add(newVault);
 					return newVault;
 				});
 	}
 
-	private void setVaultScheme(Vault vault) {
+	private void setVaultScheme(Vault vault) throws IOException {
 		try {
 			var lastKnownKeyLoader = vault.getVaultSettings().lastKnownKeyLoader;
 			if (Objects.isNull(lastKnownKeyLoader.get())) {
@@ -89,9 +93,12 @@ public class VaultListManager {
 				lastKnownKeyLoader.set(keyIdScheme);
 			}
 		} catch (NoSuchFileException e) {
-			LOG.error("NoSuchFileException", e);
+			vault.stateProperty().set(VaultState.Value.ERROR);
+			LOG.error("Configuration file missing or corrupted.", e);
 		} catch (IOException e) {
-			throw new RuntimeException("Unexpected Exception", e);
+			vault.stateProperty().set(VaultState.Value.ERROR);
+			LOG.error("Unexpected IO exception while setting vault scheme.", e);
+			throw new IOException("Configuration file missing or corrupted.", e);
 		}
 	}
 
@@ -118,7 +125,13 @@ public class VaultListManager {
 	private void addAll(Collection<VaultSettings> vaultSettings) {
 		Collection<Vault> vaults = vaultSettings.stream().map(this::create).toList();
 		vaultList.addAll(vaults);
-		vaults.forEach(this::setVaultScheme);
+		for (Vault vault : vaults) {
+			try {
+				setVaultScheme(vault);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	private Optional<Vault> get(Path vaultPath) {
