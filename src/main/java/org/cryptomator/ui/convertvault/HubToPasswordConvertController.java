@@ -109,7 +109,7 @@ public class HubToPasswordConvertController implements FxController {
 				.thenRunAsync(this::convertInternal, backgroundExecutorService) //
 				.whenCompleteAsync((result, exception) -> {
 					if (exception == null) {
-						vault.getVaultSettings().keyLoader.set(MasterkeyFileLoadingStrategy.SCHEME);
+						vault.getVaultSettings().lastKnownKeyLoader.set(MasterkeyFileLoadingStrategy.SCHEME);
 						LOG.info("Conversion of vault {} succeeded.", vault.getPath());
 						window.setScene(successScene.get());
 					} else {

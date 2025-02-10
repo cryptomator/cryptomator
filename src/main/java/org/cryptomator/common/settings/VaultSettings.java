@@ -58,7 +58,7 @@ public class VaultSettings {
 	public final StringExpression mountName;
 	public final StringProperty mountService;
 	public final IntegerProperty port;
-	public final StringProperty keyLoader;
+	public final StringProperty lastKnownKeyLoader;
 
 	VaultSettings(VaultSettingsJson json) {
 		this.id = json.id;
@@ -75,7 +75,7 @@ public class VaultSettings {
 		this.mountPoint = new SimpleObjectProperty<>(this, "mountPoint", json.mountPoint == null ? null : Path.of(json.mountPoint));
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
 		this.port = new SimpleIntegerProperty(this, "port", json.port);
-		this.keyLoader = new SimpleStringProperty(this, "keyLoader", json.keyLoader);
+		this.lastKnownKeyLoader = new SimpleStringProperty(this, "lastKnownKeyLoader", json.lastKnownKeyLoader);
 		// mount name is no longer an explicit setting, see https://github.com/cryptomator/cryptomator/pull/1318
 		this.mountName = StringExpression.stringExpression(Bindings.createStringBinding(() -> {
 			final String name;
@@ -101,7 +101,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode, port, mountService, keyLoader};
+		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode, port, mountService, lastKnownKeyLoader};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -132,7 +132,7 @@ public class VaultSettings {
 		json.mountPoint = mountPoint.map(Path::toString).getValue();
 		json.mountService = mountService.get();
 		json.port = port.get();
-		json.keyLoader = keyLoader.get();
+		json.lastKnownKeyLoader = lastKnownKeyLoader.get();
 		return json;
 	}
 

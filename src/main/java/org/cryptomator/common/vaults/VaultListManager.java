@@ -82,11 +82,11 @@ public class VaultListManager {
 
 	private void setVaultScheme(Vault vault) {
 		try {
-			var keyLoader = vault.getVaultSettings().keyLoader;
-			if (Objects.isNull(keyLoader.get())) {
+			var lastKnownKeyLoader = vault.getVaultSettings().lastKnownKeyLoader;
+			if (Objects.isNull(lastKnownKeyLoader.get())) {
 				var vaultConfig = vault.getVaultConfigCache().get();
 				var keyIdScheme = vaultConfig.getKeyId().getScheme();
-				keyLoader.set(keyIdScheme);
+				lastKnownKeyLoader.set(keyIdScheme);
 			}
 		} catch (NoSuchFileException e) {
 			LOG.error("NoSuchFileException", e);

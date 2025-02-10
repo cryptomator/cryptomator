@@ -75,7 +75,7 @@ public class Vault {
 	private final Mounter mounter;
 	private final Settings settings;
 	private final BooleanProperty showingStats;
-	private final StringBinding keyLoader;
+	private final StringBinding lastKnownKeyLoader;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
 
@@ -105,7 +105,7 @@ public class Vault {
 		this.settings = settings;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
-		this.keyLoader = Bindings.createStringBinding(this::getKeyLoader, vaultSettings.keyLoader);
+		this.lastKnownKeyLoader = Bindings.createStringBinding(this::getLastKnownKeyLoader, vaultSettings.lastKnownKeyLoader);
 	}
 
 	// ******************************************************************************
@@ -342,12 +342,12 @@ public class Vault {
 		return handle == null ? null : handle.mountObj().getMountpoint();
 	}
 
-	public StringBinding keyLoaderProperty() {
-		return keyLoader;
+	public StringBinding lastKnownKeyLoaderProperty() {
+		return lastKnownKeyLoader;
 	}
 
-	public String getKeyLoader() {
-		return vaultSettings.keyLoader.get();
+	public String getLastKnownKeyLoader() {
+		return vaultSettings.lastKnownKeyLoader.get();
 	}
 
 	public StringBinding displayablePathProperty() {
