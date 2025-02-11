@@ -1,13 +1,5 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.fxml.FXML;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
@@ -21,6 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.Observable;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.fxml.FXML;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -63,27 +64,46 @@ public class MainWindowController implements FxController {
 		}
 		window.focusedProperty().addListener(this::mainWindowFocusChanged);
 
-		if (!neverTouched()) {
-			window.setHeight(settings.windowHeight.get() > window.getMinHeight() ? settings.windowHeight.get() : window.getMinHeight());
-			window.setWidth(settings.windowWidth.get() > window.getMinWidth() ? settings.windowWidth.get() : window.getMinWidth());
-			window.setX(settings.windowXPosition.get());
-			window.setY(settings.windowYPosition.get());
+		int x = settings.windowXPosition.get();
+		int y = settings.windowYPosition.get();
+		int width = settings.windowWidth.get();
+		int height = settings.windowHeight.get();
+		if (windowPositionSaved(x, y, width, height) ) {
+			if(isWithinDisplayBounds(x, y, width, height)) { //use stored window position
+				window.setX(x);
+				window.setY(y);
+				window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
+				window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
+			} else if(isWithinDisplayBounds((int) window.getX(), (int) window.getY(), width, height)) { //just reset position of upper left corner, keep window size
+				window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
+				window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
+			} //else reset window completely
 		}
-		window.widthProperty().addListener((_, _, _) -> savePositionalSettings());
-		window.heightProperty().addListener((_, _, _) -> savePositionalSettings());
-		window.xProperty().addListener((_, _, _) -> savePositionalSettings());
-		window.yProperty().addListener((_, _, _) -> savePositionalSettings());
+
+		settings.windowXPosition.bind(window.xProperty());
+		settings.windowYPosition.bind(window.yProperty());
+		settings.windowWidth.bind(window.widthProperty());
+		settings.windowHeight.bind(window.heightProperty());
 	}
 
-	private boolean neverTouched() {
-		return (settings.windowHeight.get() == 0) && (settings.windowWidth.get() == 0) && (settings.windowXPosition.get() == 0) && (settings.windowYPosition.get() == 0);
+	private boolean windowPositionSaved(int x, int y, int width, int height) {
+		return x != 0 || y != 0 || width != 0 || height != 0;
 	}
 
-	public void savePositionalSettings() {
-		settings.windowWidth.setValue(window.getWidth());
-		settings.windowHeight.setValue(window.getHeight());
-		settings.windowXPosition.setValue(window.getX());
-		settings.windowYPosition.setValue(window.getY());
+	private boolean isWithinDisplayBounds(int x, int y, int width, int height) {
+		// define a rect which is inset on all sides from the window's rect:
+		final int shrinkedX = x + 20; // 20px left
+		final int shrinkedY = y + 5; // 5px top
+		final int shrinkedWidth = width - 40; // 20px left + 20px right
+		final int shrinkedHeigth = height - 25; // 5px top + 20px bottom
+		return isRectangleWithinBounds(shrinkedX, shrinkedY, 0, shrinkedHeigth) // Left pixel column
+				&& isRectangleWithinBounds(shrinkedX + shrinkedWidth, shrinkedY, 0, shrinkedHeigth) // Right pixel column
+				&& isRectangleWithinBounds(shrinkedX, shrinkedY, shrinkedWidth, 0) // Top pixel row
+				&& isRectangleWithinBounds(shrinkedX, shrinkedY + shrinkedHeigth, shrinkedWidth, 0); // Bottom pixel row
+	}
+
+	private boolean isRectangleWithinBounds(int x, int y, int width, int height) {
+		return !Screen.getScreensForRectangle(x, y, width, height).isEmpty();
 	}
 
 	private void mainWindowFocusChanged(Observable observable) {
