@@ -7,6 +7,7 @@ public enum FontAwesome5Icon {
 	ANCHOR("\uF13D"), //
 	ARROW_UP("\uF062"), //
 	BAN("\uF05E"), //
+	BELL("\uF0F3"), //
 	BUG("\uF188"), //
 	CARET_DOWN("\uF0D7"), //
 	CARET_RIGHT("\uF0Da"), //

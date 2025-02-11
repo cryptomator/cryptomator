@@ -42,6 +42,11 @@
 				</graphic>
 			</Button>
 			<Region HBox.hgrow="ALWAYS"/>
+			<Button onMouseClicked="#showEventViewer" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
+				<graphic>
+					<FontAwesome5IconView glyph="BELL" glyphSize="16"/>
+				</graphic>
+			</Button>
 			<Button onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
 				<graphic>
 					<FontAwesome5IconView glyph="COG" glyphSize="16"/>

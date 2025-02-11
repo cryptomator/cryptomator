@@ -7,6 +7,7 @@ import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.error.ErrorComponent;
+import org.cryptomator.ui.eventviewer.EventViewerComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -51,6 +52,7 @@ public class FxApplicationWindows {
 	private final UpdateReminderComponent.Factory updateReminderWindowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
+	private final EventViewerComponent.Factory eventViewWindow;
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
@@ -69,6 +71,7 @@ public class FxApplicationWindows {
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
+								EventViewerComponent.Factory eventViewWindow, //
 								ExecutorService executor, //
 								Dialogs dialogs) {
 		this.primaryStage = primaryStage;
@@ -80,6 +83,7 @@ public class FxApplicationWindows {
 		this.updateReminderWindowFactory = updateReminderWindowFactory;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
+		this.eventViewWindow = eventViewWindow;
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
@@ -200,4 +204,10 @@ public class FxApplicationWindows {
 		}
 	}
 
+	public CompletionStage<Void> showEventViewer(@Nullable Stage owner) {
+		return CompletableFuture.supplyAsync(() -> {
+			eventViewWindow.create(owner).showEventViewerWindow();
+			return null;
+		}, Platform::runLater);
+	}
 }

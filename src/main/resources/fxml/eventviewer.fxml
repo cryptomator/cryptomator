@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.eventviewer.EventViewController"
+	  minWidth="450"
+	  minHeight="450"
+	  prefWidth="450"
+	  prefHeight="450"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<Group>
+		<StackPane>
+			<padding>
+				<Insets topRightBottomLeft="6"/>
+			</padding>
+			<Circle styleClass="glyph-icon-primary" radius="24"/>
+			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="BELL" glyphSize="24"/>
+		</StackPane>
+	</Group>
+	<VBox HBox.hgrow="ALWAYS">
+	</VBox>
+</HBox>

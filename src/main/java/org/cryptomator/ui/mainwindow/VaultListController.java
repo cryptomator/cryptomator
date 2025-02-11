@@ -264,6 +264,10 @@ public class VaultListController implements FxController {
 		appWindows.showPreferencesWindow(SelectedPreferencesTab.ANY);
 	}
 
+	@FXML
+	public void showEventViewer() {
+		appWindows.showEventViewer(mainWindow);
+	}
 	// Getter and Setter
 
 	public BooleanBinding emptyVaultListProperty() {
