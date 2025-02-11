@@ -19,6 +19,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,7 +34,10 @@ import java.util.ResourceBundle;
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {
 
-	private static final String DOWNLOADS_URI = "https://cryptomator.org/downloads";
+	private static final String DOWNLOADS_URI_TEMPLATE = "https://cryptomator.org/downloads" //
+			+ "?utm_source=cryptomator-desktop" //
+			+ "&utm_medium=update-notification&" //
+			+ "utm_campaign=app-update-%s";
 
 	private final Application application;
 	private final Environment environment;
@@ -50,6 +55,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final DateTimeFormatter formatter;
 	private final BooleanBinding upToDate;
+	private final String downloadsUri;
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
@@ -65,12 +71,13 @@ public class UpdatesPreferencesController implements FxController {
 		this.latestVersion = updateChecker.latestVersionProperty();
 		this.lastSuccessfulUpdateCheck = updateChecker.lastSuccessfulUpdateCheckProperty();
 		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, lastSuccessfulUpdateCheck);
-		this.currentVersion = updateChecker.getCurrentVersion();
+		this.currentVersion = environment.getAppVersion();
 		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 		this.upToDate = updateChecker.updateCheckStateProperty().isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 		this.checkFailed = updateChecker.checkFailedProperty();
 		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, lastSuccessfulUpdateCheck);
+		this.downloadsUri = DOWNLOADS_URI_TEMPLATE.formatted(URLEncoder.encode(currentVersion, StandardCharsets.US_ASCII));
 	}
 
 	public void initialize() {
@@ -93,7 +100,7 @@ public class UpdatesPreferencesController implements FxController {
 
 	@FXML
 	public void visitDownloadsPage() {
-		application.getHostServices().showDocument(DOWNLOADS_URI);
+		application.getHostServices().showDocument(downloadsUri);
 	}
 
 	@FXML
