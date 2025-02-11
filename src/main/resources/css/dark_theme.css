@@ -183,8 +183,8 @@
 }
 
 .main-window .button-bar {
-	-fx-min-height:44px;
-	-fx-max-height:44px;
+	-fx-min-height:42px;
+	-fx-max-height:42px;
 	-fx-background-color: MAIN_BG;
 	-fx-border-color: CONTROL_BORDER_NORMAL transparent transparent transparent;
 	-fx-border-width: 1px 0 0 0;
@@ -195,8 +195,8 @@
 	-fx-border-width: 0 1px 0 0;
 	-fx-background-color: MAIN_BG;
 	-fx-background-radius: 0px;
-	-fx-min-height: 44px;
-	-fx-max-height: 44px;
+	-fx-min-height: 42px;
+	-fx-max-height: 42px;
 }
 
 .main-window .button-bar .button-right {
@@ -204,8 +204,8 @@
 	-fx-border-width: 0 0 0 1px;
 	-fx-background-color: MAIN_BG;
 	-fx-background-radius: 0px;
-	-fx-min-height: 44px;
-	-fx-max-height: 44px;
+	-fx-min-height: 42px;
+	-fx-max-height: 42px;
 }
 
 .main-window .button-bar .button-left:armed {
