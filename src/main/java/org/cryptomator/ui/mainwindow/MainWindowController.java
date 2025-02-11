@@ -68,12 +68,18 @@ public class MainWindowController implements FxController {
 		int y = settings.windowYPosition.get();
 		int width = settings.windowWidth.get();
 		int height = settings.windowHeight.get();
-		if (windowPositionSaved(x, y, width, height) && isWithinDisplayBounds(x, y, width, height)) {
-			window.setX(x);
-			window.setY(y);
-			window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
-			window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
+		if (windowPositionSaved(x, y, width, height) ) {
+			if(isWithinDisplayBounds(x, y, width, height)) { //use stored window position
+				window.setX(x);
+				window.setY(y);
+				window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
+				window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
+			} else if(isWithinDisplayBounds((int) window.getX(), (int) window.getY(), width, height)) { //just reset position of upper left corner, keep window size
+				window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
+				window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
+			} //else reset window completely
 		}
+
 		settings.windowXPosition.bind(window.xProperty());
 		settings.windowYPosition.bind(window.yProperty());
 		settings.windowWidth.bind(window.widthProperty());
