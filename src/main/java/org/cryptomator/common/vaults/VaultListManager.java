@@ -50,9 +50,9 @@ public class VaultListManager {
 	@Inject
 	public VaultListManager(ObservableList<Vault> vaultList, //
 							AutoLocker autoLocker, //
-							List<MountService> mountServices,
-							VaultComponent.Factory vaultComponentFactory,
-							ResourceBundle resourceBundle,
+							List<MountService> mountServices, //
+							VaultComponent.Factory vaultComponentFactory, //
+							ResourceBundle resourceBundle, //
 							Settings settings) {
 		this.vaultList = vaultList;
 		this.autoLocker = autoLocker;
@@ -71,17 +71,15 @@ public class VaultListManager {
 			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
 		}
 
-		return get(normalizedPathToVault) //
-				.orElseGet(() -> {
-					Vault newVault = create(newVaultSettings(normalizedPathToVault));
-					try {
-						setVaultScheme(newVault);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-					vaultList.add(newVault);
-					return newVault;
-				});
+		var maybeVault = get(normalizedPathToVault);
+		if (maybeVault.isEmpty()) {
+			Vault newVault = create(newVaultSettings(normalizedPathToVault));
+			setVaultScheme(newVault);
+			vaultList.add(newVault);
+			return newVault;
+		} else {
+			return maybeVault.get();
+		}
 	}
 
 	private void setVaultScheme(Vault vault) throws IOException {
@@ -94,11 +92,11 @@ public class VaultListManager {
 			}
 		} catch (NoSuchFileException e) {
 			vault.stateProperty().set(VaultState.Value.ERROR);
-			LOG.error("Configuration file missing or corrupted.", e);
+			LOG.error("Configuration file missing.", e);
 		} catch (IOException e) {
 			vault.stateProperty().set(VaultState.Value.ERROR);
 			LOG.error("Unexpected IO exception while setting vault scheme.", e);
-			throw new IOException("Configuration file missing or corrupted.", e);
+			throw e;
 		}
 	}
 
