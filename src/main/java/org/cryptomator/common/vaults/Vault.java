@@ -18,6 +18,7 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
+import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
@@ -26,6 +27,8 @@ import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.cryptomator.integrations.quickaccess.QuickAccessServiceException;
+import org.cryptomator.notify.Event;
+import org.cryptomator.notify.VaultEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,6 +78,7 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final Settings settings;
+	private final ObservableList<Event> eventQueue;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -85,7 +90,9 @@ public class Vault {
 		  VaultState state, //
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
-		  Mounter mounter, Settings settings) {
+		  Mounter mounter, Settings settings, //
+		  ObservableList<Event> eventQueue
+		   ) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -102,6 +109,7 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.settings = settings;
+		this.eventQueue = eventQueue;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -143,6 +151,7 @@ public class Vault {
 				.withFlags(flags) //
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
 				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
+				.withFilesystemEventConsumer(this::consumeVaultEvent)
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
@@ -249,6 +258,10 @@ public class Vault {
 		} catch (QuickAccessServiceException e) {
 			LOG.error("Removing vault from quick access area failed", e);
 		}
+	}
+
+	private void consumeVaultEvent(FilesystemEvent e) {
+		eventQueue.addLast(new VaultEvent(vaultSettings.id, vaultSettings.path.get().toString(), e));
 	}
 
 	// ******************************************************************************
