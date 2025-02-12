@@ -71,33 +71,12 @@ public class VaultListManager {
 			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
 		}
 
-		var maybeVault = get(normalizedPathToVault);
-		if (maybeVault.isEmpty()) {
-			Vault newVault = create(newVaultSettings(normalizedPathToVault));
-			setVaultScheme(newVault);
-			vaultList.add(newVault);
-			return newVault;
-		} else {
-			return maybeVault.get();
-		}
-	}
-
-	private void setVaultScheme(Vault vault) throws IOException {
-		try {
-			var lastKnownKeyLoader = vault.getVaultSettings().lastKnownKeyLoader;
-			if (Objects.isNull(lastKnownKeyLoader.get())) {
-				var vaultConfig = vault.getVaultConfigCache().get();
-				var keyIdScheme = vaultConfig.getKeyId().getScheme();
-				lastKnownKeyLoader.set(keyIdScheme);
-			}
-		} catch (NoSuchFileException e) {
-			vault.stateProperty().set(VaultState.Value.ERROR);
-			LOG.error("Configuration file missing.", e);
-		} catch (IOException e) {
-			vault.stateProperty().set(VaultState.Value.ERROR);
-			LOG.error("Unexpected IO exception while setting vault scheme.", e);
-			throw e;
-		}
+		return get(normalizedPathToVault) //
+				.orElseGet(() -> {
+					Vault newVault = create(newVaultSettings(normalizedPathToVault));
+					vaultList.add(newVault);
+					return newVault;
+				});
 	}
 
 	private VaultSettings newVaultSettings(Path path) {
@@ -123,13 +102,6 @@ public class VaultListManager {
 	private void addAll(Collection<VaultSettings> vaultSettings) {
 		Collection<Vault> vaults = vaultSettings.stream().map(this::create).toList();
 		vaultList.addAll(vaults);
-		for (Vault vault : vaults) {
-			try {
-				setVaultScheme(vault);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	private Optional<Vault> get(Path vaultPath) {
@@ -143,6 +115,15 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
+			if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
+				try {
+					var keyIdScheme = wrapper.get().getKeyId().getScheme();
+					vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
+				} catch (NoSuchFileException e) {
+					LOG.error("Configuration file missing.", e);
+					return vaultComponentFactory.create(vaultSettings, wrapper, ERROR, e).vault();
+				}
+			}
 			var vaultState = determineVaultState(vaultSettings.path.get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
