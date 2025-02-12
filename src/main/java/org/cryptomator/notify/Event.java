@@ -1,5 +1,5 @@
 package org.cryptomator.notify;
 
-public sealed interface Event permits AppEvent, VaultEvent {
+public sealed interface Event permits UpdateEvent, VaultEvent {
 
 }
