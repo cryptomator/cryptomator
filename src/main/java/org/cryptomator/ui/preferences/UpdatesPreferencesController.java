@@ -34,7 +34,7 @@ import java.util.ResourceBundle;
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {
 
-	private static final String DOWNLOADS_URI_TEMPLATE = "https://cryptomator.org/downloads" //
+	private static final String DOWNLOADS_URI_TEMPLATE = "https://cryptomator.org/downloads/" //
 			+ "?utm_source=cryptomator-desktop" //
 			+ "&utm_medium=update-notification&" //
 			+ "utm_campaign=app-update-%s";
