@@ -134,7 +134,7 @@ public abstract class CommonsModule {
 	@Provides
 	@Singleton
 	static ObservableList<Event> provideAppEventQueue() {
-		return FXCollections.observableArrayList();
+		return FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 	}
 
 	private static void handleUncaughtExceptionInBackgroundThread(Thread thread, Throwable throwable) {
