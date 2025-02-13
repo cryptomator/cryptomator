@@ -60,7 +60,7 @@ public class Settings {
 	public final BooleanProperty debugMode;
 	public final ObjectProperty<UiTheme> theme;
 	public final StringProperty keychainProvider;
-	public final BooleanProperty useQuickAccess;
+	public BooleanProperty useQuickAccess;
 	public final StringProperty quickAccessService;
 	public final ObjectProperty<NodeOrientation> userInterfaceOrientation;
 	public final StringProperty licenseKey;

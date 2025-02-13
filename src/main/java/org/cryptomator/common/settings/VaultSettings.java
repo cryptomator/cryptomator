@@ -34,12 +34,12 @@ public class VaultSettings {
 	static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
 	static final boolean DEFAULT_REVEAL_AFTER_MOUNT = true;
 	static final boolean DEFAULT_USES_READONLY_MODE = false;
-	static final String DEFAULT_MOUNT_FLAGS = ""; // TODO: remove empty default mount flags and let this property be null if not used
-	static final int DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH = -1;
-	static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
-	static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
-	static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
-	static final int DEFAULT_PORT = 42427;
+	public static final String DEFAULT_MOUNT_FLAGS = ""; // TODO: remove empty default mount flags and let this property be null if not used
+	public static final int DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH = -1;
+	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
+	public static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
+	public static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
+	public static final int DEFAULT_PORT = 42427;
 
 	private static final Random RNG = new Random();
 
@@ -59,7 +59,7 @@ public class VaultSettings {
 	public final StringProperty mountService;
 	public final IntegerProperty port;
 
-	VaultSettings(VaultSettingsJson json) {
+	protected VaultSettings(VaultSettingsJson json) {
 		this.id = json.id;
 		this.path = new SimpleObjectProperty<>(this, "path", json.path == null ? null : Paths.get(json.path));
 		this.displayName = new SimpleStringProperty(this, "displayName", json.displayName);
