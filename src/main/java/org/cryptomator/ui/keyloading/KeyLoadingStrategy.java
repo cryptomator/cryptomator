@@ -4,6 +4,7 @@ import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.ui.keyloading.hub.HubKeyLoadingStrategy;
+import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,20 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 	 */
 	static boolean isHubVault(String keyLoader) {
 		return HubKeyLoadingStrategy.SCHEME_HUB_HTTP.equals(keyLoader) || HubKeyLoadingStrategy.SCHEME_HUB_HTTPS.equals(keyLoader);
+	}
+
+	/**
+	 * Determines whether the provided key loader scheme corresponds to a Masterkey File Vault.
+	 * <p>
+	 * This method checks if the {@code keyLoader} parameter matches the known Masterkey File Vault scheme
+	 * {@link MasterkeyFileLoadingStrategy#SCHEME}.
+	 * </p>
+	 *
+	 * @param keyLoader A string representing the key loader scheme to be checked.
+	 * @return {@code true} if the given key loader scheme represents a Masterkey File Vault; {@code false} otherwise.
+	 */
+	static boolean isMasterkeyFileVault(String keyLoader) {
+		return MasterkeyFileLoadingStrategy.SCHEME.equals(keyLoader);
 	}
 
 	/**
