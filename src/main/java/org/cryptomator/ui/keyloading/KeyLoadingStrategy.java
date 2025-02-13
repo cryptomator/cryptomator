@@ -39,8 +39,7 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 	 * @return {@code true} if the given key loader scheme represents a Hub Vault; {@code false} otherwise.
 	 */
 	static boolean isHubVault(String keyLoader) {
-		return keyLoader.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) ||
-				keyLoader.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS);
+		return HubKeyLoadingStrategy.SCHEME_HUB_HTTP.equals(keyLoader) || HubKeyLoadingStrategy.SCHEME_HUB_HTTPS.equals(keyLoader);
 	}
 
 	/**
