@@ -116,13 +116,8 @@ public class VaultListManager {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
 			if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
-				try {
-					var keyIdScheme = wrapper.get().getKeyId().getScheme();
-					vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
-				} catch (NoSuchFileException e) {
-					LOG.error("Configuration file missing.", e);
-					return vaultComponentFactory.create(vaultSettings, wrapper, ERROR, e).vault();
-				}
+				var keyIdScheme = wrapper.get().getKeyId().getScheme();
+				vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
 			}
 			var vaultState = determineVaultState(vaultSettings.path.get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
