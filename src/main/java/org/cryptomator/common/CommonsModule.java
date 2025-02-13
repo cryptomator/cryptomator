@@ -15,7 +15,7 @@ import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.revealpath.RevealPathService;
-import org.cryptomator.notify.Event;
+import org.cryptomator.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

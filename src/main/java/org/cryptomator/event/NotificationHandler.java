@@ -1,4 +1,4 @@
-package org.cryptomator.notify;
+package org.cryptomator.event;
 
 import org.cryptomator.integrations.common.IntegrationsLoader;
 

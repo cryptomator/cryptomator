@@ -30,7 +30,7 @@ abstract class EventViewerModule {
 		Stage stage = factory.create();
 		stage.setTitle("TODO EVENTVIEWER");
 		stage.setResizable(true);
-		stage.initModality(Modality.WINDOW_MODAL); //TODO: or not modal at all?
+		stage.initModality(Modality.NONE);
 		stage.initOwner(owner);
 		return stage;
 	}
@@ -42,11 +42,6 @@ abstract class EventViewerModule {
 		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
-	@Binds
-	@IntoMap
-	@FxControllerKey(EventViewController.class)
-	abstract FxController bindEventViewController(EventViewController controller);
-
 	@Provides
 	@FxmlScene(FxmlFile.EVENT_VIEWER)
 	@EventViewerScoped
@@ -54,4 +49,14 @@ abstract class EventViewerModule {
 		return fxmlLoaders.createScene(FxmlFile.EVENT_VIEWER);
 	}
 
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(EventViewController.class)
+	abstract FxController bindEventViewController(EventViewController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(UpdateEventViewController.class)
+	abstract FxController bindUpdateEventViewController(UpdateEventViewController controller);
 }

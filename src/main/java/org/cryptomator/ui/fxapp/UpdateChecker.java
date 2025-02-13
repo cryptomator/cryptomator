@@ -3,8 +3,8 @@ package org.cryptomator.ui.fxapp;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.notify.Event;
-import org.cryptomator.notify.UpdateEvent;
+import org.cryptomator.event.Event;
+import org.cryptomator.event.UpdateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -204,10 +204,14 @@ public class FxApplicationWindows {
 		}
 	}
 
-	public CompletionStage<Void> showEventViewer(@Nullable Stage owner) {
+	public CompletionStage<Object> showEventViewer(@Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {
 			eventViewWindow.create(owner).showEventViewerWindow();
 			return null;
-		}, Platform::runLater);
+		}, Platform::runLater).exceptionally(t -> {
+			LOG.error("Unable to display event viewer.", t);
+
+			return null;
+		});
 	}
 }

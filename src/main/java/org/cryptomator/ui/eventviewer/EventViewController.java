@@ -1,14 +1,39 @@
 package org.cryptomator.ui.eventviewer;
 
+import org.cryptomator.event.Event;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
+import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
+import java.util.Comparator;
 
 @EventViewerScoped
 public class EventViewController implements FxController {
 
-	@Inject
-	public EventViewController() {
+	private final SortedList<Event> reversedEventList;
+	private final ObservableList<Event> eventList;
 
+	@FXML
+	ListView<Event> eventListView;
+
+	@Inject
+	public EventViewController(ObservableList<Event> eventList) {
+		reversedEventList = new SortedList<>(eventList, Comparator.reverseOrder());
+		this.eventList = eventList;
 	}
+
+	@FXML
+	public void initialize() {
+		eventListView.setItems(reversedEventList);
+	}
+
+	@FXML
+	void emptyEventList() {
+		eventList.clear();
+	}
+
+
 }
