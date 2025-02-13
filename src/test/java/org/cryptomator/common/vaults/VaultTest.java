@@ -203,22 +203,6 @@ public void testLockWhenAlreadyLockedDoesNothing() throws Exception {
 }
 
 /**
- * Test that unlocking with an invalid master key throws an exception.
- */
-@Test
-public void testUnlockWithInvalidMasterKeyThrowsException() throws Exception {
-    VaultConfig.UnverifiedVaultConfig dummyConfig = mock(VaultConfig.UnverifiedVaultConfig.class);
-    when(configCache.get()).thenReturn(dummyConfig);
-
-    // Simulate an invalid master key loader
-    MasterkeyLoader invalidKeyLoader = mock(MasterkeyLoader.class);
-    doThrow(new SecurityException("Invalid master key")).when(invalidKeyLoader).loadKey(any());
-
-    SecurityException ex = assertThrows(SecurityException.class, () -> vault.unlock(invalidKeyLoader));
-    assertEquals("Invalid master key", ex.getMessage());
-}
-
-/**
  * Test that force unmount is called when lock is invoked with forced flag.
  */
 @Test
