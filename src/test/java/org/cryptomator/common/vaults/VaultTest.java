@@ -190,4 +190,51 @@ public class VaultTest {
 		assertNull(cryptoFileSystem.get(), "CryptoFileSystem should be cleared after lock");
 		assertNull(mountHandleRef.get(), "MountHandle should be cleared after lock");
 	}
+
+	@Test
+public void testLockWhenAlreadyLockedDoesNothing() throws Exception {
+    // Ensure the vault is locked
+    cryptoFileSystem.set(null);
+
+    vault.lock(false);
+
+    // Verify that no exception is thrown and state remains unchanged
+    assertNull(cryptoFileSystem.get(), "CryptoFileSystem should remain null when already locked");
+}
+
+/**
+ * Test that force unmount is called when lock is invoked with forced flag.
+ */
+@Test
+public void testLockWithForceUnmount() throws Exception {
+    // Simulate that the vault is unlocked
+    CryptoFileSystem dummyCryptoFS = mock(CryptoFileSystem.class);
+    cryptoFileSystem.set(dummyCryptoFS);
+
+    // Prepare a dummy mount handle
+    Mounter.MountHandle dummyMountHandle = mock(Mounter.MountHandle.class);
+    Runnable dummyCleanup = mock(Runnable.class);
+    when(dummyMountHandle.specialCleanup()).thenReturn(dummyCleanup);
+
+    Mount dummyMount = mock(Mount.class);
+    when(dummyMountHandle.mountObj()).thenReturn(dummyMount);
+    when(dummyMountHandle.supportsUnmountForced()).thenReturn(true);
+
+    // Set the private field "mountHandle" in Vault via reflection.
+    Field mountHandleField = Vault.class.getDeclaredField("mountHandle");
+    mountHandleField.setAccessible(true);
+    @SuppressWarnings("unchecked")
+    AtomicReference<Mounter.MountHandle> mountHandleRef =
+            (AtomicReference<Mounter.MountHandle>) mountHandleField.get(vault);
+    mountHandleRef.set(dummyMountHandle);
+
+    vault.lock(true); // Call lock with force unmount
+
+    // Verify that the cleanup routine is executed
+    verify(dummyCleanup, times(1)).run(); // This ensures the unmounting logic runs
+
+    // Ensure state is cleared
+    assertNull(cryptoFileSystem.get(), "CryptoFileSystem should be cleared after forced lock");
+    assertNull(mountHandleRef.get(), "MountHandle should be cleared after forced lock");
+}
 }
