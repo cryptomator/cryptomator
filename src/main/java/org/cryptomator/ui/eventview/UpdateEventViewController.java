@@ -1,10 +1,10 @@
-package org.cryptomator.ui.eventviewer;
+package org.cryptomator.ui.eventview;
 
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 
-@EventViewerScoped
+@EventViewScoped
 public class UpdateEventViewController implements FxController {
 
 	@Inject

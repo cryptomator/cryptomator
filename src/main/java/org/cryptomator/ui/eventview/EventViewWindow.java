@@ -1,4 +1,4 @@
-package org.cryptomator.ui.eventviewer;
+package org.cryptomator.ui.eventview;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Documented;
@@ -9,6 +9,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Qualifier
 @Documented
 @Retention(RUNTIME)
-@interface EventViewerWindow {
+@interface EventViewWindow {
 
 }

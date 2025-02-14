@@ -1,4 +1,4 @@
-package org.cryptomator.ui.eventviewer;
+package org.cryptomator.ui.eventview;
 
 import dagger.Binds;
 import dagger.Module;
@@ -21,11 +21,11 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 @Module
-abstract class EventViewerModule {
+abstract class EventViewModule {
 
 	@Provides
-	@EventViewerScoped
-	@EventViewerWindow
+	@EventViewScoped
+	@EventViewWindow
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @Named("owner") Stage owner) {
 		Stage stage = factory.create();
 		stage.setTitle("TODO EVENTVIEWER");
@@ -36,17 +36,17 @@ abstract class EventViewerModule {
 	}
 
 	@Provides
-	@EventViewerScoped
-	@EventViewerWindow
+	@EventViewScoped
+	@EventViewWindow
 	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
 		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.EVENT_VIEWER)
-	@EventViewerScoped
-	static Scene provideEventViewerScene(@EventViewerWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.EVENT_VIEWER);
+	@FxmlScene(FxmlFile.EVENT_VIEW)
+	@EventViewScoped
+	static Scene provideEventViewerScene(@EventViewWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.EVENT_VIEW);
 	}
 
 

@@ -1,4 +1,4 @@
-package org.cryptomator.ui.eventviewer;
+package org.cryptomator.ui.eventview;
 
 import dagger.BindsInstance;
 import dagger.Lazy;
@@ -10,14 +10,14 @@ import javax.inject.Named;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-@EventViewerScoped
-@Subcomponent(modules = {EventViewerModule.class})
-public interface EventViewerComponent {
+@EventViewScoped
+@Subcomponent(modules = {EventViewModule.class})
+public interface EventViewComponent {
 
-	@EventViewerWindow
+	@EventViewWindow
 	Stage window();
 
-	@FxmlScene(FxmlFile.EVENT_VIEWER)
+	@FxmlScene(FxmlFile.EVENT_VIEW)
 	Lazy<Scene> scene();
 
 	default void showEventViewerWindow() {
@@ -30,6 +30,6 @@ public interface EventViewerComponent {
 	@Subcomponent.Factory
 	interface Factory {
 
-		EventViewerComponent create(@BindsInstance @Named("owner") Stage owner);
+		EventViewComponent create(@BindsInstance @Named("owner") Stage owner);
 	}
 }

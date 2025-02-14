@@ -8,7 +8,7 @@ package org.cryptomator.ui.fxapp;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.ui.error.ErrorComponent;
-import org.cryptomator.ui.eventviewer.EventViewerComponent;
+import org.cryptomator.ui.eventview.EventViewComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -35,7 +35,7 @@ import java.io.InputStream;
 		HealthCheckComponent.class, //
 		UpdateReminderComponent.class, //
 		ShareVaultComponent.class, //
-		EventViewerComponent.class})
+		EventViewComponent.class})
 abstract class FxApplicationModule {
 
 	private static Image createImageFromResource(String resourceName) throws IOException {

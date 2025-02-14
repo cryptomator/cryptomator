@@ -1,4 +1,4 @@
-package org.cryptomator.ui.eventviewer;
+package org.cryptomator.ui.eventview;
 
 import org.cryptomator.event.Event;
 import org.cryptomator.ui.common.FxController;
@@ -10,7 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import java.util.Comparator;
 
-@EventViewerScoped
+@EventViewScoped
 public class EventViewController implements FxController {
 
 	private final SortedList<Event> reversedEventList;
