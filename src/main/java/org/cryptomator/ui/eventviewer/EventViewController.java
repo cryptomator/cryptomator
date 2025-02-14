@@ -31,7 +31,7 @@ public class EventViewController implements FxController {
 	}
 
 	@FXML
-	void emptyEventList() {
+	void clearEventList() {
 		eventList.clear();
 	}
 

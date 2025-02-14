@@ -16,7 +16,7 @@
 	  >
 	<HBox styleClass="button-bar">
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button text="Clear" styleClass="button-right" onAction="#emptyEventList" />
+		<Button text="Clear" styleClass="button-right" onAction="#clearEventList" />
 	</HBox>
 	<ListView fx:id="eventListView" fixedCellSize="60"/>
 </VBox>
