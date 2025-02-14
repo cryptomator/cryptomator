@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.eventview.EventViewController"
@@ -16,7 +17,11 @@
 	  >
 	<HBox styleClass="button-bar">
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button text="Clear" styleClass="button-right" onAction="#clearEventList" />
+		<Button styleClass="button-right" onAction="#clearEventList" contentDisplay="GRAPHIC_ONLY">
+			<graphic>
+				<FontAwesome5IconView glyph="TRASH" glyphSize="16"/>
+			</graphic>
+		</Button>
 	</HBox>
 	<ListView fx:id="eventListView" fixedCellSize="60"/>
 </VBox>

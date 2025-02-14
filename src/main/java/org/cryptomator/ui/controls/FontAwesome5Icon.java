@@ -20,6 +20,7 @@ public enum FontAwesome5Icon {
 	CROWN("\uF521"), //
 	DONATE("\uF4B9"), //
 	EDIT("\uF044"), //
+	ELLIPSIS_V("\uF142"), //
 	EXCHANGE_ALT("\uF362"), //
 	EXCLAMATION("\uF12A"), //
 	EXCLAMATION_CIRCLE("\uF06A"), //

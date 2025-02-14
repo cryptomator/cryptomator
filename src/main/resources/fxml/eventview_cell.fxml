@@ -5,9 +5,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:id="eventListCell"
 	  fx:controller="org.cryptomator.ui.eventview.EventListCellController"
 	  prefHeight="60"
 	  prefWidth="200"
@@ -18,10 +20,23 @@
 	</padding>
 	<!-- Remark Check the containing list view for a fixed cell size before editing height properties -->
 	<VBox alignment="CENTER" minWidth="20">
-		<FontAwesome5IconView fx:id="eventIcon" glyph="BELL" HBox.hgrow="NEVER" glyphSize="16"/>
+		<FontAwesome5IconView glyph="${controller.icon}" HBox.hgrow="NEVER" glyphSize="16"/>
 	</VBox>
 	<VBox spacing="4" HBox.hgrow="ALWAYS">
 		<Label styleClass="header-label" text="${controller.message}"/>
 		<Label styleClass="detail-label" text="${controller.description}" textOverrun="CENTER_ELLIPSIS" />
 	</VBox>
+	<Button fx:id="eventActionsButton" contentDisplay="GRAPHIC_ONLY" onAction="#toggleEventActionsMenu">
+		<graphic>
+			<FontAwesome5IconView glyph="ELLIPSIS_V" glyphSize="16"/>
+		</graphic>
+	</Button>
+
+	<fx:define>
+		<ContextMenu fx:id="eventActionsContextMenu">
+			<items>
+				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#remove" />
+			</items>
+		</ContextMenu>
+	</fx:define>
 </HBox>
