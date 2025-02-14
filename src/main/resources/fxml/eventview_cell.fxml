@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:id="eventListCell"
@@ -12,11 +13,15 @@
 	  prefWidth="200"
 	  spacing="12"
 	  alignment="CENTER_LEFT">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
 	<!-- Remark Check the containing list view for a fixed cell size before editing height properties -->
 	<VBox alignment="CENTER" minWidth="20">
 		<FontAwesome5IconView fx:id="eventIcon" glyph="BELL" HBox.hgrow="NEVER" glyphSize="16"/>
 	</VBox>
 	<VBox spacing="4" HBox.hgrow="ALWAYS">
-		<Label styleClass="header-label" text="Hey, listen!"/>
+		<Label styleClass="header-label" text="${controller.message}"/>
+		<Label styleClass="detail-label" text="${controller.description}" textOverrun="CENTER_ELLIPSIS" />
 	</VBox>
 </HBox>

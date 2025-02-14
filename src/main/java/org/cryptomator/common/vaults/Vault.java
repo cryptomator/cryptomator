@@ -22,19 +22,20 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.event.Event;
+import org.cryptomator.event.VaultEvent;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.cryptomator.integrations.quickaccess.QuickAccessServiceException;
-import org.cryptomator.event.Event;
-import org.cryptomator.event.VaultEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -49,6 +50,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.ReadOnlyFileSystemException;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
@@ -91,8 +93,7 @@ public class Vault {
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
 		  Mounter mounter, Settings settings, //
-		  ObservableList<Event> eventQueue
-		   ) {
+		  ObservableList<Event> eventQueue) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -151,7 +152,7 @@ public class Vault {
 				.withFlags(flags) //
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
 				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
-				.withFilesystemEventConsumer(this::consumeVaultEvent)
+				.withFilesystemEventConsumer(this::consumeVaultEvent) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
@@ -261,7 +262,8 @@ public class Vault {
 	}
 
 	private void consumeVaultEvent(FilesystemEvent e) {
-		eventQueue.addLast(new VaultEvent(vaultSettings.id, vaultSettings.path.get().toString(), e));
+		long timestamp = Instant.now().toEpochMilli();
+		Platform.runLater(() -> eventQueue.addLast(new VaultEvent(timestamp, vaultSettings.id, vaultSettings.path.get().toString(), e)));
 	}
 
 	// ******************************************************************************
