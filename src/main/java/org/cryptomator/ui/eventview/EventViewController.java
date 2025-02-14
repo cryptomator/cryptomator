@@ -15,18 +15,21 @@ public class EventViewController implements FxController {
 
 	private final SortedList<Event> reversedEventList;
 	private final ObservableList<Event> eventList;
+	private final EventListCellFactory cellFactory;
 
 	@FXML
 	ListView<Event> eventListView;
 
 	@Inject
-	public EventViewController(ObservableList<Event> eventList) {
+	public EventViewController(ObservableList<Event> eventList, EventListCellFactory cellFactory) {
 		reversedEventList = new SortedList<>(eventList, Comparator.reverseOrder());
 		this.eventList = eventList;
+		this.cellFactory = cellFactory;
 	}
 
 	@FXML
 	public void initialize() {
+		eventListView.setCellFactory(cellFactory);
 		eventListView.setItems(reversedEventList);
 	}
 

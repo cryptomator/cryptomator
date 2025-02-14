@@ -57,6 +57,6 @@ abstract class EventViewModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(UpdateEventViewController.class)
-	abstract FxController bindUpdateEventViewController(UpdateEventViewController controller);
+	@FxControllerKey(EventListCellController.class)
+	abstract FxController bindEventListCellController(EventListCellController controller);
 }
