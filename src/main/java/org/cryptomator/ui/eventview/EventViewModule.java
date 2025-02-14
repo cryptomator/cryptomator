@@ -12,7 +12,6 @@ import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 
-import javax.inject.Named;
 import javax.inject.Provider;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -26,12 +25,11 @@ abstract class EventViewModule {
 	@Provides
 	@EventViewScoped
 	@EventViewWindow
-	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @Named("owner") Stage owner) {
+	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
 		stage.setTitle("TODO EVENTVIEWER");
 		stage.setResizable(true);
 		stage.initModality(Modality.NONE);
-		stage.initOwner(owner);
 		return stage;
 	}
 

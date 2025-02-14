@@ -68,4 +68,10 @@ abstract class FxApplicationModule {
 		return builder.build();
 	}
 
+	@Provides
+	@FxApplicationScoped
+	static EventViewComponent provideEventViewComponent(EventViewComponent.Factory factory) {
+		return factory.create();
+	}
+
 }

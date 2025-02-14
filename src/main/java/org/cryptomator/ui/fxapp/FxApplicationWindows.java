@@ -52,7 +52,7 @@ public class FxApplicationWindows {
 	private final UpdateReminderComponent.Factory updateReminderWindowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
-	private final EventViewComponent.Factory eventViewWindow;
+	private final Lazy<EventViewComponent> eventViewWindow;
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
@@ -71,7 +71,7 @@ public class FxApplicationWindows {
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
-								EventViewComponent.Factory eventViewWindow, //
+								Lazy<EventViewComponent> eventViewWindow, //
 								ExecutorService executor, //
 								Dialogs dialogs) {
 		this.primaryStage = primaryStage;
@@ -186,6 +186,11 @@ public class FxApplicationWindows {
 				});
 	}
 
+
+	public CompletionStage<Stage> showEventViewer() {
+		return CompletableFuture.supplyAsync(() -> eventViewWindow.get().showEventViewerWindow(), Platform::runLater).whenComplete(this::reportErrors);
+	}
+
 	/**
 	 * Displays the generic error scene in the given window.
 	 *
@@ -202,16 +207,5 @@ public class FxApplicationWindows {
 		if (error != null) {
 			LOG.error("Failed to display stage", error);
 		}
-	}
-
-	public CompletionStage<Object> showEventViewer(@Nullable Stage owner) {
-		return CompletableFuture.supplyAsync(() -> {
-			eventViewWindow.create(owner).showEventViewerWindow();
-			return null;
-		}, Platform::runLater).exceptionally(t -> {
-			LOG.error("Unable to display event viewer.", t);
-
-			return null;
-		});
 	}
 }

@@ -266,7 +266,7 @@ public class VaultListController implements FxController {
 
 	@FXML
 	public void showEventViewer() {
-		appWindows.showEventViewer(mainWindow);
+		appWindows.showEventViewer();
 	}
 	// Getter and Setter
 
