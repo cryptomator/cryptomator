@@ -3,7 +3,7 @@ package org.cryptomator.ui.sharevault;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.keyloading.hub.HubKeyLoadingStrategy;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 
 import javax.inject.Inject;
 import javafx.application.Application;
@@ -33,8 +33,7 @@ public class ShareVaultController implements FxController {
 		this.window = window;
 		this.application = application;
 		this.vault = vault;
-		var vaultScheme = vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme();
-		this.hubVault = (vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS));
+		this.hubVault = KeyLoadingStrategy.isHubVault(vault.getVaultSettings().lastKnownKeyLoader.get());
 	}
 
 	@FXML

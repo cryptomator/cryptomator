@@ -3,6 +3,7 @@ package org.cryptomator.ui.vaultoptions;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.keyloading.hub.HubKeyLoadingStrategy;
 import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.slf4j.Logger;
@@ -42,11 +43,11 @@ public class VaultOptionsController implements FxController {
 		window.setOnShowing(this::windowWillAppear);
 		selectedTabProperty.addListener(observable -> this.selectChosenTab());
 		tabPane.getSelectionModel().selectedItemProperty().addListener(observable -> this.selectedTabChanged());
-		var vaultScheme = vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme();
-		if(!vaultScheme.equals(MasterkeyFileLoadingStrategy.SCHEME)){
+		var vaultKeyLoader = vault.getVaultSettings().lastKnownKeyLoader.get();
+		if(!KeyLoadingStrategy.isMasterkeyFileVault(vaultKeyLoader)){
 			tabPane.getTabs().remove(keyTab);
 		}
-		if(!(vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS))){
+		if(!KeyLoadingStrategy.isHubVault(vaultKeyLoader)){
 			tabPane.getTabs().remove(hubTab);
 		}
 
