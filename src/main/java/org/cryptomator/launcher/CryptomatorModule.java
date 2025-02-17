@@ -2,6 +2,7 @@ package org.cryptomator.launcher;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.common.Hyperlinks;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
@@ -21,6 +22,12 @@ class CryptomatorModule {
 	@Singleton
 	static ResourceBundle provideLocalization() {
 		return ResourceBundle.getBundle("i18n.strings");
+	}
+
+	@Provides
+	@Singleton
+	static Hyperlinks provideHyperlinks() {
+		return Hyperlinks.load();
 	}
 
 	@Provides

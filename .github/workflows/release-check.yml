@@ -57,6 +57,11 @@ jobs:
             dependency-check
         env:
           SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
+      - name: Validate urls used in app
+        uses:  urlstechie/urlchecker-action@0.0.34
+        with:
+          file_types: .md,.json
+          include_files: README.md,src/main/resources/hyperlinks.json
       - name: Run org.owasp:dependency-check plugin
         id: dependency-check
         continue-on-error: true

@@ -1,6 +1,7 @@
 package org.cryptomator.ui.sharevault;
 
 import dagger.Lazy;
+import org.cryptomator.common.Hyperlinks;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.keyloading.hub.HubKeyLoadingStrategy;
@@ -18,9 +19,9 @@ import java.net.URISyntaxException;
 public class ShareVaultController implements FxController {
 
 	private static final String SCHEME_PREFIX = "hub+";
-	private static final String VISIT_HUB_URL = "https://cryptomator.org/hub/";
 	private static final String BEST_PRACTICES_URL = "https://docs.cryptomator.org/en/latest/security/best-practices/#sharing-of-vaults";
 
+	private final String VISIT_HUB_URL;
 	private final Stage window;
 	private final Lazy<Application> application;
 	private final Vault vault;
@@ -29,10 +30,12 @@ public class ShareVaultController implements FxController {
 	@Inject
 	ShareVaultController(@ShareVaultWindow Stage window, //
 						 Lazy<Application> application, //
+						 Hyperlinks links, //
 						 @ShareVaultWindow Vault vault) {
 		this.window = window;
 		this.application = application;
 		this.vault = vault;
+		this.VISIT_HUB_URL =links.homepageHub();
 		var vaultScheme = vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme();
 		this.hubVault = (vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS));
 	}
