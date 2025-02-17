@@ -43,8 +43,8 @@ public class AutoUnlocker {
 	private CompletionStage<Void> unlockSequentially(Stream<Vault> vaultStream) {
 		// this is an attempt to run all the unlock workflows sequentially, i.e. start the next workflow only after completing/failing the previous workflow.
 		return vaultStream.filter(Vault::isLocked).reduce(CompletableFuture.completedFuture(null),
-				(prevUnlock, nextVault) -> prevUnlock.thenCompose(unused -> appWindows.startUnlockWorkflow(nextVault, null)),
-				(prevUnlock, nextUnlock) -> nextUnlock.exceptionally(e -> null) // we don't care here about the exception, logged elsewhere
+				(prevUnlock, nextVault) -> prevUnlock.thenCompose(_ -> appWindows.startUnlockWorkflow(nextVault, null)),
+				(_, nextUnlock) -> nextUnlock.exceptionally(_ -> null) // we don't care here about the exception, logged elsewhere
 				);
 	}
 
