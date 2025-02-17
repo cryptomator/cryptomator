@@ -6,6 +6,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -93,17 +94,17 @@ public class FxApplicationWindows {
 
 		// register preferences shortcut
 		if (desktop.isSupported(Desktop.Action.APP_PREFERENCES)) {
-			desktop.setPreferencesHandler(evt -> showPreferencesWindow(SelectedPreferencesTab.ANY));
+			desktop.setPreferencesHandler(_ -> showPreferencesWindow(SelectedPreferencesTab.ANY));
 		}
 
 		// register preferences shortcut
 		if (desktop.isSupported(Desktop.Action.APP_ABOUT)) {
-			desktop.setAboutHandler(evt -> showPreferencesWindow(SelectedPreferencesTab.ABOUT));
+			desktop.setAboutHandler(_ -> showPreferencesWindow(SelectedPreferencesTab.ABOUT));
 		}
 
 		// register app reopen listener
 		if (desktop.isSupported(Desktop.Action.APP_EVENT_REOPENED)) {
-			desktop.addAppEventListener((AppReopenedListener) e -> showMainWindow());
+			desktop.addAppEventListener((AppReopenedListener) _ -> showMainWindow());
 		}
 
 		// observe visible windows
@@ -135,11 +136,12 @@ public class FxApplicationWindows {
 	}
 
 	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {
-		return showMainWindow().thenApplyAsync((window) -> vaultOptionsWindow.create(vault).showVaultOptionsWindow(tab), Platform::runLater).whenComplete(this::reportErrors);
+		return showMainWindow().thenApplyAsync(_ -> vaultOptionsWindow.create(vault).showVaultOptionsWindow(tab), Platform::runLater) //
+				.whenComplete(this::reportErrors);
 	}
 
 	public void showQuitWindow(QuitResponse response, boolean forced) {
-			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
+		CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response, forced), Platform::runLater);
 	}
 
 	public void showUpdateReminderWindow() {
@@ -147,13 +149,14 @@ public class FxApplicationWindows {
 	}
 
 	public void showDokanySupportEndWindow() {
-		CompletableFuture.runAsync(() -> dialogs.prepareDokanySupportEndDialog(
-				mainWindow.get().window(),
-				stage -> {
-					showPreferencesWindow(SelectedPreferencesTab.VOLUME);
-					stage.close();
-				}
-		).build().showAndWait(), Platform::runLater);
+		CompletableFuture.runAsync(() -> createDokanySupportEndDialog().showAndWait(), Platform::runLater);
+	}
+
+	private SimpleDialog createDokanySupportEndDialog() {
+		return dialogs.prepareDokanySupportEndDialog(mainWindow.get().window(), stage -> {
+			showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+			stage.close();
+		}).build();
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
@@ -162,8 +165,7 @@ public class FxApplicationWindows {
 					LOG.debug("Start unlock workflow for {}", vault.getDisplayName());
 					return unlockWorkflowFactory.create(vault, owner).unlockWorkflow();
 				}, Platform::runLater) //
-				.thenAcceptAsync(UnlockWorkflow::run, executor)
-				.exceptionally(e -> {
+				.thenAcceptAsync(UnlockWorkflow::run, executor).exceptionally(e -> {
 					showErrorWindow(e, owner == null ? primaryStage : owner, null);
 					return null;
 				});
