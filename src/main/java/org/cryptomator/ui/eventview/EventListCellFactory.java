@@ -2,7 +2,6 @@ package org.cryptomator.ui.eventview;
 
 import org.cryptomator.event.Event;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
-import org.cryptomator.ui.mainwindow.VaultListCellController;
 
 import javax.inject.Inject;
 import javafx.fxml.FXMLLoader;
@@ -50,10 +49,11 @@ public class EventListCellFactory implements Callback<ListView<Event>, ListCell<
 		protected void updateItem(Event item, boolean empty) {
 			super.updateItem(item, empty);
 
-			if (empty) {
-				setText(null);
+			if (empty || item == null) {
 				setGraphic(null);
+				this.getStyleClass().remove("list-cell");
 			} else {
+				this.getStyleClass().addLast("list-cell");
 				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 				setGraphic(root);
 				controller.setEvent(item);

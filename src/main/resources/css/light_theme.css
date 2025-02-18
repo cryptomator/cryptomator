@@ -299,6 +299,15 @@
  *                                                                             *
  ******************************************************************************/
 
+.event-window .list-view .list-cell:hover {
+	-fx-background-color: CONTROL_BG_SELECTED;
+}
+
+.event-window .list-view .list-cell:selected {
+	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
+	-fx-background-insets: 0, 0 0 0 3px;
+}
+
 .list-view {
 	-fx-background-color: CONTROL_BG_NORMAL;
 }
