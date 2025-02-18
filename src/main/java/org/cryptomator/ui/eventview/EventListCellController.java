@@ -1,6 +1,9 @@
 package org.cryptomator.ui.eventview;
 
 import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
+import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.event.Event;
 import org.cryptomator.event.UpdateEvent;
 import org.cryptomator.event.VaultEvent;
@@ -8,20 +11,24 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
+import javafx.application.Application;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
 
 public class EventListCellController implements FxController {
 
-	private final ObservableList<Event> eventList;
+	private final ObservableList<Event> events;
+	private final Application app;
 	private final ResourceBundle resourceBundle;
 	private final ObjectProperty<Event> event;
 	private final ObservableValue<String> message;
@@ -29,18 +36,29 @@ public class EventListCellController implements FxController {
 	private final ObservableValue<FontAwesome5Icon> icon;
 
 	@FXML
-	ContextMenu eventActionsContextMenu;
+	ContextMenu basicEventActions;
+	@FXML
+	ContextMenu conflictResoledEventActions;
 	@FXML
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(ObservableList<Event> eventList, ResourceBundle resourceBundle) {
-		this.eventList = eventList;
+	public EventListCellController(ObservableList<Event> events, Application app, ResourceBundle resourceBundle) {
+		this.events = events;
+		this.app = app;
 		this.resourceBundle = resourceBundle;
 		this.event = new SimpleObjectProperty<>(null);
 		this.message = ObservableUtil.mapWithDefault(event, e -> e.getClass().getName(), "");
 		this.description = ObservableUtil.mapWithDefault(event, this::selectDescription, "");
 		this.icon = ObservableUtil.mapWithDefault(event, this::selectIcon, FontAwesome5Icon.BELL);
+		event.addListener(this::hideContextMenus);
+	}
+
+	private void hideContextMenus(Observable observable, Event oldValue, Event newValue) {
+		//hide all context menus
+		basicEventActions.hide();
+		conflictResoledEventActions.hide();
+
 	}
 
 	public void setEvent(Event item) {
@@ -62,17 +80,41 @@ public class EventListCellController implements FxController {
 	}
 
 	@FXML
-	public void toggleEventActionsMenu(ActionEvent actionEvent) {
-		if (eventActionsContextMenu.isShowing()) {
-			eventActionsContextMenu.hide();
-		} else {
-			eventActionsContextMenu.show(eventActionsButton, Side.BOTTOM, 0.0, 0.0);
+	public void toggleEventActionsMenu() {
+		var e = event.get();
+		if(e != null) {
+			var contextMenu = switch (e) {
+				case VaultEvent _ -> conflictResoledEventActions;
+				default ->  basicEventActions;
+			};
+			if (contextMenu.isShowing()) {
+				contextMenu.hide();
+			} else {
+				contextMenu.show(eventActionsButton, Side.BOTTOM, 0.0, 0.0);
+			}
 		}
 	}
 
 	@FXML
 	public void remove() {
-		eventList.remove(event.getValue());
+		events.remove(event.getValue());
+	}
+
+	@FXML
+	public void openVaultStoragePath() {
+		if(event.getValue() instanceof VaultEvent(_, Vault v, _)) {
+			app.getHostServices().showDocument(v.getPath().toUri().toString());
+		}
+	}
+
+	@FXML
+	public void showResolvedConflict() {
+		if(event.getValue() instanceof VaultEvent(_, Vault v, FilesystemEvent fse) && fse instanceof ConflictResolvedEvent cre) {
+			if(v.isUnlocked()) {
+				//TODO
+			}
+
+		}
 	}
 
 	//-- property accessors --

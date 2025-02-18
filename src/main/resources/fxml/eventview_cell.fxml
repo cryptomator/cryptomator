@@ -33,9 +33,16 @@
 	</Button>
 
 	<fx:define>
-		<ContextMenu fx:id="eventActionsContextMenu">
+		<ContextMenu fx:id="basicEventActions">
 			<items>
 				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#remove" />
+			</items>
+		</ContextMenu>
+		<ContextMenu fx:id="conflictResoledEventActions">
+			<items>
+				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#remove" />
+				<MenuItem styleClass="add-vault-menu-item" text="showVault" onAction="#openVaultStoragePath"/>
+				<MenuItem styleClass="add-vault-menu-item" text="showFile" onAction="#showResolvedConflict"/>
 			</items>
 		</ContextMenu>
 	</fx:define>

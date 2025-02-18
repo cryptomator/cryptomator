@@ -263,7 +263,7 @@ public class Vault {
 
 	private void consumeVaultEvent(FilesystemEvent e) {
 		long timestamp = Instant.now().toEpochMilli();
-		Platform.runLater(() -> eventQueue.addLast(new VaultEvent(timestamp, vaultSettings.id, vaultSettings.path.get().toString(), e)));
+		Platform.runLater(() -> eventQueue.addLast(new VaultEvent(timestamp, this, e)));
 	}
 
 	// ******************************************************************************
