@@ -13,6 +13,7 @@ import javafx.util.Callback;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
+@EventViewScoped
 public class EventListCellFactory implements Callback<ListView<Event>, ListCell<Event>> {
 
 	private static final String FXML_PATH = "/fxml/eventview_cell.fxml";
