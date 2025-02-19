@@ -35,14 +35,13 @@
 	<fx:define>
 		<ContextMenu fx:id="basicEventActions">
 			<items>
-				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#remove" />
+				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#dismissEvent" />
 			</items>
 		</ContextMenu>
 		<ContextMenu fx:id="conflictResoledEventActions">
 			<items>
-				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#remove" />
-				<MenuItem styleClass="add-vault-menu-item" text="showVault" onAction="#openVaultStoragePath"/>
-				<MenuItem styleClass="add-vault-menu-item" text="showFile" onAction="#showResolvedConflict"/>
+				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#dismissEvent" />
+				<MenuItem styleClass="add-vault-menu-item" text="Show" onAction="#showResolvedConflict" visible="${controller.revealServicePresent}"/>
 			</items>
 		</ContextMenu>
 	</fx:define>

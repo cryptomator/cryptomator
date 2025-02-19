@@ -7,11 +7,14 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.event.Event;
 import org.cryptomator.event.UpdateEvent;
 import org.cryptomator.event.VaultEvent;
+import org.cryptomator.integrations.revealpath.RevealFailedException;
+import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -21,14 +24,16 @@ import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class EventListCellController implements FxController {
 
+	private static final Logger LOG = LoggerFactory.getLogger(EventListCellController.class);
+
 	private final ObservableList<Event> events;
-	private final Application app;
+	private final Optional<RevealPathService> revealService;
 	private final ResourceBundle resourceBundle;
 	private final ObjectProperty<Event> event;
 	private final ObservableValue<String> message;
@@ -43,9 +48,9 @@ public class EventListCellController implements FxController {
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(ObservableList<Event> events, Application app, ResourceBundle resourceBundle) {
+	public EventListCellController(ObservableList<Event> events, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
 		this.events = events;
-		this.app = app;
+		this.revealService = revealService;
 		this.resourceBundle = resourceBundle;
 		this.event = new SimpleObjectProperty<>(null);
 		this.message = ObservableUtil.mapWithDefault(event, e -> e.getClass().getName(), "");
@@ -54,11 +59,10 @@ public class EventListCellController implements FxController {
 		event.addListener(this::hideContextMenus);
 	}
 
+
 	private void hideContextMenus(Observable observable, Event oldValue, Event newValue) {
-		//hide all context menus
 		basicEventActions.hide();
 		conflictResoledEventActions.hide();
-
 	}
 
 	public void setEvent(Event item) {
@@ -82,10 +86,10 @@ public class EventListCellController implements FxController {
 	@FXML
 	public void toggleEventActionsMenu() {
 		var e = event.get();
-		if(e != null) {
+		if (e != null) {
 			var contextMenu = switch (e) {
 				case VaultEvent _ -> conflictResoledEventActions;
-				default ->  basicEventActions;
+				default -> basicEventActions;
 			};
 			if (contextMenu.isShowing()) {
 				contextMenu.hide();
@@ -96,24 +100,25 @@ public class EventListCellController implements FxController {
 	}
 
 	@FXML
-	public void remove() {
+	public void dismissEvent() {
 		events.remove(event.getValue());
 	}
 
 	@FXML
-	public void openVaultStoragePath() {
-		if(event.getValue() instanceof VaultEvent(_, Vault v, _)) {
-			app.getHostServices().showDocument(v.getPath().toUri().toString());
-		}
-	}
-
-	@FXML
 	public void showResolvedConflict() {
-		if(event.getValue() instanceof VaultEvent(_, Vault v, FilesystemEvent fse) && fse instanceof ConflictResolvedEvent cre) {
-			if(v.isUnlocked()) {
-				//TODO
-			}
+		if (event.getValue() instanceof VaultEvent(_, Vault v, FilesystemEvent fse) && fse instanceof ConflictResolvedEvent cre) {
+			if (v.isUnlocked()) {
+				var mountUri = v.getMountPoint().uri();
+				var internalPath = cre.resolvedCleartextPath().toString().substring(1);
+				var actualPath = Path.of(mountUri.getPath().concat(internalPath).substring(1));
+				var s = revealService.orElseThrow(() -> new IllegalStateException("Function requiring revealService called, but service not available"));
+				try {
+					s.reveal(actualPath);
+				} catch (RevealFailedException e) {
+					LOG.warn("Failed to show resolved file conflict", e);
+				}
 
+			}
 		}
 	}
 
@@ -141,4 +146,9 @@ public class EventListCellController implements FxController {
 	public FontAwesome5Icon getIcon() {
 		return icon.getValue();
 	}
+
+	public boolean isRevealServicePresent() {
+		return revealService.isPresent();
+	}
+
 }
