@@ -15,7 +15,7 @@ import java.io.UncheckedIOException;
 @WrongFileAlertScoped
 public class WrongFileAlertController implements FxController {
 
-	private static final String DOCUMENTATION_URI = "https://docs.cryptomator.org/en/1.7/desktop/accessing-vaults/";
+	private static final String DOCUMENTATION_URI = "https://docs.cryptomator.org/desktop/accessing-vaults/";
 
 	private final Application app;
 	private final Stage window;

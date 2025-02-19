@@ -1,6 +1,7 @@
 package org.cryptomator.ui.mainwindow;
 
 import dagger.Binds;
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
@@ -14,11 +15,12 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.common.StageInitializer;
 import org.cryptomator.ui.error.ErrorComponent;
+import org.cryptomator.ui.fxapp.FxApplicationTerminator;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
-import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
+import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 
 import javax.inject.Named;
@@ -31,17 +33,25 @@ import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {AddVaultWizardComponent.class, MigrationComponent.class, RemoveVaultComponent.class, VaultStatisticsComponent.class, WrongFileAlertComponent.class, ErrorComponent.class, RecoveryKeyComponent.class})
+@Module(subcomponents = {AddVaultWizardComponent.class, MigrationComponent.class, VaultStatisticsComponent.class, WrongFileAlertComponent.class, ErrorComponent.class, RecoveryKeyComponent.class})
 abstract class MainWindowModule {
 
 	@Provides
 	@MainWindow
 	@MainWindowScoped
-	static Stage provideMainWindow(@PrimaryStage Stage stage, StageInitializer initializer) {
+	static Stage provideMainWindow(@PrimaryStage Stage stage, StageInitializer initializer, FxApplicationTerminator terminator, Lazy<TrayMenuComponent> trayMenu) {
 		initializer.accept(stage);
 		stage.setTitle("Cryptomator");
 		stage.setMinWidth(650);
 		stage.setMinHeight(498);
+		stage.setOnCloseRequest(e -> {
+			if (!trayMenu.get().isInitialized()) {
+				terminator.terminate();
+				e.consume();
+			} else {
+				stage.close();
+			}
+		});
 		return stage;
 	}
 

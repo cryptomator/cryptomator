@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
@@ -54,9 +55,9 @@ public class VaultListManager {
 	@Inject
 	public VaultListManager(ObservableList<Vault> vaultList, //
 							AutoLocker autoLocker, //
-							List<MountService> mountServices,
-							VaultComponent.Factory vaultComponentFactory,
-							ResourceBundle resourceBundle,
+							List<MountService> mountServices, //
+							VaultComponent.Factory vaultComponentFactory, //
+							ResourceBundle resourceBundle, //
 							Settings settings) {
 		this.vaultList = vaultList;
 		this.autoLocker = autoLocker;
@@ -123,6 +124,10 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
+			if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
+				var keyIdScheme = wrapper.get().getKeyId().getScheme();
+				vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
+			}
 			var vaultState = determineVaultState(vaultSettings.path.get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();

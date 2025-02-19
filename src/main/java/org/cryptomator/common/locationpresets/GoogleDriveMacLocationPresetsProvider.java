@@ -67,7 +67,7 @@ public final class GoogleDriveMacLocationPresetsProvider implements LocationPres
 	 */
 	private String getDriveLocationString(Path accountPath) {
 		String accountName = accountPath.getFileName().toString().replace("GoogleDrive-", "");
-		return STR."Google Drive - \{accountName}";
+		return "Google Drive - " + accountName;
 	}
 
 	/**

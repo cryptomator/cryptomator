@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2018 Armin Schrenk <armin.schrenk@zoho.eu> -->
 <component type="desktop-application">
 	<id>org.cryptomator.Cryptomator</id>
 	<metadata_license>FSFAP</metadata_license>
 	<project_license>GPL-3.0-or-later</project_license>
 	<name>Cryptomator</name>
-	<summary>Encryption made easy and optimized for the cloud</summary>
+	<summary>Encryption for your cloud made easy</summary>
+
+	<keywords>
+		<keyword>encryption</keyword>
+		<keyword>security</keyword>
+		<keyword>privacy</keyword>
+	</keywords>
 
 	<description>
 		<p>
@@ -44,12 +49,16 @@
 
 	<screenshots>
 		<screenshot type="default">
-			<caption>Light theme</caption>
-			<image>https://user-images.githubusercontent.com/11858409/156986109-6e58f59c-8b8c-4501-b33b-bb1e33007cea.png</image>
+			<caption>Encrypts your data, protects your privacy</caption>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlockDialog_light.png</image>
 		</screenshot>
 		<screenshot>
-			<caption>Dark theme</caption>
-			<image>https://user-images.githubusercontent.com/11858409/156986113-6c5d7801-86e0-4643-bc2f-aff9d95d3ce0.png</image>
+			<caption>Dark theme available</caption>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlocked_dark.png</image>
+		</screenshot>
+		<screenshot>
+			<caption>Easy to use - work on encrypted files as if they were not</caption>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlocked_light.png</image>
 		</screenshot>
 	</screenshots>
 
@@ -74,6 +83,12 @@
 	</content_rating>
 
 	<releases>
+		<release date="2025-02-05" version="1.15.1">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.15.1</url>
+		</release>
+		<release date="2025-02-03" version="1.15.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.15.0</url>
+		</release>
 		<release date="2024-11-19" version="1.14.2">
 			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.14.2</url>
 		</release>

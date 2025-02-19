@@ -4,8 +4,8 @@ on:
   pull_request:
 
 env:
-  JAVA_DIST: 'zulu'
-  JAVA_VERSION: 22
+  JAVA_DIST: 'temurin'
+  JAVA_VERSION: 23
 
 defaults:
   run:

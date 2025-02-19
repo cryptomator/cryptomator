@@ -25,10 +25,10 @@ cp ../../../target/cryptomator-*.jar ../../../target/mods
 
 JAVAFX_VERSION=22.0.2
 JAVAFX_ARCH="x64"
-JAVAFX_JMODS_SHA256='d44bff3b94d5668fdee18a938d7b1269026d663d44765f02d29a9bdfd3fa1eb0'
+JAVAFX_JMODS_SHA256='2164bca470bf70a5e2764645e2078ba7f787b274e5be3d7df30d87c5bb62bba6'
 if [ "${CPU_ARCH}" = "aarch64" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256='3d5457136690c4f5bb9522d38b45218e045bdac13c24aa4c808c7c8d17d039c7'
+    JAVAFX_JMODS_SHA256='09c92fa9fa0b82adefd88640a14ebb2a49e5f3f733a57d1542f5590d060ffe1b'
 fi
 
 # download javaFX jmods
@@ -76,7 +76,7 @@ ${JAVA_HOME}/bin/jpackage \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
     --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
-    --copyright "(C) 2016 - 2024 Skymatic GmbH" \
+    --copyright "(C) 2016 - 2025 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \
@@ -91,6 +91,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\"" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
+    --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
     --resource-dir ../resources
 
 # transform AppDir
@@ -108,13 +109,13 @@ cp ../common/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/usr/share/ap
 cp ../common/org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/metainfo/org.cryptomator.Cryptomator.metainfo.xml
 cp ../common/application-vnd.cryptomator.vault.xml Cryptomator.AppDir/usr/share/mime/packages/application-vnd.cryptomator.vault.xml
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
-ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
-ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
+ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/org.cryptomator.Cryptomator.desktop
+ln -s org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/metainfo/org.cryptomator.Cryptomator.appdata.xml
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
 
 # load AppImageTool
-curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
+curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage
 
 # create AppImage

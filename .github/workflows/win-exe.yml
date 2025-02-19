@@ -16,9 +16,9 @@ on:
 
 env:
   JAVA_DIST: 'zulu'
-  JAVA_VERSION: '22.0.2+9'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_windows-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: 'f9376d200f5c5b85327d575c1ec1482e6455f19916577f7e2fc9be2f48bb29b6'
+  JAVA_VERSION: '23.0.1+11'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
 
@@ -89,7 +89,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "jfxjmods;${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.mscapi,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -110,7 +110,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2024 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
@@ -218,7 +218,7 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2024 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           --win-menu
           --win-dir-chooser
@@ -304,7 +304,7 @@ jobs:
           -out dist/win/bundle/
           -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           -dBundleVendor="Skymatic GmbH"
-          -dBundleCopyright="(C) 2016 - 2024 Skymatic GmbH"
+          -dBundleCopyright="(C) 2016 - 2025 Skymatic GmbH"
           -dAboutUrl="https://cryptomator.org"
           -dHelpUrl="https://cryptomator.org/contact"
           -dUpdateUrl="https://cryptomator.org/downloads/"

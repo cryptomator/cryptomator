@@ -16,7 +16,7 @@ import javafx.fxml.FXML;
 public class WelcomeController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
-	private static final String GETTING_STARTED_URI = "https://docs.cryptomator.org/en/1.7/desktop/getting-started/";
+	private static final String GETTING_STARTED_URI = "https://docs.cryptomator.org/desktop/getting-started/";
 
 	private final Application application;
 	private final BooleanBinding noVaultPresent;

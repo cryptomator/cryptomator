@@ -14,8 +14,8 @@ on:
     types: [published]
 
 env:
-  JAVA_DIST: 'zulu'
-  JAVA_VERSION: '22.0.2+9'
+  JAVA_DIST: 'temurin'
+  JAVA_VERSION: '23.0.1+11'
 
 jobs:
   get-version:
@@ -35,8 +35,8 @@ jobs:
           architecture: x64
           output-suffix: x64
           fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/22.0.2/openjfx-22.0.2_osx-x64_bin-jmods.zip'
-          openjfx-sha: '115cb08bb59d880cfff6e51e0bf0dcc45785ed9d456b8b8425597b04da6ab3d4'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_osx-x64_bin-jmods.zip'
+          openjfx-sha: '8857965975c464a0e5d57709292ce357d0ebb39f6168c41d5ca38301e42c3c8e'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -100,7 +100,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2024 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.mac"

@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-JAVA_HOME = /usr/lib/jvm/java-22-coffeelibs
+JAVA_HOME = /usr/lib/jvm/java-23-coffeelibs
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DEB_BUILD_ARCH),amd64)
 JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods
@@ -45,7 +45,7 @@ override_dh_auto_build:
 		--vendor "Skymatic GmbH" \
 		--java-options "--enable-preview" \
 		--java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
-		--copyright "(C) 2016 - 2024 Skymatic GmbH" \
+		--copyright "(C) 2016 - 2025 Skymatic GmbH" \
 		--java-options "-Xss5m" \
 		--java-options "-Xmx256m" \
 		--java-options "-Dfile.encoding=\"utf-8\"" \
@@ -62,6 +62,7 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\"" \
 		--java-options "-Dcryptomator.disableUpdateCheck=\"${DISABLE_UPDATE_CHECK}\"" \
 		--java-options "-Dcryptomator.integrationsLinux.autoStartCmd=\"cryptomator\"" \
+		--java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
 		--app-version "${VERSION_NUM}.${REVISION_NUM}" \
 		--resource-dir resources \
 		--verbose
