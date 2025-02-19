@@ -1,6 +1,7 @@
 package org.cryptomator.common.keychain;
 
 
+import org.cryptomator.JavaFXUtil;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -19,6 +20,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KeychainManagerTest {
 
+	@BeforeAll
+	public static void startup() throws InterruptedException {
+		var isRunning = JavaFXUtil.startPlatform();
+		Assumptions.assumeTrue(isRunning);
+	}
+
 	@Test
 	public void testStoreAndLoad() throws KeychainAccessException {
 		KeychainManager keychainManager = new KeychainManager(new SimpleObjectProperty<>(new MapKeychainAccess()));
@@ -27,15 +34,7 @@ public class KeychainManagerTest {
 	}
 
 	@Nested
-	public static class WhenObservingProperties {
-
-		@BeforeAll
-		public static void startup() throws InterruptedException {
-			CountDownLatch latch = new CountDownLatch(1);
-			Platform.startup(latch::countDown);
-			var javafxStarted = latch.await(5, TimeUnit.SECONDS);
-			Assumptions.assumeTrue(javafxStarted);
-		}
+	public class WhenObservingProperties {
 
 		@Test
 		public void testPropertyChangesWhenStoringPassword() throws KeychainAccessException, InterruptedException {
@@ -43,7 +42,7 @@ public class KeychainManagerTest {
 			ReadOnlyBooleanProperty property = keychainManager.getPassphraseStoredProperty("test");
 			Assertions.assertFalse(property.get());
 
-			keychainManager.storePassphrase("test", null,"bar");
+			keychainManager.storePassphrase("test", null, "bar");
 
 			AtomicBoolean result = new AtomicBoolean(false);
 			CountDownLatch latch = new CountDownLatch(1);

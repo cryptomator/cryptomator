@@ -24,7 +24,7 @@ public class KeychainManager implements KeychainAccessProvider {
 	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain) {
 		this.keychain = selectedKeychain;
 		this.passphraseStoredProperties = Caffeine.newBuilder() //
-				.weakValues() //
+				.softValues() //
 				.build(this::createStoredPassphraseProperty);
 		keychain.addListener(ignored -> passphraseStoredProperties.invalidateAll());
 	}
@@ -43,8 +43,13 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	@Override
-	public void storePassphrase(String key, String displayName, CharSequence passphrase, boolean ignored) throws KeychainAccessException {
-		getKeychainOrFail().storePassphrase(key, displayName, passphrase);
+	public void storePassphrase(String key, String displayName, CharSequence passphrase) throws KeychainAccessException {
+		storePassphrase(key, displayName, passphrase, true); //TODO: currently only TouchID is using this parameter, so this is okayish
+	}
+
+	@Override
+	public void storePassphrase(String key, String displayName, CharSequence passphrase, boolean requireOsAuthentication) throws KeychainAccessException {
+		getKeychainOrFail().storePassphrase(key, displayName, passphrase, requireOsAuthentication);
 		setPassphraseStored(key, true);
 	}
 
@@ -101,13 +106,11 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	private void setPassphraseStored(String key, boolean value) {
-		BooleanProperty property = passphraseStoredProperties.getIfPresent(key);
-		if (property != null) {
-			if (Platform.isFxApplicationThread()) {
-				property.set(value);
-			} else {
-				Platform.runLater(() -> property.set(value));
-			}
+		BooleanProperty property = passphraseStoredProperties.get(key, _ -> new SimpleBooleanProperty(value));
+		if (Platform.isFxApplicationThread()) {
+			property.set(value);
+		} else {
+			Platform.runLater(() -> property.set(value));
 		}
 	}
 
@@ -132,6 +135,10 @@ public class KeychainManager implements KeychainAccessProvider {
 		} catch (KeychainAccessException e) {
 			return new SimpleBooleanProperty(false);
 		}
+	}
+
+	public ObjectExpression<KeychainAccessProvider> getKeychainImplementation() {
+		return this.keychain;
 	}
 
 }
