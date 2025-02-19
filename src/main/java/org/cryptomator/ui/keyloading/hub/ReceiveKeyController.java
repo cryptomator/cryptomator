@@ -165,7 +165,7 @@ public class ReceiveKeyController implements FxController {
 		var vaultKeyUri = hubConfig.URIs.API.resolve("vaults/" + vaultId + "/access-token");
 		var request = HttpRequest.newBuilder(vaultKeyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
-				.header("deviceId", deviceId) //
+				.header("Hub-Device-ID", deviceId) //
 				.GET() //
 				.timeout(REQ_TIMEOUT) //
 				.build();
