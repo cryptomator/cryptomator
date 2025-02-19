@@ -28,6 +28,9 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -42,6 +45,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Environment environment;
 	private final List<KeychainAccessProvider> keychainAccessProviders;
 	private final KeychainManager keychain;
+	private final ExecutorService backgroundExecutor;
 	private final FxApplicationWindows appWindows;
 	public CheckBox useKeychainCheckbox;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
@@ -53,13 +57,18 @@ public class GeneralPreferencesController implements FxController {
 	public CheckBox autoStartCheckbox;
 	public ToggleGroup nodeOrientation;
 
+	private CompletionStage<Void> keychainMigrations = CompletableFuture.completedFuture(null);
+
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, KeychainManager keychain, Application application, Environment environment, FxApplicationWindows appWindows) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, //
+								 List<KeychainAccessProvider> keychainAccessProviders, KeychainManager keychain, Application application, //
+								 Environment environment, FxApplicationWindows appWindows, ExecutorService backgroundExecutor) {
 		this.window = window;
 		this.settings = settings;
 		this.autoStartProvider = autoStartProvider;
 		this.keychainAccessProviders = keychainAccessProviders;
 		this.keychain = keychain;
+		this.backgroundExecutor = backgroundExecutor;
 		this.quickAccessServices = QuickAccessService.get().toList();
 		this.application = application;
 		this.environment = environment;
@@ -80,6 +89,7 @@ public class GeneralPreferencesController implements FxController {
 		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
 		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
+		keychainBackendChoiceBox.valueProperty().addListener(this::migrateMacKeychainEntries);
 
 		useQuickAccessCheckbox.selectedProperty().bindBidirectional(settings.useQuickAccess);
 		var quickAccessSettingsConverter = new ServiceToSettingsConverter<>(quickAccessServices);
@@ -88,6 +98,34 @@ public class GeneralPreferencesController implements FxController {
 		quickAccessServiceChoiceBox.setConverter(new NamedServiceConverter<>());
 		Bindings.bindBidirectional(settings.quickAccessService, quickAccessServiceChoiceBox.valueProperty(), quickAccessSettingsConverter);
 		quickAccessServiceChoiceBox.disableProperty().bind(useQuickAccessCheckbox.selectedProperty().not());
+	}
+
+	public void migrateMacKeychainEntries(Observable observable, KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider) {
+		if (!SystemUtils.IS_OS_MAC) {
+			return;
+		}
+
+		record VIdAndName(String id, String name) {}
+		var vaults = settings.directories.stream().map(vault -> new VIdAndName(vault.id, vault.displayName.getValue())).toList();
+
+		keychainMigrations = keychainMigrations.thenRunAsync(() -> {
+			if (!vaults.isEmpty()) {
+				LOG.info("Migrating keychain entries for vaults: {}", vaults.stream().map(VIdAndName::id));
+			}
+			for (var v : vaults) { //TODO: migrate to pattern matching once supported
+				try {
+					var passphrase = oldProvider.loadPassphrase(v.id);
+					if (passphrase != null) {
+						var wrapper = new Passphrase(passphrase);
+						newProvider.storePassphrase(v.id, v.name, wrapper);
+						oldProvider.deletePassphrase(v.id);
+						wrapper.destroy();
+					}
+				} catch (KeychainAccessException e) {
+					LOG.error("Failed to migrate keychain entry for vault {}.", v.id, e);
+				}
+			}
+		}, backgroundExecutor);
 	}
 
 	public boolean isAutoStartSupported() {

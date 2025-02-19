@@ -13,12 +13,14 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.util.Arrays;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Singleton
 public class KeychainManager implements KeychainAccessProvider {
 
 	private final ObjectExpression<KeychainAccessProvider> keychain;
 	private final LoadingCache<String, BooleanProperty> passphraseStoredProperties;
+	private final ReentrantReadWriteLock lock;
 
 	@Inject
 	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain) {
@@ -27,6 +29,7 @@ public class KeychainManager implements KeychainAccessProvider {
 				.softValues() //
 				.build(this::createStoredPassphraseProperty);
 		keychain.addListener(ignored -> passphraseStoredProperties.invalidateAll());
+		this.lock = new ReentrantReadWriteLock(false);
 	}
 
 	private KeychainAccessProvider getKeychainOrFail() throws KeychainAccessException {
@@ -44,32 +47,57 @@ public class KeychainManager implements KeychainAccessProvider {
 
 	@Override
 	public void storePassphrase(String key, String displayName, CharSequence passphrase) throws KeychainAccessException {
-		storePassphrase(key, displayName, passphrase, true); //TODO: currently only TouchID is using this parameter, so this is okayish
+		storePassphrase(key, displayName, passphrase, true);
 	}
 
+	//TODO: remove ignored parameter once the API is fixed
 	@Override
-	public void storePassphrase(String key, String displayName, CharSequence passphrase, boolean requireOsAuthentication) throws KeychainAccessException {
-		getKeychainOrFail().storePassphrase(key, displayName, passphrase, requireOsAuthentication);
+	public void storePassphrase(String key, String displayName, CharSequence passphrase, boolean ignored) throws KeychainAccessException {
+		try {
+			lock.writeLock().lock();
+			var kc = getKeychainOrFail();
+			//this is the only keychain actually using the parameter
+			var usesOSAuth = (kc.getClass().getName().equals("org.cryptomator.macos.keychain.TouchIdKeychainAccess"));
+			kc.storePassphrase(key, displayName, passphrase, usesOSAuth);
+		} finally {
+			lock.writeLock().unlock();
+		}
 		setPassphraseStored(key, true);
 	}
 
 	@Override
 	public char[] loadPassphrase(String key) throws KeychainAccessException {
-		char[] passphrase = getKeychainOrFail().loadPassphrase(key);
+		char[] passphrase = null;
+		try {
+			lock.readLock().lock();
+			passphrase = getKeychainOrFail().loadPassphrase(key);
+		} finally {
+			lock.readLock().unlock();
+		}
 		setPassphraseStored(key, passphrase != null);
 		return passphrase;
 	}
 
 	@Override
 	public void deletePassphrase(String key) throws KeychainAccessException {
-		getKeychainOrFail().deletePassphrase(key);
+		try {
+			lock.writeLock().lock();
+			getKeychainOrFail().deletePassphrase(key);
+		} finally {
+			lock.writeLock().unlock();
+		}
 		setPassphraseStored(key, false);
 	}
 
 	@Override
 	public void changePassphrase(String key, String displayName, CharSequence passphrase) throws KeychainAccessException {
 		if (isPassphraseStored(key)) {
-			getKeychainOrFail().changePassphrase(key, displayName, passphrase);
+			try {
+				lock.writeLock().lock();
+				getKeychainOrFail().changePassphrase(key, displayName, passphrase);
+			} finally {
+				lock.writeLock().unlock();
+			}
 			setPassphraseStored(key, true);
 		}
 	}
