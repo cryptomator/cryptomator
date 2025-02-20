@@ -1,6 +1,12 @@
 package org.cryptomator.common.vaults;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -17,26 +23,18 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.integrations.mount.Mount;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import org.cryptomator.integrations.quickaccess.QuickAccessService;
+import org.cryptomator.integrations.quickaccess.QuickAccessServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 @ExtendWith(MockitoExtension.class)
 public class VaultTest {
@@ -94,9 +92,24 @@ public class VaultTest {
 		vaultSettings = new DummyVaultSettings();
 
 		settings = mock(Settings.class);
+
+		// Set the non-final field 'useQuickAccess'
 		Field useQuickAccessField = Settings.class.getDeclaredField("useQuickAccess");
 		useQuickAccessField.setAccessible(true);
-		useQuickAccessField.set(settings, new SimpleBooleanProperty(false));
+		useQuickAccessField.set(settings, new SimpleBooleanProperty(true));
+
+		// For the final field 'quickAccessService', remove the final modifier if possible,
+		// and set it to a SimpleStringProperty (which is a StringProperty).
+		Field quickAccessServiceField = Settings.class.getDeclaredField("quickAccessService");
+		quickAccessServiceField.setAccessible(true);
+		try {
+			Field modifiersField = Field.class.getDeclaredField("modifiers");
+			modifiersField.setAccessible(true);
+			modifiersField.setInt(quickAccessServiceField, quickAccessServiceField.getModifiers() & ~Modifier.FINAL);
+		} catch (NoSuchFieldException e) {
+			// If not available, proceed without modification.
+		}
+		quickAccessServiceField.set(settings, new SimpleStringProperty("DummyQuickAccessService"));
 
 		vault = new Vault(vaultSettings, configCache, cryptoFileSystem, vaultState, lastKnownException, vaultStats, mounter, settings);
 	}
@@ -143,7 +156,6 @@ public class VaultTest {
 			MasterkeyLoader dummyKeyLoader = mock(MasterkeyLoader.class);
 			vault.unlock(dummyKeyLoader);
 
-			// The code apparently sets the FS, but remains locked:
 			assertNotNull(cryptoFileSystem.get(), "FS is created even if the mount is null");
 			assertNull(vault.getMountPoint(), "Mountpoint is null if mount returns null");
 			assertEquals(VaultState.Value.LOCKED, vaultState.getValue(), "Vault remains locked if no valid mountpoint");
@@ -297,6 +309,107 @@ public class VaultTest {
 
 			assertNull(cryptoFileSystem.get(), "FS should not be set due to error");
 			assertEquals(VaultState.Value.LOCKED, vaultState.getValue(), "Vault remains LOCKED after error");
+		}
+	}
+
+	@Test
+	public void testGetCiphertextPathWhenLocked() {
+		Exception ex = assertThrows(IllegalStateException.class, () -> {
+			vault.getCiphertextPath(Paths.get("dummy"));
+		});
+		assertEquals("Vault is not unlocked", ex.getMessage());
+	}
+
+	@Test
+	public void testGetDisplayablePathHome() {
+		Path home = Paths.get(System.getProperty("user.home"));
+		vaultSettings.path.set(home.resolve("myVault"));
+		String displayable = vault.getDisplayablePath();
+		if (System.getProperty("os.name").toLowerCase().contains("win")) {
+			assertTrue(displayable.startsWith("~\\"));
+		} else {
+			assertTrue(displayable.startsWith("~/"));
+		}
+	}
+
+	@Test
+	public void testGetDisplayablePathNonHome() {
+		vaultSettings.path.set(Paths.get("/non/home/path"));
+		String displayable = vault.getDisplayablePath();
+		assertEquals("/non/home/path", displayable);
+	}
+
+	@Test
+	public void testPropertyGetters() {
+		assertNotNull(vault.displayNameProperty());
+		assertNotNull(vault.lastKnownExceptionProperty());
+		assertNotNull(vault.lockedProperty());
+		assertNotNull(vault.processingProperty());
+		assertNotNull(vault.unlockedProperty());
+		assertNotNull(vault.missingProperty());
+		assertNotNull(vault.needsMigrationProperty());
+		assertNotNull(vault.unknownErrorProperty());
+		assertNotNull(vault.mountPointProperty());
+		assertNotNull(vault.displayablePathProperty());
+		assertNotNull(vault.showingStatsProperty());
+	}
+
+	@Test
+	public void testSetAndGetLastKnownException() {
+		Exception testEx = new Exception("Test");
+		vault.setLastKnownException(testEx);
+		assertEquals(testEx, vault.getLastKnownException());
+	}
+
+	@Test
+	public void testObservables() {
+		assertNotNull(vault.observables());
+		assertTrue(vault.observables().length > 0);
+	}
+
+	@Test
+	public void testGettersForVaultInfo() {
+		assertEquals(vaultSettings, vault.getVaultSettings());
+		assertEquals(vaultSettings.path.get(), vault.getPath());
+		assertEquals(vaultStats, vault.getStats());
+		assertEquals(configCache, vault.getVaultConfigCache());
+		assertEquals(vaultSettings.id, vault.getId());
+	}
+
+	@Test
+	public void testSupportsForcedUnmountWithoutMount() {
+		Exception ex = assertThrows(IllegalStateException.class, () -> vault.supportsForcedUnmount());
+		assertEquals("Vault is not mounted", ex.getMessage());
+	}
+
+
+	@Test
+	public void testRemoveFromQuickAccessWhenEntryNull() {
+		vault.removeFromQuickAccess();
+	}
+
+	@Test
+	public void testRemoveFromQuickAccessInternal() throws QuickAccessServiceException {
+		QuickAccessService.QuickAccessEntry dummyEntry = mock(QuickAccessService.QuickAccessEntry.class);
+		try {
+			Field field = Vault.class.getDeclaredField("quickAccessEntry");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			AtomicReference<QuickAccessService.QuickAccessEntry> qaEntry = (AtomicReference<QuickAccessService.QuickAccessEntry>) field.get(vault);
+			qaEntry.set(dummyEntry);
+		} catch (Exception e) {
+			fail("Reflection failed: " + e.getMessage());
+		}
+		vault.removeFromQuickAccess();
+		verify(dummyEntry, times(1)).remove();
+		try {
+			Field field = Vault.class.getDeclaredField("quickAccessEntry");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			AtomicReference<QuickAccessService.QuickAccessEntry> qaEntry = (AtomicReference<QuickAccessService.QuickAccessEntry>) field.get(vault);
+			assertNull(qaEntry.get());
+		} catch (Exception e) {
+			fail("Reflection failed: " + e.getMessage());
 		}
 	}
 }
