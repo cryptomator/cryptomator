@@ -172,19 +172,33 @@ public class VaultListManager {
 	}
 
 	private static VaultState.Value determineVaultState(Path pathToVault, VaultSettings vaultSettings) throws IOException {
-		Path pathToVaultConfig = Path.of(pathToVault.toString(),"vault.cryptomator");
-		Path pathToMasterkey = Path.of(pathToVault.toString(),"masterkey.cryptomator");
+		Path pathToVaultConfig = pathToVault.resolve("vault.cryptomator");
+		Path pathToMasterkey = pathToVault.resolve("masterkey.cryptomator");
 
-		if (!Files.exists(pathToVault)) {
+		if (Files.notExists(pathToVault)) {
 			return VaultState.Value.MISSING;
 		}
-		else if (Files.notExists(pathToVaultConfig)) {
-			return RecoverUtil.tryBackUpConfig(pathToVaultConfig, VAULT_CONFIG_MISSING);
+
+		boolean vaultConfigRestored = Files.notExists(pathToVaultConfig) &&
+				RecoverUtil.restoreBackupIfAvailable(pathToVaultConfig, VaultState.Value.VAULT_CONFIG_MISSING);
+
+		boolean masterkeyRestored = Files.notExists(pathToMasterkey) &&
+				KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get()) &&
+				RecoverUtil.restoreBackupIfAvailable(pathToMasterkey, VaultState.Value.MASTERKEY_MISSING);
+
+		if (vaultConfigRestored || masterkeyRestored) {
+			return LOCKED;
 		}
-		else if (Files.notExists(pathToMasterkey) &&
+
+		if (Files.notExists(pathToVaultConfig)) {
+			return VaultState.Value.VAULT_CONFIG_MISSING;
+		}
+
+		if (Files.notExists(pathToMasterkey) &&
 				KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get())) {
-			return RecoverUtil.tryBackUpConfig(pathToMasterkey, MASTERKEY_MISSING);
+			return VaultState.Value.MASTERKEY_MISSING;
 		}
+
 		return checkDirStructure(pathToVault);
 	}
 
