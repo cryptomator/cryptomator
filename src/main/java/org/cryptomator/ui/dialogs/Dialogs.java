@@ -47,6 +47,16 @@ public class Dialogs {
 				});
 	}
 
+	public SimpleDialog.Builder prepareContactHubAdmin(Stage window) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("contactHubAdmin.title") //
+				.setMessageKey("contactHubAdmin.message") //
+				.setDescriptionKey("contactHubAdmin.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION)//
+				.setOkButtonKey("removeVault.confirmBtn") //
+				.setCancelButtonKey("generic.button.cancel");
+	}
+
 	public SimpleDialog.Builder prepareRemoveCertDialog(Stage window, Settings settings) {
 		return createDialogBuilder() //
 				.setOwner(window) //

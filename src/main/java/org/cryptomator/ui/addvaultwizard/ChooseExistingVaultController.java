@@ -94,6 +94,11 @@ public class ChooseExistingVaultController implements FxController {
 		}
 	}
 
+	@FXML
+	public void restoreVaultConfigWithRecoveryKey() {
+		//appWindows.showErrorWindow(e, window, window.getScene());
+	}
+
 	/* Getter */
 
 	public ObservableValue<Image> screenshotProperty() {

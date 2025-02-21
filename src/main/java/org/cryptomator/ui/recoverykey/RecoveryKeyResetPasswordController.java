@@ -1,6 +1,7 @@
 package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -95,9 +96,10 @@ public class RecoveryKeyResetPasswordController implements FxController {
 			Path masterkeyFilePath = recoveryPath.resolve(MASTERKEY_FILENAME);
 			try (Masterkey masterkey = masterkeyFileAccess.load(masterkeyFilePath, newPasswordController.passwordField.getCharacters())) {
 				try {
+					var combo = RecoverUtil.detectCipherCombo(masterkey.getEncoded(),vaultPath);
 					MasterkeyLoader loader = ignored -> masterkey.copy();
 					CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
-							.withCipherCombo(CryptorProvider.Scheme.SIV_CTRMAC) //
+							.withCipherCombo(combo) //
 							.withKeyLoader(loader) //
 							.withShorteningThreshold(220) //
 							.build();

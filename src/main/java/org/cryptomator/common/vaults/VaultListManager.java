@@ -9,13 +9,14 @@
 package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.cryptomator.integrations.mount.MountService;
-import org.cryptomator.ui.keyloading.hub.HubKeyLoadingStrategy;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +27,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Stream;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
@@ -124,11 +123,15 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
-			if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
-				var keyIdScheme = wrapper.get().getKeyId().getScheme();
-				vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
+			try {
+				if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
+					var keyIdScheme = wrapper.get().getKeyId().getScheme();
+					vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
+				}
+			} catch (NoSuchFileException e) {
+				LOG.warn("Vault config file not found.");
 			}
-			var vaultState = determineVaultState(vaultSettings.path.get());
+			var vaultState = determineVaultState(vaultSettings.path.get(),vaultSettings);
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 			}
@@ -145,10 +148,10 @@ public class VaultListManager {
 		return switch (previousState) {
 			case LOCKED, NEEDS_MIGRATION, MISSING, VAULT_CONFIG_MISSING, MASTERKEY_MISSING -> {
 				try {
-					var determinedState = determineVaultState(vault.getPath());
+					var determinedState = determineVaultState(vault.getPath(),vault.getVaultSettings());
 					if(determinedState == MASTERKEY_MISSING){
 						var vaultScheme = vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme();
-						if((vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTP) || vaultScheme.equals(HubKeyLoadingStrategy.SCHEME_HUB_HTTPS))){
+						if(KeyLoadingStrategy.isHubVault(vaultScheme)){
 							determinedState = LOCKED;
 						}
 					}
@@ -168,58 +171,24 @@ public class VaultListManager {
 		};
 	}
 
-	private static VaultState.Value determineVaultState(Path pathToVault) throws IOException {
+	private static VaultState.Value determineVaultState(Path pathToVault, VaultSettings vaultSettings) throws IOException {
 		Path pathToVaultConfig = Path.of(pathToVault.toString(),"vault.cryptomator");
 		Path pathToMasterkey = Path.of(pathToVault.toString(),"masterkey.cryptomator");
+
 		if (!Files.exists(pathToVault)) {
 			return VaultState.Value.MISSING;
 		}
-		else if (!Files.exists(pathToVaultConfig)) {
-			try (Stream<Path> files = Files.list(pathToVaultConfig.getParent())) {
-				Path backupFile = files.filter(file -> {
-					String fileName = file.getFileName().toString();
-					return fileName.startsWith("vault.cryptomator") && fileName.endsWith(".bkup");
-				}).findFirst().orElse(null);
-
-				if (backupFile != null) {
-					try {
-						Files.copy(backupFile, pathToVaultConfig, StandardCopyOption.REPLACE_EXISTING);
-					} catch (IOException e) {
-						LOG.error("error",e);
-						return VAULT_CONFIG_MISSING;
-					}
-				} else {
-					return VAULT_CONFIG_MISSING;
-				}
-			} catch (IOException e) {
-				LOG.error("error",e);
-				return VAULT_CONFIG_MISSING;
-			}
-
+		else if (Files.notExists(pathToVaultConfig)) {
+			return RecoverUtil.tryBackUpConfig(pathToVaultConfig, VAULT_CONFIG_MISSING);
 		}
-		else if (!Files.exists(pathToMasterkey)) {
-			try (Stream<Path> files = Files.list(pathToMasterkey.getParent())) {
-				Path backupFile = files.filter(file -> {
-					String fileName = file.getFileName().toString();
-					return fileName.startsWith("masterkey.cryptomator") && fileName.endsWith(".bkup");
-				}).findFirst().orElse(null);
-
-				if (backupFile != null) {
-					try {
-						Files.copy(backupFile, pathToMasterkey, StandardCopyOption.REPLACE_EXISTING);
-						return MASTERKEY_MISSING;
-					} catch (IOException e) {
-						LOG.error("error",e);
-						return MASTERKEY_MISSING;
-					}
-				} else {
-					return MASTERKEY_MISSING;
-				}
-			} catch (IOException e) {
-				LOG.error("error",e);
-				return MASTERKEY_MISSING;
-			}
+		else if (Files.notExists(pathToMasterkey) &&
+				KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get())) {
+			return RecoverUtil.tryBackUpConfig(pathToMasterkey, MASTERKEY_MISSING);
 		}
+		return checkDirStructure(pathToVault);
+	}
+
+	private static VaultState.Value checkDirStructure(Path pathToVault) throws IOException{
 		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
 			case VAULT -> VaultState.Value.LOCKED;
 			case UNRELATED -> VaultState.Value.MISSING;

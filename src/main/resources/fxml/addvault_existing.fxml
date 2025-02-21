@@ -11,7 +11,7 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
 	  prefWidth="450"
-	  prefHeight="450"
+	  prefHeight="480"
 	  spacing="24"
 	  alignment="CENTER">
 	<padding>
@@ -20,13 +20,14 @@
 	<children>
 		<ImageView VBox.vgrow="ALWAYS" fitWidth="400" preserveRatio="true" smooth="true" image="${controller.screenshot}"/>
 
-		<Label text="%addvaultwizard.existing.instruction" wrapText="true" labelFor="$finishButton"/>
+		<Label text="%addvaultwizard.existing.instruction" wrapText="true"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<ButtonBar buttonMinWidth="120" buttonOrder="+X">
+		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
-				<Button fx:id="finishButton" text="%addvaultwizard.existing.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" onAction="#chooseFileAndNext" defaultButton="true"/>
+				<Button text="%addvaultwizard.existing.restore" ButtonBar.buttonData="NEXT_FORWARD" onAction="#restoreVaultConfigWithRecoveryKey" />
+				<Button text="%addvaultwizard.existing.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" onAction="#chooseFileAndNext" defaultButton="true"/>
 			</buttons>
 		</ButtonBar>
 	</children>

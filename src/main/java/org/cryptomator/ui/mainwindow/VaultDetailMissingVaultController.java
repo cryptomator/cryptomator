@@ -4,6 +4,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Inject;
@@ -54,7 +55,12 @@ public class VaultDetailMissingVaultController implements FxController {
 
 	@FXML
 	void restoreVaultConfig() {
-		recoveryKeyWindow.create(vault.get(), window).showIsHubVaultDialogWindow();
+		if(KeyLoadingStrategy.isHubVault(vault.get().getVaultSettings().lastKnownKeyLoader.get())){
+			dialogs.prepareContactHubAdmin(window).build().showAndWait();
+		}
+		else {
+			recoveryKeyWindow.create(vault.get(), window).showIsHubVaultDialogWindow();
+		}
 	}
 
 	@FXML
