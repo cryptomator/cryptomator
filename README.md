@@ -92,6 +92,19 @@ mvn clean install
 
 This will build all the jars and bundle them together with their OS-specific dependencies under `target`. This can now be used to build native packages.
 
+
+## Error:
+
+If on unlock a vault any of these faults occur follow the steps
+
+### GH1B:GH1B:JCKJ on Windows
+
+- In File Exporer Navigatate to `%ProgramFiles%\Cryptomator`
+- Right click `PatchWebDAV.bat` and select __Run as administrator__ from the context menu
+
+You should be able to unlock the vault.
+
+
 ## License
 
 This project is dual-licensed under the GPLv3 for FOSS projects as well as a commercial license for independent software vendors and resellers. If you want to modify this application under different conditions, feel free to contact our support team.
