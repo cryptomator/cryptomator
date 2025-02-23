@@ -346,18 +346,10 @@
 	-fx-background-color: RED_5;
 }
 
-.notification-debug:hover .notification-label {
-	-fx-underline:true;
-}
-
 .notification-update {
 	-fx-min-height:24px;
 	-fx-max-height:24px;
 	-fx-background-color: YELLOW_5;
-}
-
-.notification-update:hover .notification-label {
-	-fx-underline:true;
 }
 
 .notification-support {
@@ -366,6 +358,8 @@
 	-fx-background-color: PRIMARY;
 }
 
+.notification-debug:hover .notification-label,
+.notification-update:hover .notification-label,
 .notification-support:hover .notification-label {
 	-fx-underline:true;
 }
