@@ -31,8 +31,9 @@ public class SimpleDialog {
 		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController( //
 				new SimpleDialogController(resolveText(builder.messageKey, null), //
 						resolveText(builder.descriptionKey, null), //
-						builder.icon, resolveText(builder.okButtonKey, null), //
-						resolveText(builder.cancelButtonKey, null), //
+						builder.icon, //
+						resolveText(builder.okButtonKey, null), //
+						builder.cancelButtonKey != null ? resolveText(builder.cancelButtonKey, null) : null, //
 						() -> builder.okAction.accept(dialogStage), //
 						() -> builder.cancelAction.accept(dialogStage)), //
 				Scene::new, builder.resourceBundle);
@@ -67,7 +68,6 @@ public class SimpleDialog {
 		private String descriptionKey;
 		private String okButtonKey;
 		private String cancelButtonKey;
-
 		private FontAwesome5Icon icon;
 		private Consumer<Stage> okAction = Stage::close;
 		private Consumer<Stage> cancelAction = Stage::close;
@@ -128,7 +128,6 @@ public class SimpleDialog {
 			Objects.requireNonNull(messageKey, "SimpleDialog messageKey must be set.");
 			Objects.requireNonNull(descriptionKey, "SimpleDialog descriptionKey must be set.");
 			Objects.requireNonNull(okButtonKey, "SimpleDialog okButtonKey must be set.");
-			Objects.requireNonNull(cancelButtonKey, "SimpleDialog cancelButtonKey must be set.");
 
 			try {
 				return new SimpleDialog(this);

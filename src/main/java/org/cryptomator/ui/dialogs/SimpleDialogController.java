@@ -3,6 +3,8 @@ package org.cryptomator.ui.dialogs;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 
 public class SimpleDialogController implements FxController {
@@ -14,6 +16,7 @@ public class SimpleDialogController implements FxController {
 	private final String cancelButtonText;
 	private final Runnable okAction;
 	private final Runnable cancelAction;
+	private final BooleanProperty dismissed = new SimpleBooleanProperty();
 
 	public SimpleDialogController(String message, String description, FontAwesome5Icon icon, String okButtonText, String cancelButtonText, Runnable okAction, Runnable cancelAction) {
 		this.message = message;
@@ -23,6 +26,10 @@ public class SimpleDialogController implements FxController {
 		this.cancelButtonText = cancelButtonText;
 		this.okAction = okAction;
 		this.cancelAction = cancelAction;
+	}
+	
+	public void initialize() {
+		dismissed.set(cancelButtonText == null || cancelButtonText.isEmpty());
 	}
 
 	public String getMessage() {
@@ -43,6 +50,11 @@ public class SimpleDialogController implements FxController {
 
 	public String getCancelButtonText() {
 		return cancelButtonText;
+	}
+
+	@FXML
+	public boolean getDismissed() {
+		return dismissed.get();
 	}
 
 	@FXML
