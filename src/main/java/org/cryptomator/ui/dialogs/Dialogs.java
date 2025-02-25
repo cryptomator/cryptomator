@@ -38,7 +38,7 @@ public class Dialogs {
 				.setMessageKey("removeVault.message") //
 				.setDescriptionKey("removeVault.description") //
 				.setIcon(FontAwesome5Icon.QUESTION) //
-				.setOkButtonKey("removeVault.confirmBtn") //
+				.setOkButtonKey("generic.button.remove") //
 				.setCancelButtonKey("generic.button.cancel") //
 				.setOkAction(stage -> {
 					LOG.debug("Removing vault {}.", vault.getDisplayName());
@@ -54,7 +54,7 @@ public class Dialogs {
 				.setMessageKey("removeCert.message") //
 				.setDescriptionKey("removeCert.description") //
 				.setIcon(FontAwesome5Icon.QUESTION) //
-				.setOkButtonKey("removeCert.confirmBtn") //
+				.setOkButtonKey("generic.button.remove") //
 				.setCancelButtonKey("generic.button.cancel") //
 				.setOkAction(stage -> {
 					settings.licenseKey.set(null);
