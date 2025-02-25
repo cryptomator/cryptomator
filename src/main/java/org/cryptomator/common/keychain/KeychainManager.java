@@ -2,8 +2,11 @@ package org.cryptomator.common.keychain;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,10 +16,13 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Singleton
 public class KeychainManager implements KeychainAccessProvider {
+
+	private static final Logger LOG = LoggerFactory.getLogger(KeychainManager.class);
 
 	private final ObjectExpression<KeychainAccessProvider> keychain;
 	private final LoadingCache<String, BooleanProperty> passphraseStoredProperties;
@@ -169,4 +175,24 @@ public class KeychainManager implements KeychainAccessProvider {
 		return this.keychain;
 	}
 
+	public static void migrate(KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider, Map<String, String> idsAndNames) {
+		if (oldProvider instanceof KeychainManager || newProvider instanceof KeychainManager) {
+			throw new IllegalArgumentException("KeychainManger must not be the source or target of migration");
+		}
+
+		LOG.info("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.displayName(), newProvider.displayName());
+		idsAndNames.forEach((id, name) -> {
+			try {
+				var passphrase = oldProvider.loadPassphrase(id);
+				if (passphrase != null) {
+					var wrapper = new Passphrase(passphrase);
+					newProvider.storePassphrase(id, name, wrapper);
+					oldProvider.deletePassphrase(id);
+					wrapper.destroy();
+				}
+			} catch (KeychainAccessException e) {
+				LOG.error("Failed to migrate keychain entry for vault {}.", id, e);
+			}
+		});
+	}
 }

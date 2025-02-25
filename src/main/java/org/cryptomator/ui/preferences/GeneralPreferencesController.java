@@ -2,13 +2,11 @@ package org.cryptomator.ui.preferences;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.common.NamedServiceProvider;
-import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.cryptomator.ui.common.FxController;
@@ -31,6 +29,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -89,7 +88,7 @@ public class GeneralPreferencesController implements FxController {
 		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
 		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
-		keychainBackendChoiceBox.valueProperty().addListener(this::migrateMacKeychainEntries);
+		keychainBackendChoiceBox.valueProperty().addListener(this::migrateKeychainEntries);
 
 		useQuickAccessCheckbox.selectedProperty().bindBidirectional(settings.useQuickAccess);
 		var quickAccessSettingsConverter = new ServiceToSettingsConverter<>(quickAccessServices);
@@ -100,32 +99,14 @@ public class GeneralPreferencesController implements FxController {
 		quickAccessServiceChoiceBox.disableProperty().bind(useQuickAccessCheckbox.selectedProperty().not());
 	}
 
-	public void migrateMacKeychainEntries(Observable observable, KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider) {
-		if (!SystemUtils.IS_OS_MAC) {
-			return;
+	private void migrateKeychainEntries(Observable observable, KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider) {
+		//currently, we only migrate on macOS (touchID vs regular keychain)
+		if (SystemUtils.IS_OS_MAC) {
+			var idsAndNames = settings.directories.stream().collect(Collectors.toMap(vs -> vs.id, vs -> vs.displayName.getValue()));
+			if (!idsAndNames.isEmpty()) {
+				keychainMigrations = keychainMigrations.thenRunAsync(() -> KeychainManager.migrate(oldProvider, newProvider, idsAndNames), backgroundExecutor);
+			}
 		}
-
-		record VIdAndName(String id, String name) {}
-		var vaults = settings.directories.stream().map(vault -> new VIdAndName(vault.id, vault.displayName.getValue())).toList();
-
-		keychainMigrations = keychainMigrations.thenRunAsync(() -> {
-			if (!vaults.isEmpty()) {
-				LOG.info("Migrating keychain entries for vaults: {}", vaults.stream().map(VIdAndName::id));
-			}
-			for (var v : vaults) { //TODO: migrate to pattern matching once supported
-				try {
-					var passphrase = oldProvider.loadPassphrase(v.id);
-					if (passphrase != null) {
-						var wrapper = new Passphrase(passphrase);
-						newProvider.storePassphrase(v.id, v.name, wrapper);
-						oldProvider.deletePassphrase(v.id);
-						wrapper.destroy();
-					}
-				} catch (KeychainAccessException e) {
-					LOG.error("Failed to migrate keychain entry for vault {}.", v.id, e);
-				}
-			}
-		}, backgroundExecutor);
 	}
 
 	public boolean isAutoStartSupported() {
