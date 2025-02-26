@@ -1,6 +1,6 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.event.Event;
+import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
@@ -13,15 +13,15 @@ import java.util.Comparator;
 @EventViewScoped
 public class EventViewController implements FxController {
 
-	private final SortedList<Event> reversedEventList;
-	private final ObservableList<Event> eventList;
+	private final SortedList<VaultEvent> reversedEventList;
+	private final ObservableList<VaultEvent> eventList;
 	private final EventListCellFactory cellFactory;
 
 	@FXML
-	ListView<Event> eventListView;
+	ListView<VaultEvent> eventListView;
 
 	@Inject
-	public EventViewController(ObservableList<Event> eventList, EventListCellFactory cellFactory) {
+	public EventViewController(ObservableList<VaultEvent> eventList, EventListCellFactory cellFactory) {
 		reversedEventList = new SortedList<>(eventList, Comparator.reverseOrder());
 		this.eventList = eventList;
 		this.cellFactory = cellFactory;

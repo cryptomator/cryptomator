@@ -14,8 +14,8 @@ import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.event.VaultEvent;
 import org.cryptomator.integrations.revealpath.RevealPathService;
-import org.cryptomator.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +133,7 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static ObservableList<Event> provideAppEventQueue() {
+	static ObservableList<VaultEvent> provideVaultEventQueue() {
 		return FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 	}
 

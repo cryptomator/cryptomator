@@ -22,7 +22,6 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
-import org.cryptomator.event.Event;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
@@ -80,7 +79,7 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final Settings settings;
-	private final ObservableList<Event> eventQueue;
+	private final ObservableList<VaultEvent> eventList;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -93,7 +92,7 @@ public class Vault {
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
 		  Mounter mounter, Settings settings, //
-		  ObservableList<Event> eventQueue) {
+		  ObservableList<VaultEvent> eventList) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -110,7 +109,7 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.settings = settings;
-		this.eventQueue = eventQueue;
+		this.eventList = eventList;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -262,8 +261,9 @@ public class Vault {
 	}
 
 	private void consumeVaultEvent(FilesystemEvent e) {
+		//TODO: here we could implement a buffer to prevent event spam (due to many filesystem requests)
 		long timestamp = Instant.now().toEpochMilli();
-		Platform.runLater(() -> eventQueue.addLast(new VaultEvent(timestamp, this, e)));
+		Platform.runLater(() -> eventList.addLast(new VaultEvent(timestamp, this, e)));
 	}
 
 	// ******************************************************************************

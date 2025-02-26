@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 public interface NotificationHandler {
 
-	Answer handle(Event e);
+	Answer handle(VaultEvent e);
 
 	static Stream<NotificationHandler> loadAll() {
 		return IntegrationsLoader.loadAll(ServiceLoader.load(NotificationHandler.class), NotificationHandler.class);

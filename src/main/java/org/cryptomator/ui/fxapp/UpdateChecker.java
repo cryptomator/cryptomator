@@ -3,8 +3,6 @@ package org.cryptomator.ui.fxapp;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.event.Event;
-import org.cryptomator.event.UpdateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +14,6 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
@@ -36,7 +33,6 @@ public class UpdateChecker {
 	private final ScheduledService<String> updateCheckerService;
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
-	private final ObservableList<Event> eventQueue;
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final BooleanBinding updateAvailable;
 	private final BooleanBinding checkFailed;
@@ -44,13 +40,11 @@ public class UpdateChecker {
 	@Inject
 	UpdateChecker(Settings settings, //
 				  Environment env, //
-				  ScheduledService<String> updateCheckerService, //
-				  ObservableList<Event> eventQueue) {
+				  ScheduledService<String> updateCheckerService) {
 		this.env = env;
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
 		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
-		this.eventQueue = eventQueue;
 		this.updateAvailable = Bindings.createBooleanBinding(this::isUpdateAvailable, latestVersion);
 		this.checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, state);
 	}
@@ -86,9 +80,6 @@ public class UpdateChecker {
 		lastSuccessfulUpdateCheck.set(Instant.now());
 		latestVersion.set(latestVersionString);
 		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
-		if( updateAvailable.get()) {
-			eventQueue.addLast(new UpdateEvent(latestVersionString));
-		}
 	}
 
 	private void checkFailed(WorkerStateEvent event) {

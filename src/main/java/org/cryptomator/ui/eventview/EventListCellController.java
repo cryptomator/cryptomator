@@ -4,8 +4,6 @@ import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
-import org.cryptomator.event.Event;
-import org.cryptomator.event.UpdateEvent;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
@@ -32,10 +30,10 @@ public class EventListCellController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EventListCellController.class);
 
-	private final ObservableList<Event> events;
+	private final ObservableList<VaultEvent> events;
 	private final Optional<RevealPathService> revealService;
 	private final ResourceBundle resourceBundle;
-	private final ObjectProperty<Event> event;
+	private final ObjectProperty<VaultEvent> event;
 	private final ObservableValue<String> message;
 	private final ObservableValue<String> description;
 	private final ObservableValue<FontAwesome5Icon> icon;
@@ -48,7 +46,7 @@ public class EventListCellController implements FxController {
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(ObservableList<Event> events, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
+	public EventListCellController(ObservableList<VaultEvent> events, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
 		this.events = events;
 		this.revealService = revealService;
 		this.resourceBundle = resourceBundle;
@@ -60,26 +58,23 @@ public class EventListCellController implements FxController {
 	}
 
 
-	private void hideContextMenus(Observable observable, Event oldValue, Event newValue) {
+	private void hideContextMenus(Observable observable, VaultEvent oldValue, VaultEvent newValue) {
 		basicEventActions.hide();
 		conflictResoledEventActions.hide();
 	}
 
-	public void setEvent(Event item) {
+	public void setEvent(VaultEvent item) {
 		event.set(item);
 	}
 
-	private FontAwesome5Icon selectIcon(Event e) {
-		return switch (e) {
-			case UpdateEvent _ -> FontAwesome5Icon.BELL;
-			case VaultEvent _ -> FontAwesome5Icon.FILE;
-		};
+	private FontAwesome5Icon selectIcon(VaultEvent e) {
+			return FontAwesome5Icon.FILE;
 	}
 
-	private String selectDescription(Event e) {
-		return switch (e) {
-			case UpdateEvent(_, String newVersion) -> resourceBundle.getString("preferences.updates.updateAvailable").formatted(newVersion);
-			case VaultEvent _ -> "A vault is weird!";
+	private String selectDescription(VaultEvent e) {
+		return switch (e.actualEvent()) {
+			case  ConflictResolvedEvent _-> "A conflict is resolved!";
+			default -> "Something happened";
 		};
 	}
 
@@ -87,8 +82,8 @@ public class EventListCellController implements FxController {
 	public void toggleEventActionsMenu() {
 		var e = event.get();
 		if (e != null) {
-			var contextMenu = switch (e) {
-				case VaultEvent _ -> conflictResoledEventActions;
+			var contextMenu = switch (e.actualEvent()) {
+				case ConflictResolvedEvent _ -> conflictResoledEventActions;
 				default -> basicEventActions;
 			};
 			if (contextMenu.isShowing()) {
