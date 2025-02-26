@@ -18,7 +18,6 @@ public class SimpleDialogController implements FxController {
 	private final Runnable cancelAction;
 	private final BooleanProperty cancelButtonVisible = new SimpleBooleanProperty(true);
 
-
 	public SimpleDialogController(String message, String description, FontAwesome5Icon icon, String okButtonText, String cancelButtonText, Runnable okAction, Runnable cancelAction) {
 		this.message = message;
 		this.description = description;
@@ -34,10 +33,9 @@ public class SimpleDialogController implements FxController {
 		return cancelButtonVisible;
 	}
 
-	public boolean isCancelButtonVisible(){
+	public boolean isCancelButtonVisible() {
 		return cancelButtonVisible.get();
 	}
-
 
 	public String getMessage() {
 		return message;
