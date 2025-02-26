@@ -33,16 +33,8 @@
 	</Button>
 
 	<fx:define>
-		<ContextMenu fx:id="basicEventActions">
-			<items>
-				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#dismissEvent" />
-			</items>
-		</ContextMenu>
-		<ContextMenu fx:id="conflictResoledEventActions">
-			<items>
-				<MenuItem styleClass="add-vault-menu-item" text="Dismiss" onAction="#dismissEvent" />
-				<MenuItem styleClass="add-vault-menu-item" text="Show" onAction="#showResolvedConflict" visible="${controller.revealServicePresent}"/>
-			</items>
+		<ContextMenu fx:id="eventActions">
+			<!-- entries are added in the controller -->
 		</ContextMenu>
 	</fx:define>
 </HBox>
