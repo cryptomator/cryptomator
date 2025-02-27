@@ -262,7 +262,7 @@ public class Vault {
 
 	private void consumeVaultEvent(FilesystemEvent e) {
 		//TODO: here we could implement a buffer to prevent event spam (due to many filesystem requests)
-		long timestamp = Instant.now().toEpochMilli();
+		var timestamp = Instant.now();
 		Platform.runLater(() -> eventList.addLast(new VaultEvent(timestamp, this, e)));
 	}
 

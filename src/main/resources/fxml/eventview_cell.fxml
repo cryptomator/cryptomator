@@ -7,7 +7,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ContextMenu?>
-<?import javafx.scene.control.MenuItem?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.eventview.EventListCellController"
@@ -32,6 +32,10 @@
 			<FontAwesome5IconView glyph="ELLIPSIS_V" glyphSize="16"/>
 		</graphic>
 	</Button>
+	<VBox alignment="CENTER" maxWidth="64" minWidth="64" visible="${!controller.actionsButtonVisible}" managed="${!controller.actionsButtonVisible}">
+		<Label text="${controller.eventLocalTime}" />
+		<Label text="${controller.eventLocalDate}" />
+	</VBox>
 
 	<fx:define>
 		<ContextMenu fx:id="eventActionsMenu"/>

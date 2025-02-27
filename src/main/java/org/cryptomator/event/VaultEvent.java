@@ -5,18 +5,19 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 
 import java.time.Instant;
 
-public record VaultEvent(long timestamp, Vault v, FilesystemEvent actualEvent) implements Comparable<VaultEvent> {
+public record VaultEvent(Instant timestamp, Vault v, FilesystemEvent actualEvent) implements Comparable<VaultEvent> {
 
 	public VaultEvent(Vault v, FilesystemEvent actualEvent) {
-		this(Instant.now().toEpochMilli(), v, actualEvent);
+		this(Instant.now(), v, actualEvent);
 	}
 
 	@Override
 	public int compareTo(VaultEvent other) {
-		long timeDiff = this.timestamp - other.timestamp;
-		if (timeDiff != 0) {
-			return (int) timeDiff;
+		var timeResult = this.timestamp.compareTo(other.timestamp);
+		if(timeResult != 0) {
+			return timeResult;
+		} else {
+			return this.equals(other) ? 0 : this.actualEvent.getClass().getName().compareTo(other.actualEvent.getClass().getName());
 		}
-		return this.equals(other) ? 0 : this.actualEvent.getClass().getName().compareTo(other.actualEvent.getClass().getName());
 	}
 }

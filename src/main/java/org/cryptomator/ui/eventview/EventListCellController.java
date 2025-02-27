@@ -30,6 +30,9 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Function;
@@ -37,6 +40,8 @@ import java.util.function.Function;
 public class EventListCellController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EventListCellController.class);
+	private static final DateTimeFormatter LOCAL_DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
+	private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
 	private final ObservableList<VaultEvent> events;
 	private final Optional<RevealPathService> revealService;
@@ -46,6 +51,8 @@ public class EventListCellController implements FxController {
 	private final StringProperty eventDescription;
 	private final ObjectProperty<FontAwesome5Icon> eventIcon;
 	private final ObservableValue<Boolean> vaultUnlocked;
+	private final ObservableValue<String> readableTime;
+	private final ObservableValue<String> readableDate;
 	private final ObservableValue<String> message;
 	private final ObservableValue<String> description;
 	private final ObservableValue<FontAwesome5Icon> icon;
@@ -68,6 +75,8 @@ public class EventListCellController implements FxController {
 		this.eventDescription = new SimpleStringProperty();
 		this.eventIcon = new SimpleObjectProperty<>();
 		this.vaultUnlocked = ObservableUtil.mapWithDefault(event.flatMap(e -> e.v().unlockedProperty()), Function.identity(), false);
+		this.readableTime = ObservableUtil.mapWithDefault(event, e -> LOCAL_TIME_FORMATTER.format(e.timestamp()), "");
+		this.readableDate = ObservableUtil.mapWithDefault(event, e -> LOCAL_DATE_FORMATTER.format(e.timestamp()), "");
 		this.message = Bindings.createStringBinding(this::selectMessage, vaultUnlocked, eventMessage);
 		this.description = Bindings.createStringBinding(this::selectDescription, vaultUnlocked, eventDescription);
 		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon);
@@ -77,7 +86,7 @@ public class EventListCellController implements FxController {
 	@FXML
 	public void initialize() {
 		actionsButtonVisible.bind(Bindings.createBooleanBinding(this::determineActionsButtonVisibility, root.hoverProperty(), eventActionsMenu.showingProperty(), vaultUnlocked));
-		vaultUnlocked.addListener((_,_,newValue) -> eventActionsMenu.hide());
+		vaultUnlocked.addListener((_, _, newValue) -> eventActionsMenu.hide());
 	}
 
 	private boolean determineActionsButtonVisibility() {
@@ -222,5 +231,19 @@ public class EventListCellController implements FxController {
 		return actionsButtonVisible.getValue();
 	}
 
+	public ObservableValue<String> eventLocalTimeProperty() {
+		return readableTime;
+	}
 
+	public String getEventLocalTime() {
+		return readableTime.getValue();
+	}
+
+	public ObservableValue<String> eventLocalDateProperty() {
+		return readableDate;
+	}
+
+	public String getEventLocalDate() {
+		return readableDate.getValue();
+	}
 }
