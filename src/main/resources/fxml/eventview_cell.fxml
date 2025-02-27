@@ -14,7 +14,8 @@
 	  prefHeight="60"
 	  prefWidth="200"
 	  spacing="12"
-	  alignment="CENTER_LEFT">
+	  alignment="CENTER_LEFT"
+	  fx:id="root">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
@@ -26,15 +27,13 @@
 		<Label styleClass="header-label" text="${controller.message}"/>
 		<Label styleClass="detail-label" text="${controller.description}" textOverrun="CENTER_ELLIPSIS" />
 	</VBox>
-	<Button fx:id="eventActionsButton" contentDisplay="GRAPHIC_ONLY" onAction="#toggleEventActionsMenu">
+	<Button fx:id="eventActionsButton" contentDisplay="GRAPHIC_ONLY" onAction="#toggleEventActionsMenu" managed="${controller.actionsButtonVisible}" visible="${controller.actionsButtonVisible}">
 		<graphic>
 			<FontAwesome5IconView glyph="ELLIPSIS_V" glyphSize="16"/>
 		</graphic>
 	</Button>
 
 	<fx:define>
-		<ContextMenu fx:id="eventActions">
-			<!-- entries are added in the controller -->
-		</ContextMenu>
+		<ContextMenu fx:id="eventActionsMenu"/>
 	</fx:define>
 </HBox>

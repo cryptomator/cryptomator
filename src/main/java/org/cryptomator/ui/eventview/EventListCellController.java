@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -26,6 +28,7 @@ import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.layout.HBox;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -46,9 +49,12 @@ public class EventListCellController implements FxController {
 	private final ObservableValue<String> message;
 	private final ObservableValue<String> description;
 	private final ObservableValue<FontAwesome5Icon> icon;
+	private final BooleanProperty actionsButtonVisible;
 
 	@FXML
-	ContextMenu eventActions;
+	HBox root;
+	@FXML
+	ContextMenu eventActionsMenu;
 	@FXML
 	Button eventActionsButton;
 
@@ -65,13 +71,23 @@ public class EventListCellController implements FxController {
 		this.message = Bindings.createStringBinding(this::selectMessage, vaultUnlocked, eventMessage);
 		this.description = Bindings.createStringBinding(this::selectDescription, vaultUnlocked, eventDescription);
 		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon);
+		this.actionsButtonVisible = new SimpleBooleanProperty();
+	}
+
+	@FXML
+	public void initialize() {
+		actionsButtonVisible.bind(Bindings.createBooleanBinding(this::determineActionsButtonVisibility, root.hoverProperty(), eventActionsMenu.showingProperty(), vaultUnlocked));
+		vaultUnlocked.addListener((_,_,newValue) -> eventActionsMenu.hide());
+	}
+
+	private boolean determineActionsButtonVisibility() {
+		return vaultUnlocked.getValue() && (eventActionsMenu.isShowing() || root.isHover());
 	}
 
 	public void setEvent(@NotNull VaultEvent item) {
 		event.set(item);
-		eventDescription.setValue("Vault " + item.v().getDisplayName());
-		eventActions.hide();
-		eventActions.getItems().clear();
+		eventActionsMenu.hide();
+		eventActionsMenu.getItems().clear();
 		addAction("generic.action.dismiss", () -> events.remove(item));
 		switch (item.actualEvent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
@@ -82,7 +98,8 @@ public class EventListCellController implements FxController {
 
 	private void adjustToConflictResolvedEvent(ConflictResolvedEvent cre) {
 		eventIcon.setValue(FontAwesome5Icon.FILE);
-		eventMessage.setValue("Resolved conflict, new file is " + cre.resolvedCleartextPath()); //TODO:localize
+		eventMessage.setValue(cre.resolvedCleartextPath().toString());
+		eventDescription.setValue(resourceBundle.getString("event.conflictResolved.description"));
 		if (revealService.isPresent()) {
 			addAction("event.conflictResolved.showDecrypted", () -> this.showResolvedConflict(cre));
 		}
@@ -90,15 +107,18 @@ public class EventListCellController implements FxController {
 
 	private void adjustToConflictEvent(ConflictResolutionFailedEvent cfe) {
 		eventIcon.setValue(FontAwesome5Icon.TIMES);
-		eventMessage.setValue("Failed to resolve conflict for " + cfe.conflictingCiphertextPath()); //TODO:localize
+		eventMessage.setValue(cfe.canonicalCleartextPath().toString());
+		eventDescription.setValue(resourceBundle.getString("event.conflict.description"));
 		if (revealService.isPresent()) {
-			addAction("event.conflictFailed.showEncrypted", () -> reveal(cfe.conflictingCiphertextPath()));
+			addAction("event.conflict.showDecrypted", () -> reveal(cfe.canonicalCleartextPath()));
+			addAction("event.conflict.showEncrypted", () -> reveal(cfe.conflictingCiphertextPath()));
 		}
 	}
 
 	private void adjustToDecryptionFailedEvent(DecryptionFailedEvent dfe) {
 		eventIcon.setValue(FontAwesome5Icon.BAN);
-		eventMessage.setValue("Cannot decrypt " + dfe.ciphertextPath()); //TODO:localize
+		eventMessage.setValue(dfe.ciphertextPath().toString());
+		eventDescription.setValue(resourceBundle.getString("event.decryptionFailed.description"));
 		if (revealService.isPresent()) {
 			addAction("event.decryptionFailed.showEncrypted", () -> reveal(dfe.ciphertextPath()));
 		}
@@ -108,7 +128,7 @@ public class EventListCellController implements FxController {
 		var entry = new MenuItem(resourceBundle.getString(localizationKey));
 		entry.getStyleClass().addLast("add-vault-menu-item");
 		entry.setOnAction(_ -> action.run());
-		eventActions.getItems().addLast(entry);
+		eventActionsMenu.getItems().addLast(entry);
 	}
 
 
@@ -125,7 +145,7 @@ public class EventListCellController implements FxController {
 			return eventMessage.getValue();
 		} else {
 			var e = event.getValue();
-			return "Event for " + (e != null ? e.v().getDisplayName() : ""); //TODO: localize
+			return resourceBundle.getString("event.vaultLocked.message");
 		}
 	}
 
@@ -133,7 +153,7 @@ public class EventListCellController implements FxController {
 		if (vaultUnlocked.getValue()) {
 			return eventDescription.getValue();
 		} else {
-			return "Unlock the vault to display details."; //TODO: localize
+			return resourceBundle.getString("event.vaultLocked.description");
 		}
 	}
 
@@ -142,10 +162,10 @@ public class EventListCellController implements FxController {
 	public void toggleEventActionsMenu() {
 		var e = event.get();
 		if (e != null) {
-			if (eventActions.isShowing()) {
-				eventActions.hide();
+			if (eventActionsMenu.isShowing()) {
+				eventActionsMenu.hide();
 			} else {
-				eventActions.show(eventActionsButton, Side.BOTTOM, 0.0, 0.0);
+				eventActionsMenu.show(eventActionsButton, Side.BOTTOM, 0.0, 0.0);
 			}
 		}
 	}
@@ -165,10 +185,9 @@ public class EventListCellController implements FxController {
 			revealService.orElseThrow(() -> new IllegalStateException("Function requiring revealService called, but service not available")) //
 					.reveal(p);
 		} catch (RevealFailedException e) {
-			LOG.warn("Failed to show path  {}",p, e);
+			LOG.warn("Failed to show path  {}", p, e);
 		}
 	}
-
 
 	//-- property accessors --
 	public ObservableValue<String> messageProperty() {
@@ -194,5 +213,14 @@ public class EventListCellController implements FxController {
 	public FontAwesome5Icon getIcon() {
 		return icon.getValue();
 	}
+
+	public ObservableValue<Boolean> actionsButtonVisibleProperty() {
+		return actionsButtonVisible;
+	}
+
+	public boolean isActionsButtonVisible() {
+		return actionsButtonVisible.getValue();
+	}
+
 
 }
