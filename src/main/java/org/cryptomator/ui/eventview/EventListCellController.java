@@ -1,6 +1,7 @@
 package org.cryptomator.ui.eventview;
 
 import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.cryptofs.CryptoPath;
 import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
@@ -28,6 +29,8 @@ import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import java.nio.file.Path;
 import java.time.ZoneId;
@@ -110,7 +113,9 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(cre.resolvedCleartextPath().toString());
 		eventDescription.setValue(resourceBundle.getString("event.conflictResolved.description"));
 		if (revealService.isPresent()) {
-			addAction("event.conflictResolved.showDecrypted", () -> this.showResolvedConflict(cre));
+			addAction("event.conflictResolved.showDecrypted", () -> reveal(convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
+		} else {
+			addAction("event.conflictResolved.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cre.resolvedCleartextPath()).toString()));
 		}
 	}
 
@@ -119,8 +124,11 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(cfe.canonicalCleartextPath().toString());
 		eventDescription.setValue(resourceBundle.getString("event.conflict.description"));
 		if (revealService.isPresent()) {
-			addAction("event.conflict.showDecrypted", () -> reveal(cfe.canonicalCleartextPath()));
+			addAction("event.conflict.showDecrypted", () -> reveal(convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
 			addAction("event.conflict.showEncrypted", () -> reveal(cfe.conflictingCiphertextPath()));
+		} else {
+			addAction("event.conflict.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cfe.canonicalCleartextPath()).toString()));
+			addAction("event.conflict.copyEncrypted", () -> copyToClipboard(cfe.conflictingCiphertextPath().toString()));
 		}
 	}
 
@@ -130,6 +138,8 @@ public class EventListCellController implements FxController {
 		eventDescription.setValue(resourceBundle.getString("event.decryptionFailed.description"));
 		if (revealService.isPresent()) {
 			addAction("event.decryptionFailed.showEncrypted", () -> reveal(dfe.ciphertextPath()));
+		} else {
+			addAction("event.decryptionFailed.copyEncrypted", () -> copyToClipboard(dfe.ciphertextPath().toString()));
 		}
 	}
 
@@ -179,14 +189,18 @@ public class EventListCellController implements FxController {
 		}
 	}
 
-	private void showResolvedConflict(ConflictResolvedEvent cre) {
-		var v = event.getValue().v();
-		if (v.isUnlocked()) {
-			var mountUri = v.getMountPoint().uri();
-			var internalPath = cre.resolvedCleartextPath().toString().substring(1);
-			var actualPath = Path.of(mountUri.getPath().concat(internalPath).substring(1));
-			reveal(actualPath);
+	private Path convertVaultPathToSystemPath(Path p) {
+		if (!(p instanceof CryptoPath)) {
+			throw new IllegalArgumentException("Path " + p + " is not a vault path");
 		}
+		var v = event.getValue().v();
+		if (!v.isUnlocked()) {
+			return Path.of(System.getProperty("user.home"));
+		}
+
+		var mountUri = v.getMountPoint().uri();
+		var internalPath = p.toString().substring(1);
+		return Path.of(mountUri.getPath().concat(internalPath).substring(1));
 	}
 
 	private void reveal(Path p) {
@@ -196,6 +210,12 @@ public class EventListCellController implements FxController {
 		} catch (RevealFailedException e) {
 			LOG.warn("Failed to show path  {}", p, e);
 		}
+	}
+
+	private void copyToClipboard(String s) {
+		var content = new ClipboardContent();
+		content.putString(s);
+		Clipboard.getSystemClipboard().setContent(content);
 	}
 
 	//-- property accessors --
