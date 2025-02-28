@@ -165,7 +165,6 @@ public class EventListCellController implements FxController {
 		if (vaultUnlocked.getValue()) {
 			return eventMessage.getValue();
 		} else {
-			var e = event.getValue();
 			return resourceBundle.getString("event.vaultLocked.message");
 		}
 	}
@@ -174,7 +173,8 @@ public class EventListCellController implements FxController {
 		if (vaultUnlocked.getValue()) {
 			return eventDescription.getValue();
 		} else {
-			return resourceBundle.getString("event.vaultLocked.description");
+			var e = event.getValue();
+			return resourceBundle.getString("event.vaultLocked.description").formatted(e != null? e.v().getDisplayName():"");
 		}
 	}
 

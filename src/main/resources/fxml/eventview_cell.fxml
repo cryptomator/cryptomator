@@ -25,7 +25,7 @@
 	</VBox>
 	<VBox spacing="4" HBox.hgrow="ALWAYS">
 		<Label styleClass="header-label" text="${controller.message}"/>
-		<Label styleClass="detail-label" text="${controller.description}" textOverrun="CENTER_ELLIPSIS" />
+		<Label text="${controller.description}"/>
 	</VBox>
 	<Button fx:id="eventActionsButton" contentDisplay="GRAPHIC_ONLY" onAction="#toggleEventActionsMenu" managed="${controller.actionsButtonVisible}" visible="${controller.actionsButtonVisible}">
 		<graphic>
