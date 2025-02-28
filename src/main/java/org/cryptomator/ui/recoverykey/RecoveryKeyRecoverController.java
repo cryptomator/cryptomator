@@ -4,8 +4,6 @@ import dagger.Lazy;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
@@ -16,10 +14,8 @@ import java.util.ResourceBundle;
 @RecoveryKeyScoped
 public class RecoveryKeyRecoverController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyCreationController.class);
-
 	private final Stage window;
-	private final Lazy<Scene> resetPasswordScene;
+	private final Lazy<Scene> nextScene;
 
 	@FXML
 	RecoveryKeyValidateController recoveryKeyValidateController;
@@ -27,10 +23,16 @@ public class RecoveryKeyRecoverController implements FxController {
 	@Inject
 	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene, //
+										@FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> expertSettingsScene, //
 										ResourceBundle resourceBundle) {
 		this.window = window;
-		window.setTitle(resourceBundle.getString("recoveryKey.recover.title"));
-		this.resetPasswordScene = resetPasswordScene;
+		if (window.getTitle().equals("Recover Config")) {
+			this.nextScene = expertSettingsScene;
+		} else if (window.getTitle().equals(resourceBundle.getString("recoveryKey.recover.title"))) {
+			this.nextScene = resetPasswordScene;
+		} else {
+			this.nextScene = resetPasswordScene;
+		}
 	}
 
 	@FXML
@@ -44,7 +46,7 @@ public class RecoveryKeyRecoverController implements FxController {
 
 	@FXML
 	public void recover() {
-		window.setScene(resetPasswordScene.get());
+		window.setScene(nextScene.get());
 	}
 
 	/* Getter/Setter */

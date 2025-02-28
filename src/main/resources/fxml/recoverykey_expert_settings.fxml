@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.NumericTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyExpertSettingsController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12"
+	  alignment="TOP_CENTER">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<Group>
+		<StackPane>
+			<padding>
+				<Insets topRightBottomLeft="6"/>
+			</padding>
+			<Circle styleClass="glyph-icon-primary" radius="24"/>
+			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
+		</StackPane>
+	</Group>
+
+	<VBox HBox.hgrow="ALWAYS">
+		<Label styleClass="label-large" text="Expert Settings" wrapText="true">
+			<padding>
+				<Insets bottom="6" top="6"/>
+			</padding>
+		</Label>
+
+		<CheckBox fx:id="expertSettingsCheckBox" text="%addvaultwizard.new.expertSettings.enableExpertSettingsCheckbox" onAction="#toggleUseExpertSettings"/>
+		<VBox spacing="6" visible="${expertSettingsCheckBox.selected}">
+			<HBox spacing="2" HBox.hgrow="NEVER">
+				<Label text="%addvaultwizard.new.expertSettings.shorteningThreshold.title"/>
+				<Region prefWidth="2"/>
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
+					<graphic>
+						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%addvaultwizard.new.expertSettings.shorteningThreshold.tooltip" showDelay="10ms"/>
+					</tooltip>
+				</Hyperlink>
+			</HBox>
+			<NumericTextField fx:id="shorteningThresholdTextField"/>
+			<HBox alignment="TOP_RIGHT">
+				<Region minWidth="4" prefWidth="4" HBox.hgrow="NEVER"/>
+				<StackPane>
+					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.invalid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${!controller.validShorteningThreshold}" managed="${!controller.validShorteningThreshold}" graphicTextGap="6">
+						<graphic>
+							<FontAwesome5IconView styleClass="glyph-icon-red" glyph="TIMES"/>
+						</graphic>
+					</Label>
+					<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.shorteningThreshold.valid" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.validShorteningThreshold}" managed="${controller.validShorteningThreshold}" graphicTextGap="6">
+						<graphic>
+							<FontAwesome5IconView styleClass="glyph-icon-primary" glyph="CHECK"/>
+						</graphic>
+					</Label>
+				</StackPane>
+			</HBox>
+		</VBox>
+		<Region VBox.vgrow="ALWAYS" minHeight="18"/>
+		<ButtonBar buttonMinWidth="120" buttonOrder="+C">
+			<buttons>
+				<Button text="%generic.button.back" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#back"/>
+				<Button text="%generic.button.next" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" onAction="#next"/>
+			</buttons>
+		</ButtonBar>
+	</VBox>
+</HBox>

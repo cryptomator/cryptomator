@@ -7,6 +7,7 @@ import dagger.multibindings.IntoMap;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -19,6 +20,8 @@ import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
@@ -119,6 +122,13 @@ abstract class RecoveryKeyModule {
 		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_IS_HUB_VAULT);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyExpertSettingsScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS);
+	}
+
 	// ------------------
 
 	@Binds
@@ -132,6 +142,19 @@ abstract class RecoveryKeyModule {
 	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, ResourceBundle localization) {
 		return new RecoveryKeyDisplayController(window, vault.getDisplayName(), recoveryKey.get(), localization);
 	}
+
+	@Provides
+	@Named("shorteningThreshold")
+	@RecoveryKeyScoped
+	static IntegerProperty provideShorteningThreshold() {
+		return new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.MAX_SHORTENING_THRESHOLD);
+	}
+
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyExpertSettingsController.class)
+	abstract FxController provideRecoveryKeyExpertSettingsController(RecoveryKeyExpertSettingsController controller);
 
 	@Binds
 	@IntoMap

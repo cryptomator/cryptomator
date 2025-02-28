@@ -43,16 +43,16 @@ public interface RecoveryKeyComponent {
 
 	default void showRecoveryKeyRecoverWindow(String title) {
 		Stage stage = window();
-		stage.setScene(recoverScene().get());
 		stage.setTitle(title);
+		stage.setScene(recoverScene().get());
 		stage.sizeToScene();
 		stage.show();
 	}
 
-	default void showIsHubVaultDialogWindow(){
+	default void showIsHubVaultDialogWindow() {
 		Stage stage = window();
 		stage.setScene(recoverIsHubVaultScene().get());
-		stage.setTitle("Recover Vault Config");
+		stage.setTitle("Recover Config");
 		stage.sizeToScene();
 		stage.show();
 	}

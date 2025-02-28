@@ -1,30 +1,60 @@
 package org.cryptomator.common;
 
+import dagger.Lazy;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultComponent;
+import org.cryptomator.common.vaults.VaultConfigCache;
+import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.common.vaults.VaultState;
+import org.cryptomator.cryptofs.CryptoFileSystemProperties;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.ui.changepassword.NewPasswordController;
+import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.StringProperty;
+import javafx.concurrent.Task;
+import javafx.scene.Scene;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.cryptomator.common.Constants.DEFAULT_KEY_ID;
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 import static org.cryptomator.cryptofs.common.Constants.DATA_DIR_NAME;
 import static org.cryptomator.cryptolib.api.CryptorProvider.Scheme.SIV_CTRMAC;
 import static org.cryptomator.cryptolib.api.CryptorProvider.Scheme.SIV_GCM;
 
 public class RecoverUtil {
 
+	private static final Logger LOG = LoggerFactory.getLogger(RecoverUtil.class);
+
 	public static CryptorProvider.Scheme detectCipherCombo(byte[] masterkey, Path pathToVault) {
 		try (Stream<Path> paths = Files.walk(pathToVault.resolve(DATA_DIR_NAME))) {
-			return paths.filter(path -> path.toString().endsWith(".c9r"))
-					.findFirst()
-					.map(c9rFile -> determineScheme(c9rFile, masterkey))
-					.orElseThrow(() -> new IllegalStateException("No .c9r file found."));
+			return paths.filter(path -> path.toString().endsWith(".c9r")).findFirst().map(c9rFile -> determineScheme(c9rFile, masterkey)).orElseThrow(() -> new IllegalStateException("No .c9r file found."));
 		} catch (IOException e) {
 			throw new IllegalStateException("Failed to detect cipher combo.", e);
 		}
@@ -33,8 +63,7 @@ public class RecoverUtil {
 	private static CryptorProvider.Scheme determineScheme(Path c9rFile, byte[] masterkey) {
 		try {
 			ByteBuffer header = ByteBuffer.wrap(Files.readAllBytes(c9rFile));
-			return tryDecrypt(header, new Masterkey(masterkey), SIV_GCM) ? SIV_GCM :
-					tryDecrypt(header, new Masterkey(masterkey), SIV_CTRMAC) ? SIV_CTRMAC : null;
+			return tryDecrypt(header, new Masterkey(masterkey), SIV_GCM) ? SIV_GCM : tryDecrypt(header, new Masterkey(masterkey), SIV_CTRMAC) ? SIV_CTRMAC : null;
 		} catch (IOException e) {
 			return null;
 		}
@@ -51,11 +80,7 @@ public class RecoverUtil {
 
 	public static boolean restoreBackupIfAvailable(Path configPath, VaultState.Value vaultState) {
 		try (Stream<Path> files = Files.list(configPath.getParent())) {
-			return files
-					.filter(file -> matchesBackupFile(file.getFileName().toString(), vaultState))
-					.findFirst()
-					.map(backupFile -> copyBackupFile(backupFile, configPath))
-					.orElse(false);
+			return files.filter(file -> matchesBackupFile(file.getFileName().toString(), vaultState)).findFirst().map(backupFile -> copyBackupFile(backupFile, configPath)).orElse(false);
 		} catch (IOException e) {
 			return false;
 		}
@@ -77,5 +102,139 @@ public class RecoverUtil {
 			return false;
 		}
 	}
+
+	public static Path createRecoveryDirectory(Path vaultPath) throws IOException {
+		Path recoveryPath = vaultPath.resolve("r");
+		Files.createDirectory(recoveryPath);
+		return recoveryPath;
+	}
+
+	public static void createNewMasterkeyFile(RecoveryKeyFactory recoveryKeyFactory, Path recoveryPath, String recoveryKey, CharSequence newPassword) throws IOException {
+		recoveryKeyFactory.newMasterkeyFileWithPassphrase(recoveryPath, recoveryKey, newPassword);
+	}
+
+	public static Masterkey loadMasterkey(org.cryptomator.cryptolib.common.MasterkeyFileAccess masterkeyFileAccess, Path masterkeyFilePath, CharSequence password) throws IOException {
+		return masterkeyFileAccess.load(masterkeyFilePath, password);
+	}
+
+	public static void initializeCryptoFileSystem(Path recoveryPath, Path vaultPath, Masterkey masterkey, IntegerProperty shorteningThreshold) throws IOException, CryptoException {
+		var combo = RecoverUtil.detectCipherCombo(masterkey.getEncoded(), vaultPath);
+		org.cryptomator.cryptolib.api.MasterkeyLoader loader = ignored -> masterkey.copy();
+		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(combo).withKeyLoader(loader).withShorteningThreshold(shorteningThreshold.get()).build();
+		CryptoFileSystemProvider.initialize(recoveryPath, fsProps, DEFAULT_KEY_ID);
+	}
+
+	public static void moveRecoveredFiles(Path recoveryPath, Path vaultPath) throws IOException {
+		Files.move(recoveryPath.resolve(MASTERKEY_FILENAME), vaultPath.resolve(MASTERKEY_FILENAME), StandardCopyOption.REPLACE_EXISTING);
+		Files.move(recoveryPath.resolve(VAULTCONFIG_FILENAME), vaultPath.resolve(VAULTCONFIG_FILENAME));
+	}
+
+	public static void deleteRecoveryDirectory(Path recoveryPath) {
+		try (var paths = Files.walk(recoveryPath)) {
+			paths.sorted(Comparator.reverseOrder()).forEach(p -> {
+				try {
+					Files.delete(p);
+				} catch (IOException e) {
+					LOG.info("Unable to delete {}. Please delete it manually.", p);
+				}
+			});
+		} catch (IOException e) {
+			LOG.error("Failed to clean up recovery directory", e);
+		}
+	}
+
+	public static void addVaultToList(VaultListManager vaultListManager, Path vaultPath) throws IOException {
+		if (!vaultListManager.containsVault(vaultPath)) {
+			vaultListManager.add(vaultPath);
+		}
+	}
+
+	public static Task<Void> createResetPasswordTask(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, NewPasswordController newPasswordController, Stage window, Lazy<Scene> recoverResetPasswordSuccessScene, Lazy<Scene> recoverResetVaultConfigSuccessScene, FxApplicationWindows appWindows) {
+
+		Task<Void> task = new ResetPasswordTask(recoveryKeyFactory, vault, recoveryKey, newPasswordController);
+
+		task.setOnScheduled(_ -> {
+			LOG.debug("Using recovery key to reset password for {}.", vault.getDisplayablePath());
+		});
+
+		task.setOnSucceeded(_ -> {
+			LOG.info("Used recovery key to reset password for {}.", vault.getDisplayablePath());
+			if (vault.getState().equals(VAULT_CONFIG_MISSING)) {
+				window.setScene(recoverResetVaultConfigSuccessScene.get());
+			} else {
+				window.setScene(recoverResetPasswordSuccessScene.get());
+			}
+		});
+
+		task.setOnFailed(_ -> {
+			LOG.error("Resetting password failed.", task.getException());
+			appWindows.showErrorWindow(task.getException(), window, null);
+		});
+
+		return task;
+	}
+
+
+	public static class ResetPasswordTask extends Task<Void> {
+
+		private static final Logger LOG = LoggerFactory.getLogger(ResetPasswordTask.class);
+		private final RecoveryKeyFactory recoveryKeyFactory;
+		private final Vault vault;
+		private final StringProperty recoveryKey;
+		private final NewPasswordController newPasswordController;
+
+		public ResetPasswordTask(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, NewPasswordController newPasswordController) {
+			this.recoveryKeyFactory = recoveryKeyFactory;
+			this.vault = vault;
+			this.recoveryKey = recoveryKey;
+			this.newPasswordController = newPasswordController;
+
+			setOnFailed(event -> LOG.error("Failed to reset password", getException()));
+		}
+
+		@Override
+		protected Void call() throws IOException, IllegalArgumentException {
+			recoveryKeyFactory.newMasterkeyFileWithPassphrase(vault.getPath(), recoveryKey.get(), newPasswordController.passwordField.getCharacters());
+			return null;
+		}
+	}
+
+	public static Optional<Vault> prepareVaultFromDirectory(DirectoryChooser directoryChooser, Stage window, Dialogs dialogs, VaultComponent.Factory vaultComponentFactory, List<MountService> mountServices) {
+
+		File selectedDirectory;
+		do {
+			selectedDirectory = directoryChooser.showDialog(window);
+			if (selectedDirectory == null) {
+				return Optional.empty();
+			}
+			boolean hasSubfolderD = new File(selectedDirectory, "d").isDirectory();
+
+			if (!hasSubfolderD) {
+				dialogs.prepareNoDDirectorySelectedDialog(window).build().showAndWait();
+				selectedDirectory = null;
+			}
+		} while (selectedDirectory == null);
+
+		Path selectedPath = selectedDirectory.toPath();
+		VaultSettings vaultSettings = VaultSettings.withRandomId();
+		vaultSettings.path.set(selectedPath);
+		if (selectedPath.getFileName() != null) {
+			vaultSettings.displayName.set(selectedPath.getFileName().toString());
+		} else {
+			vaultSettings.displayName.set("defaultVaultName");
+		}
+
+		var wrapper = new VaultConfigCache(vaultSettings);
+		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, VAULT_CONFIG_MISSING, null).vault();
+
+		// Spezialbehandlung für Windows + Dropbox + WinFsp
+		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
+		if (SystemUtils.IS_OS_WINDOWS && vaultSettings.path.get().toString().contains("Dropbox") && mountServices.stream().anyMatch(s -> s.getClass().getName().equals(nameOfWinfspLocalMounter))) {
+			vaultSettings.mountService.setValue(nameOfWinfspLocalMounter);
+		}
+
+		return Optional.of(vault);
+	}
+
 
 }

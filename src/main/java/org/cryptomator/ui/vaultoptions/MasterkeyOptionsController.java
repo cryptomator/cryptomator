@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import java.util.ResourceBundle;
 
 @VaultOptionsScoped
 public class MasterkeyOptionsController implements FxController {
@@ -27,16 +28,19 @@ public class MasterkeyOptionsController implements FxController {
 	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
 	private final KeychainManager keychain;
 	private final ObservableValue<Boolean> passwordSaved;
+	private final ResourceBundle resourceBundle;
 
 
 	@Inject
-	MasterkeyOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Factory recoveryKeyWindow, ForgetPasswordComponent.Builder forgetPasswordWindow, KeychainManager keychain) {
+	MasterkeyOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Factory recoveryKeyWindow, ForgetPasswordComponent.Builder forgetPasswordWindow, KeychainManager keychain, //
+							   ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.window = window;
 		this.changePasswordWindow = changePasswordWindow;
 		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.forgetPasswordWindow = forgetPasswordWindow;
 		this.keychain = keychain;
+		this.resourceBundle = resourceBundle;
 		if (keychain.isSupported() && !keychain.isLocked()) {
 			this.passwordSaved = keychain.getPassphraseStoredProperty(vault.getId()).orElse(false);
 		} else {
@@ -56,7 +60,7 @@ public class MasterkeyOptionsController implements FxController {
 
 	@FXML
 	public void showRecoverVaultDialog() {
-		recoveryKeyWindow.create(vault, window).showRecoveryKeyRecoverWindow();
+		recoveryKeyWindow.create(vault, window).showRecoveryKeyRecoverWindow(resourceBundle.getString("recoveryKey.recover.title"));
 	}
 
 	@FXML

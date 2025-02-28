@@ -69,6 +69,12 @@ public class VaultListManager {
 		autoLocker.init();
 	}
 
+	public boolean containsVault(Path vaultPath) {
+		assert vaultPath.isAbsolute();
+		assert vaultPath.normalize().equals(vaultPath);
+		return vaultList.stream().anyMatch(v -> vaultPath.equals(v.getPath()));
+	}
+
 	public Vault add(Path pathToVault) throws IOException {
 		Path normalizedPathToVault = pathToVault.normalize().toAbsolutePath();
 		if (CryptoFileSystemProvider.checkDirStructureForVault(normalizedPathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) == DirStructure.UNRELATED) {

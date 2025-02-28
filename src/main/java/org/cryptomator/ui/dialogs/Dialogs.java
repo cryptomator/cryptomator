@@ -97,4 +97,18 @@ public class Dialogs {
 				.setOkAction(okAction) //
 				.setCancelAction(Stage::close);
 	}
+
+	public SimpleDialog.Builder prepareNoDDirectorySelectedDialog(Stage window) {
+		return createDialogBuilder() //
+				.setOwner(window) //
+				.setTitleKey("recoveryKey.noDDirDetected.title") //
+				.setMessageKey("recoveryKey.noDDirDetected.message") //
+				.setDescriptionKey("recoveryKey.noDDirDetected.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
+				.setOkButtonKey("generic.button.change") //
+				.setCancelButtonKey("generic.button.close") //
+				.setOkAction(Stage::close) //
+				.setCancelAction(Stage::close);
+	}
+
 }
