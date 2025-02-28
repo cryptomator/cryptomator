@@ -1,5 +1,6 @@
 package org.cryptomator.ui.eventview;
 
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.cryptofs.CryptoPath;
 import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
@@ -47,7 +48,8 @@ public class EventListCellController implements FxController {
 	private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
 	private final ObservableList<VaultEvent> events;
-	private final Optional<RevealPathService> revealService;
+	@Nullable
+	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
 	private final ObjectProperty<VaultEvent> event;
 	private final StringProperty eventMessage;
@@ -71,7 +73,7 @@ public class EventListCellController implements FxController {
 	@Inject
 	public EventListCellController(ObservableList<VaultEvent> events, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
 		this.events = events;
-		this.revealService = revealService;
+		this.revealService = revealService.orElseGet(() -> null);
 		this.resourceBundle = resourceBundle;
 		this.event = new SimpleObjectProperty<>(null);
 		this.eventMessage = new SimpleStringProperty();
@@ -112,8 +114,8 @@ public class EventListCellController implements FxController {
 		eventIcon.setValue(FontAwesome5Icon.FILE);
 		eventMessage.setValue(cre.resolvedCleartextPath().toString());
 		eventDescription.setValue(resourceBundle.getString("event.conflictResolved.description"));
-		if (revealService.isPresent()) {
-			addAction("event.conflictResolved.showDecrypted", () -> reveal(convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
+		if (revealService != null) {
+			addAction("event.conflictResolved.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
 		} else {
 			addAction("event.conflictResolved.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cre.resolvedCleartextPath()).toString()));
 		}
@@ -123,9 +125,9 @@ public class EventListCellController implements FxController {
 		eventIcon.setValue(FontAwesome5Icon.TIMES);
 		eventMessage.setValue(cfe.canonicalCleartextPath().toString());
 		eventDescription.setValue(resourceBundle.getString("event.conflict.description"));
-		if (revealService.isPresent()) {
-			addAction("event.conflict.showDecrypted", () -> reveal(convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
-			addAction("event.conflict.showEncrypted", () -> reveal(cfe.conflictingCiphertextPath()));
+		if (revealService != null) {
+			addAction("event.conflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
+			addAction("event.conflict.showEncrypted", () -> reveal(revealService, cfe.conflictingCiphertextPath()));
 		} else {
 			addAction("event.conflict.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cfe.canonicalCleartextPath()).toString()));
 			addAction("event.conflict.copyEncrypted", () -> copyToClipboard(cfe.conflictingCiphertextPath().toString()));
@@ -136,8 +138,8 @@ public class EventListCellController implements FxController {
 		eventIcon.setValue(FontAwesome5Icon.BAN);
 		eventMessage.setValue(dfe.ciphertextPath().toString());
 		eventDescription.setValue(resourceBundle.getString("event.decryptionFailed.description"));
-		if (revealService.isPresent()) {
-			addAction("event.decryptionFailed.showEncrypted", () -> reveal(dfe.ciphertextPath()));
+		if (revealService != null) {
+			addAction("event.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
 		} else {
 			addAction("event.decryptionFailed.copyEncrypted", () -> copyToClipboard(dfe.ciphertextPath().toString()));
 		}
@@ -203,10 +205,9 @@ public class EventListCellController implements FxController {
 		return Path.of(mountUri.getPath().concat(internalPath).substring(1));
 	}
 
-	private void reveal(Path p) {
+	private void reveal(RevealPathService s, Path p) {
 		try {
-			revealService.orElseThrow(() -> new IllegalStateException("Function requiring revealService called, but service not available")) //
-					.reveal(p);
+			s.reveal(p);
 		} catch (RevealFailedException e) {
 			LOG.warn("Failed to show path  {}", p, e);
 		}
