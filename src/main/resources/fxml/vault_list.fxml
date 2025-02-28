@@ -58,12 +58,12 @@
 	<fx:define>
 		<ContextMenu fx:id="addVaultContextMenu">
 			<items>
-				<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault" >
+				<MenuItem styleClass="dropdown-button-context-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault" >
 					<graphic>
 						<FontAwesome5IconView glyph="PLUS" textAlignment="CENTER" wrappingWidth="14" />
 					</graphic>
 				</MenuItem>
-				<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault" >
+				<MenuItem styleClass="dropdown-button-context-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault" >
 					<graphic>
 						<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
 					</graphic>

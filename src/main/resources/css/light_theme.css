@@ -299,15 +299,6 @@
  *                                                                             *
  ******************************************************************************/
 
-.event-window .list-view .list-cell:hover {
-	-fx-background-color: CONTROL_BG_SELECTED;
-}
-
-.event-window .list-view .list-cell:selected {
-	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
-	-fx-background-insets: 0, 0 0 0 3px;
-}
-
 .list-view {
 	-fx-background-color: CONTROL_BG_NORMAL;
 }
@@ -356,6 +347,21 @@
 .onboarding-overlay-arc {
 	-fx-stroke: TEXT_FILL;
 	-fx-fill: transparent;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Event List                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.event-window .list-view .list-cell:hover {
+	-fx-background-color: CONTROL_BG_SELECTED;
+}
+
+.event-window .list-view .list-cell:selected {
+	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
+	-fx-background-insets: 0, 0 0 0 3px;
 }
 
 /*******************************************************************************
@@ -833,11 +839,11 @@
 
 /*******************************************************************************
  *                                                                             *
- * Add Vault - MenuItem                                                                    *
+ * Dropdown button context menu
  *                                                                             *
  ******************************************************************************/
 
-.add-vault-menu-item {
+.dropdown-button-context-menu-item {
     -fx-padding: 4px 8px;
 }
 

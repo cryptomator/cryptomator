@@ -147,7 +147,7 @@ public class EventListCellController implements FxController {
 
 	private void addAction(String localizationKey, Runnable action) {
 		var entry = new MenuItem(resourceBundle.getString(localizationKey));
-		entry.getStyleClass().addLast("add-vault-menu-item");
+		entry.getStyleClass().addLast("dropdown-button-context-menu-item");
 		entry.setOnAction(_ -> action.run());
 		eventActionsMenu.getItems().addLast(entry);
 	}
