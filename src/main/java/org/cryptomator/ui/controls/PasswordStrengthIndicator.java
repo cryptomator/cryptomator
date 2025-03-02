@@ -11,14 +11,14 @@ import javafx.scene.layout.Region;
 
 public class PasswordStrengthIndicator extends HBox {
 
-	private static final String STYLECLASS = "password-strength-indicator";
-	private static final String SEGMENT_CLASS = "segment";
-	private static final String ACTIVE_SEGMENT_CLASS = "active";
-	private static final String STRENGTH_0_CLASS = "strength-0";
-	private static final String STRENGTH_1_CLASS = "strength-1";
-	private static final String STRENGTH_2_CLASS = "strength-2";
-	private static final String STRENGTH_3_CLASS = "strength-3";
-	private static final String STRENGTH_4_CLASS = "strength-4";
+	static final String STYLECLASS = "password-strength-indicator";
+	static final String SEGMENT_CLASS = "segment";
+	static final String ACTIVE_SEGMENT_CLASS = "active";
+	static final String STRENGTH_0_CLASS = "strength-0";
+	static final String STRENGTH_1_CLASS = "strength-1";
+	static final String STRENGTH_2_CLASS = "strength-2";
+	static final String STRENGTH_3_CLASS = "strength-3";
+	static final String STRENGTH_4_CLASS = "strength-4";
 
 	private final Region s0;
 	private final Region s1;

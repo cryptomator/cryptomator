@@ -1,10 +1,5 @@
 package org.cryptomator.ipc;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.MoreExecutors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -13,7 +8,11 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.MoreExecutors;
 
 public interface IpcCommunicator extends Closeable {
 
@@ -31,7 +30,10 @@ public interface IpcCommunicator extends Closeable {
 	 * @return A communicator object that allows sending and receiving messages
 	 */
 	static IpcCommunicator create(Iterable<Path> socketPaths) {
-		Preconditions.checkArgument(socketPaths.iterator().hasNext(), "socketPaths must contain at least one element");
+		if (!socketPaths.iterator().hasNext()) {
+			LOG.warn("No socket path provided. Using Loop back Communicator as fallback.");
+			return new LoopbackCommunicator();
+		}
 		for (var p : socketPaths) {
 			try {
 				var attr = Files.readAttributes(p, BasicFileAttributes.class);

@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
 
 public class RevealRunningAppMessageTest {
 
@@ -26,5 +26,19 @@ public class RevealRunningAppMessageTest {
 				Assertions.fail("Received message of unexpected class");
 			}
 		}
+	}
+
+	@Test
+	public void testDecodeFromEmptyBuffer() {
+		ByteBuffer buffer = ByteBuffer.allocate(0);
+		RevealRunningAppMessage message = RevealRunningAppMessage.decode(buffer);
+		Assertions.assertNotNull(message);
+	}
+
+	@Test
+	public void testEncodePayload() {
+		RevealRunningAppMessage message = new RevealRunningAppMessage();
+		ByteBuffer buffer = message.encodePayload();
+		Assertions.assertEquals(0, buffer.remaining());
 	}
 }
