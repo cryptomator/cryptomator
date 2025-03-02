@@ -79,7 +79,7 @@ public class ReadmeGenerator {
 			} else if (c <= 0xFF) {
 				sb.append("\\'").append(String.format("%02X", c));
 			} else if (c < 0xFFFF) {
-				sb.append("\\u").append(c);
+				sb.append("\\uc1\\u").append(c);
 			}
 		});
 	}
