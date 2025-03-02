@@ -8,9 +8,9 @@ import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
@@ -21,7 +21,6 @@ public class VaultDetailLockedController implements FxController {
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final FxApplicationWindows appWindows;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
-	private final KeychainManager keychain;
 	private final Stage mainWindow;
 	private final ObservableValue<Boolean> passwordSaved;
 
@@ -30,13 +29,11 @@ public class VaultDetailLockedController implements FxController {
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.vaultOptionsWindow = vaultOptionsWindow;
-		this.keychain = keychain;
 		this.mainWindow = mainWindow;
-		if (keychain.isSupported() && !keychain.isLocked()) {
-			this.passwordSaved = vault.flatMap(v -> keychain.getPassphraseStoredProperty(v.getId())).orElse(false);
-		} else {
-			this.passwordSaved = new SimpleBooleanProperty(false);
-		}
+		this.passwordSaved = Bindings.createBooleanBinding(() -> {
+			var v = vault.get();
+			return v != null && keychain.getPassphraseStoredProperty(v.getId()).getValue();
+		}, vault, keychain.getKeychainImplementation());
 	}
 
 	@FXML
