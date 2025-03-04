@@ -6,16 +6,20 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.geometry.Insets?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.eventview.EventViewController"
 	  minWidth="300"
-	  minHeight="450"
 	  prefWidth="300"
-	  prefHeight="450"
 	  styleClass="event-window"
 	  >
-	<HBox styleClass="button-bar">
+	<HBox styleClass="button-bar" alignment="CENTER">
+		<padding>
+			<Insets left="6" />
+		</padding>
+		<ChoiceBox fx:id="vaultFilterChoiceBox"/>
 		<Region HBox.hgrow="ALWAYS"/>
 		<Button styleClass="button-right" onAction="#clearEventList" contentDisplay="GRAPHIC_ONLY">
 			<graphic>
@@ -23,5 +27,5 @@
 			</graphic>
 		</Button>
 	</HBox>
-	<ListView fx:id="eventListView" fixedCellSize="60"/>
+	<ListView fx:id="eventListView" fixedCellSize="60" VBox.vgrow="ALWAYS"/>
 </VBox>
