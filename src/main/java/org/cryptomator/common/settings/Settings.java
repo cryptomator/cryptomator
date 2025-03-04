@@ -113,7 +113,12 @@ public class Settings {
 		migrateLegacySettings(json);
 
 		directories.addListener(this::somethingChanged);
-		networkSettings.addListener(this::somethingChanged);
+		networkSettings.get().mode.addListener(this::somethingChanged);
+		networkSettings.get().httpProxy.addListener(this::somethingChanged);
+		networkSettings.get().httpPort.addListener(this::somethingChanged);
+		networkSettings.get().samePortProxyForHttpHttps.addListener(this::somethingChanged);
+		networkSettings.get().httpsProxy.addListener(this::somethingChanged);
+		networkSettings.get().httpsPort.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
 		checkForUpdates.addListener(this::somethingChanged);
 		startHidden.addListener(this::somethingChanged);

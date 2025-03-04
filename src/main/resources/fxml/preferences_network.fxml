@@ -33,14 +33,14 @@
 				<Label text="HTTP Proxy" minWidth="90" />
 				<TextField fx:id="httpProxy" HBox.hgrow="ALWAYS" />
 				<Label text="Port"/>
-				<NumericTextField fx:id="httpProxyPort" prefWidth="60" promptText="0" />
+				<NumericTextField fx:id="httpPort" prefWidth="60" promptText="0" />
 			</HBox>
-			<CheckBox text="Also use this proxy for HTTPS"/>
-			<HBox spacing="12" alignment="CENTER_LEFT">
+			<CheckBox fx:id="samePortProxyForHttpHttps" text="Also use this proxy for HTTPS"/>
+			<HBox fx:id="httpsProxyBox" spacing="12" alignment="CENTER_LEFT">
 				<Label text="HTTPS Proxy" minWidth="90"/>
 				<TextField fx:id="httpsProxy" HBox.hgrow="ALWAYS" />
 				<Label text="Port"/>
-				<NumericTextField fx:id="httpsProxyPort" prefWidth="60" promptText="0"/>
+				<NumericTextField fx:id="httpsPort" prefWidth="60" promptText="0"/>
 			</HBox>
 		</VBox>
 
