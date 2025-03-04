@@ -3,6 +3,8 @@ package org.cryptomator.ui.eventview;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.cryptofs.CryptoPath;
+import org.cryptomator.cryptofs.event.BrokenDirFileEvent;
+import org.cryptomator.cryptofs.event.BrokenFileNodeEvent;
 import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
@@ -107,13 +109,28 @@ public class EventListCellController implements FxController {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
 			case ConflictResolutionFailedEvent fse -> this.adjustToConflictEvent(fse);
 			case DecryptionFailedEvent fse -> this.adjustToDecryptionFailedEvent(fse);
+			case BrokenDirFileEvent fse -> this.adjustToBrokenDirFileEvent(fse);
+			case BrokenFileNodeEvent fse -> this.adjustToBrokenFileNodeEvent(fse);
 		}
 	}
 
+
+	private void adjustToBrokenFileNodeEvent(BrokenFileNodeEvent bfe) {
+		eventIcon.setValue(FontAwesome5Icon.TIMES);
+		eventMessage.setValue(resourceBundle.getString("event.brokenFileNode.message"));
+		eventDescription.setValue(bfe.ciphertextPath().getFileName().toString());
+		if (revealService != null) {
+			addAction("event.brokenFileNode.showEncrypted", () -> reveal(revealService, convertVaultPathToSystemPath(bfe.ciphertextPath())));
+		} else {
+			addAction("event.brokenFileNode.copyEncrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.ciphertextPath()).toString()));
+		}
+		addAction("event.brokenFileNode.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.cleartextPath()).toString()));
+	}
+
 	private void adjustToConflictResolvedEvent(ConflictResolvedEvent cre) {
-		eventIcon.setValue(FontAwesome5Icon.FILE);
-		eventMessage.setValue(cre.resolvedCleartextPath().toString());
-		eventDescription.setValue(resourceBundle.getString("event.conflictResolved.description"));
+		eventIcon.setValue(FontAwesome5Icon.CHECK);
+		eventMessage.setValue(resourceBundle.getString("event.conflictResolved.message"));
+		eventDescription.setValue(cre.resolvedCiphertextPath().getFileName().toString());
 		if (revealService != null) {
 			addAction("event.conflictResolved.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
 		} else {
@@ -122,9 +139,9 @@ public class EventListCellController implements FxController {
 	}
 
 	private void adjustToConflictEvent(ConflictResolutionFailedEvent cfe) {
-		eventIcon.setValue(FontAwesome5Icon.TIMES);
-		eventMessage.setValue(cfe.canonicalCleartextPath().toString());
-		eventDescription.setValue(resourceBundle.getString("event.conflict.description"));
+		eventIcon.setValue(FontAwesome5Icon.COMPRESS_ALT);
+		eventMessage.setValue(resourceBundle.getString("event.conflict.message"));
+		eventDescription.setValue(cfe.conflictingCiphertextPath().getFileName().toString());
 		if (revealService != null) {
 			addAction("event.conflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
 			addAction("event.conflict.showEncrypted", () -> reveal(revealService, cfe.conflictingCiphertextPath()));
@@ -136,12 +153,23 @@ public class EventListCellController implements FxController {
 
 	private void adjustToDecryptionFailedEvent(DecryptionFailedEvent dfe) {
 		eventIcon.setValue(FontAwesome5Icon.BAN);
-		eventMessage.setValue(dfe.ciphertextPath().toString());
-		eventDescription.setValue(resourceBundle.getString("event.decryptionFailed.description"));
+		eventMessage.setValue(resourceBundle.getString("event.decryptionFailed.message"));
+		eventDescription.setValue(dfe.ciphertextPath().getFileName().toString());
 		if (revealService != null) {
 			addAction("event.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
 		} else {
 			addAction("event.decryptionFailed.copyEncrypted", () -> copyToClipboard(dfe.ciphertextPath().toString()));
+		}
+	}
+
+	private void adjustToBrokenDirFileEvent(BrokenDirFileEvent bde) {
+		eventIcon.setValue(FontAwesome5Icon.TIMES);
+		eventMessage.setValue(resourceBundle.getString("event.brokenDirFile.message"));
+		eventDescription.setValue(bde.ciphertextPath().getParent().getFileName().toString());
+		if (revealService != null) {
+			addAction("event.brokenDirFile.showEncrypted", () -> reveal(revealService, bde.ciphertextPath()));
+		} else {
+			addAction("event.brokenDirFile.copyEncrypted", () -> copyToClipboard(bde.ciphertextPath().toString()));
 		}
 	}
 

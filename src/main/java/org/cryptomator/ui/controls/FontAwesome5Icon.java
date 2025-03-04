@@ -16,6 +16,7 @@ public enum FontAwesome5Icon {
 	CLIPBOARD("\uF328"), //
 	COG("\uF013"), //
 	COGS("\uF085"), //
+	COMPRESS_ALT("\uF422"), //
 	COPY("\uF0C5"), //
 	CROWN("\uF521"), //
 	DONATE("\uF4B9"), //
