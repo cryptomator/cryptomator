@@ -224,8 +224,8 @@
 }
 
 .event-window .button-bar .button-right {
-	-fx-border-color: CONTROL_BORDER_NORMAL;
-	-fx-border-width: 0 0 1px 1px;
+	-fx-border-color: transparent transparent transparent CONTROL_BORDER_NORMAL;
+	-fx-border-width: 0 0 0 1px;
 	-fx-background-color: MAIN_BG;
 	-fx-background-radius: 0px;
 	-fx-min-height: 42px;

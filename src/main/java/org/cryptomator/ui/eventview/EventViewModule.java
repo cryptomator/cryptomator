@@ -27,7 +27,8 @@ abstract class EventViewModule {
 	@EventViewWindow
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle("TODO EVENTVIEWER");
+		stage.setHeight(498);
+		stage.setTitle(resourceBundle.getString("eventView.title"));
 		stage.setResizable(true);
 		stage.initModality(Modality.NONE);
 		return stage;
