@@ -209,7 +209,7 @@ public class EventListCellController implements FxController {
 			return eventDescription.getValue();
 		} else {
 			var e = event.getValue();
-			return resourceBundle.getString("event.vaultLocked.description").formatted(e != null? e.v().getDisplayName():"");
+			return resourceBundle.getString("event.vaultLocked.description").formatted(e != null ? e.v().getDisplayName() : "");
 		}
 	}
 
