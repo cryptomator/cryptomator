@@ -59,7 +59,7 @@ public class VaultSettings {
 	public final StringProperty mountService;
 	public final IntegerProperty port;
 
-	protected VaultSettings(VaultSettingsJson json) {
+	public VaultSettings(VaultSettingsJson json) {
 		this.id = json.id;
 		this.path = new SimpleObjectProperty<>(this, "path", json.path == null ? null : Paths.get(json.path));
 		this.displayName = new SimpleStringProperty(this, "displayName", json.displayName);

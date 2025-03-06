@@ -9,10 +9,12 @@ import org.cryptomator.ui.fxapp.FxApplicationComponent;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Supplier;
 
 @Module(subcomponents = {FxApplicationComponent.class})
 class CryptomatorModule {
@@ -48,4 +50,8 @@ class CryptomatorModule {
 		return TrayIntegrationProvider.get();
 	}
 
+	@Provides
+	static Supplier<Instant> provideTimeSupplier() {
+		return Instant::now; // Real time provider
+	}
 }
