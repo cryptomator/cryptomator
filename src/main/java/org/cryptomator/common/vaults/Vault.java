@@ -205,7 +205,7 @@ public class Vault {
 		LOG.info("Locked vault '{}'", getDisplayName());
 	}
 
-	private synchronized void addToQuickAccess() {
+	synchronized void addToQuickAccess() {
 		if (quickAccessEntry.get() != null) {
 			//we don't throw an exception since we don't wanna block unlocking
 			LOG.warn("Vault already added to quick access area. Will be removed on next lock operation.");
@@ -234,7 +234,7 @@ public class Vault {
 		}
 	}
 
-	private synchronized void removeFromQuickAccess() {
+	synchronized void removeFromQuickAccess() {
 		if (quickAccessEntry.get() == null) {
 			LOG.debug("Removing vault from quick access area: Entry not found, nothing to do.");
 			return;
