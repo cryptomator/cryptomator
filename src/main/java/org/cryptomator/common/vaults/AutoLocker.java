@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 @Singleton
 public class AutoLocker {
@@ -20,18 +21,20 @@ public class AutoLocker {
 
 	private final ScheduledExecutorService scheduler;
 	private final ObservableList<Vault> vaultList;
+	private final Supplier<Instant> timeProvider; // Injected time provider for testability
 
 	@Inject
-	public AutoLocker(ScheduledExecutorService scheduler, ObservableList<Vault> vaultList) {
+	public AutoLocker(ScheduledExecutorService scheduler, ObservableList<Vault> vaultList, Supplier<Instant> timeProvider) {
 		this.scheduler = scheduler;
 		this.vaultList = vaultList;
+		this.timeProvider = timeProvider;
 	}
 
 	public void init() {
 		scheduler.scheduleAtFixedRate(this::tick, 0, 1, TimeUnit.MINUTES);
 	}
 
-	private void tick() {
+	void tick() { // Made package-private for testing
 		vaultList.stream() // all vaults
 				.filter(Vault::isUnlocked) // unlocked vaults
 				.filter(this::exceedsIdleTime) // idle vaults
@@ -53,11 +56,8 @@ public class AutoLocker {
 		if (vault.getVaultSettings().autoLockWhenIdle.get()) {
 			int maxIdleSeconds = vault.getVaultSettings().autoLockIdleSeconds.get();
 			var deadline = vault.getStats().getLastActivity().plusSeconds(maxIdleSeconds);
-			return deadline.isBefore(Instant.now());
-		} else {
-			return false;
+			return deadline.isBefore(timeProvider.get()); // Now using injected time provider
 		}
+		return false;
 	}
-
-
 }
