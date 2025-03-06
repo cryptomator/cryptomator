@@ -32,6 +32,7 @@ import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
@@ -66,6 +67,9 @@ public class EventListCellController implements FxController {
 	private final BooleanProperty actionsButtonVisible;
 
 	@FXML
+	private Tooltip eventTooltip;
+
+	@FXML
 	HBox root;
 	@FXML
 	ContextMenu eventActionsMenu;
@@ -88,12 +92,14 @@ public class EventListCellController implements FxController {
 		this.description = Bindings.createStringBinding(this::selectDescription, vaultUnlocked, eventDescription);
 		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon);
 		this.actionsButtonVisible = new SimpleBooleanProperty();
+		this.eventTooltip = new Tooltip();
 	}
 
 	@FXML
 	public void initialize() {
 		actionsButtonVisible.bind(Bindings.createBooleanBinding(this::determineActionsButtonVisibility, root.hoverProperty(), eventActionsMenu.showingProperty(), vaultUnlocked));
 		vaultUnlocked.addListener((_, _, newValue) -> eventActionsMenu.hide());
+		Tooltip.install(root, eventTooltip);
 	}
 
 	private boolean determineActionsButtonVisibility() {
@@ -104,6 +110,7 @@ public class EventListCellController implements FxController {
 		event.set(item);
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
+		eventTooltip.setText(item.v().getDisplayName());
 		addAction("generic.action.dismiss", () -> events.remove(item));
 		switch (item.actualEvent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
