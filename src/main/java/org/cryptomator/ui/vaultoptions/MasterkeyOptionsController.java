@@ -1,5 +1,6 @@
 package org.cryptomator.ui.vaultoptions;
 
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
@@ -55,12 +56,12 @@ public class MasterkeyOptionsController implements FxController {
 
 	@FXML
 	public void showRecoveryKey() {
-		recoveryKeyWindow.create(vault, window).showRecoveryKeyCreationWindow();
+		recoveryKeyWindow.create(vault, window, RecoverUtil.Type.SHOW_KEY).showRecoveryKeyCreationWindow();
 	}
 
 	@FXML
 	public void showRecoverVaultDialog() {
-		recoveryKeyWindow.create(vault, window).showRecoveryKeyRecoverWindow(resourceBundle.getString("recoveryKey.recover.title"));
+		recoveryKeyWindow.create(vault, window,RecoverUtil.Type.RESET_PASSWORD).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML

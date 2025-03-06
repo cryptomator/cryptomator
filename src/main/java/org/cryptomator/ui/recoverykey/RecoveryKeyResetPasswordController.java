@@ -18,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -26,6 +28,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -40,12 +43,16 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final ExecutorService executor;
 	private final StringProperty recoveryKey;
+	private final Lazy<Scene> recoverExpertSettingsScene;
 	private final Lazy<Scene> recoverResetPasswordSuccessScene;
 	private final Lazy<Scene> recoverResetVaultConfigSuccessScene;
 	private final FxApplicationWindows appWindows;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final VaultListManager vaultListManager;
 	private final IntegerProperty shorteningThreshold;
+	private final ObjectProperty<RecoverUtil.Type> recoverType;
+	private final ResourceBundle resourceBundle;
+	private final StringProperty buttonText = new SimpleStringProperty();
 
 	public NewPasswordController newPasswordController;
 
@@ -55,28 +62,49 @@ public class RecoveryKeyResetPasswordController implements FxController {
 											  RecoveryKeyFactory recoveryKeyFactory, //
 											  ExecutorService executor, //
 											  @RecoveryKeyWindow StringProperty recoveryKey, //
+											  @FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> recoverExpertSettingsScene, //
 											  @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS) Lazy<Scene> recoverResetPasswordSuccessScene, //
 											  @FxmlScene(FxmlFile.RECOVERYKEY_RESET_VAULT_CONFIG_SUCCESS) Lazy<Scene> recoverResetVaultConfigSuccessScene, //
 											  FxApplicationWindows appWindows, //
 											  MasterkeyFileAccess masterkeyFileAccess, //
 											  VaultListManager vaultListManager, //
-											  @Named("shorteningThreshold") IntegerProperty shorteningThreshold) {
+											  @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
+											  @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType,
+											  ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.executor = executor;
 		this.recoveryKey = recoveryKey;
+		this.recoverExpertSettingsScene = recoverExpertSettingsScene;
 		this.recoverResetPasswordSuccessScene = recoverResetPasswordSuccessScene;
 		this.recoverResetVaultConfigSuccessScene = recoverResetVaultConfigSuccessScene;
 		this.appWindows = appWindows;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.vaultListManager = vaultListManager;
 		this.shorteningThreshold = shorteningThreshold;
+		this.recoverType = recoverType;
+		this.resourceBundle = resourceBundle;
+
+		initButtonText(recoverType.get());
+	}
+
+	private void initButtonText(RecoverUtil.Type type) {
+		if (type == RecoverUtil.Type.RESTORE_MASTERKEY) {
+			buttonText.set(resourceBundle.getString("generic.button.close"));
+		} else {
+			buttonText.set(resourceBundle.getString("generic.button.back"));
+		}
 	}
 
 	@FXML
 	public void close() {
-		window.close();
+		if(recoverType.getValue().equals(RecoverUtil.Type.RESTORE_MASTERKEY)){
+			window.close();
+		}
+		else {
+			window.setScene(recoverExpertSettingsScene.get());
+		}
 	}
 
 	@FXML
@@ -114,6 +142,14 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	}
 
 	/* Getter/Setter */
+
+	public StringProperty buttonTextProperty() {
+		return buttonText;
+	}
+
+	public String getButtonText() {
+		return buttonText.get();
+	}
 
 	public ReadOnlyBooleanProperty passwordSufficientAndMatchingProperty() {
 		return newPasswordController.goodPasswordProperty();

@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.Nullable;
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
@@ -21,7 +22,9 @@ import org.cryptomator.ui.common.StageFactory;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
@@ -150,6 +153,12 @@ abstract class RecoveryKeyModule {
 		return new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.MAX_SHORTENING_THRESHOLD);
 	}
 
+	@Provides
+	@Named("recoverType")
+	@RecoveryKeyScoped
+	static ObjectProperty<RecoverUtil.Type> provideRecoverType() {
+		return new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_MASTERKEY);
+	}
 
 	@Binds
 	@IntoMap

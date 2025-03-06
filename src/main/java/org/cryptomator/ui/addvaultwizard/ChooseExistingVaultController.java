@@ -130,7 +130,7 @@ public class ChooseExistingVaultController implements FxController {
 					.setCancelButtonKey("generic.button.cancel") //
 					.setOkButtonKey("generic.button.next") //
 					.setOkAction(stage -> {
-						recoveryKeyWindow.create(vault, window).showIsHubVaultDialogWindow();
+						recoveryKeyWindow.create(vault, window,RecoverUtil.Type.RESTORE_VAULT_CONFIG).showIsHubVaultDialogWindow();
 						stage.close();
 					}) //
 					.build().showAndWait();

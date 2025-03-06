@@ -236,5 +236,11 @@ public class RecoverUtil {
 		return Optional.of(vault);
 	}
 
+	public enum Type {
+		RESTORE_VAULT_CONFIG,
+		RESTORE_MASTERKEY,
+		RESET_PASSWORD,
+		SHOW_KEY;
+	}
 
 }

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
@@ -59,13 +60,13 @@ public class VaultDetailMissingVaultController implements FxController {
 			dialogs.prepareContactHubAdmin(window).build().showAndWait();
 		}
 		else {
-			recoveryKeyWindow.create(vault.get(), window).showIsHubVaultDialogWindow();
+			recoveryKeyWindow.create(vault.get(), window, RecoverUtil.Type.RESTORE_VAULT_CONFIG).showIsHubVaultDialogWindow();
 		}
 	}
 
 	@FXML
 	void restoreMasterkey() {
-		recoveryKeyWindow.create(vault.get(), window).showRecoveryKeyRecoverWindow("Recover Masterkey");
+		recoveryKeyWindow.create(vault.get(), window,RecoverUtil.Type.RESTORE_MASTERKEY).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML

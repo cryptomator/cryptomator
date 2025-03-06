@@ -3,6 +3,7 @@ package org.cryptomator.ui.recoverykey;
 import dagger.BindsInstance;
 import dagger.Lazy;
 import dagger.Subcomponent;
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -41,18 +42,9 @@ public interface RecoveryKeyComponent {
 		stage.show();
 	}
 
-	default void showRecoveryKeyRecoverWindow(String title) {
-		Stage stage = window();
-		stage.setTitle(title);
-		stage.setScene(recoverScene().get());
-		stage.sizeToScene();
-		stage.show();
-	}
-
 	default void showIsHubVaultDialogWindow() {
 		Stage stage = window();
 		stage.setScene(recoverIsHubVaultScene().get());
-		stage.setTitle("Recover Config");
 		stage.sizeToScene();
 		stage.show();
 	}
@@ -60,7 +52,9 @@ public interface RecoveryKeyComponent {
 	@Subcomponent.Factory
 	interface Factory {
 
-		RecoveryKeyComponent create(@BindsInstance @RecoveryKeyWindow Vault vault, @BindsInstance @Named("keyRecoveryOwner") Stage owner);
+		RecoveryKeyComponent create(@BindsInstance @RecoveryKeyWindow Vault vault,
+									@BindsInstance @Named("keyRecoveryOwner") Stage owner,
+									@BindsInstance @Named("recoverType") RecoverUtil.Type recoverType);
 	}
 
 }

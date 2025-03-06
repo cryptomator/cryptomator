@@ -1,11 +1,14 @@
 package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -24,15 +27,28 @@ public class RecoveryKeyRecoverController implements FxController {
 	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> expertSettingsScene, //
-										ResourceBundle resourceBundle) {
+										ResourceBundle resourceBundle,
+										@Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType) {
 		this.window = window;
-		if (window.getTitle().equals("Recover Config")) {
-			this.nextScene = expertSettingsScene;
-		} else if (window.getTitle().equals(resourceBundle.getString("recoveryKey.recover.title"))) {
-			this.nextScene = resetPasswordScene;
-		} else {
-			this.nextScene = resetPasswordScene;
-		}
+
+		this.nextScene = switch (recoverType.get()) {
+			case RESTORE_VAULT_CONFIG -> {
+				window.setTitle(resourceBundle.getString("recoveryKey.recoverVaultConfig.title"));
+				yield expertSettingsScene;
+			}
+			case RESTORE_MASTERKEY -> {
+				window.setTitle(resourceBundle.getString("recoveryKey.recoverMasterkey.title"));
+				yield resetPasswordScene;
+			}
+			case RESET_PASSWORD -> {
+				window.setTitle(resourceBundle.getString("recoveryKey.recover.title"));
+				yield resetPasswordScene;
+			}
+			case SHOW_KEY-> {
+				window.setTitle(resourceBundle.getString("recoveryKey.display.title"));
+				yield resetPasswordScene;
+			}
+		};
 	}
 
 	@FXML
