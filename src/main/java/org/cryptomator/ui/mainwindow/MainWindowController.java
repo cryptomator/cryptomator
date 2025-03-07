@@ -19,9 +19,11 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -68,17 +70,14 @@ public class MainWindowController implements FxController {
 		int y = settings.windowYPosition.get();
 		int width = settings.windowWidth.get();
 		int height = settings.windowHeight.get();
-		if (windowPositionSaved(x, y, width, height) ) {
-			if(isWithinDisplayBounds(x, y, width, height)) { //use stored window position
-				window.setX(x);
-				window.setY(y);
-				window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
-				window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
-			} else if(isWithinDisplayBounds((int) window.getX(), (int) window.getY(), width, height)) { //just reset position of upper left corner, keep window size
-				window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
-				window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
-			} //else reset window completely
+		if (windowPositionSaved(x, y, width, height)) {
+			window.setX(x);
+			window.setY(y);
+			window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
+			window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
 		}
+
+		window.setOnShowing(this::checkDisplayBounds);
 
 		settings.windowXPosition.bind(window.xProperty());
 		settings.windowYPosition.bind(window.yProperty());
@@ -88,6 +87,37 @@ public class MainWindowController implements FxController {
 
 	private boolean windowPositionSaved(int x, int y, int width, int height) {
 		return x != 0 || y != 0 || width != 0 || height != 0;
+	}
+
+	private void checkDisplayBounds(WindowEvent windowEvent) {
+		int x = settings.windowXPosition.get();
+		int y = settings.windowYPosition.get();
+		int width = settings.windowWidth.get();
+		int height = settings.windowHeight.get();
+
+		// Minimizing a window in Windows and closing it could result in an out of bounds position at (x, y) = (-32000, -32000)
+		// See https://devblogs.microsoft.com/oldnewthing/20041028-00/?p=37453
+		// If the position is (-32000, -32000), restore to the last saved position
+		if (window.getX() == -32000 && window.getY() == -32000) {
+			window.setX(x);
+			window.setY(y);
+			window.setWidth(width);
+			window.setHeight(height);
+		}
+
+		Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
+		if (!isWithinDisplayBounds(x, y, width, height)) { //use stored window position
+			LOG.debug("Resetting window position due to insufficient screen overlap");
+			var centerdX = (primaryScreenBounds.getWidth() - window.getMinWidth()) / 2;
+			var centeredY = (primaryScreenBounds.getHeight() - window.getMinHeight()) / 2;
+			if (isWithinDisplayBounds((int) centerdX, (int) centeredY, width, height)) { //just reset position of upper left corner, keep window size
+				window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
+				window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
+			}
+			// If the position is illegal, then the window appears on the main screen in the middle of the window.
+			window.setX(centerdX);
+			window.setY(centeredY);
+		}
 	}
 
 	private boolean isWithinDisplayBounds(int x, int y, int width, int height) {
