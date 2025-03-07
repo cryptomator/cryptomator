@@ -1,5 +1,6 @@
 package org.cryptomator.ui.eventview;
 
+import org.cryptomator.common.EventMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -21,6 +23,7 @@ import java.util.ResourceBundle;
 @EventViewScoped
 public class EventViewController implements FxController {
 
+	private final EventMap eventMap;
 	private final ObservableList<VaultEvent> eventList;
 	private final FilteredList<VaultEvent> filteredEventList;
 	private final ObservableList<Vault> vaults;
@@ -35,8 +38,9 @@ public class EventViewController implements FxController {
 	ListView<VaultEvent> eventListView;
 
 	@Inject
-	public EventViewController(ObservableList<VaultEvent> eventList, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
-		this.eventList = eventList;
+	public EventViewController(EventMap eventMap, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
+		this.eventMap = eventMap;
+		this.eventList = FXCollections.observableArrayList();
 		this.filteredEventList = eventList.filtered(_ -> true);
 		this.vaults = vaults;
 		this.reversedEventList = new SortedList<>(filteredEventList, Comparator.reverseOrder());
@@ -55,12 +59,27 @@ public class EventViewController implements FxController {
 				choiceBoxEntries.addAll(c.getAddedSubList());
 			}
 		});
+
+		eventList.addAll(eventMap.values());
+		eventMap.addListener((MapChangeListener<? super EventMap.EventKey, ? super VaultEvent>) this::updateList);
 		eventListView.setCellFactory(cellFactory);
 		eventListView.setItems(reversedEventList);
 
 		vaultFilterChoiceBox.setItems(choiceBoxEntries);
 		vaultFilterChoiceBox.valueProperty().addListener(this::applyVaultFilter);
 		vaultFilterChoiceBox.setConverter(new VaultConverter(resourceBundle));
+	}
+
+	private void updateList(MapChangeListener.Change<? extends EventMap.EventKey, ? extends VaultEvent> change) {
+		if (change.wasAdded() && change.wasRemoved()) {
+			//entry updated
+			eventList.remove(change.getValueRemoved());
+			eventList.addLast(change.getValueAdded());
+		} else if (change.wasAdded()) {
+			eventList.addLast(change.getValueAdded());
+		} else { //removed
+			eventList.remove(change.getValueRemoved());
+		}
 	}
 
 	private void applyVaultFilter(ObservableValue<? extends Vault> v, Vault oldV, Vault newV) {
@@ -72,8 +91,8 @@ public class EventViewController implements FxController {
 	}
 
 	@FXML
-	void clearEventList() {
-		eventList.clear();
+	void clearEvents() {
+		eventMap.clear();
 	}
 
 	private static class VaultConverter extends StringConverter<Vault> {

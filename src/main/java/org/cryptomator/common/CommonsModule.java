@@ -14,15 +14,12 @@ import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
-import org.cryptomator.event.VaultEvent;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Comparator;
@@ -129,12 +126,6 @@ public abstract class CommonsModule {
 		});
 		shutdownHook.runOnShutdown(executorService::shutdown);
 		return executorService;
-	}
-
-	@Provides
-	@Singleton
-	static ObservableList<VaultEvent> provideVaultEventQueue() {
-		return FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 	}
 
 	private static void handleUncaughtExceptionInBackgroundThread(Thread thread, Throwable throwable) {

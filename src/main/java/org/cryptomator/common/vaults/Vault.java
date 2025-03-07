@@ -10,6 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
+import org.cryptomator.common.EventMap;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -44,12 +45,10 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.ReadOnlyFileSystemException;
-import java.time.Instant;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
@@ -79,7 +78,7 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final Settings settings;
-	private final ObservableList<VaultEvent> eventList;
+	private final EventMap eventMap;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -92,7 +91,7 @@ public class Vault {
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
 		  Mounter mounter, Settings settings, //
-		  ObservableList<VaultEvent> eventList) {
+		  EventMap eventMap) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -109,7 +108,7 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.settings = settings;
-		this.eventList = eventList;
+		this.eventMap = eventMap;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -260,10 +259,12 @@ public class Vault {
 		}
 	}
 
+
 	private void consumeVaultEvent(FilesystemEvent e) {
-		//TODO: here we could implement a buffer to prevent event spam (due to many filesystem requests)
-		var timestamp = Instant.now();
-		Platform.runLater(() -> eventList.addLast(new VaultEvent(timestamp, this, e)));
+		var wrapper = new VaultEvent(this, e);
+		Platform.runLater(() -> {
+			eventMap.put(wrapper);
+		});
 	}
 
 	// ******************************************************************************

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.eventview;
 
+import org.cryptomator.common.EventMap;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.cryptofs.CryptoPath;
@@ -26,7 +27,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.control.Button;
@@ -50,7 +50,7 @@ public class EventListCellController implements FxController {
 	private static final DateTimeFormatter LOCAL_DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 	private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
-	private final ObservableList<VaultEvent> events;
+	private final EventMap eventMap;
 	@Nullable
 	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
@@ -65,9 +65,7 @@ public class EventListCellController implements FxController {
 	private final ObservableValue<String> description;
 	private final ObservableValue<FontAwesome5Icon> icon;
 	private final BooleanProperty actionsButtonVisible;
-
-	@FXML
-	private Tooltip eventTooltip;
+	private final Tooltip eventTooltip;
 
 	@FXML
 	HBox root;
@@ -77,8 +75,8 @@ public class EventListCellController implements FxController {
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(ObservableList<VaultEvent> events, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
-		this.events = events;
+	public EventListCellController(EventMap eventMap, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
+		this.eventMap = eventMap;
 		this.revealService = revealService.orElseGet(() -> null);
 		this.resourceBundle = resourceBundle;
 		this.event = new SimpleObjectProperty<>(null);
@@ -111,7 +109,7 @@ public class EventListCellController implements FxController {
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
 		eventTooltip.setText(item.v().getDisplayName());
-		addAction("generic.action.dismiss", () -> events.remove(item));
+		addAction("generic.action.dismiss", () -> eventMap.remove(item));
 		switch (item.actualEvent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
 			case ConflictResolutionFailedEvent fse -> this.adjustToConflictEvent(fse);

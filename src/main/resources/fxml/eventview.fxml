@@ -21,7 +21,7 @@
 		</padding>
 		<ChoiceBox fx:id="vaultFilterChoiceBox"/>
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button styleClass="button-right" onAction="#clearEventList" contentDisplay="GRAPHIC_ONLY">
+		<Button styleClass="button-right" onAction="#clearEvents" contentDisplay="GRAPHIC_ONLY">
 			<graphic>
 				<FontAwesome5IconView glyph="TRASH" glyphSize="16"/>
 			</graphic>
