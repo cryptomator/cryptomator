@@ -1,5 +1,6 @@
 package org.cryptomator.ui.controls;
 
+import org.cryptomator.JavaFXUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -18,10 +19,8 @@ public class SecurePasswordFieldTest {
 
 	@BeforeAll
 	public static void initJavaFx() throws InterruptedException {
-		CountDownLatch latch = new CountDownLatch(1);
-		Platform.startup(latch::countDown);
-		var javafxStarted = latch.await(5, TimeUnit.SECONDS);
-		Assumptions.assumeTrue(javafxStarted);
+		var isRunning = JavaFXUtil.startPlatform();
+		Assumptions.assumeTrue(isRunning);
 	}
 
 	@Nested
