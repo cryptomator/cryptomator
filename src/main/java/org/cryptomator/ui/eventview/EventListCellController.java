@@ -36,6 +36,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
+import javafx.util.Duration;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -93,6 +94,7 @@ public class EventListCellController implements FxController {
 		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon);
 		this.actionsButtonVisible = new SimpleBooleanProperty();
 		this.eventTooltip = new Tooltip();
+		eventTooltip.setShowDelay(Duration.millis(500.0));
 	}
 
 	@FXML
