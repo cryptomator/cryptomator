@@ -321,6 +321,10 @@
 	-fx-font-size: 1.0em;
 }
 
+.list-cell .header-misc {
+	-fx-font-size: 1.0em;
+}
+
 .list-cell .detail-label {
 	-fx-text-fill: TEXT_FILL_MUTED;
 	-fx-font-size: 0.8em;

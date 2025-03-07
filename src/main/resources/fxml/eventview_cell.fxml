@@ -23,7 +23,10 @@
 		<FontAwesome5IconView glyph="${controller.icon}" HBox.hgrow="NEVER" glyphSize="16"/>
 	</VBox>
 	<VBox spacing="4" HBox.hgrow="ALWAYS">
-		<Label styleClass="header-label" text="${controller.message}"/>
+		<HBox spacing="4">
+			<Label styleClass="header-label" text="${controller.message}"/>
+			<Label styleClass="header-misc" text="${controller.count}"/>
+		</HBox>
 		<Label text="${controller.description}"/>
 	</VBox>
 	<Button fx:id="eventActionsButton" contentDisplay="GRAPHIC_ONLY" onAction="#toggleEventActionsMenu" managed="${controller.actionsButtonVisible}" visible="${controller.actionsButtonVisible}">

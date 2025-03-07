@@ -58,6 +58,7 @@ public class EventListCellController implements FxController {
 	private final StringProperty eventMessage;
 	private final StringProperty eventDescription;
 	private final ObjectProperty<FontAwesome5Icon> eventIcon;
+	private final ObservableValue<String> eventCount;
 	private final ObservableValue<Boolean> vaultUnlocked;
 	private final ObservableValue<String> readableTime;
 	private final ObservableValue<String> readableDate;
@@ -83,6 +84,7 @@ public class EventListCellController implements FxController {
 		this.eventMessage = new SimpleStringProperty();
 		this.eventDescription = new SimpleStringProperty();
 		this.eventIcon = new SimpleObjectProperty<>();
+		this.eventCount = ObservableUtil.mapWithDefault(event, e -> e.count() == 1? "" : "("+ e.count() +")", "");
 		this.vaultUnlocked = ObservableUtil.mapWithDefault(event.flatMap(e -> e.v().unlockedProperty()), Function.identity(), false);
 		this.readableTime = ObservableUtil.mapWithDefault(event, e -> LOCAL_TIME_FORMATTER.format(e.timestamp()), "");
 		this.readableDate = ObservableUtil.mapWithDefault(event, e -> LOCAL_DATE_FORMATTER.format(e.timestamp()), "");
@@ -259,6 +261,14 @@ public class EventListCellController implements FxController {
 
 	public String getMessage() {
 		return message.getValue();
+	}
+
+	public ObservableValue<String> countProperty() {
+		return eventCount;
+	}
+
+	public String getCount() {
+		return eventCount.getValue();
 	}
 
 	public ObservableValue<String> descriptionProperty() {
