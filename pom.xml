@@ -45,13 +45,13 @@
 		<commons-lang3.version>3.17.0</commons-lang3.version>
 		<dagger.version>2.55</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.18.2</jackson.version>
+		<jackson.version>2.18.3</jackson.version>
 		<javafx.version>23.0.1</javafx.version>
-		<jwt.version>4.4.0</jwt.version>
+		<jwt.version>4.5.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
-		<logback.version>1.5.16</logback.version>
-		<slf4j.version>2.0.16</slf4j.version>
-		<tinyoauth2.version>0.8.0</tinyoauth2.version>
+		<logback.version>1.5.17</logback.version>
+		<slf4j.version>2.0.17</slf4j.version>
+		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
 
 		<!-- test dependencies -->
@@ -60,7 +60,7 @@
 		<hamcrest.version>3.0</hamcrest.version>
 
 		<!-- build-time dependencies -->
-		<jetbrains.annotations.version>26.0.1</jetbrains.annotations.version>
+		<jetbrains.annotations.version>26.0.2</jetbrains.annotations.version>
 		<dependency-check.version>12.1.0</dependency-check.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<license-generator.version>2.5.0</license-generator.version>
