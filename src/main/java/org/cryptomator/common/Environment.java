@@ -111,7 +111,7 @@ public class Environment {
 	 * @return App version or "SNAPSHOT", if undefined
 	 */
 	public String getAppVersion() {
-		return System.getProperty(APP_VERSION_PROP_NAME, "1.14.2");
+		return System.getProperty(APP_VERSION_PROP_NAME, "SNAPSHOT");
 	}
 
 	public Optional<String> getBuildNumber() {
