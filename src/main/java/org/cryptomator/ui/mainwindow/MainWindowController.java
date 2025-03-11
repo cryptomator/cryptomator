@@ -108,14 +108,14 @@ public class MainWindowController implements FxController {
 		Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
 		if (!isWithinDisplayBounds(x, y, width, height)) { //use stored window position
 			LOG.debug("Resetting window position due to insufficient screen overlap");
-			var centerdX = (primaryScreenBounds.getWidth() - window.getMinWidth()) / 2;
+			var centeredX = (primaryScreenBounds.getWidth() - window.getMinWidth()) / 2;
 			var centeredY = (primaryScreenBounds.getHeight() - window.getMinHeight()) / 2;
-			if (isWithinDisplayBounds((int) centerdX, (int) centeredY, width, height)) { //just reset position of upper left corner, keep window size
+			if (isWithinDisplayBounds((int) centeredX, (int) centeredY, width, height)) { //just reset position of upper left corner, keep window size
 				window.setWidth(Math.clamp(width, window.getMinWidth(), window.getMaxWidth()));
 				window.setHeight(Math.clamp(height, window.getMinHeight(), window.getMaxHeight()));
 			}
 			// If the position is illegal, then the window appears on the main screen in the middle of the window.
-			window.setX(centerdX);
+			window.setX(centeredX);
 			window.setY(centeredY);
 		}
 	}
