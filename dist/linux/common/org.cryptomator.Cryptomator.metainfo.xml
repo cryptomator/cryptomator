@@ -6,6 +6,12 @@
 	<name>Cryptomator</name>
 	<summary>Encryption for your cloud made easy</summary>
 
+	<keywords>
+		<keyword>encryption</keyword>
+		<keyword>security</keyword>
+		<keyword>privacy</keyword>
+	</keywords>
+
 	<description>
 		<p>
 			Cryptomator provides easy-to-use, transparent, client-side encryption for your cloud.
@@ -43,16 +49,16 @@
 
 	<screenshots>
 		<screenshot type="default">
-			<caption>Encrypt your data, protect your privacy</caption>
-			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlocked_light.png</image>
+			<caption>Encrypts your data, protects your privacy</caption>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlockDialog_light.png</image>
 		</screenshot>
 		<screenshot>
 			<caption>Dark theme available</caption>
 			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlocked_dark.png</image>
 		</screenshot>
 		<screenshot>
-			<caption>Uses AES-GCM 256 - an industry standardized, quantum resistant encryption</caption>
-			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlockDialog_light.png</image>
+			<caption>Easy to use - work on encrypted files as if they were not</caption>
+			<image>https://static.cryptomator.org/desktop/flathubScreenshots/MainWindowUnlocked_light.png</image>
 		</screenshot>
 	</screenshots>
 
