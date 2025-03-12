@@ -26,13 +26,16 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
@@ -110,6 +113,7 @@ public class VaultDetailUnlockedController implements FxController {
 			draggingOver.set(true);
 		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 			List<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).toList();
+			//TODO: differ between encrypted and decrypted files
 			if (ciphertextPaths.isEmpty()) {
 				wrongFileAlert.build().showWrongFileAlertWindow();
 			} else {
@@ -158,6 +162,26 @@ public class VaultDetailUnlockedController implements FxController {
 		if (cleartextFile != null) {
 			var ciphertextPaths = getCiphertextPath(cleartextFile.toPath()).stream().toList();
 			revealOrCopyPaths(ciphertextPaths);
+		}
+	}
+
+	@FXML
+	public void chooseEncryptedFileAndGetName() {
+		var fileChooser = new FileChooser();
+		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.filePickerTitle"));
+
+		fileChooser.setInitialDirectory(vault.getValue().getPath().toFile());
+		var ciphertextNode = fileChooser.showOpenDialog(mainWindow);
+		try {
+			var nodeName = vault.get().getCleartextName(ciphertextNode.toPath());
+			var alert = new Alert(Alert.AlertType.INFORMATION, "The answer is: %s".formatted(nodeName), ButtonType.OK);
+			alert.showAndWait();
+			//.filter(response -> response == ButtonType.OK)
+			//.ifPresent(response -> formatSystem());
+		} catch (Exception e) {
+			LOG.warn("Failed to decrypt filename for {}", ciphertextNode, e);
+			var alert = new Alert(Alert.AlertType.ERROR, "The exception is: %s".formatted(e.getClass()), ButtonType.OK);
+			alert.showAndWait();
 		}
 	}
 

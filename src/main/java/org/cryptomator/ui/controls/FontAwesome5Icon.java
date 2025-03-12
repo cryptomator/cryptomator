@@ -8,6 +8,8 @@ public enum FontAwesome5Icon {
 	ARROW_UP("\uF062"), //
 	BAN("\uF05E"), //
 	BUG("\uF188"), //
+	BULLSEYE("\uF140"), //
+	DOT_CIRCLE("\uF192"), //
 	CARET_DOWN("\uF0D7"), //
 	CARET_RIGHT("\uF0Da"), //
 	CHECK("\uF00C"), //
