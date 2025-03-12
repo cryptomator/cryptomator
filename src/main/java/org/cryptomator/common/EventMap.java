@@ -18,15 +18,22 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Map containing {@link VaultEvent}s.
  * The map is keyed by the ciphertext path of the affected resource _and_ the {@link FilesystemEvent}s class in order to group same events
+ * <p>
+ * Use {@link EventMap#put(VaultEvent)} to add an element and {@link EventMap#remove(VaultEvent)} to remove it.
+ * <p>
+ * The map is size restricted to {@value MAX_SIZE} elements. If a _new_ element (i.e. not already present) is added, the least recently added is removed.
  */
 @Singleton
 public class EventMap implements ObservableMap<EventMap.EventKey, VaultEvent> {
+
+	private static final int MAX_SIZE = 300;
 
 	public record EventKey(Path ciphertextPath, Class<? extends FilesystemEvent> c) {}
 
@@ -123,6 +130,11 @@ public class EventMap implements ObservableMap<EventMap.EventKey, VaultEvent> {
 		//if-else
 		var nullOrEntry = delegate.get(key);
 		if (nullOrEntry == null) {
+			if (size() == MAX_SIZE) {
+				delegate.entrySet().stream() //
+						.min(Comparator.comparing(entry -> entry.getValue().timestamp())) //
+						.ifPresent(oldestEntry -> delegate.remove(oldestEntry.getKey()));
+			}
 			delegate.put(key, e);
 		} else {
 			delegate.put(key, nullOrEntry.incrementCount(e.timestamp()));
