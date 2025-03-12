@@ -126,59 +126,59 @@ public class EventListCellController implements FxController {
 
 	private void adjustToBrokenFileNodeEvent(BrokenFileNodeEvent bfe) {
 		eventIcon.setValue(FontAwesome5Icon.TIMES);
-		eventMessage.setValue(resourceBundle.getString("event.brokenFileNode.message"));
+		eventMessage.setValue(resourceBundle.getString("eventView.entry.brokenFileNode.message"));
 		eventDescription.setValue(bfe.ciphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("event.brokenFileNode.showEncrypted", () -> reveal(revealService, convertVaultPathToSystemPath(bfe.ciphertextPath())));
+			addAction("eventView.entry.brokenFileNode.showEncrypted", () -> reveal(revealService, convertVaultPathToSystemPath(bfe.ciphertextPath())));
 		} else {
 			addAction("event.brokenFileNode.copyEncrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.ciphertextPath()).toString()));
 		}
-		addAction("event.brokenFileNode.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.cleartextPath()).toString()));
+		addAction("eventView.entry.brokenFileNode.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.cleartextPath()).toString()));
 	}
 
 	private void adjustToConflictResolvedEvent(ConflictResolvedEvent cre) {
 		eventIcon.setValue(FontAwesome5Icon.CHECK);
-		eventMessage.setValue(resourceBundle.getString("event.conflictResolved.message"));
+		eventMessage.setValue(resourceBundle.getString("eventView.entry.conflictResolved.message"));
 		eventDescription.setValue(cre.resolvedCiphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("event.conflictResolved.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
+			addAction("eventView.entry.conflictResolved.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
 		} else {
-			addAction("event.conflictResolved.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cre.resolvedCleartextPath()).toString()));
+			addAction("eventView.entry.conflictResolved.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cre.resolvedCleartextPath()).toString()));
 		}
 	}
 
 	private void adjustToConflictEvent(ConflictResolutionFailedEvent cfe) {
 		eventIcon.setValue(FontAwesome5Icon.COMPRESS_ALT);
-		eventMessage.setValue(resourceBundle.getString("event.conflict.message"));
+		eventMessage.setValue(resourceBundle.getString("eventView.entry.conflict.message"));
 		eventDescription.setValue(cfe.conflictingCiphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("event.conflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
-			addAction("event.conflict.showEncrypted", () -> reveal(revealService, cfe.conflictingCiphertextPath()));
+			addAction("eventView.entry.conflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
+			addAction("eventView.entry.conflict.showEncrypted", () -> reveal(revealService, cfe.conflictingCiphertextPath()));
 		} else {
-			addAction("event.conflict.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cfe.canonicalCleartextPath()).toString()));
-			addAction("event.conflict.copyEncrypted", () -> copyToClipboard(cfe.conflictingCiphertextPath().toString()));
+			addAction("eventView.entry.conflict.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cfe.canonicalCleartextPath()).toString()));
+			addAction("eventView.entry.conflict.copyEncrypted", () -> copyToClipboard(cfe.conflictingCiphertextPath().toString()));
 		}
 	}
 
 	private void adjustToDecryptionFailedEvent(DecryptionFailedEvent dfe) {
 		eventIcon.setValue(FontAwesome5Icon.BAN);
-		eventMessage.setValue(resourceBundle.getString("event.decryptionFailed.message"));
+		eventMessage.setValue(resourceBundle.getString("eventView.entry.decryptionFailed.message"));
 		eventDescription.setValue(dfe.ciphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("event.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
+			addAction("eventView.entry.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
 		} else {
-			addAction("event.decryptionFailed.copyEncrypted", () -> copyToClipboard(dfe.ciphertextPath().toString()));
+			addAction("eventView.entry.decryptionFailed.copyEncrypted", () -> copyToClipboard(dfe.ciphertextPath().toString()));
 		}
 	}
 
 	private void adjustToBrokenDirFileEvent(BrokenDirFileEvent bde) {
 		eventIcon.setValue(FontAwesome5Icon.TIMES);
-		eventMessage.setValue(resourceBundle.getString("event.brokenDirFile.message"));
+		eventMessage.setValue(resourceBundle.getString("eventView.entry.brokenDirFile.message"));
 		eventDescription.setValue(bde.ciphertextPath().getParent().getFileName().toString());
 		if (revealService != null) {
-			addAction("event.brokenDirFile.showEncrypted", () -> reveal(revealService, bde.ciphertextPath()));
+			addAction("eventView.entry.brokenDirFile.showEncrypted", () -> reveal(revealService, bde.ciphertextPath()));
 		} else {
-			addAction("event.brokenDirFile.copyEncrypted", () -> copyToClipboard(bde.ciphertextPath().toString()));
+			addAction("eventView.entry.brokenDirFile.copyEncrypted", () -> copyToClipboard(bde.ciphertextPath().toString()));
 		}
 	}
 
@@ -202,7 +202,7 @@ public class EventListCellController implements FxController {
 		if (vaultUnlocked.getValue()) {
 			return eventMessage.getValue();
 		} else {
-			return resourceBundle.getString("event.vaultLocked.message");
+			return resourceBundle.getString("eventView.entry.vaultLocked.message");
 		}
 	}
 
@@ -211,7 +211,7 @@ public class EventListCellController implements FxController {
 			return eventDescription.getValue();
 		} else {
 			var e = event.getValue();
-			return resourceBundle.getString("event.vaultLocked.description").formatted(e != null ? e.v().getDisplayName() : "");
+			return resourceBundle.getString("eventView.entry.vaultLocked.description").formatted(e != null ? e.v().getDisplayName() : "");
 		}
 	}
 
