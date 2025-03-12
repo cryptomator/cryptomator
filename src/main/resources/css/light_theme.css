@@ -215,6 +215,13 @@
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
 }
 
+.update-indicator {
+	-fx-background-color: white, RED_5;
+	-fx-background-insets: 1px, 2px;
+	-fx-background-radius: 6px, 5px;
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 2, 0, 0, 0);
+}
+
 .event-window .button-bar {
 	-fx-min-height:42px;
 	-fx-max-height:42px;

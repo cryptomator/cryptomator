@@ -3,6 +3,7 @@
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -42,11 +43,17 @@
 				</graphic>
 			</Button>
 			<Region HBox.hgrow="ALWAYS"/>
-			<Button onMouseClicked="#showEventViewer" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
-				<graphic>
-					<FontAwesome5IconView glyph="BELL" glyphSize="16"/>
-				</graphic>
-			</Button>
+			<StackPane>
+				<Button onMouseClicked="#showEventViewer" styleClass="button-right" minWidth="20" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false">
+					<graphic>
+						<FontAwesome5IconView glyph="BELL" glyphSize="16"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%main.vaultlist.showEventsButton.tooltip"/>
+					</tooltip>
+				</Button>
+				<Region styleClass="update-indicator" visible="${controller.newEventsPresent}" mouseTransparent="true" StackPane.alignment="TOP_RIGHT" prefWidth="12" prefHeight="12" maxWidth="-Infinity" maxHeight="-Infinity"/>
+			</StackPane>
 			<Button onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
 				<graphic>
 					<FontAwesome5IconView glyph="COG" glyphSize="16"/>
