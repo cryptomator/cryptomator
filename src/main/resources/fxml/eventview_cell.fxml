@@ -25,7 +25,7 @@
 	<VBox spacing="4" HBox.hgrow="ALWAYS">
 		<HBox spacing="4">
 			<Label styleClass="header-label" text="${controller.message}"/>
-			<Label styleClass="header-misc" text="${controller.count}"/>
+			<Label styleClass="header-misc" text="${controller.count}" visible="${controller.vaultUnlocked}"/>
 		</HBox>
 		<Label text="${controller.description}"/>
 	</VBox>

@@ -312,4 +312,12 @@ public class EventListCellController implements FxController {
 	public String getEventLocalDate() {
 		return readableDate.getValue();
 	}
+
+	public ObservableValue<Boolean> vaultUnlockedProperty() {
+		return vaultUnlocked;
+	}
+
+	public boolean isVaultUnlocked() {
+		return vaultUnlocked.getValue();
+	}
 }
