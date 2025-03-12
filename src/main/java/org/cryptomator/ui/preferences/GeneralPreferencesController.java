@@ -105,7 +105,9 @@ public class GeneralPreferencesController implements FxController {
 		if (SystemUtils.IS_OS_MAC) {
 			var idsAndNames = settings.directories.stream().collect(Collectors.toMap(vs -> vs.id, vs -> vs.displayName.getValue()));
 			if (!idsAndNames.isEmpty()) {
-				LOG.debug("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.displayName(), newProvider.displayName());
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.displayName(), newProvider.displayName());
+				}
 				keychainMigrations = keychainMigrations.thenRunAsync(() -> {
 					try {
 						KeychainManager.migrate(oldProvider, newProvider, idsAndNames);

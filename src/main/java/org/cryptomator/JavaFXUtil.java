@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 public class JavaFXUtil {
 
+	private JavaFXUtil() {}
+
 	public static boolean startPlatform() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 		try {

@@ -14,11 +14,10 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class KeychainManagerTest {
+class KeychainManagerTest {
 
 	@BeforeAll
 	public static void startup() throws InterruptedException {
@@ -34,7 +33,7 @@ public class KeychainManagerTest {
 	}
 
 	@Nested
-	public class WhenObservingProperties {
+	class WhenObservingProperties {
 
 		@Test
 		public void testPropertyChangesWhenStoringPassword() throws KeychainAccessException, InterruptedException {
