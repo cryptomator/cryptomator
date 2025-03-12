@@ -7,6 +7,7 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.common.NamedServiceProvider;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.cryptomator.ui.common.FxController;
@@ -104,11 +105,14 @@ public class GeneralPreferencesController implements FxController {
 		if (SystemUtils.IS_OS_MAC) {
 			var idsAndNames = settings.directories.stream().collect(Collectors.toMap(vs -> vs.id, vs -> vs.displayName.getValue()));
 			if (!idsAndNames.isEmpty()) {
-				keychainMigrations = keychainMigrations.thenRunAsync(() -> KeychainManager.migrate(oldProvider, newProvider, idsAndNames), backgroundExecutor) //
-						.exceptionally(e -> {
-							LOG.warn("Failed to migrate entries", e);
-							return null;
-						});
+				LOG.debug("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.displayName(), newProvider.displayName());
+				keychainMigrations = keychainMigrations.thenRunAsync(() -> {
+					try {
+						KeychainManager.migrate(oldProvider, newProvider, idsAndNames);
+					} catch (KeychainAccessException e) {
+						LOG.warn("Failed to migrate all entries from {} to {}", oldProvider.displayName(), newProvider.displayName(), e);
+					}
+				}, backgroundExecutor);
 			}
 		}
 	}

@@ -5,8 +5,6 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,8 +19,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Singleton
 public class KeychainManager implements KeychainAccessProvider {
-
-	private static final Logger LOG = LoggerFactory.getLogger(KeychainManager.class);
 
 	private final ObjectExpression<KeychainAccessProvider> keychain;
 	private final LoadingCache<String, BooleanProperty> passphraseStoredProperties;
@@ -175,24 +171,18 @@ public class KeychainManager implements KeychainAccessProvider {
 		return this.keychain;
 	}
 
-	public static void migrate(KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider, Map<String, String> idsAndNames) {
+	public static void migrate(KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider, Map<String, String> idsAndNames) throws KeychainAccessException {
 		if (oldProvider instanceof KeychainManager || newProvider instanceof KeychainManager) {
 			throw new IllegalArgumentException("KeychainManger must not be the source or target of migration");
 		}
-
-		LOG.info("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.displayName(), newProvider.displayName());
-		idsAndNames.forEach((id, name) -> {
-			try {
-				var passphrase = oldProvider.loadPassphrase(id);
-				if (passphrase != null) {
-					var wrapper = new Passphrase(passphrase);
-					newProvider.storePassphrase(id, name, wrapper);
-					oldProvider.deletePassphrase(id);
-					wrapper.destroy();
-				}
-			} catch (KeychainAccessException e) {
-				LOG.error("Failed to migrate keychain entry for vault {}.", id, e);
+		for (var entry : idsAndNames.entrySet()) {
+			var passphrase = oldProvider.loadPassphrase(entry.getKey());
+			if (passphrase != null) {
+				var wrapper = new Passphrase(passphrase);
+				oldProvider.deletePassphrase(entry.getKey()); //we cannot apply "first-write-then-delete" pattern here, since we can potentially write to the same passphrase store (e.g., touchID and regular keychain)
+				newProvider.storePassphrase(entry.getKey(), entry.getValue(), wrapper);
+				wrapper.destroy();
 			}
-		});
+		}
 	}
 }
