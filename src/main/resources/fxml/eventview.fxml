@@ -8,6 +8,7 @@
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Tooltip?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.eventview.EventViewController"
@@ -25,6 +26,9 @@
 			<graphic>
 				<FontAwesome5IconView glyph="TRASH" glyphSize="16"/>
 			</graphic>
+			<tooltip>
+				<Tooltip text="%eventView.clearListButton.tooltip"/>
+			</tooltip>
 		</Button>
 	</HBox>
 	<ListView fx:id="eventListView" fixedCellSize="60" VBox.vgrow="ALWAYS"/>
