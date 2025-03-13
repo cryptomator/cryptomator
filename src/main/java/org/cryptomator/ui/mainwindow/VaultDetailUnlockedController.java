@@ -11,7 +11,9 @@ import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
@@ -156,7 +158,7 @@ public class VaultDetailUnlockedController implements FxController {
 	public void chooseFileAndReveal() {
 		Preconditions.checkState(accessibleViaPath.getValue());
 		var fileChooser = new FileChooser();
-		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.filePickerTitle"));
+		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.decryptedFilePickerTitle"));
 		fileChooser.setInitialDirectory(Path.of(mountPoint.getValue()).toFile());
 		var cleartextFile = fileChooser.showOpenDialog(mainWindow);
 		if (cleartextFile != null) {
@@ -168,7 +170,7 @@ public class VaultDetailUnlockedController implements FxController {
 	@FXML
 	public void chooseEncryptedFileAndGetName() {
 		var fileChooser = new FileChooser();
-		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.filePickerTitle"));
+		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.encryptedFilePickerTitle"));
 
 		fileChooser.setInitialDirectory(vault.getValue().getPath().toFile());
 		var ciphertextNode = fileChooser.showOpenDialog(mainWindow);
