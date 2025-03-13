@@ -131,7 +131,7 @@ public class EventListCellController implements FxController {
 		if (revealService != null) {
 			addAction("eventView.entry.brokenFileNode.showEncrypted", () -> reveal(revealService, convertVaultPathToSystemPath(bfe.ciphertextPath())));
 		} else {
-			addAction("event.brokenFileNode.copyEncrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.ciphertextPath()).toString()));
+			addAction("eventView.entry.brokenFileNode.copyEncrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.ciphertextPath()).toString()));
 		}
 		addAction("eventView.entry.brokenFileNode.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.cleartextPath()).toString()));
 	}
