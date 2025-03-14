@@ -5,14 +5,17 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -37,12 +40,19 @@ public class RecoveryKeyValidateController implements FxController {
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final ObjectProperty<RecoveryKeyState> recoveryKeyState;
 	private final AutoCompleter autoCompleter;
+	private final ObjectProperty<RecoverUtil.Type> recoverType;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	private volatile boolean isWrongKey;
 
 	public TextArea textarea;
 
-	public RecoveryKeyValidateController(Vault vault, @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
+	public RecoveryKeyValidateController(Vault vault, //
+										 @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, //
+										 StringProperty recoveryKey, //
+										 RecoveryKeyFactory recoveryKeyFactory, //
+										 @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, //
+										 MasterkeyFileAccess masterkeyFileAccess) {
 		this.vault = vault;
 		this.unverifiedVaultConfig = vaultConfig;
 		this.recoveryKey = recoveryKey;
@@ -52,6 +62,8 @@ public class RecoveryKeyValidateController implements FxController {
 		this.recoveryKeyCorrect = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.CORRECT::equals, false);
 		this.recoveryKeyWrong = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.WRONG::equals, false);
 		this.recoveryKeyInvalid = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.INVALID::equals, false);
+		this.recoverType = recoverType;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 	}
 
 	@FXML
@@ -118,7 +130,23 @@ public class RecoveryKeyValidateController implements FxController {
 
 	private void validateRecoveryKey() {
 		isWrongKey = false;
-		var valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
+		var valid = false;
+		switch (recoverType.get()) {
+			case RESTORE_VAULT_CONFIG -> {
+				try{
+					valid = RecoverUtil.validateRecoveryKey(recoveryKeyFactory, vault, recoveryKey, masterkeyFileAccess);
+				}
+				catch (IllegalStateException e){
+					isWrongKey = true;
+				}
+				catch (IllegalArgumentException e){
+					isWrongKey = false;
+				}
+			}
+			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT -> {
+				valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
+			}
+		};
 		if (valid) {
 			recoveryKeyState.set(RecoveryKeyState.CORRECT);
 		} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()

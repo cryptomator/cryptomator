@@ -8,6 +8,7 @@ import org.cryptomator.common.Nullable;
 import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
@@ -193,8 +194,8 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
-	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
-		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory);
+	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, @Nullable MasterkeyFileAccess masterkeyFileAccess) {
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, recoverType, masterkeyFileAccess);
 	}
 
 	@Provides

@@ -14,7 +14,9 @@ import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
 import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
@@ -23,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
@@ -39,6 +42,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
 
 import static org.cryptomator.common.Constants.DEFAULT_KEY_ID;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -54,7 +58,11 @@ public class RecoverUtil {
 
 	public static CryptorProvider.Scheme detectCipherCombo(byte[] masterkey, Path pathToVault) {
 		try (Stream<Path> paths = Files.walk(pathToVault.resolve(DATA_DIR_NAME))) {
-			return paths.filter(path -> path.toString().endsWith(".c9r")).findFirst().map(c9rFile -> determineScheme(c9rFile, masterkey)).orElseThrow(() -> new IllegalStateException("No .c9r file found."));
+			return paths.filter(path -> path.toString()
+							.endsWith(".c9r"))
+							.findFirst()
+							.map(c9rFile -> determineScheme(c9rFile, masterkey))
+							.orElseThrow(() -> new IllegalStateException("No .c9r file found."));
 		} catch (IOException e) {
 			throw new IllegalStateException("Failed to detect cipher combo.", e);
 		}
@@ -117,9 +125,30 @@ public class RecoverUtil {
 		return masterkeyFileAccess.load(masterkeyFilePath, password);
 	}
 
+	public static boolean validateRecoveryKey(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, MasterkeyFileAccess masterkeyFileAccess) {
+		Path tempRecoveryPath = null;
+		CharSequence tmpPass = "asdasdasd";
+		try {
+			tempRecoveryPath = createRecoveryDirectory(vault.getPath());
+			createNewMasterkeyFile(recoveryKeyFactory, tempRecoveryPath, recoveryKey.get(), tmpPass);
+			Path masterkeyFilePath = tempRecoveryPath.resolve(MASTERKEY_FILENAME);
+			try (Masterkey masterkey = loadMasterkey(masterkeyFileAccess, masterkeyFilePath, tmpPass)) {
+				initializeCryptoFileSystem(tempRecoveryPath, vault.getPath(), masterkey, new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.MAX_SHORTENING_THRESHOLD));
+				return true;
+			}
+		} catch (IOException | CryptoException e) {
+			LOG.warn("Recovery key validation failed", e);
+			return false;
+		} finally {
+			if (tempRecoveryPath != null) {
+				deleteRecoveryDirectory(tempRecoveryPath);
+			}
+		}
+	}
+
 	public static void initializeCryptoFileSystem(Path recoveryPath, Path vaultPath, Masterkey masterkey, IntegerProperty shorteningThreshold) throws IOException, CryptoException {
 		var combo = RecoverUtil.detectCipherCombo(masterkey.getEncoded(), vaultPath);
-		org.cryptomator.cryptolib.api.MasterkeyLoader loader = ignored -> masterkey.copy();
+		MasterkeyLoader loader = ignored -> masterkey.copy();
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(combo).withKeyLoader(loader).withShorteningThreshold(shorteningThreshold.get()).build();
 		CryptoFileSystemProvider.initialize(recoveryPath, fsProps, DEFAULT_KEY_ID);
 	}
@@ -240,7 +269,8 @@ public class RecoverUtil {
 		RESTORE_VAULT_CONFIG,
 		RESTORE_MASTERKEY,
 		RESET_PASSWORD,
-		SHOW_KEY;
+		SHOW_KEY,
+		CONVERT_VAULT;
 	}
 
 }
