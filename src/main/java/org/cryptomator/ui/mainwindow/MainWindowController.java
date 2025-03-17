@@ -166,7 +166,7 @@ public class MainWindowController implements FxController {
 		return updateAvailable.get();
 	}
 
-	public BooleanBinding licenseValidProperty(){
+	public BooleanBinding licenseValidProperty() {
 		return licenseHolder.validLicenseProperty();
 	}
 
