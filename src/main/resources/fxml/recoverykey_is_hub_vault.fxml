@@ -16,7 +16,7 @@
 	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyIsHubVaultController"
 	  minWidth="400"
 	  maxWidth="400"
-	  minHeight="145"
+	  minHeight="204"
 	  spacing="12"
 	  alignment="TOP_CENTER">
 	<padding>
@@ -34,19 +34,22 @@
 		</Group>
 
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="Hub Vault or not?" wrapText="true">
+			<Label styleClass="label-large" text="%recoveryKey.recover.onBoarding.title" wrapText="true">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-
-			<Label text="If your Vault is an Hub Vault you can restore the vault config .... Otherwise you need the recovery key of the vault to restore the config files." wrapText="true"/>
-
+			<Label text="%recoveryKey.recover.onBoarding.message" wrapText="true"/>
+			<Label text="%recoveryKey.recover.onBoarding.description" wrapText="true">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
 				<buttons>
 					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
-					<Button text="Use RecoveryKey" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" onAction="#recover"/>
+					<Button text="%recoveryKey.recover.onBoarding.confirm" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" onAction="#recover"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

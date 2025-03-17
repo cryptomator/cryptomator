@@ -7,26 +7,29 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.CheckBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
 	  prefWidth="450"
-	  prefHeight="480"
-	  spacing="24"
-	  alignment="CENTER">
+	  prefHeight="480">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
 		<ImageView VBox.vgrow="ALWAYS" fitWidth="400" preserveRatio="true" smooth="true" image="${controller.screenshot}"/>
 
-		<Label text="%addvaultwizard.existing.instruction" wrapText="true"/>
+		<Label text="%addvaultwizard.existing.instruction" wrapText="true">
+			<padding>
+				<Insets bottom="6" top="6"/>
+			</padding>
+		</Label>
 
+		<CheckBox fx:id="restoreCheckBox" text="%addvaultwizard.existing.instruction.restore" wrapText="true"/>
 		<Region VBox.vgrow="ALWAYS"/>
-
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
-				<Button text="%addvaultwizard.existing.restore" ButtonBar.buttonData="NEXT_FORWARD" onAction="#restoreVaultConfigWithRecoveryKey" />
+				<Button text="%addvaultwizard.existing.restore" ButtonBar.buttonData="NEXT_FORWARD" onAction="#restoreVaultConfigWithRecoveryKey" visible="${controller.restoreButtonVisible}" />
 				<Button text="%addvaultwizard.existing.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" onAction="#chooseFileAndNext" defaultButton="true"/>
 			</buttons>
 		</ButtonBar>

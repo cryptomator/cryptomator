@@ -19,10 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.image.Image;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -55,6 +58,11 @@ public class ChooseExistingVaultController implements FxController {
 	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final List<MountService> mountServices;
 
+	@FXML
+	private CheckBox restoreCheckBox;
+
+	private final BooleanProperty restoreButtonVisible = new SimpleBooleanProperty(false);
+
 
 	@Inject
 	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, //
@@ -83,6 +91,9 @@ public class ChooseExistingVaultController implements FxController {
 		this.dialogs = dialogs;
 	}
 
+	public void initialize(){
+		restoreButtonVisible.bind(restoreCheckBox.selectedProperty());
+	}
 	private Image selectScreenshot(Theme theme) {
 		String imageResourcePath;
 		if (SystemUtils.IS_OS_MAC) {
@@ -122,18 +133,9 @@ public class ChooseExistingVaultController implements FxController {
 
 		Optional<Vault> optionalVault = RecoverUtil.prepareVaultFromDirectory(directoryChooser, window, dialogs, vaultComponentFactory, mountServices);
 
+
 		optionalVault.ifPresent(vault -> {
-			dialogs.prepareContactHubAdmin(window) //
-					.setTitleKey("a.title", vault.getVaultSettings().displayName.get() + " " + vault.getState()) //
-					.setDescriptionKey("a.description") //
-					.setMessageKey("a.message") //
-					.setCancelButtonKey("generic.button.cancel") //
-					.setOkButtonKey("generic.button.next") //
-					.setOkAction(stage -> {
-						recoveryKeyWindow.create(vault, window,RecoverUtil.Type.RESTORE_VAULT_CONFIG).showIsHubVaultDialogWindow();
-						stage.close();
-					}) //
-					.build().showAndWait();
+			recoveryKeyWindow.create(vault, window,RecoverUtil.Type.RESTORE_VAULT_CONFIG).showIsHubVaultDialogWindow();
 		});
 	}
 
@@ -147,4 +149,11 @@ public class ChooseExistingVaultController implements FxController {
 		return screenshot.getValue();
 	}
 
+	public boolean isRestoreButtonVisible() {
+		return restoreButtonVisible.get();
+	}
+
+	public BooleanProperty restoreButtonVisibleProperty() {
+		return restoreButtonVisible;
+	}
 }
