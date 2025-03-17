@@ -8,6 +8,7 @@ import org.cryptomator.common.Nullable;
 import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
 import org.cryptomator.ui.common.DefaultSceneFactory;
@@ -161,6 +162,13 @@ abstract class RecoveryKeyModule {
 		return new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_MASTERKEY);
 	}
 
+	@Provides
+	@Named("cipherCombo")
+	@RecoveryKeyScoped
+	static ObjectProperty<CryptorProvider.Scheme> provideCipherCombo() {
+		return new SimpleObjectProperty<>();
+	}
+
 	@Binds
 	@IntoMap
 	@FxControllerKey(RecoveryKeyExpertSettingsController.class)
@@ -194,8 +202,8 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
-	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, @Nullable MasterkeyFileAccess masterkeyFileAccess) {
-		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, recoverType, masterkeyFileAccess);
+	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo, @Nullable MasterkeyFileAccess masterkeyFileAccess) {
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, recoverType, cipherCombo, masterkeyFileAccess);
 	}
 
 	@Provides

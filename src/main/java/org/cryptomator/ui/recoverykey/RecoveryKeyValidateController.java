@@ -10,6 +10,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public class RecoveryKeyValidateController implements FxController {
 	private final ObservableValue<Boolean> recoveryKeyInvalid;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final ObjectProperty<RecoveryKeyState> recoveryKeyState;
+	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final AutoCompleter autoCompleter;
 	private final ObjectProperty<RecoverUtil.Type> recoverType;
 	private final MasterkeyFileAccess masterkeyFileAccess;
@@ -52,6 +54,7 @@ public class RecoveryKeyValidateController implements FxController {
 										 StringProperty recoveryKey, //
 										 RecoveryKeyFactory recoveryKeyFactory, //
 										 @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, //
+										 @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
 										 MasterkeyFileAccess masterkeyFileAccess) {
 		this.vault = vault;
 		this.unverifiedVaultConfig = vaultConfig;
@@ -63,6 +66,7 @@ public class RecoveryKeyValidateController implements FxController {
 		this.recoveryKeyWrong = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.WRONG::equals, false);
 		this.recoveryKeyInvalid = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.INVALID::equals, false);
 		this.recoverType = recoverType;
+		this.cipherCombo = cipherCombo;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 	}
 
@@ -133,20 +137,20 @@ public class RecoveryKeyValidateController implements FxController {
 		var valid = false;
 		switch (recoverType.get()) {
 			case RESTORE_VAULT_CONFIG -> {
-				try{
-					valid = RecoverUtil.validateRecoveryKey(recoveryKeyFactory, vault, recoveryKey, masterkeyFileAccess);
-				}
-				catch (IllegalStateException e){
+				try {
+					var combo = RecoverUtil.validateRecoveryKeyAndGetCombo(recoveryKeyFactory, vault, recoveryKey, masterkeyFileAccess);
+					valid = combo.isPresent();
+					combo.ifPresent(cipherCombo::set);
+				} catch (IllegalStateException e) {
 					isWrongKey = true;
-				}
-				catch (IllegalArgumentException e){
+				} catch (IllegalArgumentException e) {
 					isWrongKey = false;
 				}
 			}
 			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT -> {
 				valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
 			}
-		};
+		}
 		if (valid) {
 			recoveryKeyState.set(RecoveryKeyState.CORRECT);
 		} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()
@@ -155,6 +159,7 @@ public class RecoveryKeyValidateController implements FxController {
 			recoveryKeyState.set(RecoveryKeyState.INVALID);
 		}
 	}
+
 
 	/* Getter/Setter */
 

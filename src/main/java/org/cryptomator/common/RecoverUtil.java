@@ -125,20 +125,41 @@ public class RecoverUtil {
 		return masterkeyFileAccess.load(masterkeyFilePath, password);
 	}
 
-	public static boolean validateRecoveryKey(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, MasterkeyFileAccess masterkeyFileAccess) {
+	public static void initializeCryptoFileSystem(Path recoveryPath, Masterkey masterkey, IntegerProperty shorteningThreshold, CryptorProvider.Scheme combo) throws IOException, CryptoException {
+		MasterkeyLoader loader = ignored -> masterkey.copy();
+		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(combo).withKeyLoader(loader).withShorteningThreshold(shorteningThreshold.get()).build();
+		CryptoFileSystemProvider.initialize(recoveryPath, fsProps, DEFAULT_KEY_ID);
+	}
+
+	public static Optional<CryptorProvider.Scheme> getCipherCombo(Path vaultPath, Masterkey masterkey) {
+		try {
+			return Optional.of(RecoverUtil.detectCipherCombo(masterkey.getEncoded(), vaultPath));
+		} catch (Exception e) {
+			LOG.warn("Failed to detect cipher combo", e);
+			return Optional.empty();
+		}
+	}
+
+	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndGetCombo(
+			RecoveryKeyFactory recoveryKeyFactory,
+			Vault vault,
+			StringProperty recoveryKey,
+			MasterkeyFileAccess masterkeyFileAccess) {
+
 		Path tempRecoveryPath = null;
 		CharSequence tmpPass = "asdasdasd";
+
 		try {
 			tempRecoveryPath = createRecoveryDirectory(vault.getPath());
 			createNewMasterkeyFile(recoveryKeyFactory, tempRecoveryPath, recoveryKey.get(), tmpPass);
 			Path masterkeyFilePath = tempRecoveryPath.resolve(MASTERKEY_FILENAME);
+
 			try (Masterkey masterkey = loadMasterkey(masterkeyFileAccess, masterkeyFilePath, tmpPass)) {
-				initializeCryptoFileSystem(tempRecoveryPath, vault.getPath(), masterkey, new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.MAX_SHORTENING_THRESHOLD));
-				return true;
+				return getCipherCombo(vault.getPath(), masterkey);
 			}
 		} catch (IOException | CryptoException e) {
 			LOG.warn("Recovery key validation failed", e);
-			return false;
+			return Optional.empty();
 		} finally {
 			if (tempRecoveryPath != null) {
 				deleteRecoveryDirectory(tempRecoveryPath);
@@ -146,12 +167,6 @@ public class RecoverUtil {
 		}
 	}
 
-	public static void initializeCryptoFileSystem(Path recoveryPath, Path vaultPath, Masterkey masterkey, IntegerProperty shorteningThreshold) throws IOException, CryptoException {
-		var combo = RecoverUtil.detectCipherCombo(masterkey.getEncoded(), vaultPath);
-		MasterkeyLoader loader = ignored -> masterkey.copy();
-		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(combo).withKeyLoader(loader).withShorteningThreshold(shorteningThreshold.get()).build();
-		CryptoFileSystemProvider.initialize(recoveryPath, fsProps, DEFAULT_KEY_ID);
-	}
 
 	public static void moveRecoveredFiles(Path recoveryPath, Path vaultPath) throws IOException {
 		Files.move(recoveryPath.resolve(MASTERKEY_FILENAME), vaultPath.resolve(MASTERKEY_FILENAME), StandardCopyOption.REPLACE_EXISTING);

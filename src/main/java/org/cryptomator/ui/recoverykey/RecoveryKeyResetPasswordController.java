@@ -5,6 +5,7 @@ import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.changepassword.NewPasswordController;
@@ -51,6 +52,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final VaultListManager vaultListManager;
 	private final IntegerProperty shorteningThreshold;
 	private final ObjectProperty<RecoverUtil.Type> recoverType;
+	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final ResourceBundle resourceBundle;
 	private final StringProperty buttonText = new SimpleStringProperty();
 
@@ -70,6 +72,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 											  VaultListManager vaultListManager, //
 											  @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
 											  @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType,
+											  @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
 											  ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
@@ -83,6 +86,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.vaultListManager = vaultListManager;
 		this.shorteningThreshold = shorteningThreshold;
+		this.cipherCombo = cipherCombo;
 		this.recoverType = recoverType;
 		this.resourceBundle = resourceBundle;
 
@@ -116,7 +120,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 				Path masterkeyFilePath = recoveryPath.resolve(MASTERKEY_FILENAME);
 
 				try (Masterkey masterkey = RecoverUtil.loadMasterkey(masterkeyFileAccess, masterkeyFilePath, newPasswordController.passwordField.getCharacters())) {
-					RecoverUtil.initializeCryptoFileSystem(recoveryPath, vault.getPath(), masterkey, shorteningThreshold);
+					RecoverUtil.initializeCryptoFileSystem(recoveryPath,masterkey,shorteningThreshold,cipherCombo.get());
 				}
 
 				RecoverUtil.moveRecoveredFiles(recoveryPath, vault.getPath());
