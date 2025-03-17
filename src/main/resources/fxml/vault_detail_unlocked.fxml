@@ -50,19 +50,15 @@
 			<padding>
 				<Insets topRightBottomLeft="0"/>
 			</padding>
-			<Button fx:id="dropZone" styleClass="drag-n-drop" text="%main.vaultDetail.locateEncryptedFileBtn" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseFileAndReveal" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
+			<Button fx:id="revealEncryptedDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.locateEncryptedFileBtn" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseDecryptedFileAndReveal" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
 				<graphic>
-					<HBox spacing="4">
-						<Text styleClass="cryptic-text" text="abc"/>
-						<FontAwesome5IconView glyph="ARROW_RIGH" glyphSize="10"/>
-						<Text styleClass="cryptic-text" text="101010"/>
-					</HBox>
+					<Text styleClass="cryptic-text" text="abc → 101010"/>
 				</graphic>
 				<tooltip>
 					<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
 				</tooltip>
 			</Button>
-			<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseFileAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
+			<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseDecryptedFileAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
 				<graphic>
 					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
 				</graphic>
@@ -73,19 +69,15 @@
 			<padding>
 				<Insets topRightBottomLeft="0"/>
 			</padding>
-			<Button fx:id="dropZone2" styleClass="drag-n-drop" text="Decrypt file name" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseEncryptedFileAndGetName" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
+			<Button fx:id="decryptNameDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.buttonLabel" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseEncryptedFileAndGetName" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
 				<graphic>
-					<HBox spacing="4">
-						<Text styleClass="cryptic-text" text="101010"/>
-						<FontAwesome5IconView glyph="LONG_ARROW_ALT_RIGHT" glyphSize="10"/>
-						<Text styleClass="cryptic-text" text="abc"/>
-					</HBox>
+					<Text styleClass="cryptic-text" text="101010 → abc"/>
 				</graphic>
 				<tooltip>
-					<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
+					<Tooltip text="%main.vaultDetail.decryptName.tooltip"/>
 				</tooltip>
 			</Button>
-			<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseEncryptedFileAndGetName" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
+			<Button styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.copied" minWidth="120" maxWidth="180" wrapText="true" textAlignment="CENTER" onAction="#chooseEncryptedFileAndGetName" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
 				<graphic>
 					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
 				</graphic>

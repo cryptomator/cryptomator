@@ -17,7 +17,8 @@
 }
 
 @font-face {
-	src: url('courierprime_regular.ttf');
+	src: url('firacode_regular.ttf');
+}
 }
 
 /*******************************************************************************
@@ -126,6 +127,13 @@
 
 .text-flow > * {
 	-fx-fill: TEXT_FILL;
+}
+
+.cryptic-text {
+	-fx-background-color: MAIN_BG;
+	-fx-text-fill: TEXT_FILL;
+	-fx-font-family: 'Fira Code';
+	-fx-font-size: 1.1em;
 }
 
 /*******************************************************************************
@@ -927,13 +935,6 @@
 	-fx-border-radius: 4px;
 	-fx-border-style: dashed inside;
 	-fx-border-width: 1px;
-}
-
-.cryptic-text {
-	-fx-background-color: MAIN_BG;
-	-fx-text-fill: TEXT_FILL;
-	-fx-font-family: 'Courier Prime';
-	-fx-font-size: 1.1em;
 }
 
 .button.drag-n-drop:focused {
