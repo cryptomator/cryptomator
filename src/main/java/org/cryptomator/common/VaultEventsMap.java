@@ -35,7 +35,7 @@ public class VaultEventsMap extends ObservableMapDecorator<VaultEventsMap.Key, V
 
 	private static final int MAX_SIZE = 300;
 
-	public record Key(Vault v, Path key, Class<? extends FilesystemEvent> c) {}
+	public record Key(Vault vault, Path idPath, Class<? extends FilesystemEvent> c) {}
 
 	public record Value(FilesystemEvent mostRecentEvent, int count) {}
 
@@ -66,11 +66,11 @@ public class VaultEventsMap extends ObservableMapDecorator<VaultEventsMap.Key, V
 		if (timeComparsion != 0) {
 			return timeComparsion;
 		}
-		var vaultIdComparsion = left.v.getId().compareTo(right.v.getId());
+		var vaultIdComparsion = left.vault.getId().compareTo(right.vault.getId());
 		if (vaultIdComparsion != 0) {
 			return vaultIdComparsion;
 		}
-		var pathComparsion = left.key.compareTo(right.key);
+		var pathComparsion = left.idPath.compareTo(right.idPath);
 		if (pathComparsion != 0) {
 			return pathComparsion;
 		}
@@ -86,7 +86,7 @@ public class VaultEventsMap extends ObservableMapDecorator<VaultEventsMap.Key, V
 	public synchronized List<VaultEvent> listAll() {
 		return lruCache.stream().map(key -> {
 			var value = delegate.get(key);
-			return new VaultEvent(key.v(), value.mostRecentEvent(), value.count());
+			return new VaultEvent(key.vault(), value.mostRecentEvent(), value.count());
 		}).toList();
 	}
 

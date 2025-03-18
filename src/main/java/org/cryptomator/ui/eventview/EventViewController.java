@@ -71,7 +71,7 @@ public class EventViewController implements FxController {
 	}
 
 	private void updateList(MapChangeListener.Change<? extends VaultEventsMap.Key, ? extends VaultEventsMap.Value> change) {
-		var vault = change.getKey().v();
+		var vault = change.getKey().vault();
 		if (change.wasAdded() && change.wasRemoved()) {
 			//entry updated
 			eventList.remove(new VaultEvent(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
