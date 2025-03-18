@@ -4,14 +4,10 @@ package org.cryptomator.ui.controls;
  * Inspired by de.jensd:fontawesomefx-fontawesome
  */
 public enum FontAwesome5Icon {
-	ARROW_RIGH("\uF061"),
-	LONG_ARROW_ALT_RIGHT("\uF30B"),
 	ANCHOR("\uF13D"), //
 	ARROW_UP("\uF062"), //
 	BAN("\uF05E"), //
 	BUG("\uF188"), //
-	BULLSEYE("\uF140"), //
-	DOT_CIRCLE("\uF192"), //
 	CARET_DOWN("\uF0D7"), //
 	CARET_RIGHT("\uF0Da"), //
 	CHECK("\uF00C"), //
