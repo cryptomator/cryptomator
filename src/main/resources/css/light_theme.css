@@ -16,6 +16,10 @@
 	src: url('opensans_bold.ttf');
 }
 
+@font-face {
+	src: url('firacode_regular.ttf');
+}
+
 /*******************************************************************************
  *                                                                             *
  * Root Styling & Colors                                                       *
@@ -122,6 +126,13 @@
 
 .text-flow > * {
 	-fx-fill: TEXT_FILL;
+}
+
+.cryptic-text {
+	-fx-background-color: MAIN_BG;
+	-fx-text-fill: TEXT_FILL;
+	-fx-font-family: 'Fira Code';
+	-fx-font-size: 1.1em;
 }
 
 /*******************************************************************************
