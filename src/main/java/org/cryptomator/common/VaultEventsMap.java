@@ -32,13 +32,14 @@ import java.util.Set;
  * The map is size restricted to {@value MAX_SIZE} elements. If a _new_ element (i.e. not already present) is added, the least recently added is removed.
  */
 @Singleton
-public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, VaultEvent> {
+public class VaultEventsMap implements ObservableMap<VaultEventsMap.Key, VaultEvent> {
 
 	private static final int MAX_SIZE = 300;
 
-	public record EventKey(Vault v, Path key, Class<? extends FilesystemEvent> c) {}
+	public record Key(Vault v, Path key, Class<? extends FilesystemEvent> c) {}
+	public record Value(FilesystemEvent event, int count) {}
 
-	private final ObservableMap<VaultEventsMap.EventKey, VaultEvent> delegate;
+	private final ObservableMap<Key, VaultEvent> delegate;
 
 	@Inject
 	public VaultEventsMap() {
@@ -46,12 +47,12 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 	}
 
 	@Override
-	public void addListener(MapChangeListener<? super EventKey, ? super VaultEvent> mapChangeListener) {
+	public void addListener(MapChangeListener<? super Key, ? super VaultEvent> mapChangeListener) {
 		delegate.addListener(mapChangeListener);
 	}
 
 	@Override
-	public void removeListener(MapChangeListener<? super EventKey, ? super VaultEvent> mapChangeListener) {
+	public void removeListener(MapChangeListener<? super Key, ? super VaultEvent> mapChangeListener) {
 		delegate.removeListener(mapChangeListener);
 	}
 
@@ -81,7 +82,7 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 	}
 
 	@Override
-	public @Nullable VaultEvent put(EventKey key, VaultEvent value) {
+	public @Nullable VaultEvent put(Key key, VaultEvent value) {
 		return delegate.put(key, value);
 	}
 
@@ -91,7 +92,7 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 	}
 
 	@Override
-	public void putAll(@NotNull Map<? extends EventKey, ? extends VaultEvent> m) {
+	public void putAll(@NotNull Map<? extends Key, ? extends VaultEvent> m) {
 		delegate.putAll(m);
 	}
 
@@ -101,7 +102,7 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 	}
 
 	@Override
-	public @NotNull Set<EventKey> keySet() {
+	public @NotNull Set<Key> keySet() {
 		return delegate.keySet();
 	}
 
@@ -111,7 +112,7 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 	}
 
 	@Override
-	public @NotNull Set<Entry<EventKey, VaultEvent>> entrySet() {
+	public @NotNull Set<Entry<Key, VaultEvent>> entrySet() {
 		return delegate.entrySet();
 	}
 
@@ -148,7 +149,7 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 		return this.remove(key);
 	}
 
-	private EventKey computeKey(VaultEvent ve) {
+	private Key computeKey(VaultEvent ve) {
 		var e = ve.actualEvent();
 		var p = switch (e) {
 			case DecryptionFailedEvent(_, Path ciphertextPath, _) -> ciphertextPath;
@@ -157,6 +158,6 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 			case BrokenDirFileEvent(_, Path ciphertext) -> ciphertext;
 			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
 		};
-		return new EventKey(ve.v(), p, e.getClass());
+		return new Key(ve.v(), p, e.getClass());
 	}
 }

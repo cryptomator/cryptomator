@@ -61,7 +61,7 @@ public class EventViewController implements FxController {
 		});
 
 		eventList.addAll(vaultEventsMap.values());
-		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.EventKey, ? super VaultEvent>) this::updateList);
+		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.Key, ? super VaultEvent>) this::updateList);
 		eventListView.setCellFactory(cellFactory);
 		eventListView.setItems(reversedEventList);
 
@@ -70,7 +70,7 @@ public class EventViewController implements FxController {
 		vaultFilterChoiceBox.setConverter(new VaultConverter(resourceBundle));
 	}
 
-	private void updateList(MapChangeListener.Change<? extends VaultEventsMap.EventKey, ? extends VaultEvent> change) {
+	private void updateList(MapChangeListener.Change<? extends VaultEventsMap.Key, ? extends VaultEvent> change) {
 		if (change.wasAdded() && change.wasRemoved()) {
 			//entry updated
 			eventList.remove(change.getValueRemoved());
