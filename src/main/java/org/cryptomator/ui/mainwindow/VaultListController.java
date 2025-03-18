@@ -112,7 +112,7 @@ public class VaultListController implements FxController {
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.vaultEventsMap = vaultEventsMap;
 		this.newEventsPresent = new SimpleBooleanProperty(false);
-		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.Key, ? super VaultEvent>) change -> {
+		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.Key, ? super VaultEventsMap.Value>) change -> {
 			if (change.wasAdded()) {
 				newEventsPresent.setValue(true);
 			}

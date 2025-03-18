@@ -16,9 +16,12 @@ public record VaultEvent(Vault v, FilesystemEvent actualEvent, int count) implem
 		var timeResult = actualEvent.getTimestamp().compareTo(other.actualEvent().getTimestamp());
 		if(timeResult != 0) {
 			return timeResult;
-		} else {
-			return this.equals(other) ? 0 : this.actualEvent.getClass().getName().compareTo(other.actualEvent.getClass().getName());
 		}
+		var vaultIdResult = v.getId().compareTo(other.v.getId());
+		if(vaultIdResult != 0) {
+			return vaultIdResult;
+		}
+		return this.actualEvent.getClass().getName().compareTo(other.actualEvent.getClass().getName());
 	}
 
 	public VaultEvent incrementCount(FilesystemEvent update) {

@@ -113,7 +113,7 @@ public class EventListCellController implements FxController {
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
 		eventTooltip.setText(item.v().getDisplayName());
-		addAction("generic.action.dismiss", () -> vaultEventsMap.remove(item));
+		addAction("generic.action.dismiss", () -> vaultEventsMap.remove(item.v(),item.actualEvent()));
 		switch (item.actualEvent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
 			case ConflictResolutionFailedEvent fse -> this.adjustToConflictEvent(fse);

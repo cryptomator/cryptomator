@@ -60,8 +60,8 @@ public class EventViewController implements FxController {
 			}
 		});
 
-		eventList.addAll(vaultEventsMap.values());
-		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.Key, ? super VaultEvent>) this::updateList);
+		eventList.addAll(vaultEventsMap.listAll());
+		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.Key, ? super VaultEventsMap.Value>) this::updateList);
 		eventListView.setCellFactory(cellFactory);
 		eventListView.setItems(reversedEventList);
 
@@ -70,15 +70,16 @@ public class EventViewController implements FxController {
 		vaultFilterChoiceBox.setConverter(new VaultConverter(resourceBundle));
 	}
 
-	private void updateList(MapChangeListener.Change<? extends VaultEventsMap.Key, ? extends VaultEvent> change) {
+	private void updateList(MapChangeListener.Change<? extends VaultEventsMap.Key, ? extends VaultEventsMap.Value> change) {
+		var vault = change.getKey().v();
 		if (change.wasAdded() && change.wasRemoved()) {
 			//entry updated
-			eventList.remove(change.getValueRemoved());
-			eventList.addLast(change.getValueAdded());
+			eventList.remove(new VaultEvent(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
+			eventList.addLast(new VaultEvent(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
 		} else if (change.wasAdded()) {
-			eventList.addLast(change.getValueAdded());
+			eventList.addLast(new VaultEvent(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
 		} else { //removed
-			eventList.remove(change.getValueRemoved());
+			eventList.remove(new VaultEvent(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
 		}
 	}
 

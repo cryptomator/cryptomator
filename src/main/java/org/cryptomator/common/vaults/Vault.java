@@ -261,9 +261,8 @@ public class Vault {
 
 
 	private void consumeVaultEvent(FilesystemEvent e) {
-		var wrapper = new VaultEvent(this, e);
 		Platform.runLater(() -> {
-			vaultEventsMap.put(wrapper);
+			vaultEventsMap.put(this, e);
 		});
 	}
 

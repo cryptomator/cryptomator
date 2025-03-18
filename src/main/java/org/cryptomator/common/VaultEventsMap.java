@@ -8,156 +8,121 @@ import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.event.VaultEvent;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableMap;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Map containing {@link VaultEvent}s.
- * The map is keyed by the ciphertext path of the affected resource _and_ the {@link FilesystemEvent}s class in order to group same events
+ * The map is keyed by three elements:
+ * <ul>
+ *     <li>the vault where the event occurred</li>
+ *     <li>an identifying path (can be cleartext or ciphertext)</li>
+ *     <li>the class name of the occurred event</li>
+ * </ul>
+ *
  * <p>
- * Use {@link VaultEventsMap#put(VaultEvent)} to add an element and {@link VaultEventsMap#remove(VaultEvent)} to remove it.
+ * Use {@link VaultEventsMap#put(Vault, FilesystemEvent)} to add an element and {@link VaultEventsMap#remove(Vault, FilesystemEvent)} to remove it.
  * <p>
  * The map is size restricted to {@value MAX_SIZE} elements. If a _new_ element (i.e. not already present) is added, the least recently added is removed.
  */
 @Singleton
-public class VaultEventsMap implements ObservableMap<VaultEventsMap.Key, VaultEvent> {
+public class VaultEventsMap extends ObservableMapDecorator<VaultEventsMap.Key, VaultEventsMap.Value> {
 
 	private static final int MAX_SIZE = 300;
 
 	public record Key(Vault v, Path key, Class<? extends FilesystemEvent> c) {}
-	public record Value(FilesystemEvent event, int count) {}
 
-	private final ObservableMap<Key, VaultEvent> delegate;
+	public record Value(FilesystemEvent mostRecentEvent, int count) {}
+
+	/**
+	 * Internal least-recently-used cache.
+	 */
+	private final TreeSet<Key> lruCache;
 
 	@Inject
 	public VaultEventsMap() {
-		delegate = FXCollections.observableHashMap();
+		super(FXCollections.observableHashMap());
+		this.lruCache = new TreeSet<>(this::compareToMapKeys);
 	}
 
-	@Override
-	public void addListener(MapChangeListener<? super Key, ? super VaultEvent> mapChangeListener) {
-		delegate.addListener(mapChangeListener);
+
+	/**
+	 * Comparsion method for the lru cache. During comparsion the map is accessed.
+	 * First the entries are compared by the event timestamp, then vaultId, then identifying path and lastly by class name.
+	 *
+	 * @param left a {@link Key} object
+	 * @param right another {@link Key} object, compared to {@code left}
+	 * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+	 */
+	private int compareToMapKeys(Key left, Key right) {
+		var t1 = delegate.get(left).mostRecentEvent.getTimestamp();
+		var t2 = delegate.get(right).mostRecentEvent.getTimestamp();
+		var timeComparsion = t1.compareTo(t2);
+		if (timeComparsion != 0) {
+			return timeComparsion;
+		}
+		var vaultIdComparsion = left.v.getId().compareTo(right.v.getId());
+		if (vaultIdComparsion != 0) {
+			return vaultIdComparsion;
+		}
+		var pathComparsion = left.key.compareTo(right.key);
+		if (pathComparsion != 0) {
+			return pathComparsion;
+		}
+		return left.c.getName().compareTo(right.c.getName());
 	}
 
-	@Override
-	public void removeListener(MapChangeListener<? super Key, ? super VaultEvent> mapChangeListener) {
-		delegate.removeListener(mapChangeListener);
+	/**
+	 * Lists all entries in this map as {@link VaultEvent}. The list is sorted ascending by the timestamp of event occurral (and more if it is the same timestamp).
+	 * This method is synchronized with {@link VaultEventsMap#put(Vault, FilesystemEvent)} and {@link VaultEventsMap#remove(Vault, FilesystemEvent)}.
+	 *
+	 * @return a list of vault events, mainly sorted ascending by the event timestamp
+	 */
+	public synchronized List<VaultEvent> listAll() {
+		return lruCache.stream().map(key -> {
+			var value = delegate.get(key);
+			return new VaultEvent(key.v(), value.mostRecentEvent(), value.count());
+		}).toList();
 	}
 
-	@Override
-	public int size() {
-		return delegate.size();
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return delegate.isEmpty();
-	}
-
-	@Override
-	public boolean containsKey(Object key) {
-		return delegate.containsKey(key);
-	}
-
-	@Override
-	public boolean containsValue(Object value) {
-		return delegate.containsValue(value);
-	}
-
-	@Override
-	public VaultEvent get(Object key) {
-		return delegate.get(key);
-	}
-
-	@Override
-	public @Nullable VaultEvent put(Key key, VaultEvent value) {
-		return delegate.put(key, value);
-	}
-
-	@Override
-	public VaultEvent remove(Object key) {
-		return delegate.remove(key);
-	}
-
-	@Override
-	public void putAll(@NotNull Map<? extends Key, ? extends VaultEvent> m) {
-		delegate.putAll(m);
-	}
-
-	@Override
-	public void clear() {
-		delegate.clear();
-	}
-
-	@Override
-	public @NotNull Set<Key> keySet() {
-		return delegate.keySet();
-	}
-
-	@Override
-	public @NotNull Collection<VaultEvent> values() {
-		return delegate.values();
-	}
-
-	@Override
-	public @NotNull Set<Entry<Key, VaultEvent>> entrySet() {
-		return delegate.entrySet();
-	}
-
-	@Override
-	public void addListener(InvalidationListener invalidationListener) {
-		delegate.addListener(invalidationListener);
-	}
-
-	@Override
-	public void removeListener(InvalidationListener invalidationListener) {
-		delegate.removeListener(invalidationListener);
-	}
-
-	public synchronized void put(VaultEvent e) {
-		//compute key
-		var key = computeKey(e);
+	public synchronized void put(Vault v, FilesystemEvent e) {
+		var key = computeKey(v, e);
 		//if-else
-		var nullOrEntry = delegate.get(key);
-		if (nullOrEntry == null) {
+		var entry = delegate.get(key);
+		if (entry == null) {
 			if (size() == MAX_SIZE) {
-				delegate.entrySet().stream() //
-						.min(Comparator.comparing(entry -> entry.getValue().actualEvent().getTimestamp())) //
-						.ifPresent(oldestEntry -> delegate.remove(oldestEntry.getKey()));
+				var toRemove = lruCache.first();
+				lruCache.remove(toRemove);
+				delegate.remove(toRemove);
 			}
-			delegate.put(key, e);
+			delegate.put(key, new Value(e, 1));
+			lruCache.add(key);
 		} else {
-			delegate.put(key, nullOrEntry.incrementCount(e.actualEvent()));
+			lruCache.remove(key);
+			delegate.put(key, new Value(e, entry.count() + 1));
+			lruCache.add(key); //correct, because cache-sorting uses the map in comparsionMethod
 		}
 	}
 
-	public synchronized VaultEvent remove(VaultEvent similar) {
-		//compute key
-		var key = computeKey(similar);
-		return this.remove(key);
+	public synchronized Value remove(Vault v, FilesystemEvent similar) {
+		var key = computeKey(v, similar);
+		lruCache.remove(key);
+		return delegate.remove(key);
 	}
 
-	private Key computeKey(VaultEvent ve) {
-		var e = ve.actualEvent();
-		var p = switch (e) {
+	private Key computeKey(Vault v, FilesystemEvent event) {
+		var p = switch (event) {
 			case DecryptionFailedEvent(_, Path ciphertextPath, _) -> ciphertextPath;
 			case ConflictResolvedEvent(_, _, _, _, Path resolvedCiphertext) -> resolvedCiphertext;
 			case ConflictResolutionFailedEvent(_, _, Path conflictingCiphertext, _) -> conflictingCiphertext;
 			case BrokenDirFileEvent(_, Path ciphertext) -> ciphertext;
 			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
 		};
-		return new Key(ve.v(), p, e.getClass());
+		return new Key(v, p, event.getClass());
 	}
 }
