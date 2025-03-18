@@ -65,7 +65,7 @@
 			</Button>
 		</StackPane>
 		<!-- decrypt file name -->
-		<StackPane visible="${controller.accessibleViaPath}" managed="${controller.accessibleViaPath}">
+		<StackPane>
 			<padding>
 				<Insets topRightBottomLeft="0"/>
 			</padding>
