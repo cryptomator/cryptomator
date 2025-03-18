@@ -33,10 +33,10 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.8.0</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.9.0-beta2</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.5.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.3.0</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.2.4</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.mac.version>1.3.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.5.2</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>5.0.2</cryptomator.fuse.version>
 		<cryptomator.webdav.version>2.0.7</cryptomator.webdav.version>
@@ -46,7 +46,7 @@
 		<dagger.version>2.55</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.18.2</jackson.version>
-		<javafx.version>23.0.1</javafx.version>
+		<javafx.version>23.0.2</javafx.version>
 		<jwt.version>4.4.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
 		<logback.version>1.5.16</logback.version>
