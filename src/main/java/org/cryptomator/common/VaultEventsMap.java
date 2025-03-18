@@ -26,21 +26,21 @@ import java.util.Set;
  * Map containing {@link VaultEvent}s.
  * The map is keyed by the ciphertext path of the affected resource _and_ the {@link FilesystemEvent}s class in order to group same events
  * <p>
- * Use {@link EventMap#put(VaultEvent)} to add an element and {@link EventMap#remove(VaultEvent)} to remove it.
+ * Use {@link VaultEventsMap#put(VaultEvent)} to add an element and {@link VaultEventsMap#remove(VaultEvent)} to remove it.
  * <p>
  * The map is size restricted to {@value MAX_SIZE} elements. If a _new_ element (i.e. not already present) is added, the least recently added is removed.
  */
 @Singleton
-public class EventMap implements ObservableMap<EventMap.EventKey, VaultEvent> {
+public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, VaultEvent> {
 
 	private static final int MAX_SIZE = 300;
 
 	public record EventKey(Path ciphertextPath, Class<? extends FilesystemEvent> c) {}
 
-	private final ObservableMap<EventMap.EventKey, VaultEvent> delegate;
+	private final ObservableMap<VaultEventsMap.EventKey, VaultEvent> delegate;
 
 	@Inject
-	public EventMap() {
+	public VaultEventsMap() {
 		delegate = FXCollections.observableHashMap();
 	}
 

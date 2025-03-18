@@ -1,6 +1,6 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.common.EventMap;
+import org.cryptomator.common.VaultEventsMap;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.cryptofs.CryptoPath;
@@ -51,7 +51,7 @@ public class EventListCellController implements FxController {
 	private static final DateTimeFormatter LOCAL_DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 	private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
-	private final EventMap eventMap;
+	private final VaultEventsMap vaultEventsMap;
 	@Nullable
 	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
@@ -77,8 +77,8 @@ public class EventListCellController implements FxController {
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(EventMap eventMap, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
-		this.eventMap = eventMap;
+	public EventListCellController(VaultEventsMap vaultEventsMap, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
+		this.vaultEventsMap = vaultEventsMap;
 		this.revealService = revealService.orElseGet(() -> null);
 		this.resourceBundle = resourceBundle;
 		this.event = new SimpleObjectProperty<>(null);
@@ -113,7 +113,7 @@ public class EventListCellController implements FxController {
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
 		eventTooltip.setText(item.v().getDisplayName());
-		addAction("generic.action.dismiss", () -> eventMap.remove(item));
+		addAction("generic.action.dismiss", () -> vaultEventsMap.remove(item));
 		switch (item.actualEvent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
 			case ConflictResolutionFailedEvent fse -> this.adjustToConflictEvent(fse);

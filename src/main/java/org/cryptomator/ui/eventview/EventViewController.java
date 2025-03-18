@@ -1,6 +1,6 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.common.EventMap;
+import org.cryptomator.common.VaultEventsMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
 @EventViewScoped
 public class EventViewController implements FxController {
 
-	private final EventMap eventMap;
+	private final VaultEventsMap vaultEventsMap;
 	private final ObservableList<VaultEvent> eventList;
 	private final FilteredList<VaultEvent> filteredEventList;
 	private final ObservableList<Vault> vaults;
@@ -38,8 +38,8 @@ public class EventViewController implements FxController {
 	ListView<VaultEvent> eventListView;
 
 	@Inject
-	public EventViewController(EventMap eventMap, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
-		this.eventMap = eventMap;
+	public EventViewController(VaultEventsMap vaultEventsMap, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
+		this.vaultEventsMap = vaultEventsMap;
 		this.eventList = FXCollections.observableArrayList();
 		this.filteredEventList = eventList.filtered(_ -> true);
 		this.vaults = vaults;
@@ -60,8 +60,8 @@ public class EventViewController implements FxController {
 			}
 		});
 
-		eventList.addAll(eventMap.values());
-		eventMap.addListener((MapChangeListener<? super EventMap.EventKey, ? super VaultEvent>) this::updateList);
+		eventList.addAll(vaultEventsMap.values());
+		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.EventKey, ? super VaultEvent>) this::updateList);
 		eventListView.setCellFactory(cellFactory);
 		eventListView.setItems(reversedEventList);
 
@@ -70,7 +70,7 @@ public class EventViewController implements FxController {
 		vaultFilterChoiceBox.setConverter(new VaultConverter(resourceBundle));
 	}
 
-	private void updateList(MapChangeListener.Change<? extends EventMap.EventKey, ? extends VaultEvent> change) {
+	private void updateList(MapChangeListener.Change<? extends VaultEventsMap.EventKey, ? extends VaultEvent> change) {
 		if (change.wasAdded() && change.wasRemoved()) {
 			//entry updated
 			eventList.remove(change.getValueRemoved());
@@ -92,7 +92,7 @@ public class EventViewController implements FxController {
 
 	@FXML
 	void clearEvents() {
-		eventMap.clear();
+		vaultEventsMap.clear();
 	}
 
 	private static class VaultConverter extends StringConverter<Vault> {
