@@ -1,6 +1,6 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.common.VaultEventsMap;
+import org.cryptomator.event.VaultEventsMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;

@@ -1,5 +1,6 @@
-package org.cryptomator.common;
+package org.cryptomator.event;
 
+import org.cryptomator.common.ObservableMapDecorator;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.event.BrokenDirFileEvent;
 import org.cryptomator.cryptofs.event.BrokenFileNodeEvent;
@@ -7,7 +8,6 @@ import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
-import org.cryptomator.event.VaultEvent;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
