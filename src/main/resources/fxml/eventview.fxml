@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Tooltip?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.eventview.EventViewController"
+	  minWidth="300"
+	  prefWidth="300"
+	  styleClass="event-window"
+	  >
+	<HBox styleClass="button-bar" alignment="CENTER">
+		<padding>
+			<Insets left="6" />
+		</padding>
+		<ChoiceBox fx:id="vaultFilterChoiceBox"/>
+		<Region HBox.hgrow="ALWAYS"/>
+		<Button styleClass="button-right" onAction="#clearEvents" contentDisplay="GRAPHIC_ONLY">
+			<graphic>
+				<FontAwesome5IconView glyph="TRASH" glyphSize="16"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%eventView.clearListButton.tooltip"/>
+			</tooltip>
+		</Button>
+	</HBox>
+	<ListView fx:id="eventListView" fixedCellSize="60" VBox.vgrow="ALWAYS"/>
+</VBox>

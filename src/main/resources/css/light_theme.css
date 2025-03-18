@@ -312,6 +312,10 @@
 	-fx-font-size: 1.0em;
 }
 
+.list-cell .header-misc {
+	-fx-font-size: 1.0em;
+}
+
 .list-cell .detail-label {
 	-fx-text-fill: TEXT_FILL_MUTED;
 	-fx-font-size: 0.8em;
@@ -338,6 +342,42 @@
 .onboarding-overlay-arc {
 	-fx-stroke: TEXT_FILL;
 	-fx-fill: transparent;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Event List                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.event-window .button-bar {
+	-fx-min-height:42px;
+	-fx-max-height:42px;
+	-fx-background-color: MAIN_BG;
+	-fx-border-color: transparent transparent CONTROL_BORDER_NORMAL transparent;
+	-fx-border-width: 0 0 1px 0;
+}
+
+.event-window .button-bar .button-right {
+	-fx-border-color: transparent transparent transparent CONTROL_BORDER_NORMAL;
+	-fx-border-width: 0 0 0 1px;
+	-fx-background-color: MAIN_BG;
+	-fx-background-radius: 0px;
+	-fx-min-height: 42px;
+	-fx-max-height: 42px;
+}
+
+.event-window .button-bar .button-right:armed {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
+}
+
+.event-window .list-view .list-cell:hover {
+	-fx-background-color: CONTROL_BG_SELECTED;
+}
+
+.event-window .list-view .list-cell:selected {
+	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
+	-fx-background-insets: 0, 0 0 0 3px;
 }
 
 /*******************************************************************************
@@ -611,6 +651,19 @@
 
 /*******************************************************************************
  *                                                                             *
+ * Update indicator
+ *                                                                             *
+ ******************************************************************************/
+
+.update-indicator {
+	-fx-background-color: white, RED_5;
+	-fx-background-insets: 1px, 2px;
+	-fx-background-radius: 6px, 5px;
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 2, 0, 0, 0);
+}
+
+/*******************************************************************************
+ *                                                                             *
  * Hyperlinks                                                                  *
  *                                                                             *
  ******************************************************************************/
@@ -821,11 +874,11 @@
 
 /*******************************************************************************
  *                                                                             *
- * Add Vault - MenuItem                                                                    *
+ * Dropdown button context menu
  *                                                                             *
  ******************************************************************************/
 
-.add-vault-menu-item {
+.dropdown-button-context-menu-item {
     -fx-padding: 4px 8px;
 }
 
