@@ -1,5 +1,6 @@
 package org.cryptomator.common;
 
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.event.BrokenDirFileEvent;
 import org.cryptomator.cryptofs.event.BrokenFileNodeEvent;
 import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
@@ -35,7 +36,7 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 
 	private static final int MAX_SIZE = 300;
 
-	public record EventKey(Path ciphertextPath, Class<? extends FilesystemEvent> c) {}
+	public record EventKey(Vault v, Path key, Class<? extends FilesystemEvent> c) {}
 
 	private final ObservableMap<VaultEventsMap.EventKey, VaultEvent> delegate;
 
@@ -126,7 +127,7 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 
 	public synchronized void put(VaultEvent e) {
 		//compute key
-		var key = computeKey(e.actualEvent());
+		var key = computeKey(e);
 		//if-else
 		var nullOrEntry = delegate.get(key);
 		if (nullOrEntry == null) {
@@ -143,11 +144,12 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 
 	public synchronized VaultEvent remove(VaultEvent similar) {
 		//compute key
-		var key = computeKey(similar.actualEvent());
+		var key = computeKey(similar);
 		return this.remove(key);
 	}
 
-	private EventKey computeKey(FilesystemEvent e) {
+	private EventKey computeKey(VaultEvent ve) {
+		var e = ve.actualEvent();
 		var p = switch (e) {
 			case DecryptionFailedEvent(_, Path ciphertextPath, _) -> ciphertextPath;
 			case ConflictResolvedEvent(_, _, _, _, Path resolvedCiphertext) -> resolvedCiphertext;
@@ -155,6 +157,6 @@ public class VaultEventsMap implements ObservableMap<VaultEventsMap.EventKey, Va
 			case BrokenDirFileEvent(_, Path ciphertext) -> ciphertext;
 			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
 		};
-		return new EventKey(p, e.getClass());
+		return new EventKey(ve.v(), p, e.getClass());
 	}
 }
