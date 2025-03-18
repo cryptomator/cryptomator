@@ -413,6 +413,7 @@ public class Vault {
 	}
 
 	/**
+	 * Gets the cleartext name from a given path to an encrypted vault file
 	 */
 	public String getCleartextName(Path ciphertextPath) throws IOException {
 		if (!state.getValue().equals(VaultState.Value.UNLOCKED)) {

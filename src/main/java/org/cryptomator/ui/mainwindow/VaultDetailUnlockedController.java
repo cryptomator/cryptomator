@@ -27,9 +27,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -168,7 +166,7 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	private void copyDecryptedNamesToClipboard(List<CipherToCleartext> mapping) {
-		if(mapping.size() == 1) {
+		if (mapping.size() == 1) {
 			Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, mapping.getFirst().cleartext));
 		} else {
 			var content = mapping.stream().map(CipherToCleartext::toString).collect(Collectors.joining("\n"));
@@ -262,12 +260,13 @@ public class VaultDetailUnlockedController implements FxController {
 		vaultStats.getUnchecked(vault.get()).showVaultStatisticsWindow();
 	}
 
-	record CipherToCleartext (String ciphertext, String cleartext) {
+	record CipherToCleartext(String ciphertext, String cleartext) {
+
 		@Override
 		public String toString() {
 			return ciphertext + " > " + cleartext;
 		}
-	};
+	}
 
 	/* Getter/Setter */
 
