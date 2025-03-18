@@ -156,13 +156,6 @@ abstract class RecoveryKeyModule {
 	}
 
 	@Provides
-	@Named("recoverType")
-	@RecoveryKeyScoped
-	static ObjectProperty<RecoverUtil.Type> provideRecoverType() {
-		return new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_MASTERKEY);
-	}
-
-	@Provides
 	@Named("cipherCombo")
 	@RecoveryKeyScoped
 	static ObjectProperty<CryptorProvider.Scheme> provideCipherCombo() {
@@ -194,10 +187,6 @@ abstract class RecoveryKeyModule {
 	@FxControllerKey(RecoveryKeyResetPasswordController.class)
 	abstract FxController bindRecoveryKeyResetPasswordController(RecoveryKeyResetPasswordController controller);
 
-	@Binds
-	@IntoMap
-	@FxControllerKey(RecoveryKeyResetPasswordSuccessController.class)
-	abstract FxController bindRecoveryKeyResetPasswordSuccessController(RecoveryKeyResetPasswordSuccessController controller);
 
 	@Provides
 	@IntoMap

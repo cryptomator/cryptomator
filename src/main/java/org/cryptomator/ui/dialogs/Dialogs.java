@@ -57,6 +57,22 @@ public class Dialogs {
 				.setCancelButtonKey("generic.button.cancel");
 	}
 
+	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window, Stage owner, ResourceBundle resourceBundle) {
+		return createDialogBuilder()
+				.setOwner(window) //
+				.setTitleKey("recoveryKey.recover.title") //
+				.setMessageKey("recoveryKey.recover.resetSuccess.message") //
+				.setDescriptionKey("recoveryKey.recover.resetSuccess.description") //
+				.setIcon(FontAwesome5Icon.CHECK)
+				.setOkAction(stage -> {
+					stage.close();
+					if (owner.getTitle().equals(resourceBundle.getString("addvaultwizard.existing.title"))) {
+						owner.close();
+					}
+				})
+				.setOkButtonKey("generic.button.close");
+	}
+
 	public SimpleDialog.Builder prepareRemoveCertDialog(Stage window, Settings settings) {
 		return createDialogBuilder() //
 				.setOwner(window) //
@@ -106,9 +122,7 @@ public class Dialogs {
 				.setDescriptionKey("recoveryKey.noDDirDetected.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION) //
 				.setOkButtonKey("generic.button.change") //
-				.setCancelButtonKey("generic.button.close") //
-				.setOkAction(Stage::close) //
-				.setCancelAction(Stage::close);
+				.setOkAction(Stage::close);
 	}
 
 }

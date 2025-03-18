@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
@@ -56,12 +58,14 @@ public class MasterkeyOptionsController implements FxController {
 
 	@FXML
 	public void showRecoveryKey() {
-		recoveryKeyWindow.create(vault, window, RecoverUtil.Type.SHOW_KEY).showRecoveryKeyCreationWindow();
+		ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.SHOW_KEY);
+		recoveryKeyWindow.create(vault, window, recoverTypeProperty).showRecoveryKeyCreationWindow();
 	}
 
 	@FXML
 	public void showRecoverVaultDialog() {
-		recoveryKeyWindow.create(vault, window,RecoverUtil.Type.RESET_PASSWORD).showRecoveryKeyRecoverWindow();
+		ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESET_PASSWORD);
+		recoveryKeyWindow.create(vault, window, recoverTypeProperty).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML

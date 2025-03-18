@@ -9,6 +9,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Named;
+import javafx.beans.property.ObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -54,7 +55,7 @@ public interface RecoveryKeyComponent {
 
 		RecoveryKeyComponent create(@BindsInstance @RecoveryKeyWindow Vault vault,
 									@BindsInstance @Named("keyRecoveryOwner") Stage owner,
-									@BindsInstance @Named("recoverType") RecoverUtil.Type recoverType);
+									@BindsInstance @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType);
 	}
 
 }

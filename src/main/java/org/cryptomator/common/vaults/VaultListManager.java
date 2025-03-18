@@ -173,7 +173,18 @@ public class VaultListManager {
 					yield ERROR;
 				}
 			}
-			case ERROR, UNLOCKED, PROCESSING -> previousState;
+			case ERROR -> {
+				try {
+					var determinedState = determineVaultState(vault.getPath(), vault.getVaultSettings());
+					state.set(determinedState);
+					yield determinedState;
+				} catch (IOException e) {
+					LOG.warn("Failed to redetermine vault state for " + vault.getPath(), e);
+					vault.setLastKnownException(e);
+					yield ERROR;
+				}
+			}
+			case UNLOCKED, PROCESSING -> previousState;
 		};
 	}
 

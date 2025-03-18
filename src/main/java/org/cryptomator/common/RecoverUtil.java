@@ -1,6 +1,32 @@
 package org.cryptomator.common;
 
-import dagger.Lazy;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.StringProperty;
+import javafx.concurrent.Task;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.stream.Stream;
+
+import static org.cryptomator.common.Constants.DEFAULT_KEY_ID;
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
+import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
+import static org.cryptomator.cryptofs.common.Constants.DATA_DIR_NAME;
+import static org.cryptomator.cryptolib.api.CryptorProvider.Scheme.SIV_CTRMAC;
+import static org.cryptomator.cryptolib.api.CryptorProvider.Scheme.SIV_GCM;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
@@ -14,9 +40,9 @@ import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.mount.MountService;
-import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
 import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
@@ -24,45 +50,13 @@ import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.StringProperty;
-import javafx.concurrent.Task;
-import javafx.scene.Scene;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.security.SecureRandom;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-import org.cryptomator.cryptolib.api.MasterkeyLoader;
-
-import static org.cryptomator.common.Constants.DEFAULT_KEY_ID;
-import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
-import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
-import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
-import static org.cryptomator.cryptofs.common.Constants.DATA_DIR_NAME;
-import static org.cryptomator.cryptolib.api.CryptorProvider.Scheme.SIV_CTRMAC;
-import static org.cryptomator.cryptolib.api.CryptorProvider.Scheme.SIV_GCM;
-
 public class RecoverUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RecoverUtil.class);
 
 	public static CryptorProvider.Scheme detectCipherCombo(byte[] masterkey, Path pathToVault) {
 		try (Stream<Path> paths = Files.walk(pathToVault.resolve(DATA_DIR_NAME))) {
-			return paths.filter(path -> path.toString()
-							.endsWith(".c9r"))
-							.findFirst()
-							.map(c9rFile -> determineScheme(c9rFile, masterkey))
-							.orElseThrow(() -> new IllegalStateException("No .c9r file found."));
+			return paths.filter(path -> path.toString().endsWith(".c9r")).findFirst().map(c9rFile -> determineScheme(c9rFile, masterkey)).orElseThrow(() -> new IllegalStateException("No .c9r file found."));
 		} catch (IOException e) {
 			throw new IllegalStateException("Failed to detect cipher combo.", e);
 		}
@@ -140,11 +134,7 @@ public class RecoverUtil {
 		}
 	}
 
-	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndGetCombo(
-			RecoveryKeyFactory recoveryKeyFactory,
-			Vault vault,
-			StringProperty recoveryKey,
-			MasterkeyFileAccess masterkeyFileAccess) {
+	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndGetCombo(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, MasterkeyFileAccess masterkeyFileAccess) {
 
 		Path tempRecoveryPath = null;
 		CharSequence tmpPass = "asdasdasd";
@@ -193,7 +183,7 @@ public class RecoverUtil {
 		}
 	}
 
-	public static Task<Void> createResetPasswordTask(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, NewPasswordController newPasswordController, Stage window, Lazy<Scene> recoverResetPasswordSuccessScene, Lazy<Scene> recoverResetVaultConfigSuccessScene, FxApplicationWindows appWindows) {
+	public static Task<Void> createResetPasswordTask(ResourceBundle resourceBundle,Stage owner, RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, NewPasswordController newPasswordController, Stage window, FxApplicationWindows appWindows, Dialogs dialogs) {
 
 		Task<Void> task = new ResetPasswordTask(recoveryKeyFactory, vault, recoveryKey, newPasswordController);
 
@@ -203,10 +193,12 @@ public class RecoverUtil {
 
 		task.setOnSucceeded(_ -> {
 			LOG.info("Used recovery key to reset password for {}.", vault.getDisplayablePath());
-			if (vault.getState().equals(VAULT_CONFIG_MISSING)) {
-				window.setScene(recoverResetVaultConfigSuccessScene.get());
+			if (vault.getState().equals(MASTERKEY_MISSING)) {
+				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).setTitleKey("recoveryKey.recoverMasterkey.title").setMessageKey("recoveryKey.recover.resetMasterkeyFileSuccess.message").build().showAndWait();
+				window.close();
 			} else {
-				window.setScene(recoverResetPasswordSuccessScene.get());
+				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).build().showAndWait();
+				window.close();
 			}
 		});
 
@@ -243,7 +235,7 @@ public class RecoverUtil {
 		}
 	}
 
-	public static Optional<Vault> prepareVaultFromDirectory(DirectoryChooser directoryChooser, Stage window, Dialogs dialogs, VaultComponent.Factory vaultComponentFactory, List<MountService> mountServices) {
+	public static Optional<Vault> checkAndPrepareVaultFromDirectory(DirectoryChooser directoryChooser, Stage window, Dialogs dialogs, VaultComponent.Factory vaultComponentFactory, List<MountService> mountServices) {
 
 		File selectedDirectory;
 		do {

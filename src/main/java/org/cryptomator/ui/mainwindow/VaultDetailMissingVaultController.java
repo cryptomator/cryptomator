@@ -10,6 +10,7 @@ import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
@@ -60,13 +61,15 @@ public class VaultDetailMissingVaultController implements FxController {
 			dialogs.prepareContactHubAdmin(window).build().showAndWait();
 		}
 		else {
-			recoveryKeyWindow.create(vault.get(), window, RecoverUtil.Type.RESTORE_VAULT_CONFIG).showIsHubVaultDialogWindow();
+			ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_VAULT_CONFIG);
+			recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showIsHubVaultDialogWindow();
 		}
 	}
 
 	@FXML
 	void restoreMasterkey() {
-		recoveryKeyWindow.create(vault.get(), window,RecoverUtil.Type.RESTORE_MASTERKEY).showRecoveryKeyRecoverWindow();
+		ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_MASTERKEY);
+		recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML

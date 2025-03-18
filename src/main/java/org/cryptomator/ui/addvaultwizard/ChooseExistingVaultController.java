@@ -1,27 +1,10 @@
 package org.cryptomator.ui.addvaultwizard;
 
-import dagger.Lazy;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.RecoverUtil;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultComponent;
-import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.integrations.mount.MountService;
-import org.cryptomator.integrations.uiappearance.Theme;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.dialogs.Dialogs;
-import org.cryptomator.ui.fxapp.FxApplicationStyle;
-import org.cryptomator.ui.fxapp.FxApplicationWindows;
-import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.inject.Inject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -39,6 +22,24 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+
+import dagger.Lazy;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultComponent;
+import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.integrations.uiappearance.Theme;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.fxapp.FxApplicationStyle;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @AddVaultWizardScoped
 public class ChooseExistingVaultController implements FxController {
@@ -91,9 +92,10 @@ public class ChooseExistingVaultController implements FxController {
 		this.dialogs = dialogs;
 	}
 
-	public void initialize(){
+	public void initialize() {
 		restoreButtonVisible.bind(restoreCheckBox.selectedProperty());
 	}
+
 	private Image selectScreenshot(Theme theme) {
 		String imageResourcePath;
 		if (SystemUtils.IS_OS_MAC) {
@@ -129,13 +131,11 @@ public class ChooseExistingVaultController implements FxController {
 	@FXML
 	public void restoreVaultConfigWithRecoveryKey() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(resourceBundle.getString("generic.button.cancel"));
-
-		Optional<Vault> optionalVault = RecoverUtil.prepareVaultFromDirectory(directoryChooser, window, dialogs, vaultComponentFactory, mountServices);
-
+		Optional<Vault> optionalVault = RecoverUtil.checkAndPrepareVaultFromDirectory(directoryChooser, window, dialogs, vaultComponentFactory, mountServices);
 
 		optionalVault.ifPresent(vault -> {
-			recoveryKeyWindow.create(vault, window,RecoverUtil.Type.RESTORE_VAULT_CONFIG).showIsHubVaultDialogWindow();
+			ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_VAULT_CONFIG);
+			recoveryKeyWindow.create(vault, window, recoverTypeProperty).showIsHubVaultDialogWindow();
 		});
 	}
 

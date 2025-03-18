@@ -12,6 +12,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @RecoveryKeyScoped
@@ -52,6 +53,7 @@ public class RecoveryKeyRecoverController implements FxController {
 				yield null;
 			}
 		};
+
 	}
 
 	@FXML

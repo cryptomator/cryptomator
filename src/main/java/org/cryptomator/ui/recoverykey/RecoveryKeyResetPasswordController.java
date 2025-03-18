@@ -12,6 +12,8 @@ import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final ResourceBundle resourceBundle;
 	private final StringProperty buttonText = new SimpleStringProperty();
+	private final Dialogs dialogs;
+	private final Stage owner;
 
 	public NewPasswordController newPasswordController;
 
@@ -63,6 +67,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 											  @RecoveryKeyWindow Vault vault, //
 											  RecoveryKeyFactory recoveryKeyFactory, //
 											  ExecutorService executor, //
+											  @Named("keyRecoveryOwner") Stage owner,
 											  @RecoveryKeyWindow StringProperty recoveryKey, //
 											  @FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> recoverExpertSettingsScene, //
 											  @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS) Lazy<Scene> recoverResetPasswordSuccessScene, //
@@ -73,7 +78,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 											  @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
 											  @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType,
 											  @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
-											  ResourceBundle resourceBundle) {
+											  ResourceBundle resourceBundle,
+											  Dialogs dialogs) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
@@ -89,7 +95,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		this.cipherCombo = cipherCombo;
 		this.recoverType = recoverType;
 		this.resourceBundle = resourceBundle;
-
+		this.dialogs = dialogs;
+		this.owner = owner;
 		initButtonText(recoverType.get());
 	}
 
@@ -127,20 +134,26 @@ public class RecoveryKeyResetPasswordController implements FxController {
 				RecoverUtil.deleteRecoveryDirectory(recoveryPath);
 				RecoverUtil.addVaultToList(vaultListManager, vault.getPath());
 
-				window.setScene(recoverResetVaultConfigSuccessScene.get());
+				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
+						.setTitleKey("recoveryKey.recoverVaultConfig.title")
+						.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message")
+						.build().showAndWait();
+				window.close(); // Erst jetzt das Fenster schließen
+
 			} catch (IOException | CryptoException e) {
 				LOG.error("Recovery process failed", e);
 			}
 		} else {
 			Task<Void> task = RecoverUtil.createResetPasswordTask( //
+					resourceBundle,
+					owner,
 					recoveryKeyFactory, //
 					vault, //
 					recoveryKey, //
 					newPasswordController, //
 					window, //
-					recoverResetPasswordSuccessScene, //
-					recoverResetVaultConfigSuccessScene, //
-					appWindows);
+					appWindows,
+					dialogs);
 			executor.submit(task);
 		}
 	}
