@@ -132,12 +132,12 @@ public class EventMap implements ObservableMap<EventMap.EventKey, VaultEvent> {
 		if (nullOrEntry == null) {
 			if (size() == MAX_SIZE) {
 				delegate.entrySet().stream() //
-						.min(Comparator.comparing(entry -> entry.getValue().timestamp())) //
+						.min(Comparator.comparing(entry -> entry.getValue().actualEvent().getTimestamp())) //
 						.ifPresent(oldestEntry -> delegate.remove(oldestEntry.getKey()));
 			}
 			delegate.put(key, e);
 		} else {
-			delegate.put(key, nullOrEntry.incrementCount(e.timestamp()));
+			delegate.put(key, nullOrEntry.incrementCount(e.actualEvent()));
 		}
 	}
 
@@ -149,11 +149,11 @@ public class EventMap implements ObservableMap<EventMap.EventKey, VaultEvent> {
 
 	private EventKey computeKey(FilesystemEvent e) {
 		var p = switch (e) {
-			case DecryptionFailedEvent(Path ciphertextPath, _) -> ciphertextPath;
-			case ConflictResolvedEvent(_, _, _, Path resolvedCiphertext) -> resolvedCiphertext;
-			case ConflictResolutionFailedEvent(_, Path conflictingCiphertext, _) -> conflictingCiphertext;
-			case BrokenDirFileEvent(Path ciphertext) -> ciphertext;
-			case BrokenFileNodeEvent(_, Path ciphertext) -> ciphertext;
+			case DecryptionFailedEvent(_, Path ciphertextPath, _) -> ciphertextPath;
+			case ConflictResolvedEvent(_, _, _, _, Path resolvedCiphertext) -> resolvedCiphertext;
+			case ConflictResolutionFailedEvent(_, _, Path conflictingCiphertext, _) -> conflictingCiphertext;
+			case BrokenDirFileEvent(_, Path ciphertext) -> ciphertext;
+			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
 		};
 		return new EventKey(p, e.getClass());
 	}

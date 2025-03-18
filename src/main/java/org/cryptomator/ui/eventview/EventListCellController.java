@@ -87,8 +87,8 @@ public class EventListCellController implements FxController {
 		this.eventIcon = new SimpleObjectProperty<>();
 		this.eventCount = ObservableUtil.mapWithDefault(event, e -> e.count() == 1? "" : "("+ e.count() +")", "");
 		this.vaultUnlocked = ObservableUtil.mapWithDefault(event.flatMap(e -> e.v().unlockedProperty()), Function.identity(), false);
-		this.readableTime = ObservableUtil.mapWithDefault(event, e -> LOCAL_TIME_FORMATTER.format(e.timestamp()), "");
-		this.readableDate = ObservableUtil.mapWithDefault(event, e -> LOCAL_DATE_FORMATTER.format(e.timestamp()), "");
+		this.readableTime = ObservableUtil.mapWithDefault(event, e -> LOCAL_TIME_FORMATTER.format(e.actualEvent().getTimestamp()), "");
+		this.readableDate = ObservableUtil.mapWithDefault(event, e -> LOCAL_DATE_FORMATTER.format(e.actualEvent().getTimestamp()), "");
 		this.message = Bindings.createStringBinding(this::selectMessage, vaultUnlocked, eventMessage);
 		this.description = Bindings.createStringBinding(this::selectDescription, vaultUnlocked, eventDescription);
 		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon);
