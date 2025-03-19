@@ -89,6 +89,7 @@ public class VaultEventsMap {
 	 * Must be executed on the JavaFX application thread
 	 *
 	 * @return a list of vault events, mainly sorted ascending by the event timestamp
+	 * @implNote Method is not synchronized, because it is only executed if executed by JavaFX application thread
 	 */
 	public List<VaultEvent> listAll() {
 		if (!Platform.isFxApplicationThread()) {
@@ -109,6 +110,7 @@ public class VaultEventsMap {
 	 * @param v Vault where the event occurred
 	 * @param similar A similar {@link FilesystemEvent} (same class, same idPath)
 	 * @return the removed {@link Value}
+	 * @implNote Method is not synchronized, because it is only executed if executed by JavaFX application thread
 	 */
 	public Value remove(Vault v, FilesystemEvent similar) {
 		if (!Platform.isFxApplicationThread()) {
@@ -119,6 +121,13 @@ public class VaultEventsMap {
 		return map.remove(key);
 	}
 
+	/**
+	 * Clears the event map.
+	 * <p>
+	 * Must be executed on the JavaFX application thread
+	 *
+	 * @implNote Method is not synchronized, because it is only executed if executed by JavaFX application thread
+	 */
 	public void clear() {
 		if (!Platform.isFxApplicationThread()) {
 			throw new IllegalStateException("Map removal must be performed on JavaFX application thread");
@@ -151,6 +160,7 @@ public class VaultEventsMap {
 	 *
 	 * @param k Key of the entry to update
 	 * @param v Value of the entry to update
+	 * @implNote Method is not synchronized, because it is only called on the (one-and-only) JavaFX application thread
 	 */
 	private void updateMap(Key k, Value v) {
 		var entry = map.get(k);
