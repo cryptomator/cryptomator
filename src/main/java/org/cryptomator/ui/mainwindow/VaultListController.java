@@ -1,7 +1,7 @@
 package org.cryptomator.ui.mainwindow;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.event.VaultEventsMap;
+import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
@@ -68,7 +68,7 @@ public class VaultListController implements FxController {
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
-	private final VaultEventsMap vaultEventsMap;
+	private final FileSystemEventRegistry fileSystemEventRegistry;
 	private final BooleanProperty newEventsPresent;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
@@ -96,7 +96,7 @@ public class VaultListController implements FxController {
 						FxApplicationWindows appWindows, //
 						Settings settings, //
 						Dialogs dialogs, //
-						VaultEventsMap vaultEventsMap) {
+						FileSystemEventRegistry fileSystemEventRegistry) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -109,9 +109,9 @@ public class VaultListController implements FxController {
 		this.dialogs = dialogs;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
-		this.vaultEventsMap = vaultEventsMap;
+		this.fileSystemEventRegistry = fileSystemEventRegistry;
 		this.newEventsPresent = new SimpleBooleanProperty(false);
-		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.Key, ? super VaultEventsMap.Value>) change -> {
+		fileSystemEventRegistry.addListener((MapChangeListener<? super FileSystemEventRegistry.Key, ? super FileSystemEventRegistry.Value>) change -> {
 			if (change.wasAdded()) {
 				newEventsPresent.setValue(true);
 			}

@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Singleton
-public class VaultEventsMap {
+public class FileSystemEventRegistry {
 
 	private static final int MAX_MAP_SIZE = 400;
 
@@ -51,7 +51,7 @@ public class VaultEventsMap {
 	private final AtomicBoolean queueHasElements;
 
 	@Inject
-	public VaultEventsMap(ScheduledExecutorService scheduledExecutorService) {
+	public FileSystemEventRegistry(ScheduledExecutorService scheduledExecutorService) {
 		this.queue = new ConcurrentHashMap<>();
 		this.lruCache = new TreeSet<>(this::compareKeys);
 		this.map = FXCollections.observableHashMap();
@@ -85,19 +85,19 @@ public class VaultEventsMap {
 
 
 	/**
-	 * Lists all entries in this map as {@link VaultEvent}. The list is sorted ascending by the timestamp of event occurral (and more if it is the same timestamp).
+	 * Lists all entries in this map as {@link FileSystemEventBucket}. The list is sorted ascending by the timestamp of event occurral (and more if it is the same timestamp).
 	 * Must be executed on the JavaFX application thread
 	 *
 	 * @return a list of vault events, mainly sorted ascending by the event timestamp
 	 * @implNote Method is not synchronized, because it is only executed if executed by JavaFX application thread
 	 */
-	public List<VaultEvent> listAll() {
+	public List<FileSystemEventBucket> listAll() {
 		if (!Platform.isFxApplicationThread()) {
 			throw new IllegalStateException("Listing map entries must be performed on JavaFX application thread");
 		}
 		return lruCache.stream().map(key -> {
 			var value = map.get(key);
-			return new VaultEvent(key.vault(), value.mostRecentEvent(), value.count());
+			return new FileSystemEventBucket(key.vault(), value.mostRecentEvent(), value.count());
 		}).toList();
 	}
 
@@ -225,7 +225,7 @@ public class VaultEventsMap {
 	 * @param event Actual {@link FilesystemEvent}
 	 * @return a {@link Key} used in the map and lru cache
 	 */
-	private Key computeKey(Vault v, FilesystemEvent event) {
+	private static Key computeKey(Vault v, FilesystemEvent event) {
 		var p = switch (event) {
 			case DecryptionFailedEvent(_, Path ciphertextPath, _) -> ciphertextPath;
 			case ConflictResolvedEvent(_, _, _, _, Path resolvedCiphertext) -> resolvedCiphertext;

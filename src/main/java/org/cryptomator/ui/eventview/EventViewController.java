@@ -1,8 +1,8 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.event.VaultEventsMap;
+import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.event.VaultEvent;
+import org.cryptomator.event.FileSystemEventBucket;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
@@ -23,11 +23,11 @@ import java.util.ResourceBundle;
 @EventViewScoped
 public class EventViewController implements FxController {
 
-	private final VaultEventsMap vaultEventsMap;
-	private final ObservableList<VaultEvent> eventList;
-	private final FilteredList<VaultEvent> filteredEventList;
+	private final FileSystemEventRegistry fileSystemEventRegistry;
+	private final ObservableList<FileSystemEventBucket> eventList;
+	private final FilteredList<FileSystemEventBucket> filteredEventList;
 	private final ObservableList<Vault> vaults;
-	private final SortedList<VaultEvent> reversedEventList;
+	private final SortedList<FileSystemEventBucket> reversedEventList;
 	private final ObservableList<Vault> choiceBoxEntries;
 	private final ResourceBundle resourceBundle;
 	private final EventListCellFactory cellFactory;
@@ -35,11 +35,11 @@ public class EventViewController implements FxController {
 	@FXML
 	ChoiceBox<Vault> vaultFilterChoiceBox;
 	@FXML
-	ListView<VaultEvent> eventListView;
+	ListView<FileSystemEventBucket> eventListView;
 
 	@Inject
-	public EventViewController(VaultEventsMap vaultEventsMap, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
-		this.vaultEventsMap = vaultEventsMap;
+	public EventViewController(FileSystemEventRegistry fileSystemEventRegistry, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
+		this.fileSystemEventRegistry = fileSystemEventRegistry;
 		this.eventList = FXCollections.observableArrayList();
 		this.filteredEventList = eventList.filtered(_ -> true);
 		this.vaults = vaults;
@@ -60,8 +60,8 @@ public class EventViewController implements FxController {
 			}
 		});
 
-		eventList.addAll(vaultEventsMap.listAll());
-		vaultEventsMap.addListener((MapChangeListener<? super VaultEventsMap.Key, ? super VaultEventsMap.Value>) this::updateList);
+		eventList.addAll(fileSystemEventRegistry.listAll());
+		fileSystemEventRegistry.addListener((MapChangeListener<? super FileSystemEventRegistry.Key, ? super FileSystemEventRegistry.Value>) this::updateList);
 		eventListView.setCellFactory(cellFactory);
 		eventListView.setItems(reversedEventList);
 
@@ -70,16 +70,16 @@ public class EventViewController implements FxController {
 		vaultFilterChoiceBox.setConverter(new VaultConverter(resourceBundle));
 	}
 
-	private void updateList(MapChangeListener.Change<? extends VaultEventsMap.Key, ? extends VaultEventsMap.Value> change) {
+	private void updateList(MapChangeListener.Change<? extends FileSystemEventRegistry.Key, ? extends FileSystemEventRegistry.Value> change) {
 		var vault = change.getKey().vault();
 		if (change.wasAdded() && change.wasRemoved()) {
 			//entry updated
-			eventList.remove(new VaultEvent(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
-			eventList.addLast(new VaultEvent(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
+			eventList.remove(new FileSystemEventBucket(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
+			eventList.addLast(new FileSystemEventBucket(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
 		} else if (change.wasAdded()) {
-			eventList.addLast(new VaultEvent(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
+			eventList.addLast(new FileSystemEventBucket(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
 		} else { //removed
-			eventList.remove(new VaultEvent(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
+			eventList.remove(new FileSystemEventBucket(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
 		}
 	}
 
@@ -93,7 +93,7 @@ public class EventViewController implements FxController {
 
 	@FXML
 	void clearEvents() {
-		vaultEventsMap.clear();
+		fileSystemEventRegistry.clear();
 	}
 
 	private static class VaultConverter extends StringConverter<Vault> {

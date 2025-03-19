@@ -1,6 +1,6 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.event.VaultEventsMap;
+import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.cryptofs.CryptoPath;
@@ -9,7 +9,7 @@ import org.cryptomator.cryptofs.event.BrokenFileNodeEvent;
 import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
-import org.cryptomator.event.VaultEvent;
+import org.cryptomator.event.FileSystemEventBucket;
 import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
@@ -51,11 +51,11 @@ public class EventListCellController implements FxController {
 	private static final DateTimeFormatter LOCAL_DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 	private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
-	private final VaultEventsMap vaultEventsMap;
+	private final FileSystemEventRegistry fileSystemEventRegistry;
 	@Nullable
 	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
-	private final ObjectProperty<VaultEvent> event;
+	private final ObjectProperty<FileSystemEventBucket> event;
 	private final StringProperty eventMessage;
 	private final StringProperty eventDescription;
 	private final ObjectProperty<FontAwesome5Icon> eventIcon;
@@ -77,8 +77,8 @@ public class EventListCellController implements FxController {
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(VaultEventsMap vaultEventsMap, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
-		this.vaultEventsMap = vaultEventsMap;
+	public EventListCellController(FileSystemEventRegistry fileSystemEventRegistry, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
+		this.fileSystemEventRegistry = fileSystemEventRegistry;
 		this.revealService = revealService.orElseGet(() -> null);
 		this.resourceBundle = resourceBundle;
 		this.event = new SimpleObjectProperty<>(null);
@@ -87,8 +87,8 @@ public class EventListCellController implements FxController {
 		this.eventIcon = new SimpleObjectProperty<>();
 		this.eventCount = ObservableUtil.mapWithDefault(event, e -> e.count() == 1? "" : "("+ e.count() +")", "");
 		this.vaultUnlocked = ObservableUtil.mapWithDefault(event.flatMap(e -> e.v().unlockedProperty()), Function.identity(), false);
-		this.readableTime = ObservableUtil.mapWithDefault(event, e -> LOCAL_TIME_FORMATTER.format(e.actualEvent().getTimestamp()), "");
-		this.readableDate = ObservableUtil.mapWithDefault(event, e -> LOCAL_DATE_FORMATTER.format(e.actualEvent().getTimestamp()), "");
+		this.readableTime = ObservableUtil.mapWithDefault(event, e -> LOCAL_TIME_FORMATTER.format(e.mostRecent().getTimestamp()), "");
+		this.readableDate = ObservableUtil.mapWithDefault(event, e -> LOCAL_DATE_FORMATTER.format(e.mostRecent().getTimestamp()), "");
 		this.message = Bindings.createStringBinding(this::selectMessage, vaultUnlocked, eventMessage);
 		this.description = Bindings.createStringBinding(this::selectDescription, vaultUnlocked, eventDescription);
 		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon);
@@ -108,13 +108,13 @@ public class EventListCellController implements FxController {
 		return vaultUnlocked.getValue() && (eventActionsMenu.isShowing() || root.isHover());
 	}
 
-	public void setEvent(@NotNull VaultEvent item) {
+	public void setEvent(@NotNull FileSystemEventBucket item) {
 		event.set(item);
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
 		eventTooltip.setText(item.v().getDisplayName());
-		addAction("generic.action.dismiss", () -> vaultEventsMap.remove(item.v(),item.actualEvent()));
-		switch (item.actualEvent()) {
+		addAction("generic.action.dismiss", () -> fileSystemEventRegistry.remove(item.v(),item.mostRecent()));
+		switch (item.mostRecent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
 			case ConflictResolutionFailedEvent fse -> this.adjustToConflictEvent(fse);
 			case DecryptionFailedEvent fse -> this.adjustToDecryptionFailedEvent(fse);
