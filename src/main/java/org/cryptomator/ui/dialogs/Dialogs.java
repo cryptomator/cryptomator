@@ -53,8 +53,7 @@ public class Dialogs {
 				.setMessageKey("contactHubAdmin.message") //
 				.setDescriptionKey("contactHubAdmin.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION)//
-				.setOkButtonKey("removeVault.confirmBtn") //
-				.setCancelButtonKey("generic.button.cancel");
+				.setOkButtonKey("generic.button.close");
 	}
 
 	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window, Stage owner, ResourceBundle resourceBundle) {

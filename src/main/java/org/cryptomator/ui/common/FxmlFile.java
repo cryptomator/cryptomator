@@ -44,8 +44,6 @@ public enum FxmlFile {
 	RECOVERYKEY_EXPERT_SETTINGS("/fxml/recoverykey_expert_settings.fxml"), //
 	RECOVERYKEY_RECOVER("/fxml/recoverykey_recover.fxml"), //
 	RECOVERYKEY_RESET_PASSWORD("/fxml/recoverykey_reset_password.fxml"), //
-	RECOVERYKEY_RESET_PASSWORD_SUCCESS("/fxml/recoverykey_reset_password_success.fxml"), //
-	RECOVERYKEY_RESET_VAULT_CONFIG_SUCCESS("/fxml/recoverykey_reset_vault_config_success.fxml"), //
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
 	SHARE_VAULT("/fxml/share_vault.fxml"), //
 	SIMPLE_DIALOG("/fxml/simple_dialog.fxml"), //

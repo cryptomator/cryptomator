@@ -107,20 +107,6 @@ abstract class RecoveryKeyModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS)
-	@RecoveryKeyScoped
-	static Scene provideRecoveryKeyResetPasswordSuccessScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS);
-	}
-
-	@Provides
-	@FxmlScene(FxmlFile.RECOVERYKEY_RESET_VAULT_CONFIG_SUCCESS)
-	@RecoveryKeyScoped
-	static Scene provideRecoveryKeyResetVaultConfigSuccessScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_RESET_VAULT_CONFIG_SUCCESS);
-	}
-
-	@Provides
 	@FxmlScene(FxmlFile.RECOVERYKEY_IS_HUB_VAULT)
 	@RecoveryKeyScoped
 	static Scene provideRecoveryKeyIsHubVaultScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
