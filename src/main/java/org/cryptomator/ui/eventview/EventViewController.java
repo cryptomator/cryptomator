@@ -1,8 +1,8 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.event.FileSystemEventBucket;
+import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
@@ -72,14 +72,11 @@ public class EventViewController implements FxController {
 
 	private void updateList(MapChangeListener.Change<? extends FileSystemEventRegistry.Key, ? extends FileSystemEventRegistry.Value> change) {
 		var vault = change.getKey().vault();
-		if (change.wasAdded() && change.wasRemoved()) {
-			//entry updated
-			eventList.remove(new FileSystemEventBucket(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
+		if (change.wasRemoved()) {
+			eventList.remove(new FileSystemEventBucket(vault, change.getValueRemoved().mostRecentEvent(), 0));
+		}
+		if (change.wasAdded()) {
 			eventList.addLast(new FileSystemEventBucket(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
-		} else if (change.wasAdded()) {
-			eventList.addLast(new FileSystemEventBucket(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
-		} else { //removed
-			eventList.remove(new FileSystemEventBucket(vault, change.getValueRemoved().mostRecentEvent(), change.getValueRemoved().count()));
 		}
 	}
 
@@ -87,7 +84,7 @@ public class EventViewController implements FxController {
 		if (newV == null) {
 			filteredEventList.setPredicate(_ -> true);
 		} else {
-			filteredEventList.setPredicate(e -> e.v().equals(newV));
+			filteredEventList.setPredicate(e -> e.vault().equals(newV));
 		}
 	}
 

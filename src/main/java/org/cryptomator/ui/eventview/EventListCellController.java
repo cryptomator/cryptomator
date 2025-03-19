@@ -86,7 +86,7 @@ public class EventListCellController implements FxController {
 		this.eventDescription = new SimpleStringProperty();
 		this.eventIcon = new SimpleObjectProperty<>();
 		this.eventCount = ObservableUtil.mapWithDefault(event, e -> e.count() == 1? "" : "("+ e.count() +")", "");
-		this.vaultUnlocked = ObservableUtil.mapWithDefault(event.flatMap(e -> e.v().unlockedProperty()), Function.identity(), false);
+		this.vaultUnlocked = ObservableUtil.mapWithDefault(event.flatMap(e -> e.vault().unlockedProperty()), Function.identity(), false);
 		this.readableTime = ObservableUtil.mapWithDefault(event, e -> LOCAL_TIME_FORMATTER.format(e.mostRecent().getTimestamp()), "");
 		this.readableDate = ObservableUtil.mapWithDefault(event, e -> LOCAL_DATE_FORMATTER.format(e.mostRecent().getTimestamp()), "");
 		this.message = Bindings.createStringBinding(this::selectMessage, vaultUnlocked, eventMessage);
@@ -112,8 +112,8 @@ public class EventListCellController implements FxController {
 		event.set(item);
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
-		eventTooltip.setText(item.v().getDisplayName());
-		addAction("generic.action.dismiss", () -> fileSystemEventRegistry.remove(item.v(),item.mostRecent()));
+		eventTooltip.setText(item.vault().getDisplayName());
+		addAction("generic.action.dismiss", () -> fileSystemEventRegistry.remove(item.vault(),item.mostRecent()));
 		switch (item.mostRecent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
 			case ConflictResolutionFailedEvent fse -> this.adjustToConflictEvent(fse);
@@ -211,7 +211,7 @@ public class EventListCellController implements FxController {
 			return eventDescription.getValue();
 		} else {
 			var e = event.getValue();
-			return resourceBundle.getString("eventView.entry.vaultLocked.description").formatted(e != null ? e.v().getDisplayName() : "");
+			return resourceBundle.getString("eventView.entry.vaultLocked.description").formatted(e != null ? e.vault().getDisplayName() : "");
 		}
 	}
 
@@ -232,7 +232,7 @@ public class EventListCellController implements FxController {
 		if (!(p instanceof CryptoPath)) {
 			throw new IllegalArgumentException("Path " + p + " is not a vault path");
 		}
-		var v = event.getValue().v();
+		var v = event.getValue().vault();
 		if (!v.isUnlocked()) {
 			return Path.of(System.getProperty("user.home"));
 		}

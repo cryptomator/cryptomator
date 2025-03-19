@@ -3,12 +3,12 @@ package org.cryptomator.event;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
 
-public record FileSystemEventBucket(Vault v, FilesystemEvent mostRecent, int count) implements Comparable<FileSystemEventBucket> {
+public record FileSystemEventBucket(Vault vault, FilesystemEvent mostRecent, int count) implements Comparable<FileSystemEventBucket> {
 
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof FileSystemEventBucket(Vault v2, FilesystemEvent e2, _)) {
-			return v.equals(v2) && mostRecent.getClass().equals(e2.getClass());
+			return vault.equals(v2) && mostRecent.getClass().equals(e2.getClass());
 		}
 		return false;
 	}
@@ -19,7 +19,7 @@ public record FileSystemEventBucket(Vault v, FilesystemEvent mostRecent, int cou
 		if (timeResult != 0) {
 			return timeResult;
 		}
-		var vaultIdResult = v.getId().compareTo(other.v.getId());
+		var vaultIdResult = vault.getId().compareTo(other.vault.getId());
 		if (vaultIdResult != 0) {
 			return vaultIdResult;
 		}
