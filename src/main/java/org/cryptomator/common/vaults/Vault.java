@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -260,9 +259,7 @@ public class Vault {
 
 
 	private void consumeVaultEvent(FilesystemEvent e) {
-		Platform.runLater(() -> {
-			vaultEventsMap.put(this, e);
-		});
+		vaultEventsMap.enque(this, e);
 	}
 
 	// ******************************************************************************
