@@ -12,7 +12,9 @@ import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 
+import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.beans.property.BooleanProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -25,12 +27,17 @@ abstract class EventViewModule {
 	@Provides
 	@EventViewScoped
 	@EventViewWindow
-	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
+	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @Named("unreadEventsAvailable") BooleanProperty unreadEvents) {
 		Stage stage = factory.create();
 		stage.setHeight(498);
 		stage.setTitle(resourceBundle.getString("eventView.title"));
 		stage.setResizable(true);
 		stage.initModality(Modality.NONE);
+		stage.focusedProperty().addListener((_,_,isFocused) -> {
+			if(isFocused) {
+				unreadEvents.setValue(false);
+			}
+		});
 		return stage;
 	}
 

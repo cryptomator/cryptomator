@@ -1,12 +1,12 @@
 package org.cryptomator.ui.mainwindow;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
+import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -96,7 +97,8 @@ public class VaultListController implements FxController {
 						FxApplicationWindows appWindows, //
 						Settings settings, //
 						Dialogs dialogs, //
-						FileSystemEventRegistry fileSystemEventRegistry) {
+						FileSystemEventRegistry fileSystemEventRegistry, //
+						@Named("unreadEventsAvailable") BooleanProperty unreadEvents) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -110,7 +112,7 @@ public class VaultListController implements FxController {
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.fileSystemEventRegistry = fileSystemEventRegistry;
-		this.newEventsPresent = new SimpleBooleanProperty(false);
+		this.newEventsPresent = unreadEvents;
 		fileSystemEventRegistry.addListener((MapChangeListener<? super FileSystemEventRegistry.Key, ? super FileSystemEventRegistry.Value>) change -> {
 			if (change.wasAdded()) {
 				newEventsPresent.setValue(true);

@@ -20,6 +20,9 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 import org.cryptomator.ui.updatereminder.UpdateReminderComponent;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
+import javax.inject.Named;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,6 +75,13 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	static EventViewComponent provideEventViewComponent(EventViewComponent.Factory factory) {
 		return factory.create();
+	}
+
+	@Provides
+	@FxApplicationScoped
+	@Named("unreadEventsAvailable")
+	static BooleanProperty provideUnreadEventsAvailable() {
+		return new SimpleBooleanProperty(false);
 	}
 
 }
