@@ -6,6 +6,14 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 public record FileSystemEventBucket(Vault v, FilesystemEvent mostRecent, int count) implements Comparable<FileSystemEventBucket> {
 
 	@Override
+	public boolean equals(Object other) {
+		if (other instanceof FileSystemEventBucket(Vault v2, FilesystemEvent e2, _)) {
+			return v.equals(v2) && mostRecent.getClass().equals(e2.getClass());
+		}
+		return false;
+	}
+
+	@Override
 	public int compareTo(FileSystemEventBucket other) {
 		var timeResult = mostRecent.getTimestamp().compareTo(other.mostRecent().getTimestamp());
 		if (timeResult != 0) {
