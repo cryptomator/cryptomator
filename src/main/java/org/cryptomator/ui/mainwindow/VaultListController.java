@@ -69,7 +69,6 @@ public class VaultListController implements FxController {
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
-	private final FileSystemEventRegistry fileSystemEventRegistry;
 	private final BooleanProperty newEventsPresent;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
@@ -97,7 +96,6 @@ public class VaultListController implements FxController {
 						FxApplicationWindows appWindows, //
 						Settings settings, //
 						Dialogs dialogs, //
-						FileSystemEventRegistry fileSystemEventRegistry, //
 						@Named("unreadEventsAvailable") BooleanProperty unreadEvents) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
@@ -111,13 +109,7 @@ public class VaultListController implements FxController {
 		this.dialogs = dialogs;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
-		this.fileSystemEventRegistry = fileSystemEventRegistry;
 		this.newEventsPresent = unreadEvents;
-		fileSystemEventRegistry.addListener((MapChangeListener<? super FileSystemEventRegistry.Key, ? super FileSystemEventRegistry.Value>) change -> {
-			if (change.wasAdded()) {
-				newEventsPresent.setValue(true);
-			}
-		});
 
 		selectedVault.addListener(this::selectedVaultDidChange);
 		cellSize = settings.compactMode.map(compact -> compact ? 30.0 : 60.0);

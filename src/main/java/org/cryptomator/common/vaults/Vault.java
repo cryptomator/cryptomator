@@ -259,7 +259,7 @@ public class Vault {
 
 
 	private void consumeVaultEvent(FilesystemEvent e) {
-		fileSystemEventRegistry.enque(this, e);
+		fileSystemEventRegistry.enqueue(this, e);
 	}
 
 	// ******************************************************************************

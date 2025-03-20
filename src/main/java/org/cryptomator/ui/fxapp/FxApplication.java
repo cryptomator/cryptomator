@@ -43,6 +43,7 @@ public class FxApplication {
 		this.autoUnlocker = autoUnlocker;
 	}
 
+	//TODO: eventUpdater muss hier starten
 	public void start() {
 		LOG.trace("FxApplication.start()");
 		applicationStyle.initialize();

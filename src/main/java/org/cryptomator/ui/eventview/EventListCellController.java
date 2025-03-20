@@ -9,7 +9,6 @@ import org.cryptomator.cryptofs.event.BrokenFileNodeEvent;
 import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
-import org.cryptomator.event.FileSystemEventBucket;
 import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
@@ -41,6 +40,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Function;
@@ -55,7 +55,7 @@ public class EventListCellController implements FxController {
 	@Nullable
 	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
-	private final ObjectProperty<FileSystemEventBucket> event;
+	private final ObjectProperty<Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value>> eventEntry;
 	private final StringProperty eventMessage;
 	private final StringProperty eventDescription;
 	private final ObjectProperty<FontAwesome5Icon> eventIcon;
@@ -81,14 +81,14 @@ public class EventListCellController implements FxController {
 		this.fileSystemEventRegistry = fileSystemEventRegistry;
 		this.revealService = revealService.orElseGet(() -> null);
 		this.resourceBundle = resourceBundle;
-		this.event = new SimpleObjectProperty<>(null);
+		this.eventEntry = new SimpleObjectProperty<>(null);
 		this.eventMessage = new SimpleStringProperty();
 		this.eventDescription = new SimpleStringProperty();
 		this.eventIcon = new SimpleObjectProperty<>();
-		this.eventCount = ObservableUtil.mapWithDefault(event, e -> e.count() == 1? "" : "("+ e.count() +")", "");
-		this.vaultUnlocked = ObservableUtil.mapWithDefault(event.flatMap(e -> e.vault().unlockedProperty()), Function.identity(), false);
-		this.readableTime = ObservableUtil.mapWithDefault(event, e -> LOCAL_TIME_FORMATTER.format(e.mostRecent().getTimestamp()), "");
-		this.readableDate = ObservableUtil.mapWithDefault(event, e -> LOCAL_DATE_FORMATTER.format(e.mostRecent().getTimestamp()), "");
+		this.eventCount = ObservableUtil.mapWithDefault(eventEntry, e -> e.getValue().count() == 1? "" : "("+ e.getValue().count() +")", "");
+		this.vaultUnlocked = ObservableUtil.mapWithDefault(eventEntry.flatMap(e -> e.getKey().vault().unlockedProperty()), Function.identity(), false);
+		this.readableTime = ObservableUtil.mapWithDefault(eventEntry, e -> LOCAL_TIME_FORMATTER.format(e.getValue().mostRecentEvent().getTimestamp()), "");
+		this.readableDate = ObservableUtil.mapWithDefault(eventEntry, e -> LOCAL_DATE_FORMATTER.format(e.getValue().mostRecentEvent().getTimestamp()), "");
 		this.message = Bindings.createStringBinding(this::selectMessage, vaultUnlocked, eventMessage);
 		this.description = Bindings.createStringBinding(this::selectDescription, vaultUnlocked, eventDescription);
 		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon);
@@ -108,13 +108,13 @@ public class EventListCellController implements FxController {
 		return vaultUnlocked.getValue() && (eventActionsMenu.isShowing() || root.isHover());
 	}
 
-	public void setEvent(@NotNull FileSystemEventBucket item) {
-		event.set(item);
+	public void setEventEntry(@NotNull Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value> item) {
+		eventEntry.set(item);
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
-		eventTooltip.setText(item.vault().getDisplayName());
-		addAction("generic.action.dismiss", () -> fileSystemEventRegistry.remove(item.vault(),item.mostRecent()));
-		switch (item.mostRecent()) {
+		eventTooltip.setText(item.getKey().vault().getDisplayName());
+		addAction("generic.action.dismiss", () -> fileSystemEventRegistry.remove(item.getKey()));
+		switch (item.getValue().mostRecentEvent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
 			case ConflictResolutionFailedEvent fse -> this.adjustToConflictEvent(fse);
 			case DecryptionFailedEvent fse -> this.adjustToDecryptionFailedEvent(fse);
@@ -209,16 +209,18 @@ public class EventListCellController implements FxController {
 	private String selectDescription() {
 		if (vaultUnlocked.getValue()) {
 			return eventDescription.getValue();
-		} else {
-			var e = event.getValue();
+		} else if (eventEntry.getValue() != null) {
+			var e = eventEntry.getValue().getKey();
 			return resourceBundle.getString("eventView.entry.vaultLocked.description").formatted(e != null ? e.vault().getDisplayName() : "");
+		} else {
+			return "";
 		}
 	}
 
 
 	@FXML
 	public void toggleEventActionsMenu() {
-		var e = event.get();
+		var e = eventEntry.get();
 		if (e != null) {
 			if (eventActionsMenu.isShowing()) {
 				eventActionsMenu.hide();
@@ -232,7 +234,7 @@ public class EventListCellController implements FxController {
 		if (!(p instanceof CryptoPath)) {
 			throw new IllegalArgumentException("Path " + p + " is not a vault path");
 		}
-		var v = event.getValue().vault();
+		var v = eventEntry.getValue().getKey().vault();
 		if (!v.isUnlocked()) {
 			return Path.of(System.getProperty("user.home"));
 		}

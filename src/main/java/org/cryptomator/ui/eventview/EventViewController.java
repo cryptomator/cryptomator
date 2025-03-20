@@ -1,15 +1,14 @@
 package org.cryptomator.ui.eventview;
 
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.event.FileSystemEventBucket;
 import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.EventsUpdateCheck;
 
 import javax.inject.Inject;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -17,17 +16,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListView;
 import javafx.util.StringConverter;
-import java.util.Comparator;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 @EventViewScoped
 public class EventViewController implements FxController {
 
-	private final FileSystemEventRegistry fileSystemEventRegistry;
-	private final ObservableList<FileSystemEventBucket> eventList;
-	private final FilteredList<FileSystemEventBucket> filteredEventList;
+	private final FilteredList<Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value>> filteredEventList;
 	private final ObservableList<Vault> vaults;
-	private final SortedList<FileSystemEventBucket> reversedEventList;
+	private final SortedList<Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value>> sortedEventList;
 	private final ObservableList<Vault> choiceBoxEntries;
 	private final ResourceBundle resourceBundle;
 	private final EventListCellFactory cellFactory;
@@ -35,18 +32,42 @@ public class EventViewController implements FxController {
 	@FXML
 	ChoiceBox<Vault> vaultFilterChoiceBox;
 	@FXML
-	ListView<FileSystemEventBucket> eventListView;
+	ListView<Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value>> eventListView;
 
 	@Inject
-	public EventViewController(FileSystemEventRegistry fileSystemEventRegistry, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
-		this.fileSystemEventRegistry = fileSystemEventRegistry;
-		this.eventList = FXCollections.observableArrayList();
-		this.filteredEventList = eventList.filtered(_ -> true);
+	public EventViewController(EventsUpdateCheck eventsUpdateCheck, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
+		this.filteredEventList = eventsUpdateCheck.getList().filtered(_ -> true);
 		this.vaults = vaults;
-		this.reversedEventList = new SortedList<>(filteredEventList, Comparator.reverseOrder());
+		this.sortedEventList = new SortedList<>(filteredEventList, this::compareBuckets);
 		this.choiceBoxEntries = FXCollections.observableArrayList();
 		this.resourceBundle = resourceBundle;
 		this.cellFactory = cellFactory;
+	}
+
+	/**
+	 * Comparsion method for the lru cache. During comparsion the map is accessed.
+	 * First the entries are compared by the event timestamp, then vaultId, then identifying path and lastly by class name.
+	 *
+	 * @param left a {@link FileSystemEventRegistry.Key} object
+	 * @param right another {@link FileSystemEventRegistry.Key} object, compared to {@code left}
+	 * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+	 */
+	private int compareBuckets(Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value> left, Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value> right) {
+		var t1 = left.getValue().mostRecentEvent().getTimestamp();
+		var t2 = right.getValue().mostRecentEvent().getTimestamp();
+		var timeComparison = t1.compareTo(t2);
+		if (timeComparison != 0) {
+			return -timeComparison; //we need the reverse timesorting
+		}
+		var vaultIdComparsion = left.getKey().vault().getId().compareTo(right.getKey().vault().getId());
+		if (vaultIdComparsion != 0) {
+			return vaultIdComparsion;
+		}
+		var pathComparsion = left.getKey().idPath().compareTo(right.getKey().idPath());
+		if (pathComparsion != 0) {
+			return pathComparsion;
+		}
+		return left.getKey().c().getName().compareTo(right.getKey().c().getName());
 	}
 
 	@FXML
@@ -60,37 +81,25 @@ public class EventViewController implements FxController {
 			}
 		});
 
-		eventList.addAll(fileSystemEventRegistry.listAll());
-		fileSystemEventRegistry.addListener((MapChangeListener<? super FileSystemEventRegistry.Key, ? super FileSystemEventRegistry.Value>) this::updateList);
 		eventListView.setCellFactory(cellFactory);
-		eventListView.setItems(reversedEventList);
+		eventListView.setItems(sortedEventList);
 
 		vaultFilterChoiceBox.setItems(choiceBoxEntries);
 		vaultFilterChoiceBox.valueProperty().addListener(this::applyVaultFilter);
 		vaultFilterChoiceBox.setConverter(new VaultConverter(resourceBundle));
 	}
 
-	private void updateList(MapChangeListener.Change<? extends FileSystemEventRegistry.Key, ? extends FileSystemEventRegistry.Value> change) {
-		var vault = change.getKey().vault();
-		if (change.wasRemoved()) {
-			eventList.remove(new FileSystemEventBucket(vault, change.getValueRemoved().mostRecentEvent(), 0));
-		}
-		if (change.wasAdded()) {
-			eventList.addLast(new FileSystemEventBucket(vault, change.getValueAdded().mostRecentEvent(), change.getValueAdded().count()));
-		}
-	}
-
 	private void applyVaultFilter(ObservableValue<? extends Vault> v, Vault oldV, Vault newV) {
 		if (newV == null) {
 			filteredEventList.setPredicate(_ -> true);
 		} else {
-			filteredEventList.setPredicate(e -> e.vault().equals(newV));
+			filteredEventList.setPredicate(e -> e.getKey().vault().equals(newV));
 		}
 	}
 
 	@FXML
 	void clearEvents() {
-		fileSystemEventRegistry.clear();
+		//fileSystemEventRegistry.clear();
 	}
 
 	private static class VaultConverter extends StringConverter<Vault> {
