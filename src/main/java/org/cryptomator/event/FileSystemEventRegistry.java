@@ -7,32 +7,29 @@ import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
-import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Angenommen:
  * Datenstruktur die
  * 1. Thread-Safe ist
  * ??
- *
- *
- *
- *
+ * <p>
+ * <p>
+ * <p>
+ * <p>
  * 1. Wenn ein Set verwendet wird, dann können wir nach Timestamp sortieren, aber wir können einen Eintrag nur durch entfernen und hinzufügen updaten
  * 2. Wenn eine Map verwendet wird, dann können wir Einträge updaten. Aber
- *
  */
 //TODO: Rename to aggregator
 //TODO: lru cache
@@ -60,8 +57,9 @@ public class FileSystemEventRegistry {
 	 * @param v Vault where the event occurred
 	 * @param e Actual {@link FilesystemEvent}
 	 */
-	public synchronized void enqueue(Vault v, FilesystemEvent e) {
+	public void enqueue(Vault v, FilesystemEvent e) {
 		var key = computeKey(v, e);
+		hasUpdates.set(true);
 		map.compute(key, (k, val) -> {
 			if (val == null) {
 				return new Value(e, 1);
@@ -70,7 +68,6 @@ public class FileSystemEventRegistry {
 			}
 		});
 
-		hasUpdates.set(true);
 	}
 
 	/**
@@ -82,9 +79,8 @@ public class FileSystemEventRegistry {
 	 * @implNote Method is not synchronized, because it is only executed if executed by JavaFX application thread
 	 */
 	public Value remove(Key key) {
-		var result = map.remove(key);
 		hasUpdates.set(true);
-		return result;
+		return map.remove(key);
 	}
 
 	/**
@@ -95,8 +91,26 @@ public class FileSystemEventRegistry {
 	 * @implNote Method is not synchronized, because it is only executed if executed by JavaFX application thread
 	 */
 	public void clear() {
-		map.clear();
 		hasUpdates.set(true);
+		map.clear();
+	}
+
+
+	public boolean hasUpdates() {
+		return hasUpdates.get();
+	}
+
+	/**
+	 * Clones the map entries into a collection.
+	 * <p>
+	 * The collection is first cleared, then all map entries are added in one bulk operation. Cleans the hasUpdates status.
+	 *
+	 * @param targetCollection
+	 */
+	public void cloneTo(Collection<Map.Entry<Key, Value>> targetCollection) {
+		hasUpdates.set(false);
+		targetCollection.clear();
+		targetCollection.addAll(map.entrySet());
 	}
 
 	/**
@@ -115,22 +129,5 @@ public class FileSystemEventRegistry {
 			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
 		};
 		return new Key(v, p, event.getClass());
-	}
-
-	public boolean hasUpdates() {
-		return hasUpdates.get();
-	}
-
-	/**
-	 * Clones the map entries into a set.
-	 * <p>
-	 * The set is first cleared, then all map entries are added in one bulk operation. Sets the updates status of the event registry.
-	 *
-	 * @param targetCollection
-	 */
-	public void cloneTo(Collection<Map.Entry<Key, Value>> targetCollection) {
-		targetCollection.clear();
-		targetCollection.addAll(map.entrySet());
-		hasUpdates.set(false);
 	}
 }
