@@ -34,15 +34,10 @@ public class FxFSEventList {
 				flush();
 			}
 		}, 1000, 1000, TimeUnit.MILLISECONDS);
-		//TODO: allow the task to be canceled (to enable ui actions, e.g. when the contextMenu is open, the list should not be updated
-	}
-
-	public ObservableList<Map.Entry<FSEventBucket, FSEventBucketContent>> getObservableList() {
-		return events;
 	}
 
 	/**
-	 * Clones the aggregator into the observable list
+	 * Starts the clone task on the FX thread and wait till it is completed
 	 */
 	private void flush() {
 		var latch = new CountDownLatch(1);
@@ -56,6 +51,10 @@ public class FxFSEventList {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
+	}
+
+	public ObservableList<Map.Entry<FSEventBucket, FSEventBucketContent>> getObservableList() {
+		return events;
 	}
 
 	public BooleanProperty unreadEventsProperty() {

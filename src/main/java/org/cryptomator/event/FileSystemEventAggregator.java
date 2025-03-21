@@ -29,12 +29,12 @@ public class FileSystemEventAggregator {
 	}
 
 	/**
-	 * Enques the given event to be inserted into the map.
+	 * Adds the given event to the map. If a bucket for this event already exists, only the count is updated and the event set as the most recent one.
 	 *
 	 * @param v Vault where the event occurred
 	 * @param e Actual {@link FilesystemEvent}
 	 */
-	public void enqueue(Vault v, FilesystemEvent e) {
+	public void put(Vault v, FilesystemEvent e) {
 		var key = computeKey(v, e);
 		hasUpdates.set(true);
 		map.compute(key, (k, val) -> {
