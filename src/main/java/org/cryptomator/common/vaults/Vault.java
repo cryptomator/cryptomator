@@ -10,7 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.event.FileSystemEventRegistry;
+import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -76,7 +76,7 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final Settings settings;
-	private final FileSystemEventRegistry fileSystemEventRegistry;
+	private final FileSystemEventAggregator fileSystemEventAggregator;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -89,7 +89,7 @@ public class Vault {
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
 		  Mounter mounter, Settings settings, //
-		  FileSystemEventRegistry fileSystemEventRegistry) {
+		  FileSystemEventAggregator fileSystemEventAggregator) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -106,7 +106,7 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.settings = settings;
-		this.fileSystemEventRegistry = fileSystemEventRegistry;
+		this.fileSystemEventAggregator = fileSystemEventAggregator;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -259,7 +259,7 @@ public class Vault {
 
 
 	private void consumeVaultEvent(FilesystemEvent e) {
-		fileSystemEventRegistry.enque(this, e);
+		fileSystemEventAggregator.put(this, e);
 	}
 
 	// ******************************************************************************

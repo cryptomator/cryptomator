@@ -6,18 +6,17 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
-import org.cryptomator.event.FileSystemEventRegistry;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.fxapp.FxFSEventList;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -25,7 +24,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -69,8 +67,7 @@ public class VaultListController implements FxController {
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
-	private final FileSystemEventRegistry fileSystemEventRegistry;
-	private final BooleanProperty newEventsPresent;
+	private final BooleanProperty unreadEvents;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
@@ -97,8 +94,7 @@ public class VaultListController implements FxController {
 						FxApplicationWindows appWindows, //
 						Settings settings, //
 						Dialogs dialogs, //
-						FileSystemEventRegistry fileSystemEventRegistry, //
-						@Named("unreadEventsAvailable") BooleanProperty unreadEvents) {
+						FxFSEventList fxFSEventList) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -111,13 +107,7 @@ public class VaultListController implements FxController {
 		this.dialogs = dialogs;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
-		this.fileSystemEventRegistry = fileSystemEventRegistry;
-		this.newEventsPresent = unreadEvents;
-		fileSystemEventRegistry.addListener((MapChangeListener<? super FileSystemEventRegistry.Key, ? super FileSystemEventRegistry.Value>) change -> {
-			if (change.wasAdded()) {
-				newEventsPresent.setValue(true);
-			}
-		});
+		this.unreadEvents = fxFSEventList.unreadEventsProperty();
 
 		selectedVault.addListener(this::selectedVaultDidChange);
 		cellSize = settings.compactMode.map(compact -> compact ? 30.0 : 60.0);
@@ -280,7 +270,7 @@ public class VaultListController implements FxController {
 	@FXML
 	public void showEventViewer() {
 		appWindows.showEventViewer();
-		newEventsPresent.setValue(false);
+		unreadEvents.setValue(false);
 	}
 	// Getter and Setter
 
@@ -308,11 +298,11 @@ public class VaultListController implements FxController {
 		return cellSize.getValue();
 	}
 
-	public ObservableValue<Boolean> newEventsPresentProperty() {
-		return newEventsPresent;
+	public ObservableValue<Boolean> unreadEventsPresentProperty() {
+		return unreadEvents;
 	}
 
-	public boolean getNewEventsPresent() {
-		return newEventsPresent.getValue();
+	public boolean getUnreadEventsPresent() {
+		return unreadEvents.getValue();
 	}
 }
