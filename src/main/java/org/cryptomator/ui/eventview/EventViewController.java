@@ -3,6 +3,7 @@ package org.cryptomator.ui.eventview;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.event.FSEventBucket;
 import org.cryptomator.event.FSEventBucketContent;
+import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxFSEventList;
 
@@ -25,6 +26,7 @@ public class EventViewController implements FxController {
 
 	private final FilteredList<Map.Entry<FSEventBucket, FSEventBucketContent>> filteredEventList;
 	private final ObservableList<Vault> vaults;
+	private final FileSystemEventAggregator aggregator;
 	private final SortedList<Map.Entry<FSEventBucket, FSEventBucketContent>> sortedEventList;
 	private final ObservableList<Vault> choiceBoxEntries;
 	private final ResourceBundle resourceBundle;
@@ -36,9 +38,10 @@ public class EventViewController implements FxController {
 	ListView<Map.Entry<FSEventBucket, FSEventBucketContent>> eventListView;
 
 	@Inject
-	public EventViewController(FxFSEventList fxFSEventList, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
+	public EventViewController(FxFSEventList fxFSEventList, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory, FileSystemEventAggregator aggregator) {
 		this.filteredEventList = fxFSEventList.getObservableList().filtered(_ -> true);
 		this.vaults = vaults;
+		this.aggregator = aggregator;
 		this.sortedEventList = new SortedList<>(filteredEventList, this::compareBuckets);
 		this.choiceBoxEntries = FXCollections.observableArrayList();
 		this.resourceBundle = resourceBundle;
@@ -100,7 +103,7 @@ public class EventViewController implements FxController {
 
 	@FXML
 	void clearEvents() {
-		//fileSystemEventRegistry.clear();
+		aggregator.clear();
 	}
 
 	private static class VaultConverter extends StringConverter<Vault> {
