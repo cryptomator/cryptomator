@@ -36,7 +36,6 @@ public class FileSystemEventAggregator {
 	 */
 	public void put(Vault v, FilesystemEvent e) {
 		var key = computeKey(v, e);
-		hasUpdates.set(true);
 		map.compute(key, (k, val) -> {
 			if (val == null) {
 				return new FSEventBucketContent(e, 1);
@@ -44,27 +43,28 @@ public class FileSystemEventAggregator {
 				return new FSEventBucketContent(e, val.count() + 1);
 			}
 		});
-
+		hasUpdates.set(true);
 	}
 
 	/**
 	 * Removes an event bucket from the map.
 	 */
 	public FSEventBucketContent remove(FSEventBucket key) {
+		var content = map.remove(key);
 		hasUpdates.set(true);
-		return map.remove(key);
+		return content;
 	}
 
 	/**
 	 * Clears the event map.
 	 */
 	public void clear() {
-		hasUpdates.set(true);
 		map.clear();
+		hasUpdates.set(true);
 	}
 
 
-	public boolean hasUpdates() {
+	public boolean hasMaybeUpdates() {
 		return hasUpdates.get();
 	}
 

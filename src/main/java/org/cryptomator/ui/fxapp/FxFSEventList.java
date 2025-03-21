@@ -30,7 +30,7 @@ public class FxFSEventList {
 		this.eventAggregator = fsEventAggregator;
 		this.unreadEvents = new SimpleBooleanProperty(false);
 		this.scheduledTask = scheduler.scheduleWithFixedDelay(() -> {
-			if (fsEventAggregator.hasUpdates()) {
+			if (fsEventAggregator.hasMaybeUpdates()) {
 				flush();
 			}
 		}, 1000, 1000, TimeUnit.MILLISECONDS);
