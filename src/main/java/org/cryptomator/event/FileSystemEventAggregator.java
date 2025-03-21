@@ -16,6 +16,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Aggregator for {@link FilesystemEvent}s.
+ * <p>
+ * The aggregator groups filesystem events by the vault where the event occurred, an identifying path (clear- or ciphertext) and the event class (aka type).
+ * A group is called an {@link FSEventBucket}, its {@link FSEventBucketContent} is the most recent event object and a count of how often the event already occurred.
+ */
 @Singleton
 public class FileSystemEventAggregator {
 

@@ -16,6 +16,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * List of all occurred filesystem events.
+ * <p>
+ * The list exposes an observable list to listen for updates and a property. Internally it polls the {@link FileSystemEventAggregator} in a regular interval for updates. If an update is available, the observable list is updated on the FX application thread.
+ */
 @FxApplicationScoped
 public class FxFSEventList {
 
