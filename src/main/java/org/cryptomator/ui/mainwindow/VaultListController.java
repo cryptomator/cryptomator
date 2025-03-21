@@ -270,7 +270,6 @@ public class VaultListController implements FxController {
 	@FXML
 	public void showEventViewer() {
 		appWindows.showEventViewer();
-		unreadEvents.setValue(false);
 	}
 	// Getter and Setter
 
