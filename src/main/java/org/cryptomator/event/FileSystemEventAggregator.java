@@ -16,15 +16,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-//TODO: Rename to aggregator
 @Singleton
 public class FileSystemEventAggregator {
 
-	public record Key(Vault vault, Path idPath, Class<? extends FilesystemEvent> c) {};
-
-	public record Value(FilesystemEvent mostRecentEvent, int count) {}
-
-	private final ConcurrentHashMap<Key, Value> map;
+	private final ConcurrentHashMap<FSEventBucket, FSEventBucketContent> map;
 	private final AtomicBoolean hasUpdates;
 
 	@Inject
@@ -44,9 +39,9 @@ public class FileSystemEventAggregator {
 		hasUpdates.set(true);
 		map.compute(key, (k, val) -> {
 			if (val == null) {
-				return new Value(e, 1);
+				return new FSEventBucketContent(e, 1);
 			} else {
-				return new Value(e, val.count() + 1);
+				return new FSEventBucketContent(e, val.count() + 1);
 			}
 		});
 
@@ -55,7 +50,7 @@ public class FileSystemEventAggregator {
 	/**
 	 * Removes an event bucket from the map.
 	 */
-	public Value remove(Key key) {
+	public FSEventBucketContent remove(FSEventBucket key) {
 		hasUpdates.set(true);
 		return map.remove(key);
 	}
@@ -80,7 +75,7 @@ public class FileSystemEventAggregator {
 	 *
 	 * @param target collection which is first cleared and then the EntrySet copied to.
 	 */
-	public void cloneTo(Collection<Map.Entry<Key, Value>> target) {
+	public void cloneTo(Collection<Map.Entry<FSEventBucket, FSEventBucketContent>> target) {
 		hasUpdates.set(false);
 		target.clear();
 		target.addAll(map.entrySet());
@@ -91,9 +86,9 @@ public class FileSystemEventAggregator {
 	 *
 	 * @param v Vault where the event occurred
 	 * @param event Actual {@link FilesystemEvent}
-	 * @return a {@link Key} used in the map and lru cache
+	 * @return a {@link FSEventBucket} used in the map and lru cache
 	 */
-	private static Key computeKey(Vault v, FilesystemEvent event) {
+	private static FSEventBucket computeKey(Vault v, FilesystemEvent event) {
 		var p = switch (event) {
 			case DecryptionFailedEvent(_, Path ciphertextPath, _) -> ciphertextPath;
 			case ConflictResolvedEvent(_, _, _, _, Path resolvedCiphertext) -> resolvedCiphertext;
@@ -101,6 +96,6 @@ public class FileSystemEventAggregator {
 			case BrokenDirFileEvent(_, Path ciphertext) -> ciphertext;
 			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
 		};
-		return new Key(v, p, event.getClass());
+		return new FSEventBucket(v, p, event.getClass());
 	}
 }

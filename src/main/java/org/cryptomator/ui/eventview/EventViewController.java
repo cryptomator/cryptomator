@@ -1,7 +1,8 @@
 package org.cryptomator.ui.eventview;
 
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.event.FileSystemEventAggregator;
+import org.cryptomator.event.FSEventBucket;
+import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.EventsUpdateCheck;
 
@@ -22,9 +23,9 @@ import java.util.ResourceBundle;
 @EventViewScoped
 public class EventViewController implements FxController {
 
-	private final FilteredList<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> filteredEventList;
+	private final FilteredList<Map.Entry<FSEventBucket, FSEventBucketContent>> filteredEventList;
 	private final ObservableList<Vault> vaults;
-	private final SortedList<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> sortedEventList;
+	private final SortedList<Map.Entry<FSEventBucket, FSEventBucketContent>> sortedEventList;
 	private final ObservableList<Vault> choiceBoxEntries;
 	private final ResourceBundle resourceBundle;
 	private final EventListCellFactory cellFactory;
@@ -32,7 +33,7 @@ public class EventViewController implements FxController {
 	@FXML
 	ChoiceBox<Vault> vaultFilterChoiceBox;
 	@FXML
-	ListView<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> eventListView;
+	ListView<Map.Entry<FSEventBucket, FSEventBucketContent>> eventListView;
 
 	@Inject
 	public EventViewController(EventsUpdateCheck eventsUpdateCheck, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
@@ -48,11 +49,11 @@ public class EventViewController implements FxController {
 	 * Comparsion method for the lru cache. During comparsion the map is accessed.
 	 * First the entries are compared by the event timestamp, then vaultId, then identifying path and lastly by class name.
 	 *
-	 * @param left a {@link FileSystemEventAggregator.Key} object
-	 * @param right another {@link FileSystemEventAggregator.Key} object, compared to {@code left}
+	 * @param left a {@link FSEventBucket} object
+	 * @param right another {@link FSEventBucket} object, compared to {@code left}
 	 * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
 	 */
-	private int compareBuckets(Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value> left, Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value> right) {
+	private int compareBuckets(Map.Entry<FSEventBucket, FSEventBucketContent> left, Map.Entry<FSEventBucket, FSEventBucketContent> right) {
 		var t1 = left.getValue().mostRecentEvent().getTimestamp();
 		var t2 = right.getValue().mostRecentEvent().getTimestamp();
 		var timeComparison = t1.compareTo(t2);

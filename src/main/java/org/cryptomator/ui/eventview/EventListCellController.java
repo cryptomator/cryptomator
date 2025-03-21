@@ -1,5 +1,7 @@
 package org.cryptomator.ui.eventview;
 
+import org.cryptomator.event.FSEventBucket;
+import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
@@ -55,7 +57,7 @@ public class EventListCellController implements FxController {
 	@Nullable
 	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
-	private final ObjectProperty<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> eventEntry;
+	private final ObjectProperty<Map.Entry<FSEventBucket, FSEventBucketContent>> eventEntry;
 	private final StringProperty eventMessage;
 	private final StringProperty eventDescription;
 	private final ObjectProperty<FontAwesome5Icon> eventIcon;
@@ -108,7 +110,7 @@ public class EventListCellController implements FxController {
 		return vaultUnlocked.getValue() && (eventActionsMenu.isShowing() || root.isHover());
 	}
 
-	public void setEventEntry(@NotNull Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value> item) {
+	public void setEventEntry(@NotNull Map.Entry<FSEventBucket, FSEventBucketContent> item) {
 		eventEntry.set(item);
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();

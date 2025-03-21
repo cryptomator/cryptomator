@@ -1,5 +1,7 @@
 package org.cryptomator.ui.fxapp;
 
+import org.cryptomator.event.FSEventBucket;
+import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.event.FileSystemEventAggregator;
 
 import javax.inject.Inject;
@@ -17,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @FxApplicationScoped
 public class EventsUpdateCheck {
 
-	private final ObservableList<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> events;
+	private final ObservableList<Map.Entry<FSEventBucket, FSEventBucketContent>> events;
 	private final FileSystemEventAggregator eventRegistry;
 	private final ScheduledFuture<?> scheduledTask;
 	private final BooleanProperty unreadEvents;
@@ -35,7 +37,7 @@ public class EventsUpdateCheck {
 		//TODO: allow the task to be canceled (to enable ui actions, e.g. when the contextMenu is open, the list should not be updated
 	}
 
-	public ObservableList<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> getList() {
+	public ObservableList<Map.Entry<FSEventBucket, FSEventBucketContent>> getList() {
 		return events;
 	}
 

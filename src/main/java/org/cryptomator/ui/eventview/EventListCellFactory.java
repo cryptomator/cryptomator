@@ -1,6 +1,7 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.event.FileSystemEventAggregator;
+import org.cryptomator.event.FSEventBucket;
+import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 
 import javax.inject.Inject;
@@ -15,7 +16,7 @@ import java.io.UncheckedIOException;
 import java.util.Map;
 
 @EventViewScoped
-public class EventListCellFactory implements Callback<ListView<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>>, ListCell<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>>> {
+public class EventListCellFactory implements Callback<ListView<Map.Entry<FSEventBucket, FSEventBucketContent>>, ListCell<Map.Entry<FSEventBucket, FSEventBucketContent>>> {
 
 	private static final String FXML_PATH = "/fxml/eventview_cell.fxml";
 
@@ -28,7 +29,7 @@ public class EventListCellFactory implements Callback<ListView<Map.Entry<FileSys
 
 
 	@Override
-	public ListCell<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> call(ListView<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> eventListView) {
+	public ListCell<Map.Entry<FSEventBucket, FSEventBucketContent>> call(ListView<Map.Entry<FSEventBucket, FSEventBucketContent>> eventListView) {
 		try {
 			FXMLLoader fxmlLoader = fxmlLoaders.load(FXML_PATH);
 			return new Cell(fxmlLoader.getRoot(), fxmlLoader.getController());
@@ -37,7 +38,7 @@ public class EventListCellFactory implements Callback<ListView<Map.Entry<FileSys
 		}
 	}
 
-	private static class Cell extends ListCell<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> {
+	private static class Cell extends ListCell<Map.Entry<FSEventBucket, FSEventBucketContent>> {
 
 		private final Parent root;
 		private final EventListCellController controller;
@@ -48,7 +49,7 @@ public class EventListCellFactory implements Callback<ListView<Map.Entry<FileSys
 		}
 
 		@Override
-		protected void updateItem(Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value> item, boolean empty) {
+		protected void updateItem(Map.Entry<FSEventBucket, FSEventBucketContent> item, boolean empty) {
 			super.updateItem(item, empty);
 
 			if (empty || item == null) {
