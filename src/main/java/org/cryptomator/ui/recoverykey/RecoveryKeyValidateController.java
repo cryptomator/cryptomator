@@ -26,6 +26,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RecoveryKeyValidateController implements FxController {
 
@@ -133,33 +134,25 @@ public class RecoveryKeyValidateController implements FxController {
 	}
 
 	private void validateRecoveryKey() {
-		isWrongKey = false;
-		var valid = false;
-		switch (recoverType.get()) {
+		AtomicBoolean illegalArgumentExceptionOccurred = new AtomicBoolean(false);
+		boolean valid = switch (recoverType.get()) {
 			case RESTORE_VAULT_CONFIG -> {
-				try {
-					var combo = RecoverUtil.validateRecoveryKeyAndGetCombo(recoveryKeyFactory, vault, recoveryKey, masterkeyFileAccess);
-					valid = combo.isPresent();
-					combo.ifPresent(cipherCombo::set);
-				} catch (IllegalStateException e) {
-					isWrongKey = true;
-				} catch (IllegalArgumentException e) {
-					isWrongKey = false;
-				}
+				var combo = RecoverUtil.validateRecoveryKeyAndGetCombo(
+						recoveryKeyFactory, vault, recoveryKey, masterkeyFileAccess, illegalArgumentExceptionOccurred);
+				combo.ifPresent(cipherCombo::set);
+				yield combo.isPresent();
 			}
-			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT -> {
-				valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
-			}
-		}
+			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT ->
+					recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(),
+							unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
+		};
+
 		if (valid) {
 			recoveryKeyState.set(RecoveryKeyState.CORRECT);
-		} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()
-			recoveryKeyState.set(RecoveryKeyState.WRONG);
-		} else {
-			recoveryKeyState.set(RecoveryKeyState.INVALID);
+			return;
 		}
+		recoveryKeyState.set(illegalArgumentExceptionOccurred.get() ? RecoveryKeyState.INVALID : RecoveryKeyState.WRONG);
 	}
-
 
 	/* Getter/Setter */
 

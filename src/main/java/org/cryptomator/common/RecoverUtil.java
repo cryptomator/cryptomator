@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static org.cryptomator.common.Constants.DEFAULT_KEY_ID;
@@ -56,19 +57,32 @@ public class RecoverUtil {
 
 	public static CryptorProvider.Scheme detectCipherCombo(byte[] masterkey, Path pathToVault) {
 		try (Stream<Path> paths = Files.walk(pathToVault.resolve(DATA_DIR_NAME))) {
-			return paths.filter(path -> path.toString().endsWith(".c9r")).findFirst().map(c9rFile -> determineScheme(c9rFile, masterkey)).orElseThrow(() -> new IllegalStateException("No .c9r file found."));
+			Path c9rFile = paths.filter(path -> path.toString().endsWith(".c9r"))
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("No .c9r file found. The vault might not exist or the provided masterkey does not match."));
+			CryptorProvider.Scheme scheme = determineScheme(c9rFile, masterkey);
+			if (scheme == null) {
+				throw new IllegalArgumentException("Invalid masterkey: Decryption failed.");
+			}
+			return scheme;
 		} catch (IOException e) {
-			throw new IllegalStateException("Failed to detect cipher combo.", e);
+			throw new IllegalStateException("Failed to detect cipher combo.");
 		}
 	}
 
 	private static CryptorProvider.Scheme determineScheme(Path c9rFile, byte[] masterkey) {
 		try {
 			ByteBuffer header = ByteBuffer.wrap(Files.readAllBytes(c9rFile));
-			return tryDecrypt(header, new Masterkey(masterkey), SIV_GCM) ? SIV_GCM : tryDecrypt(header, new Masterkey(masterkey), SIV_CTRMAC) ? SIV_CTRMAC : null;
+			if (tryDecrypt(header, new Masterkey(masterkey), SIV_GCM)) {
+				return SIV_GCM;
+			}
+			if (tryDecrypt(header, new Masterkey(masterkey), SIV_CTRMAC)) {
+				return SIV_CTRMAC;
+			}
 		} catch (IOException e) {
-			return null;
+			throw new IllegalStateException("Failed to read .c9r file.", e);
 		}
+		return null;
 	}
 
 	private static boolean tryDecrypt(ByteBuffer header, Masterkey masterkey, CryptorProvider.Scheme scheme) {
@@ -129,34 +143,34 @@ public class RecoverUtil {
 		try {
 			return Optional.of(RecoverUtil.detectCipherCombo(masterkey.getEncoded(), vaultPath));
 		} catch (Exception e) {
-			LOG.warn("Failed to detect cipher combo", e);
+			LOG.info("Failed to detect cipher combo.");
 			return Optional.empty();
 		}
 	}
 
-	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndGetCombo(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, MasterkeyFileAccess masterkeyFileAccess) {
-
-		Path tempRecoveryPath = null;
-		CharSequence tmpPass = "asdasdasd";
+	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndGetCombo(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, MasterkeyFileAccess masterkeyFileAccess, AtomicBoolean illegalArgumentExceptionOccurred) {
+		var tmpPass = "asdasdasd";
 
 		try {
-			tempRecoveryPath = createRecoveryDirectory(vault.getPath());
-			createNewMasterkeyFile(recoveryKeyFactory, tempRecoveryPath, recoveryKey.get(), tmpPass);
-			Path masterkeyFilePath = tempRecoveryPath.resolve(MASTERKEY_FILENAME);
+			var tempRecoveryPath = createRecoveryDirectory(vault.getPath());
+			try {
+				createNewMasterkeyFile(recoveryKeyFactory, tempRecoveryPath, recoveryKey.get(), tmpPass);
+				var masterkeyFilePath = tempRecoveryPath.resolve(MASTERKEY_FILENAME);
 
-			try (Masterkey masterkey = loadMasterkey(masterkeyFileAccess, masterkeyFilePath, tmpPass)) {
-				return getCipherCombo(vault.getPath(), masterkey);
-			}
-		} catch (IOException | CryptoException e) {
-			LOG.warn("Recovery key validation failed", e);
-			return Optional.empty();
-		} finally {
-			if (tempRecoveryPath != null) {
+				try (var masterkey = loadMasterkey(masterkeyFileAccess, masterkeyFilePath, tmpPass)) {
+					return getCipherCombo(vault.getPath(), masterkey);
+				}
+			} finally {
 				deleteRecoveryDirectory(tempRecoveryPath);
 			}
+		} catch (IOException | CryptoException e) {
+			LOG.info("Recovery key validation failed");
+		} catch (IllegalArgumentException e) {
+			LOG.info("Recovery key has an illegal argument");
+			illegalArgumentExceptionOccurred.set(true);
 		}
+		return Optional.empty();
 	}
-
 
 	public static void moveRecoveredFiles(Path recoveryPath, Path vaultPath) throws IOException {
 		Files.move(recoveryPath.resolve(MASTERKEY_FILENAME), vaultPath.resolve(MASTERKEY_FILENAME), StandardCopyOption.REPLACE_EXISTING);
