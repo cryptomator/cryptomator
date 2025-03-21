@@ -5,9 +5,9 @@ import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.event.FileSystemEventAggregator;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.Map;
@@ -17,37 +17,37 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
-public class EventsUpdateCheck {
+public class FxFSEventList {
 
 	private final ObservableList<Map.Entry<FSEventBucket, FSEventBucketContent>> events;
-	private final FileSystemEventAggregator eventRegistry;
+	private final FileSystemEventAggregator eventAggregator;
 	private final ScheduledFuture<?> scheduledTask;
 	private final BooleanProperty unreadEvents;
 
 	@Inject
-	public EventsUpdateCheck(FileSystemEventAggregator eventRegistry, ScheduledExecutorService scheduler, @Named("unreadEventsAvailable") BooleanProperty unreadEvents) {
+	public FxFSEventList(FileSystemEventAggregator fsEventAggregator, ScheduledExecutorService scheduler) {
 		this.events = FXCollections.observableArrayList();
-		this.eventRegistry = eventRegistry;
-		this.unreadEvents = unreadEvents;
+		this.eventAggregator = fsEventAggregator;
+		this.unreadEvents = new SimpleBooleanProperty(false);
 		this.scheduledTask = scheduler.scheduleWithFixedDelay(() -> {
-			if (eventRegistry.hasUpdates()) {
+			if (fsEventAggregator.hasUpdates()) {
 				flush();
 			}
 		}, 1000, 1000, TimeUnit.MILLISECONDS);
 		//TODO: allow the task to be canceled (to enable ui actions, e.g. when the contextMenu is open, the list should not be updated
 	}
 
-	public ObservableList<Map.Entry<FSEventBucket, FSEventBucketContent>> getList() {
+	public ObservableList<Map.Entry<FSEventBucket, FSEventBucketContent>> getObservableList() {
 		return events;
 	}
 
 	/**
-	 * Clones the registry into the observable list
+	 * Clones the aggregator into the observable list
 	 */
 	private void flush() {
 		var latch = new CountDownLatch(1);
 		Platform.runLater(() -> {
-			eventRegistry.cloneTo(events);
+			eventAggregator.cloneTo(events);
 			unreadEvents.setValue(true);
 			latch.countDown();
 		});
@@ -58,6 +58,9 @@ public class EventsUpdateCheck {
 		}
 	}
 
+	public BooleanProperty unreadEventsProperty() {
+		return unreadEvents;
+	}
 
 
 }

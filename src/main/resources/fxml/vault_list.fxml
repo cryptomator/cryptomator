@@ -56,7 +56,7 @@
 					</tooltip>
 				</Button>
 				<AnchorPane mouseTransparent="true" minWidth="12" maxWidth="12" minHeight="12" maxHeight="12" StackPane.alignment="CENTER">
-					<Circle radius="4" styleClass="icon-update-indicator" AnchorPane.topAnchor="-8" AnchorPane.rightAnchor="-6" visible="${controller.newEventsPresent}" />
+					<Circle radius="4" styleClass="icon-update-indicator" AnchorPane.topAnchor="-8" AnchorPane.rightAnchor="-6" visible="${controller.unreadEventsPresent}" />
 				</AnchorPane>
 			</StackPane>
 			<Button onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">

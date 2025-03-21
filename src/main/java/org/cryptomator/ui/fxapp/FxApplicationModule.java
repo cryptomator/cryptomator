@@ -77,11 +77,4 @@ abstract class FxApplicationModule {
 		return factory.create();
 	}
 
-	@Provides
-	@FxApplicationScoped
-	@Named("unreadEventsAvailable")
-	static BooleanProperty provideUnreadEventsAvailable() {
-		return new SimpleBooleanProperty(false);
-	}
-
 }

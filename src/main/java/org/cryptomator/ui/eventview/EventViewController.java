@@ -4,7 +4,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.event.FSEventBucket;
 import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.EventsUpdateCheck;
+import org.cryptomator.ui.fxapp.FxFSEventList;
 
 import javax.inject.Inject;
 import javafx.beans.value.ObservableValue;
@@ -36,8 +36,8 @@ public class EventViewController implements FxController {
 	ListView<Map.Entry<FSEventBucket, FSEventBucketContent>> eventListView;
 
 	@Inject
-	public EventViewController(EventsUpdateCheck eventsUpdateCheck, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
-		this.filteredEventList = eventsUpdateCheck.getList().filtered(_ -> true);
+	public EventViewController(FxFSEventList fxFSEventList, ObservableList<Vault> vaults, ResourceBundle resourceBundle, EventListCellFactory cellFactory) {
+		this.filteredEventList = fxFSEventList.getObservableList().filtered(_ -> true);
 		this.vaults = vaults;
 		this.sortedEventList = new SortedList<>(filteredEventList, this::compareBuckets);
 		this.choiceBoxEntries = FXCollections.observableArrayList();
