@@ -1,6 +1,6 @@
 package org.cryptomator.ui.eventview;
 
-import org.cryptomator.event.FileSystemEventRegistry;
+import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.cryptofs.CryptoPath;
@@ -51,11 +51,11 @@ public class EventListCellController implements FxController {
 	private static final DateTimeFormatter LOCAL_DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 	private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
-	private final FileSystemEventRegistry fileSystemEventRegistry;
+	private final FileSystemEventAggregator fileSystemEventAggregator;
 	@Nullable
 	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
-	private final ObjectProperty<Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value>> eventEntry;
+	private final ObjectProperty<Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value>> eventEntry;
 	private final StringProperty eventMessage;
 	private final StringProperty eventDescription;
 	private final ObjectProperty<FontAwesome5Icon> eventIcon;
@@ -77,8 +77,8 @@ public class EventListCellController implements FxController {
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(FileSystemEventRegistry fileSystemEventRegistry, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
-		this.fileSystemEventRegistry = fileSystemEventRegistry;
+	public EventListCellController(FileSystemEventAggregator fileSystemEventAggregator, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
+		this.fileSystemEventAggregator = fileSystemEventAggregator;
 		this.revealService = revealService.orElseGet(() -> null);
 		this.resourceBundle = resourceBundle;
 		this.eventEntry = new SimpleObjectProperty<>(null);
@@ -108,12 +108,14 @@ public class EventListCellController implements FxController {
 		return vaultUnlocked.getValue() && (eventActionsMenu.isShowing() || root.isHover());
 	}
 
-	public void setEventEntry(@NotNull Map.Entry<FileSystemEventRegistry.Key, FileSystemEventRegistry.Value> item) {
+	public void setEventEntry(@NotNull Map.Entry<FileSystemEventAggregator.Key, FileSystemEventAggregator.Value> item) {
 		eventEntry.set(item);
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
 		eventTooltip.setText(item.getKey().vault().getDisplayName());
-		addAction("generic.action.dismiss", () -> fileSystemEventRegistry.remove(item.getKey()));
+		addAction("generic.action.dismiss", () -> {
+			fileSystemEventAggregator.remove(item.getKey());
+		});
 		switch (item.getValue().mostRecentEvent()) {
 			case ConflictResolvedEvent fse -> this.adjustToConflictResolvedEvent(fse);
 			case ConflictResolutionFailedEvent fse -> this.adjustToConflictEvent(fse);

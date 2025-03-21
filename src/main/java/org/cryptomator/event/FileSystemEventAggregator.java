@@ -14,12 +14,11 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: Rename to aggregator
 @Singleton
-public class FileSystemEventRegistry {
+public class FileSystemEventAggregator {
 
 	public record Key(Vault vault, Path idPath, Class<? extends FilesystemEvent> c) {};
 
@@ -29,7 +28,7 @@ public class FileSystemEventRegistry {
 	private final AtomicBoolean hasUpdates;
 
 	@Inject
-	public FileSystemEventRegistry(ScheduledExecutorService scheduledExecutorService) {
+	public FileSystemEventAggregator() {
 		this.map = new ConcurrentHashMap<>();
 		this.hasUpdates = new AtomicBoolean(false);
 	}
@@ -54,12 +53,7 @@ public class FileSystemEventRegistry {
 	}
 
 	/**
-	 * Removes an event from the map.
-	 * <p>
-	 * To identify the event, a similar event (in the sense of map key) is given.
-	 *
-	 * @return the removed {@link Value}
-	 * @implNote Method is not synchronized, because it is only executed if executed by JavaFX application thread
+	 * Removes an event bucket from the map.
 	 */
 	public Value remove(Key key) {
 		hasUpdates.set(true);
@@ -68,10 +62,6 @@ public class FileSystemEventRegistry {
 
 	/**
 	 * Clears the event map.
-	 * <p>
-	 * Must be executed on the JavaFX application thread
-	 *
-	 * @implNote Method is not synchronized, because it is only executed if executed by JavaFX application thread
 	 */
 	public void clear() {
 		hasUpdates.set(true);
@@ -88,12 +78,12 @@ public class FileSystemEventRegistry {
 	 * <p>
 	 * The collection is first cleared, then all map entries are added in one bulk operation. Cleans the hasUpdates status.
 	 *
-	 * @param targetCollection
+	 * @param target collection which is first cleared and then the EntrySet copied to.
 	 */
-	public void cloneTo(Collection<Map.Entry<Key, Value>> targetCollection) {
+	public void cloneTo(Collection<Map.Entry<Key, Value>> target) {
 		hasUpdates.set(false);
-		targetCollection.clear();
-		targetCollection.addAll(map.entrySet());
+		target.clear();
+		target.addAll(map.entrySet());
 	}
 
 	/**
