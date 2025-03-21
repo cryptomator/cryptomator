@@ -16,21 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-/**
- * Angenommen:
- * Datenstruktur die
- * 1. Thread-Safe ist
- * ??
- * <p>
- * <p>
- * <p>
- * <p>
- * 1. Wenn ein Set verwendet wird, dann können wir nach Timestamp sortieren, aber wir können einen Eintrag nur durch entfernen und hinzufügen updaten
- * 2. Wenn eine Map verwendet wird, dann können wir Einträge updaten. Aber
- */
 //TODO: Rename to aggregator
 //TODO: lru cache
 @Singleton
