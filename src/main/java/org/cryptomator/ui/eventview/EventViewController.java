@@ -49,11 +49,11 @@ public class EventViewController implements FxController {
 	}
 
 	/**
-	 * Comparsion method for the lru cache. During comparsion the map is accessed.
+	 * Comparison method for the lru cache. During comparsion the map is accessed.
 	 * First the entries are compared by the event timestamp, then vaultId, then identifying path and lastly by class name.
 	 *
-	 * @param left a {@link FSEventBucket} object
-	 * @param right another {@link FSEventBucket} object, compared to {@code left}
+	 * @param left an entry of a {@link FSEventBucket} and its content
+	 * @param right another entry of a {@link FSEventBucket} plus content, compared to {@code left}
 	 * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
 	 */
 	private int compareBuckets(Map.Entry<FSEventBucket, FSEventBucketContent> left, Map.Entry<FSEventBucket, FSEventBucketContent> right) {
@@ -63,13 +63,13 @@ public class EventViewController implements FxController {
 		if (timeComparison != 0) {
 			return -timeComparison; //we need the reverse timesorting
 		}
-		var vaultIdComparsion = left.getKey().vault().getId().compareTo(right.getKey().vault().getId());
-		if (vaultIdComparsion != 0) {
-			return vaultIdComparsion;
+		var vaultIdComparison = left.getKey().vault().getId().compareTo(right.getKey().vault().getId());
+		if (vaultIdComparison != 0) {
+			return vaultIdComparison;
 		}
-		var pathComparsion = left.getKey().idPath().compareTo(right.getKey().idPath());
-		if (pathComparsion != 0) {
-			return pathComparsion;
+		var pathComparison = left.getKey().idPath().compareTo(right.getKey().idPath());
+		if (pathComparison != 0) {
+			return pathComparison;
 		}
 		return left.getKey().c().getName().compareTo(right.getKey().c().getName());
 	}
