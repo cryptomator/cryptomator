@@ -18,11 +18,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: Rename to aggregator
-//TODO: lru cache
 @Singleton
 public class FileSystemEventRegistry {
-
-	private static final int MAX_MAP_SIZE = 400;
 
 	public record Key(Vault vault, Path idPath, Class<? extends FilesystemEvent> c) {};
 
