@@ -134,24 +134,33 @@ public class RecoveryKeyValidateController implements FxController {
 	}
 
 	private void validateRecoveryKey() {
-		AtomicBoolean illegalArgumentExceptionOccurred = new AtomicBoolean(false);
-		boolean valid = switch (recoverType.get()) {
+		switch (recoverType.get()) {
 			case RESTORE_VAULT_CONFIG -> {
+				AtomicBoolean illegalArgumentExceptionOccurred = new AtomicBoolean(false);
 				var combo = RecoverUtil.validateRecoveryKeyAndGetCombo(
 						recoveryKeyFactory, vault, recoveryKey, masterkeyFileAccess, illegalArgumentExceptionOccurred);
 				combo.ifPresent(cipherCombo::set);
-				yield combo.isPresent();
+				if (illegalArgumentExceptionOccurred.get()) {
+					recoveryKeyState.set(RecoveryKeyState.INVALID);
+				} else if (combo.isPresent()) {
+					recoveryKeyState.set(RecoveryKeyState.CORRECT);
+				} else {
+					recoveryKeyState.set(RecoveryKeyState.WRONG);
+				}
 			}
-			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT ->
-					recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(),
-							unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
-		};
-
-		if (valid) {
-			recoveryKeyState.set(RecoveryKeyState.CORRECT);
-			return;
+			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT -> {
+				isWrongKey = false;
+				boolean valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(),
+						unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
+				if (valid) {
+					recoveryKeyState.set(RecoveryKeyState.CORRECT);
+				} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()
+					recoveryKeyState.set(RecoveryKeyState.WRONG);
+				} else {
+					recoveryKeyState.set(RecoveryKeyState.INVALID);
+				}
+			}
 		}
-		recoveryKeyState.set(illegalArgumentExceptionOccurred.get() ? RecoveryKeyState.INVALID : RecoveryKeyState.WRONG);
 	}
 
 	/* Getter/Setter */

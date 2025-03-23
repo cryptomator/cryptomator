@@ -53,8 +53,8 @@ public interface RecoveryKeyComponent {
 	@Subcomponent.Factory
 	interface Factory {
 
-		RecoveryKeyComponent create(@BindsInstance @RecoveryKeyWindow Vault vault,
-									@BindsInstance @Named("keyRecoveryOwner") Stage owner,
+		RecoveryKeyComponent create(@BindsInstance @RecoveryKeyWindow Vault vault, //
+									@BindsInstance @Named("keyRecoveryOwner") Stage owner, //
 									@BindsInstance @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType);
 	}
 

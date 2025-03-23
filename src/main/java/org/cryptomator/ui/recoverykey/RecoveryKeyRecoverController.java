@@ -12,7 +12,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @RecoveryKeyScoped
@@ -28,8 +27,7 @@ public class RecoveryKeyRecoverController implements FxController {
 	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> expertSettingsScene, //
-										ResourceBundle resourceBundle,
-										@Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType) {
+										ResourceBundle resourceBundle, @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType) {
 		this.window = window;
 
 		this.nextScene = switch (recoverType.get()) {
@@ -45,7 +43,7 @@ public class RecoveryKeyRecoverController implements FxController {
 				window.setTitle(resourceBundle.getString("recoveryKey.recover.title"));
 				yield resetPasswordScene;
 			}
-			case SHOW_KEY-> {
+			case SHOW_KEY -> {
 				window.setTitle(resourceBundle.getString("recoveryKey.display.title"));
 				yield resetPasswordScene;
 			}

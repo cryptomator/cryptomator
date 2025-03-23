@@ -1,12 +1,5 @@
 package org.cryptomator.ui.recoverykey;
 
-import dagger.Lazy;
-import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.controls.NumericTextField;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Application;
@@ -17,6 +10,13 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
+
+import dagger.Lazy;
+import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.controls.NumericTextField;
 
 @RecoveryKeyScoped
 public class RecoveryKeyExpertSettingsController implements FxController {

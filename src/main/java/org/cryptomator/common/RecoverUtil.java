@@ -57,9 +57,7 @@ public class RecoverUtil {
 
 	public static CryptorProvider.Scheme detectCipherCombo(byte[] masterkey, Path pathToVault) {
 		try (Stream<Path> paths = Files.walk(pathToVault.resolve(DATA_DIR_NAME))) {
-			Path c9rFile = paths.filter(path -> path.toString().endsWith(".c9r"))
-					.findFirst()
-					.orElseThrow(() -> new IllegalStateException("No .c9r file found. The vault might not exist or the provided masterkey does not match."));
+			Path c9rFile = paths.filter(path -> path.toString().endsWith(".c9r")).findFirst().orElseThrow(() -> new IllegalStateException("No .c9r file found. The vault might not exist or the provided masterkey does not match."));
 			CryptorProvider.Scheme scheme = determineScheme(c9rFile, masterkey);
 			if (scheme == null) {
 				throw new IllegalArgumentException("Invalid masterkey: Decryption failed.");
@@ -197,7 +195,7 @@ public class RecoverUtil {
 		}
 	}
 
-	public static Task<Void> createResetPasswordTask(ResourceBundle resourceBundle,Stage owner, RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, NewPasswordController newPasswordController, Stage window, FxApplicationWindows appWindows, Dialogs dialogs) {
+	public static Task<Void> createResetPasswordTask(ResourceBundle resourceBundle, Stage owner, RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, NewPasswordController newPasswordController, Stage window, FxApplicationWindows appWindows, Dialogs dialogs) {
 
 		Task<Void> task = new ResetPasswordTask(recoveryKeyFactory, vault, recoveryKey, newPasswordController);
 
@@ -277,7 +275,7 @@ public class RecoverUtil {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, VAULT_CONFIG_MISSING, null).vault();
 
-		// Spezialbehandlung für Windows + Dropbox + WinFsp
+		//due to https://github.com/cryptomator/cryptomator/issues/2880#issuecomment-1680313498
 		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
 		if (SystemUtils.IS_OS_WINDOWS && vaultSettings.path.get().toString().contains("Dropbox") && mountServices.stream().anyMatch(s -> s.getClass().getName().equals(nameOfWinfspLocalMounter))) {
 			vaultSettings.mountService.setValue(nameOfWinfspLocalMounter);

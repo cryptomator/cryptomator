@@ -1,23 +1,5 @@
 package org.cryptomator.ui.recoverykey;
 
-import dagger.Lazy;
-import org.cryptomator.common.RecoverUtil;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.cryptolib.api.CryptorProvider;
-import org.cryptomator.cryptolib.api.Masterkey;
-import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
-import org.cryptomator.ui.changepassword.NewPasswordController;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.dialogs.Dialogs;
-import org.cryptomator.ui.dialogs.SimpleDialog;
-import org.cryptomator.ui.fxapp.FxApplicationWindows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.beans.property.IntegerProperty;
@@ -35,6 +17,23 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
+import dagger.Lazy;
+import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.CryptorProvider;
+import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.ui.changepassword.NewPasswordController;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RecoveryKeyScoped
 public class RecoveryKeyResetPasswordController implements FxController {
@@ -65,17 +64,14 @@ public class RecoveryKeyResetPasswordController implements FxController {
 											  @RecoveryKeyWindow Vault vault, //
 											  RecoveryKeyFactory recoveryKeyFactory, //
 											  ExecutorService executor, //
-											  @Named("keyRecoveryOwner") Stage owner,
-											  @RecoveryKeyWindow StringProperty recoveryKey, //
+											  @Named("keyRecoveryOwner") Stage owner, @RecoveryKeyWindow StringProperty recoveryKey, //
 											  @FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> recoverExpertSettingsScene, //
 											  FxApplicationWindows appWindows, //
 											  MasterkeyFileAccess masterkeyFileAccess, //
 											  VaultListManager vaultListManager, //
 											  @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
-											  @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType,
-											  @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
-											  ResourceBundle resourceBundle,
-											  Dialogs dialogs) {
+											  @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
+											  ResourceBundle resourceBundle, Dialogs dialogs) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
@@ -104,10 +100,9 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 	@FXML
 	public void close() {
-		if(recoverType.getValue().equals(RecoverUtil.Type.RESTORE_MASTERKEY)){
+		if (recoverType.getValue().equals(RecoverUtil.Type.RESTORE_MASTERKEY)) {
 			window.close();
-		}
-		else {
+		} else {
 			window.setScene(recoverExpertSettingsScene.get());
 		}
 	}
@@ -121,33 +116,24 @@ public class RecoveryKeyResetPasswordController implements FxController {
 				Path masterkeyFilePath = recoveryPath.resolve(MASTERKEY_FILENAME);
 
 				try (Masterkey masterkey = RecoverUtil.loadMasterkey(masterkeyFileAccess, masterkeyFilePath, newPasswordController.passwordField.getCharacters())) {
-					RecoverUtil.initializeCryptoFileSystem(recoveryPath,masterkey,shorteningThreshold,cipherCombo.get());
+					RecoverUtil.initializeCryptoFileSystem(recoveryPath, masterkey, shorteningThreshold, cipherCombo.get());
 				}
 
 				RecoverUtil.moveRecoveredFiles(recoveryPath, vault.getPath());
 				RecoverUtil.deleteRecoveryDirectory(recoveryPath);
 				RecoverUtil.addVaultToList(vaultListManager, vault.getPath());
 
-				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
-						.setTitleKey("recoveryKey.recoverVaultConfig.title")
-						.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message")
-						.build().showAndWait();
-				window.close(); // Erst jetzt das Fenster schließen
+				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).setTitleKey("recoveryKey.recoverVaultConfig.title").setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message").build().showAndWait();
+				window.close();
 
 			} catch (IOException | CryptoException e) {
 				LOG.error("Recovery process failed", e);
 			}
 		} else {
 			Task<Void> task = RecoverUtil.createResetPasswordTask( //
-					resourceBundle,
-					owner,
-					recoveryKeyFactory, //
-					vault, //
-					recoveryKey, //
-					newPasswordController, //
-					window, //
-					appWindows,
-					dialogs);
+					resourceBundle, owner, recoveryKeyFactory, //
+					vault, recoveryKey, newPasswordController, //
+					window, appWindows, dialogs);
 			executor.submit(task);
 		}
 	}

@@ -8,18 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.RecoverUtil;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.cryptofs.CryptoFileSystemProvider;
-import org.cryptomator.cryptofs.DirStructure;
-import org.cryptomator.cryptofs.migration.Migrators;
-import org.cryptomator.integrations.mount.MountService;
-import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javafx.collections.ObservableList;
@@ -38,7 +26,18 @@ import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
-import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
+
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.DirStructure;
+import org.cryptomator.cryptofs.migration.Migrators;
+import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class VaultListManager {
@@ -137,13 +136,13 @@ public class VaultListManager {
 			} catch (NoSuchFileException e) {
 				LOG.warn("Vault config file not found.");
 			}
-			var vaultState = determineVaultState(vaultSettings.path.get(),vaultSettings);
+			var vaultState = determineVaultState(vaultSettings.path.get(), vaultSettings);
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 			}
 			return vaultComponentFactory.create(vaultSettings, wrapper, vaultState, null).vault();
 		} catch (IOException e) {
-			LOG.warn("Failed to determine vault state for " + vaultSettings.path.get(), e);
+			LOG.warn("Failed to determine vault state for {}", vaultSettings.path.get(), e);
 			return vaultComponentFactory.create(vaultSettings, wrapper, ERROR, e).vault();
 		}
 	}
@@ -154,10 +153,10 @@ public class VaultListManager {
 		return switch (previousState) {
 			case LOCKED, NEEDS_MIGRATION, MISSING, VAULT_CONFIG_MISSING, MASTERKEY_MISSING -> {
 				try {
-					var determinedState = determineVaultState(vault.getPath(),vault.getVaultSettings());
-					if(determinedState == MASTERKEY_MISSING){
+					var determinedState = determineVaultState(vault.getPath(), vault.getVaultSettings());
+					if (determinedState == MASTERKEY_MISSING) {
 						var vaultScheme = vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme();
-						if(KeyLoadingStrategy.isHubVault(vaultScheme)){
+						if (KeyLoadingStrategy.isHubVault(vaultScheme)) {
 							determinedState = LOCKED;
 						}
 					}
@@ -167,7 +166,7 @@ public class VaultListManager {
 					state.set(determinedState);
 					yield determinedState;
 				} catch (IOException e) {
-					LOG.warn("Failed to determine vault state for " + vault.getPath(), e);
+					LOG.warn("Failed to determine vault state for {}", vault.getPath(), e);
 					state.set(ERROR);
 					vault.setLastKnownException(e);
 					yield ERROR;
@@ -179,7 +178,7 @@ public class VaultListManager {
 					state.set(determinedState);
 					yield determinedState;
 				} catch (IOException e) {
-					LOG.warn("Failed to redetermine vault state for " + vault.getPath(), e);
+					LOG.warn("Failed to redetermine vault state for {}", vault.getPath(), e);
 					vault.setLastKnownException(e);
 					yield ERROR;
 				}
@@ -196,12 +195,9 @@ public class VaultListManager {
 			return VaultState.Value.MISSING;
 		}
 
-		boolean vaultConfigRestored = Files.notExists(pathToVaultConfig) &&
-				RecoverUtil.restoreBackupIfAvailable(pathToVaultConfig, VaultState.Value.VAULT_CONFIG_MISSING);
+		boolean vaultConfigRestored = Files.notExists(pathToVaultConfig) && RecoverUtil.restoreBackupIfAvailable(pathToVaultConfig, VaultState.Value.VAULT_CONFIG_MISSING);
 
-		boolean masterkeyRestored = Files.notExists(pathToMasterkey) &&
-				KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get()) &&
-				RecoverUtil.restoreBackupIfAvailable(pathToMasterkey, VaultState.Value.MASTERKEY_MISSING);
+		boolean masterkeyRestored = Files.notExists(pathToMasterkey) && KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get()) && RecoverUtil.restoreBackupIfAvailable(pathToMasterkey, VaultState.Value.MASTERKEY_MISSING);
 
 		if (vaultConfigRestored || masterkeyRestored) {
 			return LOCKED;
@@ -211,15 +207,14 @@ public class VaultListManager {
 			return VaultState.Value.VAULT_CONFIG_MISSING;
 		}
 
-		if (Files.notExists(pathToMasterkey) &&
-				KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get())) {
+		if (Files.notExists(pathToMasterkey) && KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get())) {
 			return VaultState.Value.MASTERKEY_MISSING;
 		}
 
 		return checkDirStructure(pathToVault);
 	}
 
-	private static VaultState.Value checkDirStructure(Path pathToVault) throws IOException{
+	private static VaultState.Value checkDirStructure(Path pathToVault) throws IOException {
 		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
 			case VAULT -> VaultState.Value.LOCKED;
 			case UNRELATED -> VaultState.Value.MISSING;

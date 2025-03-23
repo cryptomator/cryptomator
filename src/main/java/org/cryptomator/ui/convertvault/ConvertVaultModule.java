@@ -21,7 +21,6 @@ import org.cryptomator.ui.recoverykey.RecoveryKeyValidateController;
 
 import javax.inject.Named;
 import javax.inject.Provider;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -123,7 +122,7 @@ abstract class ConvertVaultModule {
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
 	static FxController bindRecoveryKeyValidateController(@ConvertVaultWindow Vault vault, @ConvertVaultWindow VaultConfig.UnverifiedVaultConfig vaultConfig, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
-		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, new SimpleObjectProperty<>(RecoverUtil.Type.CONVERT_VAULT),null,null);
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, new SimpleObjectProperty<>(RecoverUtil.Type.CONVERT_VAULT), null, null);
 	}
 
 }
