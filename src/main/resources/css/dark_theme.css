@@ -130,8 +130,7 @@
 }
 
 .cryptic-text {
-	-fx-background-color: MAIN_BG;
-	-fx-text-fill: TEXT_FILL;
+	-fx-fill: TEXT_FILL;
 	-fx-font-family: 'Fira Code';
 	-fx-font-size: 1.1em;
 }
