@@ -65,7 +65,7 @@
 		<jacoco.version>0.8.12</jacoco.version>
 		<license-generator.version>2.5.0</license-generator.version>
 		<junit-tree-reporter.version>1.4.0</junit-tree-reporter.version>
-		<mvn-compiler.version>3.13.0</mvn-compiler.version>
+		<mvn-compiler.version>3.14.0</mvn-compiler.version>
 		<mvn-resources.version>3.3.1</mvn-resources.version>
 		<mvn-dependency.version>3.8.1</mvn-dependency.version>
 		<mvn-surefire.version>3.5.2</mvn-surefire.version>
