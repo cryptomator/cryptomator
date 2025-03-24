@@ -11,7 +11,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '23.0.27'
+  JAVA_VERSION: '23.0.2'
 
 jobs:
   get-version:
