@@ -7,6 +7,7 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.ui.decryptname.DecryptNameComponent;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, //
+		DecryptNameComponent.class, //
 		MainWindowComponent.class, //
 		PreferencesComponent.class, //
 		VaultOptionsComponent.class, //

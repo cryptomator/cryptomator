@@ -13,6 +13,7 @@ import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.decryptname.DecryptNameComponent;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
@@ -61,6 +62,7 @@ public class VaultDetailUnlockedController implements FxController {
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	private final Stage mainWindow;
 	private final Optional<RevealPathService> revealPathService;
+	private final DecryptNameComponent.Factory decryptNameWindowFactory;
 	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
@@ -78,13 +80,22 @@ public class VaultDetailUnlockedController implements FxController {
 	public Button decryptNameDropZone;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, WrongFileAlertComponent.Builder wrongFileAlert, @MainWindow Stage mainWindow, Optional<RevealPathService> revealPathService, ResourceBundle resourceBundle) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, //
+										 FxApplicationWindows appWindows, //
+										 VaultService vaultService, //
+										 VaultStatisticsComponent.Builder vaultStatsBuilder, //
+										 WrongFileAlertComponent.Builder wrongFileAlert, //
+										 @MainWindow Stage mainWindow, //
+										 Optional<RevealPathService> revealPathService, //
+										 DecryptNameComponent.Factory decryptNameWindowFactory, //
+										 ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
 		this.wrongFileAlert = wrongFileAlert;
 		this.mainWindow = mainWindow;
 		this.revealPathService = revealPathService;
+		this.decryptNameWindowFactory = decryptNameWindowFactory;
 		this.resourceBundle = resourceBundle;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
 		this.vaultStatsBuilder = vaultStatsBuilder;
@@ -154,6 +165,8 @@ public class VaultDetailUnlockedController implements FxController {
 
 	@FXML
 	public void chooseEncryptedFileAndCopyNames() {
+		decryptNameWindowFactory.create(vault.get(),mainWindow, List.of()).showDecryptFileNameWindow();
+		/*
 		var fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.decryptName.filePickerTitle"));
 
@@ -163,6 +176,8 @@ public class VaultDetailUnlockedController implements FxController {
 			var nodeName = getCleartextName(ciphertextNode.toPath());
 			copyDecryptedNamesToClipboard(List.of(nodeName));
 		}
+
+		 */
 	}
 
 	private void copyDecryptedNamesToClipboard(List<CipherToCleartext> mapping) {
