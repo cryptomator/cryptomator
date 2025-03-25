@@ -13,23 +13,68 @@ on:
         description: "Url to the file to upload"
         required: true
         type: string
+      avast:
+        description: "Upload to Avast"
+        required: false
+        type: boolean
+        default: false
+      kaspersky:
+        description: "Upload to Kaspersky"
+        required: false
+        type: boolean
+        default: false
+env:
+  FILE_NAME: ""
 
 jobs:
-  allowlist:
-    name: Anti Virus Allowlisting
+  download-file:
+    name: Downloads the file into the VM
     runs-on: ubuntu-latest
     steps:
-      - name: Download file
+      - name: Get file name
         run: |
-          curl --remote-name ${{ inputs.url }} -L
+          url="${{ inputs.url }}"
+          echo "FILE_NAME=${url##*/}" >> $GITHUB_ENV
+      - name: Download file
+        run: curl --remote-name ${{ inputs.url }} -L -o ${{env.FILE_NAME}}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FILE_NAME}}
+          path: ${{ env.FILE_NAME }}
+          if-no-files-found: error
+  allowlist-kaspersky:
+    name: Anti Virus Allowlisting Kaspersky
+    runs-on: ubuntu-latest
+    needs: download-file
+    if: inputs.kaspersky || github.event_name == 'workflow_call'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.FILE_NAME}}
+          path: upload
       - name: Upload to Kaspersky
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        continue-on-error: true
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
           port: 990
           username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
           password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+          local-dir: ./upload/
+  allowlist-avast:
+    name: Anti Virus Allowlisting Kaspersky
+    runs-on: ubuntu-latest
+    needs: download-file
+    if: inputs.avast || github.event_name == 'workflow_call'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.FILE_NAME}}
+          path: upload
       - name: Upload to Avast
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -38,3 +83,4 @@ jobs:
           port: 21
           username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
           password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
+          local-dir: ./upload/
