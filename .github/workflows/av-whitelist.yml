@@ -53,7 +53,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ job.download-file.outputs.fileName }}
+          name: ${{ needs.download-file.outputs.fileName }}
           path: upload
       - name: Upload to Kaspersky
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -74,7 +74,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ job.download-file.outputs.fileName }}
+          name: ${{ needs.download-file.outputs.fileName }}
           path: upload
       - name: Upload to Avast
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
