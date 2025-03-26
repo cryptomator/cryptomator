@@ -9,96 +9,112 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
-<VBox xmlns:fx="http://javafx.com/fxml"
-	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailUnlockedController"
-	  alignment="TOP_CENTER"
-	  spacing="9">
-	<Label text="%main.vaultDetail.accessLocation"/>
-	<Button styleClass="button-large" contentDisplay="GRAPHIC_ONLY" minWidth="120" onAction="#revealAccessLocation" defaultButton="${controller.accessibleViaPath}" visible="${controller.accessibleViaPath}" managed="${controller.accessibleViaPath}">
-		<graphic>
-			<HBox spacing="12" alignment="CENTER">
-				<FontAwesome5IconView glyph="HDD" glyphSize="24"/>
-				<VBox spacing="4" alignment="CENTER_LEFT">
-					<Label text="%main.vaultDetail.revealBtn"/>
-					<Label styleClass="label-extra-small" text="${controller.mountPoint}" textOverrun="CENTER_ELLIPSIS"/>
-				</VBox>
-			</HBox>
-		</graphic>
-	</Button>
-	<Button styleClass="button-large" contentDisplay="GRAPHIC_ONLY" minWidth="120" onAction="#copyMountUri" defaultButton="${controller.accessibleViaUri}" visible="${controller.accessibleViaUri}" managed="${controller.accessibleViaUri}">
-		<graphic>
-			<HBox spacing="12" alignment="CENTER">
-				<FontAwesome5IconView glyph="LINK" glyphSize="24"/>
-				<VBox spacing="4" alignment="CENTER_LEFT">
-					<Label text="%main.vaultDetail.copyUri"/>
-					<Label styleClass="label-extra-small" text="${controller.mountPoint}" textOverrun="CENTER_ELLIPSIS"/>
-				</VBox>
-			</HBox>
-		</graphic>
-	</Button>
-	<Button text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
-		<graphic>
-			<FontAwesome5IconView glyph="KEY"/>
-		</graphic>
-	</Button>
-
-	<Region VBox.vgrow="ALWAYS"/>
-
-	<HBox alignment="BOTTOM_CENTER">
-		<StackPane visible="${controller.accessibleViaPath}" managed="${controller.accessibleViaPath}">
-			<padding>
-				<Insets topRightBottomLeft="0"/>
-			</padding>
-			<Button fx:id="revealEncryptedDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.locateEncryptedFileBtn" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseDecryptedFileAndReveal" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
-				<graphic>
-					<Text styleClass="cryptic-text" text="abc → 101010"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
-				</tooltip>
-			</Button>
-			<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseDecryptedFileAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
-				<graphic>
-					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
-				</graphic>
-			</Button>
-		</StackPane>
-		<!-- decrypt file name -->
-		<StackPane>
-			<padding>
-				<Insets topRightBottomLeft="0"/>
-			</padding>
-			<Button fx:id="decryptNameDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.buttonLabel" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseEncryptedFileAndCopyNames" contentDisplay="TOP" visible="${!controller.cleartextNamesCopied}" managed="${!controller.cleartextNamesCopied}">
-				<graphic>
-					<Text styleClass="cryptic-text" text="101010 → abc"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%main.vaultDetail.decryptName.tooltip"/>
-				</tooltip>
-			</Button>
-			<Button styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.copied" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseEncryptedFileAndCopyNames" contentDisplay="TOP" visible="${controller.cleartextNamesCopied}" managed="${controller.cleartextNamesCopied}">
-				<graphic>
-					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
-				</graphic>
-			</Button>
-		</StackPane>
-
-		<Region HBox.hgrow="ALWAYS"/>
-
-		<Button text="%main.vaultDetail.stats" minWidth="120" onAction="#showVaultStatistics" contentDisplay="BOTTOM" prefHeight="72">
+<?import javafx.scene.control.ListView?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+		   xmlns="http://javafx.com/javafx"
+		   fx:controller="org.cryptomator.ui.mainwindow.VaultDetailUnlockedController"
+		   >
+	<VBox spacing="9" alignment="TOP_CENTER">
+		<Label text="%main.vaultDetail.accessLocation"/>
+		<Button styleClass="button-large" contentDisplay="GRAPHIC_ONLY" minWidth="120" onAction="#revealAccessLocation" defaultButton="${controller.accessibleViaPath}" visible="${controller.accessibleViaPath}" managed="${controller.accessibleViaPath}">
 			<graphic>
-				<VBox spacing="6">
-					<HBox alignment="CENTER_RIGHT" spacing="6">
-						<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondRead"/>
-						<ThroughputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
-					</HBox>
-					<HBox alignment="CENTER_RIGHT" spacing="6">
-						<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondWritten"/>
-						<ThroughputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
-					</HBox>
-				</VBox>
+				<HBox spacing="12" alignment="CENTER">
+					<FontAwesome5IconView glyph="HDD" glyphSize="24"/>
+					<VBox spacing="4" alignment="CENTER_LEFT">
+						<Label text="%main.vaultDetail.revealBtn"/>
+						<Label styleClass="label-extra-small" text="${controller.mountPoint}" textOverrun="CENTER_ELLIPSIS"/>
+					</VBox>
+				</HBox>
 			</graphic>
 		</Button>
-	</HBox>
-</VBox>
+		<Button styleClass="button-large" contentDisplay="GRAPHIC_ONLY" minWidth="120" onAction="#copyMountUri" defaultButton="${controller.accessibleViaUri}" visible="${controller.accessibleViaUri}" managed="${controller.accessibleViaUri}">
+			<graphic>
+				<HBox spacing="12" alignment="CENTER">
+					<FontAwesome5IconView glyph="LINK" glyphSize="24"/>
+					<VBox spacing="4" alignment="CENTER_LEFT">
+						<Label text="%main.vaultDetail.copyUri"/>
+						<Label styleClass="label-extra-small" text="${controller.mountPoint}" textOverrun="CENTER_ELLIPSIS"/>
+					</VBox>
+				</HBox>
+			</graphic>
+		</Button>
+		<Button text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
+			<graphic>
+				<FontAwesome5IconView glyph="KEY"/>
+			</graphic>
+		</Button>
+
+		<Region VBox.vgrow="ALWAYS"/>
+
+		<HBox alignment="BOTTOM_CENTER">
+			<StackPane visible="${controller.accessibleViaPath}" managed="${controller.accessibleViaPath}">
+				<padding>
+					<Insets topRightBottomLeft="0"/>
+				</padding>
+				<Button fx:id="revealEncryptedDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.locateEncryptedFileBtn" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseDecryptedFileAndReveal" contentDisplay="TOP" visible="${!controller.ciphertextPathsCopied}" managed="${!controller.ciphertextPathsCopied}">
+					<graphic>
+						<Text styleClass="cryptic-text" text="abc → 101010"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
+					</tooltip>
+				</Button>
+			</StackPane>
+			<!-- decrypt file name -->
+			<StackPane>
+				<padding>
+					<Insets topRightBottomLeft="0"/>
+				</padding>
+				<Button fx:id="decryptNameDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.buttonLabel" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#showDecryptNameView" contentDisplay="TOP">
+					<graphic>
+						<Text styleClass="cryptic-text" text="101010 → abc"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%main.vaultDetail.decryptName.tooltip"/>
+					</tooltip>
+				</Button>
+			</StackPane>
+
+			<Region HBox.hgrow="ALWAYS"/>
+
+			<Button text="%main.vaultDetail.stats" minWidth="120" onAction="#showVaultStatistics" contentDisplay="BOTTOM" prefHeight="72">
+				<graphic>
+					<VBox spacing="6">
+						<HBox alignment="CENTER_RIGHT" spacing="6">
+							<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondRead"/>
+							<ThroughputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
+						</HBox>
+						<HBox alignment="CENTER_RIGHT" spacing="6">
+							<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondWritten"/>
+							<ThroughputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
+						</HBox>
+					</VBox>
+				</graphic>
+			</Button>
+		</HBox>
+	</VBox>
+	<VBox visible="${controller.decryptNameViewShowing}" mouseTransparent="${!controller.decryptNameViewShowing}" styleClass="test-style" alignment="TOP_CENTER" spacing="6">
+		<padding>
+			<Insets topRightBottomLeft="24"/>
+		</padding>
+		<StackPane>
+			<Label text="Decrypt File Name" styleClass="label-large"/>
+			<HBox>
+				<Region HBox.hgrow="ALWAYS"/>
+				<Button onAction="#closeDecryptNameView" contentDisplay="GRAPHIC_ONLY">
+					<graphic>
+						<FontAwesome5IconView glyph="TIMES" glyphSize="16" />
+					</graphic>
+				</Button>
+			</HBox>
+		</StackPane>
+		<VBox alignment="CENTER" VBox.vgrow="ALWAYS" styleClass="test-style2" visible="${controller.decryptedPathsListEmpty}" managed="${controller.decryptedPathsListEmpty}" onMouseClicked="#selectAndDecrypt">
+			<Label fx:id="dropZoneText" text="Drop or click to decrypt names of files" contentDisplay="TOP">
+				<graphic>
+					<FontAwesome5IconView fx:id="dropZoneId" glyph="FILE_IMPORT" glyphSize="16"/>
+				</graphic>
+			</Label>
+		</VBox>
+		<ListView fx:id="decryptedNamesView" styleClass="test-list-view" VBox.vgrow="ALWAYS" visible="${!controller.decryptedPathsListEmpty}" managed="${!controller.decryptedPathsListEmpty}"/>
+	</VBox>
+</StackPane>

@@ -13,6 +13,8 @@ import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
@@ -21,18 +23,29 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
+import javafx.beans.binding.ListExpression;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
@@ -47,7 +60,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {
@@ -70,7 +82,8 @@ public class VaultDetailUnlockedController implements FxController {
 	private final BooleanProperty draggingOverLocateEncrypted = new SimpleBooleanProperty();
 	private final BooleanProperty draggingOverDecryptName = new SimpleBooleanProperty();
 	private final BooleanProperty ciphertextPathsCopied = new SimpleBooleanProperty();
-	private final BooleanProperty cleartextNamesCopied = new SimpleBooleanProperty();
+	private final BooleanProperty decryptNameViewShowing = new SimpleBooleanProperty();
+	private final ListProperty<Path> pathsToDecrypt = new SimpleListProperty<>(FXCollections.observableArrayList());
 
 	@FXML
 	public Button revealEncryptedDropZone;
@@ -106,12 +119,17 @@ public class VaultDetailUnlockedController implements FxController {
 		revealEncryptedDropZone.setOnDragExited(_ -> draggingOverLocateEncrypted.setValue(false));
 
 		decryptNameDropZone.setOnDragOver(e -> handleDragOver(e, draggingOverDecryptName));
-		decryptNameDropZone.setOnDragDropped(e -> handleDragDropped(e, this::getCleartextName, this::copyDecryptedNamesToClipboard));
+		decryptNameDropZone.setOnDragDropped(e -> {
+			decryptNameViewShowing.set(true);
+			pathsToDecrypt.addAll(e.getDragboard().getFiles().stream().map(File::toPath).toList());
+		});
 		decryptNameDropZone.setOnDragExited(_ -> draggingOverDecryptName.setValue(false));
+		initDecryptNameFeature();
 
 		EasyBind.includeWhen(revealEncryptedDropZone.getStyleClass(), ACTIVE_CLASS, draggingOverLocateEncrypted);
 		EasyBind.includeWhen(decryptNameDropZone.getStyleClass(), ACTIVE_CLASS, draggingOverDecryptName);
 	}
+
 
 	private void handleDragOver(DragEvent event, BooleanProperty prop) {
 		if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
@@ -153,39 +171,8 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	@FXML
-	public void chooseEncryptedFileAndCopyNames() {
-		var fileChooser = new FileChooser();
-		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.decryptName.filePickerTitle"));
-
-		fileChooser.setInitialDirectory(vault.getValue().getPath().toFile());
-		var ciphertextNode = fileChooser.showOpenDialog(mainWindow);
-		if (ciphertextNode != null) {
-			var nodeName = getCleartextName(ciphertextNode.toPath());
-			copyDecryptedNamesToClipboard(List.of(nodeName));
-		}
-	}
-
-	private void copyDecryptedNamesToClipboard(List<CipherToCleartext> mapping) {
-		if (mapping.size() == 1) {
-			Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, mapping.getFirst().cleartext));
-		} else {
-			var content = mapping.stream().map(CipherToCleartext::toString).collect(Collectors.joining("\n"));
-			Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, content));
-		}
-		cleartextNamesCopied.setValue(true);
-		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
-			cleartextNamesCopied.set(false);
-		});
-	}
-
-	@Nullable
-	private CipherToCleartext getCleartextName(Path ciphertextNode) {
-		try {
-			return new CipherToCleartext(ciphertextNode.getFileName().toString(), vault.get().getCleartextName(ciphertextNode));
-		} catch (IOException e) {
-			LOG.warn("Failed to decrypt filename for {}", ciphertextNode, e);
-			return null;
-		}
+	public void showDecryptNameView() {
+		decryptNameViewShowing.set(true);
 	}
 
 	private boolean startsWithVaultAccessPoint(Path path) {
@@ -310,11 +297,94 @@ public class VaultDetailUnlockedController implements FxController {
 		return ciphertextPathsCopied.get();
 	}
 
-	public BooleanProperty cleartextNamesCopiedProperty() {
-		return cleartextNamesCopied;
+	public BooleanProperty decryptNameViewShowingProperty() {
+		return decryptNameViewShowing;
 	}
 
-	public boolean isCleartextNamesCopied() {
-		return cleartextNamesCopied.get();
+	public boolean isDecryptNameViewShowing() {
+		return decryptNameViewShowing.get();
 	}
+
+	@FXML
+	public void closeDecryptNameView() {
+		decryptNameViewShowing.set(false);
+	}
+
+	//new stuff
+
+	@FXML
+	public void selectAndDecrypt() {
+		var fileChooser = new FileChooser();
+		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.decryptName.filePickerTitle"));
+
+		fileChooser.setInitialDirectory(vault.getValue().getPath().toFile());
+		var ciphertextNodes = fileChooser.showOpenMultipleDialog(mainWindow);
+		if (ciphertextNodes != null) {
+			pathsToDecrypt.clear();
+			pathsToDecrypt.addAll(ciphertextNodes.stream().map(File::toPath).toList());
+		}
+	}
+
+	@Nullable
+	private CipherToCleartext getCleartextName(Path ciphertextNode) {
+		try {
+			return new CipherToCleartext(ciphertextNode.getFileName().toString(), vault.get().getCleartextName(ciphertextNode));
+		} catch (IOException e) {
+			LOG.warn("Failed to decrypt filename for {}", ciphertextNode, e);
+			return null;
+		}
+	}
+
+	public ListView<Path> decryptedNamesView;
+
+	public ObservableValue<Boolean> decryptedPathsListEmptyProperty() {
+		return pathsToDecrypt.emptyProperty();
+	}
+
+	public boolean isDecryptedPathsListEmpty() {
+		return pathsToDecrypt.isEmpty();
+	}
+
+	private void initDecryptNameFeature() {
+		decryptNameViewShowing.addListener((_,_,isShowing) -> {
+			if(!isShowing) {
+				pathsToDecrypt.clear();
+			}
+		});
+		decryptedNamesView.setItems(pathsToDecrypt);
+		decryptedNamesView.setCellFactory(this::createListCell);
+	}
+
+	private ListCell<Path> createListCell(ListView<Path> pathListView) {
+		return new ListCell<Path>() {
+			private final HBox root;
+			private final FontAwesome5IconView icon;
+			private final Label encryptedName;
+
+			{
+				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+				encryptedName = new Label();
+				icon = new FontAwesome5IconView();
+				root = new HBox(icon, encryptedName);
+				root.setSpacing(6.0);
+				root.setPadding(new Insets(6));
+			}
+
+			@Override
+			protected void updateItem(Path item, boolean empty) {
+				super.updateItem(item, empty);
+
+				if (item == null || empty) {
+					setGraphic(null);
+				} else {
+					encryptedName.setText(item.toString());
+					icon.setGlyph(FontAwesome5Icon.LOCK);
+					setGraphic(root);
+					getStyleClass().add("test-list-cell");
+				}
+			}
+		};
+	}
+
 }
+
