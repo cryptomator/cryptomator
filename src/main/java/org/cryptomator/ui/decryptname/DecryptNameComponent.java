@@ -3,7 +3,6 @@ package org.cryptomator.ui.decryptname;
 import dagger.BindsInstance;
 import dagger.Lazy;
 import dagger.Subcomponent;
-import org.cryptomator.common.Nullable;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxmlFile;
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 
 @DecryptNameScoped
@@ -27,14 +26,14 @@ public interface DecryptNameComponent {
 	Stage window();
 
 	@FxmlScene(FxmlFile.DECRYPTNAMES)
-	Lazy<Scene> namesDecryptedScene();
+	Lazy<Scene> decryptNamesView();
 
 	@DecryptNameWindow
 	Vault vault();
 
 	default void showDecryptFileNameWindow() {
 		Stage s = window();
-		s.setScene(null);
+		s.setScene(decryptNamesView().get());
 		s.sizeToScene();
 		if (vault().isUnlocked()) {
 			s.show();
@@ -46,6 +45,6 @@ public interface DecryptNameComponent {
 	@Subcomponent.Factory
 	interface Factory {
 
-		DecryptNameComponent create(@BindsInstance @DecryptNameWindow Vault vault, @BindsInstance @Named("windowOwner") Stage owner, @Nullable @BindsInstance List<Paths> ciphertextPaths);
+		DecryptNameComponent create(@BindsInstance @DecryptNameWindow Vault vault, @BindsInstance @Named("windowOwner") Stage owner, @BindsInstance @DecryptNameWindow List<Path> pathsToDecrypt);
 	}
 }

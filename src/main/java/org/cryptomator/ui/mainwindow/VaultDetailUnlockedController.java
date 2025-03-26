@@ -48,7 +48,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {
@@ -72,7 +71,6 @@ public class VaultDetailUnlockedController implements FxController {
 	private final BooleanProperty draggingOverLocateEncrypted = new SimpleBooleanProperty();
 	private final BooleanProperty draggingOverDecryptName = new SimpleBooleanProperty();
 	private final BooleanProperty ciphertextPathsCopied = new SimpleBooleanProperty();
-	private final BooleanProperty cleartextNamesCopied = new SimpleBooleanProperty();
 
 	@FXML
 	public Button revealEncryptedDropZone;
@@ -117,7 +115,7 @@ public class VaultDetailUnlockedController implements FxController {
 		revealEncryptedDropZone.setOnDragExited(_ -> draggingOverLocateEncrypted.setValue(false));
 
 		decryptNameDropZone.setOnDragOver(e -> handleDragOver(e, draggingOverDecryptName));
-		decryptNameDropZone.setOnDragDropped(e -> handleDragDropped(e, this::getCleartextName, this::copyDecryptedNamesToClipboard));
+		decryptNameDropZone.setOnDragDropped(e -> showDecryptNameWindow(e.getDragboard().getFiles().stream().map(File::toPath).toList()));
 		decryptNameDropZone.setOnDragExited(_ -> draggingOverDecryptName.setValue(false));
 
 		EasyBind.includeWhen(revealEncryptedDropZone.getStyleClass(), ACTIVE_CLASS, draggingOverLocateEncrypted);
@@ -164,43 +162,12 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	@FXML
-	public void chooseEncryptedFileAndCopyNames() {
-		decryptNameWindowFactory.create(vault.get(),mainWindow, List.of()).showDecryptFileNameWindow();
-		/*
-		var fileChooser = new FileChooser();
-		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.decryptName.filePickerTitle"));
-
-		fileChooser.setInitialDirectory(vault.getValue().getPath().toFile());
-		var ciphertextNode = fileChooser.showOpenDialog(mainWindow);
-		if (ciphertextNode != null) {
-			var nodeName = getCleartextName(ciphertextNode.toPath());
-			copyDecryptedNamesToClipboard(List.of(nodeName));
-		}
-
-		 */
+	public void showDecryptNameWindow() {
+		showDecryptNameWindow(List.of());
 	}
 
-	private void copyDecryptedNamesToClipboard(List<CipherToCleartext> mapping) {
-		if (mapping.size() == 1) {
-			Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, mapping.getFirst().cleartext));
-		} else {
-			var content = mapping.stream().map(CipherToCleartext::toString).collect(Collectors.joining("\n"));
-			Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, content));
-		}
-		cleartextNamesCopied.setValue(true);
-		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
-			cleartextNamesCopied.set(false);
-		});
-	}
-
-	@Nullable
-	private CipherToCleartext getCleartextName(Path ciphertextNode) {
-		try {
-			return new CipherToCleartext(ciphertextNode.getFileName().toString(), vault.get().getCleartextName(ciphertextNode));
-		} catch (IOException e) {
-			LOG.warn("Failed to decrypt filename for {}", ciphertextNode, e);
-			return null;
-		}
+	private void showDecryptNameWindow(List<Path> pathsToDecrypt) {
+		decryptNameWindowFactory.create(vault.get(), mainWindow, pathsToDecrypt).showDecryptFileNameWindow();
 	}
 
 	private boolean startsWithVaultAccessPoint(Path path) {
@@ -325,11 +292,52 @@ public class VaultDetailUnlockedController implements FxController {
 		return ciphertextPathsCopied.get();
 	}
 
-	public BooleanProperty cleartextNamesCopiedProperty() {
-		return cleartextNamesCopied;
+	//new stuff
+
+
+	/*
+	@Nullable
+	private CipherToCleartext getCleartextName(Path ciphertextNode) {
+		try {
+			return new CipherToCleartext(ciphertextNode.getFileName().toString(), vault.get().getCleartextName(ciphertextNode));
+		} catch (IOException e) {
+			LOG.warn("Failed to decrypt filename for {}", ciphertextNode, e);
+			return null;
+		}
 	}
 
-	public boolean isCleartextNamesCopied() {
-		return cleartextNamesCopied.get();
+	private ListCell<Path> createListCell(ListView<Path> pathListView) {
+		return new ListCell<Path>() {
+			private final HBox root;
+			private final FontAwesome5IconView icon;
+			private final Label encryptedName;
+
+			{
+				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+				encryptedName = new Label();
+				icon = new FontAwesome5IconView();
+				root = new HBox(icon, encryptedName);
+				root.setSpacing(6.0);
+				root.setPadding(new Insets(6));
+			}
+
+			@Override
+			protected void updateItem(Path item, boolean empty) {
+				super.updateItem(item, empty);
+
+				if (item == null || empty) {
+					setGraphic(null);
+				} else {
+					encryptedName.setText(item.toString());
+					icon.setGlyph(FontAwesome5Icon.LOCK);
+					setGraphic(root);
+					getStyleClass().add("test-list-cell");
+				}
+			}
+		};
 	}
+
+	 */
+
 }
+

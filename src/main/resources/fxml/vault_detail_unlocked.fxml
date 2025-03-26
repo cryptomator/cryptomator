@@ -58,31 +58,16 @@
 					<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
 				</tooltip>
 			</Button>
-			<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseDecryptedFileAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
-				<graphic>
-					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
-				</graphic>
-			</Button>
 		</StackPane>
 		<!-- decrypt file name -->
-		<StackPane>
-			<padding>
-				<Insets topRightBottomLeft="0"/>
-			</padding>
-			<Button fx:id="decryptNameDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.buttonLabel" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseEncryptedFileAndCopyNames" contentDisplay="TOP" visible="${!controller.cleartextNamesCopied}" managed="${!controller.cleartextNamesCopied}">
-				<graphic>
-					<Text styleClass="cryptic-text" text="101010 → abc"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%main.vaultDetail.decryptName.tooltip"/>
-				</tooltip>
-			</Button>
-			<Button styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.copied" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseEncryptedFileAndCopyNames" contentDisplay="TOP" visible="${controller.cleartextNamesCopied}" managed="${controller.cleartextNamesCopied}">
-				<graphic>
-					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
-				</graphic>
-			</Button>
-		</StackPane>
+		<Button fx:id="decryptNameDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.buttonLabel" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#showDecryptNameWindow" contentDisplay="TOP">
+			<graphic>
+				<Text styleClass="cryptic-text" text="101010 → abc"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%main.vaultDetail.decryptName.tooltip"/>
+			</tooltip>
+		</Button>
 
 		<Region HBox.hgrow="ALWAYS"/>
 

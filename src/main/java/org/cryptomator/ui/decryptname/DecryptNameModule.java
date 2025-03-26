@@ -5,7 +5,6 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -55,6 +54,6 @@ public abstract class DecryptNameModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(OverviewController.class)
-	abstract FxController bindOverviewController(OverviewController controller);
+	@FxControllerKey(DecryptFileNamesView.class)
+	abstract FxController bindOverviewController(DecryptFileNamesView controller);
 }
