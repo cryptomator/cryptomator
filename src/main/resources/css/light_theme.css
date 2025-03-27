@@ -972,3 +972,59 @@
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
 }
+
+.test-style {
+	/*-fx-background-color: rgba(88,94,98,0.7), rgba(53,57,59,0.7) ;*/
+	-fx-background-color: CONTROL_BORDER_NORMAL, MAIN_BG;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+}
+
+.test-style2 {
+	/*-fx-background-color: rgba(88,94,98,0.7), rgba(53,57,59,0.7) ;*/
+	-fx-background-color: CONTROL_BG_NORMAL;
+	-fx-background-insets: 1px;
+	-fx-background-radius: 4px;
+	-fx-border-width: 4px;
+	-fx-border-style: dashed inside;
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-radius: 4px;
+}
+
+.test-style2:hover {
+	/*-fx-background-color: rgba(88,94,98,0.7), rgba(53,57,59,0.7) ;*/
+	-fx-background-color: CONTROL_BG_HOVER;
+}
+
+.test-list-view {
+	-fx-background-color: CONTROL_BG_NORMAL;
+}
+
+.test-list-view:focused .test-list-cell:selected {
+	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
+	-fx-background-insets: 0, 0 0 0 3px;
+}
+.test-list-view .test-list-cell:hover {
+	-fx-background-color: CONTROL_BG_SELECTED;
+}
+
+.test-list-cell:selected {
+	-fx-background-color: CONTROL_BG_SELECTED;
+}
+
+.test-list-cell .glyph-icon {
+	-fx-fill: TEXT_FILL_MUTED;
+}
+
+.test-list-cell .text {
+	-fx-fill: TEXT_FILL;
+	-fx-font-size: 1.0em;
+}
+
+.test-list-cell:selected .glyph-icon {
+	-fx-fill: PRIMARY;
+}
+
+.test-list-cell:selected .text {
+	-fx-fill: TEXT_FILL_HIGHLIGHTED;
+}

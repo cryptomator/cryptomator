@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-<?import javafx.geometry.Insets?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
-	  fx:controller="org.cryptomator.ui.decryptname.DecryptFileNamesView"
+	  fx:controller="org.cryptomator.ui.decryptname.DecryptFileNamesViewController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145">
@@ -18,7 +15,7 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<Label text="Decrypt File Name" styleClass="label-large"/>
-	<VBox alignment="CENTER" VBox.vgrow="ALWAYS" styleClass="test-style2" visible="${controller.decryptedPathsListEmpty}" managed="${controller.decryptedPathsListEmpty}" onMouseClicked="#selectAndDecrypt">
+	<VBox alignment="CENTER" VBox.vgrow="ALWAYS" styleClass="test-style2" visible="${controller.decryptedPathsListEmpty}" managed="${controller.decryptedPathsListEmpty}" onMouseClicked="#selectFiles">
 		<!-- Drop or click to decrypt names of files -->
 		<Label text="${controller.dropZoneText}" contentDisplay="TOP">
 			<graphic>

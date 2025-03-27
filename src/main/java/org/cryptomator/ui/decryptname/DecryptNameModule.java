@@ -48,12 +48,17 @@ public abstract class DecryptNameModule {
 	@Provides
 	@FxmlScene(FxmlFile.DECRYPTNAMES)
 	@DecryptNameScoped
-	static Scene provideOverviewScene(@DecryptNameWindow FxmlLoaderFactory fxmlLoaders) {
+	static Scene provideDecryptNamesViewScene(@DecryptNameWindow FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.DECRYPTNAMES);
 	}
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(DecryptFileNamesView.class)
-	abstract FxController bindOverviewController(DecryptFileNamesView controller);
+	@FxControllerKey(DecryptFileNamesViewController.class)
+	abstract FxController bindDecryptNamesViewController(DecryptFileNamesViewController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(CipherAndCleartextCellController.class)
+	abstract FxController binCipherAndCleartextCellController(CipherAndCleartextCellController controller);
 }

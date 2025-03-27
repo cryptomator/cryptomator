@@ -1001,9 +1001,12 @@
 	-fx-background-color: CONTROL_BG_NORMAL;
 }
 
-.test-list-view:focused .list-cell:selected {
+.test-list-view:focused .test-list-cell:selected {
 	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
 	-fx-background-insets: 0, 0 0 0 3px;
+}
+.test-list-view .test-list-cell:hover {
+	-fx-background-color: CONTROL_BG_SELECTED;
 }
 
 .test-list-cell:selected {
@@ -1014,20 +1017,15 @@
 	-fx-fill: TEXT_FILL_MUTED;
 }
 
-.test-list-cell .header-label {
-	-fx-font-family: 'Open Sans SemiBold';
+.test-list-cell .text {
+	-fx-fill: TEXT_FILL;
 	-fx-font-size: 1.0em;
-}
-
-.test-list-cell .detail-label {
-	-fx-text-fill: TEXT_FILL_MUTED;
-	-fx-font-size: 0.8em;
 }
 
 .test-list-cell:selected .glyph-icon {
 	-fx-fill: PRIMARY;
 }
 
-.test-list-cell:selected .header-label {
-	-fx-text-fill: TEXT_FILL_HIGHLIGHTED;
+.test-list-cell:selected .text {
+	-fx-fill: TEXT_FILL_HIGHLIGHTED;
 }

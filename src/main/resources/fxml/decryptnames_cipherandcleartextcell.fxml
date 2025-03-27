@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.HBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.text.Text?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<HBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.decryptname.CipherAndCleartextCellController"
+	  spacing="6"
+	  fx:id="root"
+		>
+	<padding>
+		<Insets topRightBottomLeft="6"/>
+	</padding>
+	<FontAwesome5IconView glyph="${controller.icon}" glyphSize="16" />
+	<StackPane alignment="CENTER_LEFT">
+		<Label styleClass="label" textOverrun="CENTER_ELLIPSIS" text="${controller.ciphertext}" visible="${!root.hover}"/>
+		<Label styleClass="label" textOverrun="CENTER_ELLIPSIS" text="${controller.cleartext}" visible="${root.hover}"/>
+	</StackPane>
+</HBox>
