@@ -140,6 +140,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`"" `
 	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`"" `
+	--java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json;@{userhome}/AppData/Roaming/$AppName/windowsHelloKeychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
