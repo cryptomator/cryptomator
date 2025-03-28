@@ -1,5 +1,6 @@
 package org.cryptomator.ui.decryptname;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.ui.common.FxController;
@@ -18,7 +19,10 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
@@ -39,18 +43,20 @@ public class DecryptFileNamesViewController implements FxController {
 	private final BooleanProperty wrongFilesSelected = new SimpleBooleanProperty(false);
 	private final Stage window;
 	private final Vault vault;
-	private final CipherAndCleartextCellFactory cellFactory;
 	private final ResourceBundle resourceBundle;
 	private final List<Path> initialList;
 
 	@FXML
-	public ListView<CipherAndCleartext> decryptedNamesView;
+	public TableColumn<CipherAndCleartext, String> ciphertextColumn;
+	@FXML
+	public TableColumn<CipherAndCleartext, String> cleartextColumn;
+	@FXML
+	public TableView<CipherAndCleartext> cipherToCleartextTable;
 
 	@Inject
-	public DecryptFileNamesViewController(@DecryptNameWindow Stage window, @DecryptNameWindow Vault vault, @DecryptNameWindow List<Path> pathsToDecrypt, CipherAndCleartextCellFactory cellFactory, ResourceBundle resourceBundle) {
+	public DecryptFileNamesViewController(@DecryptNameWindow Stage window, @DecryptNameWindow Vault vault, @DecryptNameWindow List<Path> pathsToDecrypt, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
-		this.cellFactory = cellFactory;
 		this.resourceBundle = resourceBundle;
 		this.mapping = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.initialList = pathsToDecrypt;
@@ -58,15 +64,39 @@ public class DecryptFileNamesViewController implements FxController {
 
 	@FXML
 	public void initialize() {
-		decryptedNamesView.setItems(mapping);
-		decryptedNamesView.setCellFactory(cellFactory);
+		cipherToCleartextTable.setItems(mapping);
+		cipherToCleartextTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+		cipherToCleartextTable.getSelectionModel().setCellSelectionEnabled(true);
+		cipherToCleartextTable.setOnDragEntered(event -> {
+			if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+				cipherToCleartextTable.setItems(FXCollections.emptyObservableList());
+			}
+		});
+		cipherToCleartextTable.setOnDragOver(event -> {
+			if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+				if (SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_MAC) {
+					event.acceptTransferModes(TransferMode.LINK);
+				} else {
+					event.acceptTransferModes(TransferMode.ANY);
+				}
+			}
+		});
+		cipherToCleartextTable.setOnDragDropped(event -> {
+			if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+				checkAndDecrypt(event.getDragboard().getFiles().stream().map(File::toPath).toList());
+				cipherToCleartextTable.setItems(mapping);
+			}
+		});
+		cipherToCleartextTable.setOnDragExited(_ -> cipherToCleartextTable.setItems(mapping));
+		ciphertextColumn.setCellValueFactory(new PropertyValueFactory<>("ciphertextFilename"));
+		cleartextColumn.setCellValueFactory(new PropertyValueFactory<>("cleartextName"));
 
 		dropZoneText.setValue("Drop files or click to select");
 		dropZoneIcon.setValue(FontAwesome5Icon.FILE_IMPORT);
 
 		wrongFilesSelected.addListener((_, _, areWrongFiles) -> {
 			if (areWrongFiles) {
-				CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
+				CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
 					//dropZoneText.setValue(resourceBundle.getString(".."));
 					dropZoneText.setValue("Drop files or click to select");
 					dropZoneIcon.setValue(FontAwesome5Icon.FILE_IMPORT);
@@ -92,25 +122,25 @@ public class DecryptFileNamesViewController implements FxController {
 	}
 
 	private void checkAndDecrypt(List<Path> pathsToDecrypt) {
+		mapping.clear();
 		//Assumption: All files are in the same directory
 		var testPath = pathsToDecrypt.getFirst();
 		if (!testPath.startsWith(vault.getPath())) {
-			setDropZoneError("Selected files do not belong the the vault");
+			setDropZoneError("Selected files do not belong vault %s".formatted(vault.getDisplayName()));
 			return;
 		}
 		if (pathsToDecrypt.size() == 1 && testPath.endsWith(Constants.DIR_ID_BACKUP_FILE_NAME)) {
-			setDropZoneError("%s is a vault internal file with no encrypted filename".formatted(Constants.DIR_ID_BACKUP_FILE_NAME));
+			setDropZoneError("Vault internal files with no decrypt-able name selected");
 			return;
 		}
 
 		try {
 			var newMapping = pathsToDecrypt.stream().filter(p -> !p.endsWith(Constants.DIR_ID_BACKUP_FILE_NAME)).map(this::getCleartextName).toList();
-			mapping.clear();
 			mapping.addAll(newMapping);
 		} catch (UncheckedIOException e) {
 			setDropZoneError("Failed to read selected files");
 		} catch (IllegalArgumentException e) {
-			setDropZoneError("Names of selected files are not encrypted".formatted(Constants.DIR_ID_BACKUP_FILE_NAME));
+			setDropZoneError("Vault internal files with no decrypt-able name selected");
 		}
 	}
 
@@ -145,14 +175,6 @@ public class DecryptFileNamesViewController implements FxController {
 
 	public FontAwesome5Icon getDropZoneIcon() {
 		return dropZoneIcon.get();
-	}
-
-	public ObservableValue<Boolean> decryptedPathsListEmptyProperty() {
-		return mapping.emptyProperty();
-	}
-
-	public boolean isDecryptedPathsListEmpty() {
-		return mapping.isEmpty();
 	}
 
 }

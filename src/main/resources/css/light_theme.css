@@ -86,6 +86,22 @@
 	-fx-background-color: MAIN_BG;
 	-fx-text-fill: TEXT_FILL;
 	-fx-font-family: 'Open Sans';
+	-fx-control-inner-background: CONTROL_BG_NORMAL;
+	-fx-focus-color: PRIMARY;
+	-fx-accent: PRIMARY;
+	-fx-border: CONTROL_BORDER_NORMAL;
+	-fx-box-border: CONTROL_BORDER_NORMAL;
+	-fx-base: MAIN_BG;
+	-fx-table-header-border-color: GRAY_5;
+    -fx-table-cell-border-color: GRAY_6;
+	-fx-cell-focus-inner-border: GRAY_9;
+	-fx-selection-bar: PRIMARY_L1;
+	-fx-selection-bar-text: TEXT_FILL;
+	-fx-cell-hover-color: CONTROL_BG_HOVER;
+	-fx-text-inner-color: TEXT_FILL;
+	-fx-body-color: GRAY_7;
+	-fx-mark-highlight-color: PRIMARY;
+	-fx-mark-color: BLACK;
 }
 
 /*******************************************************************************
@@ -980,51 +996,257 @@
 	-fx-background-radius: 4px;
 }
 
-.test-style2 {
-	/*-fx-background-color: rgba(88,94,98,0.7), rgba(53,57,59,0.7) ;*/
-	-fx-background-color: CONTROL_BG_NORMAL;
-	-fx-background-insets: 1px;
-	-fx-background-radius: 4px;
-	-fx-border-width: 4px;
-	-fx-border-style: dashed inside;
-	-fx-border-color: CONTROL_BORDER_NORMAL;
-	-fx-border-radius: 4px;
+/*******************************************************************************
+ *                                                                             *
+ * TableView                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.table-view {
+    -fx-background-color: -fx-box-border, -fx-control-inner-background;
+    -fx-background-insets: 0,1;
+
+    /* There is some oddness if padding is in em values rather than pixels,
+       in particular, the left border of the control doesn't show. */
+    -fx-padding: 1; /* 0.083333em; */
 }
 
-.test-style2:hover {
-	/*-fx-background-color: rgba(88,94,98,0.7), rgba(53,57,59,0.7) ;*/
-	-fx-background-color: CONTROL_BG_HOVER;
+/** Draws focus border around tableview */
+.table-view:focused {
+    -fx-background-color: CONTROL_BORDER_FOCUSED,-fx-control-inner-background;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 0, 0;
+
+    /* There is some oddness if padding is in em values rather than pixels,
+      in particular, the left border of the control doesn't show. */
+    -fx-padding: 1; /* 0.083333em; */
 }
 
-.test-list-view {
-	-fx-background-color: CONTROL_BG_NORMAL;
+.table-view > .virtual-flow > .scroll-bar:vertical {
+    -fx-background-insets: 0, 0 0 0 1;
+    -fx-padding: -1 -1 -1 0;
 }
 
-.test-list-view:focused .test-list-cell:selected {
-	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
-	-fx-background-insets: 0, 0 0 0 3px;
-}
-.test-list-view .test-list-cell:hover {
-	-fx-background-color: CONTROL_BG_SELECTED;
+.table-view > .virtual-flow > .corner {
+    -fx-background-color: -fx-box-border, -fx-base;
+    -fx-background-insets: 0, 1 0 0 1;
 }
 
-.test-list-cell:selected {
-	-fx-background-color: CONTROL_BG_SELECTED;
+/* Each row in the table is a table-row-cell. Inside a table-row-cell is any
+   number of table-cell. */
+.table-row-cell {
+    -fx-background-color: -fx-table-cell-border-color, -fx-control-inner-background;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.0em; /* 0 */
+    -fx-text-fill: -fx-text-inner-color;
 }
 
-.test-list-cell .glyph-icon {
-	-fx-fill: TEXT_FILL_MUTED;
+.table-row-cell:odd {
+    -fx-background-color: -fx-table-cell-border-color, GRAY_9;
+    -fx-background-insets: 0, 0 0 1 0;
 }
 
-.test-list-cell .text {
-	-fx-fill: TEXT_FILL;
-	-fx-font-size: 1.0em;
+.table-row-cell:focused {
+    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-control-inner-background;
+    -fx-background-insets: 0, 1, 2;
 }
 
-.test-list-cell:selected .glyph-icon {
-	-fx-fill: PRIMARY;
+.table-row-cell:focused:odd {
+    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, GRAY_9;
+    -fx-background-insets: 0, 1, 2;
 }
 
-.test-list-cell:selected .text {
-	-fx-fill: TEXT_FILL_HIGHLIGHTED;
+/* When the table-row-cell is selected and focused */
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:focused:selected {
+    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
+    -fx-background-insets: 0, 1, 2;
+    -fx-background: -fx-accent;
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:selected > .table-cell {
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:selected {
+    -fx-background: -fx-accent;
+    -fx-background-color: -fx-selection-bar;
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+.table-view:row-selection:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:focused:selected:hover {
+    -fx-background: -fx-accent;
+    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
+    -fx-background-insets: 0, 1, 2;
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+/* When the TableView is _not_ focused, we show alternate selection colors */
+.table-row-cell:filled:selected:focused,
+.table-row-cell:filled:selected,
+    -fx-background-color: lightgray; /* TODO: */
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+.table-view:row-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:hover {
+    -fx-background-color: -fx-table-cell-border-color, -fx-cell-hover-color;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-text-fill: -fx-text-inner-color;
+}
+
+.table-view:row-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:focused:hover {
+    -fx-background-color: -fx-table-cell-border-color, -fx-focus-color, -fx-cell-focus-inner-border, -fx-cell-hover-color;
+    -fx-background-insets: 0, 0 0 1 0, 1 1 2 1, 2 2 3 2, 3 3 4 3;
+    -fx-text-fill: -fx-text-inner-color;
+}
+
+.table-cell {
+    -fx-padding: 0.166667em; /* 2px, plus border adds 1px */
+    -fx-background-color: transparent;
+    -fx-border-color: transparent -fx-table-cell-border-color transparent transparent;
+    -fx-border-width: 0.083333em; /* 1 */
+    -fx-cell-size: 2.0em; /* 24 */
+    -fx-text-fill: -fx-text-inner-color;
+    -fx-text-overrun: center-ellipsis;
+}
+
+/* When in constrained resize mode, the right-most visible cell should not have
+   a right-border, as it is not possible to get this cleanly out of view without
+   introducing horizontal scrollbars (see JDK-8114045). */
+.table-view:constrained-resize > .virtual-flow > .clipped-container > .sheet > .table-row-cell > .table-cell:last-visible {
+    -fx-border-color: transparent;
+}
+.table-view:constrained-resize > .column-header:last-visible {
+    -fx-border-width: 0.083333em 0.0em 0.083333em 0.083333em, 0.083333em 0.0em 0.083333em 0.083333em;
+}
+.table-view:constrained-resize .filler {
+    -fx-border-color:
+        derive(-fx-base, 80%)
+        linear-gradient(to bottom, derive(-fx-base,80%) 20%, derive(-fx-base,-10%) 90%)
+        derive(-fx-base, 10%)
+        linear-gradient(to bottom, derive(-fx-base,80%) 20%, derive(-fx-base,-10%) 90%),
+        /* Outer border: */
+        transparent -fx-table-header-border-color -fx-table-header-border-color -fx-table-header-border-color;
+    -fx-border-insets: 0 1 1 1, 0 0 0 0;
+}
+
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell > .table-cell:focused {
+    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-control-inner-background;
+    -fx-background-insets: 0 1 0 0, 1 2 1 1, 2 3 2 2;
+}
+
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled .table-cell:focused:selected {
+    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
+    -fx-background-insets: 0 1 0 0, 1 2 1 1, 2 3 2 2;
+    -fx-background: -fx-accent;
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:selected,
+.table-view:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:hover:selected {
+    -fx-background: -fx-accent;
+    -fx-background-color: -fx-selection-bar;
+    -fx-text-fill: -fx-selection-bar-text;
+    -fx-background-insets: 0 0 1 0;
+}
+
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:focused:selected:hover {
+    -fx-background: -fx-accent;
+    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
+    -fx-background-insets: 0 1 0 0, 1 2 1 1, 2 3 2 2;
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+/* When the TableView is _not_ focused, we show alternate selection colors */
+.table-row-cell:filled > .table-cell:selected:focused,
+.table-row-cell:filled > .table-cell:selected {
+    -fx-background-color: lightgray;
+   	-fx-text-fill: -fx-selection-bar-text;
+}
+
+
+.table-view:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:hover {
+   -fx-background-color: -fx-cell-hover-color;
+   -fx-text-fill: -fx-text-inner-color;
+   -fx-background-insets: 0 0 1 0;
+}
+
+.table-view:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:focused:hover,
+    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-cell-hover-color;
+    -fx-background-insets: 0 1 0 0, 1 2 1 1, 2 3 2 2;
+    -fx-text-fill: -fx-text-inner-color;
+}
+
+/* The column-resize-line is shown when the user is attempting to resize a column. */
+.table-view .column-resize-line {
+    -fx-background: -fx-accent;
+    -fx-background-color: -fx-selection-bar;
+    -fx-padding: 0.0em 0.0416667em 0.0em 0.0416667em; /* 0 0.571429 0 0.571429 */
+}
+
+/* This is the area behind the column headers. An ideal place to specify background
+   and border colors for the whole area (not individual column-header's). */
+.table-view .column-header-background {
+    -fx-background-color: -fx-body-color;
+    -fx-padding: 0;
+}
+
+/* The column header row is made up of a number of column-header, one for each
+   TableColumn, and a 'filler' area that extends from the right-most column
+   to the edge of the tableview, or up to the 'column control' button. */
+.table-view .column-header {
+    -fx-text-fill: -fx-selection-bar-text;
+
+    /* TODO: for some reason, this doesn't scale. */
+    -fx-font-size: 1.083333em; /* 13pt ;  1 more than the default font */
+    -fx-size: 24;
+    -fx-border-style: solid;
+    -fx-border-color:
+        GRAY_7
+        GRAY_5
+        GRAY_5
+        transparent;
+    -fx-border-insets: 0 0 0 0;
+    -fx-border-width: 0.083333em;
+}
+
+.table-view .filler {
+    -fx-size: 24;
+    -fx-border-style: solid;
+    -fx-border-color:
+        GRAY_7;
+    -fx-border-insets: 0 0 0 0;
+    -fx-border-width: 0.083333em;
+}
+
+.table-view .column-header .sort-order-dots-container {
+    -fx-padding: 2 0 2 0;
+}
+
+.table-view .column-header .sort-order {
+    -fx-font-size: 0.916667em; /* 11pt - 1 less than the default font */
+}
+
+.table-view .column-header .sort-order-dot {
+    -fx-background-color: derive(-fx-mark-highlight-color, 40%), -fx-mark-color;
+    -fx-padding: 0.0625em 0.104em 0.0625em 0.104em;
+}
+
+.table-view .column-header .sort-order-dot.ascending {
+    -fx-background-insets: -1 0 1 0, 0;
+}
+
+.table-view .column-header .sort-order-dot.descending {
+    -fx-background-insets: 1 0 -1 0, 0;
+}
+
+.table-view .column-header .label {
+    -fx-alignment: center;
+	-fx-font-family: 'Fira Code';
+}
+
+/* This is shown when the table has no rows and/or no columns. */
+.table-view .empty-table {
+    -fx-background-color: MAIN_BG;
+    -fx-font-size: 1.166667em; /* 14pt - 2 more than the default font */
 }

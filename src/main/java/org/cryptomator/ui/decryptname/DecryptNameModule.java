@@ -57,8 +57,4 @@ public abstract class DecryptNameModule {
 	@FxControllerKey(DecryptFileNamesViewController.class)
 	abstract FxController bindDecryptNamesViewController(DecryptFileNamesViewController controller);
 
-	@Binds
-	@IntoMap
-	@FxControllerKey(CipherAndCleartextCellController.class)
-	abstract FxController binCipherAndCleartextCellController(CipherAndCleartextCellController controller);
 }
