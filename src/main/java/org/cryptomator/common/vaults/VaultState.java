@@ -1,6 +1,9 @@
 package org.cryptomator.common.vaults;
 
 import com.google.common.base.Preconditions;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.DirStructure;
+import org.cryptomator.cryptofs.migration.Migrators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,11 +11,17 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValueBase;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 
 @PerVault
 public class VaultState extends ObservableValueBase<VaultState.Value> implements ObservableObjectValue<VaultState.Value> {
@@ -68,6 +77,41 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 	@Override
 	public Value getValue() {
 		return value.get();
+	}
+
+	/**
+	 * Determines the appropriate vault state based on the vault's directory structure.
+	 *
+	 * @param pathToVault Path to the vault directory
+	 * @return The determined vault state
+	 * @throws IOException If an I/O error occurs while checking the vault
+	 */
+	public static Value determineForPath(Path pathToVault) throws IOException {
+		if (!Files.exists(pathToVault)) {
+			return Value.MISSING;
+		}
+		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
+			case VAULT -> Value.LOCKED;
+			case UNRELATED -> Value.MISSING;
+			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ?
+					Value.NEEDS_MIGRATION :
+					Value.MISSING;
+		};
+	}
+
+	/**
+	 * Redetermines the vault state based on current conditions.
+	 *
+	 * @param vaultPath Path to the vault directory
+	 * @param configCache Vault configuration cache
+	 * @return The determined vault state
+	 */
+	public Value redetermine(Path vaultPath, VaultConfigCache configCache) throws IOException {
+		var determinedState = determineForPath(vaultPath);
+		if (determinedState == Value.LOCKED) {
+			configCache.reloadConfig();
+		}
+		return determinedState;
 	}
 
 	/**

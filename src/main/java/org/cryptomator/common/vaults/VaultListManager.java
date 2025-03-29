@@ -119,7 +119,7 @@ public class VaultListManager {
 				var keyIdScheme = wrapper.get().getKeyId().getScheme();
 				vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
 			}
-			var vaultState = determineVaultState(vaultSettings.path.get());
+			var vaultState = VaultState.determineForPath(vaultSettings.path.get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 			}
@@ -136,10 +136,7 @@ public class VaultListManager {
 		return switch (previousState) {
 			case LOCKED, NEEDS_MIGRATION, MISSING -> {
 				try {
-					var determinedState = determineVaultState(vault.getPath());
-					if (determinedState == LOCKED) {
-						vault.getVaultConfigCache().reloadConfig();
-					}
+					var determinedState = state.redetermine(vault.getPath(), vault.getVaultConfigCache());
 					state.set(determinedState);
 					yield determinedState;
 				} catch (IOException e) {
