@@ -136,10 +136,8 @@ public class Mounter {
 				try {
 					builder.setMountpoint(userChosenMountPoint);
 				} catch (IllegalArgumentException | UnsupportedOperationException e) {
-					var configNotSupported = (!canMountToDriveLetter && mpIsDriveLetter) //mounting as driveletter, albeit not supported
-							|| (!canMountToDir && !mpIsDriveLetter) //mounting to directory, albeit not supported
-							|| (!canMountToParent && !mpIsDriveLetter) //
-							|| (!canMountToDir && !canMountToParent && !canMountToSystem && !canMountToDriveLetter);
+
+					var configNotSupported = isConfigNotSupported(canMountToDriveLetter, mpIsDriveLetter, canMountToDir, canMountToParent, canMountToSystem);
 					if (configNotSupported) {
 						throw new MountPointNotSupportedException(userChosenMountPoint, e.getMessage());
 					} else if (canMountToDir && !canMountToParent && !Files.exists(userChosenMountPoint)) {
@@ -154,6 +152,18 @@ public class Mounter {
 			return cleanup;
 		}
 
+	}
+
+	private static boolean isConfigNotSupported(boolean canMountToDriveLetter, boolean mpIsDriveLetter, boolean canMountToDir, boolean canMountToParent, boolean canMountToSystem) {
+		boolean attemptingUnsupportedDriveLetterMount = !canMountToDriveLetter && mpIsDriveLetter;
+		boolean attemptingUnsupportedDirectoryMount = !canMountToDir && !mpIsDriveLetter;
+		boolean cannotMountWithinParent = !canMountToParent && !mpIsDriveLetter;
+		boolean noMountingCapabilityAvailable = !canMountToDir && !canMountToParent && !canMountToSystem && !canMountToDriveLetter;
+		var configNotSupported = attemptingUnsupportedDriveLetterMount
+				|| attemptingUnsupportedDirectoryMount
+				|| cannotMountWithinParent
+				|| noMountingCapabilityAvailable;
+		return configNotSupported;
 	}
 
 	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot) throws IOException, MountFailedException {
