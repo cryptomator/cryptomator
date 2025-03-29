@@ -18,7 +18,7 @@ public interface LocationPresetsProvider {
 
 	Logger LOG = LoggerFactory.getLogger(LocationPresetsProvider.class);
 	String USER_HOME = System.getProperty("user.home");
-
+	int HOME_PREFIX_LENGTH = 2;
 	/**
 	 * Streams account-separated location presets found by this provider
 	 * @return Stream of LocationPresets
@@ -27,7 +27,7 @@ public interface LocationPresetsProvider {
 
 	static Path resolveLocation(String p) {
 		if (p.startsWith("~/")) {
-			return Path.of(USER_HOME, p.substring(2));
+			return Path.of(USER_HOME, p.substring(HOME_PREFIX_LENGTH));
 		} else {
 			return Path.of(p);
 		}
