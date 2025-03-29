@@ -44,6 +44,7 @@ public class VaultStats {
 	private final LongProperty filesAccessed = new SimpleLongProperty();
 	private final LongProperty totalFilesAccessed = new SimpleLongProperty();
 	private final ObjectProperty<Instant> lastActivity = new SimpleObjectProperty<>();
+	private final LongProperty totalSize = new SimpleLongProperty(); // Paa2f
 
 	@Inject
 	VaultStats(AtomicReference<CryptoFileSystem> fs, VaultState state, ExecutorService executor) {
@@ -91,6 +92,7 @@ public class VaultStats {
 		// check for any I/O activity
 		if (newAccessCount > oldAccessCount) {
 			lastActivity.set(Instant.now());
+			totalSize.set(stats.map(CryptoFileSystemStats::pollTotalSize).orElse(0L)); // Pf229
 		}
 	}
 
@@ -211,5 +213,13 @@ public class VaultStats {
 
 	public Instant getLastActivity() {
 		return lastActivity.get();
+	}
+
+	public LongProperty totalSizeProperty() { // P6122
+		return totalSize;
+	}
+
+	public long getTotalSize() {
+		return totalSize.get();
 	}
 }

@@ -52,6 +52,7 @@ public class VaultStatisticsController implements FxController {
 	private final LongBinding totalFilesAccessed;
 	private final LongBinding bpsEncrypted;
 	private final LongBinding bpsDecrypted;
+	private final LongBinding totalSize; // P2359
 
 	public AreaChart<Number, Number> readChart;
 	public AreaChart<Number, Number> writeChart;
@@ -85,6 +86,7 @@ public class VaultStatisticsController implements FxController {
 		this.totalFilesAccessed = WeakBindings.bindLong(stats.totalFilesAccessed());
 		this.bpsEncrypted = WeakBindings.bindLong(stats.bytesPerSecondEncryptedProperty());
 		this.bpsDecrypted = WeakBindings.bindLong(stats.bytesPerSecondDecryptedProperty());
+		this.totalSize = WeakBindings.bindLong(stats.totalSizeProperty()); // Pda50
 
 		this.ioAnimation = new Timeline(); //TODO Research better timer
 		ioAnimation.getKeyFrames().add(new KeyFrame(Duration.seconds(IO_SAMPLING_INTERVAL), new IoSamplingAnimationHandler(readData, writeData, accessData)));
@@ -241,4 +243,12 @@ public class VaultStatisticsController implements FxController {
 	public LongBinding totalFilesAccessedProperty() {return totalFilesAccessed;}
 
 	public long getTotalFilesAccessed() {return totalFilesAccessed.get();}
+
+	public LongBinding totalSizeProperty() { // Pfde9
+		return totalSize;
+	}
+
+	public long getTotalSize() {
+		return totalSize.get();
+	}
 }
