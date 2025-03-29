@@ -13,12 +13,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Optional;
 
-/**
- * SSLContextProvider for Linux using a PKCS#12 file as trust store
- */
 @OperatingSystem(OperatingSystem.Value.LINUX)
 @CheckAvailability
-public class SSLContextWithPKCS12TrustStore extends SSLContextDifferentTrustStoreBase implements SSLContextProvider {
+public class SSLContextWithPKCS12TrustStore extends SSLContextDifferentTrustStoreBase {
 
 	private static final String CERT_FILE_LOCATION_PROPERTY = "cryptomator.networking.truststore.p12Path";
 

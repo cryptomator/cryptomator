@@ -1,3 +1,4 @@
+// SSLContextWithMacKeychain.java
 package org.cryptomator.networking;
 
 import org.cryptomator.integrations.common.OperatingSystem;
@@ -8,11 +9,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
-/**
- * SSLContextProvider for macOS using the macOS Keychain as truststore
- */
 @OperatingSystem(OperatingSystem.Value.MAC)
-public class SSLContextWithMacKeychain extends SSLContextDifferentTrustStoreBase implements SSLContextProvider {
+public class SSLContextWithMacKeychain extends SSLContextDifferentTrustStoreBase {
 
 	@Override
 	KeyStore getTruststore() throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
