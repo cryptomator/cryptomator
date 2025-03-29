@@ -31,15 +31,16 @@ class Server implements IpcCommunicator {
 	public static Server create(Path socketPath) throws IOException {
 		Files.createDirectories(socketPath.getParent());
 		var address = UnixDomainSocketAddress.of(socketPath);
-		ServerSocketChannel ch = null;
+
+		ServerSocketChannel serverChannel = null;
 		try {
-			ch = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
-			ch.bind(address);
+			serverChannel = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
+			serverChannel.bind(address);
 			LOG.info("Spawning IPC server listening on socket {}", socketPath);
-			return new Server(ch, socketPath);
+			return new Server(serverChannel, socketPath);
 		} catch (IOException | AlreadyBoundException | UnsupportedAddressTypeException e) {
-			if (ch != null) {
-				ch.close();
+			if (serverChannel != null) {
+				serverChannel.close();
 			}
 			throw e;
 		}
