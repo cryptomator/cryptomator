@@ -29,7 +29,7 @@ public class FxApplication {
 	private final FxApplicationStyle applicationStyle;
 	private final FxApplicationTerminator applicationTerminator;
 	private final AutoUnlocker autoUnlocker;
-	private final FxFSEventList fxFSEventList; //not unused! By injecting it here, the object gets initiated the service starts
+	private final FxFSEventList fxFSEventList;
 
 	@Inject
 	FxApplication(@Named("startupTime") long startupTime, Environment environment, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker, FxFSEventList fxFSEventList) {
@@ -87,6 +87,7 @@ public class FxApplication {
 		migrateAndInformDokanyRemoval();
 
 		launchEventHandler.startHandlingLaunchEvents();
+		fxFSEventList.startPolling();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
 	}
 
