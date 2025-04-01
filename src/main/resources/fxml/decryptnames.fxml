@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.control.Tooltip?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.decryptname.DecryptFileNamesViewController"
@@ -22,12 +23,12 @@
 			<Insets left="6" />
 		</padding>
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#copyMappingToClipboard">
+		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#copyMappingToClipboard"> <!-- TODO: rename method -->
 			<graphic>
 				<FontAwesome5IconView glyph="CLIPBOARD" glyphSize="16"/>
 			</graphic>
 			<tooltip>
-				<Tooltip text="Copy all mappings"/>
+				<Tooltip text="%decryptNames.copyTable.tooltip"/>
 			</tooltip>
 		</Button>
 		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#clearTable">
@@ -35,7 +36,7 @@
 				<FontAwesome5IconView glyph="TRASH" glyphSize="16"/>
 			</graphic>
 			<tooltip>
-				<Tooltip text="Clear table"/>
+				<Tooltip text="%decryptNames.clearTable.tooltip"/>
 			</tooltip>
 		</Button>
 	</HBox>
@@ -65,6 +66,6 @@
 			<Insets topRightBottomLeft="6"/>
 		</padding>
 		<Region HBox.hgrow="ALWAYS"/>
-		<Label styleClass="label-small" text="Copy cell content with CTRL+C"/>
+		<FormattedLabel styleClass="label-small" format="%decryptNames.copyHint" arg1="${controller.copyToClipboardShortcutString}"/>
 	</HBox>
 </VBox>

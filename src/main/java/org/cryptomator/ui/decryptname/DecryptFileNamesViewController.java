@@ -5,9 +5,10 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.tools.Tool;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -22,7 +23,6 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
@@ -45,7 +45,11 @@ import java.util.stream.Collectors;
 @DecryptNameScoped
 public class DecryptFileNamesViewController implements FxController {
 
+	private static final Logger LOG = LoggerFactory.getLogger(DecryptFileNamesViewController.class);
 	private static final KeyCodeCombination COPY_TO_CLIPBOARD_SHORTCUT = new KeyCodeCombination(KeyCode.C, KeyCodeCombination.SHORTCUT_DOWN);
+	private static final String COPY_TO_CLIPBOARD_SHORTCUT_STRING_WIN = "CTRL+C";
+	private static final String COPY_TO_CLIPBOARD_SHORTCUT_STRING_MAC = "⌘C";
+	private static final String COPY_TO_CLIPBOARD_SHORTCUT_STRING_LINUX = "CTRL+C";
 
 	private final ListProperty<CipherAndCleartext> mapping;
 	private final StringProperty dropZoneText = new SimpleStringProperty();
@@ -115,14 +119,14 @@ public class DecryptFileNamesViewController implements FxController {
 		ciphertextColumn.setCellValueFactory(new PropertyValueFactory<>("ciphertextFilename"));
 		cleartextColumn.setCellValueFactory(new PropertyValueFactory<>("cleartextName"));
 
-		dropZoneText.setValue("Drop files or click to select");
+		dropZoneText.setValue(resourceBundle.getString("decryptNames.dropZone.message"));
 		dropZoneIcon.setValue(FontAwesome5Icon.FILE_IMPORT);
 
 		wrongFilesSelected.addListener((_, _, areWrongFiles) -> {
 			if (areWrongFiles) {
 				CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
 					//dropZoneText.setValue(resourceBundle.getString(".."));
-					dropZoneText.setValue("Drop files or click to select");
+					dropZoneText.setValue(resourceBundle.getString("decryptNames.dropZone.message"));
 					dropZoneIcon.setValue(FontAwesome5Icon.FILE_IMPORT);
 					wrongFilesSelected.setValue(false);
 				});
@@ -136,8 +140,8 @@ public class DecryptFileNamesViewController implements FxController {
 	@FXML
 	public void selectFiles() {
 		var fileChooser = new FileChooser();
-		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.decryptName.filePickerTitle"));
-		fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Cryptomator encrypted files", List.of("*.c9r", "*.c9s")));
+		fileChooser.setTitle(resourceBundle.getString("decryptNames.filePicker.title"));
+		fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter(resourceBundle.getString("decryptNames.filePicker.extensionDescription"), List.of("*.c9r")));
 		fileChooser.setInitialDirectory(vault.getPath().toFile());
 		var ciphertextNodes = fileChooser.showOpenMultipleDialog(window);
 		if (ciphertextNodes != null) {
@@ -150,11 +154,11 @@ public class DecryptFileNamesViewController implements FxController {
 		//Assumption: All files are in the same directory
 		var testPath = pathsToDecrypt.getFirst();
 		if (!testPath.startsWith(vault.getPath())) {
-			setDropZoneError("Selected files do not belong vault %s".formatted(vault.getDisplayName()));
+			setDropZoneError(resourceBundle.getString("decryptNames.dropZone.error.foreignFiles").formatted(vault.getDisplayName()));
 			return;
 		}
 		if (pathsToDecrypt.size() == 1 && testPath.endsWith(Constants.DIR_ID_BACKUP_FILE_NAME)) {
-			setDropZoneError("Vault internal files with no decrypt-able name selected");
+			setDropZoneError(resourceBundle.getString("decryptNames.dropZone.error.vaultInternalFiles"));
 			return;
 		}
 
@@ -162,9 +166,12 @@ public class DecryptFileNamesViewController implements FxController {
 			var newMapping = pathsToDecrypt.stream().filter(p -> !p.endsWith(Constants.DIR_ID_BACKUP_FILE_NAME)).map(this::getCleartextName).toList();
 			mapping.addAll(newMapping);
 		} catch (UncheckedIOException e) {
-			setDropZoneError("Failed to read selected files");
+			setDropZoneError(resourceBundle.getString("decryptNames.dropZone.error.generic"));
+			LOG.info("Failed to decrypt filenames for directory {}", testPath.getParent(), e);
 		} catch (IllegalArgumentException e) {
-			setDropZoneError("Vault internal files with no decrypt-able name selected");
+			setDropZoneError(resourceBundle.getString("decryptNames.dropZone.error.vaultInternalFiles"));
+		} catch (UnsupportedOperationException e) {
+			setDropZoneError(resourceBundle.getString("decryptNames.dropZone.error.noDirIdBackup"));
 		}
 	}
 
@@ -208,5 +215,15 @@ public class DecryptFileNamesViewController implements FxController {
 	public void copyMappingToClipboard() {
 		var csv = mapping.stream().map(cipherAndClear -> "\"" + cipherAndClear.ciphertext() + "\", \"" + cipherAndClear.cleartextName() + "\"").collect(Collectors.joining("\n"));
 		Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, csv));
+	}
+
+	public String getCopyToClipboardShortcutString() {
+		if(SystemUtils.IS_OS_WINDOWS) {
+			return COPY_TO_CLIPBOARD_SHORTCUT_STRING_WIN;
+		} else if(SystemUtils.IS_OS_MAC) {
+			return COPY_TO_CLIPBOARD_SHORTCUT_STRING_MAC;
+		} else {
+			return COPY_TO_CLIPBOARD_SHORTCUT_STRING_LINUX;
+		}
 	}
 }

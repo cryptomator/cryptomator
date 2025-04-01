@@ -32,9 +32,8 @@ public abstract class DecryptNameModule {
 		stage.setResizable(true);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		stage.setTitle("TODO Decrypt Name");
+		stage.setTitle(resourceBundle.getString("decryptNames.title"));
 		vault.stateProperty().addListener(((_, _, _) -> stage.close())); //as soon as the state changes from unlocked, close the window
-		//stage.setTitle(resourceBundle.getString("convertVault.title"));
 		return stage;
 	}
 
