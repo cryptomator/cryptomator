@@ -7,6 +7,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
+import javax.tools.Tool;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -21,7 +22,12 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -30,12 +36,16 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @DecryptNameScoped
 public class DecryptFileNamesViewController implements FxController {
+
+	private static final KeyCodeCombination COPY_TO_CLIPBOARD_SHORTCUT = new KeyCodeCombination(KeyCode.C, KeyCodeCombination.SHORTCUT_DOWN);
 
 	private final ListProperty<CipherAndCleartext> mapping;
 	private final StringProperty dropZoneText = new SimpleStringProperty();
@@ -66,7 +76,7 @@ public class DecryptFileNamesViewController implements FxController {
 	public void initialize() {
 		cipherToCleartextTable.setItems(mapping);
 		cipherToCleartextTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
-		cipherToCleartextTable.getSelectionModel().setCellSelectionEnabled(true);
+		//DragNDrop
 		cipherToCleartextTable.setOnDragEntered(event -> {
 			if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
 				cipherToCleartextTable.setItems(FXCollections.emptyObservableList());
@@ -88,6 +98,20 @@ public class DecryptFileNamesViewController implements FxController {
 			}
 		});
 		cipherToCleartextTable.setOnDragExited(_ -> cipherToCleartextTable.setItems(mapping));
+		//selectionModel and copy-to-clipboard action
+		cipherToCleartextTable.getSelectionModel().setCellSelectionEnabled(true);
+		cipherToCleartextTable.setOnKeyPressed(keyEvent -> {
+			if (COPY_TO_CLIPBOARD_SHORTCUT.match(keyEvent)) {
+				cipherToCleartextTable.getSelectionModel().getSelectedCells().stream().findFirst().ifPresent(tablePosition -> {
+					var selectedItem = cipherToCleartextTable.getSelectionModel().getSelectedItem();
+					if (tablePosition.getTableColumn().equals(ciphertextColumn)) {
+						Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, selectedItem.ciphertext().toString()));
+					} else {
+						Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, selectedItem.cleartextName()));
+					}
+				});
+			}
+		});
 		ciphertextColumn.setCellValueFactory(new PropertyValueFactory<>("ciphertextFilename"));
 		cleartextColumn.setCellValueFactory(new PropertyValueFactory<>("cleartextName"));
 
@@ -177,4 +201,12 @@ public class DecryptFileNamesViewController implements FxController {
 		return dropZoneIcon.get();
 	}
 
+	public void clearTable() {
+		mapping.clear();
+	}
+
+	public void copyMappingToClipboard() {
+		var csv = mapping.stream().map(cipherAndClear -> "\"" + cipherAndClear.ciphertext() + "\", \"" + cipherAndClear.cleartextName() + "\"").collect(Collectors.joining("\n"));
+		Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, csv));
+	}
 }
