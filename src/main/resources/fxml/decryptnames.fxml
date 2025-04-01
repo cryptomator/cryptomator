@@ -23,7 +23,7 @@
 			<Insets left="6" />
 		</padding>
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#copyMappingToClipboard"> <!-- TODO: rename method -->
+		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#copyTableToClipboard">
 			<graphic>
 				<FontAwesome5IconView glyph="CLIPBOARD" glyphSize="16"/>
 			</graphic>

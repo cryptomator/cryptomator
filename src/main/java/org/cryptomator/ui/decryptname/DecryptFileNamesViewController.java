@@ -212,7 +212,7 @@ public class DecryptFileNamesViewController implements FxController {
 		mapping.clear();
 	}
 
-	public void copyMappingToClipboard() {
+	public void copyTableToClipboard() {
 		var csv = mapping.stream().map(cipherAndClear -> "\"" + cipherAndClear.ciphertext() + "\", \"" + cipherAndClear.cleartextName() + "\"").collect(Collectors.joining("\n"));
 		Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, csv));
 	}

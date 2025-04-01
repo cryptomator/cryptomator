@@ -242,14 +242,6 @@ public class VaultDetailUnlockedController implements FxController {
 		vaultStats.getUnchecked(vault.get()).showVaultStatisticsWindow();
 	}
 
-	record CipherToCleartext(String ciphertext, String cleartext) {
-
-		@Override
-		public String toString() {
-			return ciphertext + " > " + cleartext;
-		}
-	}
-
 	/* Getter/Setter */
 
 	public ReadOnlyObjectProperty<Vault> vaultProperty() {
@@ -291,53 +283,6 @@ public class VaultDetailUnlockedController implements FxController {
 	public boolean isCiphertextPathsCopied() {
 		return ciphertextPathsCopied.get();
 	}
-
-	//new stuff
-
-
-	/*
-	@Nullable
-	private CipherToCleartext getCleartextName(Path ciphertextNode) {
-		try {
-			return new CipherToCleartext(ciphertextNode.getFileName().toString(), vault.get().getCleartextName(ciphertextNode));
-		} catch (IOException e) {
-			LOG.warn("Failed to decrypt filename for {}", ciphertextNode, e);
-			return null;
-		}
-	}
-
-	private ListCell<Path> createListCell(ListView<Path> pathListView) {
-		return new ListCell<Path>() {
-			private final HBox root;
-			private final FontAwesome5IconView icon;
-			private final Label encryptedName;
-
-			{
-				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-				encryptedName = new Label();
-				icon = new FontAwesome5IconView();
-				root = new HBox(icon, encryptedName);
-				root.setSpacing(6.0);
-				root.setPadding(new Insets(6));
-			}
-
-			@Override
-			protected void updateItem(Path item, boolean empty) {
-				super.updateItem(item, empty);
-
-				if (item == null || empty) {
-					setGraphic(null);
-				} else {
-					encryptedName.setText(item.toString());
-					icon.setGlyph(FontAwesome5Icon.LOCK);
-					setGraphic(root);
-					getStyleClass().add("test-list-cell");
-				}
-			}
-		};
-	}
-
-	 */
 
 }
 
