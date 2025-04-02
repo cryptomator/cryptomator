@@ -58,7 +58,11 @@
 					<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
 				</tooltip>
 			</Button>
-			<!-- TODO: revert removing te copied to button -->
+			<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseDecryptedFileAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>
+				</graphic>
+			</Button>
 		</StackPane>
 		<!-- decrypt file name -->
 		<Button fx:id="decryptNameDropZone" styleClass="drag-n-drop" text="%main.vaultDetail.decryptName.buttonLabel" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#showDecryptNameWindow" contentDisplay="TOP">
