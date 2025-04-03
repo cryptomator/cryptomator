@@ -7,6 +7,7 @@ public enum FontAwesome5Icon {
 	ANCHOR("\uF13D"), //
 	ARROW_UP("\uF062"), //
 	BAN("\uF05E"), //
+	BELL("\uF0F3"), //
 	BUG("\uF188"), //
 	CARET_DOWN("\uF0D7"), //
 	CARET_RIGHT("\uF0Da"), //
@@ -15,10 +16,12 @@ public enum FontAwesome5Icon {
 	CLIPBOARD("\uF328"), //
 	COG("\uF013"), //
 	COGS("\uF085"), //
+	COMPRESS_ALT("\uF422"), //
 	COPY("\uF0C5"), //
 	CROWN("\uF521"), //
 	DONATE("\uF4B9"), //
 	EDIT("\uF044"), //
+	ELLIPSIS_V("\uF142"), //
 	EXCHANGE_ALT("\uF362"), //
 	EXCLAMATION("\uF12A"), //
 	EXCLAMATION_CIRCLE("\uF06A"), //
