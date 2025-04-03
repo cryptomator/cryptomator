@@ -12,7 +12,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,7 +36,7 @@ public class FxFSEventList {
 		this.unreadEvents = new SimpleBooleanProperty(false);
 	}
 
-	public void startPolling() {
+	public void schedulePollForUpdates() {
 		scheduler.schedule(this::checkForEventUpdates, 1000, TimeUnit.MILLISECONDS);
 	}
 
@@ -51,10 +50,10 @@ public class FxFSEventList {
 			Platform.runLater(() -> {
 				eventAggregator.cloneTo(events);
 				unreadEvents.setValue(true);
-				startPolling();
+				schedulePollForUpdates();
 			});
 		} else {
-			startPolling();
+			schedulePollForUpdates();
 		}
 	}
 

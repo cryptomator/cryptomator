@@ -87,7 +87,7 @@ public class FxApplication {
 		migrateAndInformDokanyRemoval();
 
 		launchEventHandler.startHandlingLaunchEvents();
-		fxFSEventList.startPolling();
+		fxFSEventList.schedulePollForUpdates();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
 	}
 
