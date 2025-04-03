@@ -1,10 +1,13 @@
 package org.cryptomator.ui.preferences;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.common.NamedServiceProvider;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import org.cryptomator.integrations.quickaccess.QuickAccessService;
 import org.cryptomator.ui.common.FxController;
@@ -14,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Application;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -23,6 +27,10 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -36,6 +44,8 @@ public class GeneralPreferencesController implements FxController {
 	private final Application application;
 	private final Environment environment;
 	private final List<KeychainAccessProvider> keychainAccessProviders;
+	private final KeychainManager keychain;
+	private final ExecutorService backgroundExecutor;
 	private final FxApplicationWindows appWindows;
 	public CheckBox useKeychainCheckbox;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
@@ -47,12 +57,18 @@ public class GeneralPreferencesController implements FxController {
 	public CheckBox autoStartCheckbox;
 	public ToggleGroup nodeOrientation;
 
+	private CompletionStage<Void> keychainMigrations = CompletableFuture.completedFuture(null);
+
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, Application application, Environment environment, FxApplicationWindows appWindows) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, //
+								 List<KeychainAccessProvider> keychainAccessProviders, KeychainManager keychain, Application application, //
+								 Environment environment, FxApplicationWindows appWindows, ExecutorService backgroundExecutor) {
 		this.window = window;
 		this.settings = settings;
 		this.autoStartProvider = autoStartProvider;
 		this.keychainAccessProviders = keychainAccessProviders;
+		this.keychain = keychain;
+		this.backgroundExecutor = backgroundExecutor;
 		this.quickAccessServices = QuickAccessService.get().toList();
 		this.application = application;
 		this.environment = environment;
@@ -73,6 +89,7 @@ public class GeneralPreferencesController implements FxController {
 		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
 		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
+		keychainBackendChoiceBox.valueProperty().addListener(this::migrateKeychainEntries);
 
 		useQuickAccessCheckbox.selectedProperty().bindBidirectional(settings.useQuickAccess);
 		var quickAccessSettingsConverter = new ServiceToSettingsConverter<>(quickAccessServices);
@@ -81,6 +98,25 @@ public class GeneralPreferencesController implements FxController {
 		quickAccessServiceChoiceBox.setConverter(new NamedServiceConverter<>());
 		Bindings.bindBidirectional(settings.quickAccessService, quickAccessServiceChoiceBox.valueProperty(), quickAccessSettingsConverter);
 		quickAccessServiceChoiceBox.disableProperty().bind(useQuickAccessCheckbox.selectedProperty().not());
+	}
+
+	private void migrateKeychainEntries(Observable observable, KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider) {
+		//currently, we only migrate on macOS (touchID vs regular keychain)
+		if (SystemUtils.IS_OS_MAC) {
+			var idsAndNames = settings.directories.stream().collect(Collectors.toMap(vs -> vs.id, vs -> vs.displayName.getValue()));
+			if (!idsAndNames.isEmpty()) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.displayName(), newProvider.displayName());
+				}
+				keychainMigrations = keychainMigrations.thenRunAsync(() -> {
+					try {
+						KeychainManager.migrate(oldProvider, newProvider, idsAndNames);
+					} catch (KeychainAccessException e) {
+						LOG.warn("Failed to migrate all entries from {} to {}", oldProvider.displayName(), newProvider.displayName(), e);
+					}
+				}, backgroundExecutor);
+			}
+		}
 	}
 
 	public boolean isAutoStartSupported() {

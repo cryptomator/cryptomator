@@ -95,16 +95,6 @@ public class MainWindowController implements FxController {
 		int width = settings.windowWidth.get();
 		int height = settings.windowHeight.get();
 
-		// Minimizing a window in Windows and closing it could result in an out of bounds position at (x, y) = (-32000, -32000)
-		// See https://devblogs.microsoft.com/oldnewthing/20041028-00/?p=37453
-		// If the position is (-32000, -32000), restore to the last saved position
-		if (window.getX() == -32000 && window.getY() == -32000) {
-			window.setX(x);
-			window.setY(y);
-			window.setWidth(width);
-			window.setHeight(height);
-		}
-
 		Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
 		if (!isWithinDisplayBounds(x, y, width, height)) { //use stored window position
 			LOG.debug("Resetting window position due to insufficient screen overlap");
@@ -176,7 +166,7 @@ public class MainWindowController implements FxController {
 		return updateAvailable.get();
 	}
 
-	public BooleanBinding licenseValidProperty(){
+	public BooleanBinding licenseValidProperty() {
 		return licenseHolder.validLicenseProperty();
 	}
 
