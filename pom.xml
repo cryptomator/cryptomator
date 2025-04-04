@@ -75,6 +75,17 @@
 		<surefire.jacoco.args></surefire.jacoco.args>
 	</properties>
 
+	<dependencyManagement>
+		<dependencies>
+			<!-- TODO: remove once fuse-nio-adapter is updated -->
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>jfuse</artifactId>
+				<version>0.7.2</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<!-- Cryptomator Libs -->
 		<dependency>
@@ -91,12 +102,6 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>fuse-nio-adapter</artifactId>
 			<version>${cryptomator.fuse.version}</version>
-		</dependency>
-		<!-- TODO: remove once fuse-nio-adapter is updated -->
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>jfuse</artifactId>
-			<version>0.7.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
