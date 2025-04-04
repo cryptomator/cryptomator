@@ -36,6 +36,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 @PassphraseEntryScoped
 public class PassphraseEntryController implements FxController {
@@ -49,6 +50,7 @@ public class PassphraseEntryController implements FxController {
 	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final KeychainManager keychain;
 	private final StringBinding vaultName;
+	private final ExecutorService backgroundExecutorService;
 	private final BooleanProperty unlockInProgress = new SimpleBooleanProperty();
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.when(unlockInProgress).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 	private final BooleanProperty unlockButtonDisabled = new SimpleBooleanProperty();
@@ -64,7 +66,7 @@ public class PassphraseEntryController implements FxController {
 	public Animation unlockAnimation;
 
 	@Inject
-	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
+	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain, ExecutorService backgroundExecutorService) {
 		this.window = window;
 		this.vault = vault;
 		this.result = result;
@@ -72,8 +74,8 @@ public class PassphraseEntryController implements FxController {
 		this.forgetPassword = forgetPassword;
 		this.keychain = keychain;
 		this.vaultName = WeakBindings.bindString(vault.displayNameProperty());
+		this.backgroundExecutorService = backgroundExecutorService;
 		window.setOnHiding(this::windowClosed);
-		result.whenCompleteAsync((r, t) -> unlockInProgress.set(false), Platform::runLater);
 	}
 
 	@FXML
@@ -119,8 +121,6 @@ public class PassphraseEntryController implements FxController {
 				new KeyFrame(Duration.millis(800), legsExtendedY, legsExtendedX, faceHidden), //
 				new KeyFrame(Duration.millis(1000), faceVisible) //
 		);
-
-		result.whenCompleteAsync((r, t) -> stopUnlockAnimation());
 	}
 
 	@FXML
@@ -133,6 +133,9 @@ public class PassphraseEntryController implements FxController {
 			result.cancel(true);
 			LOG.debug("Unlock canceled by user.");
 		}
+		if( passwordField != null) {
+			passwordField.getCharacters().destroy();
+		}
 
 	}
 
@@ -142,7 +145,7 @@ public class PassphraseEntryController implements FxController {
 		unlockInProgress.set(true);
 		CharSequence pwFieldContents = passwordField.getCharacters();
 		Passphrase pw = Passphrase.copyOf(pwFieldContents);
-		result.complete(new PassphraseEntryResult(pw, savePasswordCheckbox.isSelected()));
+		result.completeAsync(() -> new PassphraseEntryResult(pw, savePasswordCheckbox.isSelected()), backgroundExecutorService);
 		startUnlockAnimation();
 	}
 
