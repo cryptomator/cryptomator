@@ -61,14 +61,14 @@
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>26.0.2</jetbrains.annotations.version>
-		<dependency-check.version>12.1.0</dependency-check.version>
-		<jacoco.version>0.8.12</jacoco.version>
+		<dependency-check.version>12.1.1</dependency-check.version>
+		<jacoco.version>0.8.13</jacoco.version>
 		<license-generator.version>2.5.0</license-generator.version>
 		<junit-tree-reporter.version>1.4.0</junit-tree-reporter.version>
-		<mvn-compiler.version>3.13.0</mvn-compiler.version>
+		<mvn-compiler.version>3.14.0</mvn-compiler.version>
 		<mvn-resources.version>3.3.1</mvn-resources.version>
 		<mvn-dependency.version>3.8.1</mvn-dependency.version>
-		<mvn-surefire.version>3.5.2</mvn-surefire.version>
+		<mvn-surefire.version>3.5.3</mvn-surefire.version>
 		<mvn-jar.version>3.4.2</mvn-jar.version>
 
 		<!-- Property used by surefire to determine jacoco engine -->
