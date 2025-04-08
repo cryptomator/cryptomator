@@ -76,12 +76,13 @@ jobs:
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
-      - name: Upload to Avast
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: SFTP Deploy
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
-          protocol: ftp
           server: whitelisting.avast.com
-          port: 21
+          port: 22
           username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
           password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
-          local-dir: ./upload/
+          ssh_private_key: ''
+          local_path: './upload/*'
+          remote_path: '/data'
