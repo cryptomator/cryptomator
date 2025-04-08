@@ -84,5 +84,6 @@ jobs:
           username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
           password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
           ssh_private_key: ''
+          sftp_only: true
           local_path: './upload/*'
           remote_path: '/data'
