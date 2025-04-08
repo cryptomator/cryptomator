@@ -57,7 +57,6 @@ jobs:
           path: upload
       - name: Upload to Kaspersky
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        continue-on-error: true
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
