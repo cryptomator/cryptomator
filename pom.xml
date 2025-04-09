@@ -38,7 +38,7 @@
 		<cryptomator.integrations.win.version>1.3.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.2.4</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.5.2</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>5.0.2</cryptomator.fuse.version>
+		<cryptomator.fuse.version>5.0.5</cryptomator.fuse.version>
 		<cryptomator.webdav.version>2.0.10</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
@@ -74,17 +74,6 @@
 		<!-- Property used by surefire to determine jacoco engine -->
 		<surefire.jacoco.args></surefire.jacoco.args>
 	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-			<!-- TODO: remove once fuse-nio-adapter is updated -->
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>jfuse</artifactId>
-				<version>0.7.2</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 		<!-- Cryptomator Libs -->
