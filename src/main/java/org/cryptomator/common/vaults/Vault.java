@@ -423,6 +423,17 @@ public class Vault {
 		}
 	}
 
+	/**
+	 * Gets the cleartext name from a given path to an encrypted vault file
+	 */
+	public String getCleartextName(Path ciphertextPath) throws IOException {
+		if (!state.getValue().equals(VaultState.Value.UNLOCKED)) {
+			throw new IllegalStateException("Vault is not unlocked");
+		}
+		var fs = cryptoFileSystem.get();
+		return fs.getCleartextName(ciphertextPath);
+	}
+
 	public VaultConfigCache getVaultConfigCache() {
 		return configCache;
 	}
