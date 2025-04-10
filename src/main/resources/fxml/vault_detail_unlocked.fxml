@@ -58,6 +58,7 @@
 					<Tooltip text="%main.vaultDetail.locateEncryptedFileBtn.tooltip"/>
 				</tooltip>
 			</Button>
+			<!-- TODO: instead of showing a button, show on error a small dialog and if copied, show a tooltip -->
 			<Button styleClass="drag-n-drop" text="%main.vaultDetail.encryptedPathsCopied" minWidth="120" maxWidth="180" prefHeight="72" wrapText="true" textAlignment="CENTER" onAction="#chooseDecryptedFileAndReveal" contentDisplay="TOP" visible="${controller.ciphertextPathsCopied}" managed="${controller.ciphertextPathsCopied}">
 				<graphic>
 					<FontAwesome5IconView glyph="CHECK" glyphSize="15"/>

@@ -125,7 +125,6 @@ public class DecryptFileNamesViewController implements FxController {
 		wrongFilesSelected.addListener((_, _, areWrongFiles) -> {
 			if (areWrongFiles) {
 				CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
-					//dropZoneText.setValue(resourceBundle.getString(".."));
 					dropZoneText.setValue(resourceBundle.getString("decryptNames.dropZone.message"));
 					dropZoneIcon.setValue(FontAwesome5Icon.FILE_IMPORT);
 					wrongFilesSelected.setValue(false);
@@ -218,9 +217,9 @@ public class DecryptFileNamesViewController implements FxController {
 	}
 
 	public String getCopyToClipboardShortcutString() {
-		if(SystemUtils.IS_OS_WINDOWS) {
+		if (SystemUtils.IS_OS_WINDOWS) {
 			return COPY_TO_CLIPBOARD_SHORTCUT_STRING_WIN;
-		} else if(SystemUtils.IS_OS_MAC) {
+		} else if (SystemUtils.IS_OS_MAC) {
 			return COPY_TO_CLIPBOARD_SHORTCUT_STRING_MAC;
 		} else {
 			return COPY_TO_CLIPBOARD_SHORTCUT_STRING_LINUX;
