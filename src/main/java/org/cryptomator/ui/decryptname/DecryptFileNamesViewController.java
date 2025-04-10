@@ -106,14 +106,7 @@ public class DecryptFileNamesViewController implements FxController {
 		cipherToCleartextTable.getSelectionModel().setCellSelectionEnabled(true);
 		cipherToCleartextTable.setOnKeyPressed(keyEvent -> {
 			if (COPY_TO_CLIPBOARD_SHORTCUT.match(keyEvent)) {
-				cipherToCleartextTable.getSelectionModel().getSelectedCells().stream().findFirst().ifPresent(tablePosition -> {
-					var selectedItem = cipherToCleartextTable.getSelectionModel().getSelectedItem();
-					if (tablePosition.getTableColumn().equals(ciphertextColumn)) {
-						Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, selectedItem.ciphertext().toString()));
-					} else {
-						Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, selectedItem.cleartextName()));
-					}
-				});
+				copySingleCelltoClipboard();
 			}
 		});
 		ciphertextColumn.setCellValueFactory(new PropertyValueFactory<>("ciphertextFilename"));
@@ -134,6 +127,18 @@ public class DecryptFileNamesViewController implements FxController {
 		if (!initialList.isEmpty()) {
 			checkAndDecrypt(initialList);
 		}
+	}
+
+	private void copySingleCelltoClipboard() {
+		cipherToCleartextTable.getSelectionModel().getSelectedCells().stream().findFirst().ifPresent(tablePosition -> {
+			var selectedItem = cipherToCleartextTable.getSelectionModel().getSelectedItem();
+			//TODO: give user feedback, if content is copied -> must be done via a custom cell factory to access the actual table cell!
+			if (tablePosition.getTableColumn().equals(ciphertextColumn)) {
+				Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, selectedItem.ciphertext().toString()));
+			} else {
+				Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, selectedItem.cleartextName()));
+			}
+		});
 	}
 
 	@FXML
