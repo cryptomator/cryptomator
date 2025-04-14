@@ -48,7 +48,7 @@ jobs:
     name: Anti Virus Allowlisting Kaspersky
     runs-on: ubuntu-latest
     needs: download-file
-    if: inputs.kaspersky || github.event_name == 'workflow_call'
+    if: github.event_name == 'workflow_call' || inputs.kaspersky
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -68,14 +68,14 @@ jobs:
     name: Anti Virus Allowlisting Avast
     runs-on: ubuntu-latest
     needs: download-file
-    if: inputs.avast || github.event_name == 'workflow_call'
+    if: github.event_name == 'workflow_call'  || inputs.avast
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
-      - name: SFTP Deploy
+      - name: Upload to Avast 
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           server: whitelisting.avast.com

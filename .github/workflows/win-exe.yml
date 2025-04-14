@@ -394,7 +394,7 @@ jobs:
 
   allowlist-exe:
     uses: ./.github/workflows/av-whitelist.yml
-    needs: [publish]
+    needs: [publish, allowlist-msi]
     with:
       url: ${{ needs.publish.outputs.download-url-exe }}
     secrets: inherit
