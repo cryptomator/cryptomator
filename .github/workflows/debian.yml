@@ -119,34 +119,7 @@ jobs:
       - name: debuild
         run: |
           debuild -S -sa -d
-          debuild -b -sa -d
         env:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
         working-directory: cryptomator_${{ inputs.ppaver }}
-      - name: Create detached GPG signatures
-        run: |
-          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-deb-package
-          path: |
-            cryptomator_*.dsc
-            cryptomator_*.orig.tar.xz
-            cryptomator_*.debian.tar.xz
-            cryptomator_*_source.buildinfo
-            cryptomator_*_source.changes
-            cryptomator_*_amd64.deb
-            cryptomator_*.asc
-      - name: Publish on PPA
-        if: inputs.dput
-        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_*_source.changes
-      # If ref is a tag, also upload to GitHub Releases:
-      - name: Publish Debian package on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/') && inputs.dput
-        env:
-          GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-        run: |
-          artifacts=$(ls | grep cryptomator*.deb)
-          gh release upload ${{ github.ref_name }} $artifacts
