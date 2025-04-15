@@ -43,13 +43,13 @@
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.17.0</commons-lang3.version>
-		<dagger.version>2.55</dagger.version>
+		<dagger.version>2.56.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.18.3</jackson.version>
 		<javafx.version>23.0.2</javafx.version>
 		<jwt.version>4.5.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
-		<logback.version>1.5.17</logback.version>
+		<logback.version>1.5.18</logback.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
