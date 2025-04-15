@@ -11,6 +11,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.fxapp.FxFSEventList;
 
 import javax.inject.Provider;
 import javafx.scene.Scene;
@@ -25,12 +26,17 @@ abstract class EventViewModule {
 	@Provides
 	@EventViewScoped
 	@EventViewWindow
-	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
+	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, FxFSEventList fxFSEventList) {
 		Stage stage = factory.create();
 		stage.setHeight(498);
 		stage.setTitle(resourceBundle.getString("eventView.title"));
 		stage.setResizable(true);
 		stage.initModality(Modality.NONE);
+		stage.focusedProperty().addListener((_,_,isFocused) -> {
+			if(isFocused) {
+				fxFSEventList.unreadEventsProperty().setValue(false);
+			}
+		});
 		return stage;
 	}
 

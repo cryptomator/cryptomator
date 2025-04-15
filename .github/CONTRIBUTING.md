@@ -16,6 +16,10 @@
 
 - Suggest your change by [submitting a new issue](https://github.com/cryptomator/cryptomator/issues/new/choose) and start writing code.
 
+## Do you intend to add a new translation or change an existing one?
+
+Translations are not managed directly in this repository. Instead, we use [Crowdin](https://translate.cryptomator.org/), which automatically synchronizes translations with this repository. If you want to help us with translations, please visit our translation project on Crowdin.
+
 ## Code of Conduct
 
 Help us keep Cryptomator open and inclusive. Please read and follow our [Code of Conduct](https://github.com/cryptomator/cryptomator/blob/develop/.github/CODE_OF_CONDUCT.md).

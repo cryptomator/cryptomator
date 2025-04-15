@@ -12,6 +12,10 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.layout.AnchorPane?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
@@ -51,7 +55,9 @@
 						<Tooltip text="%main.vaultlist.showEventsButton.tooltip"/>
 					</tooltip>
 				</Button>
-				<Region styleClass="update-indicator" visible="${controller.newEventsPresent}" mouseTransparent="true" StackPane.alignment="TOP_RIGHT" prefWidth="12" prefHeight="12" maxWidth="-Infinity" maxHeight="-Infinity"/>
+				<AnchorPane mouseTransparent="true" minWidth="12" maxWidth="12" minHeight="12" maxHeight="12" StackPane.alignment="CENTER">
+					<Circle radius="4" styleClass="icon-update-indicator" AnchorPane.topAnchor="-8" AnchorPane.rightAnchor="-6" visible="${controller.unreadEventsPresent}" />
+				</AnchorPane>
 			</StackPane>
 			<Button onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
 				<graphic>

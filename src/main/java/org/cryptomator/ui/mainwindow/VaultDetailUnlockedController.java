@@ -13,6 +13,7 @@ import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.decryptname.DecryptNameComponent;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
@@ -47,7 +48,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {
@@ -61,6 +61,7 @@ public class VaultDetailUnlockedController implements FxController {
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	private final Stage mainWindow;
 	private final Optional<RevealPathService> revealPathService;
+	private final DecryptNameComponent.Factory decryptNameWindowFactory;
 	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
@@ -70,7 +71,6 @@ public class VaultDetailUnlockedController implements FxController {
 	private final BooleanProperty draggingOverLocateEncrypted = new SimpleBooleanProperty();
 	private final BooleanProperty draggingOverDecryptName = new SimpleBooleanProperty();
 	private final BooleanProperty ciphertextPathsCopied = new SimpleBooleanProperty();
-	private final BooleanProperty cleartextNamesCopied = new SimpleBooleanProperty();
 
 	@FXML
 	public Button revealEncryptedDropZone;
@@ -78,13 +78,22 @@ public class VaultDetailUnlockedController implements FxController {
 	public Button decryptNameDropZone;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, WrongFileAlertComponent.Builder wrongFileAlert, @MainWindow Stage mainWindow, Optional<RevealPathService> revealPathService, ResourceBundle resourceBundle) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, //
+										 FxApplicationWindows appWindows, //
+										 VaultService vaultService, //
+										 VaultStatisticsComponent.Builder vaultStatsBuilder, //
+										 WrongFileAlertComponent.Builder wrongFileAlert, //
+										 @MainWindow Stage mainWindow, //
+										 Optional<RevealPathService> revealPathService, //
+										 DecryptNameComponent.Factory decryptNameWindowFactory, //
+										 ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
 		this.wrongFileAlert = wrongFileAlert;
 		this.mainWindow = mainWindow;
 		this.revealPathService = revealPathService;
+		this.decryptNameWindowFactory = decryptNameWindowFactory;
 		this.resourceBundle = resourceBundle;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
 		this.vaultStatsBuilder = vaultStatsBuilder;
@@ -106,7 +115,7 @@ public class VaultDetailUnlockedController implements FxController {
 		revealEncryptedDropZone.setOnDragExited(_ -> draggingOverLocateEncrypted.setValue(false));
 
 		decryptNameDropZone.setOnDragOver(e -> handleDragOver(e, draggingOverDecryptName));
-		decryptNameDropZone.setOnDragDropped(e -> handleDragDropped(e, this::getCleartextName, this::copyDecryptedNamesToClipboard));
+		decryptNameDropZone.setOnDragDropped(e -> showDecryptNameWindow(e.getDragboard().getFiles().stream().map(File::toPath).toList()));
 		decryptNameDropZone.setOnDragExited(_ -> draggingOverDecryptName.setValue(false));
 
 		EasyBind.includeWhen(revealEncryptedDropZone.getStyleClass(), ACTIVE_CLASS, draggingOverLocateEncrypted);
@@ -153,39 +162,12 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	@FXML
-	public void chooseEncryptedFileAndCopyNames() {
-		var fileChooser = new FileChooser();
-		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.decryptName.filePickerTitle"));
-
-		fileChooser.setInitialDirectory(vault.getValue().getPath().toFile());
-		var ciphertextNode = fileChooser.showOpenDialog(mainWindow);
-		if (ciphertextNode != null) {
-			var nodeName = getCleartextName(ciphertextNode.toPath());
-			copyDecryptedNamesToClipboard(List.of(nodeName));
-		}
+	public void showDecryptNameWindow() {
+		showDecryptNameWindow(List.of());
 	}
 
-	private void copyDecryptedNamesToClipboard(List<CipherToCleartext> mapping) {
-		if (mapping.size() == 1) {
-			Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, mapping.getFirst().cleartext));
-		} else {
-			var content = mapping.stream().map(CipherToCleartext::toString).collect(Collectors.joining("\n"));
-			Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, content));
-		}
-		cleartextNamesCopied.setValue(true);
-		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
-			cleartextNamesCopied.set(false);
-		});
-	}
-
-	@Nullable
-	private CipherToCleartext getCleartextName(Path ciphertextNode) {
-		try {
-			return new CipherToCleartext(ciphertextNode.getFileName().toString(), vault.get().getCleartextName(ciphertextNode));
-		} catch (IOException e) {
-			LOG.warn("Failed to decrypt filename for {}", ciphertextNode, e);
-			return null;
-		}
+	private void showDecryptNameWindow(List<Path> pathsToDecrypt) {
+		decryptNameWindowFactory.create(vault.get(), mainWindow, pathsToDecrypt).showDecryptFileNameWindow();
 	}
 
 	private boolean startsWithVaultAccessPoint(Path path) {
@@ -260,14 +242,6 @@ public class VaultDetailUnlockedController implements FxController {
 		vaultStats.getUnchecked(vault.get()).showVaultStatisticsWindow();
 	}
 
-	record CipherToCleartext(String ciphertext, String cleartext) {
-
-		@Override
-		public String toString() {
-			return ciphertext + " > " + cleartext;
-		}
-	}
-
 	/* Getter/Setter */
 
 	public ReadOnlyObjectProperty<Vault> vaultProperty() {
@@ -310,11 +284,5 @@ public class VaultDetailUnlockedController implements FxController {
 		return ciphertextPathsCopied.get();
 	}
 
-	public BooleanProperty cleartextNamesCopiedProperty() {
-		return cleartextNamesCopied;
-	}
-
-	public boolean isCleartextNamesCopied() {
-		return cleartextNamesCopied.get();
-	}
 }
+

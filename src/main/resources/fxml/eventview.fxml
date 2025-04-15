@@ -20,7 +20,7 @@
 		<padding>
 			<Insets left="6" />
 		</padding>
-		<ChoiceBox fx:id="vaultFilterChoiceBox"/>
+		<ChoiceBox fx:id="vaultFilterChoiceBox" minWidth="42"/>
 		<Region HBox.hgrow="ALWAYS"/>
 		<Button styleClass="button-right" onAction="#clearEvents" contentDisplay="GRAPHIC_ONLY">
 			<graphic>

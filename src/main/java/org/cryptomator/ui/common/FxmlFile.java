@@ -12,6 +12,7 @@ public enum FxmlFile {
 	CONVERTVAULT_HUBTOPASSWORD_START("/fxml/convertvault_hubtopassword_start.fxml"), //
 	CONVERTVAULT_HUBTOPASSWORD_CONVERT("/fxml/convertvault_hubtopassword_convert.fxml"), //
 	CONVERTVAULT_HUBTOPASSWORD_SUCCESS("/fxml/convertvault_hubtopassword_success.fxml"), //
+	DECRYPTNAMES("/fxml/decryptnames.fxml"), //
 	ERROR("/fxml/error.fxml"), //
 	EVENT_VIEW("/fxml/eventview.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
