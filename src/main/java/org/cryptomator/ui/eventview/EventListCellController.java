@@ -206,7 +206,7 @@ public class EventListCellController implements FxController {
 		if (vaultUnlocked.getValue()) {
 			return eventMessage.getValue();
 		} else {
-			return resourceBundle.getString("eventView.entry.vaultLocked.message");
+			return "***********";
 		}
 	}
 
