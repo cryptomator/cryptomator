@@ -35,8 +35,8 @@ jobs:
           architecture: x64
           output-suffix: x64
           fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_osx-x64_bin-jmods.zip'
-          openjfx-sha: '8857965975c464a0e5d57709292ce357d0ebb39f6168c41d5ca38301e42c3c8e'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_osx-x64_bin-jmods.zip'
+          openjfx-sha: '5e6c65c065eea22430c0eab36f37a5985eb8ad99e19e8772262021740d338f68'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java

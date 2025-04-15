@@ -32,15 +32,15 @@ REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
-JAVAFX_VERSION=23.0.1
+JAVAFX_VERSION=23.0.2
 JAVAFX_ARCH="undefined"
 JAVAFX_JMODS_SHA256="undefined"
 if [ "$(machine)" = "arm64e" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256="a800724a1f3e6757ecfa0bd5bf7ed64d2e6a7a3f5b3522650a70b8cfc7782fb6"
+    JAVAFX_JMODS_SHA256="c690cc642a3924cf56622951f478ba57aec9ce09063761f800c3319331bed3fc"
 else
     JAVAFX_ARCH="x64"
-    JAVAFX_JMODS_SHA256="8857965975c464a0e5d57709292ce357d0ebb39f6168c41d5ca38301e42c3c8e"
+    JAVAFX_JMODS_SHA256="5e6c65c065eea22430c0eab36f37a5985eb8ad99e19e8772262021740d338f68"
 fi
 JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_osx-${JAVAFX_ARCH}_bin-jmods.zip"
 

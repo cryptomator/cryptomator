@@ -19,11 +19,11 @@ env:
   JAVA_DIST: 'temurin'
   JAVA_VERSION: '23.0.2+7'
   COFFEELIBS_JDK: 23
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '2164bca470bf70a5e2764645e2078ba7f787b274e5be3d7df30d87c5bb62bba6'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: '09c92fa9fa0b82adefd88640a14ebb2a49e5f3f733a57d1542f5590d060ffe1b'
   COFFEELIBS_JDK_VERSION: '23.0.2+7-0ppa1'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '063baebc6922e4a89c94b9dfb7a4f53e59e8d6fec400d4e670b31bc2ab324dec'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: '9bbedaeae1590b69e2b22237bda310936df33e344dbc243bea2e86acaab3a0d8'
 
 jobs:
   build:
