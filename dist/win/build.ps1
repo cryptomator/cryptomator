@@ -32,6 +32,49 @@ $version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.
 $semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
 
+$arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
+switch ($arch) {
+    'Arm64' {
+		$javafxBaseJmod = Join-Path $Env:JAVA_HOME "jmods\javafx.base.jmod"
+		if (!(Test-Path $javafxBaseJmod)) {
+			Write-Error "JavaFX module not found in JDK. Please ensure BellSoft Full JDK is installed."
+			exit 1
+		}
+
+		$archSuffix = '-arm64'
+        $modulePath = "$Env:JAVA_HOME/jmods"
+    }
+    'X64' {
+        $archSuffix = ''
+        $modulePath = "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods"
+
+        # Download JavaFX JMODs
+        $javaFxVersion = '23.0.2'
+        $javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
+        $javaFxJmodsSHA256 = 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
+        $javaFxJmods = '.\resources\jfxJmods.zip'
+
+        if (!(Test-Path -Path $javaFxJmods)) {
+            Write-Output "Downloading $javaFxJmodsUrl..."
+            Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods
+        }
+
+        $jmodsChecksumActual = (Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
+        if ($jmodsChecksumActual -ne $javaFxJmodsSHA256) {
+            Write-Error "Checksum mismatch for jfxJmods.zip.`nExpected: $javaFxJmodsSHA256`nActual:   $jmodsChecksumActual"
+            exit 1
+        }
+
+        Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
+        Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
+        Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
+    }
+    default {
+        Write-Error "Unsupported architecture: $arch"
+        exit 1
+    }
+}
+
 Write-Output "`$version=$version"
 Write-Output "`$semVerNo=$semVerNo"
 Write-Output "`$revisionNo=$revisionNo"
@@ -54,7 +97,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
-	--module-path "$Env:JAVA_HOME/jmods" `
+	--module-path $modulePath `
 	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
@@ -132,7 +175,7 @@ $Env:JP_WIXHELPER_DIR = "."
 	--win-upgrade-uuid $UpgradeUUID `
 	--app-image $AppName `
 	--dest installer `
-	--name ($AppName + "-arm64") `
+	--name ($AppName + $archSuffix) `
 	--vendor $Vendor `
 	--copyright $copyright `
 	--app-version "$semVerNo.$revisionNo" `
@@ -177,4 +220,4 @@ Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName
 	-dAboutUrl="$AboutUrl" `
 	-dHelpUrl="$HelpUrl" `
 	-dUpdateUrl="$UpdateUrl"
-& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -ext WixUtilextension -out installer\$AppName-arm64-Installer.exe
+& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -ext WixUtilextension -out ("installer\" + $AppName + $archSuffix + "-Installer.exe")
