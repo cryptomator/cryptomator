@@ -55,7 +55,6 @@ jobs:
           check-latest: true
           cache: 'maven'
       - name: Download and extract JavaFX jmods from Gluon
-        if: matrix.arch == 'x64'
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
           curl --output jfxjmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
@@ -66,7 +65,6 @@ jobs:
           Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent }
         shell: pwsh
       - name: Ensure major jfx version in pom and in jmods is the same
-        if: matrix.arch == 'x64'
         run: |
           JMOD_VERSION_AMD64=$(jmod describe jfxjmods/javafx.base.jmod | head -1)
           JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
@@ -89,23 +87,17 @@ jobs:
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
         # Remark: no compression is applied here (zip-0) to improve overall MSI build compression later
-        run: |
-          if ("${{ matrix.arch }}" -eq "x64") {
-            $modulePath = "jfxjmods;${env:JAVA_HOME}/jmods"
-          } else {
-            $modulePath = "${env:JAVA_HOME}/jmods"
-          }
-          & "${env:JAVA_HOME}/bin/jlink" `
-            --verbose `
-            --output runtime `
-            --module-path $modulePath `
-            --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.mscapi,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler `
-            --strip-native-commands `
-            --no-header-files `
-            --no-man-pages `
-            --strip-debug `
-            --compress zip-0
-        shell: pwsh
+        run: >
+          ${JAVA_HOME}/bin/jlink
+          --verbose
+          --output runtime
+          --module-path "jfxjmods;${JAVA_HOME}/jmods"
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.mscapi,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
+          --strip-native-commands
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress zip-0
       - name: Change win-console flag if debug is active
         if: ${{ inputs.isDebug }}
         run: echo "WIN_CONSOLE_FLAG=--win-console" >> $GITHUB_ENV
