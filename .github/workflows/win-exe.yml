@@ -271,7 +271,7 @@ jobs:
 
   build-exe:
     name: Build .exe installer
-    runs-on: windows-latest
+    runs-on: ${{ matrix.arch == 'x64' && 'windows-latest' || 'windows-11-arm' }}
     needs: [ get-version, build-msi ]
     strategy:
       matrix:
