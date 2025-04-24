@@ -26,7 +26,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>23</project.jdk.version>
+		<project.jdk.version>24</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<!-- remove them, as soon they got modularized or support is dropped (i.e., WebDAV) -->
