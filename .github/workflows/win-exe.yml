@@ -388,9 +388,9 @@ jobs:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
-            *-x86.msi
+            *-x64.msi
             *-arm64.msi
-            *-x86.exe
+            *-x64.exe
             *-arm64.exe
             *.asc
 
