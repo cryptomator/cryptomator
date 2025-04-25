@@ -391,7 +391,7 @@ jobs:
             *-x86.msi
             *-arm64.msi
             *-x86.exe
-            *-arm64.msi
+            *-arm64.exe
             *.asc
 
   allowlist-msi-x64:
