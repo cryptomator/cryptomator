@@ -11,9 +11,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Vector;
+import java.util.LinkedHashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CombinedKeyStoreSpi extends KeyStoreSpi {
@@ -114,20 +115,11 @@ public class CombinedKeyStoreSpi extends KeyStoreSpi {
 
 	@Override
 	public Enumeration<String> engineAliases() {
-		var aliases = new Vector<String>();
+		var aliases = new LinkedHashSet<String>();
 		try {
-			var it1 = primary.aliases().asIterator();
-			while (it1.hasNext()) {
-				aliases.add(it1.next());
-			}
-			var it2 = fallback.aliases().asIterator();
-			while (it2.hasNext()) {
-				var alias = it2.next();
-				if (!aliases.contains(alias)) {
-					aliases.add(alias);
-				}
-			}
-			return aliases.elements();
+			primary.aliases().asIterator().forEachRemaining(aliases::add);
+			fallback.aliases().asIterator().forEachRemaining(aliases::add);
+			return Collections.enumeration(aliases);
 		} catch (KeyStoreException e) {
 			throw new IllegalStateException("At least one keystore of [%s, %s] is not initialized.".formatted(primary.getType(), fallback.getType()), e);
 		}
