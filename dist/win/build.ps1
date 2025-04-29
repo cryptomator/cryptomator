@@ -51,7 +51,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$javaFxVersion='23.0.1'
+$javaFxVersion='23.0.2'
 $javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
 $javaFxJmodsSHA256 = 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
 $javaFxJmods = '.\resources\jfxJmods.zip'

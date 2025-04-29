@@ -10,6 +10,7 @@ import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.fxapp.FxFSEventList;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.input.ContextMenuEvent;
@@ -34,7 +36,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import java.io.File;
@@ -66,6 +67,7 @@ public class VaultListController implements FxController {
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
+	private final BooleanProperty unreadEvents;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
@@ -76,7 +78,7 @@ public class VaultListController implements FxController {
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
-	private HBox addVaultButton;
+	private Button addVaultButton;
 	@FXML
 	private ContextMenu addVaultContextMenu;
 
@@ -91,7 +93,8 @@ public class VaultListController implements FxController {
 						ResourceBundle resourceBundle, //
 						FxApplicationWindows appWindows, //
 						Settings settings, //
-						Dialogs dialogs) {
+						Dialogs dialogs, //
+						FxFSEventList fxFSEventList) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -104,6 +107,7 @@ public class VaultListController implements FxController {
 		this.dialogs = dialogs;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
+		this.unreadEvents = fxFSEventList.unreadEventsProperty();
 
 		selectedVault.addListener(this::selectedVaultDidChange);
 		cellSize = settings.compactMode.map(compact -> compact ? 30.0 : 60.0);
@@ -263,6 +267,10 @@ public class VaultListController implements FxController {
 		appWindows.showPreferencesWindow(SelectedPreferencesTab.ANY);
 	}
 
+	@FXML
+	public void showEventViewer() {
+		appWindows.showEventViewer();
+	}
 	// Getter and Setter
 
 	public BooleanBinding emptyVaultListProperty() {
@@ -289,4 +297,11 @@ public class VaultListController implements FxController {
 		return cellSize.getValue();
 	}
 
+	public ObservableValue<Boolean> unreadEventsPresentProperty() {
+		return unreadEvents;
+	}
+
+	public boolean getUnreadEventsPresent() {
+		return unreadEvents.getValue();
+	}
 }

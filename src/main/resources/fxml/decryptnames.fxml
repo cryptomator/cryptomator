@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.decryptname.DecryptFileNamesViewController"
+	  styleClass="decrypt-name-window"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145">
+	<HBox styleClass="button-bar" alignment="CENTER">
+		<padding>
+			<Insets left="6"/>
+		</padding>
+		<Region HBox.hgrow="ALWAYS"/>
+		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#copyTableToClipboard">
+			<graphic>
+				<FontAwesome5IconView glyph="CLIPBOARD" glyphSize="16"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%decryptNames.copyTable.tooltip"/>
+			</tooltip>
+		</Button>
+		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#clearTable">
+			<graphic>
+				<FontAwesome5IconView glyph="TRASH" glyphSize="16"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%decryptNames.clearTable.tooltip"/>
+			</tooltip>
+		</Button>
+	</HBox>
+	<TableView fx:id="cipherToCleartextTable" VBox.vgrow="ALWAYS">
+		<placeholder>
+			<Button alignment="CENTER" onAction="#selectFiles" text="${controller.dropZoneText}" contentDisplay="TOP" maxWidth="Infinity" maxHeight="Infinity">
+				<graphic>
+					<FontAwesome5IconView glyph="${controller.dropZoneIcon}" glyphSize="16"/>
+				</graphic>
+			</Button>
+		</placeholder>
+		<columns>
+			<TableColumn fx:id="ciphertextColumn" prefWidth="${cipherToCleartextTable.width * 0.5}">
+				<graphic>
+					<FontAwesome5IconView glyph="LOCK"/>
+				</graphic>
+			</TableColumn>
+			<TableColumn fx:id="cleartextColumn" prefWidth="${cipherToCleartextTable.width * 0.5}">
+				<graphic>
+					<FontAwesome5IconView glyph="LOCK_OPEN"/>
+				</graphic>
+			</TableColumn>
+		</columns>
+	</TableView>
+	<HBox>
+		<padding>
+			<Insets topRightBottomLeft="6"/>
+		</padding>
+		<Region HBox.hgrow="ALWAYS"/>
+		<FormattedLabel styleClass="label-small" format="%decryptNames.copyHint" arg1="${controller.copyToClipboardShortcutString}"/>
+	</HBox>
+</VBox>

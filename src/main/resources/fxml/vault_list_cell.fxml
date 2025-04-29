@@ -14,17 +14,15 @@
 	  spacing="12"
 	  alignment="CENTER_LEFT">
 	<!-- Remark Check the containing list view for a fixed cell size before editing height properties -->
-	<children>
-		<VBox alignment="CENTER" minWidth="20">
-			<FontAwesome5IconView fx:id="vaultStateView" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
-		</VBox>
-		<VBox spacing="4" HBox.hgrow="ALWAYS">
-			<Label styleClass="header-label" text="${controller.vault.displayName}"/>
-			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" visible="${!controller.compactMode}" managed="${!controller.compactMode}">
-				<tooltip>
-					<Tooltip text="${controller.vault.displayablePath}"/>
-				</tooltip>
-			</Label>
-		</VBox>
-	</children>
+	<VBox alignment="CENTER" minWidth="20">
+		<FontAwesome5IconView fx:id="vaultStateView" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+	</VBox>
+	<VBox spacing="4" HBox.hgrow="ALWAYS">
+		<Label styleClass="header-label" text="${controller.vault.displayName}"/>
+		<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" visible="${!controller.compactMode}" managed="${!controller.compactMode}">
+			<tooltip>
+				<Tooltip text="${controller.vault.displayablePath}"/>
+			</tooltip>
+		</Label>
+	</VBox>
 </HBox>

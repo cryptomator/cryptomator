@@ -16,6 +16,10 @@
 	src: url('opensans_bold.ttf');
 }
 
+@font-face {
+	src: url('firacode_regular.ttf');
+}
+
 /*******************************************************************************
  *                                                                             *
  * Root Styling & Colors                                                       *
@@ -79,6 +83,7 @@
 	PROGRESS_INDICATOR_END: GRAY_4;
 	PROGRESS_BAR_BG: GRAY_8;
 
+
 	-fx-background-color: MAIN_BG;
 	-fx-text-fill: TEXT_FILL;
 	-fx-font-family: 'Open Sans';
@@ -122,6 +127,12 @@
 
 .text-flow > * {
 	-fx-fill: TEXT_FILL;
+}
+
+.cryptic-text {
+	-fx-fill: TEXT_FILL;
+	-fx-font-family: 'Fira Code';
+	-fx-font-size: 1.1em;
 }
 
 /*******************************************************************************
@@ -182,6 +193,8 @@
 }
 
 .main-window .button-bar {
+	-fx-min-height:42px;
+	-fx-max-height:42px;
 	-fx-background-color: MAIN_BG;
 	-fx-border-color: CONTROL_BORDER_NORMAL transparent transparent transparent;
 	-fx-border-width: 1px 0 0 0;
@@ -190,11 +203,27 @@
 .main-window .button-bar .button-left {
 	-fx-border-color: CONTROL_BORDER_NORMAL;
 	-fx-border-width: 0 1px 0 0;
+	-fx-background-color: MAIN_BG;
+	-fx-background-radius: 0px;
+	-fx-min-height: 42px;
+	-fx-max-height: 42px;
 }
 
 .main-window .button-bar .button-right {
 	-fx-border-color: CONTROL_BORDER_NORMAL;
 	-fx-border-width: 0 0 0 1px;
+	-fx-background-color: MAIN_BG;
+	-fx-background-radius: 0px;
+	-fx-min-height: 42px;
+	-fx-max-height: 42px;
+}
+
+.main-window .button-bar .button-left:armed {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
+}
+
+.main-window .button-bar .button-right:armed {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
 }
 
 /*******************************************************************************
@@ -283,6 +312,10 @@
 	-fx-font-size: 1.0em;
 }
 
+.list-cell .header-misc {
+	-fx-font-size: 1.0em;
+}
+
 .list-cell .detail-label {
 	-fx-text-fill: TEXT_FILL_MUTED;
 	-fx-font-size: 0.8em;
@@ -313,6 +346,42 @@
 
 /*******************************************************************************
  *                                                                             *
+ * Event List                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.event-window .button-bar {
+	-fx-min-height:42px;
+	-fx-max-height:42px;
+	-fx-background-color: MAIN_BG;
+	-fx-border-color: transparent transparent CONTROL_BORDER_NORMAL transparent;
+	-fx-border-width: 0 0 1px 0;
+}
+
+.event-window .button-bar .button-right {
+	-fx-border-color: transparent transparent transparent CONTROL_BORDER_NORMAL;
+	-fx-border-width: 0 0 0 1px;
+	-fx-background-color: MAIN_BG;
+	-fx-background-radius: 0px;
+	-fx-min-height: 42px;
+	-fx-max-height: 42px;
+}
+
+.event-window .button-bar .button-right:armed {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
+}
+
+.event-window .list-view .list-cell:hover {
+	-fx-background-color: CONTROL_BG_SELECTED;
+}
+
+.event-window .list-view .list-cell:selected {
+	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
+	-fx-background-insets: 0, 0 0 0 3px;
+}
+
+/*******************************************************************************
+ *                                                                             *
  * NotificationBar                                                             *
  *                                                                             *
  ******************************************************************************/
@@ -338,6 +407,12 @@
 	-fx-min-height:24px;
 	-fx-max-height:24px;
 	-fx-background-color: PRIMARY;
+}
+
+.notification-debug:hover .notification-label,
+.notification-update:hover .notification-label,
+.notification-support:hover .notification-label {
+	-fx-underline:true;
 }
 
 /*******************************************************************************
@@ -576,6 +651,16 @@
 
 /*******************************************************************************
  *                                                                             *
+ * Update indicator
+ *                                                                             *
+ ******************************************************************************/
+
+.icon-update-indicator {
+	-fx-fill: RED_5;
+}
+
+/*******************************************************************************
+ *                                                                             *
  * Hyperlinks                                                                  *
  *                                                                             *
  ******************************************************************************/
@@ -786,11 +871,11 @@
 
 /*******************************************************************************
  *                                                                             *
- * Add Vault - MenuItem                                                                    *
+ * Dropdown button context menu
  *                                                                             *
  ******************************************************************************/
 
-.add-vault-menu-item {
+.dropdown-button-context-menu-item {
     -fx-padding: 4px 8px;
 }
 
@@ -937,4 +1022,167 @@
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Decrypt Name Window
+ *                                                                             *
+ ******************************************************************************/
+
+.decrypt-name-window .button-bar {
+	-fx-min-height:42px;
+	-fx-max-height:42px;
+	-fx-background-color: MAIN_BG;
+	-fx-border-color: transparent transparent CONTROL_BORDER_NORMAL transparent;
+	-fx-border-width: 0 0 1px 0;
+}
+
+.decrypt-name-window .button-bar .button-right {
+	-fx-border-color: transparent transparent transparent CONTROL_BORDER_NORMAL;
+	-fx-border-width: 0 0 0 1px;
+	-fx-background-color: MAIN_BG;
+	-fx-background-radius: 0px;
+	-fx-min-height: 42px;
+	-fx-max-height: 42px;
+}
+
+.decrypt-name-window .button-bar .button-right:armed {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
+}
+
+.decrypt-name-window .table-view {
+    -fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+    -fx-background-insets: 0,1;
+    /* There is some oddness if padding is in em values rather than pixels,
+       in particular, the left border of the control doesn't show. */
+    -fx-padding: 1; /* 0.083333em; */
+}
+
+.table-view > .placeholder {
+	-fx-background-color: transparent;
+	-fx-background-radius: 0px;
+}
+
+.table-view > .placeholder > .button {
+	-fx-border-width: 0;
+    -fx-border-color: transparent;
+	-fx-background-radius: 0px;
+}
+
+.table-view:focused {
+    -fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 0, 0;
+    /* There is some oddness if padding is in em values rather than pixels,
+      in particular, the left border of the control doesn't show. */
+    -fx-padding: 1; /* 0.083333em; */
+}
+
+.table-view > .virtual-flow > .scroll-bar:vertical {
+    -fx-background-insets: 0, 0 0 0 1;
+    -fx-padding: -1 -1 -1 0;
+}
+
+.table-view > .virtual-flow > .corner {
+    -fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL ;
+    -fx-background-insets: 0, 1 0 0 1;
+}
+
+/* Each row in the table is a table-row-cell. Inside a table-row-cell is any
+   number of table-cell. */
+.table-row-cell {
+    -fx-background-color: GRAY_6, CONTROL_BG_NORMAL;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.0em; /* 0 */
+    -fx-text-fill: TEXT_FILL;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: GRAY_6, GRAY_9;
+    -fx-background-insets: 0, 0 0 1 0;
+}
+
+.table-cell {
+    -fx-padding: 3px 6px 3px 6px;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent CONTROL_BORDER_NORMAL transparent transparent;
+    -fx-border-width: 1px;
+    -fx-cell-size: 30px;
+    -fx-text-fill: TEXT_FILL;
+    -fx-text-overrun: center-ellipsis;
+}
+
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:selected > .table-cell {
+    -fx-text-fill: TEXT_FILL;
+}
+
+/* selected, hover - not specified */
+
+/* selected, focused, hover */
+/* selected, focused */
+/* selected */
+.table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:selected,
+.table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:focused:selected,
+.table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:focused:selected:hover {
+    -fx-background-color: CONTROL_PRIMARY_BG_NORMAL, CONTROL_BG_SELECTED;
+    -fx-background-insets: 0 0 0 0, 1 1 1 3;
+   	-fx-text-fill: TEXT_FILL;
+}
+/* focused */
+.table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:focused {
+    -fx-background-color: CONTROL_PRIMARY_BORDER_FOCUSED, CONTROL_PRIMARY_BG_NORMAL , CONTROL_BG_NORMAL;
+    -fx-background-insets: 0 1 0 0, 1 2 1 1, 2 3 2 2;
+    -fx-text-fill: TEXT_FILL;
+}
+/* focused, hover */
+.table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:focused:hover {
+    -fx-background-color: CONTROL_PRIMARY_BORDER_FOCUSED, CONTROL_PRIMARY_BG_NORMAL , PRIMARY_L2;
+    -fx-background-insets: 0 1 0 0, 1 2 1 1, 2 3 2 2;
+    -fx-text-fill: TEXT_FILL;
+}
+/* hover */
+.table-view:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled > .table-cell:hover {
+	-fx-background-color: PRIMARY_L2;
+	-fx-text-fill: TEXT_FILL;
+	-fx-background-insets: 0 0 1 0;
+}
+
+/* The column-resize-line is shown when the user is attempting to resize a column. */
+.table-view .column-resize-line {
+    -fx-background-color: CONTROL_BG_ARMED;
+    -fx-padding: 0.0em 0.0416667em 0.0em 0.0416667em; /* 0 0.571429 0 0.571429 */
+}
+
+/* This is the area behind the column headers. An ideal place to specify background
+   and border colors for the whole area (not individual column-header's). */
+.table-view .column-header-background {
+    -fx-background-color: GRAY_7;
+    -fx-padding: 0;
+}
+
+/* The column header row is made up of a number of column-header, one for each
+   TableColumn, and a 'filler' area that extends from the right-most column
+   to the edge of the tableview, or up to the 'column control' button. */
+.table-view .column-header {
+    -fx-text-fill: TEXT_FILL;
+    -fx-font-size: 1.083333em; /* 13pt ;  1 more than the default font */
+    -fx-size: 24;
+    -fx-border-style: solid;
+    -fx-border-color:
+        CONTROL_BORDER_NORMAL
+        GRAY_5
+        GRAY_5
+        transparent;
+    -fx-border-insets: 0 0 0 0;
+    -fx-border-width: 0.083333em;
+}
+
+.table-view .column-header .label {
+    -fx-alignment: center;
+}
+
+.table-view .empty-table {
+    -fx-background-color: MAIN_BG;
+    -fx-font-size: 1.166667em; /* 14pt - 2 more than the default font */
 }

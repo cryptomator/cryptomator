@@ -48,6 +48,9 @@ class VaultSettingsJson {
 	@JsonProperty("mountService")
 	String mountService;
 
+	@JsonProperty("lastKnownKeyLoader")
+	String lastKnownKeyLoader;
+
 	@JsonProperty("port")
 	int port = VaultSettings.DEFAULT_PORT;
 

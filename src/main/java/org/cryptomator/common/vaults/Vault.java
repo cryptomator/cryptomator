@@ -10,6 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
+import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -18,9 +19,11 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
+import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.event.VaultEvent;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
@@ -32,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -74,6 +78,7 @@ public class Vault {
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
 	private final Settings settings;
+	private final FileSystemEventAggregator fileSystemEventAggregator;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -85,7 +90,8 @@ public class Vault {
 		  VaultState state, //
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
-		  Mounter mounter, Settings settings) {
+		  Mounter mounter, Settings settings, //
+		  FileSystemEventAggregator fileSystemEventAggregator) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -102,6 +108,7 @@ public class Vault {
 		this.mountPoint = Bindings.createObjectBinding(this::getMountPoint, state);
 		this.mounter = mounter;
 		this.settings = settings;
+		this.fileSystemEventAggregator = fileSystemEventAggregator;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -143,6 +150,7 @@ public class Vault {
 				.withFlags(flags) //
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
 				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
+				.withFilesystemEventConsumer(this::consumeVaultEvent) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
@@ -249,6 +257,11 @@ public class Vault {
 		} catch (QuickAccessServiceException e) {
 			LOG.error("Removing vault from quick access area failed", e);
 		}
+	}
+
+
+	private void consumeVaultEvent(FilesystemEvent e) {
+		fileSystemEventAggregator.put(this, e);
 	}
 
 	// ******************************************************************************
@@ -410,6 +423,17 @@ public class Vault {
 		} else {
 			throw new UnsupportedOperationException("URI mount points not supported.");
 		}
+	}
+
+	/**
+	 * Gets the cleartext name from a given path to an encrypted vault file
+	 */
+	public String getCleartextName(Path ciphertextPath) throws IOException {
+		if (!state.getValue().equals(VaultState.Value.UNLOCKED)) {
+			throw new IllegalStateException("Vault is not unlocked");
+		}
+		var fs = cryptoFileSystem.get();
+		return fs.getCleartextName(ciphertextPath);
 	}
 
 	public VaultConfigCache getVaultConfigCache() {

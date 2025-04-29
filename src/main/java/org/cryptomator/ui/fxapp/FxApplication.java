@@ -29,9 +29,10 @@ public class FxApplication {
 	private final FxApplicationStyle applicationStyle;
 	private final FxApplicationTerminator applicationTerminator;
 	private final AutoUnlocker autoUnlocker;
+	private final FxFSEventList fxFSEventList;
 
 	@Inject
-	FxApplication(@Named("startupTime") long startupTime, Environment environment, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker) {
+	FxApplication(@Named("startupTime") long startupTime, Environment environment, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker, FxFSEventList fxFSEventList) {
 		this.startupTime = startupTime;
 		this.environment = environment;
 		this.settings = settings;
@@ -41,6 +42,7 @@ public class FxApplication {
 		this.applicationStyle = applicationStyle;
 		this.applicationTerminator = applicationTerminator;
 		this.autoUnlocker = autoUnlocker;
+		this.fxFSEventList = fxFSEventList;
 	}
 
 	public void start() {
@@ -85,6 +87,7 @@ public class FxApplication {
 		migrateAndInformDokanyRemoval();
 
 		launchEventHandler.startHandlingLaunchEvents();
+		fxFSEventList.schedulePollForUpdates();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
 	}
 

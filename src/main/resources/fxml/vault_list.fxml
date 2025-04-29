@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ContextMenu?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.Arc?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.layout.AnchorPane?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
@@ -35,33 +40,44 @@
 			</VBox>
 		</StackPane>
 		<HBox styleClass="button-bar">
-			<HBox fx:id="addVaultButton" onMouseClicked="#toggleMenu" styleClass="button-left" alignment="CENTER" minWidth="20">
-				<padding>
-					<Insets topRightBottomLeft="12"/>
-				</padding>
-				<FontAwesome5IconView glyph="PLUS" HBox.hgrow="NEVER" glyphSize="16"/>
-			</HBox>
+			<Button fx:id="addVaultButton" onMouseClicked="#toggleMenu" styleClass="button-left" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
+				<graphic>
+					<FontAwesome5IconView glyph="PLUS" glyphSize="16"/>
+				</graphic>
+			</Button>
 			<Region HBox.hgrow="ALWAYS"/>
-			<HBox onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20">
-				<padding>
-					<Insets topRightBottomLeft="12"/>
-				</padding>
-				<FontAwesome5IconView glyph="COG" HBox.hgrow="NEVER" glyphSize="16"/>
-			</HBox>
+			<StackPane>
+				<Button onMouseClicked="#showEventViewer" styleClass="button-right" minWidth="20" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false">
+					<graphic>
+						<FontAwesome5IconView glyph="BELL" glyphSize="16"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%main.vaultlist.showEventsButton.tooltip"/>
+					</tooltip>
+				</Button>
+				<AnchorPane mouseTransparent="true" minWidth="12" maxWidth="12" minHeight="12" maxHeight="12" StackPane.alignment="CENTER">
+					<Circle radius="4" styleClass="icon-update-indicator" AnchorPane.topAnchor="-8" AnchorPane.rightAnchor="-6" visible="${controller.unreadEventsPresent}" />
+				</AnchorPane>
+			</StackPane>
+			<Button onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
+				<graphic>
+					<FontAwesome5IconView glyph="COG" glyphSize="16"/>
+				</graphic>
+			</Button>
 		</HBox>
 	</VBox>
 	<Region styleClass="drag-n-drop-border" visible="${controller.draggingVaultOver}"/>
 	<fx:define>
 		<ContextMenu fx:id="addVaultContextMenu">
 			<items>
-				<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault" >
+				<MenuItem styleClass="dropdown-button-context-menu-item" text="%main.vaultlist.addVaultBtn.menuItemNew" onAction="#didClickAddNewVault">
 					<graphic>
-						<FontAwesome5IconView glyph="PLUS" textAlignment="CENTER" wrappingWidth="14" />
+						<FontAwesome5IconView glyph="PLUS" textAlignment="CENTER" wrappingWidth="14"/>
 					</graphic>
 				</MenuItem>
-				<MenuItem styleClass="add-vault-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault" >
+				<MenuItem styleClass="dropdown-button-context-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault">
 					<graphic>
-						<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14" />
+						<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14"/>
 					</graphic>
 				</MenuItem>
 			</items>

@@ -16,7 +16,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '23.0.1+11'
+  JAVA_VERSION: '23.0.2+7'
 
 jobs:
   get-version:
@@ -36,8 +36,8 @@ jobs:
           architecture: aarch64
           output-suffix: arm64
           fuse-lib: FUSE-T
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_osx-aarch64_bin-jmods.zip'
-          openjfx-sha: 'a800724a1f3e6757ecfa0bd5bf7ed64d2e6a7a3f5b3522650a70b8cfc7782fb6'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: 'c690cc642a3924cf56622951f478ba57aec9ce09063761f800c3319331bed3fc'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
