@@ -170,7 +170,6 @@ public class CombinedKeyStoreSpi extends KeyStoreSpi {
 
 	@Override
 	public void engineLoad(InputStream stream, char[] password) throws IOException, NoSuchAlgorithmException, CertificateException {
-		primary.load(stream, password);
-		fallback.load(stream, password);
+		// Nothing to do; the real keystores are already loaded.
 	}
 }
