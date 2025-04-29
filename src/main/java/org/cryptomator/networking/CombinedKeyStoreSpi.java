@@ -21,7 +21,21 @@ public class CombinedKeyStoreSpi extends KeyStoreSpi {
 	private final KeyStore primary;
 	private final KeyStore fallback;
 
-	public CombinedKeyStoreSpi(KeyStore primary, KeyStore fallback) {
+	public static CombinedKeyStoreSpi create(KeyStore primary, KeyStore fallback) {
+		checkIfLoaded(primary);
+		checkIfLoaded(fallback);
+		return new CombinedKeyStoreSpi(primary, fallback);
+	}
+
+	private static void checkIfLoaded(KeyStore s) {
+		try {
+			s.aliases();
+		} catch (KeyStoreException e) {
+			throw new IllegalArgumentException("Keystore %s is not loaded.".formatted(s.getType()));
+		}
+	}
+
+	private CombinedKeyStoreSpi(KeyStore primary, KeyStore fallback) {
 		this.primary = primary;
 		this.fallback = fallback;
 	}

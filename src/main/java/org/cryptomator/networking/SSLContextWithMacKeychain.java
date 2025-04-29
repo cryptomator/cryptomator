@@ -19,8 +19,12 @@ public class SSLContextWithMacKeychain extends SSLContextDifferentTrustStoreBase
 	KeyStore getTruststore() throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
 		var userKeyStore = KeyStore.getInstance("KeychainStore");
 		var systemRootKeyStore = KeyStore.getInstance("KeychainStore-ROOT");
-		CombinedKeyStoreSpi spi = new CombinedKeyStoreSpi(userKeyStore, systemRootKeyStore);
-		Provider dummyProvider = new Provider("CombinedKeyStoreProvider", "1.0", "Provides a combined, read-only KeyStore") {};
-		return new KeyStore(spi, dummyProvider, "CombinedKeyStoreProvider") {};
+		try {
+			CombinedKeyStoreSpi spi = CombinedKeyStoreSpi.create(userKeyStore, systemRootKeyStore);
+			Provider dummyProvider = new Provider("CombinedKeyStoreProvider", "1.0", "Provides a combined, read-only KeyStore") {};
+			return new KeyStore(spi, dummyProvider, "CombinedKeyStoreProvider") {};
+		} catch (IllegalArgumentException e) {
+			throw new KeyStoreException(e);
+		}
 	}
 }
