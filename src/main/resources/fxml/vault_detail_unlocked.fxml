@@ -74,7 +74,6 @@
 				<Tooltip text="%main.vaultDetail.decryptName.tooltip"/>
 			</tooltip>
 		</Button>
-
 		<Region HBox.hgrow="ALWAYS"/>
 
 		<Button text="%main.vaultDetail.stats" minWidth="120" onAction="#showVaultStatistics" contentDisplay="BOTTOM" prefHeight="72">

@@ -59,6 +59,7 @@ open module org.cryptomator.desktop {
 
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
 	uses SSLContextProvider;
+	uses org.cryptomator.event.NotificationHandler;
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
