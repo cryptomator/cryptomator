@@ -145,10 +145,6 @@ public class CombinedKeyStoreSpi extends KeyStoreSpi {
 	@Override
 	public int engineSize() {
 		var aliases = engineAliases();
-		if (!aliases.hasMoreElements()) {
-			return 0;
-		}
-
 		var i = new AtomicInteger(0);
 		aliases.asIterator().forEachRemaining(_ -> i.incrementAndGet());
 		return i.get();
@@ -156,12 +152,20 @@ public class CombinedKeyStoreSpi extends KeyStoreSpi {
 
 	@Override
 	public boolean engineIsKeyEntry(String alias) {
-		return false;
+		try {
+			return primary.isKeyEntry(alias) || fallback.isKeyEntry(alias);
+		} catch (KeyStoreException e) {
+			throw new IllegalStateException("At least one keystore of [%s, %s] is not initialized.".formatted(primary.getType(), fallback.getType()), e);
+		}
 	}
 
 	@Override
 	public boolean engineIsCertificateEntry(String alias) {
-		return false;
+		try {
+			return primary.isCertificateEntry(alias) || fallback.isCertificateEntry(alias);
+		} catch (KeyStoreException e) {
+			throw new IllegalStateException("At least one keystore of [%s, %s] is not initialized.".formatted(primary.getType(), fallback.getType()), e);
+		}
 	}
 
 	@Override
