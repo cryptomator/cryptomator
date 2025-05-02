@@ -1,4 +1,4 @@
-cryptomator (${PPA_VERSION}) focal; urgency=low
+cryptomator (${PPA_VERSION}) jammy; urgency=low
 
   * Full changelog can be found on https://github.com/cryptomator/cryptomator/releases
 
