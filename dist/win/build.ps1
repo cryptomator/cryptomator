@@ -209,6 +209,7 @@ Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName
 
 # create bundle including winfsp
 & wix build `
+	-define BundleName="$AppName" `
 	-define BundleVersion="$semVerNo.$revisionNo" `
 	-define BundleVendor="$Vendor" `
 	-define BundleCopyright="$copyright" `
