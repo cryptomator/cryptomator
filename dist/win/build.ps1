@@ -26,6 +26,24 @@ if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
    Write-Host "Unable to find mvn.cmd in your PATH (try: choco install maven)"
    exit 1
 }
+if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
+{
+   Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.0)'
+   exit 1
+}
+$wixExtensions = & wix.exe extension list --global | Out-String
+if ($wixExtensions -notmatch 'WixToolset.UI.wixext') {
+    Write-Error 'UI wix extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.0 --global)'
+    exit 1
+}
+if ($wixExtensions -notmatch 'WixToolset.Util.wixext') {
+    Write-Error 'Util wix extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.0 --global)'
+    exit 1
+}
+if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
+    Write-Error 'Util wix extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global)'
+    exit 1
+}
 
 $buildDir = Split-Path -Parent $PSCommandPath
 $version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
@@ -190,11 +208,14 @@ Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninsta
 Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi"
 
 # create bundle including winfsp
-& "$env:WIX\bin\candle.exe" .\bundle\bundleWithWinfsp.wxs -ext WixBalExtension -ext WixUtilextension -out bundle\ `
-	-dBundleVersion="$semVerNo.$revisionNo" `
-	-dBundleVendor="$Vendor" `
-	-dBundleCopyright="$copyright" `
-	-dAboutUrl="$AboutUrl" `
-	-dHelpUrl="$HelpUrl" `
-	-dUpdateUrl="$UpdateUrl"
-& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -ext WixUtilextension -out installer\$AppName-Installer.exe
+& wix build `
+	-define BundleVersion="$semVerNo.$revisionNo" `
+	-define BundleVendor="$Vendor" `
+	-define BundleCopyright="$copyright" `
+	-define AboutUrl="$AboutUrl" `
+	-define HelpUrl="$HelpUrl" `
+	-define UpdateUrl="$UpdateUrl" `
+	-ext "WixToolset.Util.wixext" `
+	-ext "WixToolset.BootstrapperApplications.wixext" `
+    .\bundle\bundleWithWinfsp.wxs `
+    -out "installer\$AppName-Installer.exe"
