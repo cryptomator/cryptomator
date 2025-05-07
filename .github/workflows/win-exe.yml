@@ -312,6 +312,7 @@ jobs:
           curl --output dist/win/bundle/resources/winfsp-uninstaller.exe -L ${{ env.WINFSP_UNINSTALLER }}
         shell: pwsh
       - name: Create Wix Burn bundle
+        working-directory: dist/win
         run: >
           wix build
           -define BundleName="Cryptomator"
@@ -323,8 +324,8 @@ jobs:
           -define UpdateUrl="https://cryptomator.org/downloads/"
           -ext "WixToolset.Util.wixext"
           -ext "WixToolset.BootstrapperApplications.wixext"
-          ./dist/win/bundle/bundleWithWinfsp.wxs
-          -out "installer/unsigned/Cryptomator-Installer.exe"
+          ./bundle/bundleWithWinfsp.wxs
+          -out "../../installer/unsigned/Cryptomator-Installer.exe"
       - name: Detach burn engine in preparation to sign
         run: >
           wix burn detach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe
