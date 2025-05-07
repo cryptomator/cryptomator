@@ -17,7 +17,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '23.0.2+7'
+  JAVA_VERSION: '24.0.1+9'
   COFFEELIBS_JDK: 23
   COFFEELIBS_JDK_VERSION: '23.0.2+7-0ppa1'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_linux-x64_bin-jmods.zip'
