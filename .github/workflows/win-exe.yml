@@ -56,16 +56,16 @@ jobs:
       - name: Download and extract JavaFX jmods from Gluon
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
-          curl --output jfxjmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
-          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
+          curl --output openjfx-jmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
+          if(!(Get-FileHash -Path openjfx-jmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
             throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
           }
-          Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
-          Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
+          Expand-Archive -Path openjfx-jmods.zip -DestinationPath openjfx-jmods
+          Get-ChildItem -Path openjfx-jmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
         shell: pwsh
       - name: Ensure major jfx version in pom and in jmods is the same
         run: |
-          JMOD_VERSION_AMD64=$(jmod describe jfxjmods/javafx.base.jmod | head -1)
+          JMOD_VERSION_AMD64=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
           JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
           JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64%%.*}
           POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
@@ -88,8 +88,8 @@ jobs:
         id: jep-493-check
         run: |
           JMOD_PATHS="openjfx-jmods"
-          if $(${JAVA_HOME}/bin/jlink --help | grep -o "Linking from run-time image enabled"); then
-            JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
+          if ! $(${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"); then
+            JMOD_PATHS="${JAVA_HOME}/jmods;${JMOD_PATHS}"
           fi
           echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
       - name: Run jlink
