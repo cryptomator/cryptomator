@@ -75,13 +75,21 @@ jobs:
         run: |
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
+      - name: Run jlink with help option
+        id: jep-493-check
+        run: |
+          JMOD_PATHS="openjfx-jmods"
+          if $(${JAVA_HOME}/bin/jlink --help | grep -o "Linking from run-time image enabled"); then
+            JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
+          fi
+          echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
       - name: Run jlink
         #Remark: no compression is applied for improved build compression later (here dmg)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${JAVA_HOME}/jmods:openjfx-jmods"
+          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files

@@ -89,10 +89,16 @@ Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
 Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 ## create custom runtime
+### check for JEP 493
+$jmodPaths="$buildDir/resources/javafx-jmods";
+if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from run-time image enabled" -SimpleMatch | Measure-Object).Count -gt 0 ) {
+	$jmodPaths="$Env:JAVA_HOME/jmods;" + $jmodPaths;
+}
+### create runtime
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
-	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
+	--module-path $jmodPaths `
 	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `

@@ -75,10 +75,16 @@ mvn -B -Djavafx.platform=mac -f../../../pom.xml clean package -DskipTests -Pmac
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 
-# add runtime
+# create runtime
+## check for JEP 493
+JMOD_PATHS="openjfx-jmods"
+if $(${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"); then
+    JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
+fi
+## create custom runtime
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
-    --module-path "${JAVA_HOME}/jmods:openjfx-jmods" \
+    --module-path "${JMOD_PATHS}" \
     --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,java.compiler \
     --strip-native-commands \
     --no-header-files \
