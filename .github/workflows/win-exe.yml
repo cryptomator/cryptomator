@@ -48,6 +48,11 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
           cache: 'maven'
+      - name: Install wix and extensions
+        run: |
+          dotnet tool install --global wix --version 6.0.0
+          wix.exe extension add WixToolset.UI.wixext/6.0.0 --global
+          wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
       - name: Download and extract JavaFX jmods from Gluon
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
@@ -269,6 +274,11 @@ jobs:
     needs: [get-version, build-msi]
     steps:
       - uses: actions/checkout@v4
+      - name: Install wix and extensions
+        run: |
+          dotnet tool install --global wix --version 6.0.0
+          wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global
+          wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
       - name: Download .msi
         uses: actions/download-artifact@v4
         with:
@@ -301,29 +311,23 @@ jobs:
         run: |
           curl --output dist/win/bundle/resources/winfsp-uninstaller.exe -L ${{ env.WINFSP_UNINSTALLER }}
         shell: pwsh
-      - name: Compile to wixObj file
+      - name: Create Wix Burn bundle
         run: >
-          "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
-          -ext WixBalExtension
-          -ext WixUtilExtension
-          -out dist/win/bundle/
-          -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
-          -dBundleVendor="Skymatic GmbH"
-          -dBundleCopyright="(C) 2016 - 2025 Skymatic GmbH"
-          -dAboutUrl="https://cryptomator.org"
-          -dHelpUrl="https://cryptomator.org/contact"
-          -dUpdateUrl="https://cryptomator.org/downloads/"
-      - name: Create executable with linker
-        run: >
-          "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
-          -ext WixBalExtension
-          -ext WixUtilExtension
-          -out installer/unsigned/Cryptomator-Installer.exe
+          wix build
+          -define BundleName="Cryptomator"
+          -define BundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
+          -define BundleVendor="Skymatic GmbH"
+          -define BundleCopyright="(C) 2016 - 2025 Skymatic GmbH"
+          -define AboutUrl="https://cryptomator.org"
+          -define HelpUrl="https://cryptomator.org/contact"
+          -define UpdateUrl="https://cryptomator.org/downloads/"
+          -ext "WixToolset.Util.wixext"
+          -ext "WixToolset.BootstrapperApplications.wixext"
+          ./dist/win/bundle/bundleWithWinfsp.wxs
+          -out "installer/unsigned/Cryptomator-Installer.exe"
       - name: Detach burn engine in preparation to sign
         run: >
-          "${WIX}/bin/insignia.exe"
-          -ib installer/unsigned/Cryptomator-Installer.exe
-          -o tmp/engine.exe
+          wix burn detach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe
       - name: Codesign burn engine
         uses: skymatic/code-sign-action@v3
         with:
@@ -334,10 +338,8 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: tmp
       - name: Reattach signed burn engine to installer
-        run : >
-          "${WIX}/bin/insignia.exe"
-          -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
-          -o installer/Cryptomator-Installer.exe
+        run: >
+          wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
       - name: Codesign EXE
         uses: skymatic/code-sign-action@v3
         with:
