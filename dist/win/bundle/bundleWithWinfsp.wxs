@@ -16,6 +16,8 @@
               LogoFile="bundle\resources\logo.png"
               LaunchTarget="[ProgramFiles64Folder]\$(var.BundleName)\$(var.BundleName).exe" />
             <ns0:Payload SourceFile="bundle\resources\logoSide.png"/>
+            <!-- Required due to https://github.com/wixtoolset/issues/issues/8104 -->
+            <ns0:Payload Name="Cryptobot.ico" SourceFile="bundle\resources\Cryptomator.ico"/>
         </ns0:BootstrapperApplication>
 
         <ns0:Chain>
