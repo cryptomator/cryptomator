@@ -1,12 +1,19 @@
 ﻿<!-- For Built in variables, see https://wixtoolset.org/docs/tools/burn/builtin-variables/-->
 <ns0:Wix xmlns:ns0="http://wixtoolset.org/schemas/v4/wxs" xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
-    <ns0:Bundle Name="$(var.BundleName)" UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b" Version="$(var.BundleVersion)" Manufacturer="$(var.BundleVendor)" AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="bundle\resources\Cryptomator.ico">
+    <ns0:Bundle Name="$(var.BundleName)"
+     UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b"
+     Version="$(var.BundleVersion)"
+     Manufacturer="$(var.BundleVendor)"
+     AboutUrl="$(var.AboutUrl)"
+     HelpUrl="$(var.HelpUrl)"
+     UpdateUrl="$(var.UpdateUrl)"
+     Copyright="$(var.BundleCopyright)"
+     IconSourceFile="bundle\resources\Cryptomator.ico">
 
         <!-- detect outdated WinFsp installations -->
         <util:ProductSearch Variable="InstalledLegacyWinFspVersion" Result="version" UpgradeCode="82F812D9-4083-4EF1-8BC8-0F1EDA05B46B" />
 
         <ns0:BootstrapperApplication>
-            <!-- Possible Attributes: LaunchTarget -->
             <bal:WixStandardBootstrapperApplication LicenseFile="bundle\resources\license.rtf" ShowVersion="yes"
               SuppressOptionsUI="yes"
               Theme="rtfLargeLicense"

@@ -18,12 +18,12 @@ $ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress
 # check preconditions
 if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
 {
-   Write-Host "Unable to find git.exe in your PATH (try: choco install git)"
+   Write-Error "Unable to find git.exe in your PATH (try: choco install git)"
    exit 1
 }
 if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
 {
-   Write-Host "Unable to find mvn.cmd in your PATH (try: choco install maven)"
+   Write-Error "Unable to find mvn.cmd in your PATH (try: choco install maven)"
    exit 1
 }
 if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
@@ -104,7 +104,7 @@ if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from 
 	--no-header-files `
 	--no-man-pages `
 	--strip-debug `
-	--compress "zip-0" #do not compress to have improved msi compression
+	--compress "zip-0" #do not compress and use msi compression
 
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
@@ -190,6 +190,12 @@ $Env:JP_WIXHELPER_DIR = "."
 	--about-url $AboutUrl `
 	--file-associations resources/FAvaultFile.properties
 
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "jpackage MSI failed with exit code $LASTEXITCODE"
+	return 1;
+}
+
+
 #Create RTF license for bundle
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
  "-Dlicense.thirdPartyFilename=license.rtf" `
@@ -211,7 +217,7 @@ Write-Output "Downloading ${winfspUninstaller}..."
 Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninstaller.exe" # redirects are followed by default
 
 # copy MSI to bundle resources
-Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi"
+Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi" -Force
 
 # create bundle including winfsp
 & wix build `
