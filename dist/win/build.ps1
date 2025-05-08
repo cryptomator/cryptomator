@@ -91,7 +91,7 @@ Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\ja
 ## create custom runtime
 ### check for JEP 493
 $jmodPaths="$buildDir/resources/javafx-jmods";
-if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from run-time image enabled" -SimpleMatch | Measure-Object).Count -gt 0 ) {
+if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from run-time image enabled" -SimpleMatch | Measure-Object).Count -eq 0 ) {
 	$jmodPaths="$Env:JAVA_HOME/jmods;" + $jmodPaths;
 }
 ### create runtime
