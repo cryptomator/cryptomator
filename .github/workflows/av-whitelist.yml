@@ -76,7 +76,7 @@ jobs:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
       - name: Upload to Avast 
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
         with:
           server: whitelisting.avast.com
           port: 22
