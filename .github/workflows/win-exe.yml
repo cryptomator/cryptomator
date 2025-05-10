@@ -43,7 +43,8 @@ jobs:
       WIN_CONSOLE_FLAG: ''
     steps:
       - name: Upgrade WIX to latest version
-        if: matrix.arch == 'skip'
+        # windows-latest has WIX 3.14.1, it's missing on arm64
+        if: matrix.arch == 'arm64'
         run: choco install wixtoolset --version 3.14.1
         shell: pwsh
       - uses: actions/checkout@v4
