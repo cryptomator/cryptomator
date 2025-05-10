@@ -15,10 +15,8 @@ on:
 
 
 env:
-  JAVA_DIST: 'zulu'
+  JAVA_DIST: 'temurin'
   JAVA_VERSION: '23.0.2+7'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_windows-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
 
@@ -34,11 +32,18 @@ jobs:
 
   build-msi:
     name: Build .msi Installer
-    runs-on: windows-latest
-    needs: [get-version]
+    needs: [ get-version ]
+    strategy:
+      matrix:
+        arch: [ x64, arm64 ]
+    runs-on: ${{ matrix.arch == 'x64' && 'windows-latest' || 'windows-11-arm' }}
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
+      OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_windows-x64_bin-jmods.zip'
+      OPENJFX_JMODS_AMD64_HASH: 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
+      LIBERICA_FULLJDK_ARM64: 'https://download.bell-sw.com/java/23.0.2+9/bellsoft-jdk23.0.2+9-windows-aarch64-full.zip'
+      LIBERICA_FULLJDK_ARM64_HASH: '16f4c17365c2805535f4a8de95f95d53a4c2ed13'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -51,28 +56,35 @@ jobs:
       - name: Download and extract JavaFX jmods from Gluon
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
-          curl --output jfxjmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
-          if(!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
-            throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
+          if ("${{ matrix.arch }}" -eq "x64") {
+            curl --output jfxjmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
+            if (!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
+              throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
+            }
+          } else {
+            curl --output jfxjmods.zip -L "${{ env.LIBERICA_FULLJDK_ARM64 }}"
+            if (!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.LIBERICA_FULLJDK_ARM64_HASH }}")) {
+              throw "Wrong checksum of JMOD archive downloaded from ${{ env.LIBERICA_FULLJDK_ARM64 }}.";
+            }
           }
           Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
-          Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
+          Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent }
         shell: pwsh
       - name: Ensure major jfx version in pom and in jmods is the same
         run: |
-          JMOD_VERSION_AMD64=$(jmod describe jfxjmods/javafx.base.jmod | head -1)
-          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
-          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64%%.*}
+          JMOD_VERSION_ARCHITECTURE=$(jmod describe jfxjmods/javafx.base.jmod | head -1)
+          JMOD_VERSION_ARCHITECTURE=${JMOD_VERSION_ARCHITECTURE#*@}
+          JMOD_VERSION_ARCHITECTURE=${JMOD_VERSION_ARCHITECTURE%%.*}
           POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
           POM_JFX_VERSION=${POM_JFX_VERSION#*@}
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
-          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
-            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION_AMD64})"
+          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_ARCHITECTURE ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION_ARCHITECTURE}) downloaded"
             exit 1
           fi
       - name: Set version
-        run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
+        run: mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
         run: mvn -B clean package -Pwin -DskipTests -Djavafx.platform=win
       - name: Patch target dir
@@ -80,7 +92,7 @@ jobs:
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
-        #Remark: no compression is applied for improved build compression later (here msi)
+        # Remark: no compression is applied here (zip-0) to improve overall MSI build compression later
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
@@ -237,8 +249,8 @@ jobs:
           description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
-      - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.msi
+      - name: Add possible alpha/beta tags and architecture to installer name
+        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -249,7 +261,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: msi
+          name: msi-${{ matrix.arch }}
           path: |
             Cryptomator-*.msi
             Cryptomator-*.asc
@@ -257,8 +269,11 @@ jobs:
 
   build-exe:
     name: Build .exe installer
-    runs-on: windows-latest
-    needs: [get-version, build-msi]
+    runs-on: ${{ matrix.arch == 'x64' && 'windows-latest' || 'windows-11-arm' }}
+    needs: [ get-version, build-msi ]
+    strategy:
+      matrix:
+        arch: [ x64, arm64 ]
     steps:
       - uses: actions/checkout@v4
       - name: Download .msi
@@ -326,7 +341,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: tmp
       - name: Reattach signed burn engine to installer
-        run : >
+        run: >
           "${WIX}/bin/insignia.exe"
           -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
           -o installer/Cryptomator-Installer.exe
@@ -340,7 +355,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.exe
+        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -351,7 +366,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: exe
+          name: exe-${{ matrix.arch }}
           path: |
             Cryptomator-*.exe
             Cryptomator-*.asc
@@ -361,39 +376,56 @@ jobs:
     name: Publish installers to the github release
     if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
     runs-on: ubuntu-latest
-    needs: [build-msi, build-exe]
+    needs: [ build-msi, build-exe ]
     outputs:
-      download-url-msi: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }}
-      download-url-exe: ${{ fromJSON(steps.publish.outputs.assets)[1].browser_download_url }}
+      download-url-msi-x64: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }}
+      download-url-msi-arm64: ${{ fromJSON(steps.publish.outputs.assets)[1].browser_download_url }}
+      download-url-exe-x64: ${{ fromJSON(steps.publish.outputs.assets)[2].browser_download_url }}
+      download-url-exe-arm64: ${{ fromJSON(steps.publish.outputs.assets)[3].browser_download_url }}
     steps:
       - name: Download installers
         uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-      - name: Publish .msi on GitHub Releases
+      - name: Publish installers on GitHub Releases
         id: publish
         uses: softprops/action-gh-release@v2
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          # do not change ordering of filelist, required for correct job output
           files: |
-            *.msi
-            *.exe
+            *-x64.msi
+            *-arm64.msi
+            *-x64.exe
+            *-arm64.exe
             *.asc
 
-  allowlist-msi:
+  allowlist-msi-x64:
     uses: ./.github/workflows/av-whitelist.yml
-    needs: [publish]
+    needs: [ publish ]
     with:
-      url: ${{ needs.publish.outputs.download-url-msi }}
+      url: ${{ needs.publish.outputs.download-url-msi-x64 }}
     secrets: inherit
 
-  allowlist-exe:
+  allowlist-msi-arm64:
     uses: ./.github/workflows/av-whitelist.yml
-    needs: [publish, allowlist-msi]
+    needs: [ publish ]
     with:
-      url: ${{ needs.publish.outputs.download-url-exe }}
+      url: ${{ needs.publish.outputs.download-url-msi-arm64 }}
+    secrets: inherit
+
+  allowlist-exe-x64:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [ publish, allowlist-msi-x64 ]
+    with:
+      url: ${{ needs.publish.outputs.download-url-exe-x64 }}
+    secrets: inherit
+
+  allowlist-exe-arm64:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [ publish, allowlist-msi-arm64 ]
+    with:
+      url: ${{ needs.publish.outputs.download-url-exe-arm64 }}
     secrets: inherit
 
   notify-winget:
@@ -410,7 +442,7 @@ jobs:
           SLACK_ICON: false
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
-          SLACK_TITLE: "MSI of ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} published."
-          SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/winget.yml| release to winget>."
+          SLACK_TITLE: "MSI packages of ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} published."
+          SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/winget.yml| release them to winget>."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
