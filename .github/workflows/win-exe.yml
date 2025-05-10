@@ -42,6 +42,8 @@ jobs:
       WIN_CONSOLE_FLAG: ''
       OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_windows-x64_bin-jmods.zip'
       OPENJFX_JMODS_AMD64_HASH: 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
+      LIBERICA_FULLJDK_ARM64: 'https://download.bell-sw.com/java/23.0.2+9/bellsoft-jdk23.0.2+9-windows-aarch64-full.zip'
+      LIBERICA_FULLJDK_ARM64_HASH: '16f4c17365c2805535f4a8de95f95d53a4c2ed13'
     steps:
       - name: Upgrade WIX to latest version
         run: choco install wixtoolset --version 3.14.1
@@ -57,24 +59,31 @@ jobs:
       - name: Download and extract JavaFX jmods from Gluon
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
-          curl --output jfxjmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
-          if (!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
-            throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
+          if ("${{ matrix.arch }}" -eq "x64") {
+            curl --output jfxjmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
+            if (!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
+              throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
+            }
+          } else {
+            curl --output jfxjmods.zip -L "${{ env.LIBERICA_FULLJDK_ARM64 }}"
+            if (!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.LIBERICA_FULLJDK_ARM64_HASH }}")) {
+              throw "Wrong checksum of JMOD archive downloaded from ${{ env.LIBERICA_FULLJDK_ARM64 }}.";
+            }
           }
           Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
           Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent }
         shell: pwsh
       - name: Ensure major jfx version in pom and in jmods is the same
         run: |
-          JMOD_VERSION_AMD64=$(jmod describe jfxjmods/javafx.base.jmod | head -1)
-          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
-          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64%%.*}
+          JMOD_VERSION_ARCHITECTURE=$(jmod describe jfxjmods/javafx.base.jmod | head -1)
+          JMOD_VERSION_ARCHITECTURE=${JMOD_VERSION_ARCHITECTURE#*@}
+          JMOD_VERSION_ARCHITECTURE=${JMOD_VERSION_ARCHITECTURE%%.*}
           POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
           POM_JFX_VERSION=${POM_JFX_VERSION#*@}
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
-          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
-            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION_AMD64})"
+          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_ARCHITECTURE ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION_ARCHITECTURE}) downloaded"
             exit 1
           fi
       - name: Set version
