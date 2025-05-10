@@ -15,8 +15,9 @@ on:
 
 
 env:
-  JAVA_DIST: 'temurin'
-  JAVA_VERSION: '23.0.2+7'
+  JAVA_DIST: 'liberica'
+  JAVA_VERSION: '23.0.2+9'
+  JAVA_PACKAGE: 'jdk+fx'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
 
@@ -40,10 +41,6 @@ jobs:
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
-      OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_windows-x64_bin-jmods.zip'
-      OPENJFX_JMODS_AMD64_HASH: 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
-      LIBERICA_FULLJDK_ARM64: 'https://download.bell-sw.com/java/23.0.2+9/bellsoft-jdk23.0.2+9-windows-aarch64-full.zip'
-      LIBERICA_FULLJDK_ARM64_HASH: '16f4c17365c2805535f4a8de95f95d53a4c2ed13'
     steps:
       - name: Upgrade WIX to latest version
         run: choco install wixtoolset --version 3.14.1
@@ -53,39 +50,10 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: ${{ matrix.java }}
+          java-package: ${{ env.JAVA_PACKAGE }}
           check-latest: true
           cache: 'maven'
-      - name: Download and extract JavaFX jmods from Gluon
-        #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
-        run: |
-          if ("${{ matrix.arch }}" -eq "x64") {
-            curl --output jfxjmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
-            if (!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
-              throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
-            }
-          } else {
-            curl --output jfxjmods.zip -L "${{ env.LIBERICA_FULLJDK_ARM64 }}"
-            if (!(Get-FileHash -Path jfxjmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.LIBERICA_FULLJDK_ARM64_HASH }}")) {
-              throw "Wrong checksum of JMOD archive downloaded from ${{ env.LIBERICA_FULLJDK_ARM64 }}.";
-            }
-          }
-          Expand-Archive -Path jfxjmods.zip -DestinationPath jfxjmods
-          Get-ChildItem -Path jfxjmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent }
-        shell: pwsh
-      - name: Ensure major jfx version in pom and in jmods is the same
-        run: |
-          JMOD_VERSION_ARCHITECTURE=$(jmod describe jfxjmods/javafx.base.jmod | head -1)
-          JMOD_VERSION_ARCHITECTURE=${JMOD_VERSION_ARCHITECTURE#*@}
-          JMOD_VERSION_ARCHITECTURE=${JMOD_VERSION_ARCHITECTURE%%.*}
-          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
-          POM_JFX_VERSION=${POM_JFX_VERSION#*@}
-          POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
-
-          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_ARCHITECTURE ]; then
-            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION_ARCHITECTURE}) downloaded"
-            exit 1
-          fi
       - name: Set version
         run: mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
@@ -100,7 +68,7 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "jfxjmods;${JAVA_HOME}/jmods"
+          --module-path "${JAVA_HOME}/jmods"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.mscapi,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
@@ -289,7 +257,8 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: ${{ matrix.java }}
+          java-package: ${{ env.JAVA_PACKAGE }}
           check-latest: true
           cache: 'maven'
       - name: Generate license for exe
