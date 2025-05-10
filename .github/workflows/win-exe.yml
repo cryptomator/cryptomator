@@ -242,11 +242,11 @@ jobs:
 
   build-exe:
     name: Build .exe installer
-    runs-on: ${{ matrix.arch == 'x64' && 'windows-latest' || 'windows-11-arm' }}
     needs: [ get-version, build-msi ]
     strategy:
       matrix:
         arch: [ x64, arm64 ]
+    runs-on: ${{ matrix.arch == 'x64' && 'windows-latest' || 'windows-11-arm' }}
     steps:
       - name: Upgrade WIX to latest version
         # windows-latest has WIX 3.14.1, it's missing on arm64
@@ -289,7 +289,7 @@ jobs:
         shell: pwsh
       - name: Compile to wixObj file
         run: >
-          "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
+          "${WiX_Path}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
           -ext WixBalExtension
           -ext WixUtilExtension
           -out dist/win/bundle/
@@ -299,17 +299,23 @@ jobs:
           -dAboutUrl="https://cryptomator.org"
           -dHelpUrl="https://cryptomator.org/contact"
           -dUpdateUrl="https://cryptomator.org/downloads/"
+        env:
+          WiX_Path: 'C:/Program Files (x86)/WiX Toolset v3.14/'
       - name: Create executable with linker
         run: >
-          "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
+          "${WiX_Path}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
           -ext WixBalExtension
           -ext WixUtilExtension
           -out installer/unsigned/Cryptomator-Installer.exe
+        env:
+          WiX_Path: 'C:/Program Files (x86)/WiX Toolset v3.14/'
       - name: Detach burn engine in preparation to sign
         run: >
-          "${WIX}/bin/insignia.exe"
+          "${WiX_Path}/bin/insignia.exe"
           -ib installer/unsigned/Cryptomator-Installer.exe
           -o tmp/engine.exe
+        env:
+          WiX_Path: 'C:/Program Files (x86)/WiX Toolset v3.14/'
       - name: Codesign burn engine
         uses: skymatic/code-sign-action@v3
         with:
@@ -321,9 +327,11 @@ jobs:
           folder: tmp
       - name: Reattach signed burn engine to installer
         run: >
-          "${WIX}/bin/insignia.exe"
+          "${WiX_Path}/bin/insignia.exe"
           -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
           -o installer/Cryptomator-Installer.exe
+        env:
+          WiX_Path: 'C:/Program Files (x86)/WiX Toolset v3.14/'
       - name: Codesign EXE
         uses: skymatic/code-sign-action@v3
         with:
