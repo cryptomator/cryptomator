@@ -42,6 +42,7 @@ jobs:
       WIN_CONSOLE_FLAG: ''
     steps:
       - name: Upgrade WIX to latest version
+        if: matrix.arch == 'skip'
         run: choco install wixtoolset --version 3.14.1
         shell: pwsh
       - uses: actions/checkout@v4
