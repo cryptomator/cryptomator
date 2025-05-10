@@ -1,12 +1,16 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
@@ -23,6 +27,7 @@ public class VaultDetailMissingVaultController implements FxController {
 	private final ObservableList<Vault> vaults;
 	private final ResourceBundle resourceBundle;
 	private final Stage window;
+	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final Dialogs dialogs;
 
 	@Inject
@@ -30,11 +35,13 @@ public class VaultDetailMissingVaultController implements FxController {
 											 ObservableList<Vault> vaults, //
 											 ResourceBundle resourceBundle, //
 											 @MainWindow Stage window, //
-											 Dialogs dialogs) {
+											 Dialogs dialogs, //
+											 RecoveryKeyComponent.Factory recoveryKeyWindow) {
 		this.vault = vault;
 		this.vaults = vaults;
 		this.resourceBundle = resourceBundle;
 		this.window = window;
+		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.dialogs = dialogs;
 	}
 
@@ -46,6 +53,23 @@ public class VaultDetailMissingVaultController implements FxController {
 	@FXML
 	void didClickRemoveVault() {
 		dialogs.prepareRemoveVaultDialog(window, vault.get(), vaults).build().showAndWait();
+	}
+
+	@FXML
+	void restoreVaultConfig() {
+		if(KeyLoadingStrategy.isHubVault(vault.get().getVaultSettings().lastKnownKeyLoader.get())){
+			dialogs.prepareContactHubAdmin(window).build().showAndWait();
+		}
+		else {
+			ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_VAULT_CONFIG);
+			recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showIsHubVaultDialogWindow();
+		}
+	}
+
+	@FXML
+	void restoreMasterkey() {
+		ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_MASTERKEY);
+		recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML

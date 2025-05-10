@@ -47,6 +47,31 @@ public class Dialogs {
 				});
 	}
 
+	public SimpleDialog.Builder prepareContactHubAdmin(Stage window) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("contactHubAdmin.title") //
+				.setMessageKey("contactHubAdmin.message") //
+				.setDescriptionKey("contactHubAdmin.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION)//
+				.setOkButtonKey("generic.button.close");
+	}
+
+	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window, Stage owner, ResourceBundle resourceBundle) {
+		return createDialogBuilder()
+				.setOwner(window) //
+				.setTitleKey("recoveryKey.recover.title") //
+				.setMessageKey("recoveryKey.recover.resetSuccess.message") //
+				.setDescriptionKey("recoveryKey.recover.resetSuccess.description") //
+				.setIcon(FontAwesome5Icon.CHECK)
+				.setOkAction(stage -> {
+					stage.close();
+					if (owner.getTitle().equals(resourceBundle.getString("addvaultwizard.existing.title"))) {
+						owner.close();
+					}
+				})
+				.setOkButtonKey("generic.button.close");
+	}
+
 	public SimpleDialog.Builder prepareRemoveCertDialog(Stage window, Settings settings) {
 		return createDialogBuilder() //
 				.setOwner(window) //
@@ -87,4 +112,16 @@ public class Dialogs {
 				.setOkAction(okAction) //
 				.setCancelAction(Stage::close);
 	}
+
+	public SimpleDialog.Builder prepareNoDDirectorySelectedDialog(Stage window) {
+		return createDialogBuilder() //
+				.setOwner(window) //
+				.setTitleKey("recoveryKey.noDDirDetected.title") //
+				.setMessageKey("recoveryKey.noDDirDetected.message") //
+				.setDescriptionKey("recoveryKey.noDDirDetected.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
+				.setOkButtonKey("generic.button.change") //
+				.setOkAction(Stage::close);
+	}
+
 }
