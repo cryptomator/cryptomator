@@ -37,11 +37,12 @@ jobs:
     needs: [ get-version ]
     strategy:
       matrix:
-        arch: [ x64, arm64 ]
         include:
-          - os: windows-latest
+          - arch: x64
+            os: windows-latest
             executable-suffix: x64
-          - os: windows-11-arm
+          - arch: arm64
+            os: windows-11-arm
             executable-suffix: arm64
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
@@ -249,10 +250,13 @@ jobs:
     needs: [ get-version, build-msi ]
     strategy:
       matrix:
-        arch: [ x64, arm64 ]
         include:
-          - os: windows-latest
-          - os: windows-11-arm
+          - arch: x64
+            os: windows-latest
+            executable-suffix: x64
+          - arch: arm64
+            os: windows-11-arm
+            executable-suffix: arm64
     steps:
       - name: Upgrade WIX to latest version
         run: choco install wixtoolset --version 3.14.1
