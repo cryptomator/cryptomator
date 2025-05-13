@@ -40,7 +40,9 @@ jobs:
         arch: [ x64, arm64 ]
         include:
           - os: windows-latest
+            executable-suffix: x64
           - os: windows-11-arm
+            executable-suffix: arm64
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
@@ -226,7 +228,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags and architecture to installer name
-        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
+        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.executable-suffix }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -237,7 +239,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: msi-${{ matrix.arch }}
+          name: msi-${{ matrix.executable-suffix }}
           path: |
             Cryptomator-*.msi
             Cryptomator-*.asc
@@ -263,7 +265,7 @@ jobs:
       - name: Download .msi
         uses: actions/download-artifact@v4
         with:
-          name: msi-${{ matrix.arch }}
+          name: msi-${{ matrix.executable-suffix }}
           path: dist/win/bundle/resources
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
@@ -348,7 +350,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.exe
+        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.executable-suffix }}.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -359,7 +361,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: exe-${{ matrix.arch }}
+          name: exe-${{ matrix.executable-suffix }}
           path: |
             Cryptomator-*.exe
             Cryptomator-*.asc
