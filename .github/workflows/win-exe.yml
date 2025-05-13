@@ -33,11 +33,14 @@ jobs:
 
   build-msi:
     name: Build .msi Installer
+    runs-on: ${{ matrix.os }}
     needs: [ get-version ]
     strategy:
       matrix:
         arch: [ x64, arm64 ]
-    runs-on: ${{ matrix.arch == 'x64' && 'windows-latest' || 'windows-11-arm' }}
+        include:
+          - os: windows-latest
+          - os: windows-11-arm
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
@@ -242,11 +245,14 @@ jobs:
 
   build-exe:
     name: Build .exe installer
+    runs-on: ${{ matrix.os }}
     needs: [ get-version, build-msi ]
     strategy:
       matrix:
         arch: [ x64, arm64 ]
-    runs-on: ${{ matrix.arch == 'x64' && 'windows-latest' || 'windows-11-arm' }}
+        include:
+          - os: windows-latest
+          - os: windows-11-arm
     steps:
       - name: Upgrade WIX to latest version
         # windows-latest has WIX 3.14.1, it's missing on arm64
