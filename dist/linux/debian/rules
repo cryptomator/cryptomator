@@ -7,9 +7,9 @@
 JAVA_HOME = /usr/lib/jvm/java-24-coffeelibs
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DEB_BUILD_ARCH),amd64)
-JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods
+JMODS_PATH = jmods/amd64
 else ifeq ($(DEB_BUILD_ARCH),arm64)
-JMODS_PATH = jmods/aarch64:${JAVA_HOME}/jmods
+JMODS_PATH = jmods/aarch64
 endif
 
 %:
