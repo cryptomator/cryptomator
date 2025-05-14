@@ -118,6 +118,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: debuild
         run: |
+          (sleep 8m; gpg --batch --quiet --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign README.md) &
           debuild -S -sa -d
           debuild -b -sa -d
         env:
