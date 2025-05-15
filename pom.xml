@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.16.1</version>
+	<version>1.16.2</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -74,6 +74,17 @@
 		<!-- Property used by surefire to determine jacoco engine -->
 		<surefire.jacoco.args></surefire.jacoco.args>
 	</properties>
+
+	<!-- TODO: Remove once webdav version 2.0.11 is released -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>webdav-nio-adapter-servlet</artifactId>
+				<version>1.2.9</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<!-- Cryptomator Libs -->
