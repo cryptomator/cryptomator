@@ -1,33 +1,45 @@
 package org.cryptomator.ui.addvaultwizard;
 
-import dagger.Lazy;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.integrations.uiappearance.Theme;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.fxapp.FxApplicationStyle;
-import org.cryptomator.ui.fxapp.FxApplicationWindows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.inject.Inject;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.image.Image;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+
+import dagger.Lazy;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultComponent;
+import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.integrations.uiappearance.Theme;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.fxapp.FxApplicationStyle;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @AddVaultWizardScoped
 public class ChooseExistingVaultController implements FxController {
@@ -42,6 +54,16 @@ public class ChooseExistingVaultController implements FxController {
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 	private final ObservableValue<Image> screenshot;
+	private final Dialogs dialogs;
+	private final VaultComponent.Factory vaultComponentFactory;
+	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
+	private final List<MountService> mountServices;
+
+	@FXML
+	private CheckBox restoreCheckBox;
+
+	private final BooleanProperty restoreButtonVisible = new SimpleBooleanProperty(false);
+
 
 	@Inject
 	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, //
@@ -51,7 +73,11 @@ public class ChooseExistingVaultController implements FxController {
 								  @AddVaultWizardWindow ObjectProperty<Vault> vault, //
 								  VaultListManager vaultListManager, //
 								  ResourceBundle resourceBundle, //
-								  FxApplicationStyle applicationStyle) {
+								  FxApplicationStyle applicationStyle, //
+								  RecoveryKeyComponent.Factory recoveryKeyWindow, //
+								  VaultComponent.Factory vaultComponentFactory, //
+								  List<MountService> mountServices, //
+								  Dialogs dialogs) {
 		this.window = window;
 		this.successScene = successScene;
 		this.appWindows = appWindows;
@@ -60,6 +86,14 @@ public class ChooseExistingVaultController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.screenshot = applicationStyle.appliedThemeProperty().map(this::selectScreenshot);
+		this.recoveryKeyWindow = recoveryKeyWindow;
+		this.vaultComponentFactory = vaultComponentFactory;
+		this.mountServices = mountServices;
+		this.dialogs = dialogs;
+	}
+
+	public void initialize() {
+		restoreButtonVisible.bind(restoreCheckBox.selectedProperty());
 	}
 
 	private Image selectScreenshot(Theme theme) {
@@ -94,6 +128,17 @@ public class ChooseExistingVaultController implements FxController {
 		}
 	}
 
+	@FXML
+	public void restoreVaultConfigWithRecoveryKey() {
+		DirectoryChooser directoryChooser = new DirectoryChooser();
+		Optional<Vault> optionalVault = RecoverUtil.checkAndPrepareVaultFromDirectory(directoryChooser, window, dialogs, vaultComponentFactory, mountServices);
+
+		optionalVault.ifPresent(vault -> {
+			ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_VAULT_CONFIG);
+			recoveryKeyWindow.create(vault, window, recoverTypeProperty).showIsHubVaultDialogWindow();
+		});
+	}
+
 	/* Getter */
 
 	public ObservableValue<Image> screenshotProperty() {
@@ -104,5 +149,11 @@ public class ChooseExistingVaultController implements FxController {
 		return screenshot.getValue();
 	}
 
+	public boolean isRestoreButtonVisible() {
+		return restoreButtonVisible.get();
+	}
 
+	public BooleanProperty restoreButtonVisibleProperty() {
+		return restoreButtonVisible;
+	}
 }
