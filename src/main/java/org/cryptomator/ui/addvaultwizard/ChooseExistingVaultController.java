@@ -22,12 +22,15 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.recovery.RecoveryActionType;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
+import org.cryptomator.common.vaults.VaultConfigCache;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.integrations.uiappearance.Theme;
@@ -131,12 +134,48 @@ public class ChooseExistingVaultController implements FxController {
 	@FXML
 	public void restoreVaultConfigWithRecoveryKey() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
-		Optional<Vault> optionalVault = RecoverUtil.checkAndPrepareVaultFromDirectory(directoryChooser, window, dialogs, vaultComponentFactory, mountServices);
 
+		File selectedDirectory;
+		do {
+			selectedDirectory = directoryChooser.showDialog(window);
+			boolean hasSubfolderD = new File(selectedDirectory, "d").isDirectory();
+
+			if (!hasSubfolderD) {
+				dialogs.prepareNoDDirectorySelectedDialog(window).build().showAndWait();
+				selectedDirectory = null;
+			}
+		} while (selectedDirectory == null);
+
+		Optional<Vault> optionalVault = prepareVault(selectedDirectory,vaultComponentFactory,
+				mountServices);
+		//TODO: optional raus, und mit error dialog arbeiten (UI kram in UI package!) hier nur fehler werfen
 		optionalVault.ifPresent(vault -> {
-			ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_VAULT_CONFIG);
+			ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG);
 			recoveryKeyWindow.create(vault, window, recoverTypeProperty).showIsHubVaultDialogWindow();
 		});
+	}
+
+	public static Optional<Vault> prepareVault(File selectedDirectory, VaultComponent.Factory vaultComponentFactory, List<MountService> mountServices) {
+
+		Path selectedPath = selectedDirectory.toPath();
+		VaultSettings vaultSettings = VaultSettings.withRandomId();
+		vaultSettings.path.set(selectedPath);
+		if (selectedPath.getFileName() != null) {
+			vaultSettings.displayName.set(selectedPath.getFileName().toString());
+		} else {
+			vaultSettings.displayName.set("defaultVaultName");
+		}
+
+		var wrapper = new VaultConfigCache(vaultSettings);
+		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, VAULT_CONFIG_MISSING, null).vault(); //TODO: VAULT_CONFIG_MISSING nicht sicher, stand nochmal überprüfen
+
+		//due to https://github.com/cryptomator/cryptomator/issues/2880#issuecomment-1680313498
+		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
+		if (SystemUtils.IS_OS_WINDOWS && vaultSettings.path.get().toString().contains("Dropbox") && mountServices.stream().anyMatch(s -> s.getClass().getName().equals(nameOfWinfspLocalMounter))) {
+			vaultSettings.mountService.setValue(nameOfWinfspLocalMounter);
+		}
+
+		return Optional.of(vault);
 	}
 
 	/* Getter */

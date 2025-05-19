@@ -5,6 +5,7 @@ import javax.inject.Named;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
@@ -19,7 +20,10 @@ import java.util.concurrent.ExecutorService;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 import dagger.Lazy;
-import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.recovery.CryptoFsInitializer;
+import org.cryptomator.common.recovery.MasterkeyService;
+import org.cryptomator.common.recovery.RecoveryActionType;
+import org.cryptomator.common.recovery.RecoveryDirectory;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptolib.api.CryptoException;
@@ -50,7 +54,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final VaultListManager vaultListManager;
 	private final IntegerProperty shorteningThreshold;
-	private final ObjectProperty<RecoverUtil.Type> recoverType;
+	private final ObjectProperty<RecoveryActionType> recoverType;
 	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final ResourceBundle resourceBundle;
 	private final StringProperty buttonText = new SimpleStringProperty();
@@ -70,7 +74,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 											  MasterkeyFileAccess masterkeyFileAccess, //
 											  VaultListManager vaultListManager, //
 											  @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
-											  @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
+											  @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
+											  @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
 											  ResourceBundle resourceBundle, Dialogs dialogs) {
 		this.window = window;
 		this.vault = vault;
@@ -90,8 +95,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		initButtonText(recoverType.get());
 	}
 
-	private void initButtonText(RecoverUtil.Type type) {
-		if (type == RecoverUtil.Type.RESTORE_MASTERKEY) {
+	private void initButtonText(RecoveryActionType type) {
+		if (type == RecoveryActionType.RESTORE_MASTERKEY) {
 			buttonText.set(resourceBundle.getString("generic.button.close"));
 		} else {
 			buttonText.set(resourceBundle.getString("generic.button.back"));
@@ -100,42 +105,68 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 	@FXML
 	public void close() {
-		if (recoverType.getValue().equals(RecoverUtil.Type.RESTORE_MASTERKEY)) {
+		if (recoverType.getValue().equals(RecoveryActionType.RESTORE_MASTERKEY)) {
 			window.close();
 		} else {
 			window.setScene(recoverExpertSettingsScene.get());
 		}
 	}
+	@FXML
+	public void restorePassword() {
+		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
+			Path recoveryPath = recoveryDirectory.getRecoveryPath();
+			MasterkeyService.recoverFromRecoveryKey(recoveryKey.get(), recoveryKeyFactory, recoveryPath, newPasswordController.passwordField.getCharacters());
+
+			Path masterkeyFilePath = recoveryPath.resolve(MASTERKEY_FILENAME);
+
+			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, masterkeyFilePath, newPasswordController.passwordField.getCharacters())) {
+				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold, cipherCombo.get());
+			}
+
+			recoveryDirectory.moveRecoveredFiles();
+
+			if (!vaultListManager.containsVault(vault.getPath())) {
+				vaultListManager.add(vault.getPath());
+			}
+
+			dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
+					.setTitleKey("recoveryKey.recoverVaultConfig.title")
+					.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message")
+					.build().showAndWait();
+			window.close();
+
+		} catch (IOException | CryptoException e) {
+			LOG.error("Recovery process failed", e);
+			appWindows.showErrorWindow(e, window, null);
+		}
+	}
 
 	@FXML
 	public void resetPassword() {
-		if (vault.isMissingVaultConfig()) {
-			try {
-				Path recoveryPath = RecoverUtil.createRecoveryDirectory(vault.getPath());
-				RecoverUtil.createNewMasterkeyFile(recoveryKeyFactory, recoveryPath, recoveryKey.get(), newPasswordController.passwordField.getCharacters());
-				Path masterkeyFilePath = recoveryPath.resolve(MASTERKEY_FILENAME);
+		Task<Void> task = new ResetPasswordTask(recoveryKeyFactory, vault, recoveryKey, newPasswordController);
 
-				try (Masterkey masterkey = RecoverUtil.loadMasterkey(masterkeyFileAccess, masterkeyFilePath, newPasswordController.passwordField.getCharacters())) {
-					RecoverUtil.initializeCryptoFileSystem(recoveryPath, masterkey, shorteningThreshold, cipherCombo.get());
-				}
+		task.setOnScheduled(_ -> LOG.debug("Using recovery key to reset password for {}.", vault.getDisplayablePath()));
 
-				RecoverUtil.moveRecoveredFiles(recoveryPath, vault.getPath());
-				RecoverUtil.deleteRecoveryDirectory(recoveryPath);
-				RecoverUtil.addVaultToList(vaultListManager, vault.getPath());
-
-				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).setTitleKey("recoveryKey.recoverVaultConfig.title").setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message").build().showAndWait();
-				window.close();
-
-			} catch (IOException | CryptoException e) {
-				LOG.error("Recovery process failed", e);
+		task.setOnSucceeded(_ -> {
+			LOG.info("Used recovery key to reset password for {}.", vault.getDisplayablePath());
+			if (vault.getState().equals(org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING)) {
+				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
+						.setTitleKey("recoveryKey.recoverMasterkey.title")
+						.setMessageKey("recoveryKey.recover.resetMasterkeyFileSuccess.message")
+						.build().showAndWait();
+			} else {
+				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
+						.build().showAndWait();
 			}
-		} else {
-			Task<Void> task = RecoverUtil.createResetPasswordTask( //
-					resourceBundle, owner, recoveryKeyFactory, //
-					vault, recoveryKey, newPasswordController, //
-					window, appWindows, dialogs);
-			executor.submit(task);
-		}
+			window.close();
+		});
+
+		task.setOnFailed(_ -> {
+			LOG.error("Resetting password failed.", task.getException());
+			appWindows.showErrorWindow(task.getException(), window, null);
+		});
+
+		executor.submit(task);
 	}
 
 	/* Getter/Setter */
@@ -155,5 +186,37 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	public boolean isPasswordSufficientAndMatching() {
 		return newPasswordController.isGoodPassword();
 	}
+	private final ReadOnlyBooleanWrapper vaultConfigMissing = new ReadOnlyBooleanWrapper();
 
+	public ReadOnlyBooleanProperty vaultConfigMissingProperty() {
+		return vaultConfigMissing.getReadOnlyProperty();
+	}
+
+	public boolean isVaultConfigMissing() {
+		return vault.isMissingVaultConfig();
+	}
+
+	private static class ResetPasswordTask extends Task<Void> {
+
+		private static final Logger LOG = LoggerFactory.getLogger(ResetPasswordTask.class);
+		private final RecoveryKeyFactory recoveryKeyFactory;
+		private final Vault vault;
+		private final StringProperty recoveryKey;
+		private final NewPasswordController newPasswordController;
+
+		public ResetPasswordTask(RecoveryKeyFactory recoveryKeyFactory, Vault vault, StringProperty recoveryKey, NewPasswordController newPasswordController) {
+			this.recoveryKeyFactory = recoveryKeyFactory;
+			this.vault = vault;
+			this.recoveryKey = recoveryKey;
+			this.newPasswordController = newPasswordController;
+
+			setOnFailed(_ -> LOG.error("Failed to reset password", getException()));
+		}
+
+		@Override
+		protected Void call() throws IOException, IllegalArgumentException {
+			recoveryKeyFactory.newMasterkeyFileWithPassphrase(vault.getPath(), recoveryKey.get(), newPasswordController.passwordField.getCharacters());
+			return null;
+		}
+	}
 }

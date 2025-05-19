@@ -1,7 +1,7 @@
 package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
-import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -27,7 +27,7 @@ public class RecoveryKeyRecoverController implements FxController {
 	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> expertSettingsScene, //
-										ResourceBundle resourceBundle, @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType) {
+										ResourceBundle resourceBundle, @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType) {
 		this.window = window;
 
 		this.nextScene = switch (recoverType.get()) {

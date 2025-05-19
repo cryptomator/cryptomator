@@ -4,7 +4,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.ui.changepassword.NewPasswordController;
@@ -122,7 +122,7 @@ abstract class ConvertVaultModule {
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
 	static FxController bindRecoveryKeyValidateController(@ConvertVaultWindow Vault vault, @ConvertVaultWindow VaultConfig.UnverifiedVaultConfig vaultConfig, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
-		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, new SimpleObjectProperty<>(RecoverUtil.Type.CONVERT_VAULT), null, null);
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, new SimpleObjectProperty<>(RecoveryActionType.CONVERT_VAULT), null, null);
 	}
 
 }

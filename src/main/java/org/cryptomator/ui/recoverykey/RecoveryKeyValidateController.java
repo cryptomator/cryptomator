@@ -5,7 +5,6 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
-import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
@@ -28,6 +27,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.cryptomator.common.recovery.MasterkeyService;
+import org.cryptomator.common.recovery.RecoveryActionType;
+
 public class RecoveryKeyValidateController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyCreationController.class);
@@ -43,7 +45,7 @@ public class RecoveryKeyValidateController implements FxController {
 	private final ObjectProperty<RecoveryKeyState> recoveryKeyState;
 	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final AutoCompleter autoCompleter;
-	private final ObjectProperty<RecoverUtil.Type> recoverType;
+	private final ObjectProperty<RecoveryActionType> recoverType;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	private volatile boolean isWrongKey;
@@ -54,7 +56,7 @@ public class RecoveryKeyValidateController implements FxController {
 										 @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, //
 										 StringProperty recoveryKey, //
 										 RecoveryKeyFactory recoveryKeyFactory, //
-										 @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, //
+										 @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
 										 @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
 										 MasterkeyFileAccess masterkeyFileAccess) {
 		this.vault = vault;
@@ -137,7 +139,7 @@ public class RecoveryKeyValidateController implements FxController {
 		switch (recoverType.get()) {
 			case RESTORE_VAULT_CONFIG -> {
 				AtomicBoolean illegalArgumentExceptionOccurred = new AtomicBoolean(false);
-				var combo = RecoverUtil.validateRecoveryKeyAndGetCombo(
+				var combo = MasterkeyService.validateRecoveryKeyAndDetectCombo(
 						recoveryKeyFactory, vault, recoveryKey, masterkeyFileAccess, illegalArgumentExceptionOccurred);
 				combo.ifPresent(cipherCombo::set);
 				if (illegalArgumentExceptionOccurred.get()) {

@@ -26,9 +26,11 @@ import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.PROCESSING;
+import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.recovery.BackupRestorer;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
@@ -146,45 +148,35 @@ public class VaultListManager {
 			return vaultComponentFactory.create(vaultSettings, wrapper, ERROR, e).vault();
 		}
 	}
-
 	public static VaultState.Value redetermineVaultState(Vault vault) {
-		VaultState state = vault.stateProperty();
-		VaultState.Value previousState = state.getValue();
-		return switch (previousState) {
-			case LOCKED, NEEDS_MIGRATION, MISSING, VAULT_CONFIG_MISSING, MASTERKEY_MISSING -> {
-				try {
-					var determinedState = determineVaultState(vault.getPath(), vault.getVaultSettings());
-					if (determinedState == MASTERKEY_MISSING) {
-						var vaultScheme = vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme();
-						if (KeyLoadingStrategy.isHubVault(vaultScheme)) {
-							determinedState = LOCKED;
-						}
-					}
-					if (determinedState == LOCKED) {
-						vault.getVaultConfigCache().reloadConfig();
-					}
-					state.set(determinedState);
-					yield determinedState;
-				} catch (IOException e) {
-					LOG.warn("Failed to determine vault state for {}", vault.getPath(), e);
-					state.set(ERROR);
-					vault.setLastKnownException(e);
-					yield ERROR;
+		VaultState state  = vault.stateProperty();
+		VaultState.Value previous = state.getValue();
+
+		if (previous.equals(UNLOCKED)||previous.equals(PROCESSING)) {
+			return previous;
+		}
+
+		try {
+			VaultState.Value determined = determineVaultState(vault.getPath(), vault.getVaultSettings());
+
+			if (determined == MASTERKEY_MISSING) {
+				if (KeyLoadingStrategy.isHubVault(vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme())) {
+					determined = LOCKED;
 				}
 			}
-			case ERROR -> {
-				try {
-					var determinedState = determineVaultState(vault.getPath(), vault.getVaultSettings());
-					state.set(determinedState);
-					yield determinedState;
-				} catch (IOException e) {
-					LOG.warn("Failed to redetermine vault state for {}", vault.getPath(), e);
-					vault.setLastKnownException(e);
-					yield ERROR;
-				}
+
+			if (determined == LOCKED) {
+				vault.getVaultConfigCache().reloadConfig();
 			}
-			case UNLOCKED, PROCESSING -> previousState;
-		};
+
+			state.set(determined);
+			return determined;
+		} catch (IOException e) {
+			LOG.warn("Failed to (re)determine vault state for {}", vault.getPath(), e);
+			vault.setLastKnownException(e);
+			state.set(ERROR);
+			return ERROR;
+		}
 	}
 
 	private static VaultState.Value determineVaultState(Path pathToVault, VaultSettings vaultSettings) throws IOException {
@@ -195,9 +187,12 @@ public class VaultListManager {
 			return VaultState.Value.MISSING;
 		}
 
-		boolean vaultConfigRestored = Files.notExists(pathToVaultConfig) && RecoverUtil.restoreBackupIfAvailable(pathToVaultConfig, VaultState.Value.VAULT_CONFIG_MISSING);
+		boolean vaultConfigRestored = Files.notExists(pathToVaultConfig)
+				&& BackupRestorer.restoreIfPresent(pathToVaultConfig.getParent(), VaultState.Value.VAULT_CONFIG_MISSING);
 
-		boolean masterkeyRestored = Files.notExists(pathToMasterkey) && KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get()) && RecoverUtil.restoreBackupIfAvailable(pathToMasterkey, VaultState.Value.MASTERKEY_MISSING);
+		boolean masterkeyRestored = Files.notExists(pathToMasterkey)
+				&& KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get())
+				&& BackupRestorer.restoreIfPresent(pathToMasterkey.getParent(), VaultState.Value.MASTERKEY_MISSING);
 
 		if (vaultConfigRestored || masterkeyRestored) {
 			return LOCKED;

@@ -3,7 +3,7 @@ package org.cryptomator.ui.recoverykey;
 import dagger.BindsInstance;
 import dagger.Lazy;
 import dagger.Subcomponent;
-import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -55,7 +55,7 @@ public interface RecoveryKeyComponent {
 
 		RecoveryKeyComponent create(@BindsInstance @RecoveryKeyWindow Vault vault, //
 									@BindsInstance @Named("keyRecoveryOwner") Stage owner, //
-									@BindsInstance @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType);
+									@BindsInstance @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType);
 	}
 
 }

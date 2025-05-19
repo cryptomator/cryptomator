@@ -1,6 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
-import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
@@ -61,14 +61,14 @@ public class VaultDetailMissingVaultController implements FxController {
 			dialogs.prepareContactHubAdmin(window).build().showAndWait();
 		}
 		else {
-			ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_VAULT_CONFIG);
+			ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG);
 			recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showIsHubVaultDialogWindow();
 		}
 	}
 
 	@FXML
 	void restoreMasterkey() {
-		ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESTORE_MASTERKEY);
+		ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESTORE_MASTERKEY);
 		recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showRecoveryKeyRecoverWindow();
 	}
 

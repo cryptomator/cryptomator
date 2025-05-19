@@ -1,7 +1,7 @@
 package org.cryptomator.ui.vaultoptions;
 
-import org.cryptomator.common.RecoverUtil;
 import org.cryptomator.common.keychain.KeychainManager;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
@@ -50,13 +50,13 @@ public class MasterkeyOptionsController implements FxController {
 
 	@FXML
 	public void showRecoveryKey() {
-		ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.SHOW_KEY);
+		ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.SHOW_KEY);
 		recoveryKeyWindow.create(vault, window, recoverTypeProperty).showRecoveryKeyCreationWindow();
 	}
 
 	@FXML
 	public void showRecoverVaultDialog() {
-		ObjectProperty<RecoverUtil.Type> recoverTypeProperty = new SimpleObjectProperty<>(RecoverUtil.Type.RESET_PASSWORD);
+		ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESET_PASSWORD);
 		recoveryKeyWindow.create(vault, window, recoverTypeProperty).showRecoveryKeyRecoverWindow();
 	}
 

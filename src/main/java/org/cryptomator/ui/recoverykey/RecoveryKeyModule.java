@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.Nullable;
-import org.cryptomator.common.RecoverUtil;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptolib.api.CryptorProvider;
@@ -177,7 +177,7 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
-	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @Named("recoverType") ObjectProperty<RecoverUtil.Type> recoverType, @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo, @Nullable MasterkeyFileAccess masterkeyFileAccess) {
+	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo, @Nullable MasterkeyFileAccess masterkeyFileAccess) {
 		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, recoverType, cipherCombo, masterkeyFileAccess);
 	}
 
