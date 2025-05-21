@@ -54,7 +54,7 @@ fi
 # create runtime
 ## check for JEP 493
 JMOD_PATHS="openjfx-jmods"
-if ! $(${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"); then
+if ! ${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"; then
     JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
 fi
 ## create runtime image

@@ -80,7 +80,7 @@ jobs:
         id: jep-493-check
         run: |
           JMOD_PATHS="openjfx-jmods"
-          if ! $(${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"); then
+          if ! ${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"; then
             JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
           fi
           echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
