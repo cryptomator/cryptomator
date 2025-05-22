@@ -51,11 +51,17 @@ if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
 fi
 
 
-# add runtime
+# create runtime
+## check for JEP 493
+JMOD_PATHS="openjfx-jmods"
+if ! ${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"; then
+    JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
+fi
+## create runtime image
 ${JAVA_HOME}/bin/jlink \
     --verbose \
     --output runtime \
-    --module-path "${JAVA_HOME}/jmods:openjfx-jmods" \
+    --module-path "${JMOD_PATHS}" \
     --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net,java.compiler \
     --strip-native-commands \
     --no-header-files \
