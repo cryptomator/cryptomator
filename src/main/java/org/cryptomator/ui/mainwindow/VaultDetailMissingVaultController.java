@@ -62,7 +62,7 @@ public class VaultDetailMissingVaultController implements FxController {
 		}
 		else {
 			ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG);
-			recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showIsHubVaultDialogWindow();
+			recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showOnboardingDialogWindow();
 		}
 	}
 

@@ -15,14 +15,14 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
 @RecoveryKeyScoped
-public class RecoveryKeyIsHubVaultController implements FxController {
+public class RecoveryKeyOnboardingController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> recoverykeyRecoverScene;
 	private final ObjectProperty<RecoveryActionType> recoverType;
 
 	@Inject
-	public RecoveryKeyIsHubVaultController(@RecoveryKeyWindow Stage window, //
+	public RecoveryKeyOnboardingController(@RecoveryKeyWindow Stage window, //
 										   @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverykeyRecoverScene, //
 										   @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
 										   ResourceBundle resourceBundle) {
@@ -39,7 +39,7 @@ public class RecoveryKeyIsHubVaultController implements FxController {
 	}
 
 	@FXML
-	public void recover() {
+	public void next() {
 		recoverType.set(RecoveryActionType.RESTORE_VAULT_CONFIG);
 		window.setScene(recoverykeyRecoverScene.get());
 	}

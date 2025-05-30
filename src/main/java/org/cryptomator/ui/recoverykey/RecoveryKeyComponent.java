@@ -26,8 +26,8 @@ public interface RecoveryKeyComponent {
 	@FxmlScene(FxmlFile.RECOVERYKEY_RECOVER)
 	Lazy<Scene> recoverScene();
 
-	@FxmlScene(FxmlFile.RECOVERYKEY_IS_HUB_VAULT)
-	Lazy<Scene> recoverIsHubVaultScene();
+	@FxmlScene(FxmlFile.RECOVERYKEY_ONBOARDING)
+	Lazy<Scene> recoverOnboardingScene();
 
 	default void showRecoveryKeyCreationWindow() {
 		Stage stage = window();
@@ -43,9 +43,9 @@ public interface RecoveryKeyComponent {
 		stage.show();
 	}
 
-	default void showIsHubVaultDialogWindow() {
+	default void showOnboardingDialogWindow() {
 		Stage stage = window();
-		stage.setScene(recoverIsHubVaultScene().get());
+		stage.setScene(recoverOnboardingScene().get());
 		stage.sizeToScene();
 		stage.show();
 	}

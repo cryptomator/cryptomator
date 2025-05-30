@@ -107,10 +107,10 @@ abstract class RecoveryKeyModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.RECOVERYKEY_IS_HUB_VAULT)
+	@FxmlScene(FxmlFile.RECOVERYKEY_ONBOARDING)
 	@RecoveryKeyScoped
-	static Scene provideRecoveryKeyIsHubVaultScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_IS_HUB_VAULT);
+	static Scene provideRecoveryKeyOnboardingScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_ONBOARDING);
 	}
 
 	@Provides
@@ -155,11 +155,6 @@ abstract class RecoveryKeyModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(RecoveryKeyIsHubVaultController.class)
-	abstract FxController provideRecoveryKeyIsHubVaultController(RecoveryKeyIsHubVaultController controller);
-
-	@Binds
-	@IntoMap
 	@FxControllerKey(RecoveryKeyRecoverController.class)
 	abstract FxController provideRecoveryKeyRecoverController(RecoveryKeyRecoverController controller);
 
@@ -173,6 +168,10 @@ abstract class RecoveryKeyModule {
 	@FxControllerKey(RecoveryKeyResetPasswordController.class)
 	abstract FxController bindRecoveryKeyResetPasswordController(RecoveryKeyResetPasswordController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyOnboardingController.class)
+	abstract FxController bindRecoveryKeyOnboardingController(RecoveryKeyOnboardingController controller);
 
 	@Provides
 	@IntoMap

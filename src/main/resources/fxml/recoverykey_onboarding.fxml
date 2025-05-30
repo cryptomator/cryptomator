@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyOnboardingController"
+	  prefWidth="650"
+	  prefHeight="400"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<HBox VBox.vgrow="ALWAYS">
+			<VBox alignment="CENTER" minWidth="175" maxWidth="175">
+				<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" cache="true">
+					<Image url="@../img/logo128.png"/>
+				</ImageView>
+			</VBox>
+			<VBox HBox.hgrow="ALWAYS" alignment="CENTER">
+				<padding>
+					<Insets topRightBottomLeft="12"/>
+				</padding>
+				<Label text="%recoveryKey.recoverVaultConfig.title" styleClass="label-extra-large"/>
+				<Region minHeight="15"/>
+				<VBox>
+					<Label text="%recoveryKey.recover.onBoarding.message" wrapText="true"/>
+					<GridPane alignment="CENTER_LEFT" >
+						<padding>
+							<Insets left="6"/>
+						</padding>
+						<columnConstraints>
+							<ColumnConstraints minWidth="20" halignment="LEFT"/>
+							<ColumnConstraints fillWidth="true"/>
+						</columnConstraints>
+						<rowConstraints>
+							<RowConstraints valignment="TOP"/>
+							<RowConstraints valignment="TOP"/>
+							<RowConstraints valignment="TOP"/>
+						</rowConstraints>
+						<Label text="1." GridPane.rowIndex="0" GridPane.columnIndex="0" />
+						<Label text="%recoveryKey.recover.onBoarding.intro1" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+						<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0" />
+						<Label text="%recoveryKey.recover.onBoarding.intro2" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+						<Label text="3." GridPane.rowIndex="2" GridPane.columnIndex="0" />
+						<Label text="%recoveryKey.recover.onBoarding.intro3" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+					</GridPane>
+					<Region minHeight="15"/>
+					<CheckBox text="%recoveryKey.recover.onBoarding.affirmation" fx:id="affirmationBox"/>
+				</VBox>
+			</VBox>
+		</HBox>
+		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
+			<buttons>
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
+				<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" disable="${!affirmationBox.selected}" defaultButton="true" onAction="#next"/>
+			</buttons>
+		</ButtonBar>
+	</children>
+</VBox>
