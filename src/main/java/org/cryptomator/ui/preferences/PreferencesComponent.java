@@ -30,6 +30,8 @@ public interface PreferencesComponent {
 		selectedTabProperty().set(selectedTab);
 		Stage stage = window();
 		stage.setScene(scene().get());
+		stage.setMinWidth(420);
+		stage.setMinHeight(400);
 		stage.show();
 		stage.requestFocus();
 		return stage;

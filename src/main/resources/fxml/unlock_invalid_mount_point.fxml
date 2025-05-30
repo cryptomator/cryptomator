@@ -40,13 +40,14 @@
 				</padding>
 			</Label>
 
-			<FormattedLabel fx:id="dialogDescription" wrapText="true" textAlignment="LEFT"/>
+			<FormattedLabel fx:id="dialogDescription" wrapText="true" textAlignment="LEFT" format="${controller.format}" arg1="${controller.exceptionPath}" arg2="${controller.exceptionMessage}" arg3="${controller.hideawayPath}"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
-					<Button text="%hub.noKeychain.openBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#closeAndOpenPreferences"/>
+					<Button text="%hub.noKeychain.openBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#closeAndOpenPreferences" visible="${controller.showPreferences}" managed="${controller.showPreferences}"/>
+					<Button text="%main.vaultDetail.optionsBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#closeAndOpenVaultOptions" visible="${controller.showVaultOptions}" managed="${controller.showVaultOptions}"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

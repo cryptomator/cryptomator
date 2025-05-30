@@ -5,13 +5,21 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.dialogs.SimpleDialog;
+import org.cryptomator.ui.error.ErrorComponent;
+import org.cryptomator.ui.eventview.EventViewComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.quit.QuitComponent;
+import org.cryptomator.ui.sharevault.ShareVaultComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
+import org.cryptomator.ui.unlock.UnlockWorkflow;
+import org.cryptomator.ui.updatereminder.UpdateReminderComponent;
+import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
+import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,23 +50,46 @@ public class FxApplicationWindows {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
+	private final UpdateReminderComponent.Factory updateReminderWindowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
+	private final Lazy<EventViewComponent> eventViewWindow;
 	private final ExecutorService executor;
+	private final VaultOptionsComponent.Factory vaultOptionsWindow;
+	private final ShareVaultComponent.Factory shareVaultWindow;
 	private final FilteredList<Window> visibleWindows;
+	private final Dialogs dialogs;
 
 	@Inject
-	public FxApplicationWindows(@PrimaryStage Stage primaryStage, Optional<TrayIntegrationProvider> trayIntegration, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, QuitComponent.Builder quitWindowBuilder, UnlockComponent.Factory unlockWorkflowFactory, LockComponent.Factory lockWorkflowFactory, ErrorComponent.Factory errorWindowFactory, ExecutorService executor) {
+	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
+								Optional<TrayIntegrationProvider> trayIntegration, //
+								Lazy<MainWindowComponent> mainWindow, //
+								Lazy<PreferencesComponent> preferencesWindow, //
+								QuitComponent.Builder quitWindowBuilder, //
+								UnlockComponent.Factory unlockWorkflowFactory, //
+								UpdateReminderComponent.Factory updateReminderWindowFactory, //
+								LockComponent.Factory lockWorkflowFactory, //
+								ErrorComponent.Factory errorWindowFactory, //
+								VaultOptionsComponent.Factory vaultOptionsWindow, //
+								ShareVaultComponent.Factory shareVaultWindow, //
+								Lazy<EventViewComponent> eventViewWindow, //
+								ExecutorService executor, //
+								Dialogs dialogs) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
+		this.updateReminderWindowFactory = updateReminderWindowFactory;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
+		this.eventViewWindow = eventViewWindow;
 		this.executor = executor;
+		this.vaultOptionsWindow = vaultOptionsWindow;
+		this.shareVaultWindow = shareVaultWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
+		this.dialogs = dialogs;
 	}
 
 	public void initialize() {
@@ -67,17 +98,17 @@ public class FxApplicationWindows {
 
 		// register preferences shortcut
 		if (desktop.isSupported(Desktop.Action.APP_PREFERENCES)) {
-			desktop.setPreferencesHandler(evt -> showPreferencesWindow(SelectedPreferencesTab.ANY));
+			desktop.setPreferencesHandler(_ -> showPreferencesWindow(SelectedPreferencesTab.ANY));
 		}
 
 		// register preferences shortcut
 		if (desktop.isSupported(Desktop.Action.APP_ABOUT)) {
-			desktop.setAboutHandler(evt -> showPreferencesWindow(SelectedPreferencesTab.ABOUT));
+			desktop.setAboutHandler(_ -> showPreferencesWindow(SelectedPreferencesTab.ABOUT));
 		}
 
 		// register app reopen listener
 		if (desktop.isSupported(Desktop.Action.APP_EVENT_REOPENED)) {
-			desktop.addAppEventListener((AppReopenedListener) e -> showMainWindow());
+			desktop.addAppEventListener((AppReopenedListener) _ -> showMainWindow());
 		}
 
 		// observe visible windows
@@ -104,8 +135,32 @@ public class FxApplicationWindows {
 		return CompletableFuture.supplyAsync(() -> preferencesWindow.get().showPreferencesWindow(selectedTab), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
+	public void showShareVaultWindow(Vault vault) {
+		CompletableFuture.runAsync(() -> shareVaultWindow.create(vault).showShareVaultWindow(), Platform::runLater);
+	}
+
+	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {
+		return showMainWindow().thenApplyAsync(_ -> vaultOptionsWindow.create(vault).showVaultOptionsWindow(tab), Platform::runLater) //
+				.whenComplete(this::reportErrors);
+	}
+
 	public void showQuitWindow(QuitResponse response, boolean forced) {
-			CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response,forced), Platform::runLater);
+		CompletableFuture.runAsync(() -> quitWindowBuilder.build().showQuitWindow(response, forced), Platform::runLater);
+	}
+
+	public void showUpdateReminderWindow() {
+		CompletableFuture.runAsync(() -> updateReminderWindowFactory.create().showUpdateReminderWindow(), Platform::runLater);
+	}
+
+	public void showDokanySupportEndWindow() {
+		CompletableFuture.runAsync(() -> createDokanySupportEndDialog().showAndWait(), Platform::runLater);
+	}
+
+	private SimpleDialog createDokanySupportEndDialog() {
+		return dialogs.prepareDokanySupportEndDialog(mainWindow.get().window(), stage -> {
+			showPreferencesWindow(SelectedPreferencesTab.VOLUME);
+			stage.close();
+		}).build();
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
@@ -114,8 +169,7 @@ public class FxApplicationWindows {
 					LOG.debug("Start unlock workflow for {}", vault.getDisplayName());
 					return unlockWorkflowFactory.create(vault, owner).unlockWorkflow();
 				}, Platform::runLater) //
-				.thenCompose(unlockWorkflow -> CompletableFuture.runAsync(unlockWorkflow, executor)) //
-				.exceptionally(e -> {
+				.thenAcceptAsync(UnlockWorkflow::run, executor).exceptionally(e -> {
 					showErrorWindow(e, owner == null ? primaryStage : owner, null);
 					return null;
 				});
@@ -132,6 +186,11 @@ public class FxApplicationWindows {
 					showErrorWindow(e, owner == null ? primaryStage : owner, null);
 					return null;
 				});
+	}
+
+
+	public CompletionStage<Stage> showEventViewer() {
+		return CompletableFuture.supplyAsync(() -> eventViewWindow.get().showEventViewerWindow(), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	/**
@@ -151,5 +210,4 @@ public class FxApplicationWindows {
 			LOG.error("Failed to display stage", error);
 		}
 	}
-
 }

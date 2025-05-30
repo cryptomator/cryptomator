@@ -1,49 +1,27 @@
-name: Release to Winget
+name: Publish  MSI to winget-pkgs
 
 on:
-  workflow_call:
-    inputs:
-      releaseTag:
-        required: true
-        type: string
   workflow_dispatch:
     inputs:
-      releaseTag:
-        description: 'Release tag name'
+      tag:
+        description: 'Release tag'
         required: true
-        type: string
 
 jobs:
-  publish-winget:
-    name: Publish on winget repo
+  winget:
+    name: Publish winget package
     runs-on: windows-latest
     steps:
-      - name: Get download url for release assets
-        id: get-release-assets
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const query =`query($tag:String!) {
-              repository(owner:"cryptomator", name:"cryptomator"){
-                release(tagName: $tag) {
-                    releaseAssets(first:20) {
-                      nodes {
-                        name
-                        downloadUrl
-                      }
-                  }
-                }
-              }
-            }`;
-            const variables = {
-              tag: "${{ inputs.releaseTag }}"
-            }
-            return await github.graphql(query, variables)
-      - name: Submit package to Windows Package Manager Community Repository
-        id: submit-winget
+      - name: Sync winget-pkgs fork
         run: |
-          iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-          $releaseAssets = (ConvertFrom-Json '${{ steps.get-release-assets.outputs.result }}').repository.release.releaseAssets.nodes
-          $installerUrl = $releaseAssets | Where-Object -Property name -match '^Cryptomator-.*\.msi$' | Select -ExpandProperty downloadUrl -First 1
-          .\wingetcreate.exe update Cryptomator.Cryptomator -s -v "${{ inputs.releaseTag }}" -u "$installerUrl" -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
-        shell: pwsh
+          gh repo sync cryptomator/winget-pkgs -b master --force
+        env:
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+      - name: Submit package
+        uses: vedantmgoyal2009/winget-releaser@main
+        with:
+          identifier: Cryptomator.Cryptomator
+          version: ${{ inputs.tag }}
+          release-tag: ${{ inputs.tag }}
+          installers-regex: '\.msi$'
+          token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}

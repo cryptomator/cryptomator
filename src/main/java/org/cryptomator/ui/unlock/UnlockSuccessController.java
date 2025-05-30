@@ -50,7 +50,7 @@ public class UnlockSuccessController implements FxController {
 		LOG.trace("UnlockSuccessController.close()");
 		window.close();
 		if (rememberChoiceCheckbox.isSelected()) {
-			vault.getVaultSettings().actionAfterUnlock().setValue(WhenUnlocked.IGNORE);
+			vault.getVaultSettings().actionAfterUnlock.setValue(WhenUnlocked.IGNORE);
 		}
 	}
 
@@ -73,7 +73,7 @@ public class UnlockSuccessController implements FxController {
 		});
 		executor.execute(revealTask);
 		if (rememberChoiceCheckbox.isSelected()) {
-			vault.getVaultSettings().actionAfterUnlock().setValue(WhenUnlocked.REVEAL);
+			vault.getVaultSettings().actionAfterUnlock.setValue(WhenUnlocked.REVEAL);
 		}
 	}
 

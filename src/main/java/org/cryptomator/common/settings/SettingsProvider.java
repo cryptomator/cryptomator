@@ -8,12 +8,10 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Suppliers;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import org.cryptomator.common.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -44,6 +37,7 @@ import java.util.stream.Stream;
 @Singleton
 public class SettingsProvider implements Supplier<Settings> {
 
+	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true).registerModule(new JavaTimeModule());
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsProvider.class);
 	private static final long SAVE_DELAY_MS = 1000;
 
@@ -51,16 +45,11 @@ public class SettingsProvider implements Supplier<Settings> {
 	private final Supplier<Settings> settings = Suppliers.memoize(this::load);
 	private final Environment env;
 	private final ScheduledExecutorService scheduler;
-	private final Gson gson;
 
 	@Inject
-	public SettingsProvider(SettingsJsonAdapter settingsJsonAdapter, Environment env, ScheduledExecutorService scheduler) {
+	public SettingsProvider(Environment env, ScheduledExecutorService scheduler) {
 		this.env = env;
 		this.scheduler = scheduler;
-		this.gson = new GsonBuilder() //
-				.setPrettyPrinting().setLenient().disableHtmlEscaping() //
-				.registerTypeAdapter(Settings.class, settingsJsonAdapter) //
-				.create();
 	}
 
 	@Override
@@ -69,28 +58,28 @@ public class SettingsProvider implements Supplier<Settings> {
 	}
 
 	private Settings load() {
-		Settings settings = env.getSettingsPath().flatMap(this::tryLoad).findFirst().orElse(new Settings(env));
+		Settings settings = env.getSettingsPath() //
+				.flatMap(this::tryLoad) //
+				.findFirst() //
+				.orElseGet(() -> Settings.create(env));
 		settings.setSaveCmd(this::scheduleSave);
 		return settings;
 	}
 
 	private Stream<Settings> tryLoad(Path path) {
 		LOG.debug("Attempting to load settings from {}", path);
-		try (InputStream in = Files.newInputStream(path, StandardOpenOption.READ); //
-			 Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-			JsonElement json = JsonParser.parseReader(reader);
-			if (json.isJsonObject()) {
-				Settings settings = gson.fromJson(json, Settings.class);
-				LOG.info("Settings loaded from {}", path);
-				return Stream.of(settings);
-			} else {
-				LOG.warn("Invalid json file {}", path);
-				return Stream.empty();
-			}
+		try (InputStream in = Files.newInputStream(path, StandardOpenOption.READ)) {
+			var json = JSON.reader().readValue(in, SettingsJson.class);
+			LOG.info("Settings loaded from {}", path);
+			var settings = new Settings(json);
+			return Stream.of(settings);
+		} catch (JacksonException e) {
+			LOG.warn("Failed to parse json file {}", path, e);
+			return Stream.empty();
 		} catch (NoSuchFileException e) {
 			return Stream.empty();
-		} catch (IOException | JsonParseException e) {
-			LOG.warn("Exception while loading settings from " + path, e);
+		} catch (IOException e) {
+			LOG.warn("Failed to load json file {}", path, e);
 			return Stream.empty();
 		}
 	}
@@ -116,13 +105,14 @@ public class SettingsProvider implements Supplier<Settings> {
 		try {
 			Files.createDirectories(settingsPath.getParent());
 			Path tmpPath = settingsPath.resolveSibling(settingsPath.getFileName().toString() + ".tmp");
-			try (OutputStream out = Files.newOutputStream(tmpPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE); //
-				 Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-				gson.toJson(settings, writer);
+			try (OutputStream out = Files.newOutputStream(tmpPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
+				var jsonObj = settings.serialized();
+				jsonObj.writtenByVersion = env.getAppVersion() + env.getBuildNumber().map("-"::concat).orElse("");
+				JSON.writerWithDefaultPrettyPrinter().writeValue(out, jsonObj);
 			}
 			Files.move(tmpPath, settingsPath, StandardCopyOption.REPLACE_EXISTING);
 			LOG.info("Settings saved to {}", settingsPath);
-		} catch (IOException | JsonParseException e) {
+		} catch (IOException e) {
 			LOG.error("Failed to save settings.", e);
 		}
 	}

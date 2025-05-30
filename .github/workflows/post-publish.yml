@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Download source tarball
         run: |
-          curl -L -H "Accept: application/vnd.github+json" ${{ github.event.release.tarball_url }} --output cryptomator-${{ github.event.release.tag_name }}.tar.gz
+          curl -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name }}.tar.gz --output cryptomator-${{ github.event.release.tag_name }}.tar.gz
       - name: Sign source tarball with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -19,7 +19,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Publish asc on GitHub Releases
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}

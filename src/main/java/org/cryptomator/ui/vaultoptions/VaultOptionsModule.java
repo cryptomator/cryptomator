@@ -13,7 +13,8 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.cryptomator.ui.convertvault.ConvertVaultComponent;
+import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
@@ -26,7 +27,7 @@ import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {ChangePasswordComponent.class, RecoveryKeyComponent.class, ForgetPasswordComponent.class})
+@Module(subcomponents = {ChangePasswordComponent.class, RecoveryKeyComponent.class, ForgetPasswordComponent.class, ConvertVaultComponent.class})
 abstract class VaultOptionsModule {
 
 	@Provides
@@ -84,4 +85,9 @@ abstract class VaultOptionsModule {
 	@IntoMap
 	@FxControllerKey(MasterkeyOptionsController.class)
 	abstract FxController bindMasterkeyOptionsController(MasterkeyOptionsController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(HubOptionsController.class)
+	abstract FxController bindHubOptionsController(HubOptionsController controller);
 }

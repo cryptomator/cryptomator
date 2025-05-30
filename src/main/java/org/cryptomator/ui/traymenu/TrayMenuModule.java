@@ -11,7 +11,7 @@ public class TrayMenuModule {
 
 	@Provides
 	@TrayMenuScoped
-	static Optional<TrayMenuController> provideSupportedKeychainAccessProviders() {
+	static Optional<TrayMenuController> provideFirstSupportedTrayMenuController() {
 		return TrayMenuController.get();
 	}
 

@@ -4,7 +4,7 @@ import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +23,14 @@ public class MasterkeyOptionsController implements FxController {
 	private final Vault vault;
 	private final Stage window;
 	private final ChangePasswordComponent.Builder changePasswordWindow;
-	private final RecoveryKeyComponent.Builder recoveryKeyWindow;
+	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
 	private final KeychainManager keychain;
 	private final ObservableValue<Boolean> passwordSaved;
 
 
 	@Inject
-	MasterkeyOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Builder recoveryKeyWindow, ForgetPasswordComponent.Builder forgetPasswordWindow, KeychainManager keychain) {
+	MasterkeyOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Factory recoveryKeyWindow, ForgetPasswordComponent.Builder forgetPasswordWindow, KeychainManager keychain) {
 		this.vault = vault;
 		this.window = window;
 		this.changePasswordWindow = changePasswordWindow;
@@ -51,12 +51,12 @@ public class MasterkeyOptionsController implements FxController {
 
 	@FXML
 	public void showRecoveryKey() {
-		recoveryKeyWindow.vault(vault).owner(window).build().showRecoveryKeyCreationWindow();
+		recoveryKeyWindow.create(vault, window).showRecoveryKeyCreationWindow();
 	}
 
 	@FXML
 	public void showRecoverVaultDialog() {
-		recoveryKeyWindow.vault(vault).owner(window).build().showRecoveryKeyRecoverWindow();
+		recoveryKeyWindow.create(vault, window).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML

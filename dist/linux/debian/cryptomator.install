@@ -1,6 +1,8 @@
 cryptomator usr/lib
 common/org.cryptomator.Cryptomator.desktop usr/share/applications
 common/org.cryptomator.Cryptomator.svg usr/share/icons/hicolor/scalable/apps
+common/org.cryptomator.Cryptomator.tray.svg usr/share/icons/hicolor/scalable/apps
+common/org.cryptomator.Cryptomator.tray-unlocked.svg usr/share/icons/hicolor/scalable/apps
 common/org.cryptomator.Cryptomator256.png usr/share/icons/hicolor/256x256/apps
 common/org.cryptomator.Cryptomator512.png usr/share/icons/hicolor/512x512/apps
 common/org.cryptomator.Cryptomator.metainfo.xml usr/share/metainfo

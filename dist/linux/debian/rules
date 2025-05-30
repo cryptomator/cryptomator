@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-JAVA_HOME = /usr/lib/jvm/java-19-coffeelibs
+JAVA_HOME = /usr/lib/jvm/java-24-coffeelibs
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DEB_BUILD_ARCH),amd64)
 JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods
@@ -24,15 +24,16 @@ override_dh_auto_clean:
 override_dh_auto_build:
 	mkdir resources
 	ln -s ../common/org.cryptomator.Cryptomator512.png resources/cryptomator.png
+# Remark: no compression is applied for improved build compression later (here deb)
 	$(JAVA_HOME)/bin/jlink \
 		--output runtime \
 		--module-path "${JMODS_PATH}" \
-		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
+		--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net,java.compiler \
 		--strip-native-commands \
 		--no-header-files \
 		--no-man-pages \
 		--strip-debug \
-		--compress=2
+		--compress zip-0
 	$(JAVA_HOME)/bin/jpackage \
 		--type app-image \
 		--runtime-image runtime \
@@ -43,20 +44,25 @@ override_dh_auto_build:
 		--name cryptomator \
 		--vendor "Skymatic GmbH" \
 		--java-options "--enable-preview" \
-		--java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64" \
-		--copyright "(C) 2016 - 2023 Skymatic GmbH" \
+		--java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
+		--copyright "(C) 2016 - 2025 Skymatic GmbH" \
 		--java-options "-Xss5m" \
 		--java-options "-Xmx256m" \
 		--java-options "-Dfile.encoding=\"utf-8\"" \
-		--java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\"" \
-		--java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\"" \
-		--java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
-		--java-options "-Dcryptomator.p12Path=\"~/.config/Cryptomator/key.p12\"" \
-		--java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\"" \
-		--java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
-		--java-options "-Dcryptomator.showTrayIcon=false" \
+		--java-options "-Djava.net.useSystemProxies=true" \
+		--java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
+		--java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
+		--java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json\"" \
+		--java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
+		--java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
+		--java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\"" \
+		--java-options "-Dcryptomator.showTrayIcon=true" \
+		--java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"/usr/share/icons/hicolor/symbolic/apps\"" \
 		--java-options "-Dcryptomator.buildNumber=\"deb-${REVISION_NUM}\"" \
 		--java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\"" \
+		--java-options "-Dcryptomator.disableUpdateCheck=\"${DISABLE_UPDATE_CHECK}\"" \
+		--java-options "-Dcryptomator.integrationsLinux.autoStartCmd=\"cryptomator\"" \
+		--java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
 		--app-version "${VERSION_NUM}.${REVISION_NUM}" \
 		--resource-dir resources \
 		--verbose

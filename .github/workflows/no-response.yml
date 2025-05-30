@@ -1,0 +1,22 @@
+# Configuration for close-stale-issues - https://github.com/marketplace/actions/close-stale-issues
+
+name: 'Close awaiting response issues'
+on:
+  schedule:
+    - cron: '00 09 * * *'
+
+jobs:
+  no-response:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 14
+          days-before-close: 0
+          days-before-pr-close: -1
+          stale-issue-label: 'state:stale'
+          close-issue-message: "This issue has been automatically closed because there has been no response to our request for more information from the original author. With only the information that is currently in the issue, we don't have enough information to take action. Please reach out if you have or find the answers we need so that we can investigate further."
+          only-labels: 'state:awaiting-response'

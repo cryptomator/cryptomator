@@ -38,16 +38,11 @@ public interface RecoveryKeyComponent {
 		stage.show();
 	}
 
-	@Subcomponent.Builder
-	interface Builder {
 
-		@BindsInstance
-		Builder vault(@RecoveryKeyWindow Vault vault);
+	@Subcomponent.Factory
+	interface Factory {
 
-		@BindsInstance
-		Builder owner(@Named("keyRecoveryOwner") Stage owner);
-
-		RecoveryKeyComponent build();
+		RecoveryKeyComponent create(@BindsInstance @RecoveryKeyWindow Vault vault, @BindsInstance @Named("keyRecoveryOwner") Stage owner);
 	}
 
 }

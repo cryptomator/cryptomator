@@ -6,7 +6,9 @@
 package org.cryptomator.common.settings;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -20,6 +22,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Random;
 
@@ -28,33 +31,52 @@ import java.util.Random;
  */
 public class VaultSettings {
 
-	public static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
-	public static final boolean DEFAULT_REVEAL_AFTER_MOUNT = true;
-	public static final boolean DEFAULT_USES_READONLY_MODE = false;
-	public static final String DEFAULT_MOUNT_FLAGS = "";
-	public static final int DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH = -1;
-	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
-	public static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
-	public static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
+	static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
+	static final boolean DEFAULT_REVEAL_AFTER_MOUNT = true;
+	static final boolean DEFAULT_USES_READONLY_MODE = false;
+	static final String DEFAULT_MOUNT_FLAGS = ""; // TODO: remove empty default mount flags and let this property be null if not used
+	static final int DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH = -1;
+	static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
+	static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
+	static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
+	static final int DEFAULT_PORT = 42427;
 
 	private static final Random RNG = new Random();
 
-	private final String id;
-	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
-	private final StringProperty displayName = new SimpleStringProperty();
-	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
-	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REVEAL_AFTER_MOUNT);
-	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
-	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS); //TODO: remove empty default mount flags and let this property be null if not used
-	private final IntegerProperty maxCleartextFilenameLength = new SimpleIntegerProperty(DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH);
-	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
-	private final BooleanProperty autoLockWhenIdle = new SimpleBooleanProperty(DEFAULT_AUTOLOCK_WHEN_IDLE);
-	private final IntegerProperty autoLockIdleSeconds = new SimpleIntegerProperty(DEFAULT_AUTOLOCK_IDLE_SECONDS);
-	private final StringExpression mountName;
-	private final ObjectProperty<Path> mountPoint = new SimpleObjectProperty<>();
+	public final String id;
+	public final ObjectProperty<Path> path;
+	public final StringProperty displayName;
+	public final BooleanProperty unlockAfterStartup;
+	public final BooleanProperty revealAfterMount;
+	public final BooleanProperty usesReadOnlyMode;
+	public final StringProperty mountFlags;
+	public final IntegerProperty maxCleartextFilenameLength;
+	public final ObjectProperty<WhenUnlocked> actionAfterUnlock;
+	public final BooleanProperty autoLockWhenIdle;
+	public final IntegerProperty autoLockIdleSeconds;
+	public final ObjectProperty<Path> mountPoint;
+	public final StringExpression mountName;
+	public final StringProperty mountService;
+	public final IntegerProperty port;
+	public final StringProperty lastKnownKeyLoader;
 
-	public VaultSettings(String id) {
-		this.id = Objects.requireNonNull(id);
+	VaultSettings(VaultSettingsJson json) {
+		this.id = json.id;
+		this.path = new SimpleObjectProperty<>(this, "path", json.path == null ? null : Paths.get(json.path));
+		this.displayName = new SimpleStringProperty(this, "displayName", json.displayName);
+		this.unlockAfterStartup = new SimpleBooleanProperty(this, "unlockAfterStartup", json.unlockAfterStartup);
+		this.revealAfterMount = new SimpleBooleanProperty(this, "revealAfterMount", json.revealAfterMount);
+		this.usesReadOnlyMode = new SimpleBooleanProperty(this, "usesReadOnlyMode", json.usesReadOnlyMode);
+		this.mountFlags = new SimpleStringProperty(this, "mountFlags", json.mountFlags);
+		this.maxCleartextFilenameLength = new SimpleIntegerProperty(this, "maxCleartextFilenameLength", json.maxCleartextFilenameLength);
+		this.actionAfterUnlock = new SimpleObjectProperty<>(this, "actionAfterUnlock", json.actionAfterUnlock);
+		this.autoLockWhenIdle = new SimpleBooleanProperty(this, "autoLockWhenIdle", json.autoLockWhenIdle);
+		this.autoLockIdleSeconds = new SimpleIntegerProperty(this, "autoLockIdleSeconds", json.autoLockIdleSeconds);
+		this.mountPoint = new SimpleObjectProperty<>(this, "mountPoint", json.mountPoint == null ? null : Path.of(json.mountPoint));
+		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
+		this.port = new SimpleIntegerProperty(this, "port", json.port);
+		this.lastKnownKeyLoader = new SimpleStringProperty(this, "lastKnownKeyLoader", json.lastKnownKeyLoader);
+		// mount name is no longer an explicit setting, see https://github.com/cryptomator/cryptomator/pull/1318
 		this.mountName = StringExpression.stringExpression(Bindings.createStringBinding(() -> {
 			final String name;
 			if (displayName.isEmpty().get()) {
@@ -64,14 +86,28 @@ public class VaultSettings {
 			}
 			return normalizeDisplayName(name);
 		}, displayName, path));
+
+		migrateLegacySettings(json);
+	}
+
+	@SuppressWarnings("deprecation")
+	private void migrateLegacySettings(VaultSettingsJson json) {
+		// implicit migration of 1.6.x legacy setting "customMountPath" / "winDriveLetter":
+		if (json.useCustomMountPath && !Strings.isNullOrEmpty(json.customMountPath)) {
+			this.mountPoint.set(Path.of(json.customMountPath));
+		} else if (!Strings.isNullOrEmpty(json.winDriveLetter)) {
+			this.mountPoint.set(Path.of(json.winDriveLetter + ":\\"));
+		}
 	}
 
 	Observable[] observables() {
-		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode};
+		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode, port, mountService, lastKnownKeyLoader};
 	}
 
 	public static VaultSettings withRandomId() {
-		return new VaultSettings(generateId());
+		var defaults = new VaultSettingsJson();
+		defaults.id = generateId();
+		return new VaultSettings(defaults);
 	}
 
 	private static String generateId() {
@@ -80,7 +116,27 @@ public class VaultSettings {
 		return BaseEncoding.base64Url().encode(randomBytes);
 	}
 
-	//visible for testing
+	VaultSettingsJson serialized() {
+		var json = new VaultSettingsJson();
+		json.id = id;
+		json.path = path.map(Path::toString).getValue();
+		json.displayName = displayName.get();
+		json.unlockAfterStartup = unlockAfterStartup.get();
+		json.revealAfterMount = revealAfterMount.get();
+		json.usesReadOnlyMode = usesReadOnlyMode.get();
+		json.mountFlags = mountFlags.get();
+		json.maxCleartextFilenameLength = maxCleartextFilenameLength.get();
+		json.actionAfterUnlock = actionAfterUnlock.get();
+		json.autoLockWhenIdle = autoLockWhenIdle.get();
+		json.autoLockIdleSeconds = autoLockIdleSeconds.get();
+		json.mountPoint = mountPoint.map(Path::toString).getValue();
+		json.mountService = mountService.get();
+		json.port = port.get();
+		json.lastKnownKeyLoader = lastKnownKeyLoader.get();
+		return json;
+	}
+
+	@VisibleForTesting
 	static String normalizeDisplayName(String original) {
 		if (original.isBlank() || ".".equals(original) || "..".equals(original)) {
 			return "_";
@@ -91,68 +147,6 @@ public class VaultSettings {
 
 		// replace control chars as well as chars that aren't allowed in file names on standard file systems by underscore
 		return CharMatcher.anyOf("<>:\"/\\|?*").or(CharMatcher.javaIsoControl()).collapseFrom(withoutFancyWhitespaces, '_');
-	}
-
-	/* Getter/Setter */
-
-	public String getId() {
-		return id;
-	}
-
-	public ObjectProperty<Path> path() {
-		return path;
-	}
-
-	public StringProperty displayName() {
-		return displayName;
-	}
-
-	public StringExpression mountName() {
-		return mountName;
-	}
-
-	public BooleanProperty unlockAfterStartup() {
-		return unlockAfterStartup;
-	}
-
-	public BooleanProperty revealAfterMount() {
-		return revealAfterMount;
-	}
-
-	public Path getMountPoint() {
-		return mountPoint.get();
-	}
-
-	public ObjectProperty<Path> mountPoint() {
-		return mountPoint;
-	}
-
-	public BooleanProperty usesReadOnlyMode() {
-		return usesReadOnlyMode;
-	}
-
-	public StringProperty mountFlags() {
-		return mountFlags;
-	}
-
-	public IntegerProperty maxCleartextFilenameLength() {
-		return maxCleartextFilenameLength;
-	}
-
-	public ObjectProperty<WhenUnlocked> actionAfterUnlock() {
-		return actionAfterUnlock;
-	}
-
-	public WhenUnlocked getActionAfterUnlock() {
-		return actionAfterUnlock.get();
-	}
-
-	public BooleanProperty autoLockWhenIdle() {
-		return autoLockWhenIdle;
-	}
-
-	public IntegerProperty autoLockIdleSeconds() {
-		return autoLockIdleSeconds;
 	}
 
 	/* Hashcode/Equals */

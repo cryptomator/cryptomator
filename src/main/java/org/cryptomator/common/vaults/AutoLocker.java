@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.time.Instant;
@@ -40,6 +41,7 @@ public class AutoLocker {
 	private void autolock(Vault vault) {
 		try {
 			vault.lock(false);
+			Platform.runLater(() -> vault.stateProperty().set(VaultState.Value.LOCKED));
 			LOG.info("Autolocked {} after idle timeout", vault.getDisplayName());
 		} catch (UnmountFailedException | IOException e) {
 			LOG.error("Autolocking failed.", e);
@@ -48,8 +50,8 @@ public class AutoLocker {
 
 	private boolean exceedsIdleTime(Vault vault) {
 		assert vault.isUnlocked();
-		if (vault.getVaultSettings().autoLockWhenIdle().get()) {
-			int maxIdleSeconds = vault.getVaultSettings().autoLockIdleSeconds().get();
+		if (vault.getVaultSettings().autoLockWhenIdle.get()) {
+			int maxIdleSeconds = vault.getVaultSettings().autoLockIdleSeconds.get();
 			var deadline = vault.getStats().getLastActivity().plusSeconds(maxIdleSeconds);
 			return deadline.isBefore(Instant.now());
 		} else {

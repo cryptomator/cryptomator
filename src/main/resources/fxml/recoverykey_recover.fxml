@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
@@ -21,16 +17,8 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<FormattedLabel format="%recoveryKey.recover.prompt" arg1="${controller.vault.displayName}" wrapText="true"/>
 
-		<TextArea wrapText="true" prefRowCount="4" fx:id="textarea" textFormatter="${controller.recoveryKeyTextFormatter}" onKeyPressed="#onKeyPressed"/>
-
-		<!-- TODO: add Label when the recovery key is not valid -->
-		<Label text="%recoveryKey.recover.validKey" graphicTextGap="6" contentDisplay="LEFT" visible="${controller.validRecoveryKey}">
-			<graphic>
-				<FontAwesome5IconView glyph="CHECK"/>
-			</graphic>
-		</Label>
+		<fx:include fx:id="recoveryKeyValidate" source="recoverykey_validate.fxml"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
 
@@ -38,7 +26,7 @@
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
-					<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#recover" disable="${!controller.validRecoveryKey}"/>
+					<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#recover" disable="${!controller.validateController.recoveryKeyCorrect}"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

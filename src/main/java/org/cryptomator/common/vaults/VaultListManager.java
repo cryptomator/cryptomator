@@ -8,11 +8,14 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.migration.Migrators;
+import org.cryptomator.integrations.mount.MountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -31,6 +36,7 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
 
 @Singleton
 public class VaultListManager {
@@ -38,19 +44,26 @@ public class VaultListManager {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 
 	private final AutoLocker autoLocker;
+	private final List<MountService> mountServices;
 	private final VaultComponent.Factory vaultComponentFactory;
 	private final ObservableList<Vault> vaultList;
 	private final String defaultVaultName;
 
 	@Inject
-	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Factory vaultComponentFactory, ResourceBundle resourceBundle, Settings settings) {
+	public VaultListManager(ObservableList<Vault> vaultList, //
+							AutoLocker autoLocker, //
+							List<MountService> mountServices, //
+							VaultComponent.Factory vaultComponentFactory, //
+							ResourceBundle resourceBundle, //
+							Settings settings) {
 		this.vaultList = vaultList;
 		this.autoLocker = autoLocker;
+		this.mountServices = mountServices;
 		this.vaultComponentFactory = vaultComponentFactory;
 		this.defaultVaultName = resourceBundle.getString("defaults.vault.vaultName");
 
-		addAll(settings.getDirectories());
-		vaultList.addListener(new VaultListChangeListener(settings.getDirectories()));
+		addAll(settings.directories);
+		vaultList.addListener(new VaultListChangeListener(settings.directories));
 		autoLocker.init();
 	}
 
@@ -70,12 +83,21 @@ public class VaultListManager {
 
 	private VaultSettings newVaultSettings(Path path) {
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
-		vaultSettings.path().set(path);
+		vaultSettings.path.set(path);
 		if (path.getFileName() != null) {
-			vaultSettings.displayName().set(path.getFileName().toString());
+			vaultSettings.displayName.set(path.getFileName().toString());
 		} else {
-			vaultSettings.displayName().set(defaultVaultName);
+			vaultSettings.displayName.set(defaultVaultName);
 		}
+
+		//due to https://github.com/cryptomator/cryptomator/issues/2880#issuecomment-1680313498
+		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
+		if (SystemUtils.IS_OS_WINDOWS //
+				&& vaultSettings.path.get().toString().contains("Dropbox") //
+				&& mountServices.stream().anyMatch(s -> s.getClass().getName().equals(nameOfWinfspLocalMounter))) {
+			vaultSettings.mountService.setValue(nameOfWinfspLocalMounter);
+		}
+
 		return vaultSettings;
 	}
 
@@ -95,13 +117,19 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
-			var vaultState = determineVaultState(vaultSettings.path().get());
+			var vaultState = determineVaultState(vaultSettings.path.get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
+				if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
+					var keyIdScheme = wrapper.get().getKeyId().getScheme();
+					vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
+				}
+			} else if (vaultState == NEEDS_MIGRATION) {
+				vaultSettings.lastKnownKeyLoader.set(Constants.DEFAULT_KEY_ID.toString());
 			}
 			return vaultComponentFactory.create(vaultSettings, wrapper, vaultState, null).vault();
 		} catch (IOException e) {
-			LOG.warn("Failed to determine vault state for " + vaultSettings.path().get(), e);
+			LOG.warn("Failed to determine vault state for " + vaultSettings.path.get(), e);
 			return vaultComponentFactory.create(vaultSettings, wrapper, ERROR, e).vault();
 		}
 	}

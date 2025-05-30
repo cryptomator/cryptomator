@@ -36,7 +36,7 @@ public class DefaultSceneFactory implements Function<Parent, Scene> {
 	}
 
 	protected void configureRoot(Parent root) {
-		root.nodeOrientationProperty().bind(settings.userInterfaceOrientation());
+		root.nodeOrientationProperty().bind(settings.userInterfaceOrientation);
 	}
 
 	protected void configureScene(Scene scene) {

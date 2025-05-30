@@ -2,6 +2,7 @@ package org.cryptomator.common;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +19,6 @@ import java.util.stream.StreamSupport;
 public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
-	private static final Path RELATIVE_HOME_DIR = Paths.get("~");
-	private static final char PATH_LIST_SEP = ':';
 	private static final int DEFAULT_MIN_PW_LENGTH = 8;
 	private static final String SETTINGS_PATH_PROP_NAME = "cryptomator.settingsPath";
 	private static final String IPC_SOCKET_PATH_PROP_NAME = "cryptomator.ipcSocketPath";
@@ -33,6 +32,7 @@ public class Environment {
 	private static final String BUILD_NUMBER_PROP_NAME = "cryptomator.buildNumber";
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
+	private static final String DISABLE_UPDATE_CHECK_PROP_NAME = "cryptomator.disableUpdateCheck";
 
 	private Environment() {}
 
@@ -45,15 +45,16 @@ public class Environment {
 		logCryptomatorSystemProperty(SETTINGS_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(IPC_SOCKET_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(KEYCHAIN_PATHS_PROP_NAME);
+		logCryptomatorSystemProperty(P12_PATH_PROP_NAME);
 		logCryptomatorSystemProperty(LOG_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(LOOPBACK_ALIAS_PROP_NAME);
-		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(MOUNTPOINT_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(MIN_PW_LENGTH_PROP_NAME);
 		logCryptomatorSystemProperty(APP_VERSION_PROP_NAME);
 		logCryptomatorSystemProperty(BUILD_NUMBER_PROP_NAME);
+		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
-		logCryptomatorSystemProperty(P12_PATH_PROP_NAME);
+		logCryptomatorSystemProperty(DISABLE_UPDATE_CHECK_PROP_NAME);
 	}
 
 	public static Environment getInstance() {
@@ -76,11 +77,7 @@ public class Environment {
 		return getPaths(SETTINGS_PATH_PROP_NAME);
 	}
 
-	public Stream<Path> getP12Path() {
-		return getPaths(P12_PATH_PROP_NAME);
-	}
-
-	public Stream<Path> ipcSocketPath() {
+	public Stream<Path> getIpcSocketPath() {
 		return getPaths(IPC_SOCKET_PATH_PROP_NAME);
 	}
 
@@ -88,20 +85,24 @@ public class Environment {
 		return getPaths(KEYCHAIN_PATHS_PROP_NAME);
 	}
 
+	public Stream<Path> getP12Path() {
+		return getPaths(P12_PATH_PROP_NAME);
+	}
+
 	public Optional<Path> getLogDir() {
-		return getPath(LOG_DIR_PROP_NAME).map(this::replaceHomeDir);
+		return getPath(LOG_DIR_PROP_NAME);
 	}
 
 	public Optional<String> getLoopbackAlias() {
 		return Optional.ofNullable(System.getProperty(LOOPBACK_ALIAS_PROP_NAME));
 	}
 
-	public Optional<Path> getPluginDir() {
-		return getPath(PLUGIN_DIR_PROP_NAME).map(this::replaceHomeDir);
+	public Optional<Path> getMountPointsDir() {
+		return getPath(MOUNTPOINT_DIR_PROP_NAME);
 	}
 
-	public Optional<Path> getMountPointsDir() {
-		return getPath(MOUNTPOINT_DIR_PROP_NAME).map(this::replaceHomeDir);
+	public int getMinPwLength() {
+		return Integer.getInteger(MIN_PW_LENGTH_PROP_NAME, DEFAULT_MIN_PW_LENGTH);
 	}
 
 	/**
@@ -117,12 +118,16 @@ public class Environment {
 		return Optional.ofNullable(System.getProperty(BUILD_NUMBER_PROP_NAME));
 	}
 
-	public int getMinPwLength() {
-		return Integer.getInteger(MIN_PW_LENGTH_PROP_NAME, DEFAULT_MIN_PW_LENGTH);
+	public Optional<Path> getPluginDir() {
+		return getPath(PLUGIN_DIR_PROP_NAME);
 	}
 
 	public boolean showTrayIcon() {
 		return Boolean.getBoolean(TRAY_ICON_PROP_NAME);
+	}
+
+	public boolean disableUpdateCheck() {
+		return Boolean.getBoolean(DISABLE_UPDATE_CHECK_PROP_NAME);
 	}
 
 	private Optional<Path> getPath(String propertyName) {
@@ -130,23 +135,10 @@ public class Environment {
 		return Optional.ofNullable(value).map(Paths::get);
 	}
 
-	// visible for testing
-	public Path getHomeDir() {
-		return getPath("user.home").orElseThrow();
-	}
-
-	// visible for testing
-	public Stream<Path> getPaths(String propertyName) {
-		Stream<String> rawSettingsPaths = getRawList(propertyName, PATH_LIST_SEP);
-		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Paths::get).map(this::replaceHomeDir);
-	}
-
-	private Path replaceHomeDir(Path path) {
-		if (path.startsWith(RELATIVE_HOME_DIR)) {
-			return getHomeDir().resolve(RELATIVE_HOME_DIR.relativize(path));
-		} else {
-			return path;
-		}
+	@VisibleForTesting
+	Stream<Path> getPaths(String propertyName) {
+		Stream<String> rawSettingsPaths = getRawList(propertyName, System.getProperty("path.separator").charAt(0));
+		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Path::of);
 	}
 
 	private Stream<String> getRawList(String propertyName, char separator) {

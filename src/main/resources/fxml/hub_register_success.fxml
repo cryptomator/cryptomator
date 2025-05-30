@@ -41,9 +41,9 @@
 			<Label text="%hub.registerSuccess.description" wrapText="true"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
-			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+X">
 				<buttons>
-					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" onAction="#close"/>
+					<Button text="%hub.registerSuccess.unlockBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#complete"/>
 					<!-- TODO: add request access button -->
 				</buttons>
 			</ButtonBar>

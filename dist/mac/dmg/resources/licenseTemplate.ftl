@@ -17,7 +17,7 @@
 \f1\b0 \
 \
 
-\f0\b \'a9 2016 \'96 2023 Skymatic GmbH
+\f0\b \'a9 2016 \'96 2025 Skymatic GmbH
 \f1\b0 \
 \
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\

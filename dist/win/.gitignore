@@ -4,5 +4,8 @@ installer
 *.wixobj
 *.pdb
 *.msi
-license.rtf
 *Debug.properties
+*.exe
+*.jmod
+resources/jfxJmods.zip
+license.rtf

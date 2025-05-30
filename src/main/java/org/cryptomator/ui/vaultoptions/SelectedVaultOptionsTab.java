@@ -21,4 +21,9 @@ public enum SelectedVaultOptionsTab {
 	 */
 	KEY,
 
+	/**
+	 * Show hub tab
+	 */
+	HUB
+
 }

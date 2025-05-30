@@ -1,43 +1,48 @@
-<?xml version="1.0"?>
+﻿<!-- For Built in variables, see https://wixtoolset.org/docs/tools/burn/builtin-variables/-->
+<ns0:Wix xmlns:ns0="http://wixtoolset.org/schemas/v4/wxs" xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+    <ns0:Bundle Name="$(var.BundleName)"
+     UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b"
+     Version="$(var.BundleVersion)"
+     Manufacturer="$(var.BundleVendor)"
+     AboutUrl="$(var.AboutUrl)"
+     HelpUrl="$(var.HelpUrl)"
+     UpdateUrl="$(var.UpdateUrl)"
+     Copyright="$(var.BundleCopyright)"
+     IconSourceFile="bundle\resources\Cryptomator.ico">
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
-    <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/bundle.html-->
-    <!-- Attributes explicitly not used:
-        Condition - the single msi files have their own install conditions, no need to copy them here
-    -->
-    <Bundle Name="Cryptomator" UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b" Version="$(var.BundleVersion)" Manufacturer="$(var.BundleVendor)"
-     AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="bundle\resources\Cryptomator.ico">
+        <!-- detect outdated WinFsp installations -->
+        <util:ProductSearch Variable="InstalledLegacyWinFspVersion" Result="version" UpgradeCode="82F812D9-4083-4EF1-8BC8-0F1EDA05B46B" />
 
-        <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
-        <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
-            <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/bal/wixstandardbootstrapperapplication.html -->
-            <!-- Possible Attributes: LaunchTarget -->
-            <bal:WixStandardBootstrapperApplication
-                LicenseFile="bundle\resources\license.rtf"
-                ShowVersion="yes"
-                SuppressOptionsUI="yes"
-                ThemeFile="bundle\customBootstrapperTheme.xml"
-                LocalizationFile="bundle\customBootstrapperTheme.wxl"
-                LogoFile="bundle\resources\logo.png"
-            />
-            <Payload SourceFile="bundle\resources\logoSide.png" />
-        </BootstrapperApplicationRef>
-        <Chain>
-            <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
-            <MsiPackage
-                SourceFile="resources\Cryptomator.msi"
-                CacheId="cryptomator-bundle-cryptomator"
-                DisplayInternalUI="no"
-                Visible="no"
-            />
-            <MsiPackage
-                SourceFile="resources\winfsp.msi"
-                CacheId="cryptomator-bundle-winfsp"
-                Visible="yes"
-                DisplayInternalUI="no"
-                Vital="no"
-                Permanent="yes"
-            />
-        </Chain>
-    </Bundle>
-</Wix>
+        <ns0:BootstrapperApplication>
+            <bal:WixStandardBootstrapperApplication LicenseFile="bundle\resources\license.rtf" ShowVersion="yes"
+              SuppressOptionsUI="yes"
+              Theme="rtfLargeLicense"
+              ThemeFile="bundle\resources\customBootstrapperTheme.xml"
+              LocalizationFile="bundle\resources\customBootstrapperTheme.wxl"
+              LogoSideFile="bundle\resources\logoSide.png"
+              LogoFile="bundle\resources\logo.png"
+              LaunchTarget="[ProgramFiles64Folder]\$(var.BundleName)\$(var.BundleName).exe" />
+            <ns0:Payload SourceFile="bundle\resources\logoSide.png"/>
+            <!-- Required due to https://github.com/wixtoolset/issues/issues/8104 -->
+            <ns0:Payload Name="Cryptobot.ico" SourceFile="bundle\resources\Cryptomator.ico"/>
+        </ns0:BootstrapperApplication>
+
+        <ns0:Chain>
+            <ns0:ExePackage Cache="keep" PerMachine="yes" Permanent="no" SourceFile="bundle\resources\winfsp-uninstaller.exe" DisplayName="Removing outdated WinFsp Driver" Description="Executable to remove old winfsp" DetectCondition="false" InstallCondition="(InstalledLegacyWinFspVersion &lt;&gt; v0.0.0.0) AND ((WixBundleAction = 7) OR (WixBundleAction = 5))" UninstallArguments="">
+                <ns0:CommandLine Condition="WixBundleUILevel &lt;= 3" InstallArgument="-q -l &quot;[WixBundleLog].winfsp-uninstaller.log&quot;" RepairArgument="-q" UninstallArgument="-s" />
+                <!-- XML allows line breaks in attributes, hence keep the line breaks here -->
+                <ns0:CommandLine Condition="WixBundleUILevel &gt; 3" InstallArgument="-l &quot;[WixBundleLog].winfsp-uninstaller.log&quot; -t &quot;Cryptomator Installer&quot; -m &quot;Cryptomator requires a newer version of the WinFsp driver. The installer will now uninstall WinFsp, possibly reboot, and afterwards proceed with the installation.
+
+Do you want to continue?&quot;" RepairArgument="-q" UninstallArgument="-s" />
+                <ns0:ExitCode Behavior="success" Value="0" />
+                <ns0:ExitCode Behavior="success" Value="1" />
+                <ns0:ExitCode Behavior="error" Value="2" />
+                <ns0:ExitCode Behavior="error" Value="3" />
+                <ns0:ExitCode Behavior="forceReboot" Value="4" />
+                <ns0:ExitCode Behavior="success" Value="5" />
+            </ns0:ExePackage>
+            <ns0:MsiPackage SourceFile="bundle\resources\Cryptomator.msi" CacheId="cryptomator-bundle-cryptomator" Visible="no" />
+            <ns0:MsiPackage SourceFile="bundle\resources\winfsp.msi" CacheId="cryptomator-bundle-winfsp" Visible="yes" Permanent="yes" />
+        </ns0:Chain>
+    </ns0:Bundle>
+</ns0:Wix>

@@ -19,15 +19,7 @@ import java.util.concurrent.Future;
 @Subcomponent(modules = {UnlockModule.class})
 public interface UnlockComponent {
 
-	ExecutorService defaultExecutorService();
-
 	UnlockWorkflow unlockWorkflow();
-
-	default Future<Boolean> startUnlockWorkflow() {
-		UnlockWorkflow workflow = unlockWorkflow();
-		defaultExecutorService().submit(workflow);
-		return workflow;
-	}
 
 	@Subcomponent.Factory
 	interface Factory {

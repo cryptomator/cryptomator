@@ -4,11 +4,11 @@ Upstream-Contact: Cryptomator <info@cryptomator.org>
 Source: https://cryptomator.org
 
 Files: *
-Copyright: 2016-2023 Skymatic GmbH
+Copyright: 2016-2025 Skymatic GmbH
 License: GPL-3+
 
 Files: debian/org.cryptomator.Cryptomator.appdata.xml
-Copyright: 2016-2023 Skymatic GmbH
+Copyright: 2016-2025 Skymatic GmbH
 License: FSFAP
 
 License: GPL-3+

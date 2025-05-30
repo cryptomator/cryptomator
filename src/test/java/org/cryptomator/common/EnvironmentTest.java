@@ -7,12 +7,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.mockito.Mockito;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @DisplayName("Environment Variables Test")
 public class EnvironmentTest {
@@ -22,39 +24,6 @@ public class EnvironmentTest {
 	@BeforeEach
 	public void init() {
 		env = Mockito.spy(Environment.getInstance());
-		Mockito.when(env.getHomeDir()).thenReturn(Path.of("/home/testuser"));
-	}
-
-	@Test
-	@DisplayName("cryptomator.settingsPath=~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json")
-	public void testSettingsPath() {
-		System.setProperty("cryptomator.settingsPath", "~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json");
-
-		List<Path> result = env.getSettingsPath().toList();
-		MatcherAssert.assertThat(result, Matchers.hasSize(2));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/settings.json"), //
-				Paths.get("/home/testuser/.Cryptomator/settings.json")));
-	}
-
-	@Test
-	@DisplayName("cryptomator.ipcSocketPath=~/.config/Cryptomator/ipc.socket:~/.Cryptomator/ipc.socket")
-	public void testIpcSocketPath() {
-		System.setProperty("cryptomator.ipcSocketPath", "~/.config/Cryptomator/ipc.socket:~/.Cryptomator/ipc.socket");
-
-		List<Path> result = env.ipcSocketPath().toList();
-		MatcherAssert.assertThat(result, Matchers.hasSize(2));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/ipc.socket"), //
-				Paths.get("/home/testuser/.Cryptomator/ipc.socket")));
-	}
-
-	@Test
-	@DisplayName("cryptomator.integrationsWin.keychainPaths=~/AppData/Roaming/Cryptomator/keychain.json")
-	public void testKeychainPath() {
-		System.setProperty("cryptomator.integrationsWin.keychainPaths", "~/AppData/Roaming/Cryptomator/keychain.json");
-
-		List<Path> result = env.getKeychainPath().toList();
-		MatcherAssert.assertThat(result, Matchers.hasSize(1));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/AppData/Roaming/Cryptomator/keychain.json")));
 	}
 
 	@Test
@@ -67,20 +36,9 @@ public class EnvironmentTest {
 		Assertions.assertTrue(logDir.isPresent());
 	}
 
-	@Test
-	@DisplayName("cryptomator.logDir=~/foo/bar")
-	public void testRelativeLogDir() {
-		System.setProperty("cryptomator.logDir", "~/foo/bar");
-
-		Optional<Path> logDir = env.getLogDir();
-
-		Assertions.assertTrue(logDir.isPresent());
-		Assertions.assertEquals(Paths.get("/home/testuser/foo/bar"), logDir.get());
-	}
-
 	@Nested
-	@DisplayName("Path Lists")
-	public class SettingsPath {
+	@DisplayName("Testing parsing path lists")
+	public class PathLists {
 
 		@Test
 		@DisplayName("test.path.property=")
@@ -93,7 +51,7 @@ public class EnvironmentTest {
 
 		@Test
 		@DisplayName("test.path.property=/foo/bar/test")
-		public void testSingleAbsolutePath() {
+		public void testSinglePath() {
 			System.setProperty("test.path.property", "/foo/bar/test");
 			List<Path> result = env.getPaths("test.path.property").toList();
 
@@ -102,27 +60,67 @@ public class EnvironmentTest {
 		}
 
 		@Test
-		@DisplayName("test.path.property=~/test")
-		public void testSingleHomeRelativePath() {
-			System.setProperty("test.path.property", "~/test");
+		@EnabledIf("isColonPathSeperator")
+		@DisplayName("test.path.property=/foo/bar/test:/bar/nez/tost")
+		public void testTwoPathsColon() {
+			System.setProperty("test.path.property", "/foo/bar/test:bar/nez/tost");
 			List<Path> result = env.getPaths("test.path.property").toList();
 
-			MatcherAssert.assertThat(result, Matchers.hasSize(1));
-			MatcherAssert.assertThat(result, Matchers.hasItem(Paths.get("/home/testuser/test")));
+			MatcherAssert.assertThat(result, Matchers.hasSize(2));
+			MatcherAssert.assertThat(result, Matchers.hasItems(Path.of("/foo/bar/test"), Path.of("bar/nez/tost")));
 		}
 
 		@Test
-		@DisplayName("test.path.property=~/test:~/test2:/foo/bar/test")
-		public void testMultiplePaths() {
-			System.setProperty("test.path.property", "~/test:~/test2:/foo/bar/test");
+		@EnabledIf("isSemiColonPathSeperator")
+		@DisplayName("test.path.property=/foo/bar/test;/bar/nez/tost")
+		public void testTwoPathsSemiColon() {
+			System.setProperty("test.path.property", "/foo/bar/test;bar/nez/tost");
 			List<Path> result = env.getPaths("test.path.property").toList();
 
-			MatcherAssert.assertThat(result, Matchers.hasSize(3));
-			MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/test"), //
-					Paths.get("/home/testuser/test2"), //
-					Paths.get("/foo/bar/test")));
+			MatcherAssert.assertThat(result, Matchers.hasSize(2));
+			MatcherAssert.assertThat(result, Matchers.hasItems(Path.of("/foo/bar/test"), Path.of("bar/nez/tost")));
 		}
 
+		boolean isColonPathSeperator() {
+			return System.getProperty("path.separator").equals(":");
+		}
+
+		boolean isSemiColonPathSeperator() {
+			return System.getProperty("path.separator").equals(";");
+		}
+
+	}
+
+	@Nested
+	public class VariablesContainingPathLists {
+
+		@Test
+		public void testSettingsPath() {
+			Mockito.doReturn(Stream.of()).when(env).getPaths(Mockito.anyString());
+			env.getSettingsPath();
+			Mockito.verify(env).getPaths("cryptomator.settingsPath");
+		}
+
+		@Test
+		public void testP12Path() {
+			Mockito.doReturn(Stream.of()).when(env).getPaths(Mockito.anyString());
+			env.getP12Path();
+			Mockito.verify(env).getPaths("cryptomator.p12Path");
+		}
+
+		@Test
+		public void testIpcSocketPath() {
+			Mockito.doReturn(Stream.of()).when(env).getPaths(Mockito.anyString());
+			env.getIpcSocketPath();
+			Mockito.verify(env).getPaths("cryptomator.ipcSocketPath");
+		}
+
+		@Test
+		public void testKeychainPath() {
+			Mockito.doReturn(Stream.of()).when(env).getPaths(Mockito.anyString());
+			env.getKeychainPath();
+			Mockito.verify(env).getPaths("cryptomator.integrationsWin.keychainPaths");
+		}
 	}
 
 }

@@ -2,13 +2,16 @@ package org.cryptomator.common.mount;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.mount.MountService;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Module
 public class MountModule {
@@ -19,33 +22,20 @@ public class MountModule {
 		return MountService.get().toList();
 	}
 
-	//currently not used, because macFUSE and FUSE-T cannot be used in the same JVM
-	/*
 	@Provides
 	@Singleton
-	static ObservableValue<ActualMountService> provideMountService(Settings settings, List<MountService> serviceImpls) {
-		var fallbackProvider = serviceImpls.stream().findFirst().orElse(null);
-		return ObservableUtil.mapWithDefault(settings.mountService(), //
-				desiredServiceImpl -> { //
-					var desiredService = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(desiredServiceImpl)).findAny(); //
-					return new ActualMountService(desiredService.orElse(fallbackProvider), desiredService.isPresent()); //
-				}, //
-				new ActualMountService(fallbackProvider, true));
-	}
-	 */
-
-	@Provides
-	@Singleton
-	static ActualMountService provideActualMountService(Settings settings, List<MountService> serviceImpls) {
-		var fallbackProvider = serviceImpls.stream().findFirst().orElse(null);
-		var desiredService = serviceImpls.stream().filter(serviceImpl -> serviceImpl.getClass().getName().equals(settings.mountService().getValue())).findFirst(); //
-		return new ActualMountService(desiredService.orElse(fallbackProvider), desiredService.isPresent()); //
+	static ObservableValue<MountService> provideDefaultMountService(List<MountService> mountProviders, Settings settings) {
+		var fallbackProvider = mountProviders.stream().findFirst().get(); //there should always be a mount provider, at least webDAV
+		return ObservableUtil.mapWithDefault(settings.mountService, //
+				serviceName -> mountProviders.stream().filter(s -> s.getClass().getName().equals(serviceName)).findFirst().orElse(fallbackProvider), //
+				fallbackProvider);
 	}
 
 	@Provides
 	@Singleton
-	static ObservableValue<ActualMountService> provideMountService(ActualMountService service) {
-		return new SimpleObjectProperty<>(service);
+	@Named("usedMountServices")
+	static Set<MountService> provideSetOfUsedMountServices() {
+		return ConcurrentHashMap.newKeySet();
 	}
 
 }

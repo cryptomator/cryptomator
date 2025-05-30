@@ -23,14 +23,14 @@ public class KeychainModule {
 	@Singleton
 	static ObjectExpression<KeychainAccessProvider> provideKeychainAccessProvider(Settings settings, List<KeychainAccessProvider> providers) {
 		return Bindings.createObjectBinding(() -> {
-			if (!settings.useKeychain().get()) {
+			if (!settings.useKeychain.get()) {
 				return null;
 			}
-			var selectedProviderClass = settings.keychainProvider().get();
+			var selectedProviderClass = settings.keychainProvider.get();
 			var selectedProvider = providers.stream().filter(provider -> provider.getClass().getName().equals(selectedProviderClass)).findAny();
 			var fallbackProvider = providers.stream().findFirst().orElse(null);
 			return selectedProvider.orElse(fallbackProvider);
-		}, settings.keychainProvider(), settings.useKeychain());
+		}, settings.keychainProvider, settings.useKeychain);
 	}
 
 }

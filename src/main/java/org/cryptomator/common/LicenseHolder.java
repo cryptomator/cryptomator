@@ -30,7 +30,7 @@ public class LicenseHolder {
 		this.licenseSubject = validJwtClaims.map(DecodedJWT::getSubject);
 		this.validLicenseProperty = validJwtClaims.isNotNull();
 
-		Optional<DecodedJWT> claims = licenseChecker.check(settings.licenseKey().get());
+		Optional<DecodedJWT> claims = licenseChecker.check(settings.licenseKey.get());
 		validJwtClaims.set(claims.orElse(null));
 	}
 
@@ -38,7 +38,7 @@ public class LicenseHolder {
 		Optional<DecodedJWT> claims = licenseChecker.check(licenseKey);
 		validJwtClaims.set(claims.orElse(null));
 		if (claims.isPresent()) {
-			settings.licenseKey().set(licenseKey);
+			settings.licenseKey.set(licenseKey);
 			return true;
 		} else {
 			return false;

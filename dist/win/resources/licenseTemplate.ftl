@@ -10,7 +10,7 @@
 \vieww12000\viewh15840\viewkind0
 \pard\tx283\tx567\tx850\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\b\fs16\lang7 Cryptomator is distributed under the GPLv3 License, found below. Please see the bottom of this document for any other license applicable to code used within Cryptomator.\b0\par
 \par
-\b\'a9 2016 \'96 2023 Skymatic GmbH \b0\par
+\b\'a9 2016 \'96 2025 Skymatic GmbH \b0\par
 \par
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\par
 \par

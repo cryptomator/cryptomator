@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
@@ -28,16 +26,9 @@ public abstract class UpdateCheckerModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateCheckerModule.class);
 
-	private static final URI LATEST_VERSION_URI = URI.create("https://api.cryptomator.org/updates/latestVersion.json");
+	private static final URI LATEST_VERSION_URI = URI.create("https://api.cryptomator.org/desktop/latest-version.json");
 	private static final Duration UPDATE_CHECK_INTERVAL = Duration.hours(3);
 	private static final Duration DISABLED_UPDATE_CHECK_INTERVAL = Duration.hours(100000); // Duration.INDEFINITE leads to overflows...
-
-	@Provides
-	@Named("latestVersion")
-	@FxApplicationScoped
-	static StringProperty provideLatestVersion() {
-		return new SimpleStringProperty();
-	}
 
 	@Provides
 	@FxApplicationScoped
@@ -63,6 +54,7 @@ public abstract class UpdateCheckerModule {
 		return HttpRequest.newBuilder() //
 				.uri(LATEST_VERSION_URI) //
 				.header("User-Agent", userAgent) //
+				.timeout(java.time.Duration.ofSeconds(10))
 				.build();
 	}
 
@@ -70,7 +62,7 @@ public abstract class UpdateCheckerModule {
 	@Named("checkForUpdatesInterval")
 	@FxApplicationScoped
 	static ObjectBinding<Duration> provideCheckForUpdateInterval(Settings settings) {
-		return Bindings.when(settings.checkForUpdates()).then(UPDATE_CHECK_INTERVAL).otherwise(DISABLED_UPDATE_CHECK_INTERVAL);
+		return Bindings.when(settings.checkForUpdates).then(UPDATE_CHECK_INTERVAL).otherwise(DISABLED_UPDATE_CHECK_INTERVAL);
 	}
 
 	@Provides

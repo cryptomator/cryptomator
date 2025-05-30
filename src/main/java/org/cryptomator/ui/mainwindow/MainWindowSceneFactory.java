@@ -16,24 +16,24 @@ import javafx.stage.Stage;
 public class MainWindowSceneFactory extends DefaultSceneFactory {
 
 	protected static final KeyCodeCombination SHORTCUT_N = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
+	protected static final KeyCodeCombination SHORTCUT_O = new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN);
 
-	private final Lazy<MainWindowTitleController> mainWindowTitleController;
+	private final Stage window;
 	private final Lazy<VaultListController> vaultListController;
 
 	@Inject
-	public MainWindowSceneFactory(Settings settings, Lazy<MainWindowTitleController> mainWindowTitleController, Lazy<VaultListController> vaultListController) {
+	public MainWindowSceneFactory(Settings settings, @MainWindow Stage window, Lazy<VaultListController> vaultListController) {
 		super(settings);
-		this.mainWindowTitleController = mainWindowTitleController;
+		this.window = window;
 		this.vaultListController = vaultListController;
 	}
 
 	@Override
 	protected void setupDefaultAccelerators(Scene scene, Stage stage) {
-		if (SystemUtils.IS_OS_WINDOWS) {
-			scene.getAccelerators().put(ALT_F4, mainWindowTitleController.get()::close);
-		} else {
-			scene.getAccelerators().put(SHORTCUT_W, mainWindowTitleController.get()::close);
+		if (!SystemUtils.IS_OS_WINDOWS) {
+			scene.getAccelerators().put(SHORTCUT_W, window::close);
 		}
-		scene.getAccelerators().put(SHORTCUT_N, vaultListController.get()::didClickAddVault);
+		scene.getAccelerators().put(SHORTCUT_N, vaultListController.get()::didClickAddNewVault);
+		scene.getAccelerators().put(SHORTCUT_O, vaultListController.get()::didClickAddExistingVault);
 	}
 }

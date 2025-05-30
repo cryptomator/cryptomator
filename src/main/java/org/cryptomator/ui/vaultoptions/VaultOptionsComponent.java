@@ -28,12 +28,13 @@ public interface VaultOptionsComponent {
 
 	ObjectProperty<SelectedVaultOptionsTab> selectedTabProperty();
 
-	default void showVaultOptionsWindow(SelectedVaultOptionsTab selectedTab) {
+	default Stage showVaultOptionsWindow(SelectedVaultOptionsTab selectedTab) {
 		selectedTabProperty().set(selectedTab);
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
 		stage.requestFocus();
+		return stage;
 	}
 
 	@Subcomponent.Factory

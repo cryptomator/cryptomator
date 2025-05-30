@@ -7,6 +7,7 @@ import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.integrations.tray.ActionItem;
 import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
+import org.cryptomator.integrations.tray.TrayIconLoader;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.integrations.tray.TrayMenuException;
 import org.cryptomator.integrations.tray.TrayMenuItem;
@@ -65,7 +66,12 @@ public class TrayMenuBuilder {
 		});
 
 		try {
-			trayMenu.showTrayIcon(getAppropriateTrayIconImage(), this::showMainWindow, "Cryptomator");
+			trayMenu.showTrayIcon(loader -> {
+				switch (loader) {
+					case TrayIconLoader.PngData l -> l.loadPng(getAppropriateTrayIconImage());
+					case TrayIconLoader.FreedesktopIconName l -> l.lookupByName(getAppropriateFreedesktopIconName());
+				}
+			}, this::showMainWindow, "Cryptomator");
 			trayMenu.onBeforeOpenMenu(() -> {
 				for (Vault vault : vaults) {
 					VaultListManager.redetermineVaultState(vault);
@@ -84,7 +90,12 @@ public class TrayMenuBuilder {
 
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		assert Platform.isFxApplicationThread();
-		trayMenu.updateTrayIcon(getAppropriateTrayIconImage());
+		trayMenu.updateTrayIcon(loader -> {
+			switch (loader) {
+				case TrayIconLoader.PngData l -> l.loadPng(getAppropriateTrayIconImage());
+				case TrayIconLoader.FreedesktopIconName l -> l.lookupByName(getAppropriateFreedesktopIconName());
+			}
+		});
 		rebuildMenu();
 	}
 
@@ -173,4 +184,8 @@ public class TrayMenuBuilder {
 		}
 	}
 
+	private String getAppropriateFreedesktopIconName() {
+		boolean isAnyVaultUnlocked = vaults.stream().anyMatch(Vault::isUnlocked);
+		return isAnyVaultUnlocked ? "org.cryptomator.Cryptomator.tray-unlocked-symbolic" : "org.cryptomator.Cryptomator.tray-symbolic";
+	}
 }

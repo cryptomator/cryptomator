@@ -46,11 +46,18 @@
 				<padding>
 					<Insets top="12"/>
 				</padding>
+				<Label text="Account Key" labelFor="$setupCodeField"/>
+				<TextField fx:id="setupCodeField" HBox.hgrow="ALWAYS"/>
+			</HBox>
+			<HBox spacing="6" alignment="CENTER_LEFT">
+				<padding>
+					<Insets top="12"/>
+				</padding>
 				<Label text="%hub.register.nameLabel" labelFor="$deviceNameField"/>
 				<TextField fx:id="deviceNameField" HBox.hgrow="ALWAYS"/>
 			</HBox>
 			<HBox alignment="TOP_RIGHT">
-				<Label text="%hub.register.occupiedMsg" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.deviceNameAlreadyExists}" graphicTextGap="6">
+				<Label text="%hub.register.invalidAccountKeyLabel" textAlignment="RIGHT" alignment="CENTER_RIGHT" visible="${controller.invalidSetupCode}" managed="${controller.invalidSetupCode}" graphicTextGap="6">
 					<padding>
 						<Insets top="6"/>
 					</padding>

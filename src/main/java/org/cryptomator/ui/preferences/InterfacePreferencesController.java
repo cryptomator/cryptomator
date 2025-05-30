@@ -1,6 +1,5 @@
 package org.cryptomator.ui.preferences;
 
-import com.google.common.base.Strings;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
@@ -35,44 +34,44 @@ public class InterfacePreferencesController implements FxController {
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
 	private final ResourceBundle resourceBundle;
+	private final SupportedLanguages supportedLanguages;
 	public ChoiceBox<UiTheme> themeChoiceBox;
-	public CheckBox showMinimizeButtonCheckbox;
 	public CheckBox showTrayIconCheckbox;
+	public CheckBox compactModeCheckbox;
 	public ChoiceBox<String> preferredLanguageChoiceBox;
 	public ToggleGroup nodeOrientation;
 	public RadioButton nodeOrientationLtr;
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	InterfacePreferencesController(Settings settings, TrayMenuComponent trayMenu, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle) {
+	InterfacePreferencesController(Settings settings, SupportedLanguages supportedLanguages, TrayMenuComponent trayMenu, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.trayMenuInitialized = trayMenu.isInitialized();
 		this.trayMenuSupported = trayMenu.isSupported();
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.resourceBundle = resourceBundle;
+		this.supportedLanguages = supportedLanguages;
 	}
 
 	@FXML
 	public void initialize() {
 		themeChoiceBox.getItems().addAll(UiTheme.applicableValues());
-		if (!themeChoiceBox.getItems().contains(settings.theme().get())) {
-			settings.theme().set(UiTheme.LIGHT);
+		if (!themeChoiceBox.getItems().contains(settings.theme.get())) {
+			settings.theme.set(UiTheme.LIGHT);
 		}
-		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
+		themeChoiceBox.valueProperty().bindBidirectional(settings.theme);
 		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
 
-		showMinimizeButtonCheckbox.selectedProperty().bindBidirectional(settings.showMinimizeButton());
+		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon);
+		compactModeCheckbox.selectedProperty().bindBidirectional(settings.compactMode);
 
-		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
-
-		preferredLanguageChoiceBox.getItems().add(null);
-		preferredLanguageChoiceBox.getItems().addAll(SupportedLanguages.LANGUAGAE_TAGS);
-		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.languageProperty());
+		preferredLanguageChoiceBox.getItems().addAll(supportedLanguages.getLanguageTags());
+		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.language);
 		preferredLanguageChoiceBox.setConverter(new LanguageTagConverter(resourceBundle));
 
-		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
-		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
+		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation.get() == NodeOrientation.LEFT_TO_RIGHT);
+		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation.get() == NodeOrientation.RIGHT_TO_LEFT);
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 	}
 
@@ -87,9 +86,9 @@ public class InterfacePreferencesController implements FxController {
 
 	private void toggleNodeOrientation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
 		if (nodeOrientationLtr.equals(newValue)) {
-			settings.userInterfaceOrientation().set(NodeOrientation.LEFT_TO_RIGHT);
+			settings.userInterfaceOrientation.set(NodeOrientation.LEFT_TO_RIGHT);
 		} else if (nodeOrientationRtl.equals(newValue)) {
-			settings.userInterfaceOrientation().set(NodeOrientation.RIGHT_TO_LEFT);
+			settings.userInterfaceOrientation.set(NodeOrientation.RIGHT_TO_LEFT);
 		} else {
 			LOG.warn("Unexpected toggle option {}", newValue);
 		}
@@ -141,9 +140,7 @@ public class InterfacePreferencesController implements FxController {
 				return resourceBundle.getString("preferences.interface.language.auto");
 			} else {
 				var locale = Locale.forLanguageTag(tag);
-				var lang = locale.getDisplayLanguage(locale);
-				var region = locale.getDisplayCountry(locale);
-				return lang + (Strings.isNullOrEmpty(region) ? "" : " (" + region + ")");
+				return locale.getDisplayName();
 			}
 		}
 

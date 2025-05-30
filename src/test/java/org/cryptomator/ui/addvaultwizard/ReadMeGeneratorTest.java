@@ -15,8 +15,8 @@ public class ReadMeGeneratorTest {
 	@ParameterizedTest
 	@CsvSource({ //
 			"test,test", //
-			"t\u00E4st,t\\u228st", //
-			"t\uD83D\uDE09st,t\\u55357\\u56841st", //
+			"t\u00E4st,t\\'E4st", //
+			"t\uD83D\uDE09st,t\\uc1\\u55357\\uc1\\u56841st", //
 	})
 	public void testEscapeNonAsciiChars(String input, String expectedResult) {
 		ReadmeGenerator readmeGenerator = new ReadmeGenerator(null);
@@ -40,7 +40,7 @@ public class ReadMeGeneratorTest {
 		MatcherAssert.assertThat(result, CoreMatchers.startsWith("{\\rtf1\\fbidis\\ansi\\uc0\\fs32"));
 		MatcherAssert.assertThat(result, CoreMatchers.containsString("{\\sa80 Dear User,}\\par"));
 		MatcherAssert.assertThat(result, CoreMatchers.containsString("{\\sa80 \\b please don't touch the \"d\" directory.}\\par "));
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("{\\sa80 Thank you for your cooperation \\u55357\\u56841}\\par"));
+		MatcherAssert.assertThat(result, CoreMatchers.containsString("{\\sa80 Thank you for your cooperation \\uc1\\u55357\\uc1\\u56841}\\par"));
 		MatcherAssert.assertThat(result, CoreMatchers.endsWith("}"));
 	}
 

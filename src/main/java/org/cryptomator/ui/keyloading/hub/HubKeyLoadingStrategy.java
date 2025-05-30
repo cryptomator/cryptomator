@@ -1,7 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
-import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.keychain.NoKeychainAccessProviderException;
@@ -29,21 +28,22 @@ import java.util.concurrent.ExecutionException;
 public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 
 	private static final String SCHEME_PREFIX = "hub+";
-	static final String SCHEME_HUB_HTTP = SCHEME_PREFIX + "http";
-	static final String SCHEME_HUB_HTTPS = SCHEME_PREFIX + "https";
+	public static final String SCHEME_HUB_HTTP = SCHEME_PREFIX + "http";
+	public static final String SCHEME_HUB_HTTPS = SCHEME_PREFIX + "https";
 
 	private final Stage window;
 	private final KeychainManager keychainManager;
 	private final Lazy<Scene> authFlowScene;
 	private final Lazy<Scene> noKeychainScene;
-	private final CompletableFuture<JWEObject> result;
+	private final CompletableFuture<ReceivedKey> result;
 	private final DeviceKey deviceKey;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<JWEObject> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle) {
 		this.window = window;
 		this.keychainManager = keychainManager;
 		window.setTitle(windowTitle);
+		window.setOnCloseRequest(_ -> result.cancel(true));
 		this.authFlowScene = authFlowScene;
 		this.noKeychainScene = noKeychainScene;
 		this.result = result;
@@ -60,7 +60,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 			var keypair = deviceKey.get();
 			showWindow(authFlowScene);
 			var jwe = result.get();
-			return JWEHelper.decrypt(jwe, keypair.getPrivate());
+			return jwe.decryptMasterkey(keypair.getPrivate());
 		} catch (NoKeychainAccessProviderException e) {
 			showWindow(noKeychainScene);
 			throw new UnlockCancelledException("Unlock canceled due to missing prerequisites", e);

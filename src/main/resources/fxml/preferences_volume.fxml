@@ -5,8 +5,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
@@ -20,6 +22,14 @@
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.volume.type"/>
 			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
+				<graphic>
+					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%preferences.volume.docsTooltip" showDelay="100ms"/>
+				</tooltip>
+			</Hyperlink>
 		</HBox>
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">

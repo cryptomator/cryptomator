@@ -1,4 +1,4 @@
-name: Build macOS .dmg
+name: Build macOS .dmg for arm64
 
 on:
   release:
@@ -8,9 +8,15 @@ on:
       version:
         description: 'Version'
         required: false
+      notarize:
+        description: 'Notarize'
+        required: true
+        default: false
+        type: boolean
 
 env:
-  JAVA_VERSION: 19
+  JAVA_DIST: 'temurin'
+  JAVA_VERSION: '24.0.1+9'
 
 jobs:
   get-version:
@@ -26,54 +32,71 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: macos-11
-          architecture: x64
-          output-suffix: x64
-          xcode-path: '/Applications/Xcode_13.2.1.app'
-        - os: [self-hosted, macOS, ARM64]
+        - os: macos-15
           architecture: aarch64
           output-suffix: arm64
-          xcode-path: '/Applications/Xcode_13.2.1.app'
+          fuse-lib: FUSE-T
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: 'c690cc642a3924cf56622951f478ba57aec9ce09063761f800c3319331bed3fc'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk+fx'
           architecture: ${{ matrix.architecture }}
+          check-latest: true
           cache: 'maven'
-      - name: Ensure major jfx version in pom equals in jdk
-        if: ${{ !contains(matrix.os, 'self-hosted') }}
-        shell: pwsh
+      - name: Download OpenJFX jmods
+        id: download-jmods
         run: |
-          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
-          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
-            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
+          curl -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
+          echo "${{ matrix.openjfx-sha }} *openjfx-jmods.zip" | shasum -a256 --check
+          mkdir -p openjfx-jmods/
+          unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+      - name: Ensure major jfx version in pom and in jmods is the same
+        run: |
+          JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
+          JMOD_VERSION=${JMOD_VERSION#*@}
+          JMOD_VERSION=${JMOD_VERSION%%.*}
+          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+          POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+
+          if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != jmod version (${JMOD_VERSION})"
             exit 1
-          }
+          fi
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
-        run: mvn -B clean package -Pdependency-check,mac -DskipTests
+        run: mvn -B -Djavafx.platform=mac clean package -Pmac -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
+      - name: Run jlink with help option
+        id: jep-493-check
+        run: |
+          JMOD_PATHS="openjfx-jmods"
+          if ! ${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"; then
+            JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
+          fi
+          echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
       - name: Run jlink
+        #Remark: no compression is applied for improved build compression later (here dmg)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
           --strip-debug
-          --compress=1
+          --compress zip-0
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -86,23 +109,24 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2023 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=org.cryptomator.jfuse.mac"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Djava.net.useSystemProxies=true"
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
-          --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
-          --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
-          --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
-          --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/Cryptomator/key.p12\""
-          --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
+          --java-options "-Dcryptomator.logDir=\"@{userhome}/Library/Logs/Cryptomator\""
+          --java-options "-Dcryptomator.pluginDir=\"@{userhome}/Library/Application Support/Cryptomator/Plugins\""
+          --java-options "-Dcryptomator.settingsPath=\"@{userhome}/Library/Application Support/Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/Cryptomator/key.p12\""
+          --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
-          --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
+          --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --mac-package-identifier org.cryptomator
@@ -113,12 +137,14 @@ jobs:
           mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
+          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output Cryptomator.app/Contents/embedded.provisionprofile
         env:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NO: ${{ needs.get-version.outputs.revNum }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
       - name: Generate license for dmg
         run: >
-          mvn -B license:add-third-party
+          mvn -B -Djavafx.platform=mac license:add-third-party
           -Dlicense.thirdPartyFilename=license.rtf
           -Dlicense.outputDirectory=dist/mac/dmg/resources
           -Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl
@@ -151,7 +177,7 @@ jobs:
         run: |
           echo "Codesigning jdk files..."
           find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ \( -name 'jspawnhelper' -o -name 'pauseengine' -o -name 'simengine' \) -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
           echo "Codesigning jar contents..."
           find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
           for JAR_PATH in `find Cryptomator.app -name "*.jar"`; do
@@ -170,14 +196,17 @@ jobs:
             fi
           done
           echo "Codesigning Cryptomator.app..."
+          sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" dist/mac/Cryptomator.entitlements
+          sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" dist/mac/Cryptomator.entitlements
           codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+          TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
       - name: Prepare .dmg contents
         run: |
           mkdir dmg
           mv Cryptomator.app dmg
-          cp dist/mac/dmg/resources/macFUSE.webloc dmg
+          cp dist/mac/dmg/resources/${{ matrix.fuse-lib }}.webloc dmg
           ls -l dmg
       - name: Install create-dmg
         run: |
@@ -188,31 +217,30 @@ jobs:
           create-dmg
           --volname Cryptomator
           --volicon "dist/mac/dmg/resources/Cryptomator-Volume.icns"
-          --background "dist/mac/dmg/resources/Cryptomator-background.tiff"
+          --background "dist/mac/dmg/resources/Cryptomator-${{ matrix.fuse-lib }}-background.tiff"
           --window-pos 400 100
           --window-size 640 694
           --icon-size 128
           --icon "Cryptomator.app" 128 245
           --hide-extension "Cryptomator.app"
-          --icon "macFUSE.webloc" 320 501
-          --hide-extension "macFUSE.webloc"
+          --icon "${{ matrix.fuse-lib }}.webloc" 320 501
+          --hide-extension "${{ matrix.fuse-lib }}.webloc"
           --app-drop-link 512 245
           --eula "dist/mac/dmg/resources/license.rtf"
           --icon ".background" 128 758
-          --icon ".fseventsd" 320 758
           --icon ".VolumeIcon.icns" 512 758
           Cryptomator-${VERSION_NO}-${{ matrix.output-suffix }}.dmg dmg
         env:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
       - name: Notarize .dmg
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.notarize
         uses: cocoalibs/xcode-notarization-action@v1
         with:
           app-path: 'Cryptomator-*.dmg'
           apple-id: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
           password: ${{ secrets.MACOS_NOTARIZATION_PW }}
           team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
-          xcode-path: ${{ matrix.xcode-path }}
+          xcode-path: '/Applications/Xcode_16.app'
       - name: Add possible alpha/beta tags to installer name
         run: mv Cryptomator-*.dmg Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.output-suffix }}.dmg
       - name: Create detached GPG signature with key 615D449FE6E6A235
@@ -227,14 +255,16 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dmg-${{ matrix.output-suffix }}
-          path: Cryptomator-*.dmg
+          path: |
+            Cryptomator-*.dmg
+            Cryptomator-*.asc
           if-no-files-found: error
       - name: Publish dmg on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
+        uses: softprops/action-gh-release@v2
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}

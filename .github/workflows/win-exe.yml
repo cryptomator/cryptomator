@@ -8,11 +8,19 @@ on:
       version:
         description: 'Version'
         required: false
+      isDebug:
+        description: 'Build debug version with console output'
+        type: boolean
+        default: false
+
 
 env:
-  JAVA_VERSION: 19
   JAVA_DIST: 'zulu'
-  JAVA_CACHE: 'maven'
+  JAVA_VERSION: '24.0.1+9'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
+  WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
+  WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
 
 defaults:
   run:
@@ -30,44 +38,73 @@ jobs:
     needs: [get-version]
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
+      WIN_CONSOLE_FLAG: ''
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          java-package: 'jdk+fx'
-          cache: ${{ env.JAVA_CACHE }}
-      - name: Ensure major jfx version in pom equals in jdk
-        shell: pwsh
+          check-latest: true
+          cache: 'maven'
+      - name: Install wix and extensions
         run: |
-          $jfxPomVersion = (&mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout) -split "\."
-          $jfxJdkVersion = ((Get-Content -path "${env:JAVA_HOME}/lib/javafx.properties" | Where-Object {$_ -like 'javafx.version=*' }) -replace '.*=','') -split "\."
-          if ($jfxPomVersion[0] -ne $jfxJdkVersion[0]) {
-            Write-Error "Major part of JavaFX version in pom($($jfxPomVersion[0])) does not match the version in JDK($($jfxJdkVersion[0])) "
-            exit 1
+          dotnet tool install --global wix --version 6.0.0
+          wix.exe extension add WixToolset.UI.wixext/6.0.0 --global
+          wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
+      - name: Download and extract JavaFX jmods from Gluon
+        #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
+        run: |
+          curl --output openjfx-jmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
+          if(!(Get-FileHash -Path openjfx-jmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
+            throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
           }
+          Expand-Archive -Path openjfx-jmods.zip -DestinationPath openjfx-jmods
+          Get-ChildItem -Path openjfx-jmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
+        shell: pwsh
+      - name: Ensure major jfx version in pom and in jmods is the same
+        run: |
+          JMOD_VERSION_AMD64=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
+          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
+          JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64%%.*}
+          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+          POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+
+          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION_AMD64})"
+            exit 1
+          fi
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
-        run: mvn -B clean package -Pdependency-check,win -DskipTests
+        run: mvn -B clean package -Pwin -DskipTests -Djavafx.platform=win
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
+      - name: Run jlink with help option
+        id: jep-493-check
+        run: |
+          JMOD_PATHS="openjfx-jmods"
+          if ! $(${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"); then
+            JMOD_PATHS="${JAVA_HOME}/jmods;${JMOD_PATHS}"
+          fi
+          echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
       - name: Run jlink
+        #Remark: no compression is applied for improved build compression later (here msi)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.mscapi,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
           --strip-debug
-          --compress=1
+          --compress zip-0
       - name: Prepare debug launcher config
         shell: bash
         run: envsubst '${SEMVER_STR} ${REVISION_NUM} ${APP_NAME} ${LOOPBACK_ALIAS}' < dist/win/resources/debug-launcher.properties > dist/win/resources/CryptomatorDebug.properties
@@ -87,25 +124,27 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2023 Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
-          --java-options "--enable-native-access=org.cryptomator.jfuse.win"
+          --java-options "--enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
           --java-options "-Dfile.encoding=\"utf-8\""
-          --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
-          --java-options "-Dcryptomator.pluginDir=\"~/AppData/Roaming/Cryptomator/Plugins\""
-          --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
-          --java-options "-Dcryptomator.p12Path=\"~/AppData/Roaming/Cryptomator/key.p12\""
-          --java-options "-Dcryptomator.ipcSocketPath=\"~/AppData/Roaming/Cryptomator/ipc.socket\""
-          --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
+          --java-options "-Djava.net.useSystemProxies=true"
+          --java-options "-Dcryptomator.logDir=\"@{localappdata}/Cryptomator\""
+          --java-options "-Dcryptomator.pluginDir=\"@{appdata}/Cryptomator/Plugins\""
+          --java-options "-Dcryptomator.settingsPath=\"@{appdata}/Cryptomator/settings.json;@{userhome}/AppData/Roaming/Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.p12Path=\"@{appdata}/Cryptomator/key.p12;@{userhome}/AppData/Roaming/Cryptomator/key.p12\""
+          --java-options "-Dcryptomator.ipcSocketPath=\"@{localappdata}/Cryptomator/ipc.socket\""
+          --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Cryptomator\""
           --java-options "-Dcryptomator.loopbackAlias=\"${{ env.LOOPBACK_ALIAS }}\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
-          --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"@{appdata}/Cryptomator/keychain.json;@{userhome}/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Djavafx.verbose=${{ inputs.isDebug }}"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
           --add-launcher "CryptomatorDebug=CryptomatorDebug.properties"
@@ -127,26 +166,56 @@ jobs:
           attrib -r appdir/Cryptomator/Cryptomator.exe
           attrib -r appdir/Cryptomator/CryptomatorDebug.exe
         shell: pwsh
-      - name: Extract integrations DLL for code signing
+      - name: Extract jars with DLLs for Codesigning
         shell: pwsh
-        run: gci ./appdir/Cryptomator/app/mods/ -File integrations-win-*.jar | ForEach-Object {Set-Location -Path $_.Directory; jar --file=$($_.FullName) --extract integrations.dll }
+        run: |
+          Add-Type -AssemblyName "System.io.compression.filesystem"
+          $jarFolder = Resolve-Path ".\appdir\Cryptomator\app\mods"
+          $jarExtractDir = New-Item -Path ".\appdir\jar-extract" -ItemType Directory
+
+          #for all jars inspect
+          Get-ChildItem -Path $jarFolder -Filter "*.jar" | ForEach-Object {
+              $jar = [Io.compression.zipfile]::OpenRead($_.FullName)
+              if (@($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0) {
+                  #jars containing dlls extract
+                  Set-Location $jarExtractDir
+                  Expand-Archive -Path $_.FullName
+              }
+              $jar.Dispose()
+          }
+      - name: Extract wixhelper.dll for Codesigning #see https://github.com/cryptomator/cryptomator/issues/3130
+        shell: pwsh
+        run: |
+          New-Item -Path appdir/jpackage-jmod -ItemType Directory
+          & $env:JAVA_HOME\bin\jmod.exe extract --dir jpackage-jmod "${env:JAVA_HOME}\jmods\jdk.jpackage.jmod"
+          Get-ChildItem -Recurse -Path "jpackage-jmod" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
       - name: Codesign
-        uses: skymatic/code-sign-action@v2
+        uses: skymatic/code-sign-action@v3
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
           certificatesha1: 5FC94CE149E5B511E621F53A060AC67CBD446B3A
           description: Cryptomator
           timestampUrl: 'http://timestamp.digicert.com'
-          folder: appdir/Cryptomator
+          folder: appdir
           recursive: true
-      - name: Repack signed DLL into jar
+      - name: Replace DLLs inside jars with signed ones
         shell: pwsh
         run: |
-          gci ./appdir/Cryptomator/app/mods/ -File integrations-win-*.jar | ForEach-Object {Set-Location -Path $_.Directory; jar --file=$($_.FullName) --update integrations.dll; Remove-Item integrations.dll}
+          $jarExtractDir = Resolve-Path ".\appdir\jar-extract"
+          $jarFolder = Resolve-Path ".\appdir\Cryptomator\app\mods"
+          Get-ChildItem -Path $jarExtractDir | ForEach-Object {
+              $jarName = $_.Name
+              $jarFile = "${jarFolder}\${jarName}.jar"
+              Set-Location $_
+              Get-ChildItem -Path $_ -Recurse -File "*.dll" | ForEach-Object {
+                  # update jar with signed dll
+                  jar --file="$jarFile" --update $(Resolve-Path -Relative -Path $_)
+              }
+          }
       - name: Generate license for MSI
         run: >
-          mvn -B license:add-third-party
+          mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.outputDirectory=dist/win/resources"
           "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
@@ -165,20 +234,21 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2023 Skymatic GmbH"
-          --app-version "${{ needs.get-version.outputs.semVerNum }}"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
+          --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           --win-menu
           --win-dir-chooser
           --win-shortcut-prompt
-          --win-update-url "https:\\cryptomator.org"
+          --win-update-url "https:\\cryptomator.org\downloads"
           --win-menu-group Cryptomator
           --resource-dir dist/win/resources
           --license-file dist/win/resources/license.rtf
           --file-associations dist/win/resources/FAvaultFile.properties
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
+          JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
       - name: Codesign MSI
-        uses: skymatic/code-sign-action@v2
+        uses: skymatic/code-sign-action@v3
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -196,53 +266,41 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: msi
           path: |
             Cryptomator-*.msi
             Cryptomator-*.asc
           if-no-files-found: error
-      - name: Publish .msi on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          files: |
-            *.msi
-            *.asc
-
-  call-winget-flow:
-    needs: [get-version, build-msi]
-    if: github.event.action == 'published' && needs.get-version.outputs.versionType == 'stable'
-    uses: ./.github/workflows/winget.yml
-    with:
-      releaseTag: ${{ github.event.release.tag_name }}
-    secrets: inherit
-
 
   build-exe:
     name: Build .exe installer
     runs-on: windows-latest
     needs: [get-version, build-msi]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Install wix and extensions
+        run: |
+          dotnet tool install --global wix --version 6.0.0
+          wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global
+          wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
       - name: Download .msi
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: msi
           path: dist/win/bundle/resources
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: ${{ env.JAVA_CACHE }}
+          check-latest: true
+          cache: 'maven'
       - name: Generate license for exe
         run: >
-          mvn -B license:add-third-party
+          mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
           "-Dlicense.outputDirectory=dist/win/bundle/resources"
@@ -253,32 +311,32 @@ jobs:
         shell: pwsh
       - name: Download WinFsp
         run: |
-          $winfspUrl= (Select-String -Path ".\dist\win\bundle\resources\winfsp-download.url" -Pattern 'https:.*').Matches.Value
-          curl --output dist/win/bundle/resources/winfsp.msi -L $winfspUrl
+          curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
         shell: pwsh
-      - name: Compile to wixObj file
+      - name: Download Legacy-WinFsp uninstaller
+        run: |
+          curl --output dist/win/bundle/resources/winfsp-uninstaller.exe -L ${{ env.WINFSP_UNINSTALLER }}
+        shell: pwsh
+      - name: Create Wix Burn bundle
+        working-directory: dist/win
         run: >
-          "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
-          -ext WixBalExtension
-          -out dist/win/bundle/
-          -dBundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
-          -dBundleVendor="Skymatic GmbH"
-          -dBundleCopyright="(C) 2016 - 2023 Skymatic GmbH"
-          -dAboutUrl="https://cryptomator.org"
-          -dHelpUrl="https://cryptomator.org/contact"
-          -dUpdateUrl="https://cryptomator.org/downloads/"
-      - name: Create executable with linker
-        run: >
-          "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
-          -ext WixBalExtension
-          -out installer/unsigned/Cryptomator-Installer.exe
+          wix build
+          -define BundleName="Cryptomator"
+          -define BundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
+          -define BundleVendor="Skymatic GmbH"
+          -define BundleCopyright="(C) 2016 - 2025 Skymatic GmbH"
+          -define AboutUrl="https://cryptomator.org"
+          -define HelpUrl="https://cryptomator.org/contact"
+          -define UpdateUrl="https://cryptomator.org/downloads/"
+          -ext "WixToolset.Util.wixext"
+          -ext "WixToolset.BootstrapperApplications.wixext"
+          ./bundle/bundleWithWinfsp.wxs
+          -out "../../installer/unsigned/Cryptomator-Installer.exe"
       - name: Detach burn engine in preparation to sign
         run: >
-          "${WIX}/bin/insignia.exe"
-          -ib installer/unsigned/Cryptomator-Installer.exe
-          -o tmp/engine.exe
+          wix burn detach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe
       - name: Codesign burn engine
-        uses: skymatic/code-sign-action@v2
+        uses: skymatic/code-sign-action@v3
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -287,12 +345,10 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: tmp
       - name: Reattach signed burn engine to installer
-        run : >
-          "${WIX}/bin/insignia.exe"
-          -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
-          -o installer/Cryptomator-Installer.exe
+        run: >
+          wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
       - name: Codesign EXE
-        uses: skymatic/code-sign-action@v2
+        uses: skymatic/code-sign-action@v3
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -310,59 +366,68 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: exe
           path: |
             Cryptomator-*.exe
             Cryptomator-*.asc
           if-no-files-found: error
+
+  publish:
+    name: Publish installers to the github release
+    if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    needs: [build-msi, build-exe]
+    outputs:
+      download-url-msi: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }}
+      download-url-exe: ${{ fromJSON(steps.publish.outputs.assets)[1].browser_download_url }}
+    steps:
+      - name: Download installers
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
       - name: Publish .msi on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
+        id: publish
+        uses: softprops/action-gh-release@v2
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          # do not change ordering of filelist, required for correct job output
           files: |
-            Cryptomator-*.exe
-            Cryptomator-*.asc
+            *.msi
+            *.exe
+            *.asc
 
-  allowlist:
-    name: Anti Virus Allowlisting
-    if: startsWith(github.ref, 'refs/tags/')
+  allowlist-msi:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [publish]
+    with:
+      url: ${{ needs.publish.outputs.download-url-msi }}
+    secrets: inherit
+
+  allowlist-exe:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [publish, allowlist-msi]
+    with:
+      url: ${{ needs.publish.outputs.download-url-exe }}
+    secrets: inherit
+
+  notify-winget:
+    name: Notify for winget-release
+    if: needs.get-version.outputs.versionType == 'stable'
+    needs: [publish, get-version]
     runs-on: ubuntu-latest
-    needs: [build-msi, build-exe]
     steps:
-      - name: Download .msi
-        uses: actions/download-artifact@v3
-        with:
-          name: msi
-          path: msi
-      - name: Download .exe
-        uses: actions/download-artifact@v3
-        with:
-          name: exe
-          path: exe
-      - name: Collect files
-        run: |
-          mkdir files
-          cp msi/*.msi files
-          cp exe/*.exe files
-      - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@4.3.3
-        with:
-          protocol: ftps
-          server: allowlist.kaspersky-labs.com
-          port: 990
-          username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
-          password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
-          local-dir: files/
-      - name: Upload to Avast
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
-        with:
-          protocol: ftp
-          server: whitelisting.avast.com
-          port: 21
-          username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
-          password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
-          local-dir: files/
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: false
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "MSI of ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} published."
+          SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/winget.yml| release to winget>."
+          SLACK_FOOTER: false
+          MSG_MINIMAL: true

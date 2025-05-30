@@ -1,45 +1,57 @@
 package org.cryptomator.ui.fxapp;
 
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
+import java.time.Instant;
 import java.util.Comparator;
 
 @FxApplicationScoped
 public class UpdateChecker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateChecker.class);
-	private static final Duration AUTOCHECK_DELAY = Duration.seconds(5);
+	private static final Duration AUTO_CHECK_DELAY = Duration.seconds(5);
 
+	private final Environment env;
 	private final Settings settings;
-	private final String currentVersion;
-	private final StringProperty latestVersionProperty;
-	private final Comparator<String> semVerComparator;
+	private final StringProperty latestVersion = new SimpleStringProperty();
 	private final ScheduledService<String> updateCheckerService;
+	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
+	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
+	private final Comparator<String> versionComparator = new SemVerComparator();
+	private final BooleanBinding updateAvailable;
+	private final BooleanBinding checkFailed;
 
 	@Inject
-	UpdateChecker(Settings settings, Environment env, @Named("latestVersion") StringProperty latestVersionProperty, @Named("SemVer") Comparator<String> semVerComparator, ScheduledService<String> updateCheckerService) {
+	UpdateChecker(Settings settings, //
+				  Environment env, //
+				  ScheduledService<String> updateCheckerService) {
+		this.env = env;
 		this.settings = settings;
-		this.latestVersionProperty = latestVersionProperty;
-		this.semVerComparator = semVerComparator;
 		this.updateCheckerService = updateCheckerService;
-		this.currentVersion = env.getAppVersion();
+		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
+		this.updateAvailable = Bindings.createBooleanBinding(this::isUpdateAvailable, latestVersion);
+		this.checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, state);
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
-		if (settings.checkForUpdates().get()) {
-			startCheckingForUpdates(AUTOCHECK_DELAY);
+		if (!env.disableUpdateCheck() && settings.checkForUpdates.get()) {
+			startCheckingForUpdates(AUTO_CHECK_DELAY);
 		}
 	}
 
@@ -59,36 +71,65 @@ public class UpdateChecker {
 
 	private void checkStarted(WorkerStateEvent event) {
 		LOG.debug("Checking for updates...");
+		state.set(UpdateCheckState.IS_CHECKING);
 	}
 
 	private void checkSucceeded(WorkerStateEvent event) {
-		String latestVersion = updateCheckerService.getValue();
-		LOG.info("Current version: {}, lastest version: {}", currentVersion, latestVersion);
-
-		if (semVerComparator.compare(currentVersion, latestVersion) < 0) {
-			// update is available
-			latestVersionProperty.set(latestVersion);
-		} else {
-			latestVersionProperty.set(null);
-		}
+		var latestVersionString = updateCheckerService.getValue();
+		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersionString);
+		lastSuccessfulUpdateCheck.set(Instant.now());
+		latestVersion.set(latestVersionString);
+		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 	}
 
 	private void checkFailed(WorkerStateEvent event) {
-		LOG.warn("Error checking for updates", event.getSource().getException());
+		state.set(UpdateCheckState.CHECK_FAILED);
+	}
+
+	public enum UpdateCheckState {
+		NOT_CHECKED,
+		IS_CHECKING,
+		CHECK_SUCCESSFUL,
+		CHECK_FAILED;
 	}
 
 	/* Observable Properties */
-
 	public BooleanBinding checkingForUpdatesProperty() {
 		return updateCheckerService.stateProperty().isEqualTo(Worker.State.RUNNING);
 	}
 
 	public ReadOnlyStringProperty latestVersionProperty() {
-		return latestVersionProperty;
+		return latestVersion;
+	}
+
+	public BooleanBinding updateAvailableProperty() {
+		return updateAvailable;
+	}
+
+	public BooleanBinding checkFailedProperty() {
+		return checkFailed;
+	}
+
+	public boolean isUpdateAvailable() {
+		String currentVersion = getCurrentVersion();
+		String latestVersionString = latestVersion.get();
+
+		if (currentVersion == null || latestVersionString == null) {
+			return false;
+		} else {
+			return versionComparator.compare(currentVersion, latestVersionString) < 0;
+		}
+	}
+
+	public ObjectProperty<Instant> lastSuccessfulUpdateCheckProperty() {
+		return lastSuccessfulUpdateCheck;
+	}
+
+	public ObjectProperty<UpdateCheckState> updateCheckStateProperty() {
+		return state;
 	}
 
 	public String getCurrentVersion() {
-		return currentVersion;
+		return env.getAppVersion();
 	}
-
 }

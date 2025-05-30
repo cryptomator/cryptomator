@@ -5,12 +5,15 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.tobiasdiez.easybind.EasyBind;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.decryptname.DecryptNameComponent;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
@@ -38,10 +41,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {
@@ -54,25 +60,40 @@ public class VaultDetailUnlockedController implements FxController {
 	private final VaultService vaultService;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	private final Stage mainWindow;
+	private final Optional<RevealPathService> revealPathService;
+	private final DecryptNameComponent.Factory decryptNameWindowFactory;
 	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
 	private final ObservableValue<Boolean> accessibleViaPath;
 	private final ObservableValue<Boolean> accessibleViaUri;
 	private final ObservableValue<String> mountPoint;
-	private final BooleanProperty draggingOver = new SimpleBooleanProperty();
+	private final BooleanProperty draggingOverLocateEncrypted = new SimpleBooleanProperty();
+	private final BooleanProperty draggingOverDecryptName = new SimpleBooleanProperty();
 	private final BooleanProperty ciphertextPathsCopied = new SimpleBooleanProperty();
 
-	//FXML
-	public Button dropZone;
+	@FXML
+	public Button revealEncryptedDropZone;
+	@FXML
+	public Button decryptNameDropZone;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, WrongFileAlertComponent.Builder wrongFileAlert, @MainWindow Stage mainWindow, ResourceBundle resourceBundle) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, //
+										 FxApplicationWindows appWindows, //
+										 VaultService vaultService, //
+										 VaultStatisticsComponent.Builder vaultStatsBuilder, //
+										 WrongFileAlertComponent.Builder wrongFileAlert, //
+										 @MainWindow Stage mainWindow, //
+										 Optional<RevealPathService> revealPathService, //
+										 DecryptNameComponent.Factory decryptNameWindowFactory, //
+										 ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.vaultService = vaultService;
 		this.wrongFileAlert = wrongFileAlert;
 		this.mainWindow = mainWindow;
+		this.revealPathService = revealPathService;
+		this.decryptNameWindowFactory = decryptNameWindowFactory;
 		this.resourceBundle = resourceBundle;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
 		this.vaultStatsBuilder = vaultStatsBuilder;
@@ -89,30 +110,110 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	public void initialize() {
-		dropZone.setOnDragEntered(this::handleDragEvent);
-		dropZone.setOnDragOver(this::handleDragEvent);
-		dropZone.setOnDragDropped(this::handleDragEvent);
-		dropZone.setOnDragExited(this::handleDragEvent);
+		revealEncryptedDropZone.setOnDragOver(e -> handleDragOver(e, draggingOverLocateEncrypted));
+		revealEncryptedDropZone.setOnDragDropped(e -> handleDragDropped(e, this::getCiphertextPath, this::revealOrCopyPaths));
+		revealEncryptedDropZone.setOnDragExited(_ -> draggingOverLocateEncrypted.setValue(false));
 
-		EasyBind.includeWhen(dropZone.getStyleClass(), ACTIVE_CLASS, draggingOver);
+		decryptNameDropZone.setOnDragOver(e -> handleDragOver(e, draggingOverDecryptName));
+		decryptNameDropZone.setOnDragDropped(e -> showDecryptNameWindow(e.getDragboard().getFiles().stream().map(File::toPath).toList()));
+		decryptNameDropZone.setOnDragExited(_ -> draggingOverDecryptName.setValue(false));
+
+		EasyBind.includeWhen(revealEncryptedDropZone.getStyleClass(), ACTIVE_CLASS, draggingOverLocateEncrypted);
+		EasyBind.includeWhen(decryptNameDropZone.getStyleClass(), ACTIVE_CLASS, draggingOverDecryptName);
 	}
 
-	private void handleDragEvent(DragEvent event) {
-		if (DragEvent.DRAG_OVER.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
-			event.acceptTransferModes(TransferMode.LINK);
-			draggingOver.set(true);
-		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
-			List<Path> ciphertextPaths = event.getDragboard().getFiles().stream().map(File::toPath).map(this::getCiphertextPath).flatMap(Optional::stream).toList();
-			if (ciphertextPaths.isEmpty()) {
+	private void handleDragOver(DragEvent event, BooleanProperty prop) {
+		if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+			if (SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_MAC) {
+				event.acceptTransferModes(TransferMode.LINK);
+			} else {
+				event.acceptTransferModes(TransferMode.ANY);
+			}
+			prop.set(true);
+		}
+	}
+
+	private <T> void handleDragDropped(DragEvent event, Function<Path, T> computation, Consumer<List<T>> positiveAction) {
+		if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+			List<T> objects = event.getDragboard().getFiles().stream().map(File::toPath).map(computation).filter(Objects::nonNull).toList();
+			if (objects.isEmpty()) {
 				wrongFileAlert.build().showWrongFileAlertWindow();
 			} else {
-				revealOrCopyPaths(ciphertextPaths);
+				positiveAction.accept(objects);
 			}
-			event.setDropCompleted(!ciphertextPaths.isEmpty());
+			event.setDropCompleted(!objects.isEmpty());
 			event.consume();
-		} else if (DragEvent.DRAG_EXITED.equals(event.getEventType())) {
-			draggingOver.set(false);
 		}
+	}
+
+	@FXML
+	public void chooseDecryptedFileAndReveal() {
+		Preconditions.checkState(accessibleViaPath.getValue());
+		var fileChooser = new FileChooser();
+		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.locateEncrypted.filePickerTitle"));
+		fileChooser.setInitialDirectory(Path.of(mountPoint.getValue()).toFile());
+		var cleartextFile = fileChooser.showOpenDialog(mainWindow);
+		if (cleartextFile != null) {
+			var ciphertextPath = getCiphertextPath(cleartextFile.toPath());
+			if (ciphertextPath != null) {
+				revealOrCopyPaths(List.of(ciphertextPath));
+			}
+		}
+	}
+
+	@FXML
+	public void showDecryptNameWindow() {
+		showDecryptNameWindow(List.of());
+	}
+
+	private void showDecryptNameWindow(List<Path> pathsToDecrypt) {
+		decryptNameWindowFactory.create(vault.get(), mainWindow, pathsToDecrypt).showDecryptFileNameWindow();
+	}
+
+	private boolean startsWithVaultAccessPoint(Path path) {
+		return path.startsWith(Path.of(mountPoint.getValue()));
+	}
+
+	@Nullable
+	private Path getCiphertextPath(Path path) {
+		if (!startsWithVaultAccessPoint(path)) {
+			LOG.debug("Path does not start with mount point of selected vault: {}", path);
+			return null;
+		}
+		try {
+			return vault.get().getCiphertextPath(path);
+		} catch (IOException e) {
+			LOG.warn("Unable to get ciphertext path from path: {}", path, e);
+			return null;
+		}
+	}
+
+	private void revealOrCopyPaths(List<Path> paths) {
+		revealPathService.ifPresentOrElse(svc -> revealPaths(svc, paths), () -> {
+			LOG.warn("No service provider to reveal files found.");
+			copyPathsToClipboard(paths);
+		});
+	}
+
+	private void revealPaths(RevealPathService service, List<Path> paths) {
+		paths.forEach(path -> {
+			try {
+				LOG.debug("Revealing {}", path);
+				service.reveal(path);
+			} catch (RevealFailedException e) {
+				LOG.error("Revealing ciphertext file failed.", e);
+			}
+		});
+	}
+
+	private void copyPathsToClipboard(List<Path> paths) {
+		StringBuilder clipboardString = new StringBuilder();
+		paths.forEach(p -> clipboardString.append(p.toString()).append("\n"));
+		Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, clipboardString.toString()));
+		ciphertextPathsCopied.setValue(true);
+		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
+			ciphertextPathsCopied.set(false);
+		});
 	}
 
 	private VaultStatisticsComponent buildVaultStats(Vault vault) {
@@ -139,77 +240,6 @@ public class VaultDetailUnlockedController implements FxController {
 	@FXML
 	public void showVaultStatistics() {
 		vaultStats.getUnchecked(vault.get()).showVaultStatisticsWindow();
-	}
-
-	@FXML
-	public void chooseFileAndReveal() {
-		Preconditions.checkState(accessibleViaPath.getValue());
-		var fileChooser = new FileChooser();
-		fileChooser.setTitle(resourceBundle.getString("main.vaultDetail.filePickerTitle"));
-		fileChooser.setInitialDirectory(Path.of(mountPoint.getValue()).toFile());
-		var cleartextFile = fileChooser.showOpenDialog(mainWindow);
-		if (cleartextFile != null) {
-			var ciphertextPaths = getCiphertextPath(cleartextFile.toPath()).stream().toList();
-			revealOrCopyPaths(ciphertextPaths);
-		}
-	}
-
-	private boolean startsWithVaultAccessPoint(Path path) {
-		return path.startsWith(Path.of(mountPoint.getValue()));
-	}
-
-	private Optional<Path> getCiphertextPath(Path path) {
-		if (!startsWithVaultAccessPoint(path)) {
-			LOG.debug("Path does not start with access point of selected vault: {}", path);
-			return Optional.empty();
-		}
-		try {
-			var accessPoint = mountPoint.getValue();
-			var cleartextPath = path.toString().substring(accessPoint.length());
-			if (!cleartextPath.startsWith("/")) {
-				cleartextPath = "/" + cleartextPath;
-			}
-			return Optional.of(vault.get().getCiphertextPath(cleartextPath));
-		} catch (IOException e) {
-			LOG.warn("Unable to get ciphertext path from path: {}", path, e);
-			return Optional.empty();
-		}
-	}
-
-	private void revealOrCopyPaths(List<Path> paths) {
-		if (!revealPaths(paths)) {
-			LOG.warn("No service provider to reveal files found.");
-			copyPathsToClipboard(paths);
-		}
-	}
-
-	/**
-	 * Reveals the paths over the {@link RevealPathService} in the file system
-	 *
-	 * @param paths List of Paths to reveal
-	 * @return true, if at least one service provider was present, false otherwise
-	 */
-	private boolean revealPaths(List<Path> paths) {
-		return RevealPathService.get().findAny().map(s -> {
-			paths.forEach(path -> {
-				try {
-					s.reveal(path);
-				} catch (RevealFailedException e) {
-					LOG.error("Revealing ciphertext file failed.", e);
-				}
-			});
-			return true;
-		}).orElse(false);
-	}
-
-	private void copyPathsToClipboard(List<Path> paths) {
-		StringBuilder clipboardString = new StringBuilder();
-		paths.forEach(p -> clipboardString.append(p.toString()).append("\n"));
-		Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, clipboardString.toString()));
-		ciphertextPathsCopied.setValue(true);
-		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
-			ciphertextPathsCopied.set(false);
-		});
 	}
 
 	/* Getter/Setter */
@@ -253,4 +283,6 @@ public class VaultDetailUnlockedController implements FxController {
 	public boolean isCiphertextPathsCopied() {
 		return ciphertextPathsCopied.get();
 	}
+
 }
+

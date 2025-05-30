@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 cd $(dirname $0)
 REVISION_NO=`git rev-list --count HEAD`
@@ -7,32 +8,68 @@ REVISION_NO=`git rev-list --count HEAD`
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
 command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found."; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found."; exit 1; }
+command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip not found."; exit 1; }
 
 VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
+CPU_ARCH=$(uname -p)
+
+if [[ ! "${CPU_ARCH}" =~ x86_64|aarch64 ]]; then echo "Platform ${CPU_ARCH} not supported"; exit 1; fi
 
 mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 
 # compile
-mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
+mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests -Djavafx.platform=linux
 cp ../../../LICENSE.txt ../../../target
-cp ../launcher.sh ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
-# add runtime
+JAVAFX_VERSION=23.0.2
+JAVAFX_ARCH="x64"
+JAVAFX_JMODS_SHA256='063baebc6922e4a89c94b9dfb7a4f53e59e8d6fec400d4e670b31bc2ab324dec'
+if [ "${CPU_ARCH}" = "aarch64" ]; then
+    JAVAFX_ARCH="aarch64"
+    JAVAFX_JMODS_SHA256='9bbedaeae1590b69e2b22237bda310936df33e344dbc243bea2e86acaab3a0d8'
+fi
+
+# download javaFX jmods
+JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_linux-${JAVAFX_ARCH}_bin-jmods.zip"
+
+
+curl -L ${JAVAFX_JMODS_URL} -o openjfx-jmods.zip
+echo "${JAVAFX_JMODS_SHA256}  openjfx-jmods.zip" | shasum -a256 --check
+mkdir -p openjfx-jmods
+unzip -o -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
+JMOD_VERSION=$(jmod describe ./openjfx-jmods/javafx.base.jmod | head -1)
+JMOD_VERSION=${JMOD_VERSION#*@}
+JMOD_VERSION=${JMOD_VERSION%%.*}
+POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout -B -f ../../../pom.xml)
+POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
+	>&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION})"
+	exit 1
+fi
+
+
+# create runtime
+## check for JEP 493
+JMOD_PATHS="openjfx-jmods"
+if ! ${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"; then
+    JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
+fi
+## create runtime image
 ${JAVA_HOME}/bin/jlink \
     --verbose \
     --output runtime \
-    --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.crypto.ec,jdk.security.auth,jdk.accessibility,jdk.management.jfr \
+    --module-path "${JMOD_PATHS}" \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net,java.compiler \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
     --strip-debug \
-    --compress=1
+    --compress zip-0
 
 # create app dir
-envsubst '${SEMVER_STR} ${REVISION_NUM}' < ../launcher-gtk2.properties > launcher-gtk2.properties
 ${JAVA_HOME}/bin/jpackage \
     --verbose \
     --type app-image \
@@ -44,21 +81,23 @@ ${JAVA_HOME}/bin/jpackage \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
-    --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64" \
-    --copyright "(C) 2016 - 2023 Skymatic GmbH" \
+    --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
+    --copyright "(C) 2016 - 2025 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
-    --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\"" \
-    --java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\"" \
-    --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
-    --java-options "-Dcryptomator.p12Path=\"~/.config/Cryptomator/key.p12\"" \
-    --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\"" \
-    --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
-    --java-options "-Dcryptomator.showTrayIcon=false" \
+    --java-options "-Djava.net.useSystemProxies=true" \
+    --java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
+    --java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
+    --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json\"" \
+    --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
+    --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
+    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\"" \
+    --java-options "-Dcryptomator.showTrayIcon=true" \
+    --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\"" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
-    --add-launcher cryptomator-gtk2=launcher-gtk2.properties \
+    --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
     --resource-dir ../resources
 
 # transform AppDir
@@ -68,27 +107,31 @@ envsubst '${REVISION_NO}' < resources/AppDir/bin/cryptomator.sh > Cryptomator.Ap
 cp ../common/org.cryptomator.Cryptomator256.png Cryptomator.AppDir/usr/share/icons/hicolor/256x256/apps/org.cryptomator.Cryptomator.png
 cp ../common/org.cryptomator.Cryptomator512.png Cryptomator.AppDir/usr/share/icons/hicolor/512x512/apps/org.cryptomator.Cryptomator.png
 cp ../common/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg
+cp ../common/org.cryptomator.Cryptomator.tray.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.tray.svg
+cp ../common/org.cryptomator.Cryptomator.tray-unlocked.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.tray-unlocked.svg
+cp ../common/org.cryptomator.Cryptomator.tray.svg Cryptomator.AppDir/usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-symbolic.svg
+cp ../common/org.cryptomator.Cryptomator.tray-unlocked.svg Cryptomator.AppDir/usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-unlocked-symbolic.svg
 cp ../common/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/usr/share/applications/org.cryptomator.Cryptomator.desktop
 cp ../common/org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/metainfo/org.cryptomator.Cryptomator.metainfo.xml
 cp ../common/application-vnd.cryptomator.vault.xml Cryptomator.AppDir/usr/share/mime/packages/application-vnd.cryptomator.vault.xml
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
-ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
-ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
+ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/org.cryptomator.Cryptomator.desktop
+ln -s org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/metainfo/org.cryptomator.Cryptomator.appdata.xml
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
 
 # load AppImageTool
-curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o /tmp/appimagetool.AppImage
+curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage
 
 # create AppImage
 /tmp/appimagetool.AppImage \
     Cryptomator.AppDir \
-    cryptomator-${SEMVER_STR}-x86_64.AppImage  \
-    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
+    cryptomator-${SEMVER_STR}-${CPU_ARCH}.AppImage  \
+    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${CPU_ARCH}.AppImage.zsync'
 
 echo ""
-echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-x86_64.AppImage"
+echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${CPU_ARCH}.AppImage"
 echo ""
-echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir jni runtime squashfs-root; rm launcher-gtk2.properties /tmp/appimagetool.AppImage"
+echo >&2 "To clean up, run: rm -rf Cryptomator.AppDir appdir runtime squashfs-root openjfx-jmods; rm /tmp/appimagetool.AppImage openjfx-jmods.zip"
 echo ""

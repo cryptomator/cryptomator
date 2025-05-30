@@ -1,33 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
+	  fx:id="vaultListCell"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultListCellController"
 	  prefHeight="60"
 	  prefWidth="200"
 	  spacing="12"
 	  alignment="CENTER_LEFT">
 	<!-- Remark Check the containing list view for a fixed cell size before editing height properties -->
-	<padding>
-		<Insets topRightBottomLeft="12"/>
-	</padding>
-	<children>
-		<VBox alignment="CENTER" minWidth="20">
-			<FontAwesome5IconView fx:id="vaultStateView" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
-		</VBox>
-		<VBox spacing="4" HBox.hgrow="ALWAYS">
-			<Label styleClass="header-label" text="${controller.vault.displayName}"/>
-			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS">
-				<tooltip>
-					<Tooltip text="${controller.vault.displayablePath}"/>
-				</tooltip>
-			</Label>
-		</VBox>
-	</children>
+	<VBox alignment="CENTER" minWidth="20">
+		<FontAwesome5IconView fx:id="vaultStateView" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+	</VBox>
+	<VBox spacing="4" HBox.hgrow="ALWAYS">
+		<Label styleClass="header-label" text="${controller.vault.displayName}"/>
+		<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" visible="${!controller.compactMode}" managed="${!controller.compactMode}">
+			<tooltip>
+				<Tooltip text="${controller.vault.displayablePath}"/>
+			</tooltip>
+		</Label>
+	</VBox>
 </HBox>

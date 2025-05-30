@@ -107,7 +107,7 @@ public class FxApplicationTerminator {
 
 		if (allowQuitWithoutPrompt.get()) {
 			exitingResponse.performQuit();
-		} else if (settings.autoCloseVaults().get() && !preventQuitWithGracefulLock.get()) {
+		} else if (settings.autoCloseVaults.get() && !preventQuitWithGracefulLock.get()) {
 			var lockAllTask = vaultService.createLockAllTask(vaults.filtered(Vault::isUnlocked), false);
 			lockAllTask.setOnSucceeded(event -> {
 				LOG.info("Locked remaining vaults was succesful.");

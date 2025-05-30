@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyValidateController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12"
+	  alignment="TOP_CENTER">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<FormattedLabel format="%recoveryKey.recover.prompt" arg1="${controller.vault.displayName}" wrapText="true"/>
+
+		<TextArea wrapText="true" prefRowCount="4" fx:id="textarea" textFormatter="${controller.recoveryKeyTextFormatter}" onKeyPressed="#onKeyPressed"/>
+
+		<StackPane>
+			<Label text="Just some Filler" visible="false" graphicTextGap="6">
+				<graphic>
+					<FontAwesome5IconView glyph="ANCHOR"/>
+				</graphic>
+			</Label>
+			<Label text="%recoveryKey.recover.correctKey" graphicTextGap="6" contentDisplay="LEFT" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyCorrect}">
+				<graphic>
+					<FontAwesome5IconView glyph="CHECK"/>
+				</graphic>
+			</Label>
+			<Label text="%recoveryKey.recover.wrongKey" graphicTextGap="6" contentDisplay="LEFT" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyWrong}">
+				<graphic>
+					<FontAwesome5IconView glyph="TIMES" styleClass="glyph-icon-red"/>
+				</graphic>
+			</Label>
+			<Label text="%recoveryKey.recover.invalidKey" graphicTextGap="6" contentDisplay="LEFT" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyInvalid}">
+				<graphic>
+					<FontAwesome5IconView glyph="TIMES" styleClass="glyph-icon-red"/>
+				</graphic>
+			</Label>
+		</StackPane>
+	</children>
+</VBox>

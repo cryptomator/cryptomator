@@ -25,7 +25,7 @@ public class SupportedLanguagesTest {
 	}
 
 	public static Stream<String> languageTags() {
-		return SupportedLanguages.LANGUAGAE_TAGS.stream() //
+		return SupportedLanguages.LANGUAGE_TAGS.stream() //
 				.filter(tag -> !"en".equals(tag)); // english uses the default bundle
 	}
 }

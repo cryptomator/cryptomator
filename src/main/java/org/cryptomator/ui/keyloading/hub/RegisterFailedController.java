@@ -1,6 +1,5 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.nimbusds.jose.JWEObject;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.keyloading.KeyLoading;
 
@@ -12,18 +11,18 @@ import java.util.concurrent.CompletableFuture;
 public class RegisterFailedController implements FxController {
 
 	private final Stage window;
-	private final CompletableFuture<JWEObject> result;
+	private final CompletableFuture<ReceivedKey> result;
 
 	@Inject
-	public RegisterFailedController(@KeyLoading Stage window, CompletableFuture<JWEObject> result) {
+	public RegisterFailedController(@KeyLoading Stage window, CompletableFuture<ReceivedKey> result) {
 		this.window = window;
 		this.result = result;
 	}
 
 	@FXML
 	public void close() {
+		result.cancel(true);
 		window.close();
 	}
-
 
 }

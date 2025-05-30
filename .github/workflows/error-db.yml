@@ -2,7 +2,7 @@ name: Update Error Database
 
 on:
   discussion:
-    types: [created, edited, category_changed, answered, unanswered]
+    types: [created, edited, deleted, category_changed, answered, unanswered]
   discussion_comment:
     types: [created, edited, deleted]
 
@@ -12,8 +12,9 @@ jobs:
     if: github.event.discussion.category.name == 'Errors'
     steps:
       - name: Query Discussion Data
+        if: github.event_name == 'discussion_comment' || github.event_name == 'discussion' && github.event.action != 'deleted'
         id: query-data
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const query = `query ($owner: String!, $name: String!, $discussionNumber: Int!) {
@@ -47,8 +48,13 @@ jobs:
       - name: Merge Error Code Data
         run: |
           jq -c '.' ${{ steps.get-gist.outputs.file }} > original.json
-          echo $DISCUSSION | jq -c '.repository.discussion | .comments = .comments.totalCount | {(.id|tostring) : .}' > new.json
-          jq -s '.[0] * .[1]' original.json new.json > merged.json
+          if [ ! -z "$DISCUSSION" ]
+          then
+            echo $DISCUSSION | jq -c '.repository.discussion | .comments = .comments.totalCount | {(.id|tostring) : .}' > new.json
+            jq -s '.[0] * .[1]' original.json new.json > merged.json
+          else
+            cat original.json | jq 'del(.[] | select(.url=="https://github.com/cryptomator/cryptomator/discussions/${{ github.event.discussion.number }}"))' > merged.json
+          fi
         env:
           DISCUSSION: ${{ steps.query-data.outputs.result }}
       - name: Patch Gist

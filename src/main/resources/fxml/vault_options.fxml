@@ -36,5 +36,13 @@
 				<fx:include source="vault_options_masterkey.fxml"/>
 			</content>
 		</Tab>
+		<Tab fx:id="hubTab" id="HUB" text="%vaultOptions.hub"> <!-- is removed in controller, when config.keyid.scheme is not cryptomator-hub -->
+			<graphic>
+				<FontAwesome5IconView glyph="KEY"/>
+			</graphic>
+			<content>
+				<fx:include source="vault_options_hub.fxml"/>
+			</content>
+		</Tab>
 	</tabs>
 </TabPane>

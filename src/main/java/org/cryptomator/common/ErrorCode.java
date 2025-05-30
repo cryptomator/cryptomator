@@ -3,6 +3,7 @@ package org.cryptomator.common;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -32,18 +33,15 @@ public class ErrorCode {
 		this.rootCauseSpecificFrames = rootCauseSpecificFrames;
 	}
 
-	// visible for testing
-	String methodCode() {
+	public String methodCode() {
 		return format(traceCode(rootCause, LATEST_FRAME));
 	}
 
-	// visible for testing
-	String rootCauseCode() {
+	public String rootCauseCode() {
 		return format(traceCode(rootCause, rootCauseSpecificFrames));
 	}
 
-	// visible for testing
-	String throwableCode() {
+	public String throwableCode() {
 		return format(traceCode(throwable, ALL_FRAMES));
 	}
 
@@ -117,7 +115,7 @@ public class ErrorCode {
 	 * @param bottomFrames Other stack frames, potentially forming the bottom of the stack of <code>allFrames</code>
 	 * @return The number of additional frames in <code>allFrames</code>. In most cases this should be equal to the difference in size.
 	 */
-	// visible for testing
+	@VisibleForTesting
 	static int countTopmostFrames(StackTraceElement[] allFrames, StackTraceElement[] bottomFrames) {
 		if (allFrames.length < bottomFrames.length) {
 			// if frames had been stacked on top of bottomFrames, allFrames would be larger
@@ -127,7 +125,7 @@ public class ErrorCode {
 		}
 	}
 
-	// visible for testing
+	@VisibleForTesting
 	static <T> int commonSuffixLength(T[] set, T[] subset) {
 		Preconditions.checkArgument(set.length >= subset.length);
 		// iterate items backwards as long as they are identical

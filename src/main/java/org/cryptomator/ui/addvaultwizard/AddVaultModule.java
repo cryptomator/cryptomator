@@ -5,21 +5,23 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.changepassword.NewPasswordController;
+import org.cryptomator.ui.changepassword.PasswordStrengthUtil;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.NewPasswordController;
-import org.cryptomator.ui.common.PasswordStrengthUtil;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -43,9 +45,8 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, ResourceBundle resourceBundle) {
+	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(primaryStage);
@@ -66,6 +67,13 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
+	@Named("shorteningThreshold")
+	@AddVaultWizardScoped
+	static IntegerProperty provideShorteningThreshold() {
+		return new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.MAX_SHORTENING_THRESHOLD);
+	}
+
+	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
 	static ObjectProperty<Vault> provideVault() {
@@ -80,13 +88,6 @@ public abstract class AddVaultModule {
 	}
 
 	// ------------------
-
-	@Provides
-	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
-	@AddVaultWizardScoped
-	static Scene provideWelcomeScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_WELCOME);
-	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
@@ -130,12 +131,14 @@ public abstract class AddVaultModule {
 		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_SUCCESS);
 	}
 
-	// ------------------
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS)
+	@AddVaultWizardScoped
+	static Scene provideCreateNewVaultExpertSettingsScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS);
+	}
 
-	@Binds
-	@IntoMap
-	@FxControllerKey(AddVaultWelcomeController.class)
-	abstract FxController bindWelcomeController(AddVaultWelcomeController controller);
+	// ------------------
 
 	@Binds
 	@IntoMap
@@ -180,5 +183,10 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(AddVaultSuccessController.class)
 	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(CreateNewVaultExpertSettingsController.class)
+	abstract FxController bindCreateNewVaultExpertSettingsController(CreateNewVaultExpertSettingsController controller);
 
 }

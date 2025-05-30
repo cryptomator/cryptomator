@@ -8,7 +8,7 @@ import dagger.multibindings.StringKey;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
-import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;

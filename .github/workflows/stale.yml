@@ -1,0 +1,24 @@
+# Configuration for close-stale-issues - https://github.com/marketplace/actions/close-stale-issues
+
+name: 'Close stale issues'
+on:
+  schedule:
+    - cron: '00 09 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 365
+          days-before-close: 90
+          exempt-issue-labels: 'type:security-issue,type:feature-request,type:enhancement,type:upstream-bug,state:awaiting-response,state:blocked,state:confirmed'
+          exempt-all-milestones: true
+          stale-issue-label: 'state:stale'
+          stale-pr-label: 'state:stale'
+          stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+          stale-pr-message: 'This PR has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'

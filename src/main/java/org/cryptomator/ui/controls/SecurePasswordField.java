@@ -43,7 +43,7 @@ public class SecurePasswordField extends TextField {
 	private static final char WIPE_CHAR = ' ';
 	private static final int INITIAL_BUFFER_SIZE = 50;
 	private static final int GROW_BUFFER_SIZE = 50;
-	private static final String DEFAULT_PLACEHOLDER = "●";
+	private static final String DEFAULT_PLACEHOLDER = "•";
 	private static final String STYLE_CLASS = "secure-password-field";
 	private static final KeyCodeCombination SHORTCUT_BACKSPACE = new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.SHORTCUT_DOWN);
 

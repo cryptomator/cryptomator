@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
@@ -19,9 +21,9 @@
 	  spacing="12"
 	  alignment="CENTER_LEFT">
 	<fx:define>
-		<ToggleGroup fx:id="predefinedLocationToggler"/>
-		<FontAwesome5IconView fx:id="badLocation" styleClass="glyph-icon-red" glyph="TIMES" />
-		<FontAwesome5IconView fx:id="goodLocation" styleClass="glyph-icon-primary" glyph="CHECK" />
+		<ToggleGroup fx:id="locationPresetsToggler"/>
+		<FontAwesome5IconView fx:id="badLocation" styleClass="glyph-icon-red" glyph="TIMES"/>
+		<FontAwesome5IconView fx:id="goodLocation" styleClass="glyph-icon-primary" glyph="CHECK"/>
 	</fx:define>
 	<padding>
 		<Insets topRightBottomLeft="24"/>
@@ -29,30 +31,33 @@
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<VBox spacing="6">
-			<Label wrapText="true" text="%addvaultwizard.new.locationInstruction"/>
-			<RadioButton fx:id="iclouddriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="iCloud Drive" visible="${controller.observedLocationPresets.foundIclouddrive}" managed="${controller.observedLocationPresets.foundIclouddrive}"/>
-			<RadioButton fx:id="dropboxRadioButton" toggleGroup="${predefinedLocationToggler}" text="Dropbox" visible="${controller.observedLocationPresets.foundDropbox}" managed="${controller.observedLocationPresets.foundDropbox}"/>
-			<RadioButton fx:id="gdriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="Google Drive" visible="${controller.observedLocationPresets.foundGdrive}" managed="${controller.observedLocationPresets.foundGdrive}"/>
-			<RadioButton fx:id="onedriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="OneDrive" visible="${controller.observedLocationPresets.foundOnedrive}" managed="${controller.observedLocationPresets.foundOnedrive}"/>
-			<RadioButton fx:id="megaRadioButton" toggleGroup="${predefinedLocationToggler}" text="MEGA" visible="${controller.observedLocationPresets.foundMega}" managed="${controller.observedLocationPresets.foundMega}"/>
-			<RadioButton fx:id="pcloudRadioButton" toggleGroup="${predefinedLocationToggler}" text="pCloud" visible="${controller.observedLocationPresets.foundPcloud}" managed="${controller.observedLocationPresets.foundPcloud}"/>
-			<HBox spacing="12" alignment="CENTER_LEFT">
-				<RadioButton fx:id="customRadioButton" toggleGroup="${predefinedLocationToggler}" text="%addvaultwizard.new.directoryPickerLabel"/>
-				<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">
-					<graphic>
-						<FontAwesome5IconView glyph="FOLDER_OPEN"/>
-					</graphic>
-				</Button>
-			</HBox>
-		</VBox>
+		<Label wrapText="true" text="%addvaultwizard.new.locationInstruction"/>
+		<ScrollPane hbarPolicy="NEVER">
+			<VBox fx:id="radioButtonVBox" spacing="6">
+				<!-- PLACEHOLDER, more radio buttons are added programmatically via controller -->
+				<HBox fx:id="customLocationRadioBtn" spacing="12" alignment="CENTER_LEFT">
+					<RadioButton fx:id="customRadioButton" toggleGroup="${locationPresetsToggler}" text="%addvaultwizard.new.directoryPickerLabel"/>
+					<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">
+						<graphic>
+							<FontAwesome5IconView glyph="FOLDER_OPEN"/>
+						</graphic>
+					</Button>
+				</HBox>
+			</VBox>
+		</ScrollPane>
+		<Region prefHeight="2"/>
+		<Label wrapText="true" text="%addvaultwizard.new.locationLoading" visible="${controller.loadingPresetLocations}" managed="${controller.loadingPresetLocations}" graphicTextGap="8">
+			<graphic>
+				<FontAwesome5Spinner/>
+			</graphic>
+		</Label>
 
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
 		<VBox spacing="6">
 			<Label text="%addvaultwizard.new.locationLabel" labelFor="$locationTextField"/>
-			<TextField promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" editable="false" disable="${!controller.anyRadioButtonSelected}" HBox.hgrow="ALWAYS"/>
-			<Label fx:id="vaultPathStatus" styleClass="label-muted" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" text="${controller.statusText}" graphic="${controller.statusGraphic}" />
+			<TextField fx:id="locationTextField" promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" editable="false" disable="${!controller.anyRadioButtonSelected}" HBox.hgrow="ALWAYS"/>
+			<Label fx:id="locationStatusLabel" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6"/>
 		</VBox>
 
 		<Region VBox.vgrow="ALWAYS"/>

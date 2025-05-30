@@ -27,7 +27,7 @@ public class VaultConfigCache {
 
 	void reloadConfig() throws IOException {
 		try {
-			config.set(readConfigFromStorage(this.settings.path().get()));
+			config.set(readConfigFromStorage(this.settings.path.get()));
 		} catch (IOException e) {
 			config.set(null);
 			throw e;
