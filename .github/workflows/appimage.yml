@@ -8,6 +8,12 @@ on:
       version:
         description: 'Version'
         required: false
+  push:
+    paths:
+      - '.github/workflows/appimage.yml'
+      - 'dist/linux/appimage/**'
+      - 'dist/linux/common/**'
+      - 'dist/linux/resources/**'
 
 env:
   JAVA_DIST: 'temurin'
@@ -17,7 +23,7 @@ jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml
     with:
-      version: ${{ inputs.version }}
+      version: ${{ inputs.version }} #okay if not defined
 
   build:
     name: Build AppImage
