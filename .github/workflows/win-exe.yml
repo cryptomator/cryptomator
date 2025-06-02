@@ -12,6 +12,10 @@ on:
         description: 'Build debug version with console output'
         type: boolean
         default: false
+  push:
+    paths:
+      - '.github/workflows/win-exe.yml'
+      - 'dist/win/**'
 
 
 env:
