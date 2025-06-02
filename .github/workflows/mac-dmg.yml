@@ -40,8 +40,8 @@ jobs:
           architecture: aarch64
           output-suffix: arm64
           fuse-lib: FUSE-T
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_osx-aarch64_bin-jmods.zip'
-          openjfx-sha: 'c690cc642a3924cf56622951f478ba57aec9ce09063761f800c3319331bed3fc'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: 'b5a94a13077507003fa852512bfa33f4fb680bc8076d8002e4227a84c85171d4'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
