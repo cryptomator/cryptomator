@@ -85,7 +85,7 @@ public class GeneralPreferencesController implements FxController {
 		var keychainSettingsConverter = new ServiceToSettingsConverter<>(keychainAccessProviders);
 		keychainBackendChoiceBox.getItems().addAll(keychainAccessProviders);
 		keychainBackendChoiceBox.setValue(keychainSettingsConverter.fromString(settings.keychainProvider.get()));
-		keychainBackendChoiceBox.setConverter(new KeychainProviderDisplayNameConverter());
+		keychainBackendChoiceBox.setConverter(new NamedServiceConverter<>());
 		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
 		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
@@ -106,13 +106,13 @@ public class GeneralPreferencesController implements FxController {
 			var idsAndNames = settings.directories.stream().collect(Collectors.toMap(vs -> vs.id, vs -> vs.displayName.getValue()));
 			if (!idsAndNames.isEmpty()) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.displayName(), newProvider.displayName());
+					LOG.debug("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.getName(), newProvider.getName());
 				}
 				keychainMigrations = keychainMigrations.thenRunAsync(() -> {
 					try {
 						KeychainManager.migrate(oldProvider, newProvider, idsAndNames);
 					} catch (KeychainAccessException e) {
-						LOG.warn("Failed to migrate all entries from {} to {}", oldProvider.displayName(), newProvider.displayName(), e);
+						LOG.warn("Failed to migrate all entries from {} to {}", oldProvider.getName(), newProvider.getName(), e);
 					}
 				}, backgroundExecutor);
 			}
@@ -151,25 +151,6 @@ public class GeneralPreferencesController implements FxController {
 	}
 
 	/* Helper classes */
-
-	private static class KeychainProviderDisplayNameConverter extends StringConverter<KeychainAccessProvider> {
-
-		@Override
-		public String toString(KeychainAccessProvider provider) {
-			if (provider == null) {
-				return null;
-			} else {
-				return provider.displayName();
-			}
-		}
-
-		@Override
-		public KeychainAccessProvider fromString(String string) {
-			throw new UnsupportedOperationException();
-		}
-
-	}
-
 	private static class NamedServiceConverter<T extends NamedServiceProvider> extends StringConverter<T> {
 
 		@Override

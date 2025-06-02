@@ -43,24 +43,10 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	@Override
-	public String displayName() {
-		return getClass().getName();
-	}
-
-	@Override
 	public void storePassphrase(String key, String displayName, CharSequence passphrase) throws KeychainAccessException {
-		storePassphrase(key, displayName, passphrase, true);
-	}
-
-	//TODO: remove ignored parameter once the API is fixed
-	@Override
-	public void storePassphrase(String key, String displayName, CharSequence passphrase, boolean ignored) throws KeychainAccessException {
 		try {
 			lock.writeLock().lock();
-			var kc = getKeychainOrFail();
-			//this is the only keychain actually using the parameter
-			var usesOSAuth = (kc.getClass().getName().equals("org.cryptomator.macos.keychain.TouchIdKeychainAccess"));
-			kc.storePassphrase(key, displayName, passphrase, usesOSAuth);
+			getKeychainOrFail().storePassphrase(key, displayName, passphrase);
 		} finally {
 			lock.writeLock().unlock();
 		}
