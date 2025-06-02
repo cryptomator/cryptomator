@@ -3,6 +3,7 @@ name: Build
 on:
   push:
     paths:
+      - '.github/workflows/build.yml'
       - 'pom.xml'
       - 'src/**'
   pull_request_target:
