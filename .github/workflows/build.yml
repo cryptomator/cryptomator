@@ -2,6 +2,9 @@ name: Build
 
 on:
   push:
+    paths:
+      - 'pom.xml'
+      - 'src/**'
   pull_request_target:
     types: [labeled]
 
