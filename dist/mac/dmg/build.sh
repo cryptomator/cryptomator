@@ -106,7 +106,7 @@ ${JAVA_HOME}/bin/jpackage \
     --copyright "(C) ${COPYRIGHT_YEARS} ${VENDOR}" \
     --app-version "${VERSION_NO}" \
     --java-options "--enable-preview" \
-    --java-options "--enable-native-access=org.cryptomator.jfuse.mac" \
+    --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
