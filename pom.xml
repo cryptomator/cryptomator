@@ -358,7 +358,7 @@
 					<consoleOutputReporter>
 						<disable>true</disable>
 					</consoleOutputReporter>
-					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar} --enable-native-access=javafx.graphics</argLine>
 					<statelessTestsetInfoReporter
 							implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
 					</statelessTestsetInfoReporter>
