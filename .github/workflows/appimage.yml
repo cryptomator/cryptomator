@@ -9,6 +9,8 @@ on:
         description: 'Version'
         required: false
   push:
+    branches-ignore:
+      - 'dependabot/**'
     paths:
       - '.github/workflows/appimage.yml'
       - 'dist/linux/appimage/**'

@@ -14,6 +14,8 @@ on:
         default: false
         type: boolean
   push:
+    branches-ignore:
+      - 'dependabot/**'
     paths:
       - '.github/workflows/mac-dmg.yml'
       - 'dist/mac/**'

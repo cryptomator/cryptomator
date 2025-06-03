@@ -13,6 +13,8 @@ on:
         default: false
         type: boolean
   push:
+    branches-ignore:
+      - 'dependabot/**'
     paths:
       - '.github/workflows/debian.yml'
       - 'dist/linux/debian/**'
