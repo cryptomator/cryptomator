@@ -32,15 +32,15 @@ REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
-JAVAFX_VERSION=23.0.2
+JAVAFX_VERSION=24.0.1
 JAVAFX_ARCH="undefined"
 JAVAFX_JMODS_SHA256="undefined"
 if [ "$(machine)" = "arm64e" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256="c690cc642a3924cf56622951f478ba57aec9ce09063761f800c3319331bed3fc"
+    JAVAFX_JMODS_SHA256="b5a94a13077507003fa852512bfa33f4fb680bc8076d8002e4227a84c85171d4"
 else
     JAVAFX_ARCH="x64"
-    JAVAFX_JMODS_SHA256="5e6c65c065eea22430c0eab36f37a5985eb8ad99e19e8772262021740d338f68"
+    JAVAFX_JMODS_SHA256="6e62a426d43c168a488521f904a523f3dd6ee2cf103e08136f2fd465c828a105"
 fi
 JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_osx-${JAVAFX_ARCH}_bin-jmods.zip"
 
@@ -106,7 +106,7 @@ ${JAVA_HOME}/bin/jpackage \
     --copyright "(C) ${COPYRIGHT_YEARS} ${VENDOR}" \
     --app-version "${VERSION_NO}" \
     --java-options "--enable-preview" \
-    --java-options "--enable-native-access=org.cryptomator.jfuse.mac" \
+    --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \

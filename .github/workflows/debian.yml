@@ -13,6 +13,8 @@ on:
         default: false
         type: boolean
   push:
+    branches-ignore:
+      - 'dependabot/**'
     paths:
       - '.github/workflows/debian.yml'
       - 'dist/linux/debian/**'
@@ -24,10 +26,10 @@ env:
   JAVA_VERSION: '24.0.1+9'
   COFFEELIBS_JDK: 24
   COFFEELIBS_JDK_VERSION: '24.0.1+9-0ppa3'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '063baebc6922e4a89c94b9dfb7a4f53e59e8d6fec400d4e670b31bc2ab324dec'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: '9bbedaeae1590b69e2b22237bda310936df33e344dbc243bea2e86acaab3a0d8'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '425fac742b9fbd095b2ce868cff82d1024620f747c94a7144d0a4879e756146c'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: '7e02edd0f4ee5527a27c94b0bbba66fcaaff41009119e45d0eca0f96ddfb6e7b'
 
 jobs:
   get-version:

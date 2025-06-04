@@ -46,7 +46,7 @@
 		<dagger.version>2.56.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.18.3</jackson.version>
-		<javafx.version>23.0.2</javafx.version>
+		<javafx.version>24.0.1</javafx.version>
 		<jwt.version>4.5.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
 		<logback.version>1.5.18</logback.version>
@@ -358,7 +358,7 @@
 					<consoleOutputReporter>
 						<disable>true</disable>
 					</consoleOutputReporter>
-					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar} --enable-native-access=javafx.graphics</argLine>
 					<statelessTestsetInfoReporter
 							implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
 					</statelessTestsetInfoReporter>

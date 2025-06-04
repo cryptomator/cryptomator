@@ -69,9 +69,9 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 }
 
 ## download jfx jmods
-$javaFxVersion='23.0.2'
+$javaFxVersion='24.0.1'
 $javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-$javaFxJmodsSHA256 = 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
+$javaFxJmodsSHA256 = 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
 $javaFxJmods = '.\resources\jfxJmods.zip'
 if( !(Test-Path -Path $javaFxJmods) ) {
 	Write-Output "Downloading ${javaFxJmodsUrl}..."
@@ -124,7 +124,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--vendor $Vendor `
 	--copyright $copyright `
 	--java-options "--enable-preview" `
-	--java-options "--enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win" `
+	--java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win" `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `

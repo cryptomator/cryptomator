@@ -133,9 +133,9 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.brokenFileNode.message"));
 		eventDescription.setValue(bfe.ciphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("eventView.entry.brokenFileNode.showEncrypted", () -> reveal(revealService, convertVaultPathToSystemPath(bfe.ciphertextPath())));
+			addAction("eventView.entry.brokenFileNode.showEncrypted", () -> reveal(revealService, bfe.ciphertextPath()));
 		} else {
-			addAction("eventView.entry.brokenFileNode.copyEncrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.ciphertextPath()).toString()));
+			addAction("eventView.entry.brokenFileNode.copyEncrypted", () -> copyToClipboard(bfe.ciphertextPath().toString()));
 		}
 		addAction("eventView.entry.brokenFileNode.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.cleartextPath()).toString()));
 	}

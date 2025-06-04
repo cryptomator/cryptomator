@@ -44,7 +44,7 @@ public class Settings {
 	@Deprecated // to be changed to "whatever is available" eventually
 	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : //
 			SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : //
-					"org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
+					"org.cryptomator.linux.keychain.GnomeKeyringKeychainAccess";
 	static final String DEFAULT_QUICKACCESS_SERVICE = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.quickaccess.ExplorerQuickAccessService" : //
 			SystemUtils.IS_OS_LINUX ? "org.cryptomator.linux.quickaccess.NautilusBookmarks" : null;
 
@@ -147,6 +147,11 @@ public class Settings {
 
 	@SuppressWarnings("deprecation")
 	private void migrateLegacySettings(SettingsJson json) {
+		// migrate renamed keychainAccess
+		if(this.keychainProvider.getValueSafe().equals("org.cryptomator.linux.SecretServiceKeychainAccess")) {
+			this.keychainProvider.setValue("org.cryptomator.linux.GnomeKeyringKeychainAccess");
+		}
+
 		// implicit migration of 1.6.x legacy setting "preferredVolumeImpl":
 		if (this.mountService.get() == null && json.preferredVolumeImpl != null) {
 			this.mountService.set(switch (json.preferredVolumeImpl) {

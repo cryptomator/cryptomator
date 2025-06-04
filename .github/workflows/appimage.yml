@@ -9,6 +9,8 @@ on:
         description: 'Version'
         required: false
   push:
+    branches-ignore:
+      - 'dependabot/**'
     paths:
       - '.github/workflows/appimage.yml'
       - 'dist/linux/appimage/**'
@@ -35,12 +37,12 @@ jobs:
         include:
           - os: ubuntu-latest
             appimage-suffix: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_linux-x64_bin-jmods.zip'
-            openjfx-sha: '063baebc6922e4a89c94b9dfb7a4f53e59e8d6fec400d4e670b31bc2ab324dec'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-x64_bin-jmods.zip'
+            openjfx-sha: '425fac742b9fbd095b2ce868cff82d1024620f747c94a7144d0a4879e756146c'
           - os: ubuntu-24.04-arm
             appimage-suffix: aarch64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_linux-aarch64_bin-jmods.zip'
-            openjfx-sha: '9bbedaeae1590b69e2b22237bda310936df33e344dbc243bea2e86acaab3a0d8'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-aarch64_bin-jmods.zip'
+            openjfx-sha: '7e02edd0f4ee5527a27c94b0bbba66fcaaff41009119e45d0eca0f96ddfb6e7b'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -115,7 +117,7 @@ jobs:
           --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{  needs.get-version.outputs.semVerNum }}.${{  needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
-          --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator"
+          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{  needs.get-version.outputs.semVerStr }}\""

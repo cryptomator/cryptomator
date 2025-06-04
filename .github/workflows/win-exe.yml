@@ -13,6 +13,8 @@ on:
         type: boolean
         default: false
   push:
+    branches-ignore:
+      - 'dependabot/**'
     paths:
       - '.github/workflows/win-exe.yml'
       - 'dist/win/**'
@@ -21,8 +23,8 @@ on:
 env:
   JAVA_DIST: 'zulu'
   JAVA_VERSION: '24.0.1+9'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_windows-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
 
@@ -127,7 +129,7 @@ jobs:
           --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
-          --java-options "--enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
