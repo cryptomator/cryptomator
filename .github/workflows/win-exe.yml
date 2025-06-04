@@ -146,6 +146,7 @@ jobs:
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"@{appdata}/Cryptomator/keychain.json;@{userhome}/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=\"@{appdata}/Cryptomator/windowsHelloKeychain.json\""
           --java-options "-Djavafx.verbose=${{ inputs.isDebug }}"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
