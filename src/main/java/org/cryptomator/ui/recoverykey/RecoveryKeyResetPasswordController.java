@@ -128,12 +128,11 @@ public class RecoveryKeyResetPasswordController implements FxController {
 			if (!vaultListManager.containsVault(vault.getPath())) {
 				vaultListManager.add(vault.getPath());
 			}
-
+			window.close();
 			dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
 					.setTitleKey("recoveryKey.recoverVaultConfig.title")
 					.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message")
 					.build().showAndWait();
-			window.close();
 
 		} catch (IOException | CryptoException e) {
 			LOG.error("Recovery process failed", e);

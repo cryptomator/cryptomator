@@ -28,7 +28,6 @@ public final class RecoveryDirectory implements AutoCloseable {
 	}
 
 	public static RecoveryDirectory create(Path vaultPath) throws IOException {
-		//TODO: Files.createTmpDirectory Doku lesen und ggf nutzen
 		Path recovery = addR(vaultPath);
 		Files.createDirectory(recovery);
 		return new RecoveryDirectory(vaultPath);
@@ -36,12 +35,12 @@ public final class RecoveryDirectory implements AutoCloseable {
 
 	public void moveRecoveredFiles() throws IOException {
 		Files.move(recoveryPath.resolve(MASTERKEY_FILENAME), vaultPath.resolve(MASTERKEY_FILENAME), StandardCopyOption.REPLACE_EXISTING);
-		Files.move(recoveryPath.resolve(VAULTCONFIG_FILENAME), vaultPath.resolve(VAULTCONFIG_FILENAME)); //TODO: ? StandardCopyOption.REPLACE_EXISTING
+		Files.move(recoveryPath.resolve(VAULTCONFIG_FILENAME), vaultPath.resolve(VAULTCONFIG_FILENAME), StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	private void deleteRecoveryDirectory() {
 		try (var paths = Files.walk(recoveryPath)) {
-			paths.sorted(Comparator.reverseOrder()).forEach(p -> { //TODO: wieso reverseOrder
+			paths.sorted(Comparator.reverseOrder()).forEach(p -> {
 				try {
 					Files.delete(p);
 				} catch (IOException e) {
