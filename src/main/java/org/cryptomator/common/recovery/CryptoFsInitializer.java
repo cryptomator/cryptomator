@@ -3,12 +3,12 @@ package org.cryptomator.common.recovery;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javafx.beans.property.IntegerProperty;
-
-import org.cryptomator.common.Constants;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
-import org.cryptomator.cryptolib.api.*;
+import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.api.CryptorProvider;
+import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
 
 import static org.cryptomator.common.Constants.DEFAULT_KEY_ID;
 
@@ -18,7 +18,7 @@ public final class CryptoFsInitializer {
 
 	public static void init(Path recoveryPath,
 							Masterkey masterkey,
-							IntegerProperty shorteningThreshold,
+							int shorteningThreshold,
 							CryptorProvider.Scheme scheme) throws IOException, CryptoException {
 
 		MasterkeyLoader loader = ignored -> masterkey.copy();
@@ -26,7 +26,7 @@ public final class CryptoFsInitializer {
 				.cryptoFileSystemProperties() //
 				.withCipherCombo(scheme) //
 				.withKeyLoader(loader) //
-				.withShorteningThreshold(shorteningThreshold.get()) //
+				.withShorteningThreshold(shorteningThreshold) //
 				.build();
 		CryptoFileSystemProvider.initialize(recoveryPath, fsProps, DEFAULT_KEY_ID);
 	}

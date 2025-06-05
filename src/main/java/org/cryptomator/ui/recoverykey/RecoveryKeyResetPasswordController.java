@@ -120,7 +120,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 			Path masterkeyFilePath = recoveryPath.resolve(MASTERKEY_FILENAME);
 
 			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, masterkeyFilePath, newPasswordController.passwordField.getCharacters())) {
-				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold, cipherCombo.get());
+				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), cipherCombo.get());
 			}
 
 			recoveryDirectory.moveRecoveredFiles();
