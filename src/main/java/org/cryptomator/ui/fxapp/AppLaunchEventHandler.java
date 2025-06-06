@@ -12,6 +12,7 @@ import javax.inject.Named;
 import javafx.application.Platform;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
@@ -58,29 +59,30 @@ class AppLaunchEventHandler {
 		switch (event.type()) {
 			case REVEAL_APP -> appWindows.showMainWindow();
 			case OPEN_FILE -> Platform.runLater(() -> {
-				event.pathsToOpen().forEach(this::addOrRevealVault);
+				event.pathsToOpen().forEach(this::openPotentialVault);
 			});
 			default -> LOG.warn("Unsupported event type: {}", event.type());
 		}
 	}
 
 	// TODO deduplicate MainWindowController...
-	private void addOrRevealVault(Path potentialVaultPath) {
+	private void openPotentialVault(Path path) {
 		assert Platform.isFxApplicationThread();
 		try {
-			final Vault v;
-			if (potentialVaultPath.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT)) {
-				v = vaultListManager.add(potentialVaultPath.getParent());
+			Path potentialVaultPath = path.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT) ? path.getParent() : path;
+			final Optional<Vault> v = vaultListManager.get(potentialVaultPath);
+			if (v.isPresent()) {
+				if (v.get().isUnlocked()) {
+					vaultService.reveal(v.get());
+				} else if (v.get().isLocked()) {
+					appWindows.startUnlockWorkflow(v.get(), null);
+				}
 			} else {
-				v = vaultListManager.add(potentialVaultPath);
+				vaultListManager.add(potentialVaultPath);
+				LOG.debug("Added vault {}", potentialVaultPath);
 			}
-
-			if (v.isUnlocked()) {
-				vaultService.reveal(v);
-			}
-			LOG.debug("Added vault {}", potentialVaultPath);
 		} catch (IOException e) {
-			LOG.error("Failed to add vault " + potentialVaultPath, e);
+			LOG.error("Failed to add vault " + path, e);
 		}
 	}
 

@@ -106,7 +106,7 @@ public class VaultListManager {
 		vaultList.addAll(vaults);
 	}
 
-	private Optional<Vault> get(Path vaultPath) {
+	public Optional<Vault> get(Path vaultPath) {
 		assert vaultPath.isAbsolute();
 		assert vaultPath.normalize().equals(vaultPath);
 		return vaultList.stream() //
