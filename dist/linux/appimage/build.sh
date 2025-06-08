@@ -12,7 +12,7 @@ command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip not found."; exit 1; }
 
 VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
-CPU_ARCH=$(uname -p)
+CPU_ARCH=$(uname -m)
 
 if [[ ! "${CPU_ARCH}" =~ x86_64|aarch64 ]]; then echo "Platform ${CPU_ARCH} not supported"; exit 1; fi
 
@@ -128,7 +128,7 @@ chmod +x /tmp/appimagetool.AppImage
 /tmp/appimagetool.AppImage \
     Cryptomator.AppDir \
     cryptomator-${SEMVER_STR}-${CPU_ARCH}.AppImage  \
-    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${CPU_ARCH}.AppImage.zsync'
+    -u "gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${CPU_ARCH}.AppImage.zsync"
 
 echo ""
 echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${CPU_ARCH}.AppImage"
