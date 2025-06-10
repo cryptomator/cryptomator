@@ -208,9 +208,19 @@ if ($LASTEXITCODE -ne 0) {
  "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # download Winfsp
-$winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
+$winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
+$winfspMsiHash = '073A70E00F77423E34BED98B86E600DEF93393BA5822204FAC57A29324DB9F7A'
 Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
+$computedHash = $(Get-FileHash -Path '.\bundle\resources\winfsp.msi' -Algorithm SHA256).Hash
+if (! $computedHash.Equals($winfspMsiHash)) {
+	Write-Error -Category InvalidData -CategoryActivity "Data integrity check failed" -Message @"
+	Downloaded Winfsp Installer does not match stored SHA256 checksum.
+	Expected: $winfspMsiHash
+	Actual:   $computedHash
+"@
+	exit 1
+}
 
 # download legacy-winfsp uninstaller
 $winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
