@@ -313,10 +313,13 @@ jobs:
         shell: pwsh
       - name: Download WinFsp
         run: |
-          curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
-          if(!(Get-FileHash -Path 'dist/win/bundle/resources/winfsp.msi' -Algorithm SHA256).Hash.ToLower().equals("${{ env.WINFSP_MSI_HASH }}")) {
-            throw "Wrong checksum of Winfsp installer downloaded from ${{ env.WINFSP_MSI }}.";
+          curl --output $env:WINFSP_PATH -L ${{ env.WINFSP_MSI }}
+          $computedHash = (Get-FileHash -Path $env:WINFSP_PATH -Algorithm SHA256).Hash.ToLower()
+          if ($computedHash -ne "${{ env.WINFSP_MSI_HASH }}") {
+            throw "Checksum mismatch for $env:WINFSP_PATH (expected ${{ env.WINFSP_MSI_HASH }}, got $computedHash)."
           }
+        env:
+          WINFSP_PATH: 'dist/win/bundle/resources/winfsp.msi'
         shell: pwsh
       - name: Download Legacy-WinFsp uninstaller
         run: |
