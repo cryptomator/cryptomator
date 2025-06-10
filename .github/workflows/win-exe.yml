@@ -314,7 +314,7 @@ jobs:
       - name: Download WinFsp
         run: |
           curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
-          if(!(Get-FileHash -Path ${{ env.WINFSP_MSI }} -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
+          if(!(Get-FileHash -Path 'dist/win/bundle/resources/winfsp.msi' -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
             throw "Wrong checksum of Winfsp installer downloaded from ${{ env.WINFSP_MSI }}.";
           }
         shell: pwsh
