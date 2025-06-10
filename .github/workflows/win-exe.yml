@@ -25,7 +25,8 @@ env:
   JAVA_VERSION: '24.0.1+9'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_windows-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
-  WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
+  WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
+  WINFSP_MSI_HASH: '073a70e00f77423e34bed98b86e600def93393ba5822204fac57a29324db9f7a'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
 
 defaults:
@@ -313,6 +314,9 @@ jobs:
       - name: Download WinFsp
         run: |
           curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
+          if(!(Get-FileHash -Path ${{ env.WINFSP_MSI }} -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
+            throw "Wrong checksum of Winfsp installer downloaded from ${{ env.WINFSP_MSI }}.";
+          }
         shell: pwsh
       - name: Download Legacy-WinFsp uninstaller
         run: |
