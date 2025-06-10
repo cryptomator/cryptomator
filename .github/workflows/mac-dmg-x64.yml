@@ -240,6 +240,11 @@ jobs:
           Cryptomator-${VERSION_NO}-${{ matrix.output-suffix }}.dmg dmg
         env:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
+      - name: Codesign .dmg
+        run: |
+          codesign -s ${CODESIGN_IDENTITY} --timestamp Cryptomator-*.dmg
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
       - name: Notarize .dmg
         if: startsWith(github.ref, 'refs/tags/') || inputs.notarize
         uses: cocoalibs/xcode-notarization-action@v1
