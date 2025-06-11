@@ -61,7 +61,7 @@
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>26.0.2</jetbrains.annotations.version>
-		<dependency-check.version>12.1.1</dependency-check.version>
+		<dependency-check.version>12.1.2</dependency-check.version>
 		<jacoco.version>0.8.13</jacoco.version>
 		<license-generator.version>2.5.0</license-generator.version>
 		<junit-tree-reporter.version>1.4.0</junit-tree-reporter.version>
