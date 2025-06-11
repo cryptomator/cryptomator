@@ -33,15 +33,15 @@ if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
 }
 $wixExtensions = & wix.exe extension list --global | Out-String
 if ($wixExtensions -notmatch 'WixToolset.UI.wixext') {
-    Write-Error 'UI wix extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.0 --global)'
+    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.0 --global)'
     exit 1
 }
 if ($wixExtensions -notmatch 'WixToolset.Util.wixext') {
-    Write-Error 'Util wix extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.0 --global)'
+    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.0 --global)'
     exit 1
 }
 if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
-    Write-Error 'Util wix extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global)'
+    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global)'
     exit 1
 }
 
@@ -71,11 +71,9 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 ## download jfx jmods for X64, while they are part of the Arm64 JDK
 $archCode = (Get-CimInstance Win32_Processor).Architecture
 $archName = switch ($archCode) {
-    0  { "x86" }
-    5  { "ARM" }
     9  { "x64 (AMD64)" }
     12 { "ARM64" }
-    default { "Unknown or Other ($archCode)" }
+    default { "WMI Win32_Processor.Architecture code ($archCode)" }
 }
 
 switch ($archName) {
@@ -262,3 +260,5 @@ Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName
 	-ext "WixToolset.BootstrapperApplications.wixext" `
     .\bundle\bundleWithWinfsp.wxs `
     -out "installer\$AppName-Installer.exe"
+
+Write-Output "Created EXE installer .\installer\$AppName-Installer.exe"
