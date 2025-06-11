@@ -272,7 +272,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags and architecture to installer name
-        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}_${{ matrix.arch }}.msi
+        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -429,10 +429,8 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           # do not change ordering of filelist, required for correct job output
           files: |
-            *-x64.msi
-            *-arm64.msi
-            *-x64.exe
-            *-arm64.exe
+            *.msi
+            *.exe
             *.asc
 
   allowlist-msi-x64:
