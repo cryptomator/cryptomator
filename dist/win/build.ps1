@@ -33,15 +33,15 @@ if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
 }
 $wixExtensions = & wix.exe extension list --global | Out-String
 if ($wixExtensions -notmatch 'WixToolset.UI.wixext') {
-    Write-Error 'UI wix extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.0 --global)'
+    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.0 --global)'
     exit 1
 }
 if ($wixExtensions -notmatch 'WixToolset.Util.wixext') {
-    Write-Error 'Util wix extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.0 --global)'
+    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.0 --global)'
     exit 1
 }
 if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
-    Write-Error 'Util wix extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global)'
+    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global)'
     exit 1
 }
 
@@ -68,32 +68,60 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	Remove-Item -Path $runtimeImagePath -Force -Recurse
 }
 
-## download jfx jmods
-$javaFxVersion='24.0.1'
-$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-$javaFxJmodsSHA256 = 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
-$javaFxJmods = '.\resources\jfxJmods.zip'
-if( !(Test-Path -Path $javaFxJmods) ) {
-	Write-Output "Downloading ${javaFxJmodsUrl}..."
-	Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
+## download jfx jmods for X64, while they are part of the Arm64 JDK
+$archCode = (Get-CimInstance Win32_Processor).Architecture
+$archName = switch ($archCode) {
+    9  { "x64 (AMD64)" }
+    12 { "ARM64" }
+    default { "WMI Win32_Processor.Architecture code ($archCode)" }
 }
 
-$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
-if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
-	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
-, actual: $jmodsChecksumActual"
-	exit 1;
+switch ($archName) {
+    'ARM64' {
+		$javafxBaseJmod = Join-Path $Env:JAVA_HOME "jmods\javafx.base.jmod"
+		if (!(Test-Path $javafxBaseJmod)) {
+			Write-Error "JavaFX module not found in JDK. Please ensure full JDK (including jmods) is installed."
+			exit 1
+		}
+
+        $jmodPaths = "$Env:JAVA_HOME/jmods"
+    }
+    'x64 (AMD64)' {
+		$javaFxVersion='24.0.1'
+		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
+		$javaFxJmodsSHA256 = 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
+		$javaFxJmods = '.\resources\jfxJmods.zip'
+
+		if( !(Test-Path -Path $javaFxJmods) ) {
+			Write-Output "Downloading ${javaFxJmodsUrl}..."
+			Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
+		}
+
+		$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
+		if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
+			Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
+		, actual: $jmodsChecksumActual"
+			exit 1;
+		}
+
+		Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
+		Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
+		Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
+
+		$jmodPaths="$buildDir/resources/javafx-jmods";
+    }
+    default {
+        Write-Error "Unsupported architecture: $arch"
+        exit 1
+    }
 }
-Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
-Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
-Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 ## create custom runtime
 ### check for JEP 493
-$jmodPaths="$buildDir/resources/javafx-jmods";
 if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from run-time image enabled" -SimpleMatch | Measure-Object).Count -eq 0 ) {
 	$jmodPaths="$Env:JAVA_HOME/jmods;" + $jmodPaths;
 }
+
 ### create runtime
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
@@ -196,7 +224,6 @@ if ($LASTEXITCODE -ne 0) {
 	return 1;
 }
 
-
 #Create RTF license for bundle
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
  "-Dlicense.thirdPartyFilename=license.rtf" `
@@ -243,3 +270,5 @@ Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName
 	-ext "WixToolset.BootstrapperApplications.wixext" `
     .\bundle\bundleWithWinfsp.wxs `
     -out "installer\$AppName-Installer.exe"
+
+Write-Output "Created EXE installer .\installer\$AppName-Installer.exe"

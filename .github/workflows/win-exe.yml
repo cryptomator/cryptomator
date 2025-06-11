@@ -21,8 +21,6 @@ on:
 
 
 env:
-  JAVA_DIST: 'zulu'
-  JAVA_VERSION: '24.0.1+9'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_windows-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
@@ -41,8 +39,21 @@ jobs:
 
   build-msi:
     name: Build .msi Installer
-    runs-on: windows-latest
-    needs: [get-version]
+    runs-on: ${{ matrix.os }}
+    needs: [ get-version ]
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            os: windows-latest
+            java-dist: 'zulu'
+            java-version: '24.0.1+9'
+            java-package: 'jdk'
+          - arch: arm64
+            os: windows-11-arm
+            java-dist: 'liberica'
+            java-version: '24.0.1+11'
+            java-package: 'jdk+fx' #This is needed, as liberica contains JFX 24 Jmods for Windows ARM64
     env:
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
@@ -51,8 +62,9 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: ${{ env.JAVA_DIST }}
-          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ matrix.java-dist }}
+          java-version: ${{ matrix.java-version }}
+          java-package: ${{ matrix.java-package }}
           check-latest: true
           cache: 'maven'
       - name: Install wix and extensions
@@ -61,6 +73,7 @@ jobs:
           wix.exe extension add WixToolset.UI.wixext/6.0.0 --global
           wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
       - name: Download and extract JavaFX jmods from Gluon
+        if: matrix.arch == 'x64'
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
           curl --output openjfx-jmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
@@ -71,6 +84,7 @@ jobs:
           Get-ChildItem -Path openjfx-jmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
         shell: pwsh
       - name: Ensure major jfx version in pom and in jmods is the same
+        if: matrix.arch == 'x64'
         run: |
           JMOD_VERSION_AMD64=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
           JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
@@ -84,7 +98,7 @@ jobs:
             exit 1
           fi
       - name: Set version
-        run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
+        run: mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
         run: mvn -B clean package -Pwin -DskipTests -Djavafx.platform=win
       - name: Patch target dir
@@ -100,7 +114,7 @@ jobs:
           fi
           echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
       - name: Run jlink
-        #Remark: no compression is applied for improved build compression later (here msi)
+        # Remark: no compression is applied for improved build compression later (here msi)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
@@ -258,8 +272,8 @@ jobs:
           description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
-      - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.msi
+      - name: Add possible alpha/beta tags and architecture to installer name
+        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -270,7 +284,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: msi
+          name: msi-${{ matrix.arch }}
           path: |
             Cryptomator-*.msi
             Cryptomator-*.asc
@@ -278,8 +292,23 @@ jobs:
 
   build-exe:
     name: Build .exe installer
-    runs-on: windows-latest
-    needs: [get-version, build-msi]
+    runs-on: ${{ matrix.os }}
+    needs: [ get-version, build-msi ]
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            os: windows-latest
+            executable-suffix: x64
+            java-dist: 'zulu'
+            java-version: '24.0.1+9'
+            java-package: 'jdk'
+          - arch: arm64
+            os: windows-11-arm
+            executable-suffix: arm64
+            java-dist: 'liberica'
+            java-version: '24.0.1+11'
+            java-package: 'jdk+fx' #This is needed, as liberica contains JFX 24 Jmods for Windows ARM64
     steps:
       - uses: actions/checkout@v4
       - name: Install wix and extensions
@@ -290,14 +319,16 @@ jobs:
       - name: Download .msi
         uses: actions/download-artifact@v4
         with:
-          name: msi
+          name: msi-${{ matrix.arch }}
           path: dist/win/bundle/resources
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          distribution: ${{ env.JAVA_DIST }}
-          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ matrix.java-dist }}
+          java-version: ${{ matrix.java-version }}
+          java-package: ${{ matrix.java-package }}
           check-latest: true
           cache: 'maven'
       - name: Generate license for exe
@@ -365,7 +396,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.exe
+        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.executable-suffix }}.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -376,7 +407,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: exe
+          name: exe-${{ matrix.executable-suffix }}
           path: |
             Cryptomator-*.exe
             Cryptomator-*.asc
@@ -386,16 +417,18 @@ jobs:
     name: Publish installers to the github release
     if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
     runs-on: ubuntu-latest
-    needs: [build-msi, build-exe]
+    needs: [ build-msi, build-exe ]
     outputs:
-      download-url-msi: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }}
-      download-url-exe: ${{ fromJSON(steps.publish.outputs.assets)[1].browser_download_url }}
+      download-url-msi-x64: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }}
+      download-url-msi-arm64: ${{ fromJSON(steps.publish.outputs.assets)[1].browser_download_url }}
+      download-url-exe-x64: ${{ fromJSON(steps.publish.outputs.assets)[2].browser_download_url }}
+      download-url-exe-arm64: ${{ fromJSON(steps.publish.outputs.assets)[3].browser_download_url }}
     steps:
       - name: Download installers
         uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-      - name: Publish .msi on GitHub Releases
+      - name: Publish installers on GitHub Releases
         id: publish
         uses: softprops/action-gh-release@v2
         with:
@@ -403,22 +436,38 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           # do not change ordering of filelist, required for correct job output
           files: |
-            *.msi
-            *.exe
+            *x64.msi
+            *arm64.msi
+            *x64.exe
+            *arm64.exe
             *.asc
 
-  allowlist-msi:
+  allowlist-msi-x64:
     uses: ./.github/workflows/av-whitelist.yml
-    needs: [publish]
+    needs: [ publish ]
     with:
-      url: ${{ needs.publish.outputs.download-url-msi }}
+      url: ${{ needs.publish.outputs.download-url-msi-x64 }}
     secrets: inherit
 
-  allowlist-exe:
+  allowlist-msi-arm64:
     uses: ./.github/workflows/av-whitelist.yml
-    needs: [publish, allowlist-msi]
+    needs: [ publish ]
     with:
-      url: ${{ needs.publish.outputs.download-url-exe }}
+      url: ${{ needs.publish.outputs.download-url-msi-arm64 }}
+    secrets: inherit
+
+  allowlist-exe-x64:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [ publish, allowlist-msi-x64 ]
+    with:
+      url: ${{ needs.publish.outputs.download-url-exe-x64 }}
+    secrets: inherit
+
+  allowlist-exe-arm64:
+    uses: ./.github/workflows/av-whitelist.yml
+    needs: [ publish, allowlist-msi-arm64 ]
+    with:
+      url: ${{ needs.publish.outputs.download-url-exe-arm64 }}
     secrets: inherit
 
   notify-winget:
@@ -435,7 +484,7 @@ jobs:
           SLACK_ICON: false
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
-          SLACK_TITLE: "MSI of ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} published."
-          SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/winget.yml| release to winget>."
+          SLACK_TITLE: "MSI packages of ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} published."
+          SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/winget.yml| release them to winget>."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
