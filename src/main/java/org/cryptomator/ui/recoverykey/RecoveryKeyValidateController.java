@@ -140,7 +140,7 @@ public class RecoveryKeyValidateController implements FxController {
 			case RESTORE_VAULT_CONFIG -> {
 				AtomicBoolean illegalArgumentExceptionOccurred = new AtomicBoolean(false);
 				var combo = MasterkeyService.validateRecoveryKeyAndDetectCombo(
-						recoveryKeyFactory, vault, recoveryKey, masterkeyFileAccess, illegalArgumentExceptionOccurred);
+						recoveryKeyFactory, vault, recoveryKey.get(), masterkeyFileAccess, illegalArgumentExceptionOccurred);
 				combo.ifPresent(cipherCombo::set);
 				if (illegalArgumentExceptionOccurred.get()) {
 					recoveryKeyState.set(RecoveryKeyState.INVALID);
