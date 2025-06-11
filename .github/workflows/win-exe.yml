@@ -429,8 +429,10 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           # do not change ordering of filelist, required for correct job output
           files: |
-            *.msi
-            *.exe
+            *x64.msi
+            *arm64.msi
+            *x64.exe
+            *arm64.exe
             *.asc
 
   allowlist-msi-x64:
