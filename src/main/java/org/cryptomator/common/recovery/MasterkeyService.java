@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -68,7 +69,11 @@ public final class MasterkeyService {
 
 	public static Optional<CryptorProvider.Scheme> detect(byte[] masterkey, Path vaultPath) {
 		try (Stream<Path> paths = Files.walk(vaultPath.resolve(DATA_DIR_NAME))) {
-			Optional<Path> c9rFile = paths.filter(p -> p.toString().endsWith(".c9r")).findFirst();
+			List<String> excludedFilenames = List.of("dirid.c9r", "dir.c9r");
+			Optional<Path> c9rFile = paths
+					.filter(p -> p.toString().endsWith(".c9r"))
+					.filter(p -> excludedFilenames.stream().noneMatch(p.toString()::endsWith))
+					.findFirst();
 			if (c9rFile.isEmpty()) {
 				LOG.info("No *.c9r file found in {}", vaultPath);
 				return Optional.empty();
