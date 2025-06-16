@@ -50,14 +50,12 @@ public class MasterkeyOptionsController implements FxController {
 
 	@FXML
 	public void showRecoveryKey() {
-		ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.SHOW_KEY);
-		recoveryKeyWindow.create(vault, window, recoverTypeProperty).showRecoveryKeyCreationWindow();
+		recoveryKeyWindow.create(vault, window, RecoveryActionType.SHOW_KEY).showRecoveryKeyCreationWindow();
 	}
 
 	@FXML
 	public void showRecoverVaultDialog() {
-		ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESET_PASSWORD);
-		recoveryKeyWindow.create(vault, window, recoverTypeProperty).showRecoveryKeyRecoverWindow();
+		recoveryKeyWindow.create(vault, window, RecoveryActionType.RESET_PASSWORD).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML

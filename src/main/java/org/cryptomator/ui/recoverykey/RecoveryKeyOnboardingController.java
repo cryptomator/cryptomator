@@ -19,12 +19,12 @@ public class RecoveryKeyOnboardingController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> recoverykeyRecoverScene;
-	private final ObjectProperty<RecoveryActionType> recoverType;
+	private RecoveryActionType recoverType;
 
 	@Inject
 	public RecoveryKeyOnboardingController(@RecoveryKeyWindow Stage window, //
 										   @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverykeyRecoverScene, //
-										   @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
+										   @Named("recoverType") RecoveryActionType recoverType, //
 										   ResourceBundle resourceBundle) {
 		this.window = window;
 		window.setTitle(resourceBundle.getString("recoveryKey.recoverVaultConfig.title"));
@@ -40,7 +40,7 @@ public class RecoveryKeyOnboardingController implements FxController {
 
 	@FXML
 	public void next() {
-		recoverType.set(RecoveryActionType.RESTORE_VAULT_CONFIG);
+		recoverType = RecoveryActionType.RESTORE_VAULT_CONFIG;
 		window.setScene(recoverykeyRecoverScene.get());
 	}
 }

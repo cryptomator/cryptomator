@@ -27,10 +27,10 @@ public class RecoveryKeyRecoverController implements FxController {
 	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> expertSettingsScene, //
-										ResourceBundle resourceBundle, @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType) {
+										ResourceBundle resourceBundle, @Named("recoverType") RecoveryActionType recoverType) {
 		this.window = window;
 
-		this.nextScene = switch (recoverType.get()) {
+		this.nextScene = switch (recoverType) {
 			case RESTORE_VAULT_CONFIG -> {
 				window.setTitle(resourceBundle.getString("recoveryKey.recoverVaultConfig.title"));
 				yield expertSettingsScene;

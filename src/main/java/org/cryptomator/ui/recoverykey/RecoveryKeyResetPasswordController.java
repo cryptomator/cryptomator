@@ -54,7 +54,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final VaultListManager vaultListManager;
 	private final IntegerProperty shorteningThreshold;
-	private final ObjectProperty<RecoveryActionType> recoverType;
+	private final RecoveryActionType recoverType;
 	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final ResourceBundle resourceBundle;
 	private final StringProperty buttonText = new SimpleStringProperty();
@@ -74,7 +74,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 											  MasterkeyFileAccess masterkeyFileAccess, //
 											  VaultListManager vaultListManager, //
 											  @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
-											  @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
+											  @Named("recoverType") RecoveryActionType recoverType, //
 											  @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
 											  ResourceBundle resourceBundle, Dialogs dialogs) {
 		this.window = window;
@@ -92,7 +92,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.dialogs = dialogs;
 		this.owner = owner;
-		initButtonText(recoverType.get());
+		initButtonText(recoverType);
 	}
 
 	private void initButtonText(RecoveryActionType type) {
@@ -105,7 +105,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 	@FXML
 	public void close() {
-		if (recoverType.getValue().equals(RecoveryActionType.RESTORE_MASTERKEY)) {
+		if (recoverType.equals(RecoveryActionType.RESTORE_MASTERKEY)) {
 			window.close();
 		} else {
 			window.setScene(recoverExpertSettingsScene.get());

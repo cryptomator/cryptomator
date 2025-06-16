@@ -150,8 +150,7 @@ public class ChooseExistingVaultController implements FxController {
 				mountServices);
 		//TODO: optional raus, und mit error dialog arbeiten (UI kram in UI package!) hier nur fehler werfen
 		optionalVault.ifPresent(vault -> {
-			ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG);
-			recoveryKeyWindow.create(vault, window, recoverTypeProperty).showOnboardingDialogWindow();
+			recoveryKeyWindow.create(vault, window, RecoveryActionType.RESTORE_VAULT_CONFIG).showOnboardingDialogWindow();
 		});
 	}
 

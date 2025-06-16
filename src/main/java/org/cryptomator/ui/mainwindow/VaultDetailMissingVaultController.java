@@ -61,15 +61,13 @@ public class VaultDetailMissingVaultController implements FxController {
 			dialogs.prepareContactHubAdmin(window).build().showAndWait();
 		}
 		else {
-			ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG);
-			recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showOnboardingDialogWindow();
+			recoveryKeyWindow.create(vault.get(), window, RecoveryActionType.RESTORE_VAULT_CONFIG).showOnboardingDialogWindow();
 		}
 	}
 
 	@FXML
 	void restoreMasterkey() {
-		ObjectProperty<RecoveryActionType> recoverTypeProperty = new SimpleObjectProperty<>(RecoveryActionType.RESTORE_MASTERKEY);
-		recoveryKeyWindow.create(vault.get(), window, recoverTypeProperty).showRecoveryKeyRecoverWindow();
+		recoveryKeyWindow.create(vault.get(), window, RecoveryActionType.RESTORE_MASTERKEY).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML
