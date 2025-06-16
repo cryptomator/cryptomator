@@ -180,8 +180,8 @@ public class VaultListManager {
 	}
 
 	private static VaultState.Value determineVaultState(Path pathToVault, VaultSettings vaultSettings) throws IOException {
-		Path pathToVaultConfig = pathToVault.resolve("vault.cryptomator");
-		Path pathToMasterkey = pathToVault.resolve("masterkey.cryptomator");
+		Path pathToVaultConfig = pathToVault.resolve(VAULTCONFIG_FILENAME);
+		Path pathToMasterkey = pathToVault.resolve(MASTERKEY_FILENAME);
 
 		if (!Files.exists(pathToVault)) {
 			return VaultState.Value.MISSING;
