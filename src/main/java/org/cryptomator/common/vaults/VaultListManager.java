@@ -183,7 +183,7 @@ public class VaultListManager {
 		Path pathToVaultConfig = pathToVault.resolve("vault.cryptomator");
 		Path pathToMasterkey = pathToVault.resolve("masterkey.cryptomator");
 
-		if (Files.notExists(pathToVault)) {
+		if (!Files.exists(pathToVault)) {
 			return VaultState.Value.MISSING;
 		}
 
