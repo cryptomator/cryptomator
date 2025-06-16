@@ -159,10 +159,8 @@ public class VaultListManager {
 		try {
 			VaultState.Value determined = determineVaultState(vault.getPath(), vault.getVaultSettings());
 
-			if (determined == MASTERKEY_MISSING) {
-				if (KeyLoadingStrategy.isHubVault(vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme())) {
-					determined = LOCKED;
-				}
+			if (determined == MASTERKEY_MISSING && KeyLoadingStrategy.isHubVault(vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme())) {
+				determined = LOCKED;
 			}
 
 			if (determined == LOCKED) {
