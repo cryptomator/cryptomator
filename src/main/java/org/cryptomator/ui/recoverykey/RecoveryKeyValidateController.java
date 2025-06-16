@@ -25,7 +25,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.cryptomator.common.recovery.MasterkeyService;
 import org.cryptomator.common.recovery.RecoveryActionType;
@@ -138,16 +137,18 @@ public class RecoveryKeyValidateController implements FxController {
 	private void validateRecoveryKey() {
 		switch (recoverType.get()) {
 			case RESTORE_VAULT_CONFIG -> {
-				AtomicBoolean illegalArgumentExceptionOccurred = new AtomicBoolean(false);
-				var combo = MasterkeyService.validateRecoveryKeyAndDetectCombo(
-						recoveryKeyFactory, vault, recoveryKey.get(), masterkeyFileAccess, illegalArgumentExceptionOccurred);
-				combo.ifPresent(cipherCombo::set);
-				if (illegalArgumentExceptionOccurred.get()) {
+				try{
+					var combo = MasterkeyService.validateRecoveryKeyAndDetectCombo(
+							recoveryKeyFactory, vault, recoveryKey.get(), masterkeyFileAccess);
+					combo.ifPresent(cipherCombo::set);
+					if (combo.isPresent()) {
+						recoveryKeyState.set(RecoveryKeyState.CORRECT);
+					} else {
+						recoveryKeyState.set(RecoveryKeyState.WRONG);
+					}
+				}
+				catch (IllegalArgumentException e){
 					recoveryKeyState.set(RecoveryKeyState.INVALID);
-				} else if (combo.isPresent()) {
-					recoveryKeyState.set(RecoveryKeyState.CORRECT);
-				} else {
-					recoveryKeyState.set(RecoveryKeyState.WRONG);
 				}
 			}
 			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT -> {

@@ -41,8 +41,9 @@ public final class MasterkeyService {
 		return masterkeyFileAccess.load(masterkeyFilePath, password);
 	}
 
-	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndDetectCombo(RecoveryKeyFactory recoveryKeyFactory, Vault vault, String recoveryKey, MasterkeyFileAccess masterkeyFileAccess, AtomicBoolean illegalArgumentExceptionOccurred) {
-
+	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndDetectCombo(RecoveryKeyFactory recoveryKeyFactory, //
+																					 Vault vault, String recoveryKey, //
+																					 MasterkeyFileAccess masterkeyFileAccess) throws  IllegalArgumentException {
 		String tmpPass = UUID.randomUUID().toString();
 		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
 			Path tempRecoveryPath = recoveryDirectory.getRecoveryPath();
@@ -54,15 +55,9 @@ public final class MasterkeyService {
 			} catch (IOException | CryptoException e) {
 				LOG.info("Recovery key validation failed", e);
 				return Optional.empty();
-			} catch (IllegalArgumentException e) {
-				illegalArgumentExceptionOccurred.set(true);
-				return Optional.empty();
 			}
 		} catch (IOException | CryptoException e) {
 			LOG.info("Recovery key validation failed");
-		} catch (IllegalArgumentException e) {
-			LOG.info("Recovery key has an illegal argument");
-			illegalArgumentExceptionOccurred.set(true);
 		}
 		return Optional.empty();
 	}
