@@ -19,20 +19,14 @@ public final class RecoveryDirectory implements AutoCloseable {
 	private final Path recoveryPath;
 	private final Path vaultPath;
 
-
-	private static Path addR(Path p){
-		return p.resolve("r");
-	}
-
-	private RecoveryDirectory(Path vaultPath) {
+	private RecoveryDirectory(Path vaultPath, Path recoveryPath) {
 		this.vaultPath = vaultPath;
-		this.recoveryPath = addR(vaultPath);
+		this.recoveryPath = recoveryPath;
 	}
 
 	public static RecoveryDirectory create(Path vaultPath) throws IOException {
-		Path recovery = addR(vaultPath);
-		Files.createDirectory(recovery);
-		return new RecoveryDirectory(vaultPath);
+		Path tempDir = Files.createTempDirectory("r");
+		return new RecoveryDirectory(vaultPath, tempDir);
 	}
 
 	public void moveRecoveredFiles() throws IOException {
