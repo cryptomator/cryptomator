@@ -130,24 +130,33 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
-			try {
-				if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
-					var keyIdScheme = wrapper.get().getKeyId().getScheme();
-					vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
-				}
-			} catch (NoSuchFileException e) {
-				LOG.warn("Vault config file not found.");
-			}
 			var vaultState = determineVaultState(vaultSettings.path.get(), vaultSettings);
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 			}
+
+			if (vaultState != VaultState.Value.VAULT_CONFIG_MISSING) {
+				initializeLastKnownKeyLoaderIfPossible(vaultSettings, wrapper);
+			}
+
 			return vaultComponentFactory.create(vaultSettings, wrapper, vaultState, null).vault();
 		} catch (IOException e) {
 			LOG.warn("Failed to determine vault state for {}", vaultSettings.path.get(), e);
 			return vaultComponentFactory.create(vaultSettings, wrapper, ERROR, e).vault();
 		}
 	}
+
+	private void initializeLastKnownKeyLoaderIfPossible(VaultSettings vaultSettings, VaultConfigCache wrapper) throws IOException {
+		try {
+			if (vaultSettings.lastKnownKeyLoader.get() == null) {
+				var keyIdScheme = wrapper.get().getKeyId().getScheme();
+				vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
+			}
+		} catch (NoSuchFileException e) {
+			LOG.warn("Vault config file not found.");
+		}
+	}
+
 	public static VaultState.Value redetermineVaultState(Vault vault) {
 		VaultState state  = vault.stateProperty();
 		VaultState.Value previous = state.getValue();
