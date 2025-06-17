@@ -16,12 +16,7 @@ class MapKeychainAccess implements KeychainAccessProvider {
 	private final Map<String, char[]> map = new HashMap<>();
 
 	@Override
-	public String displayName() {
-		return getClass().getName();
-	}
-
-	@Override
-	public void storePassphrase(String key, String displayName,CharSequence passphrase, boolean ignored) {
+	public void storePassphrase(String key, String displayName,CharSequence passphrase) {
 		char[] pw = new char[passphrase.length()];
 		for (int i = 0; i < passphrase.length(); i++) {
 			pw[i] = passphrase.charAt(i);

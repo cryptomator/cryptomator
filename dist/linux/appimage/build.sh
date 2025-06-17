@@ -12,7 +12,7 @@ command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip not found."; exit 1; }
 
 VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
-CPU_ARCH=$(uname -p)
+CPU_ARCH=$(uname -m)
 
 if [[ ! "${CPU_ARCH}" =~ x86_64|aarch64 ]]; then echo "Platform ${CPU_ARCH} not supported"; exit 1; fi
 
@@ -23,12 +23,12 @@ mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests -Djavafx.platform=l
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
-JAVAFX_VERSION=23.0.2
+JAVAFX_VERSION=24.0.1
 JAVAFX_ARCH="x64"
-JAVAFX_JMODS_SHA256='063baebc6922e4a89c94b9dfb7a4f53e59e8d6fec400d4e670b31bc2ab324dec'
+JAVAFX_JMODS_SHA256='425fac742b9fbd095b2ce868cff82d1024620f747c94a7144d0a4879e756146c'
 if [ "${CPU_ARCH}" = "aarch64" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256='9bbedaeae1590b69e2b22237bda310936df33e344dbc243bea2e86acaab3a0d8'
+    JAVAFX_JMODS_SHA256='7e02edd0f4ee5527a27c94b0bbba66fcaaff41009119e45d0eca0f96ddfb6e7b'
 fi
 
 # download javaFX jmods
@@ -81,7 +81,7 @@ ${JAVA_HOME}/bin/jpackage \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
-    --java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
+    --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
     --copyright "(C) 2016 - 2025 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
@@ -128,7 +128,7 @@ chmod +x /tmp/appimagetool.AppImage
 /tmp/appimagetool.AppImage \
     Cryptomator.AppDir \
     cryptomator-${SEMVER_STR}-${CPU_ARCH}.AppImage  \
-    -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${CPU_ARCH}.AppImage.zsync'
+    -u "gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${CPU_ARCH}.AppImage.zsync"
 
 echo ""
 echo "Done. AppImage successfully created: cryptomator-${SEMVER_STR}-${CPU_ARCH}.AppImage"
