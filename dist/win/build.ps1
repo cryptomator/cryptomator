@@ -175,7 +175,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
 	--icon resources/$AppName.ico `
-	--add-launcher "${AppName}Debug=$buildDir\debug-launcher.properties" `
+	--add-launcher "Debug_${AppName}=$buildDir\debug-launcher.properties" `
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "jpackage Appimage failed with exit code $LASTEXITCODE"
