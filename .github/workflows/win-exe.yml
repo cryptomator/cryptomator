@@ -126,13 +126,6 @@ jobs:
           --no-man-pages
           --strip-debug
           --compress zip-0
-      - name: Prepare debug launcher config
-        shell: bash
-        run: envsubst '${SEMVER_STR} ${REVISION_NUM} ${APP_NAME} ${LOOPBACK_ALIAS}' < dist/win/resources/debug-launcher.properties > dist/win/resources/CryptomatorDebug.properties
-        env:
-          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
-          REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
-          APP_NAME: 'Cryptomator'
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -170,7 +163,7 @@ jobs:
           --java-options "-Djavafx.verbose=${{ inputs.isDebug }}"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
-          --add-launcher "CryptomatorDebug=CryptomatorDebug.properties"
+          --add-launcher "CryptomatorDebug=dist/win/debug-launcher.properties"
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator

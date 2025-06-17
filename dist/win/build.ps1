@@ -139,13 +139,6 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
 }
 
-# prepare additional launcher
-$debugProps = Get-Content -Path $buildDir\resources\debug-launcher.properties
-$debugProps = $debugProps -replace '\${SEM_VER_STR}', "$semVerNo"
-$debugProps = $debugProps -replace '\${REVISION_NUM}', "$revisionNo"
-$debugProps = $debugProps -replace '\${APP_NAME}', "$AppName"
-$debugProps = $debugProps -replace '\${LOOPBACK_ALIAS}', "$LoopbackAlias"
-Set-Content -Path $buildDir\resources\${AppName}Debug.properties -Value $debugProps
 
 
 # create app dir
@@ -182,7 +175,12 @@ Set-Content -Path $buildDir\resources\${AppName}Debug.properties -Value $debugPr
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
 	--icon resources/$AppName.ico `
-	--add-launcher "${AppName}Debug=$buildDir\resources\${AppName}Debug.properties"
+	--add-launcher "${AppName}Debug=$buildDir\debug-launcher.properties" `
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "jpackage Appimage failed with exit code $LASTEXITCODE"
+	return 1;
+}
 
 #Create RTF license for msi
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
