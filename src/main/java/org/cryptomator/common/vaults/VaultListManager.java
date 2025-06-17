@@ -112,10 +112,6 @@ public class VaultListManager {
 
 	private void addAll(Collection<VaultSettings> vaultSettings) {
 		Collection<Vault> vaults = vaultSettings.stream().map(this::create).toList();
-		vaults.forEach(vault -> {
-			VaultState.Value newState = redetermineVaultState(vault);
-			LOG.info("New state for vault at {}: {}", vault.getPath(), newState);
-		});
 		vaultList.addAll(vaults);
 	}
 
