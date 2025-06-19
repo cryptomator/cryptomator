@@ -115,7 +115,7 @@ public class Settings {
 		this.checkForUpdates = new SimpleBooleanProperty(this, "checkForUpdates", json.checkForUpdatesEnabled);
 		this.lastUpdateCheckReminder = new SimpleObjectProperty<>(this, "lastUpdateCheckReminder", json.lastReminderForUpdateCheck);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
-		this.previouslyUsedVaultDirectory = new SimpleStringProperty(this, "previouslyUsedDirectory", json.previouslyUsedVaultDirectory);
+		this.previouslyUsedVaultDirectory = new SimpleStringProperty(this, "previouslyUsedVaultDirectory", json.previouslyUsedVaultDirectory);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
