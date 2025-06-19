@@ -92,4 +92,7 @@ class SettingsJson {
 
 	@JsonProperty("quickAccessService")
 	String quickAccessService = Settings.DEFAULT_QUICKACCESS_SERVICE;
+
+	@JsonProperty("previouslyUsedVaultDirectory")
+	String previouslyUsedVaultDirectory;
 }
