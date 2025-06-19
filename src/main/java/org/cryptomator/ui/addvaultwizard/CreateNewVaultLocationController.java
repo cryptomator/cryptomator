@@ -5,7 +5,6 @@ import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.locationpresets.LocationPreset;
 import org.cryptomator.common.locationpresets.LocationPresetsProvider;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
