@@ -25,7 +25,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.util.function.Consumer;
 
