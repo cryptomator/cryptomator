@@ -39,6 +39,7 @@ import javafx.stage.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -103,7 +104,11 @@ public class CreateNewVaultLocationController implements FxController {
 
 		var previouslyUsedDirectory = settings.previouslyUsedVaultDirectory.get();
 		if (previouslyUsedDirectory != null) {
-			this.customVaultPath = Paths.get(previouslyUsedDirectory);
+			try {
+				this.customVaultPath = Paths.get(previouslyUsedDirectory);
+			} catch (InvalidPathException e) {
+				LOG.warn("Invalid previously used vault directory path: {}", previouslyUsedDirectory, e);
+			}
 		}
 	}
 
@@ -205,7 +210,10 @@ public class CreateNewVaultLocationController implements FxController {
 	@FXML
 	public void next() {
 		if (validVaultPath.getValue()) {
-			this.settings.previouslyUsedVaultDirectory.setValue(this.vaultPath.get().getParent().toString());
+			Path parentPath;
+			if (this.getVaultPath() != null && (parentPath = this.getVaultPath().getParent()) != null) {
+				this.settings.previouslyUsedVaultDirectory.setValue(parentPath.toString());
+			}
 			window.setScene(chooseExpertSettingsScene.get());
 		}
 	}
