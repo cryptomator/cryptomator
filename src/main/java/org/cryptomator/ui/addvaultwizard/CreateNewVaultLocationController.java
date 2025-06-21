@@ -105,8 +105,12 @@ public class CreateNewVaultLocationController implements FxController {
 		var previouslyUsedDirectory = settings.previouslyUsedVaultDirectory.get();
 		if (previouslyUsedDirectory != null) {
 			try {
-				this.customVaultPath = Paths.get(previouslyUsedDirectory);
-			} catch (InvalidPathException e) {
+				Path cachedPath = Paths.get(previouslyUsedDirectory);
+				VaultPathStatus cachedPathStatus = validatePath(cachedPath);
+				if (cachedPathStatus.valid()) {
+					this.customVaultPath = cachedPath;
+				}
+			} catch (InvalidPathException | NullPointerException e) {
 				LOG.warn("Invalid previously used vault directory path: {}", previouslyUsedDirectory, e);
 			}
 		}
