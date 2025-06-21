@@ -4,6 +4,7 @@ import dagger.Lazy;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.locationpresets.LocationPreset;
 import org.cryptomator.common.locationpresets.LocationPresetsProvider;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -38,6 +39,7 @@ import javafx.stage.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -64,6 +66,7 @@ public class CreateNewVaultLocationController implements FxController {
 	private final BooleanProperty loadingPresetLocations = new SimpleBooleanProperty(false);
 	private final ObservableList<Node> radioButtons;
 	private final ObservableList<Node> sortedRadioButtons;
+	private final Settings settings;
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
 
@@ -82,6 +85,7 @@ public class CreateNewVaultLocationController implements FxController {
 									 @FxmlScene(FxmlFile.ADDVAULT_NEW_EXPERT_SETTINGS) Lazy<Scene> chooseExpertSettingsScene, //
 									 ObjectProperty<Path> vaultPath, //
 									 @Named("vaultName") StringProperty vaultName, //
+									 Settings settings, //
 									 ExecutorService backgroundExecutor, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
@@ -96,6 +100,20 @@ public class CreateNewVaultLocationController implements FxController {
 		this.usePresetPath = new SimpleBooleanProperty();
 		this.radioButtons = FXCollections.observableArrayList();
 		this.sortedRadioButtons = radioButtons.sorted(this::compareLocationPresets);
+		this.settings = settings;
+
+		var previouslyUsedDirectory = settings.previouslyUsedVaultDirectory.get();
+		if (previouslyUsedDirectory != null) {
+			try {
+				Path cachedPath = Paths.get(previouslyUsedDirectory);
+				VaultPathStatus cachedPathStatus = validatePath(cachedPath);
+				if (cachedPathStatus.valid()) {
+					this.customVaultPath = cachedPath;
+				}
+			} catch (InvalidPathException | NullPointerException e) {
+				LOG.warn("Invalid previously used vault directory path: {}", previouslyUsedDirectory, e);
+			}
+		}
 	}
 
 	private VaultPathStatus validatePath(Path p) throws NullPointerException {
@@ -196,6 +214,10 @@ public class CreateNewVaultLocationController implements FxController {
 	@FXML
 	public void next() {
 		if (validVaultPath.getValue()) {
+			Path parentPath;
+			if (this.getVaultPath() != null && (parentPath = this.getVaultPath().getParent()) != null) {
+				this.settings.previouslyUsedVaultDirectory.setValue(parentPath.toString());
+			}
 			window.setScene(chooseExpertSettingsScene.get());
 		}
 	}
