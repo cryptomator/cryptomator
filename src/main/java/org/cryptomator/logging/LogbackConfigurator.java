@@ -90,6 +90,9 @@ public class LogbackConfigurator extends ContextAwareBase implements Configurato
 			// configure fuse file locking logger:
 			Logger fuseLocking = context.getLogger("org.cryptomator.frontend.fuse.locks");
 			fuseLocking.setLevel(Level.OFF);
+			//deactivate kwallet unsettling message
+			Logger kdeWallet = context.getLogger("org.purejava.kwallet.freedesktop.dbus.handlers");
+			kdeWallet.setLevel(Level.OFF);
 		}
 		return ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY;
 	}
