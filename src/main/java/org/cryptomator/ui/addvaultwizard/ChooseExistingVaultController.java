@@ -135,16 +135,16 @@ public class ChooseExistingVaultController implements FxController {
 	public void restoreVaultConfigWithRecoveryKey() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 
-		File selectedDirectory;
-		do {
-			selectedDirectory = directoryChooser.showDialog(window);
-			boolean hasSubfolderD = new File(selectedDirectory, "d").isDirectory();
+		File selectedDirectory = directoryChooser.showDialog(window);
+		if (selectedDirectory == null) {
+			return;
+		}
 
-			if (!hasSubfolderD) {
-				dialogs.prepareNoDDirectorySelectedDialog(window).build().showAndWait();
-				selectedDirectory = null;
-			}
-		} while (selectedDirectory == null);
+		boolean hasSubfolderD = new File(selectedDirectory, "d").isDirectory();
+		if (!hasSubfolderD) {
+			dialogs.prepareNoDDirectorySelectedDialog(window).build().showAndWait();
+			return;
+		}
 
 		Optional<Vault> optionalVault = prepareVault(selectedDirectory,vaultComponentFactory,
 				mountServices);
