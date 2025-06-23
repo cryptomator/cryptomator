@@ -38,7 +38,7 @@ jobs:
       version: ${{ inputs.version }}
 
   build-appimage:
-    name: Build appimage Installer
+    name: Build appimage
     runs-on: ${{ matrix.os }}
     needs: [ get-version ]
     strategy:
@@ -250,7 +250,7 @@ jobs:
 
 
   build-msi:
-    name: Build .exe installer
+    name: Build .msi installer
     runs-on: windows-latest
     needs: [ get-version, build-appimage ]
     steps:
@@ -268,7 +268,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-dist: 'zulu'
+          distribution: 'zulu'
           java-version: '24.0.1+9'
           java-package: 'jdk'
           cache: 'maven'
