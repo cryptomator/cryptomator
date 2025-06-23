@@ -18,13 +18,31 @@ $ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress
 # check preconditions
 if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
 {
-   Write-Host "Unable to find git.exe in your PATH (try: choco install git)"
+   Write-Error "Unable to find git.exe in your PATH (try: choco install git)"
    exit 1
 }
 if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
 {
-   Write-Host "Unable to find mvn.cmd in your PATH (try: choco install maven)"
+   Write-Error "Unable to find mvn.cmd in your PATH (try: choco install maven)"
    exit 1
+}
+if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
+{
+   Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.0)'
+   exit 1
+}
+$wixExtensions = & wix.exe extension list --global | Out-String
+if ($wixExtensions -notmatch 'WixToolset.UI.wixext') {
+    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.0 --global)'
+    exit 1
+}
+if ($wixExtensions -notmatch 'WixToolset.Util.wixext') {
+    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.0 --global)'
+    exit 1
+}
+if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
+    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global)'
+    exit 1
 }
 
 $buildDir = Split-Path -Parent $PSCommandPath
@@ -50,37 +68,71 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	Remove-Item -Path $runtimeImagePath -Force -Recurse
 }
 
-## download jfx jmods
-$javaFxVersion='23.0.1'
-$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-$javaFxJmodsSHA256 = 'ee176dcee3bd78bde7910735bd67f67c792882f5b89626796ae06f7a1c0119d3'
-$javaFxJmods = '.\resources\jfxJmods.zip'
-if( !(Test-Path -Path $javaFxJmods) ) {
-	Write-Output "Downloading ${javaFxJmodsUrl}..."
-	Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
+## download jfx jmods for X64, while they are part of the Arm64 JDK
+$archCode = (Get-CimInstance Win32_Processor).Architecture
+$archName = switch ($archCode) {
+    9  { "x64 (AMD64)" }
+    12 { "ARM64" }
+    default { "WMI Win32_Processor.Architecture code ($archCode)" }
 }
 
-$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
-if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
-	Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
-, actual: $jmodsChecksumActual"
-	exit 1;
+switch ($archName) {
+    'ARM64' {
+		$javafxBaseJmod = Join-Path $Env:JAVA_HOME "jmods\javafx.base.jmod"
+		if (!(Test-Path $javafxBaseJmod)) {
+			Write-Error "JavaFX module not found in JDK. Please ensure full JDK (including jmods) is installed."
+			exit 1
+		}
+
+        $jmodPaths = "$Env:JAVA_HOME/jmods"
+    }
+    'x64 (AMD64)' {
+		$javaFxVersion='24.0.1'
+		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
+		$javaFxJmodsSHA256 = 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
+		$javaFxJmods = '.\resources\jfxJmods.zip'
+
+		if( !(Test-Path -Path $javaFxJmods) ) {
+			Write-Output "Downloading ${javaFxJmodsUrl}..."
+			Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
+		}
+
+		$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
+		if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
+			Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
+		, actual: $jmodsChecksumActual"
+			exit 1;
+		}
+
+		Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
+		Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
+		Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
+
+		$jmodPaths="$buildDir/resources/javafx-jmods";
+    }
+    default {
+        Write-Error "Unsupported architecture: $arch"
+        exit 1
+    }
 }
-Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
-Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
-Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
 ## create custom runtime
+### check for JEP 493
+if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from run-time image enabled" -SimpleMatch | Measure-Object).Count -eq 0 ) {
+	$jmodPaths="$Env:JAVA_HOME/jmods;" + $jmodPaths;
+}
+
+### create runtime
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
-	--module-path "$Env:JAVA_HOME/jmods;$buildDir/resources/javafx-jmods" `
+	--module-path $jmodPaths `
 	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
 	--strip-debug `
-	--compress "zip-0" #do not compress to have improved msi compression
+	--compress "zip-0" #do not compress and use msi compression
 
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
@@ -100,7 +152,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--vendor $Vendor `
 	--copyright $copyright `
 	--java-options "--enable-preview" `
-	--java-options "--enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win" `
+	--java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win" `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
@@ -116,6 +168,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`"" `
 	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
 	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`"" `
+	--java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
@@ -166,6 +219,11 @@ $Env:JP_WIXHELPER_DIR = "."
 	--about-url $AboutUrl `
 	--file-associations resources/FAvaultFile.properties
 
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "jpackage MSI failed with exit code $LASTEXITCODE"
+	return 1;
+}
+
 #Create RTF license for bundle
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
  "-Dlicense.thirdPartyFilename=license.rtf" `
@@ -177,9 +235,19 @@ $Env:JP_WIXHELPER_DIR = "."
  "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # download Winfsp
-$winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.0/winfsp-2.0.23075.msi'
+$winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
+$winfspMsiHash = '073A70E00F77423E34BED98B86E600DEF93393BA5822204FAC57A29324DB9F7A'
 Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
+$computedHash = $(Get-FileHash -Path '.\bundle\resources\winfsp.msi' -Algorithm SHA256).Hash
+if (! $computedHash.Equals($winfspMsiHash)) {
+	Write-Error -Category InvalidData -CategoryActivity "Data integrity check failed" -Message @"
+	Downloaded Winfsp Installer does not match stored SHA256 checksum.
+	Expected: $winfspMsiHash
+	Actual:   $computedHash
+"@
+	exit 1
+}
 
 # download legacy-winfsp uninstaller
 $winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
@@ -187,14 +255,20 @@ Write-Output "Downloading ${winfspUninstaller}..."
 Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninstaller.exe" # redirects are followed by default
 
 # copy MSI to bundle resources
-Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi"
+Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi" -Force
 
 # create bundle including winfsp
-& "$env:WIX\bin\candle.exe" .\bundle\bundleWithWinfsp.wxs -ext WixBalExtension -ext WixUtilextension -out bundle\ `
-	-dBundleVersion="$semVerNo.$revisionNo" `
-	-dBundleVendor="$Vendor" `
-	-dBundleCopyright="$copyright" `
-	-dAboutUrl="$AboutUrl" `
-	-dHelpUrl="$HelpUrl" `
-	-dUpdateUrl="$UpdateUrl"
-& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -ext WixUtilextension -out installer\$AppName-Installer.exe
+& wix build `
+	-define BundleName="$AppName" `
+	-define BundleVersion="$semVerNo.$revisionNo" `
+	-define BundleVendor="$Vendor" `
+	-define BundleCopyright="$copyright" `
+	-define AboutUrl="$AboutUrl" `
+	-define HelpUrl="$HelpUrl" `
+	-define UpdateUrl="$UpdateUrl" `
+	-ext "WixToolset.Util.wixext" `
+	-ext "WixToolset.BootstrapperApplications.wixext" `
+    .\bundle\bundleWithWinfsp.wxs `
+    -out "installer\$AppName-Installer.exe"
+
+Write-Output "Created EXE installer .\installer\$AppName-Installer.exe"

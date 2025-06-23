@@ -13,15 +13,48 @@ on:
         description: "Url to the file to upload"
         required: true
         type: string
+      avast:
+        description: "Upload to Avast"
+        required: false
+        type: boolean
+        default: false
+      kaspersky:
+        description: "Upload to Kaspersky"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
-  allowlist:
-    name: Anti Virus Allowlisting
+  download-file:
+    name: Downloads the file into the VM
     runs-on: ubuntu-latest
+    outputs:
+      fileName: ${{ steps.extractName.outputs.fileName}}
     steps:
-      - name: Download file
+      - name: Extract file name
+        id: extractName
         run: |
-          curl --remote-name ${{ inputs.url }} -L
+          url="${{ inputs.url }}"
+          echo "fileName=${url##*/}" >> $GITHUB_OUTPUT
+      - name: Download file
+        run: curl --remote-name ${{ inputs.url }} -L -o ${{steps.extractName.outputs.fileName}}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.extractName.outputs.fileName }}
+          path: ${{ steps.extractName.outputs.fileName }}
+          if-no-files-found: error
+  allowlist-kaspersky:
+    name: Anti Virus Allowlisting Kaspersky
+    runs-on: ubuntu-latest
+    needs: download-file
+    if: github.event_name == 'workflow_call' || inputs.kaspersky
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.download-file.outputs.fileName }}
+          path: upload
       - name: Upload to Kaspersky
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -30,11 +63,26 @@ jobs:
           port: 990
           username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
           password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
-      - name: Upload to Avast
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+          local-dir: ./upload/
+  allowlist-avast:
+    name: Anti Virus Allowlisting Avast
+    runs-on: ubuntu-latest
+    needs: download-file
+    if: github.event_name == 'workflow_call'  || inputs.avast
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
         with:
-          protocol: ftp
+          name: ${{ needs.download-file.outputs.fileName }}
+          path: upload
+      - name: Upload to Avast 
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        with:
           server: whitelisting.avast.com
-          port: 21
+          port: 22
           username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
           password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
+          ssh_private_key: ''
+          sftp_only: true
+          local_path: './upload/*'
+          remote_path: '/data'

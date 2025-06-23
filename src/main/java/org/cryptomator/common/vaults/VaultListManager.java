@@ -26,10 +26,12 @@ import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
 import static org.cryptomator.common.vaults.VaultState.Value.PROCESSING;
 import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.recovery.BackupRestorer;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -115,7 +117,7 @@ public class VaultListManager {
 		vaultList.addAll(vaults);
 	}
 
-	private Optional<Vault> get(Path vaultPath) {
+	public Optional<Vault> get(Path vaultPath) {
 		assert vaultPath.isAbsolute();
 		assert vaultPath.normalize().equals(vaultPath);
 		return vaultList.stream() //
@@ -129,6 +131,12 @@ public class VaultListManager {
 			var vaultState = determineVaultState(vaultSettings.path.get(), vaultSettings);
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
+				if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
+					var keyIdScheme = wrapper.get().getKeyId().getScheme();
+					vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
+				}
+			} else if (vaultState == NEEDS_MIGRATION) {
+				vaultSettings.lastKnownKeyLoader.set(Constants.DEFAULT_KEY_ID.toString());
 			}
 
 			if (vaultState != VaultState.Value.VAULT_CONFIG_MISSING) {
@@ -217,7 +225,7 @@ public class VaultListManager {
 			case VAULT -> VaultState.Value.LOCKED;
 			case UNRELATED -> VaultState.Value.MISSING;
 			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ? //
-					VaultState.Value.NEEDS_MIGRATION //
+					NEEDS_MIGRATION //
 					: VaultState.Value.MISSING;
 		};
 	}

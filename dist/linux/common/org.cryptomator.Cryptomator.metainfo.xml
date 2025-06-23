@@ -83,6 +83,21 @@
 	</content_rating>
 
 	<releases>
+		<release date="2025-05-15" version="1.16.2">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.16.2</url>
+		</release>
+		<release date="2025-04-30" version="1.16.1">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.16.1</url>
+		</release>
+		<release date="2025-04-29" version="1.16.0">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.16.0</url>
+		</release>
+		<release date="2025-04-09" version="1.15.3">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.15.3</url>
+		</release>
+		<release date="2025-04-04" version="1.15.2">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.15.2</url>
+		</release>
 		<release date="2025-02-05" version="1.15.1">
 			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.15.1</url>
 		</release>

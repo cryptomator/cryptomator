@@ -47,4 +47,4 @@ Legacy Installation settings:
 - SkipCryptomatorLegacyCheck
 Should be defined to disable checking for the inno setup installation of Cryptomator and undefined, to enable it.
  -->
-<Include/>
+<ns0:Include xmlns:ns0="http://wixtoolset.org/schemas/v4/wxs"></ns0:Include>

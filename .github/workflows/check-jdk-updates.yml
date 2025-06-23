@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  JDK_VERSION: '23.0.1+11'
+  JDK_VERSION: '24.0.1+9'
   JDK_VENDOR: temurin
   RUNTIME_VERSION_HELPER: >
     public class Test {

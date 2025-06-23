@@ -5,41 +5,52 @@ on:
     inputs:
       semver:
         description: 'SemVer String (e.g. 1.7.0-beta1)'
-        required: true
       ppaver:
         description: 'Base PPA Version String (e.g. 1.6.16+1.7.0~beta1) without -0ppa1'
-        required: true
       dput:
         description: 'Upload to PPA'
         required: true
         default: false
         type: boolean
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+    paths:
+      - '.github/workflows/debian.yml'
+      - 'dist/linux/debian/**'
+      - 'dist/linux/common/**'
+      - 'dist/linux/resources/**'
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '23.0.1+11'
-  COFFEELIBS_JDK: 23
-  COFFEELIBS_JDK_VERSION: '23.0.1+11-0ppa1'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '2164bca470bf70a5e2764645e2078ba7f787b274e5be3d7df30d87c5bb62bba6'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: '09c92fa9fa0b82adefd88640a14ebb2a49e5f3f733a57d1542f5590d060ffe1b'
+  JAVA_VERSION: '24.0.1+9'
+  COFFEELIBS_JDK: 24
+  COFFEELIBS_JDK_VERSION: '24.0.1+9-0ppa3'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '425fac742b9fbd095b2ce868cff82d1024620f747c94a7144d0a4879e756146c'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: '7e02edd0f4ee5527a27c94b0bbba66fcaaff41009119e45d0eca0f96ddfb6e7b'
 
 jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ inputs.semver }} #okay if not defined
+
   build:
     name: Build Debian Package
     runs-on: ubuntu-22.04
+    needs: [get-version]
     steps:
       - uses: actions/checkout@v4
-      - id: versions
-        name: Get version information
+      - id: deb-version
+        name: Determine deb-version
         run: |
-          SEM_VER_STR="${{ inputs.semver }}"
-          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-          REVCOUNT=`git rev-list --count HEAD`
-          echo "semVerStr=${SEM_VER_STR}" >> $GITHUB_OUTPUT
-          echo "semVerNum=${SEM_VER_NUM}" >> $GITHUB_OUTPUT
-          echo "revNum=${REVCOUNT}" >> $GITHUB_OUTPUT
+          if [ -n "${{inputs.ppaver}}" ]; then
+            echo "debVersion=${{inputs.ppaver }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "debVersion=${{needs.get-version.outputs.semVerStr}}" >> "$GITHUB_OUTPUT"
+          fi
       - name: Install build tools
         run: |
           sudo add-apt-repository ppa:coffeelibs/openjdk
@@ -94,7 +105,7 @@ jobs:
           cp -r jmods pkgdir
           cp -r dist/linux/common/ pkgdir
           cp target/cryptomator-*.jar pkgdir/mods
-          tar -cJf cryptomator_${{ inputs.ppaver }}.orig.tar.xz -C pkgdir .
+          tar -cJf cryptomator_${{ steps.deb-version.outputs.debVersion }}.orig.tar.xz -C pkgdir .
       - name: Patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
@@ -103,12 +114,12 @@ jobs:
           envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM} ${DISABLE_UPDATE_CHECK}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${{ inputs.ppaver }}
+          mv pkgdir cryptomator_${{ steps.deb-version.outputs.debVersion }}
         env:
-          SEMVER_STR: ${{ steps.versions.outputs.semVerStr }}
-          VERSION_NUM: ${{ steps.versions.outputs.semVerNum }}
-          REVISION_NUM: ${{ steps.versions.outputs.revNum }}
-          PPA_VERSION: ${{ inputs.ppaver }}-0ppa1
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+          VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
+          REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
+          PPA_VERSION: ${{ steps.deb-version.outputs.debVersion }}-0ppa1
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -118,12 +129,13 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: debuild
         run: |
+          (sleep 8m; gpg --batch --quiet --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign README.md) &
           debuild -S -sa -d
           debuild -b -sa -d
         env:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
-        working-directory: cryptomator_${{ inputs.ppaver }}
+        working-directory: cryptomator_${{ steps.deb-version.outputs.debVersion }}
       - name: Create detached GPG signatures
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
@@ -140,7 +152,7 @@ jobs:
             cryptomator_*_amd64.deb
             cryptomator_*.asc
       - name: Publish on PPA
-        if: inputs.dput
+        if: inputs.dput && inputs.ppaver != ''
         run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_*_source.changes
       # If ref is a tag, also upload to GitHub Releases:
       - name: Publish Debian package on GitHub Releases
