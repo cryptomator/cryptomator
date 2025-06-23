@@ -432,6 +432,7 @@ jobs:
         working-directory: dist/win
         run: >
           wix build
+          -arch ${{ matrix.arch }}
           -define BundleName="Cryptomator"
           -define BundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           -define BundleVendor="Skymatic GmbH"
