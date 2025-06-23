@@ -250,7 +250,7 @@ jobs:
         with:
           name: appimage-${{ matrix.arch }}
           path: |
-            appdir/Cryptomator
+            appdir
 
 
   build-msi:
@@ -263,12 +263,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: appimage-x64
-          target: appdir-x64
+          path: appdir-x64
       - name: Download appimage
         uses: actions/download-artifact@v4
         with:
           name: appimage-arm64
-          target: appdir-arm64
+          path: appdir-arm64
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
