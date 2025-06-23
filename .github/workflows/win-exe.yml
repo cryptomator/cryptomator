@@ -37,8 +37,8 @@ jobs:
     with:
       version: ${{ inputs.version }}
 
-  build-msi:
-    name: Build .msi Installer
+  build-appimage:
+    name: Build appimage Installer
     runs-on: ${{ matrix.os }}
     needs: [ get-version ]
     strategy:
@@ -234,20 +234,53 @@ jobs:
         run: >
           mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.outputDirectory=dist/win/resources"
+          "-Dlicense.outputDirectory=dist/win/appdir"
           "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
           "-Dlicense.includedScopes=compile"
           "-Dlicense.excludedGroups=^org\.cryptomator"
           "-Dlicense.failOnMissing=true"
           "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
         shell: pwsh
-      - name: Create MSI
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-${{ matrix.arch }}
+          path: |
+            appdir/Cryptomator
+
+
+  build-msi:
+    name: Build .exe installer
+    runs-on: windows-latest
+    needs: [ get-version, build-appimage ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download appimage
+        uses: actions/download-artifact@v4
+        with:
+          name: appimage-x64
+          target: appdir-x64
+      - name: Download appimage
+        uses: actions/download-artifact@v4
+        with:
+          name: appimage-arm64
+          target: appdir-arm64
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-dist: 'zulu'
+          java-version: '24.0.1+9'
+          java-package: 'jdk'
+          cache: 'maven'
+      - name: Copy license file
+        run: cp appdir-x64/license.rtf dist/win/resources/license.rtf
+      - name: Create x64 MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
           --verbose
           --type msi
           --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775
-          --app-image appdir/Cryptomator
+          --app-image appdir-x64/Cryptomator
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
@@ -263,7 +296,7 @@ jobs:
           --file-associations dist/win/resources/FAvaultFile.properties
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
-          JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
+          JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir-x64
       - name: Codesign MSI
         uses: skymatic/code-sign-action@v3
         with:
@@ -285,7 +318,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: msi-${{ matrix.arch }}
+          name: msi-x64
           path: |
             Cryptomator-*.msi
             Cryptomator-*.asc
