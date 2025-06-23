@@ -20,6 +20,8 @@ public class Dialogs {
 	private final ResourceBundle resourceBundle;
 	private final StageFactory stageFactory;
 
+	private static final String BUTTON_KEY_CLOSE = "generic.button.close";
+
 	@Inject
 	public Dialogs(ResourceBundle resourceBundle, StageFactory stageFactory) {
 		this.resourceBundle = resourceBundle;
@@ -53,7 +55,7 @@ public class Dialogs {
 				.setMessageKey("contactHubAdmin.message") //
 				.setDescriptionKey("contactHubAdmin.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION)//
-				.setOkButtonKey("generic.button.close");
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
 	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window, Stage owner, ResourceBundle resourceBundle) {
@@ -69,7 +71,7 @@ public class Dialogs {
 						owner.close();
 					}
 				})
-				.setOkButtonKey("generic.button.close");
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
 	public SimpleDialog.Builder prepareRemoveCertDialog(Stage window, Settings settings) {
@@ -94,7 +96,7 @@ public class Dialogs {
 				.setMessageKey("dokanySupportEnd.message") //
 				.setDescriptionKey("dokanySupportEnd.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION) //
-				.setOkButtonKey("generic.button.close") //
+				.setOkButtonKey(BUTTON_KEY_CLOSE) //
 				.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
 				.setOkAction(Stage::close) //
 				.setCancelAction(cancelAction);
@@ -108,7 +110,7 @@ public class Dialogs {
 				.setDescriptionKey("retryIfReadonly.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION) //
 				.setOkButtonKey("retryIfReadonly.retry") //
-				.setCancelButtonKey("generic.button.close") //
+				.setCancelButtonKey(BUTTON_KEY_CLOSE) //
 				.setOkAction(okAction) //
 				.setCancelAction(Stage::close);
 	}
