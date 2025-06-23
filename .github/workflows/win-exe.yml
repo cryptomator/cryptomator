@@ -280,7 +280,7 @@ jobs:
           cache: 'maven'
       - name: Copy license file
         run: cp appdir-x64/license.rtf dist/win/resources/license.rtf
-      - name: Create x64 MSI
+      - name: Create x64 MSI with x64 appimage
         run: >
           ${JAVA_HOME}/bin/jpackage
           --verbose
@@ -303,7 +303,36 @@ jobs:
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir-x64
-      - name: Codesign MSI
+      - name: Add possible alpha/beta tags and architecture to installer name
+        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-x64.msi
+      - name: Copy license file for arm64
+        run: cp appdir-arm64/license.rtf dist/win/resources/license.rtf
+      - name: Create x64 MSI with arm64 appimage
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type msi
+          --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775
+          --app-image appdir-arm64/Cryptomator
+          --dest installer
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2025 Skymatic GmbH"
+          --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
+          --win-menu
+          --win-dir-chooser
+          --win-shortcut-prompt
+          --win-update-url "https:\\cryptomator.org\downloads"
+          --win-menu-group Cryptomator
+          --resource-dir dist/win/resources
+          --license-file dist/win/resources/license.rtf
+          --file-associations dist/win/resources/FAvaultFile.properties
+        env:
+          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
+          JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir-arm64
+      - name: Add possible alpha/beta tags and architecture to installer name
+        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-arm64.msi
+      - name: Codesign MSIs
         uses: skymatic/code-sign-action@v3
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
@@ -312,8 +341,6 @@ jobs:
           description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
-      - name: Add possible alpha/beta tags and architecture to installer name
-        run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
