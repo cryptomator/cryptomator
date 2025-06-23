@@ -105,7 +105,7 @@ public class CreateNewVaultLocationController implements FxController {
 		var previouslyUsedDirectory = settings.previouslyUsedVaultDirectory.get();
 		if (previouslyUsedDirectory != null) {
 			try {
-				Path cachedPath = Paths.get(previouslyUsedDirectory);
+				Path cachedPath = Path.of(previouslyUsedDirectory);
 				VaultPathStatus cachedPathStatus = validatePath(cachedPath);
 				if (cachedPathStatus.valid()) {
 					this.customVaultPath = cachedPath;
@@ -214,9 +214,11 @@ public class CreateNewVaultLocationController implements FxController {
 	@FXML
 	public void next() {
 		if (validVaultPath.getValue()) {
-			Path parentPath;
-			if (this.getVaultPath() != null && (parentPath = this.getVaultPath().getParent()) != null) {
-				this.settings.previouslyUsedVaultDirectory.setValue(parentPath.toString());
+			if (this.getVaultPath() != null) {
+				Path parentPath = this.getVaultPath().getParent();
+				if (parentPath != null) {
+					this.settings.previouslyUsedVaultDirectory.setValue(parentPath.toString());
+				}
 			}
 			window.setScene(chooseExpertSettingsScene.get());
 		}
