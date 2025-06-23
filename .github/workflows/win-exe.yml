@@ -109,10 +109,13 @@ jobs:
         id: jep-493-check
         run: |
           JMOD_PATHS="openjfx-jmods"
+          JEP_493_ACTIVE="true"
           if ! $(${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"); then
             JMOD_PATHS="${JAVA_HOME}/jmods;${JMOD_PATHS}"
+            JEP_493_ACTIVE="false"
           fi
           echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
+          echo "jep-493-active=${JEP_493_ACTIVE}" >> "$GITHUB_OUTPUT"
       - name: Run jlink
         # Remark: no compression is applied for improved build compression later (here msi)
         run: >
@@ -202,6 +205,7 @@ jobs:
           }
       - name: Extract wixhelper.dll for Codesigning #see https://github.com/cryptomator/cryptomator/issues/3130
         shell: pwsh
+        if: ${{ ! steps.jep-493-check.outputs.jep-493-active }}
         run: |
           New-Item -Path appdir/jpackage-jmod -ItemType Directory
           & $env:JAVA_HOME\bin\jmod.exe extract --dir jpackage-jmod "${env:JAVA_HOME}\jmods\jdk.jpackage.jmod"
