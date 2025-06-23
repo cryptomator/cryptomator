@@ -125,6 +125,13 @@ public class VaultListManager {
 				.findAny();
 	}
 
+	public void addVault(Vault vault) {
+		Path path = vault.getPath().normalize().toAbsolutePath();
+		if (!containsVault(path)) {
+			vaultList.add(vault);
+		}
+	}
+
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
@@ -190,7 +197,7 @@ public class VaultListManager {
 		}
 	}
 
-	private static VaultState.Value determineVaultState(Path pathToVault, VaultSettings vaultSettings) throws IOException {
+	public static VaultState.Value determineVaultState(Path pathToVault, VaultSettings vaultSettings) throws IOException {
 		Path pathToVaultConfig = pathToVault.resolve(VAULTCONFIG_FILENAME);
 		Path pathToMasterkey = pathToVault.resolve(MASTERKEY_FILENAME);
 

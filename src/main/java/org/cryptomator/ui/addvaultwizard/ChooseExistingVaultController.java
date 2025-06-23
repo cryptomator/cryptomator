@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 import dagger.Lazy;
@@ -32,7 +34,9 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultConfigCache;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -146,16 +150,20 @@ public class ChooseExistingVaultController implements FxController {
 			return;
 		}
 
-		Optional<Vault> optionalVault = prepareVault(selectedDirectory,vaultComponentFactory,
-				mountServices);
-		//TODO: optional raus, und mit error dialog arbeiten (UI kram in UI package!) hier nur fehler werfen
-		optionalVault.ifPresent(vault -> {
-			recoveryKeyWindow.create(vault, window, RecoveryActionType.RESTORE_VAULT_CONFIG).showOnboardingDialogWindow();
-		});
+		Vault preparedVault = prepareVault(selectedDirectory, vaultComponentFactory, mountServices);
+		VaultState.Value state = preparedVault.getState();
+		switch (state) {
+			case VAULT_CONFIG_MISSING -> recoveryKeyWindow.create(preparedVault, window, RecoveryActionType.RESTORE_VAULT_CONFIG).showOnboardingDialogWindow();
+			case MASTERKEY_MISSING -> recoveryKeyWindow.create(preparedVault, window, RecoveryActionType.RESTORE_MASTERKEY).showOnboardingDialogWindow();
+			default -> {
+				vaultListManager.addVault(preparedVault);
+				vault.set(preparedVault);
+				window.setScene(successScene.get());
+			}
+		}
 	}
 
-	public static Optional<Vault> prepareVault(File selectedDirectory, VaultComponent.Factory vaultComponentFactory, List<MountService> mountServices) {
-
+	public static Vault prepareVault(File selectedDirectory, VaultComponent.Factory vaultComponentFactory, List<MountService> mountServices) {
 		Path selectedPath = selectedDirectory.toPath();
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
 		vaultSettings.path.set(selectedPath);
@@ -166,7 +174,12 @@ public class ChooseExistingVaultController implements FxController {
 		}
 
 		var wrapper = new VaultConfigCache(vaultSettings);
-		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, VAULT_CONFIG_MISSING, null).vault(); //TODO: VAULT_CONFIG_MISSING nicht sicher, stand nochmal überprüfen
+		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, VAULT_CONFIG_MISSING, null).vault();
+		try {
+			VaultListManager.determineVaultState(vault.getPath(), vaultSettings);
+		} catch (IOException e) {
+			LOG.warn("Failed to determine vault state for {}", vaultSettings.path.get(), e);
+		}
 
 		//due to https://github.com/cryptomator/cryptomator/issues/2880#issuecomment-1680313498
 		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
@@ -174,7 +187,7 @@ public class ChooseExistingVaultController implements FxController {
 			vaultSettings.mountService.setValue(nameOfWinfspLocalMounter);
 		}
 
-		return Optional.of(vault);
+		return vault;
 	}
 
 	/* Getter */
