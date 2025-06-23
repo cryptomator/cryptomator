@@ -234,11 +234,11 @@ jobs:
                   jar --file="$jarFile" --update $(Resolve-Path -Relative -Path $_)
               }
           }
-      - name: Generate license for MSI
+      - name: Generate license file
         run: >
           mvn -B license:add-third-party "-Djavafx.platform=win"
           "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.outputDirectory=dist/win/appdir"
+          "-Dlicense.outputDirectory=appdir"
           "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
           "-Dlicense.includedScopes=compile"
           "-Dlicense.excludedGroups=^org\.cryptomator"
