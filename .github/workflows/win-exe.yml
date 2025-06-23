@@ -298,18 +298,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - arch: x64
+          - arch: arm64
             os: windows-latest
             executable-suffix: x64
-            java-dist: 'zulu'
-            java-version: '24.0.1+9'
-            java-package: 'jdk'
-          - arch: arm64
-            os: windows-11-arm
-            executable-suffix: arm64
-            java-dist: 'liberica'
-            java-version: '24.0.1+11'
-            java-package: 'jdk+fx' #This is needed, as liberica contains JFX 24 Jmods for Windows ARM64
     steps:
       - uses: actions/checkout@v4
       - name: Install wix and extensions
@@ -327,10 +318,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: ${{ matrix.java-dist }}
-          java-version: ${{ matrix.java-version }}
-          java-package: ${{ matrix.java-package }}
-          check-latest: true
+          distribution: 'zulu'
+          java-version: '24.0.1+9'
           cache: 'maven'
       - name: Generate license for exe
         run: >
@@ -361,6 +350,7 @@ jobs:
         working-directory: dist/win
         run: >
           wix build
+          -arch "arm64"
           -define BundleName="Cryptomator"
           -define BundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           -define BundleVendor="Skymatic GmbH"
