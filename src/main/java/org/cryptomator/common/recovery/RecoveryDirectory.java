@@ -1,6 +1,8 @@
 package org.cryptomator.common.recovery;
 
 import java.io.IOException;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.FileAttribute;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -25,7 +27,10 @@ public final class RecoveryDirectory implements AutoCloseable {
 	}
 
 	public static RecoveryDirectory create(Path vaultPath) throws IOException {
-		Path tempDir = Files.createTempDirectory("r");
+		FileAttribute<?> attr = PosixFilePermissions.asFileAttribute(
+				PosixFilePermissions.fromString("rwx------")
+		);
+		Path tempDir = Files.createTempDirectory("r", attr);
 		return new RecoveryDirectory(vaultPath, tempDir);
 	}
 
