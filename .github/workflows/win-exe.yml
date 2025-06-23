@@ -278,6 +278,11 @@ jobs:
           java-version: '24.0.1+9'
           java-package: 'jdk'
           cache: 'maven'
+      - name: Install wix and extensions
+        run: |
+          dotnet tool install --global wix --version 6.0.0
+          wix.exe extension add WixToolset.UI.wixext/6.0.0 --global
+          wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
       - name: Copy license file
         run: cp appdir-x64/license.rtf dist/win/resources/license.rtf
       - name: Create x64 MSI with x64 appimage
