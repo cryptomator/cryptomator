@@ -9,6 +9,7 @@
 package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
@@ -35,6 +36,7 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
 
 @Singleton
 public class VaultListManager {
@@ -104,7 +106,7 @@ public class VaultListManager {
 		vaultList.addAll(vaults);
 	}
 
-	private Optional<Vault> get(Path vaultPath) {
+	public Optional<Vault> get(Path vaultPath) {
 		assert vaultPath.isAbsolute();
 		assert vaultPath.normalize().equals(vaultPath);
 		return vaultList.stream() //
@@ -115,13 +117,15 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
-			if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
-				var keyIdScheme = wrapper.get().getKeyId().getScheme();
-				vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
-			}
 			var vaultState = determineVaultState(vaultSettings.path.get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
+				if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
+					var keyIdScheme = wrapper.get().getKeyId().getScheme();
+					vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
+				}
+			} else if (vaultState == NEEDS_MIGRATION) {
+				vaultSettings.lastKnownKeyLoader.set(Constants.DEFAULT_KEY_ID.toString());
 			}
 			return vaultComponentFactory.create(vaultSettings, wrapper, vaultState, null).vault();
 		} catch (IOException e) {

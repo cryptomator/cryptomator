@@ -23,5 +23,5 @@ jobs:
           identifier: Cryptomator.Cryptomator
           version: ${{ inputs.tag }}
           release-tag: ${{ inputs.tag }}
-          installers-regex: '\.msi$'
+          installers-regex: '-x64\.msi$'
           token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}

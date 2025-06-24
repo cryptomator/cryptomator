@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.16.2</version>
+	<version>1.17.0</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -26,7 +26,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>23</project.jdk.version>
+		<project.jdk.version>24</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<!-- remove them, as soon they got modularized or support is dropped (i.e., WebDAV) -->
@@ -34,19 +34,19 @@
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.9.0</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>1.5.1</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.3.0</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.3.2</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.5.3</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.version>1.6.0</cryptomator.integrations.version>
+		<cryptomator.integrations.win.version>1.5.0</cryptomator.integrations.win.version>
+		<cryptomator.integrations.mac.version>1.4.0</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.linux.version>1.6.0</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>5.0.5</cryptomator.fuse.version>
 		<cryptomator.webdav.version>2.0.10</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.17.0</commons-lang3.version>
-		<dagger.version>2.56.1</dagger.version>
+		<dagger.version>2.56.2</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.18.3</jackson.version>
-		<javafx.version>23.0.2</javafx.version>
+		<jackson.version>2.19.1</jackson.version>
+		<javafx.version>24.0.1</javafx.version>
 		<jwt.version>4.5.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
 		<logback.version>1.5.18</logback.version>
@@ -55,13 +55,13 @@
 		<zxcvbn.version>1.9.0</zxcvbn.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.12.2</junit.jupiter.version>
-		<mockito.version>5.17.0</mockito.version>
+		<junit.jupiter.version>5.13.1</junit.jupiter.version>
+		<mockito.version>5.18.0</mockito.version>
 		<hamcrest.version>3.0</hamcrest.version>
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>26.0.2</jetbrains.annotations.version>
-		<dependency-check.version>12.1.1</dependency-check.version>
+		<dependency-check.version>12.1.3</dependency-check.version>
 		<jacoco.version>0.8.13</jacoco.version>
 		<license-generator.version>2.5.0</license-generator.version>
 		<junit-tree-reporter.version>1.4.0</junit-tree-reporter.version>
@@ -225,7 +225,7 @@
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
-			<version>3.2.0</version>
+			<version>3.2.1</version>
 		</dependency>
 		<!-- JUnit / Mockito / Hamcrest -->
 		<dependency>
@@ -358,7 +358,7 @@
 					<consoleOutputReporter>
 						<disable>true</disable>
 					</consoleOutputReporter>
-					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar} --enable-native-access=javafx.graphics</argLine>
 					<statelessTestsetInfoReporter
 							implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
 					</statelessTestsetInfoReporter>

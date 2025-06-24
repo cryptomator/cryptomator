@@ -2,12 +2,16 @@ name: Build
 
 on:
   push:
+    paths:
+      - '.github/workflows/build.yml'
+      - 'pom.xml'
+      - 'src/**'
   pull_request_target:
     types: [labeled]
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: 23
+  JAVA_VERSION: 24
 
 defaults:
   run:

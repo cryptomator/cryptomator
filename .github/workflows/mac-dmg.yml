@@ -13,10 +13,16 @@ on:
         required: true
         default: false
         type: boolean
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+    paths:
+      - '.github/workflows/mac-dmg.yml'
+      - 'dist/mac/**'
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '23.0.2+7'
+  JAVA_VERSION: '24.0.1+9'
 
 jobs:
   get-version:
@@ -36,8 +42,8 @@ jobs:
           architecture: aarch64
           output-suffix: arm64
           fuse-lib: FUSE-T
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/23.0.2/openjfx-23.0.2_osx-aarch64_bin-jmods.zip'
-          openjfx-sha: 'c690cc642a3924cf56622951f478ba57aec9ce09063761f800c3319331bed3fc'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: 'b5a94a13077507003fa852512bfa33f4fb680bc8076d8002e4227a84c85171d4'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -76,13 +82,21 @@ jobs:
         run: |
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
+      - name: Run jlink with help option
+        id: jep-493-check
+        run: |
+          JMOD_PATHS="openjfx-jmods"
+          if ! ${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"; then
+            JMOD_PATHS="${JAVA_HOME}/jmods:${JMOD_PATHS}"
+          fi
+          echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
       - name: Run jlink
         #Remark: no compression is applied for improved build compression later (here dmg)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${JAVA_HOME}/jmods:openjfx-jmods"
+          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
@@ -104,7 +118,8 @@ jobs:
           --copyright "(C) 2016 - 2025 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "--enable-preview"
-          --java-options "--enable-native-access=org.cryptomator.jfuse.mac"
+          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac"
+          --java-options "--sun-misc-unsafe-memory-access=allow"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""
@@ -224,6 +239,11 @@ jobs:
           Cryptomator-${VERSION_NO}-${{ matrix.output-suffix }}.dmg dmg
         env:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
+      - name: Codesign .dmg
+        run: |
+          codesign -s ${CODESIGN_IDENTITY} --timestamp Cryptomator-*.dmg
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
       - name: Notarize .dmg
         if: startsWith(github.ref, 'refs/tags/') || inputs.notarize
         uses: cocoalibs/xcode-notarization-action@v1

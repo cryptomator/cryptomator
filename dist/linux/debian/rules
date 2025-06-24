@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-JAVA_HOME = /usr/lib/jvm/java-23-coffeelibs
+JAVA_HOME = /usr/lib/jvm/java-24-coffeelibs
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DEB_BUILD_ARCH),amd64)
 JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods
@@ -44,7 +44,8 @@ override_dh_auto_build:
 		--name cryptomator \
 		--vendor "Skymatic GmbH" \
 		--java-options "--enable-preview" \
-		--java-options "--enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
+		--java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
+		--java-options "--sun-misc-unsafe-memory-access=allow" \
 		--copyright "(C) 2016 - 2025 Skymatic GmbH" \
 		--java-options "-Xss5m" \
 		--java-options "-Xmx256m" \
