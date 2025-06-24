@@ -177,7 +177,7 @@ $javaOptions = @(
 	--app-version "$semVerNo.$revisionNo" `
 	--resource-dir resources `
 	--icon resources/$AppName.ico `
-	--add-launcher "Debug_${AppName}=$buildDir\debug-launcher.properties" `
+	--add-launcher "${AppName}Debug=$buildDir\debug-launcher.properties" `
 	@javaOptions
 
 if ($LASTEXITCODE -ne 0) {

@@ -163,7 +163,7 @@ jobs:
           --java-options "-Djavafx.verbose=${{ inputs.isDebug }}"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
-          --add-launcher "Debug_Cryptomator=dist/win/debug-launcher.properties"
+          --add-launcher "CryptomatorDebug=dist/win/debug-launcher.properties"
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
