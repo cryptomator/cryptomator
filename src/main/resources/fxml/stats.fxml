@@ -87,7 +87,7 @@
 			</cursor>
 		</AreaChart>
 		<FormattedLabel format="%stats.access.total" arg1="${controller.totalFilesAccessed}"/>
-		<Label/> <!-- to align with other graphs -->
+		 <DataLabel byteFormat="%stats.total.size.none" kibFormat="%stats.total.size.kib" mibFormat="%stats.total.size.mib" gibFormat="%stats.total.size.gib" dataInBytes="${controller.totalSize}"/>
 		<Label/> <!-- to align with other graphs -->
 	</VBox>
 </HBox>
