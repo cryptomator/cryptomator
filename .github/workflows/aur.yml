@@ -1,0 +1,92 @@
+name: Create PR for aur
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag'
+        required: true
+
+jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ inputs.tag }}
+  tarball:
+    name: Determines tarball url and compute checksum
+    runs-on: ubuntu-latest
+    needs: [get-version]
+    if:  github.event_name == 'workflow_dispatch' || needs.get-version.outputs.versionType == 'stable'
+    outputs:
+      url: ${{ steps.url.outputs.url}}
+      sha256: ${{ steps.sha256.outputs.sha256}}
+    steps:
+      - name: Determine tarball url
+        id: url
+        run: |
+          URL="";
+          if [[ -n "${{ inputs.tag }}"  ]]; then
+            URL="https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ inputs.tag }}.tar.gz"
+          else
+            URL="https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name }}.tar.gz"
+          fi
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+      - name: Download source tarball and compute checksum
+        id: sha256
+        run: |
+          curl --silent --fail-with-body -L -H "Accept: application/vnd.github+json" ${{ steps.url.outputs.url }} --output cryptomator.tar.gz
+          TARBALL_SHA256=$(sha256sum cryptomator.tar.gz | cut -d ' ' -f1)
+          echo "sha256=${TARBALL_SHA256}" >> "$GITHUB_OUTPUT"
+  aur:
+    name: Create PR for AUR
+    runs-on: ubuntu-latest
+    needs: [tarball, get-version]
+    env:
+      AUR_PR_URL: tbd
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'cryptomator/aur'
+          token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+      - name: Install makepkg
+        run: sudo apt install makepkg
+      - name: Checkout release branch
+        run: |
+          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+      - name: Update build file
+        run: |
+          sed -i -e 's/pkgver=[0-9]\+\.[0-9]\+\.[0-9]\+.*/pkgver=${${{ needs.get-version.outputs.semVerStr }}//-/_}/g' PKGBUILD
+          sed -i -e 's/sha256sums=(\'[0-9A-Za-z_\+-]\{64\}\'$/sha256sums=(\'${{ needs.tarball.outputs.sha256 }}\'/g' PKGBUILD
+          makepkg --printsrcinfo > .SRCINFO
+        # sed -i -e 's/pkgver=[0-9]\+\.[0-9]\+\.[0-9]\+.*/pkgver=${${{ needs.get-version.outputs.semVerStr }}//-/_}/g' PKGBUILD
+        # sed -i -e 's/sha256sums = [0-9A-Za-z_\+-]\{64\}$/sha256sums = ${{ needs.tarball.outputs.sha256 }}/g'.SRCINFO
+      - name: Commit and push
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git config push.autoSetupRemote true
+          git stage .
+          git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
+          git push
+      - name: Create pull request
+        run: |
+          printf "> [!IMPORTANT]\n> Todos:\n> - [ ] Update build instructions\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
+          PR_URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
+          echo "AUR_PR_URL=$PR_URL" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        #asdif: github.event_name == 'release'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: false
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "Flathub release PR created for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
+          SLACK_MESSAGE: "See <${{ env.AUR_PR_URL }}|PR> on how to proceed.>."
+          SLACK_FOOTER: false
+          MSG_MINIMAL: true
