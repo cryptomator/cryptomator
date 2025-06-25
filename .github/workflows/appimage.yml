@@ -31,6 +31,9 @@ jobs:
     name: Build AppImage
     runs-on: ${{ matrix.os }}
     needs: [get-version]
+    outputs:
+      x64-sha256: ${{ steps.checksum-x64.outputs.sha256sum }}
+      aarch64-sha256: ${{ steps.checksum-aarch64.outputs.sha256sum }}
     strategy:
       fail-fast: false
       matrix:
@@ -175,6 +178,18 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage.zsync
+      - name: Compute sha256 hash of x64 appimage
+        id: checksum-x64
+        if: matrix.appimage-suffix == 'x86_64'
+        run: |
+          APPIMAGE_SHA256=$(sha256sum cryptomator-*.AppImage | cut -d ' ' -f1)
+          echo "sha256sum=${APPIMAGE_SHA256}" >> "$GITHUB_OUTPUT"
+      - name: Compute sha256 hash of aarch64 appimage
+        id: checksum-aarch64
+        if: matrix.appimage-suffix == 'aarch64'
+        run: |
+          APPIMAGE_SHA256=$(sha256sum cryptomator-*.AppImage | cut -d ' ' -f1)
+          echo "sha256sum=${APPIMAGE_SHA256}" >> "$GITHUB_OUTPUT"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -194,3 +209,59 @@ jobs:
             cryptomator-*.AppImage
             cryptomator-*.zsync
             cryptomator-*.asc
+
+  create-aur-bin-pr:
+    name: Create PR for aur-bin repo
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'cryptomator/aur-bin'
+          token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install makepkg pacman-package-manager
+      - name: Checkout release branch
+        run: |
+          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+      - name: Update build file
+        run: |
+          sed -i -e 's/pkgver=[0-9]\+\.[0-9]\+\.[0-9]\+.*$/pkgver=${{ needs.get-version.outputs.semVerStr }}/g' PKGBUILD
+          sed -i -e 's/pkgrel=[0-9]\+$/pkgrel=1/g' PKGBUILD
+          sed -i -e "s/sha256sums_x86_64=('[0-9A-Za-z_\+-]\{64\}'$/sha256sums_x86_64=('${{ needs.build.outputs.x64-sha256 }}'/g" PKGBUILD
+          sed -i -e "s/sha256sums_aarch64=('[0-9A-Za-z_\+-]\{64\}'$/sha256sums_aarch64=('${{ needs.build.outputs.aarch64-sha256 }}'/g" PKGBUILD
+          makepkg --printsrcinfo > .SRCINFO
+      - name: Commit and push
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git config push.autoSetupRemote true
+          git stage .
+          git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
+          git push
+      - name: Create pull request
+        run: |
+          printf "> [!IMPORTANT]\n> Todos:\n> - [ ] Update build instructions\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
+          PR_URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
+          echo "AUR_PR_URL=$PR_URL" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        if: github.event_name == 'release'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: false
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "AUR release PR created for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
+          SLACK_MESSAGE: "See <${{ env.AUR_PR_URL }}|PR> on how to proceed."
+          SLACK_FOOTER: false
+          MSG_MINIMAL: true
+      - name: Download appimages
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.build.outputs }}
