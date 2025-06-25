@@ -25,6 +25,8 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
+
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.function.Consumer;
 
@@ -75,7 +77,7 @@ public class Settings {
 	public final BooleanProperty checkForUpdates;
 	public final ObjectProperty<Instant> lastUpdateCheckReminder;
 	public final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
-	public final StringProperty previouslyUsedVaultDirectory;
+	public final ObjectProperty<Path> previouslyUsedVaultDirectory;
 
 	private Consumer<Settings> saveCmd;
 
@@ -115,7 +117,7 @@ public class Settings {
 		this.checkForUpdates = new SimpleBooleanProperty(this, "checkForUpdates", json.checkForUpdatesEnabled);
 		this.lastUpdateCheckReminder = new SimpleObjectProperty<>(this, "lastUpdateCheckReminder", json.lastReminderForUpdateCheck);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
-		this.previouslyUsedVaultDirectory = new SimpleStringProperty(this, "previouslyUsedVaultDirectory", json.previouslyUsedVaultDirectory);
+		this.previouslyUsedVaultDirectory = new SimpleObjectProperty<>(this, "previouslyUsedVaultDirectory", json.previouslyUsedVaultDirectory);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 

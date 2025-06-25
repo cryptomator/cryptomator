@@ -102,12 +102,11 @@ public class CreateNewVaultLocationController implements FxController {
 		this.sortedRadioButtons = radioButtons.sorted(this::compareLocationPresets);
 		this.settings = settings;
 
-		var previouslyUsedDirectory = settings.previouslyUsedVaultDirectory.get();
+		Path previouslyUsedDirectory = settings.previouslyUsedVaultDirectory.get();
 		if (previouslyUsedDirectory != null) {
 			try {
-				Path cachedPath = Path.of(previouslyUsedDirectory);
-				if (Files.exists(cachedPath) && Files.isDirectory(cachedPath) && isActuallyWritable(cachedPath)) {
-					this.customVaultPath = cachedPath;
+				if (Files.exists(previouslyUsedDirectory) && Files.isDirectory(previouslyUsedDirectory) && isActuallyWritable(previouslyUsedDirectory)) {
+					this.customVaultPath = previouslyUsedDirectory;
 				}
 			} catch (InvalidPathException | NullPointerException e) {
 				LOG.warn("Invalid previously used vault directory path: {}", previouslyUsedDirectory, e);
@@ -216,7 +215,7 @@ public class CreateNewVaultLocationController implements FxController {
 			if (this.getVaultPath() != null) {
 				Path parentPath = this.getVaultPath().getParent();
 				if (parentPath != null) {
-					this.settings.previouslyUsedVaultDirectory.setValue(parentPath.toString());
+					this.settings.previouslyUsedVaultDirectory.setValue(parentPath);
 				}
 			}
 			window.setScene(chooseExpertSettingsScene.get());
