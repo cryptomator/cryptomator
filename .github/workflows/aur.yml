@@ -58,6 +58,7 @@ jobs:
       - name: Update build file
         run: |
           sed -i -e 's/pkgver=[0-9]\+\.[0-9]\+\.[0-9]\+.*$/pkgver=${{ needs.get-version.outputs.semVerStr }}/g' PKGBUILD
+          sed -i -e 's/pkgrel=[0-9]\+$/pkgrel=1/g' PKGBUILD
           sed -i -e "s/sha256sums=('[0-9A-Za-z_\+-]\{64\}'$/sha256sums=('${{ needs.tarball.outputs.sha256 }}'/g" PKGBUILD
           makepkg --printsrcinfo > .SRCINFO
       - name: Commit and push
