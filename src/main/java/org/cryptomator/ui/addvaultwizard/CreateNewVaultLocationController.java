@@ -106,8 +106,7 @@ public class CreateNewVaultLocationController implements FxController {
 		if (previouslyUsedDirectory != null) {
 			try {
 				Path cachedPath = Path.of(previouslyUsedDirectory);
-				VaultPathStatus cachedPathParentStatus = validatePath(cachedPath.getParent());
-				if (cachedPathParentStatus.valid()) {
+				if (Files.exists(cachedPath) && Files.isDirectory(cachedPath) && isActuallyWritable(cachedPath)) {
 					this.customVaultPath = cachedPath;
 				}
 			} catch (InvalidPathException | NullPointerException e) {
