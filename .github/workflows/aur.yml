@@ -51,7 +51,7 @@ jobs:
           repository: 'cryptomator/aur'
           token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
       - name: Install makepkg
-        run: sudo apt install makepkg
+        run: sudo apt install makepkg pacman-package-manager
       - name: Checkout release branch
         run: |
           git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
