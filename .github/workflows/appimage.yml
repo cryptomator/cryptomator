@@ -215,7 +215,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: 'cryptomator/aur-bin'
-          token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+          token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -245,7 +245,7 @@ jobs:
           URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
           echo "PR_URL=$URL" >> "$GITHUB_OUTPUT"
         env:
-          GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
         env:
