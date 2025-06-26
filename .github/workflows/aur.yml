@@ -1,4 +1,4 @@
-name: Create PR for aur
+name: Create PR for AUR
 
 on:
   release:
@@ -50,18 +50,19 @@ jobs:
         with:
           repository: 'cryptomator/aur'
           token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
-      - name: Install makepkg
-        run: sudo apt install makepkg
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install makepkg pacman-package-manager
       - name: Checkout release branch
         run: |
           git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
       - name: Update build file
         run: |
-          sed -i -e 's/pkgver=[0-9]\+\.[0-9]\+\.[0-9]\+.*/pkgver=${${{ needs.get-version.outputs.semVerStr }}//-/_}/g' PKGBUILD
-          sed -i -e 's/sha256sums=(\'[0-9A-Za-z_\+-]\{64\}\'$/sha256sums=(\'${{ needs.tarball.outputs.sha256 }}\'/g' PKGBUILD
+          sed -i -e 's|^pkgver=.*$|pkgver=${{ needs.get-version.outputs.semVerStr }}|' PKGBUILD
+          sed -i -e 's|^pkgrel=.*$|pkgrel=1|' PKGBUILD
+          sed -i -e "s|^sha256sums=.*$|sha256sums=('${{ needs.tarball.outputs.sha256 }}'|" PKGBUILD
           makepkg --printsrcinfo > .SRCINFO
-        # sed -i -e 's/pkgver=[0-9]\+\.[0-9]\+\.[0-9]\+.*/pkgver=${${{ needs.get-version.outputs.semVerStr }}//-/_}/g' PKGBUILD
-        # sed -i -e 's/sha256sums = [0-9A-Za-z_\+-]\{64\}$/sha256sums = ${{ needs.tarball.outputs.sha256 }}/g'.SRCINFO
       - name: Commit and push
         run: |
           git config user.name "${{ github.actor }}"
@@ -79,14 +80,14 @@ jobs:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
-        #asdif: github.event_name == 'release'
+        if: github.event_name == 'release'
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_USERNAME: 'Cryptobot'
           SLACK_ICON: false
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
-          SLACK_TITLE: "Flathub release PR created for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
-          SLACK_MESSAGE: "See <${{ env.AUR_PR_URL }}|PR> on how to proceed.>."
+          SLACK_TITLE: "AUR release PR created for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
+          SLACK_MESSAGE: "See <${{ env.AUR_PR_URL }}|PR> on how to proceed."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
