@@ -139,6 +139,29 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
 }
 
+
+$javaOptions = @(
+"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+"--java-options", "-Xss5m"
+"--java-options", "-Xmx256m"
+"--java-options", "-Dcryptomator.appVersion=`"$semVerNo`""
+"--java-options", "-Dfile.encoding=`"utf-8`""
+"--java-options", "-Djava.net.useSystemProxies=true"
+"--java-options", "-Dcryptomator.logDir=`"@{localappdata}/$AppName`""
+"--java-options", "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`""
+"--java-options", "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`""
+"--java-options", "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`""
+"--java-options", "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`""
+"--java-options", "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`""
+"--java-options", "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`""
+"--java-options", "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`""
+"--java-options", "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`""
+"--java-options", "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`""
+"--java-options", "-Dcryptomator.showTrayIcon=true"
+"--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
+)
+
+
 # create app dir
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
@@ -151,28 +174,16 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--name $AppName `
 	--vendor $Vendor `
 	--copyright $copyright `
-	--java-options "--enable-preview" `
-	--java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win" `
-	--java-options "-Xss5m" `
-	--java-options "-Xmx256m" `
-	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
 	--app-version "$semVerNo.$revisionNo" `
-	--java-options "-Dfile.encoding=`"utf-8`"" `
-	--java-options "-Djava.net.useSystemProxies=true" `
-	--java-options "-Dcryptomator.logDir=`"@{localappdata}/$AppName`"" `
-	--java-options "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`"" `
-	--java-options "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`"" `
-	--java-options "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`"" `
-	--java-options "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`"" `
-	--java-options "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`"" `
-	--java-options "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`"" `
-	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
-	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`"" `
-	--java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`"" `
-	--java-options "-Dcryptomator.showTrayIcon=true" `
-	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
-	--icon resources/$AppName.ico
+	--icon resources/$AppName.ico `
+	--add-launcher "${AppName}Debug=$buildDir\debug-launcher.properties" `
+	@javaOptions
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "jpackage Appimage failed with exit code $LASTEXITCODE"
+	return 1;
+}
 
 #Create RTF license for msi
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
@@ -187,6 +198,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
+attrib -r "$AppName\${AppName}Debug.exe"
 # patch batch script to set hostfile
 $webDAVPatcher = "$AppName\patchWebDAV.bat"
 try {
