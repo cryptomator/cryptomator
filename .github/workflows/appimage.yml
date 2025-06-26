@@ -31,9 +31,6 @@ jobs:
     name: Build AppImage
     runs-on: ${{ matrix.os }}
     needs: [get-version]
-    outputs:
-      x64-sha256: ${{ steps.checksum-x64.outputs.sha256sum }}
-      aarch64-sha256: ${{ steps.checksum-aarch64.outputs.sha256sum }}
     strategy:
       fail-fast: false
       matrix:
@@ -55,7 +52,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
           cache: 'maven'
-
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
@@ -178,18 +174,6 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage.zsync
-      - name: Compute sha256 hash of x64 appimage
-        id: checksum-x64
-        if: matrix.appimage-suffix == 'x86_64'
-        run: |
-          APPIMAGE_SHA256=$(sha256sum cryptomator-*.AppImage | cut -d ' ' -f1)
-          echo "sha256sum=${APPIMAGE_SHA256}" >> "$GITHUB_OUTPUT"
-      - name: Compute sha256 hash of aarch64 appimage
-        id: checksum-aarch64
-        if: matrix.appimage-suffix == 'aarch64'
-        run: |
-          APPIMAGE_SHA256=$(sha256sum cryptomator-*.AppImage | cut -d ' ' -f1)
-          echo "sha256sum=${APPIMAGE_SHA256}" >> "$GITHUB_OUTPUT"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -212,9 +196,21 @@ jobs:
 
   create-aur-bin-pr:
     name: Create PR for aur-bin repo
-    needs: [build]
+    needs: [build, get-version]
     runs-on: ubuntu-latest
     steps:
+      - name: Download AppImages
+        uses: actions/download-artifact@v4
+        with:
+          path: downloads/
+          merge-multiple: true
+      - name: Compute sha256 hash of AppImages
+        id: checksums
+        run: |
+          X64_SHA256=$(sha256sum downloads/cryptomator-*-x86_64.AppImage | cut -d ' ' -f1)
+          echo "x64-sha256sum=${X64_SHA256}" >> "$GITHUB_OUTPUT"
+          AARCH64_SHA256=$(sha256sum downloads/cryptomator-*-aarch64.AppImage | cut -d ' ' -f1)
+          echo "aarch64-sha256sum=${AARCH64_SHA256}" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with:
           repository: 'cryptomator/aur-bin'
@@ -228,10 +224,10 @@ jobs:
           git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
       - name: Update build file
         run: |
-          sed -i -e 's/pkgver=[0-9]\+\.[0-9]\+\.[0-9]\+.*$/pkgver=${{ needs.get-version.outputs.semVerStr }}/g' PKGBUILD
-          sed -i -e 's/pkgrel=[0-9]\+$/pkgrel=1/g' PKGBUILD
-          sed -i -e "s/sha256sums_x86_64=('[0-9A-Za-z_\+-]\{64\}'$/sha256sums_x86_64=('${{ needs.build.outputs.x64-sha256 }}'/g" PKGBUILD
-          sed -i -e "s/sha256sums_aarch64=('[0-9A-Za-z_\+-]\{64\}'$/sha256sums_aarch64=('${{ needs.build.outputs.aarch64-sha256 }}'/g" PKGBUILD
+          sed -i -e 's|^pkgver=.*$|pkgver=${{ needs.get-version.outputs.semVerStr }}|' PKGBUILD
+          sed -i -e 's|^pkgrel=.*$|pkgrel=1|' PKGBUILD
+          sed -i -e "s|^sha256sums_x86_64=.*$|sha256sums_x86_64=('${{ steps.checksums.outputs.x64-sha256sum }}'|" PKGBUILD
+          sed -i -e "s|^sha256sums_aarch64=.*$|sha256sums_aarch64=('${{ steps.checksums.outputs.aarch64-sha256sum}}'|" PKGBUILD
           makepkg --printsrcinfo > .SRCINFO
       - name: Commit and push
         run: |
@@ -261,7 +257,3 @@ jobs:
           SLACK_MESSAGE: "See <${{ env.AUR_PR_URL }}|PR> on how to proceed."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
-      - name: Download appimages
-        uses: actions/download-artifact@v4
-        with:
-          artifact-ids: ${{ needs.build.outputs }}
