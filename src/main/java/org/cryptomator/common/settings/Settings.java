@@ -25,6 +25,8 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
+
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.function.Consumer;
 
@@ -75,6 +77,7 @@ public class Settings {
 	public final BooleanProperty checkForUpdates;
 	public final ObjectProperty<Instant> lastUpdateCheckReminder;
 	public final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
+	public final ObjectProperty<Path> previouslyUsedVaultDirectory;
 
 	private Consumer<Settings> saveCmd;
 
@@ -114,6 +117,7 @@ public class Settings {
 		this.checkForUpdates = new SimpleBooleanProperty(this, "checkForUpdates", json.checkForUpdatesEnabled);
 		this.lastUpdateCheckReminder = new SimpleObjectProperty<>(this, "lastUpdateCheckReminder", json.lastReminderForUpdateCheck);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
+		this.previouslyUsedVaultDirectory = new SimpleObjectProperty<>(this, "previouslyUsedVaultDirectory", json.previouslyUsedVaultDirectory);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
@@ -143,6 +147,7 @@ public class Settings {
 		checkForUpdates.addListener(this::somethingChanged);
 		lastUpdateCheckReminder.addListener(this::somethingChanged);
 		lastSuccessfulUpdateCheck.addListener(this::somethingChanged);
+		previouslyUsedVaultDirectory.addListener(this::somethingChanged);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -204,6 +209,7 @@ public class Settings {
 		json.checkForUpdatesEnabled = checkForUpdates.get();
 		json.lastReminderForUpdateCheck = lastUpdateCheckReminder.get();
 		json.lastSuccessfulUpdateCheck = lastSuccessfulUpdateCheck.get();
+		json.previouslyUsedVaultDirectory = previouslyUsedVaultDirectory.get();
 		return json;
 	}
 
