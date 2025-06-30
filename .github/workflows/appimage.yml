@@ -52,7 +52,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
           cache: 'maven'
-
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
@@ -194,3 +193,68 @@ jobs:
             cryptomator-*.AppImage
             cryptomator-*.zsync
             cryptomator-*.asc
+
+  create-aur-bin-pr:
+    name: Create PR for aur-bin repo
+    needs: [build, get-version]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Download AppImages
+        uses: actions/download-artifact@v4
+        with:
+          path: downloads/
+          merge-multiple: true
+      - name: Compute sha256 hash of AppImages
+        id: checksums
+        run: |
+          X64_SHA256=$(sha256sum downloads/cryptomator-*-x86_64.AppImage | cut -d ' ' -f1)
+          echo "x64-sha256sum=${X64_SHA256}" >> "$GITHUB_OUTPUT"
+          AARCH64_SHA256=$(sha256sum downloads/cryptomator-*-aarch64.AppImage | cut -d ' ' -f1)
+          echo "aarch64-sha256sum=${AARCH64_SHA256}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: 'cryptomator/aur-bin'
+          token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install makepkg pacman-package-manager
+      - name: Checkout release branch
+        run: |
+          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+      - name: Update build file
+        run: |
+          sed -i -e 's|^pkgver=.*$|pkgver=${{ needs.get-version.outputs.semVerStr }}|' PKGBUILD
+          sed -i -e 's|^pkgrel=.*$|pkgrel=1|' PKGBUILD
+          sed -i -e "s|^sha256sums_x86_64=.*$|sha256sums_x86_64=('${{ steps.checksums.outputs.x64-sha256sum }}'|" PKGBUILD
+          sed -i -e "s|^sha256sums_aarch64=.*$|sha256sums_aarch64=('${{ steps.checksums.outputs.aarch64-sha256sum}}'|" PKGBUILD
+          makepkg --printsrcinfo > .SRCINFO
+      - name: Commit and push
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git config push.autoSetupRemote true
+          git stage .
+          git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
+          git push
+      - name: Create pull request
+        id: create-pr
+        run: |
+          printf "> [!IMPORTANT]\n> Todos:\n> - [ ] Update build instructions\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
+          URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
+          echo "PR_URL=$URL" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: false
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "AUR-bin release PR for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
+          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.PR_URL }}|PR> on how to proceed."
+          SLACK_FOOTER: false
+          MSG_MINIMAL: true

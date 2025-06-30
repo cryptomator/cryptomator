@@ -16,7 +16,7 @@ jobs:
         run: |
           gh repo sync cryptomator/winget-pkgs -b master --force
         env:
-          GH_TOKEN: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Submit package
         uses: vedantmgoyal2009/winget-releaser@main
         with:
@@ -24,4 +24,4 @@ jobs:
           version: ${{ inputs.tag }}
           release-tag: ${{ inputs.tag }}
           installers-regex: '-x64\.msi$'
-          token: ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+          token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
