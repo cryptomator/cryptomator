@@ -23,7 +23,6 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
-import org.cryptomator.event.VaultEvent;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -75,7 +73,6 @@ public class Vault {
 	private final BooleanBinding missing;
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
-	private final BooleanBinding missingMasterkey;
 	private final BooleanBinding missingVaultConfig;
 	private final ObjectBinding<Mountpoint> mountPoint;
 	private final Mounter mounter;
@@ -105,7 +102,6 @@ public class Vault {
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
 		this.missing = Bindings.createBooleanBinding(this::isMissing, state);
-		this.missingMasterkey = Bindings.createBooleanBinding(this::isMissingMasterkey, state);
 		this.missingVaultConfig = Bindings.createBooleanBinding(this::isMissingVaultConfig, state);
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
@@ -340,20 +336,12 @@ public class Vault {
 		return state.get() == VaultState.Value.ERROR;
 	}
 
-	public BooleanBinding missingMasterkeyProperty() {
-		return missingMasterkey;
-	}
-
-	public boolean isMissingMasterkey() {
-		return state.get() == VaultState.Value.MASTERKEY_MISSING;
-	}
-
 	public BooleanBinding missingVaultConfigProperty() {
 		return missingVaultConfig;
 	}
 
 	public boolean isMissingVaultConfig() {
-		return state.get() == VaultState.Value.VAULT_CONFIG_MISSING;
+		return state.get() == VaultState.Value.VAULT_CONFIG_MISSING || state.get() == VaultState.Value.ALL_MISSING;
 	}
 
 	public ReadOnlyStringProperty displayNameProperty() {

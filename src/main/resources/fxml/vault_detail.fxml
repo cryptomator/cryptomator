@@ -53,7 +53,6 @@
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_missing.fxml" visible="${controller.vault.missing}" managed="${controller.vault.missing}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_needsmigration.fxml" visible="${controller.vault.needsMigration}" managed="${controller.vault.needsMigration}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_unknownerror.fxml" visible="${controller.vault.unknownError}" managed="${controller.vault.unknownError}"/>
-		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_missing_masterkey.fxml" visible="${controller.vault.missingMasterkey}" managed="${controller.vault.missingMasterkey}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_missing_vault_config.fxml" visible="${controller.vault.missingVaultConfig}" managed="${controller.vault.missingVaultConfig}"/>
 	</children>
 </VBox>

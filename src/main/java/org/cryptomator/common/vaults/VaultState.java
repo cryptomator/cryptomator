@@ -31,9 +31,9 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		VAULT_CONFIG_MISSING,
 
 		/**
-		 * No masterkey found at the provided path
+		 * No vault config and masterkey found at the provided path
 		 */
-		MASTERKEY_MISSING,
+		ALL_MISSING,
 
 		/**
 		 * Vault requires migration to a newer vault format

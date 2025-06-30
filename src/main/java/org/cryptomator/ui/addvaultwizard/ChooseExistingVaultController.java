@@ -18,13 +18,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
-import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
-import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
@@ -36,7 +33,6 @@ import org.cryptomator.common.vaults.VaultConfigCache;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.mount.MountService;
-import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -151,10 +147,11 @@ public class ChooseExistingVaultController implements FxController {
 		}
 
 		Vault preparedVault = prepareVault(selectedDirectory, vaultComponentFactory, mountServices);
+		VaultListManager.redetermineVaultState(preparedVault);
 		VaultState.Value state = preparedVault.getState();
 		switch (state) {
-			case VAULT_CONFIG_MISSING -> recoveryKeyWindow.create(preparedVault, window, RecoveryActionType.RESTORE_VAULT_CONFIG).showOnboardingDialogWindow();
-			case MASTERKEY_MISSING -> recoveryKeyWindow.create(preparedVault, window, RecoveryActionType.RESTORE_MASTERKEY).showOnboardingDialogWindow();
+			case VAULT_CONFIG_MISSING -> recoveryKeyWindow.create(preparedVault, window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG)).showOnboardingDialogWindow();
+			case ALL_MISSING -> recoveryKeyWindow.create(preparedVault, window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_ALL)).showOnboardingDialogWindow();
 			default -> {
 				vaultListManager.addVault(preparedVault);
 				vault.set(preparedVault);
@@ -174,7 +171,7 @@ public class ChooseExistingVaultController implements FxController {
 		}
 
 		var wrapper = new VaultConfigCache(vaultSettings);
-		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, VAULT_CONFIG_MISSING, null).vault();
+		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, LOCKED, null).vault();
 		try {
 			VaultListManager.determineVaultState(vault.getPath(), vaultSettings);
 		} catch (IOException e) {

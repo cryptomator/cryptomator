@@ -3,8 +3,10 @@ package org.cryptomator.ui.mainwindow;
 import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
@@ -16,13 +18,17 @@ import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 @MainWindowScoped
 public class VaultDetailMissingVaultController implements FxController {
 
+	private final FxApplicationWindows appWindows;
+	private final Stage mainWindow;
 	private final ObjectProperty<Vault> vault;
 	private final ObservableList<Vault> vaults;
 	private final ResourceBundle resourceBundle;
@@ -31,12 +37,17 @@ public class VaultDetailMissingVaultController implements FxController {
 	private final Dialogs dialogs;
 
 	@Inject
-	public VaultDetailMissingVaultController(ObjectProperty<Vault> vault, //
+	public VaultDetailMissingVaultController(FxApplicationWindows appWindows, //
+											 @MainWindow Stage mainWindow, //
+											 ObjectProperty<Vault> vault, //
 											 ObservableList<Vault> vaults, //
 											 ResourceBundle resourceBundle, //
 											 @MainWindow Stage window, //
 											 Dialogs dialogs, //
 											 RecoveryKeyComponent.Factory recoveryKeyWindow) {
+
+		this.appWindows = appWindows;
+		this.mainWindow = mainWindow;
 		this.vault = vault;
 		this.vaults = vaults;
 		this.resourceBundle = resourceBundle;
@@ -60,14 +71,23 @@ public class VaultDetailMissingVaultController implements FxController {
 		if(KeyLoadingStrategy.isHubVault(vault.get().getVaultSettings().lastKnownKeyLoader.get())){
 			dialogs.prepareContactHubAdmin(window).build().showAndWait();
 		}
+		else if(Files.exists(vault.get().getPath().resolve(MASTERKEY_FILENAME))){
+			recoveryKeyWindow.create(vault.get(), window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG)).showOnboardingDialogWindow();
+		}
 		else {
-			recoveryKeyWindow.create(vault.get(), window, RecoveryActionType.RESTORE_VAULT_CONFIG).showOnboardingDialogWindow();
+			recoveryKeyWindow.create(vault.get(), window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_ALL)).showOnboardingDialogWindow();
 		}
 	}
 
 	@FXML
 	void restoreMasterkey() {
-		recoveryKeyWindow.create(vault.get(), window, RecoveryActionType.RESTORE_MASTERKEY).showRecoveryKeyRecoverWindow();
+		recoveryKeyWindow.create(vault.get(), window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_MASTERKEY)).showRecoveryKeyRecoverWindow();
+	}
+
+	@FXML
+	public void unlock() {
+		vault.get().stateProperty().set(VaultState.Value.LOCKED);
+		appWindows.startUnlockWorkflow(vault.get(), mainWindow);
 	}
 
 	@FXML

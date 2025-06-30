@@ -25,10 +25,11 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
-import static org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.ALL_MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
 import static org.cryptomator.common.vaults.VaultState.Value.PROCESSING;
 import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
@@ -39,7 +40,6 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.cryptomator.integrations.mount.MountService;
-import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +146,7 @@ public class VaultListManager {
 				vaultSettings.lastKnownKeyLoader.set(Constants.DEFAULT_KEY_ID.toString());
 			}
 
-			if (vaultState != VaultState.Value.VAULT_CONFIG_MISSING) {
+			if (vaultState != VAULT_CONFIG_MISSING) {
 				initializeLastKnownKeyLoaderIfPossible(vaultSettings, wrapper);
 			}
 
@@ -179,10 +179,6 @@ public class VaultListManager {
 		try {
 			VaultState.Value determined = determineVaultState(vault.getPath(), vault.getVaultSettings());
 
-			if (determined == MASTERKEY_MISSING && KeyLoadingStrategy.isHubVault(vault.getVaultConfigCache().getUnchecked().getKeyId().getScheme())) {
-				determined = LOCKED;
-			}
-
 			if (determined == LOCKED) {
 				vault.getVaultConfigCache().reloadConfig();
 			}
@@ -205,24 +201,18 @@ public class VaultListManager {
 			return VaultState.Value.MISSING;
 		}
 
-		boolean vaultConfigRestored = Files.notExists(pathToVaultConfig)
-				&& BackupRestorer.restoreIfPresent(pathToVaultConfig.getParent(), VaultState.Value.VAULT_CONFIG_MISSING);
+		BackupRestorer.restoreIfPresent(pathToVaultConfig.getParent(), VAULTCONFIG_FILENAME);
 
-		boolean masterkeyRestored = Files.notExists(pathToMasterkey)
-				&& KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get())
-				&& BackupRestorer.restoreIfPresent(pathToMasterkey.getParent(), VaultState.Value.MASTERKEY_MISSING);
+		BackupRestorer.restoreIfPresent(pathToMasterkey.getParent(), MASTERKEY_FILENAME);
 
-		if (vaultConfigRestored || masterkeyRestored) {
-			return LOCKED;
+		if (!Files.exists(pathToVaultConfig) && !Files.exists(pathToMasterkey)) {
+			return ALL_MISSING;
 		}
 
-		if (Files.notExists(pathToVaultConfig)) {
-			return VaultState.Value.VAULT_CONFIG_MISSING;
+		if (!Files.exists(pathToVaultConfig)) {
+			return VAULT_CONFIG_MISSING;
 		}
 
-		if (Files.notExists(pathToMasterkey) && KeyLoadingStrategy.isMasterkeyFileVault(vaultSettings.lastKnownKeyLoader.get())) {
-			return VaultState.Value.MASTERKEY_MISSING;
-		}
 
 		return checkDirStructure(pathToVault);
 	}

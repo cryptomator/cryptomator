@@ -44,7 +44,7 @@ public class RecoveryKeyValidateController implements FxController {
 	private final ObjectProperty<RecoveryKeyState> recoveryKeyState;
 	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final AutoCompleter autoCompleter;
-	private final RecoveryActionType recoverType;
+	private final ObjectProperty<RecoveryActionType> recoverType;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	private volatile boolean isWrongKey;
@@ -55,7 +55,7 @@ public class RecoveryKeyValidateController implements FxController {
 										 @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, //
 										 StringProperty recoveryKey, //
 										 RecoveryKeyFactory recoveryKeyFactory, //
-										 @Named("recoverType") RecoveryActionType recoverType, //
+										 @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
 										 @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
 										 MasterkeyFileAccess masterkeyFileAccess) {
 		this.vault = vault;
@@ -135,8 +135,8 @@ public class RecoveryKeyValidateController implements FxController {
 	}
 
 	private void validateRecoveryKey() {
-		switch (recoverType) {
-			case RESTORE_VAULT_CONFIG -> {
+		switch (recoverType.get()) {
+			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> {
 				try{
 					var combo = MasterkeyService.validateRecoveryKeyAndDetectCombo(recoveryKeyFactory, vault, recoveryKey.get(), masterkeyFileAccess);
 					combo.ifPresent(cipherCombo::set);

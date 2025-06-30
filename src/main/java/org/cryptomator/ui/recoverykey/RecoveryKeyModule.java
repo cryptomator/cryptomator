@@ -176,7 +176,7 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
-	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @Named("recoverType") RecoveryActionType recoverType, @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo, @Nullable MasterkeyFileAccess masterkeyFileAccess) {
+	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @Named("recoverType") ObjectProperty<RecoveryActionType>  recoverType, @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo, @Nullable MasterkeyFileAccess masterkeyFileAccess) {
 		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, recoverType, cipherCombo, masterkeyFileAccess);
 	}
 

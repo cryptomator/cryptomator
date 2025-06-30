@@ -122,7 +122,7 @@ abstract class ConvertVaultModule {
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
 	static FxController bindRecoveryKeyValidateController(@ConvertVaultWindow Vault vault, @ConvertVaultWindow VaultConfig.UnverifiedVaultConfig vaultConfig, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
-		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, RecoveryActionType.CONVERT_VAULT, null, null);
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, new SimpleObjectProperty<>(RecoveryActionType.CONVERT_VAULT), null, null);
 	}
 
 }

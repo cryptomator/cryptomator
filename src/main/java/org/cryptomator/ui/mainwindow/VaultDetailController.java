@@ -52,7 +52,7 @@ public class VaultDetailController implements FxController {
 				case LOCKED -> FontAwesome5Icon.LOCK;
 				case PROCESSING -> FontAwesome5Icon.SPINNER;
 				case UNLOCKED -> FontAwesome5Icon.LOCK_OPEN;
-				case NEEDS_MIGRATION, MISSING, VAULT_CONFIG_MISSING, MASTERKEY_MISSING, ERROR -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+				case NEEDS_MIGRATION, MISSING, VAULT_CONFIG_MISSING, ALL_MISSING, ERROR -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
 			};
 		} else {
 			return FontAwesome5Icon.EXCLAMATION_TRIANGLE;

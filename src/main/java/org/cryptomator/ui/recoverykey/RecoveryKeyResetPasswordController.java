@@ -1,24 +1,5 @@
 package org.cryptomator.ui.recoverykey;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.concurrent.Task;
-import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-
-import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
-
 import dagger.Lazy;
 import org.cryptomator.common.recovery.CryptoFsInitializer;
 import org.cryptomator.common.recovery.MasterkeyService;
@@ -39,6 +20,27 @@ import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.concurrent.Task;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.stage.Stage;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
+
 @RecoveryKeyScoped
 public class RecoveryKeyResetPasswordController implements FxController {
 
@@ -50,11 +52,12 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final ExecutorService executor;
 	private final StringProperty recoveryKey;
 	private final Lazy<Scene> recoverExpertSettingsScene;
+	private final Lazy<Scene> recoverykeyRecoverScene;
 	private final FxApplicationWindows appWindows;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final VaultListManager vaultListManager;
 	private final IntegerProperty shorteningThreshold;
-	private final RecoveryActionType recoverType;
+	private final ObjectProperty<RecoveryActionType> recoverType;
 	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final ResourceBundle resourceBundle;
 	private final StringProperty buttonText = new SimpleStringProperty();
@@ -62,6 +65,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final Stage owner;
 
 	public NewPasswordController newPasswordController;
+	public Button backButton;
+	public Button nextButton;
 
 	@Inject
 	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, //
@@ -70,11 +75,12 @@ public class RecoveryKeyResetPasswordController implements FxController {
 											  ExecutorService executor, //
 											  @Named("keyRecoveryOwner") Stage owner, @RecoveryKeyWindow StringProperty recoveryKey, //
 											  @FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> recoverExpertSettingsScene, //
+											  @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverykeyRecoverScene, //
 											  FxApplicationWindows appWindows, //
 											  MasterkeyFileAccess masterkeyFileAccess, //
 											  VaultListManager vaultListManager, //
 											  @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
-											  @Named("recoverType") RecoveryActionType recoverType, //
+											  @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
 											  @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
 											  ResourceBundle resourceBundle, Dialogs dialogs) {
 		this.window = window;
@@ -83,6 +89,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		this.executor = executor;
 		this.recoveryKey = recoveryKey;
 		this.recoverExpertSettingsScene = recoverExpertSettingsScene;
+		this.recoverykeyRecoverScene = recoverykeyRecoverScene;
 		this.appWindows = appWindows;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.vaultListManager = vaultListManager;
@@ -92,25 +99,35 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.dialogs = dialogs;
 		this.owner = owner;
-		initButtonText(recoverType);
 	}
 
-	private void initButtonText(RecoveryActionType type) {
-		if (type == RecoveryActionType.RESTORE_MASTERKEY) {
-			buttonText.set(resourceBundle.getString("generic.button.close"));
-		} else {
-			buttonText.set(resourceBundle.getString("generic.button.back"));
+	@FXML
+	public void initialize() {
+		switch (recoverType.get()) {
+			case RESTORE_MASTERKEY -> {
+				nextButton.setText(resourceBundle.getString("recoveryKey.recover.recoverBtn"));
+				nextButton.setOnAction((_) -> resetPassword());
+			}
+			case RESTORE_ALL -> {
+				nextButton.setText(resourceBundle.getString("recoveryKey.recover.recoverBtn"));
+				nextButton.setOnAction((_) -> restorePassword());
+			}
+			case RESET_PASSWORD -> {
+				nextButton.setText(resourceBundle.getString("recoveryKey.recover.resetBtn"));
+				nextButton.setOnAction((_) -> resetPassword());
+			}
 		}
 	}
 
 	@FXML
 	public void close() {
-		if (recoverType.equals(RecoveryActionType.RESTORE_MASTERKEY)) {
-			window.close();
-		} else {
-			window.setScene(recoverExpertSettingsScene.get());
+		switch (recoverType.get()) {
+			case RESTORE_ALL -> window.setScene(recoverExpertSettingsScene.get());
+			case RESTORE_MASTERKEY, RESET_PASSWORD -> window.setScene(recoverykeyRecoverScene.get());
+			default -> window.close();
 		}
 	}
+
 	@FXML
 	public void restorePassword() {
 		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
@@ -123,16 +140,14 @@ public class RecoveryKeyResetPasswordController implements FxController {
 				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), cipherCombo.get());
 			}
 
-			recoveryDirectory.moveRecoveredFiles();
+			recoveryDirectory.moveRecoveredFile(MASTERKEY_FILENAME);
+			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
 
 			if (!vaultListManager.containsVault(vault.getPath())) {
 				vaultListManager.add(vault.getPath());
 			}
 			window.close();
-			dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
-					.setTitleKey("recoveryKey.recoverVaultConfig.title")
-					.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message")
-					.build().showAndWait();
+			dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).setTitleKey("recoveryKey.recoverVaultConfig.title").setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message").build().showAndWait();
 
 		} catch (IOException | CryptoException e) {
 			LOG.error("Recovery process failed", e);
@@ -148,14 +163,12 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 		task.setOnSucceeded(_ -> {
 			LOG.info("Used recovery key to reset password for {}.", vault.getDisplayablePath());
-			if (vault.getState().equals(org.cryptomator.common.vaults.VaultState.Value.MASTERKEY_MISSING)) {
-				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
-						.setTitleKey("recoveryKey.recoverMasterkey.title")
-						.setMessageKey("recoveryKey.recover.resetMasterkeyFileSuccess.message")
-						.build().showAndWait();
+			if (recoverType.get().equals(RecoveryActionType.RESET_PASSWORD)) {
+				window.close();
+				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).build().showAndWait();
 			} else {
-				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle)
-						.build().showAndWait();
+				window.close();
+				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).setTitleKey("recoveryKey.recoverMasterkey.title").setMessageKey("recoveryKey.recover.resetMasterkeyFileSuccess.message").build().showAndWait();
 			}
 			window.close();
 		});
@@ -185,6 +198,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	public boolean isPasswordSufficientAndMatching() {
 		return newPasswordController.isGoodPassword();
 	}
+
 	private final ReadOnlyBooleanWrapper vaultConfigMissing = new ReadOnlyBooleanWrapper();
 
 	public ReadOnlyBooleanProperty vaultConfigMissingProperty() {

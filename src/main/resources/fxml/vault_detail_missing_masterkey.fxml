@@ -29,6 +29,11 @@
 					<FontAwesome5IconView glyph="REDO"/>
 				</graphic>
 			</Button>
+			<Button text="Select Masterkey" minWidth="120" onAction="#unlock">
+				<graphic>
+					<FontAwesome5IconView glyph="MAGIC"/>
+				</graphic>
+			</Button>
 			<Button text="%main.vaultDetail.missingMasterkey.restore" minWidth="120" onAction="#restoreMasterkey">
 				<graphic>
 					<FontAwesome5IconView glyph="MAGIC"/>

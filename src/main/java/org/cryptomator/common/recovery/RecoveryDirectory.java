@@ -11,9 +11,6 @@ import java.util.Comparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
-import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
-
 public final class RecoveryDirectory implements AutoCloseable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RecoveryDirectory.class);
@@ -34,9 +31,8 @@ public final class RecoveryDirectory implements AutoCloseable {
 		return new RecoveryDirectory(vaultPath, tempDir);
 	}
 
-	public void moveRecoveredFiles() throws IOException {
-		Files.move(recoveryPath.resolve(MASTERKEY_FILENAME), vaultPath.resolve(MASTERKEY_FILENAME), StandardCopyOption.REPLACE_EXISTING);
-		Files.move(recoveryPath.resolve(VAULTCONFIG_FILENAME), vaultPath.resolve(VAULTCONFIG_FILENAME), StandardCopyOption.REPLACE_EXISTING);
+	public void moveRecoveredFile(String file) throws IOException {
+		Files.move(recoveryPath.resolve(file), vaultPath.resolve(file), StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	private void deleteRecoveryDirectory() {

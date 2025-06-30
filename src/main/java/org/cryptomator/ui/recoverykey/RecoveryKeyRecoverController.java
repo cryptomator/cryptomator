@@ -11,6 +11,7 @@ import javax.inject.Named;
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import java.util.ResourceBundle;
 
@@ -19,6 +20,12 @@ public class RecoveryKeyRecoverController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> nextScene;
+	private final Lazy<Scene> onBoardingScene;
+	private final ResourceBundle resourceBundle;
+	public ObjectProperty<RecoveryActionType> recoverType;
+
+	@FXML
+	private Button cancelButton;
 
 	@FXML
 	RecoveryKeyValidateController recoveryKeyValidateController;
@@ -27,11 +34,15 @@ public class RecoveryKeyRecoverController implements FxController {
 	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene, //
 										@FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS) Lazy<Scene> expertSettingsScene, //
-										ResourceBundle resourceBundle, @Named("recoverType") RecoveryActionType recoverType) {
+										@FxmlScene(FxmlFile.RECOVERYKEY_ONBOARDING) Lazy<Scene> onBoardingScene, //
+										ResourceBundle resourceBundle, //
+										@Named("recoverType") ObjectProperty<RecoveryActionType> recoverType) {
 		this.window = window;
-
-		this.nextScene = switch (recoverType) {
-			case RESTORE_VAULT_CONFIG -> {
+		this.recoverType = recoverType;
+		this.onBoardingScene = onBoardingScene;
+		this.resourceBundle = resourceBundle;
+		this.nextScene = switch (recoverType.get()) {
+			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> {
 				window.setTitle(resourceBundle.getString("recoveryKey.recoverVaultConfig.title"));
 				yield expertSettingsScene;
 			}
@@ -56,11 +67,18 @@ public class RecoveryKeyRecoverController implements FxController {
 
 	@FXML
 	public void initialize() {
+		switch (recoverType.get()) {
+			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> cancelButton.setText(resourceBundle.getString("generic.button.back"));
+			case RESET_PASSWORD -> cancelButton.setText(resourceBundle.getString("generic.button.cancel"));
+		}
 	}
 
 	@FXML
 	public void close() {
-		window.close();
+		switch (recoverType.get()) {
+			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> window.setScene(onBoardingScene.get());
+			case RESET_PASSWORD -> window.close();
+		}
 	}
 
 	@FXML

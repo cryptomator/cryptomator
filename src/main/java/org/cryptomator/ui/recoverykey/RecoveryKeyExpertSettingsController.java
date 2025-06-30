@@ -6,17 +6,23 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 
 import dagger.Lazy;
+import org.cryptomator.common.recovery.RecoveryActionType;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.controls.NumericTextField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RecoveryKeyScoped
 public class RecoveryKeyExpertSettingsController implements FxController {
@@ -27,28 +33,40 @@ public class RecoveryKeyExpertSettingsController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Application> application;
-	private final Lazy<Scene> resetPasswordScene;
-	private final Lazy<Scene> recoverScene;
-
-	public CheckBox expertSettingsCheckBox;
-	public NumericTextField shorteningThresholdTextField;
+	private final Vault vault;
+	private final ObjectProperty<RecoveryActionType> recoverType;
 	private final IntegerProperty shorteningThreshold;
+	private final Lazy<Scene> resetPasswordScene;
+	private final Lazy<Scene> createScene;
+	private final Lazy<Scene> onBoardingScene;
+	private final Lazy<Scene> recoverScene;
 	private final BooleanBinding validShorteningThreshold;
 
+	@FXML public CheckBox expertSettingsCheckBox;
+	@FXML public NumericTextField shorteningThresholdTextField;
+
+	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyExpertSettingsController.class);
 
 	@Inject
 	public RecoveryKeyExpertSettingsController(@RecoveryKeyWindow Stage window, //
 											   Lazy<Application> application, //
+											   @RecoveryKeyWindow Vault vault, //
+											   @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
 											   @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
 											   @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene, //
+											   @FxmlScene(FxmlFile.RECOVERYKEY_CREATE) Lazy<Scene> createScene, //
+											   @FxmlScene(FxmlFile.RECOVERYKEY_ONBOARDING) Lazy<Scene> onBoardingScene, //
 											   @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene) {
 		this.window = window;
 		this.application = application;
-		this.resetPasswordScene = resetPasswordScene;
-		this.recoverScene = recoverScene;
+		this.vault = vault;
+		this.recoverType = recoverType;
 		this.shorteningThreshold = shorteningThreshold;
+		this.resetPasswordScene = resetPasswordScene;
+		this.createScene = createScene;
+		this.onBoardingScene = onBoardingScene;
+		this.recoverScene = recoverScene;
 		this.validShorteningThreshold = Bindings.createBooleanBinding(this::isValidShorteningThreshold, shorteningThreshold);
-
 	}
 
 	@FXML
@@ -87,11 +105,19 @@ public class RecoveryKeyExpertSettingsController implements FxController {
 
 	@FXML
 	public void back() {
-		window.setScene(recoverScene.get());
+		if(recoverType.get().equals(RecoveryActionType.RESTORE_ALL) && vault.getState().equals(VaultState.Value.VAULT_CONFIG_MISSING))
+			window.setScene(recoverScene.get());
+		else if(recoverType.get().equals(RecoveryActionType.RESTORE_ALL) && vault.getState().equals(VaultState.Value.ALL_MISSING))
+			window.setScene(recoverScene.get());
+		else if(recoverType.get().equals(RecoveryActionType.RESTORE_VAULT_CONFIG))
+			window.setScene(onBoardingScene.get());
 	}
 
 	@FXML
 	public void next() {
-		window.setScene(resetPasswordScene.get());
+		if(recoverType.get().equals(RecoveryActionType.RESTORE_VAULT_CONFIG))
+			window.setScene(createScene.get());
+		else
+			window.setScene(resetPasswordScene.get());
 	}
 }

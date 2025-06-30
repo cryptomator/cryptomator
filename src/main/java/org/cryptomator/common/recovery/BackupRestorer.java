@@ -7,21 +7,17 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.util.stream.Stream;
 
-import org.cryptomator.common.vaults.VaultState.Value;
+import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 
 public final class BackupRestorer {
 
 	private BackupRestorer() {}
 
-	public static boolean restoreIfPresent(Path vaultPath, Value vaultState) {
-		Path targetFile = switch (vaultState) {
-			case VAULT_CONFIG_MISSING -> vaultPath.resolve("vault.cryptomator");
-			case MASTERKEY_MISSING -> vaultPath.resolve("masterkey.cryptomator");
-			default -> throw new IllegalArgumentException("Unexpected vault state: " + vaultState);
-		};
+	public static boolean restoreIfPresent(Path vaultPath, String fileName) {
+		Path targetFile = vaultPath.resolve(fileName);
 
 		try (Stream<Path> files = Files.list(vaultPath)) {
-			return files.filter(file -> isValidBackupFileForState(file.getFileName().toString(), vaultState))
+			return files.filter(file -> isValidBackupFileForState(file.getFileName().toString(), fileName))
 					.max((f1, f2) -> {
 						try {
 							FileTime time1 = Files.getLastModifiedTime(f1);
@@ -38,12 +34,8 @@ public final class BackupRestorer {
 		}
 	}
 
-	private static boolean isValidBackupFileForState(String fileName, Value vaultState) {
-		return switch (vaultState) {
-			case VAULT_CONFIG_MISSING -> fileName.startsWith("vault.cryptomator") && fileName.endsWith(".bkup");
-			case MASTERKEY_MISSING -> fileName.startsWith("masterkey.cryptomator") && fileName.endsWith(".bkup");
-			default -> false;
-		};
+	private static boolean isValidBackupFileForState(String fileName, String vaultState) {
+		return fileName.startsWith(vaultState) && fileName.endsWith(MASTERKEY_BACKUP_SUFFIX);
 	}
 
 	private static boolean copyBackupFile(Path backupFile, Path configPath) {
