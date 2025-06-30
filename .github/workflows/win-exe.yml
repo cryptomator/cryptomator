@@ -245,7 +245,7 @@ jobs:
         id: setup-patched-jdk
         run: |
           if [ "${{ matrix.arch }}" == "arm64" ]; then
-            curl --output patched-jdk.zip -L "https://cloud.skymatic.de/s/pyETc23Ks4Zeean"
+            curl --output patched-jdk.zip -L "https://static.cryptomator.org/desktop/patched-win-jdk.zip"
             unzip patched-jdk.zip -d patched-jdk
             echo "JAVA_HOME=${{ github.workspace }}/patched-jdk" >> $GITHUB_OUTPUT
           else
