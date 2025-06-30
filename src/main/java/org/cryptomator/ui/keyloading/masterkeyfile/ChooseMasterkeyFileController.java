@@ -1,14 +1,18 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.keyloading.KeyLoading;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.beans.binding.StringBinding;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -27,15 +31,37 @@ public class ChooseMasterkeyFileController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final CompletableFuture<Path> result;
+	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final ResourceBundle resourceBundle;
 
+	@FXML private CheckBox restoreInsteadCheckBox;
+	@FXML private Button chooseButton;
+
 	@Inject
-	public ChooseMasterkeyFileController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<Path> result, ResourceBundle resourceBundle) {
+	public ChooseMasterkeyFileController(@KeyLoading Stage window, //
+										 @KeyLoading Vault vault, //
+										 CompletableFuture<Path> result, //
+										 RecoveryKeyComponent.Factory recoveryKeyWindow, //
+										 ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
 		this.result = result;
+		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.resourceBundle = resourceBundle;
 		this.window.setOnHiding(this::windowClosed);
+	}
+
+	@FXML
+	private void initialize() {
+		restoreInsteadCheckBox.selectedProperty().addListener((_, _, newVal) -> {
+			if (newVal) {
+				chooseButton.setText(resourceBundle.getString("addvaultwizard.existing.restore"));
+				chooseButton.setOnAction(e -> restoreMasterkey());
+			} else {
+				chooseButton.setText(resourceBundle.getString("generic.button.choose"));
+				chooseButton.setOnAction(e -> proceed());
+			}
+		});
 	}
 
 	@FXML
@@ -45,6 +71,12 @@ public class ChooseMasterkeyFileController implements FxController {
 
 	private void windowClosed(WindowEvent windowEvent) {
 		result.cancel(true);
+	}
+
+	@FXML
+	void restoreMasterkey() {
+		window.close();
+		recoveryKeyWindow.create(vault, window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_MASTERKEY)).showOnboardingDialogWindow();
 	}
 
 	@FXML

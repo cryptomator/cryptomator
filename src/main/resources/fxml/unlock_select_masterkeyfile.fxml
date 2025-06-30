@@ -12,6 +12,7 @@
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.Region?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import javafx.scene.control.CheckBox?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.masterkeyfile.ChooseMasterkeyFileController"
@@ -40,12 +41,13 @@
 				</padding>
 			</Label>
 			<FormattedLabel format="%unlock.chooseMasterkey.description" arg1="${controller.displayName}" wrapText="true"/>
+			<CheckBox fx:id="restoreInsteadCheckBox" text="%unlock.chooseMasterkey.restoreInstead" wrapText="true"/>
 
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
-					<Button text="%generic.button.choose" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
+					<Button fx:id="chooseButton" text="%generic.button.choose" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

@@ -15,6 +15,7 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.keyloading.KeyLoadingComponent;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Named;
@@ -27,7 +28,7 @@ import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {KeyLoadingComponent.class})
+@Module(subcomponents = {KeyLoadingComponent.class, RecoveryKeyComponent.class})
 abstract class UnlockModule {
 
 	@Provides

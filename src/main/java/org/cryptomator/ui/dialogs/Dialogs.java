@@ -20,6 +20,8 @@ public class Dialogs {
 	private final ResourceBundle resourceBundle;
 	private final StageFactory stageFactory;
 
+	private static final String BUTTON_KEY_CLOSE = "generic.button.close";
+
 	@Inject
 	public Dialogs(ResourceBundle resourceBundle, StageFactory stageFactory) {
 		this.resourceBundle = resourceBundle;
@@ -47,6 +49,31 @@ public class Dialogs {
 				});
 	}
 
+	public SimpleDialog.Builder prepareContactHubAdmin(Stage window) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("contactHubAdmin.title") //
+				.setMessageKey("contactHubAdmin.message") //
+				.setDescriptionKey("contactHubAdmin.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION)//
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+
+	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window, Stage owner, ResourceBundle resourceBundle) {
+		return createDialogBuilder()
+				.setOwner(window) //
+				.setTitleKey("recoveryKey.recover.title") //
+				.setMessageKey("recoveryKey.recover.resetSuccess.message") //
+				.setDescriptionKey("recoveryKey.recover.resetSuccess.description") //
+				.setIcon(FontAwesome5Icon.CHECK)
+				.setOkAction(stage -> {
+					stage.close();
+					if (owner.getTitle().equals(resourceBundle.getString("addvaultwizard.existing.title"))) {
+						owner.close();
+					}
+				})
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+
 	public SimpleDialog.Builder prepareRemoveCertDialog(Stage window, Settings settings) {
 		return createDialogBuilder() //
 				.setOwner(window) //
@@ -69,7 +96,7 @@ public class Dialogs {
 				.setMessageKey("dokanySupportEnd.message") //
 				.setDescriptionKey("dokanySupportEnd.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION) //
-				.setOkButtonKey("generic.button.close") //
+				.setOkButtonKey(BUTTON_KEY_CLOSE) //
 				.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
 				.setOkAction(Stage::close) //
 				.setCancelAction(cancelAction);
@@ -83,8 +110,20 @@ public class Dialogs {
 				.setDescriptionKey("retryIfReadonly.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION) //
 				.setOkButtonKey("retryIfReadonly.retry") //
-				.setCancelButtonKey("generic.button.close") //
+				.setCancelButtonKey(BUTTON_KEY_CLOSE) //
 				.setOkAction(okAction) //
 				.setCancelAction(Stage::close);
 	}
+
+	public SimpleDialog.Builder prepareNoDDirectorySelectedDialog(Stage window) {
+		return createDialogBuilder() //
+				.setOwner(window) //
+				.setTitleKey("recoveryKey.noDDirDetected.title") //
+				.setMessageKey("recoveryKey.noDDirDetected.message") //
+				.setDescriptionKey("recoveryKey.noDDirDetected.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
+				.setOkButtonKey("generic.button.change") //
+				.setOkAction(Stage::close);
+	}
+
 }
