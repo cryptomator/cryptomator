@@ -129,6 +129,16 @@ jobs:
       - name: Change win-console flag if debug is active
         if: ${{ inputs.isDebug }}
         run: echo "WIN_CONSOLE_FLAG=--win-console" >> $GITHUB_ENV
+      - name: Setup patched JDK if necessary
+        id: setup-patched-jdk
+        run: |
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            curl --output patched-jdk.zip -L "https://static.cryptomator.org/desktop/patched-win-jdk.zip"
+            unzip patched-jdk.zip -d patched-jdk
+            echo "JAVA_HOME=${{ github.workspace }}/patched-jdk/jdk" >> $GITHUB_OUTPUT
+          else
+            echo "JAVA_HOME=${JAVA_HOME}" >> $GITHUB_OUTPUT
+          fi
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -167,6 +177,8 @@ jobs:
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
           ${WIN_CONSOLE_FLAG}
+        env:
+          JAVA_HOME: ${{ steps.setup-patched-jdk.outputs.JAVA_HOME }}
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
@@ -241,16 +253,6 @@ jobs:
           "-Dlicense.failOnMissing=true"
           "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
         shell: pwsh
-      - name: Setup patched JDK if necessary
-        id: setup-patched-jdk
-        run: |
-          if [ "${{ matrix.arch }}" == "arm64" ]; then
-            curl --output patched-jdk.zip -L "https://static.cryptomator.org/desktop/patched-win-jdk.zip"
-            unzip patched-jdk.zip -d patched-jdk
-            echo "JAVA_HOME=${{ github.workspace }}/patched-jdk/jdk" >> $GITHUB_OUTPUT
-          else
-            echo "JAVA_HOME=${JAVA_HOME}" >> $GITHUB_OUTPUT
-          fi
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
