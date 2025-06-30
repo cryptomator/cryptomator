@@ -58,6 +58,23 @@ public class Dialogs {
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
+	public SimpleDialog.Builder prepareRecoveryVaultAdded(Stage window) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("recoveryKey.recoverExisting.title") //
+				.setMessageKey("recoveryKey.recoverExisting.message") //
+				.setDescriptionKey("recoveryKey.recoverExisting.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION)//
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+	public SimpleDialog.Builder prepareRecoveryVaultAlreadyExists(Stage window) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("recoveryKey.alreadyExists.title") //
+				.setMessageKey("recoveryKey.alreadyExists.message") //
+				.setDescriptionKey("recoveryKey.alreadyExists.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION)//
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+
 	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window, Stage owner, ResourceBundle resourceBundle) {
 		return createDialogBuilder()
 				.setOwner(window) //
@@ -67,7 +84,8 @@ public class Dialogs {
 				.setIcon(FontAwesome5Icon.CHECK)
 				.setOkAction(stage -> {
 					stage.close();
-					if (owner.getTitle().equals(resourceBundle.getString("addvaultwizard.existing.title"))) {
+					String ownerTitle = owner.getTitle();
+					if (ownerTitle != null && ownerTitle.equals(resourceBundle.getString("addvaultwizard.existing.title"))) {
 						owner.close();
 					}
 				})

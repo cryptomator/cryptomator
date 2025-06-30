@@ -3,9 +3,11 @@ package org.cryptomator.ui.mainwindow;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
+import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
@@ -13,6 +15,7 @@ import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxFSEventList;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -75,6 +79,10 @@ public class VaultListController implements FxController {
 	private final ObservableValue<Double> cellSize;
 	private final Dialogs dialogs;
 
+	private final VaultComponent.Factory vaultComponentFactory;
+	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
+	private final List<MountService> mountServices;
+
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
@@ -94,6 +102,9 @@ public class VaultListController implements FxController {
 						FxApplicationWindows appWindows, //
 						Settings settings, //
 						Dialogs dialogs, //
+						RecoveryKeyComponent.Factory recoveryKeyWindow, //
+						VaultComponent.Factory vaultComponentFactory, //
+						List<MountService> mountServices, //
 						FxFSEventList fxFSEventList) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
@@ -105,6 +116,9 @@ public class VaultListController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
 		this.dialogs = dialogs;
+		this.recoveryKeyWindow = recoveryKeyWindow;
+		this.vaultComponentFactory = vaultComponentFactory;
+		this.mountServices = mountServices;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.unreadEvents = fxFSEventList.unreadEventsProperty();
@@ -212,6 +226,11 @@ public class VaultListController implements FxController {
 	@FXML
 	public void didClickAddExistingVault() {
 		addVaultWizard.build().showAddExistingVaultWizard(resourceBundle);
+	}
+
+	@FXML
+	public void didClickRecoverExistingVault() {
+		addVaultWizard.build().showRecoverExistingVaultWizard(mainWindow, dialogs, vaultComponentFactory,mountServices,vaultListManager,recoveryKeyWindow);
 	}
 
 	private void pressedShortcutToRemoveVault() {

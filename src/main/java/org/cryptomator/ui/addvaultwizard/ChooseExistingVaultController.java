@@ -1,16 +1,30 @@
 package org.cryptomator.ui.addvaultwizard;
 
+import dagger.Lazy;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultComponent;
+import org.cryptomator.common.vaults.VaultConfigCache;
+import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.integrations.uiappearance.Theme;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.fxapp.FxApplicationStyle;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.inject.Inject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
 import javafx.scene.image.Image;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
@@ -22,27 +36,6 @@ import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
-
-import dagger.Lazy;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.recovery.RecoveryActionType;
-import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultComponent;
-import org.cryptomator.common.vaults.VaultConfigCache;
-import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.integrations.mount.MountService;
-import org.cryptomator.integrations.uiappearance.Theme;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.dialogs.Dialogs;
-import org.cryptomator.ui.fxapp.FxApplicationStyle;
-import org.cryptomator.ui.fxapp.FxApplicationWindows;
-import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @AddVaultWizardScoped
 public class ChooseExistingVaultController implements FxController {
@@ -57,13 +50,6 @@ public class ChooseExistingVaultController implements FxController {
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 	private final ObservableValue<Image> screenshot;
-	private final Dialogs dialogs;
-	private final VaultComponent.Factory vaultComponentFactory;
-	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
-	private final List<MountService> mountServices;
-
-	@FXML
-	private CheckBox restoreCheckBox;
 
 	private final BooleanProperty restoreButtonVisible = new SimpleBooleanProperty(false);
 
@@ -76,11 +62,7 @@ public class ChooseExistingVaultController implements FxController {
 								  @AddVaultWizardWindow ObjectProperty<Vault> vault, //
 								  VaultListManager vaultListManager, //
 								  ResourceBundle resourceBundle, //
-								  FxApplicationStyle applicationStyle, //
-								  RecoveryKeyComponent.Factory recoveryKeyWindow, //
-								  VaultComponent.Factory vaultComponentFactory, //
-								  List<MountService> mountServices, //
-								  Dialogs dialogs) {
+								  FxApplicationStyle applicationStyle) {
 		this.window = window;
 		this.successScene = successScene;
 		this.appWindows = appWindows;
@@ -89,14 +71,6 @@ public class ChooseExistingVaultController implements FxController {
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.screenshot = applicationStyle.appliedThemeProperty().map(this::selectScreenshot);
-		this.recoveryKeyWindow = recoveryKeyWindow;
-		this.vaultComponentFactory = vaultComponentFactory;
-		this.mountServices = mountServices;
-		this.dialogs = dialogs;
-	}
-
-	public void initialize() {
-		restoreButtonVisible.bind(restoreCheckBox.selectedProperty());
 	}
 
 	private Image selectScreenshot(Theme theme) {
@@ -127,35 +101,6 @@ public class ChooseExistingVaultController implements FxController {
 			} catch (IOException e) {
 				LOG.error("Failed to open existing vault.", e);
 				appWindows.showErrorWindow(e, window, window.getScene());
-			}
-		}
-	}
-
-	@FXML
-	public void restoreVaultConfigWithRecoveryKey() {
-		DirectoryChooser directoryChooser = new DirectoryChooser();
-
-		File selectedDirectory = directoryChooser.showDialog(window);
-		if (selectedDirectory == null) {
-			return;
-		}
-
-		boolean hasSubfolderD = new File(selectedDirectory, "d").isDirectory();
-		if (!hasSubfolderD) {
-			dialogs.prepareNoDDirectorySelectedDialog(window).build().showAndWait();
-			return;
-		}
-
-		Vault preparedVault = prepareVault(selectedDirectory, vaultComponentFactory, mountServices);
-		VaultListManager.redetermineVaultState(preparedVault);
-		VaultState.Value state = preparedVault.getState();
-		switch (state) {
-			case VAULT_CONFIG_MISSING -> recoveryKeyWindow.create(preparedVault, window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG)).showOnboardingDialogWindow();
-			case ALL_MISSING -> recoveryKeyWindow.create(preparedVault, window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_ALL)).showOnboardingDialogWindow();
-			default -> {
-				vaultListManager.addVault(preparedVault);
-				vault.set(preparedVault);
-				window.setScene(successScene.get());
 			}
 		}
 	}
