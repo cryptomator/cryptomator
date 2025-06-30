@@ -148,8 +148,10 @@ public class RecoveryKeyCreationController implements FxController {
 			Path masterkeyFilePath = vault.getPath().resolve(MASTERKEY_FILENAME);
 
 			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, masterkeyFilePath, passwordField.getCharacters())) {
-				var combo = MasterkeyService.detect(masterkey.getEncoded(), vault.getPath());
-				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), combo.get());
+				var combo = MasterkeyService.detect(masterkey.getEncoded(), vault.getPath())
+						.orElseThrow(() -> new IllegalStateException("Could not detect combo for vault path: " + vault.getPath()));
+
+				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), combo);
 			}
 
 			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
