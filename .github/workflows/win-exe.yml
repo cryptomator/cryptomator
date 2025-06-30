@@ -241,6 +241,16 @@ jobs:
           "-Dlicense.failOnMissing=true"
           "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
         shell: pwsh
+      - name: Setup patched JDK if necessary
+        id: setup-patched-jdk
+        run: |
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            curl --output patched-jdk.zip -L "https://cloud.skymatic.de/s/pyETc23Ks4Zeean"
+            unzip patched-jdk.zip -d patched-jdk
+            echo "JAVA_HOME=${{ github.workspace }}/patched-jdk" >> $GITHUB_OUTPUT
+          else
+            echo "JAVA_HOME=${JAVA_HOME}" >> $GITHUB_OUTPUT
+          fi
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -262,6 +272,7 @@ jobs:
           --license-file dist/win/resources/license.rtf
           --file-associations dist/win/resources/FAvaultFile.properties
         env:
+          JAVA_HOME: ${{ steps.setup-patched-jdk.outputs.JAVA_HOME }}
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
       - name: Codesign MSI
@@ -361,6 +372,7 @@ jobs:
         working-directory: dist/win
         run: >
           wix build
+          -arch ${{ matrix.arch }}
           -define BundleName="Cryptomator"
           -define BundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           -define BundleVendor="Skymatic GmbH"
