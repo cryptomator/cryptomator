@@ -27,7 +27,7 @@ public final class RecoveryDirectory implements AutoCloseable {
 		FileAttribute<?> attr = PosixFilePermissions.asFileAttribute(
 				PosixFilePermissions.fromString("rwx------")
 		);
-		Path tempDir = Files.createTempDirectory("r", attr);
+		Path tempDir = Files.createTempDirectory("cryptomator", attr);
 		return new RecoveryDirectory(vaultPath, tempDir);
 	}
 
