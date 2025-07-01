@@ -70,12 +70,12 @@ public final class MasterkeyService {
 					.filter(p -> excludedFilenames.stream().noneMatch(p.toString()::endsWith))
 					.findFirst();
 			if (c9rFile.isEmpty()) {
-				LOG.info("No *.c9r file found in {}", vaultPath);
+				LOG.info("Unable to detect Crypto scheme: No *.c9r file found in {}", vaultPath);
 				return Optional.empty();
 			}
 			return determineScheme(c9rFile.get(), masterkey); //
 		} catch (IOException e) {
-			LOG.debug("Failed to inspect vault", e);
+			LOG.info("Unable to detect Crypto scheme: Failed to inspect vault", e);
 			return Optional.empty();
 		}
 	}
@@ -87,7 +87,7 @@ public final class MasterkeyService {
 					.filter(s -> isDecryptable(header, new Masterkey(masterkey), s))
 					.findFirst();
 		} catch (IOException e) {
-			LOG.info("Failed to decrypt .c9r file", e);
+			LOG.info("Unable to detect Crypto scheme: Failed to decrypt .c9r file", e);
 			return Optional.empty();
 		}
 	}
