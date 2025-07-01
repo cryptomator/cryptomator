@@ -142,11 +142,4 @@ public class ChooseExistingVaultController implements FxController {
 		return screenshot.getValue();
 	}
 
-	public boolean isRestoreButtonVisible() {
-		return restoreButtonVisible.get();
-	}
-
-	public BooleanProperty restoreButtonVisibleProperty() {
-		return restoreButtonVisible;
-	}
 }
