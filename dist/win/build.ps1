@@ -49,6 +49,7 @@ $buildDir = Split-Path -Parent $PSCommandPath
 $version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
 $semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
+$signingCertThumbprint = "TODO"
 
 Write-Output "`$version=$version"
 Write-Output "`$semVerNo=$semVerNo"
@@ -117,7 +118,7 @@ switch ($archName) {
 }
 
 ## create custom runtime
-### check for JEP 493
+### adjust for JEP 493
 if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from run-time image enabled" -SimpleMatch | Measure-Object).Count -eq 0 ) {
 	$jmodPaths="$Env:JAVA_HOME/jmods;" + $jmodPaths;
 }
@@ -177,7 +178,7 @@ $javaOptions = @(
 	--app-version "$semVerNo.$revisionNo" `
 	--resource-dir resources `
 	--icon resources/$AppName.ico `
-	--add-launcher "${AppName}Debug=$buildDir\debug-launcher.properties" `
+	--add-launcher "Debug_${AppName}=$buildDir\debug-launcher.properties" `
 	@javaOptions
 
 if ($LASTEXITCODE -ne 0) {
@@ -198,7 +199,7 @@ if ($LASTEXITCODE -ne 0) {
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
-attrib -r "$AppName\${AppName}Debug.exe"
+attrib -r "$AppName\Debug_${AppName}.exe"
 # patch batch script to set hostfile
 $webDAVPatcher = "$AppName\patchWebDAV.bat"
 try {
@@ -207,6 +208,53 @@ try {
    Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
    exit 1
 }
+
+# sign app dir
+## extract
+Add-Type -AssemblyName "System.io.compression.filesystem"
+$jarFolder = Resolve-Path "$AppName\app\mods"
+$jarExtractDir = New-Item -Path "$AppName\jar-extract" -ItemType Directory
+Get-ChildItem -Path $jarFolder -Filter "*.jar" | ForEach-Object {
+	$jar = [Io.compression.zipfile]::OpenRead($_.FullName)
+	if (@($jar.Entries | Where-Object {
+		$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0) {
+		#jars containing dlls extract
+		Set-Location $jarExtractDir
+		Expand-Archive -Path $_.FullName
+
+	}
+	$jar.Dispose()
+}
+Set-Location $buildDir
+## Extract wixhelper.dll for Codesigning #see https://github.com/cryptomator/cryptomator/issues/3130
+if($jmodPaths -like "${env:JAVA_HOME}\jmods") {
+	$wixHelperDir = New-Item -Path ${AppName}/jpackage-jmod -ItemType Directory
+	& ${env:JAVA_HOME}\bin\jmod.exe extract --dir $wixHelperDir "${env:JAVA_HOME}\jmods\jdk.jpackage.jmod"
+	Get-ChildItem -Recurse -Path "$wixHelperDir" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "${AppName}/"
+}
+
+## prepare signtool
+Write-Output "Signing files in app dir $AppName..."
+$signTool = Get-ChildItem -Path "${Env:ProgramFiles(x86)}\Windows Kits\10\bin\" -Recurse -Filter "signtool.exe" | Where-Object FullName -like "*${archName}*" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+if ($null -eq $signTool) {
+	Write-Error "Unable to find signtool.exe in ${Env:ProgramFiles(x86)}\Windows Kits\10\bin\. Please ensure Windows SDK is installed."
+	exit 1
+}
+Write-Output "Using signtool: $($signTool.FullName)"
+Write-Output "Using signing certificate with thumbprint: $signingCertThumbprint"
+## sign files inside app dir
+$filesToSign = Get-ChildItem -Path $AppName -Recurse -File -Include "*.exe","*.dll","*.sys"
+
+foreach ($file in $filesToSign) {
+	& $signTool sign /as /sha1 $signingCertThumbprint /tr "http://timestamp.digicert.com" /td SHA256 /fd SHA256 /d "Cryptomator"  $file.FullName
+	if( $? -eq $false) {
+		Write-Error "Failed to sign file: $($file.FullName)"
+		exit 1
+	}
+}
+
+#TODO: Sign wixhelper.dll with signtool.exe
+#TODO: patch jar files with signed dlls
 
 # create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
