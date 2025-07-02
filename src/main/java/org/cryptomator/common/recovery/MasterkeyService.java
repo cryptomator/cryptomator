@@ -13,15 +13,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -81,16 +82,28 @@ public final class MasterkeyService {
 	}
 
 	private static Optional<CryptorProvider.Scheme> determineScheme(Path c9rFile, byte[] masterkey) {
-		try {
-			ByteBuffer header = ByteBuffer.wrap(Files.readAllBytes(c9rFile));
-			return Arrays.stream(CryptorProvider.Scheme.values())
-					.filter(s -> isDecryptable(header, new Masterkey(masterkey), s))
-					.findFirst();
-		} catch (IOException e) {
-			LOG.info("Unable to detect Crypto scheme: Failed to decrypt .c9r file", e);
-			return Optional.empty();
-		}
+		return Arrays.stream(CryptorProvider.Scheme.values()).filter(scheme -> {
+			try {
+				try (Masterkey mk = new Masterkey(masterkey); Cryptor cryptor = CryptorProvider.forScheme(scheme).provide(mk, SecureRandom.getInstanceStrong())) {
+					int headerSize = cryptor.fileHeaderCryptor().headerSize();
+
+					ByteBuffer headerBuf = ByteBuffer.allocate(headerSize);
+
+					try (FileChannel channel = FileChannel.open(c9rFile, StandardOpenOption.READ)) {
+						channel.read(headerBuf, 0);
+					}
+
+					headerBuf.flip();
+
+					return isDecryptable(headerBuf, mk, scheme);
+				}
+			} catch (IOException | CryptoException | NoSuchAlgorithmException e) {
+				LOG.info("Unable to detect Crypto scheme: Failed to decrypt .c9r file", e);
+				return false;
+			}
+		}).findFirst();
 	}
+
 	private static boolean isDecryptable(ByteBuffer header, Masterkey masterkey, CryptorProvider.Scheme scheme) {
 		try (Cryptor cryptor = CryptorProvider.forScheme(scheme).provide(masterkey, SecureRandom.getInstanceStrong())) {
 			cryptor.fileHeaderCryptor().decryptHeader(header.duplicate());
