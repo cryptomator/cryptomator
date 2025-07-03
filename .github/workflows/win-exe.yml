@@ -163,7 +163,7 @@ jobs:
           --java-options "-Djavafx.verbose=${{ inputs.isDebug }}"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
-          --add-launcher "Debug_Cryptomator=dist/win/debug-launcher.properties"
+          --add-launcher "Cryptomator (Debug)=dist/win/debug-launcher.properties"
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
@@ -180,7 +180,7 @@ jobs:
       - name: Fix permissions
         run: |
           attrib -r appdir/Cryptomator/Cryptomator.exe
-          attrib -r appdir/Cryptomator/Debug_Cryptomator.exe
+          attrib -r "appdir/Cryptomator/Cryptomator (Debug).exe"
         shell: pwsh
       - name: Extract jars with DLLs for Codesigning
         shell: pwsh
@@ -263,6 +263,14 @@ jobs:
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
+      - name: Remove shortcut of debug launcher from MSI
+        run: |
+          $wiRunSQL = Get-ChildItem -Path ${env:ProgramFiles(x86)}\Windows Kits\10\bin\" -Recurse -Filter "WiRunSQL.vbs" | Where-Object FullName -like "*${{ matrix.arch }}*" | Select-Object -First 1
+          $msiPath = (Get-ChildItem -Path ".\installer\*" -Include "Cryptomator*.msi" | Select-Object -First 1).FullName
+          $shortcuts = & Cscript "$wiRunSQL" "$msiPath" "SELECT `Name` FROM `Shortcut` "
+          $debugShortcut = ($shortcuts | Select-String -Pattern 'Debug').ToString().Trim();
+          & Cscript $wiRunSQL $msiPath "DELETE FROM `Shortcut` WHERE `Shortcut`.`Name`='$debugShortcut' "
+        shell: pwsh
       - name: Codesign MSI
         uses: skymatic/code-sign-action@v3
         with:
