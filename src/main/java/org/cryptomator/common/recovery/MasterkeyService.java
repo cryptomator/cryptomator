@@ -1,7 +1,6 @@
 package org.cryptomator.common.recovery;
 
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.cryptolib.api.AuthenticationFailedException;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.CryptorProvider;
@@ -44,7 +43,7 @@ public final class MasterkeyService {
 
 	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndDetectCombo(RecoveryKeyFactory recoveryKeyFactory, //
 																					 Vault vault, String recoveryKey, //
-																					 MasterkeyFileAccess masterkeyFileAccess) throws  IllegalArgumentException {
+																					 MasterkeyFileAccess masterkeyFileAccess) throws IllegalArgumentException {
 		String tmpPass = UUID.randomUUID().toString();
 		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
 			Path tempRecoveryPath = recoveryDirectory.getRecoveryPath();
@@ -52,7 +51,7 @@ public final class MasterkeyService {
 			Path masterkeyFilePath = tempRecoveryPath.resolve(MASTERKEY_FILENAME);
 
 			try (Masterkey mk = load(masterkeyFileAccess, masterkeyFilePath, tmpPass)) {
-				return detect(mk.getEncoded(), vault.getPath());
+				return detect(mk, vault.getPath());
 			} catch (IOException | CryptoException e) {
 				LOG.info("Recovery key validation failed", e);
 				return Optional.empty();
@@ -63,13 +62,10 @@ public final class MasterkeyService {
 		return Optional.empty();
 	}
 
-	public static Optional<CryptorProvider.Scheme> detect(byte[] masterkey, Path vaultPath) {
+	public static Optional<CryptorProvider.Scheme> detect(Masterkey masterkey, Path vaultPath) {
 		try (Stream<Path> paths = Files.walk(vaultPath.resolve(DATA_DIR_NAME))) {
 			List<String> excludedFilenames = List.of("dirid.c9r", "dir.c9r");
-			Optional<Path> c9rFile = paths
-					.filter(p -> p.toString().endsWith(".c9r"))
-					.filter(p -> excludedFilenames.stream().noneMatch(p.toString()::endsWith))
-					.findFirst();
+			Optional<Path> c9rFile = paths.filter(p -> p.toString().endsWith(".c9r")).filter(p -> excludedFilenames.stream().noneMatch(p.toString()::endsWith)).findFirst();
 			if (c9rFile.isEmpty()) {
 				LOG.info("Unable to detect Crypto scheme: No *.c9r file found in {}", vaultPath);
 				return Optional.empty();
@@ -81,22 +77,20 @@ public final class MasterkeyService {
 		}
 	}
 
-	private static Optional<CryptorProvider.Scheme> determineScheme(Path c9rFile, byte[] masterkey) {
+	private static Optional<CryptorProvider.Scheme> determineScheme(Path c9rFile, Masterkey masterkey) {
 		return Arrays.stream(CryptorProvider.Scheme.values()).filter(scheme -> {
-			try {
-				try (Masterkey mk = new Masterkey(masterkey); Cryptor cryptor = CryptorProvider.forScheme(scheme).provide(mk, SecureRandom.getInstanceStrong())) {
-					int headerSize = cryptor.fileHeaderCryptor().headerSize();
+			try (Cryptor cryptor = CryptorProvider.forScheme(scheme).provide(masterkey.copy(), SecureRandom.getInstanceStrong())) {
+				int headerSize = cryptor.fileHeaderCryptor().headerSize();
 
-					ByteBuffer headerBuf = ByteBuffer.allocate(headerSize);
+				ByteBuffer headerBuf = ByteBuffer.allocate(headerSize);
 
-					try (FileChannel channel = FileChannel.open(c9rFile, StandardOpenOption.READ)) {
-						channel.read(headerBuf, 0);
-					}
-
-					headerBuf.flip();
-
-					return isDecryptable(headerBuf, mk, scheme);
+				try (FileChannel channel = FileChannel.open(c9rFile, StandardOpenOption.READ)) {
+					channel.read(headerBuf, 0);
 				}
+
+				headerBuf.flip();
+				cryptor.fileHeaderCryptor().decryptHeader(headerBuf.duplicate());
+				return true;
 			} catch (IOException | CryptoException | NoSuchAlgorithmException e) {
 				LOG.info("Unable to detect Crypto scheme: Failed to decrypt .c9r file", e);
 				return false;
@@ -104,12 +98,4 @@ public final class MasterkeyService {
 		}).findFirst();
 	}
 
-	private static boolean isDecryptable(ByteBuffer header, Masterkey masterkey, CryptorProvider.Scheme scheme) {
-		try (Cryptor cryptor = CryptorProvider.forScheme(scheme).provide(masterkey, SecureRandom.getInstanceStrong())) {
-			cryptor.fileHeaderCryptor().decryptHeader(header.duplicate());
-			return true;
-		} catch (AuthenticationFailedException | NoSuchAlgorithmException e) {
-			return false;
-		}
-	}
 }
