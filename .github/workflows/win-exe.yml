@@ -265,11 +265,11 @@ jobs:
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
       - name: Remove shortcut of debug launcher from MSI
         run: |
-          $wiRunSQL = Get-ChildItem -Path ${env:ProgramFiles(x86)}\Windows Kits\10\bin\" -Recurse -Filter "WiRunSQL.vbs" | Where-Object FullName -like "*${{ matrix.arch }}*" | Select-Object -First 1
+          $wiRunSQL = Get-ChildItem -Path "${env:ProgramFiles(x86)}\Windows Kits\10\bin\" -Recurse -Filter "WiRunSQL.vbs" | Where-Object FullName -like "*${{ matrix.arch }}*" | Select-Object -First 1
           $msiPath = (Get-ChildItem -Path ".\installer\*" -Include "Cryptomator*.msi" | Select-Object -First 1).FullName
           $shortcuts = & Cscript "$wiRunSQL" "$msiPath" "SELECT `Name` FROM `Shortcut` "
           $debugShortcut = ($shortcuts | Select-String -Pattern 'Debug').ToString().Trim();
-          & Cscript $wiRunSQL $msiPath "DELETE FROM `Shortcut` WHERE `Shortcut`.`Name`='$debugShortcut' "
+          & Cscript "$wiRunSQL" "$msiPath" "DELETE FROM `Shortcut` WHERE `Shortcut`.`Name`='$debugShortcut' "
         shell: pwsh
       - name: Codesign MSI
         uses: skymatic/code-sign-action@v3
