@@ -1,5 +1,8 @@
 package org.cryptomator.common.recovery;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -11,13 +14,15 @@ import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 
 public final class BackupRestorer {
 
+	private static final Logger LOG = LoggerFactory.getLogger(BackupRestorer.class);
+
 	private BackupRestorer() {}
 
-	public static boolean restoreIfPresent(Path vaultPath, String fileName) {
-		Path targetFile = vaultPath.resolve(fileName);
+	public static void restoreIfPresent(Path vaultPath, String filePrefix) {
+		Path targetFile = vaultPath.resolve(filePrefix);
 
 		try (Stream<Path> files = Files.list(vaultPath)) {
-			return files.filter(file -> isValidBackupFileForState(file.getFileName().toString(), fileName))
+			files.filter(file -> isFileMatchingPattern(file.getFileName().toString(), filePrefix))
 					.max((f1, f2) -> {
 						try {
 							FileTime time1 = Files.getLastModifiedTime(f1);
@@ -27,23 +32,20 @@ public final class BackupRestorer {
 							return 0;
 						}
 					})
-					.map(backupFile -> copyBackupFile(backupFile, targetFile))
-					.orElse(false);
+					.ifPresent(backupFile -> copyBackupFile(backupFile, targetFile));
 		} catch (IOException e) {
-			return false;
+			LOG.info("Unable to restore backup files in '{}'", vaultPath, e);
 		}
 	}
 
-	private static boolean isValidBackupFileForState(String fileName, String vaultState) {
-		return fileName.startsWith(vaultState) && fileName.endsWith(MASTERKEY_BACKUP_SUFFIX);
+	private static boolean isFileMatchingPattern(String fileName, String filePrefix) {
+		return fileName.startsWith(filePrefix) && fileName.endsWith(MASTERKEY_BACKUP_SUFFIX);
 	}
 
-	private static boolean copyBackupFile(Path backupFile, Path configPath) {
+	private static void copyBackupFile(Path backupFile, Path configPath) {
 		try {
 			Files.copy(backupFile, configPath, StandardCopyOption.REPLACE_EXISTING);
-			return true;
 		} catch (IOException e) {
-			return false;
-		}
+			LOG.warn("Unable to copy backup file from '{}' to '{}'", backupFile, configPath, e);		}
 	}
 }
