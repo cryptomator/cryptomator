@@ -12,6 +12,49 @@ Param(
 	[bool] $clean
 )
 
+# ============================
+# Function Definitions Section
+# ============================
+
+# Removes the shortcut entry of the debug launcher from the MSI table
+function Remove-MSIDebugShortcut {
+	param (
+        $arch
+    )
+	Write-Output "Patching msi file..."
+
+	#skip if winSDK is not installed
+	$winSDK = "${Env:ProgramFiles(x86)}\Windows Kits\10\bin\"
+	if (!(Test-Path -Path $winSDK)) {
+		Write-Error "Unable to find Windows Kits in ${Env:ProgramFiles(x86)}. Removing debug shortcut is skipped."
+		return;
+	}
+
+	# get wiRunSQL.vbs
+	$wiRunSQL = Get-ChildItem -Path $winSDK -Recurse -Filter "WiRunSQL.vbs" | Where-Object FullName -like "*$arch*" | Select-Object -First 1
+	if ($null -eq $wiRunSQL) {
+		Write-Error "Unable to find WiRunSQL.vbs in ${Env:ProgramFiles(x86)}\Windows Kits\10\bin\. Please ensure Windows SDK is installed."
+		exit 1
+	}
+	Write-Debug "Using WiRunSQL: $($wiRunSQL.FullName)"
+
+	#adjust msi
+	$msiPath = (Get-ChildItem -Path ".\installer\*" -Include "$AppName*.msi" | Select-Object -First 1).FullName
+	$shortcuts = & Cscript "$wiRunSQL" "$msiPath" "SELECT `Name` FROM `Shortcut` "
+	$debugShortcut = ($shortcuts | Select-String -Pattern 'Debug').ToString().Trim();
+	& Cscript $wiRunSQL $msiPath "DELETE FROM `Shortcut` WHERE `Shortcut`.`Name`='$debugShortcut' "
+	if ($LASTEXITCODE -ne 0) {
+    	Write-Error "Removing shortcut of debug launcher failed with $LASTEXITCODE"
+		exit 1;
+	} else {
+		Write-Output "Successfully removed '$debugShortcut' from MSI"
+		return
+	}
+
+}
+
+function Main {
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
 
@@ -71,7 +114,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 ## download jfx jmods for X64, while they are part of the Arm64 JDK
 $archCode = (Get-CimInstance Win32_Processor).Architecture
 $archName = switch ($archCode) {
-    9  { "x64 (AMD64)" }
+    9  { "x64" }
     12 { "ARM64" }
     default { "WMI Win32_Processor.Architecture code ($archCode)" }
 }
@@ -86,7 +129,7 @@ switch ($archName) {
 
         $jmodPaths = "$Env:JAVA_HOME/jmods"
     }
-    'x64 (AMD64)' {
+    'x64' {
 		$javaFxVersion='24.0.1'
 		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
 		$javaFxJmodsSHA256 = 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
@@ -177,7 +220,7 @@ $javaOptions = @(
 	--app-version "$semVerNo.$revisionNo" `
 	--resource-dir resources `
 	--icon resources/$AppName.ico `
-	--add-launcher "${AppName}Debug=$buildDir\debug-launcher.properties" `
+	--add-launcher "${AppName} (Debug)=$buildDir\debug-launcher.properties" `
 	@javaOptions
 
 if ($LASTEXITCODE -ne 0) {
@@ -198,7 +241,7 @@ if ($LASTEXITCODE -ne 0) {
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
-attrib -r "$AppName\${AppName}Debug.exe"
+attrib -r "$AppName\${AppName} (Debug).exe"
 # patch batch script to set hostfile
 $webDAVPatcher = "$AppName\patchWebDAV.bat"
 try {
@@ -235,6 +278,8 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "jpackage MSI failed with exit code $LASTEXITCODE"
 	return 1;
 }
+
+Remove-MSIDebugShortcut
 
 #Create RTF license for bundle
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
@@ -284,3 +329,11 @@ Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName
     -out "installer\$AppName-Installer.exe"
 
 Write-Output "Created EXE installer .\installer\$AppName-Installer.exe"
+return 0;
+}
+
+# ============================
+# Script Execution Starts Here
+# ============================
+return Main
+
