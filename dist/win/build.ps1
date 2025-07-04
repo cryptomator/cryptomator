@@ -16,43 +16,6 @@ Param(
 # Function Definitions Section
 # ============================
 
-# Removes the shortcut entry of the debug launcher from the MSI table
-function Remove-MSIDebugShortcut {
-	param (
-        $arch
-    )
-	Write-Output "Patching msi file..."
-
-	#skip if winSDK is not installed
-	$winSDK = "${Env:ProgramFiles(x86)}\Windows Kits\10\bin\"
-	if (!(Test-Path -Path $winSDK)) {
-		Write-Error "Unable to find Windows Kits in ${Env:ProgramFiles(x86)}. Removing debug shortcut is skipped."
-		return;
-	}
-
-	# get wiRunSQL.vbs
-	$wiRunSQL = Get-ChildItem -Path $winSDK -Recurse -Filter "WiRunSQL.vbs" | Where-Object FullName -like "*$arch*" | Select-Object -First 1
-	if ($null -eq $wiRunSQL) {
-		Write-Error "Unable to find WiRunSQL.vbs in ${Env:ProgramFiles(x86)}\Windows Kits\10\bin\. Please ensure Windows SDK is installed."
-		exit 1
-	}
-	Write-Debug "Using WiRunSQL: $($wiRunSQL.FullName)"
-
-	#adjust msi
-	$msiPath = (Get-ChildItem -Path ".\installer\*" -Include "$AppName*.msi" | Select-Object -First 1).FullName
-	$shortcuts = & Cscript "$wiRunSQL" "$msiPath" "SELECT `Name` FROM `Shortcut` "
-	$debugShortcut = ($shortcuts | Select-String -Pattern 'Debug').ToString().Trim();
-	& Cscript $wiRunSQL $msiPath "DELETE FROM `Shortcut` WHERE `Shortcut`.`Name`='$debugShortcut' "
-	if ($LASTEXITCODE -ne 0) {
-    	Write-Error "Removing shortcut of debug launcher failed with $LASTEXITCODE"
-		exit 1;
-	} else {
-		Write-Output "Successfully removed '$debugShortcut' from MSI"
-		return
-	}
-
-}
-
 function Main {
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -278,8 +241,6 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "jpackage MSI failed with exit code $LASTEXITCODE"
 	return 1;
 }
-
-Remove-MSIDebugShortcut
 
 #Create RTF license for bundle
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
