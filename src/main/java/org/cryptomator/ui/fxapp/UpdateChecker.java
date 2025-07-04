@@ -3,6 +3,7 @@ package org.cryptomator.ui.fxapp;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.updates.AppUpdateChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,17 +37,20 @@ public class UpdateChecker {
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final BooleanBinding updateAvailable;
 	private final BooleanBinding checkFailed;
+	private final AppUpdateChecker updateChecker;
 
 	@Inject
 	UpdateChecker(Settings settings, //
 				  Environment env, //
-				  ScheduledService<String> updateCheckerService) {
+				  ScheduledService<String> updateCheckerService,
+				  AppUpdateChecker updateChecker) {
 		this.env = env;
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
 		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
 		this.updateAvailable = Bindings.createBooleanBinding(this::isUpdateAvailable, latestVersion);
 		this.checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, state);
+		this.updateChecker = updateChecker;
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -56,7 +60,7 @@ public class UpdateChecker {
 	}
 
 	public void checkForUpdatesNow() {
-		startCheckingForUpdates(Duration.ZERO);
+		updateChecker.checkForUpdates();
 	}
 
 	private void startCheckingForUpdates(Duration initialDelay) {
