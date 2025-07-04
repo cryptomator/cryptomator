@@ -72,7 +72,7 @@ public class VaultListManager {
 		autoLocker.init();
 	}
 
-	public boolean containsVault(Path vaultPath) {
+	public boolean isAlreadyAdded(Path vaultPath) {
 		assert vaultPath.isAbsolute();
 		assert vaultPath.normalize().equals(vaultPath);
 		return vaultList.stream().anyMatch(v -> vaultPath.equals(v.getPath()));
@@ -127,7 +127,7 @@ public class VaultListManager {
 
 	public void addVault(Vault vault) {
 		Path path = vault.getPath().normalize().toAbsolutePath();
-		if (!containsVault(path)) {
+		if (!isAlreadyAdded(path)) {
 			vaultList.add(vault);
 		}
 	}

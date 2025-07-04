@@ -58,19 +58,19 @@ public class Dialogs {
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
-	public SimpleDialog.Builder prepareRecoveryVaultAdded(Stage window) {
+	public SimpleDialog.Builder prepareRecoveryVaultAdded(Stage window, String displayName) {
 		return createDialogBuilder().setOwner(window) //
 				.setTitleKey("recoveryKey.recoverExisting.title") //
 				.setMessageKey("recoveryKey.recoverExisting.message") //
-				.setDescriptionKey("recoveryKey.recoverExisting.description") //
-				.setIcon(FontAwesome5Icon.EXCLAMATION)//
+				.setDescriptionKey("recoveryKey.recoverExisting.description", displayName) //
+				.setIcon(FontAwesome5Icon.CHECK)//
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
-	public SimpleDialog.Builder prepareRecoveryVaultAlreadyExists(Stage window) {
+	public SimpleDialog.Builder prepareRecoveryVaultAlreadyExists(Stage window, String displayName) {
 		return createDialogBuilder().setOwner(window) //
 				.setTitleKey("recoveryKey.alreadyExists.title") //
 				.setMessageKey("recoveryKey.alreadyExists.message") //
-				.setDescriptionKey("recoveryKey.alreadyExists.description") //
+				.setDescriptionKey("recoveryKey.alreadyExists.description", displayName) //
 				.setIcon(FontAwesome5Icon.EXCLAMATION)//
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}

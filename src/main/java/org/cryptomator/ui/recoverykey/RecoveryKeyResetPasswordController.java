@@ -143,7 +143,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 			recoveryDirectory.moveRecoveredFile(MASTERKEY_FILENAME);
 			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
 
-			if (!vaultListManager.containsVault(vault.getPath())) {
+			if (!vaultListManager.isAlreadyAdded(vault.getPath())) {
 				vaultListManager.add(vault.getPath());
 			}
 			window.close();

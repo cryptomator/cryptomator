@@ -21,8 +21,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.controls.NumericTextField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RecoveryKeyScoped
 public class RecoveryKeyExpertSettingsController implements FxController {
@@ -42,10 +40,10 @@ public class RecoveryKeyExpertSettingsController implements FxController {
 	private final Lazy<Scene> recoverScene;
 	private final BooleanBinding validShorteningThreshold;
 
-	@FXML public CheckBox expertSettingsCheckBox;
-	@FXML public NumericTextField shorteningThresholdTextField;
-
-	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyExpertSettingsController.class);
+	@FXML
+	public CheckBox expertSettingsCheckBox;
+	@FXML
+	public NumericTextField shorteningThresholdTextField;
 
 	@Inject
 	public RecoveryKeyExpertSettingsController(@RecoveryKeyWindow Stage window, //
@@ -105,19 +103,21 @@ public class RecoveryKeyExpertSettingsController implements FxController {
 
 	@FXML
 	public void back() {
-		if(recoverType.get().equals(RecoveryActionType.RESTORE_ALL) && vault.getState().equals(VaultState.Value.VAULT_CONFIG_MISSING))
+		if (recoverType.get() == RecoveryActionType.RESTORE_ALL && vault.getState() == VaultState.Value.VAULT_CONFIG_MISSING) {
 			window.setScene(recoverScene.get());
-		else if(recoverType.get().equals(RecoveryActionType.RESTORE_ALL) && vault.getState().equals(VaultState.Value.ALL_MISSING))
+		} else if (recoverType.get() == RecoveryActionType.RESTORE_ALL && vault.getState() == VaultState.Value.ALL_MISSING) {
 			window.setScene(recoverScene.get());
-		else if(recoverType.get().equals(RecoveryActionType.RESTORE_VAULT_CONFIG))
+		} else if (recoverType.get() == RecoveryActionType.RESTORE_VAULT_CONFIG) {
 			window.setScene(onBoardingScene.get());
+		}
 	}
 
 	@FXML
 	public void next() {
-		if(recoverType.get().equals(RecoveryActionType.RESTORE_VAULT_CONFIG))
+		if (recoverType.get() == RecoveryActionType.RESTORE_VAULT_CONFIG) {
 			window.setScene(createScene.get());
-		else
+		} else {
 			window.setScene(resetPasswordScene.get());
+		}
 	}
 }

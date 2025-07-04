@@ -100,9 +100,9 @@ public class RecoveryKeyCreationController implements FxController {
 
 	@FXML
 	public void initialize() {
-		if (recoverType.get().equals(RecoveryActionType.SHOW_KEY)) {
+		if (recoverType.get() == RecoveryActionType.SHOW_KEY) {
 			window.setTitle(resourceBundle.getString("recoveryKey.display.title"));
-		} else if (recoverType.get().equals(RecoveryActionType.RESTORE_VAULT_CONFIG)) {
+		} else if (recoverType.get() == RecoveryActionType.RESTORE_VAULT_CONFIG) {
 			window.setTitle(resourceBundle.getString("recoveryKey.recoverVaultConfig.title"));
 			descriptionLabel.formatProperty().set(resourceBundle.getString("recoveryKey.recover.description"));
 			cancelButton.setOnAction((_) -> back());
@@ -156,7 +156,7 @@ public class RecoveryKeyCreationController implements FxController {
 
 			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
 
-			if (!vaultListManager.containsVault(vault.getPath())) {
+			if (!vaultListManager.isAlreadyAdded(vault.getPath())) {
 				vaultListManager.add(vault.getPath());
 			}
 			window.close();
