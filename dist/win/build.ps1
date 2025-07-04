@@ -9,7 +9,7 @@ Param(
 	[Parameter(Mandatory, HelpMessage="Please provide an update url")][string] $UpdateUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an about url")][string] $AboutUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an alias for localhost")][string] $LoopbackAlias,
-	[bool] $clean
+	[bool] $clean = $false # if true, cleans up previous build artifacts
 )
 
 # ============================
@@ -56,11 +56,11 @@ $version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.
 $semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
 
-Write-Output "`$version=$version"
-Write-Output "`$semVerNo=$semVerNo"
-Write-Output "`$revisionNo=$revisionNo"
-Write-Output "`$buildDir=$buildDir"
-Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
+Write-Host "`$version=$version"
+Write-Host "`$semVerNo=$semVerNo"
+Write-Host "`$revisionNo=$revisionNo"
+Write-Host "`$buildDir=$buildDir"
+Write-Host "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
@@ -99,7 +99,7 @@ switch ($archName) {
 		$javaFxJmods = '.\resources\jfxJmods.zip'
 
 		if( !(Test-Path -Path $javaFxJmods) ) {
-			Write-Output "Downloading ${javaFxJmodsUrl}..."
+			Write-Host "Downloading ${javaFxJmodsUrl}..."
 			Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
 		}
 
@@ -255,7 +255,7 @@ if ($LASTEXITCODE -ne 0) {
 # download Winfsp
 $winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
 $winfspMsiHash = '073A70E00F77423E34BED98B86E600DEF93393BA5822204FAC57A29324DB9F7A'
-Write-Output "Downloading ${winfspMsiUrl}..."
+Write-Host "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 $computedHash = $(Get-FileHash -Path '.\bundle\resources\winfsp.msi' -Algorithm SHA256).Hash
 if (! $computedHash.Equals($winfspMsiHash)) {
@@ -269,7 +269,7 @@ if (! $computedHash.Equals($winfspMsiHash)) {
 
 # download legacy-winfsp uninstaller
 $winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
-Write-Output "Downloading ${winfspUninstaller}..."
+Write-Host "Downloading ${winfspUninstaller}..."
 Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninstaller.exe" # redirects are followed by default
 
 # copy MSI to bundle resources
@@ -289,12 +289,18 @@ Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName
     .\bundle\bundleWithWinfsp.wxs `
     -out "installer\$AppName-Installer.exe"
 
-Write-Output "Created EXE installer .\installer\$AppName-Installer.exe"
+Write-Host "Created EXE installer .\installer\$AppName-Installer.exe"
 return 0;
 }
 
 # ============================
 # Script Execution Starts Here
 # ============================
+if ($clean) {
+	Write-Host "Cleaning up previous build artifacts..."
+	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore
+}
 return Main
 

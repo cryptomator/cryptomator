@@ -11,6 +11,10 @@ SET HELP_URL="https://cryptomator.org/contact/"
 SET MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
 SET LOOPBACK_ALIAS="cryptomator-vault"
 
+:: read clean parameter from command line
+SET CLEAN=0
+IF "%~1"=="clean" SET CLEAN=1
+
 pwsh -NoLogo -NoProfile -ExecutionPolicy Unrestricted -Command .\build.ps1^
  -AppName %APPNAME%^
  -MainJarGlob "%MAIN_JAR_GLOB%"^
@@ -22,4 +26,4 @@ pwsh -NoLogo -NoProfile -ExecutionPolicy Unrestricted -Command .\build.ps1^
  -HelpUrl "%HELP_URL%"^
  -UpdateUrl "%UPDATE_URL%"^
  -LoopbackAlias "%LOOPBACK_ALIAS%"^
- -Clean 1
+ -Clean %CLEAN%
