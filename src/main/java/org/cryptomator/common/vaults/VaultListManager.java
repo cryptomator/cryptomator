@@ -135,7 +135,7 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		try {
-			var vaultState = determineVaultState(vaultSettings.path.get(), vaultSettings);
+			var vaultState = determineVaultState(vaultSettings.path.get());
 			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 				if (Objects.isNull(vaultSettings.lastKnownKeyLoader.get())) {
@@ -169,15 +169,15 @@ public class VaultListManager {
 	}
 
 	public static VaultState.Value redetermineVaultState(Vault vault) {
-		VaultState state  = vault.stateProperty();
+		VaultState state = vault.stateProperty();
 		VaultState.Value previous = state.getValue();
 
-		if (previous.equals(UNLOCKED)||previous.equals(PROCESSING)) {
+		if (previous.equals(UNLOCKED) || previous.equals(PROCESSING)) {
 			return previous;
 		}
 
 		try {
-			VaultState.Value determined = determineVaultState(vault.getPath(), vault.getVaultSettings());
+			VaultState.Value determined = determineVaultState(vault.getPath());
 
 			if (determined == LOCKED) {
 				vault.getVaultConfigCache().reloadConfig();
@@ -193,7 +193,7 @@ public class VaultListManager {
 		}
 	}
 
-	public static VaultState.Value determineVaultState(Path pathToVault, VaultSettings vaultSettings) throws IOException {
+	public static VaultState.Value determineVaultState(Path pathToVault) throws IOException {
 		Path pathToVaultConfig = pathToVault.resolve(VAULTCONFIG_FILENAME);
 		Path pathToMasterkey = pathToVault.resolve(MASTERKEY_FILENAME);
 
@@ -213,7 +213,6 @@ public class VaultListManager {
 			return VAULT_CONFIG_MISSING;
 		}
 
-
 		return checkDirStructure(pathToVault);
 	}
 
@@ -222,7 +221,7 @@ public class VaultListManager {
 			case VAULT -> VaultState.Value.LOCKED;
 			case UNRELATED -> VaultState.Value.MISSING;
 			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ? //
-					NEEDS_MIGRATION //
+					VaultState.Value.NEEDS_MIGRATION //
 					: VaultState.Value.MISSING;
 		};
 	}

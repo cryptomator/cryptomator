@@ -56,10 +56,10 @@ public class ChooseMasterkeyFileController implements FxController {
 		restoreInsteadCheckBox.selectedProperty().addListener((_, _, newVal) -> {
 			if (newVal) {
 				chooseButton.setText(resourceBundle.getString("addvaultwizard.existing.restore"));
-				chooseButton.setOnAction(e -> restoreMasterkey());
+				chooseButton.setOnAction(_ -> restoreMasterkey());
 			} else {
 				chooseButton.setText(resourceBundle.getString("generic.button.choose"));
-				chooseButton.setOnAction(e -> proceed());
+				chooseButton.setOnAction(_ -> proceed());
 			}
 		});
 	}

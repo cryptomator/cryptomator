@@ -289,7 +289,7 @@ public class VaultListController implements FxController {
 		var wrapper = new VaultConfigCache(vaultSettings);
 		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, LOCKED, null).vault();
 		try {
-			VaultListManager.determineVaultState(vault.getPath(), vaultSettings);
+			VaultListManager.determineVaultState(vault.getPath());
 		} catch (IOException e) {
 			LOG.warn("Failed to determine vault state for {}", vaultSettings.path.get(), e);
 		}
