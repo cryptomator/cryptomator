@@ -132,10 +132,11 @@ public class RecoveryKeyOnboardingController implements FxController {
 					window.setScene(recoverykeyExpertSettingsScene.get());
 				} else {
 					window.setScene(recoverykeyRecoverScene.get());
-					window.centerOnScreen();
 				}
 			}
 			case RESTORE_MASTERKEY -> window.setScene(recoverykeyRecoverScene.get());
 		}
+		window.centerOnScreen();
 	}
 }
+

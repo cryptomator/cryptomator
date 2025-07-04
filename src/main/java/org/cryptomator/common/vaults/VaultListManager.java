@@ -158,13 +158,9 @@ public class VaultListManager {
 	}
 
 	private void initializeLastKnownKeyLoaderIfPossible(VaultSettings vaultSettings, VaultConfigCache wrapper) throws IOException {
-		try {
-			if (vaultSettings.lastKnownKeyLoader.get() == null) {
-				var keyIdScheme = wrapper.get().getKeyId().getScheme();
-				vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
-			}
-		} catch (NoSuchFileException e) {
-			LOG.warn("Vault config file not found.");
+		if (vaultSettings.lastKnownKeyLoader.get() == null) {
+			var keyIdScheme = wrapper.get().getKeyId().getScheme();
+			vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
 		}
 	}
 

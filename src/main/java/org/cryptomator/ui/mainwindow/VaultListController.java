@@ -60,10 +60,12 @@ import java.util.stream.Collectors;
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_EXT;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
+import static org.cryptomator.common.vaults.VaultState.Value.ALL_MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 import static org.cryptomator.common.vaults.VaultState.Value.MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 @MainWindowScoped
 public class VaultListController implements FxController {
@@ -305,7 +307,7 @@ public class VaultListController implements FxController {
 
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
-		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
+		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION, ALL_MISSING, VAULT_CONFIG_MISSING).contains(vault.getState())) {
 			dialogs.prepareRemoveVaultDialog(mainWindow, vault, vaults).build().showAndWait();
 		}
 	}

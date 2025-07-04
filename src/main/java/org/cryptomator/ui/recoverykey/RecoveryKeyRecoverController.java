@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 @RecoveryKeyScoped
@@ -67,17 +68,20 @@ public class RecoveryKeyRecoverController implements FxController {
 
 	@FXML
 	public void initialize() {
-		switch (recoverType.get()) {
-			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> cancelButton.setText(resourceBundle.getString("generic.button.back"));
-			case RESET_PASSWORD -> cancelButton.setText(resourceBundle.getString("generic.button.cancel"));
+		if (Objects.requireNonNull(recoverType.get()) == RecoveryActionType.RESET_PASSWORD) {
+			cancelButton.setText(resourceBundle.getString("generic.button.cancel"));
+		} else {
+			cancelButton.setText(resourceBundle.getString("generic.button.back"));
 		}
 	}
 
 	@FXML
 	public void close() {
-		switch (recoverType.get()) {
-			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> window.setScene(onBoardingScene.get());
-			case RESET_PASSWORD -> window.close();
+		if (Objects.requireNonNull(recoverType.get()) == RecoveryActionType.RESET_PASSWORD) {
+			window.close();
+		} else {
+			window.setScene(onBoardingScene.get());
+			window.centerOnScreen();
 		}
 	}
 

@@ -47,7 +47,7 @@
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
-					<Button fx:id="chooseButton" text="%generic.button.choose" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
+					<Button fx:id="forwardButton" text="%generic.button.choose" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

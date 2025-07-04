@@ -34,8 +34,10 @@ public class ChooseMasterkeyFileController implements FxController {
 	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final ResourceBundle resourceBundle;
 
-	@FXML private CheckBox restoreInsteadCheckBox;
-	@FXML private Button chooseButton;
+	@FXML
+	private CheckBox restoreInsteadCheckBox;
+	@FXML
+	private Button forwardButton;
 
 	@Inject
 	public ChooseMasterkeyFileController(@KeyLoading Stage window, //
@@ -55,11 +57,11 @@ public class ChooseMasterkeyFileController implements FxController {
 	private void initialize() {
 		restoreInsteadCheckBox.selectedProperty().addListener((_, _, newVal) -> {
 			if (newVal) {
-				chooseButton.setText(resourceBundle.getString("addvaultwizard.existing.restore"));
-				chooseButton.setOnAction(_ -> restoreMasterkey());
+				forwardButton.setText(resourceBundle.getString("addvaultwizard.existing.restore"));
+				forwardButton.setOnAction(_ -> restoreMasterkey());
 			} else {
-				chooseButton.setText(resourceBundle.getString("generic.button.choose"));
-				chooseButton.setOnAction(_ -> proceed());
+				forwardButton.setText(resourceBundle.getString("generic.button.choose"));
+				forwardButton.setOnAction(_ -> proceed());
 			}
 		});
 	}
@@ -94,7 +96,7 @@ public class ChooseMasterkeyFileController implements FxController {
 
 	//--- Setter & Getter ---
 
-	public String getDisplayName(){
+	public String getDisplayName() {
 		return vault.getDisplayName();
 	}
 

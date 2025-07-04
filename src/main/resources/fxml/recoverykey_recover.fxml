@@ -25,7 +25,7 @@
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
 			<ButtonBar buttonMinWidth="120" buttonOrder="+BX">
 				<buttons>
-					<Button fx:id="cancelButton" text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" cancelButton="true" onAction="#close"/>
+					<Button fx:id="cancelButton" ButtonBar.buttonData="BACK_PREVIOUS" cancelButton="true" onAction="#close"/>
 					<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#recover" disable="${!controller.validateController.recoveryKeyCorrect}"/>
 				</buttons>
 			</ButtonBar>
