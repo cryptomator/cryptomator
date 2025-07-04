@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 
@@ -92,4 +93,7 @@ class SettingsJson {
 
 	@JsonProperty("quickAccessService")
 	String quickAccessService = Settings.DEFAULT_QUICKACCESS_SERVICE;
+
+	@JsonProperty("previouslyUsedVaultDirectory")
+	Path previouslyUsedVaultDirectory;
 }
