@@ -254,8 +254,9 @@ public class VaultListController implements FxController {
 
 			Vault preparedVault = prepareVault(selectedDirectory, vaultComponentFactory, mountServices);
 
-			if (vaultListManager.get(preparedVault.getPath()).isPresent()) {
-				dialogs.prepareRecoveryVaultAlreadyExists(mainWindow, vaultListManager.get(preparedVault.getPath()).get().getDisplayName()) //
+			Optional<Vault> matchingVaultListEntry = vaultListManager.get(preparedVault.getPath());
+			if (matchingVaultListEntry.isPresent()) {
+				dialogs.prepareRecoveryVaultAlreadyExists(mainWindow, matchingVaultListEntry.get().getDisplayName()) //
 						.setOkAction(Stage::close) //
 						.build().showAndWait();
 				break;
