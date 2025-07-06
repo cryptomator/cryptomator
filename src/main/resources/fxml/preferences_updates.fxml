@@ -14,6 +14,7 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.ProgressBar?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -53,5 +54,12 @@
 			</graphic>
 		</Label>
 		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
+
+		<Button text="${controller.updateButtonTitle}" onAction="#prepareUpdate" disable="${controller.updatePreparationTask.running}">
+			<graphic>
+				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-primary" glyph="FILE_DOWNLOAD"/>
+			</graphic>
+		</Button>
+		<ProgressBar progress="${controller.updatePreparationTask.progress}" visible="${controller.updatePreparationTask.running}"/>
 	</VBox>
 </VBox>

@@ -4,10 +4,15 @@ import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.updater.UpdateMechanism;
+import org.cryptomator.updater.UpdateProcess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -16,9 +21,11 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -29,11 +36,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {
 
+	private static final Logger LOG = LoggerFactory.getLogger(UpdatesPreferencesController.class);
 	private static final String DOWNLOADS_URI_TEMPLATE = "https://cryptomator.org/downloads/" //
 			+ "?utm_source=cryptomator-desktop" //
 			+ "&utm_medium=update-notification&" //
@@ -56,6 +66,9 @@ public class UpdatesPreferencesController implements FxController {
 	private final DateTimeFormatter formatter;
 	private final BooleanBinding upToDate;
 	private final String downloadsUri;
+	private final UpdateMechanism updateMechanism;
+	public final Task<UpdateProcess> updatePreparationTask;
+	private final StringBinding updateButtonTitle;
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
@@ -78,6 +91,18 @@ public class UpdatesPreferencesController implements FxController {
 		this.checkFailed = updateChecker.checkFailedProperty();
 		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, lastSuccessfulUpdateCheck);
 		this.downloadsUri = DOWNLOADS_URI_TEMPLATE.formatted(URLEncoder.encode(currentVersion, StandardCharsets.US_ASCII));
+		this.updateMechanism = UpdateMechanism.get();
+		this.updatePreparationTask = new Task<>() { // TODO custom class?
+			@Override
+			protected UpdateProcess call() throws IOException, InterruptedException {
+				var updateProcess = updateMechanism.prepareUpdate();
+				do {
+					updateProgress(updateProcess.preparationProgress(), 1.0);
+				} while (!updateProcess.await(100, TimeUnit.MILLISECONDS));
+				return updateProcess;
+			}
+		};
+		this.updateButtonTitle = Bindings.createStringBinding(this::getUpdateButtonTitle, updatePreparationTask.stateProperty());
 	}
 
 	public void initialize() {
@@ -106,6 +131,26 @@ public class UpdatesPreferencesController implements FxController {
 	@FXML
 	public void showLogfileDirectory() {
 		environment.getLogDir().ifPresent(logDirPath -> application.getHostServices().showDocument(logDirPath.toUri().toString()));
+	}
+
+	@FXML
+	public void prepareUpdate() {
+		if (updatePreparationTask.isDone()) {
+			try {
+				// TODO: check if all vaults closed?
+				var restartProcess = updatePreparationTask.get().applyUpdate();
+				assert restartProcess.isAlive();
+				Platform.exit(); // TODO: prompt?
+			} catch (IOException | InterruptedException | ExecutionException e) {
+				LOG.error("Oh no", e); // TODO: Show error dialog
+			}
+		} else if (updatePreparationTask.isRunning()) {
+			throw new IllegalStateException("Update already in progress");
+		} else if (updatePreparationTask.isCancelled()) {
+			throw new IllegalStateException("Update preparation task was cancelled");
+		} else {
+			Thread.startVirtualThread(updatePreparationTask);
+		}
 	}
 
 	/* Observable Properties */
@@ -184,6 +229,23 @@ public class UpdatesPreferencesController implements FxController {
 
 	public boolean isCheckFailed() {
 		return checkFailed.getValue();
+	}
+
+	public Task<UpdateProcess> getUpdatePreparationTask() {
+		return updatePreparationTask;
+	}
+
+	public StringBinding updateButtonTitleProperty() {
+		return updateButtonTitle;
+	}
+
+	public String getUpdateButtonTitle() {
+		return switch (updatePreparationTask.getState()) {
+			case READY -> "Prepare Update"; // TODO: resourceBundle.getString("preferences.updates.preparingUpdate")...
+			case SCHEDULED, RUNNING -> "Preparing Update...";
+			case SUCCEEDED -> "Restart to Update";
+			case FAILED, CANCELLED -> "failed";
+		};
 	}
 
 }
