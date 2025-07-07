@@ -1,11 +1,17 @@
 package org.cryptomator.ui.mainwindow;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultComponent;
+import org.cryptomator.common.vaults.VaultConfigCache;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
+import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
@@ -13,6 +19,7 @@ import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxFSEventList;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +29,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -37,11 +45,13 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -50,10 +60,12 @@ import java.util.stream.Collectors;
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_EXT;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
+import static org.cryptomator.common.vaults.VaultState.Value.ALL_MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 import static org.cryptomator.common.vaults.VaultState.Value.MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 @MainWindowScoped
 public class VaultListController implements FxController {
@@ -75,6 +87,10 @@ public class VaultListController implements FxController {
 	private final ObservableValue<Double> cellSize;
 	private final Dialogs dialogs;
 
+	private final VaultComponent.Factory vaultComponentFactory;
+	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
+	private final List<MountService> mountServices;
+
 	public ListView<Vault> vaultList;
 	public StackPane root;
 	@FXML
@@ -94,6 +110,9 @@ public class VaultListController implements FxController {
 						FxApplicationWindows appWindows, //
 						Settings settings, //
 						Dialogs dialogs, //
+						RecoveryKeyComponent.Factory recoveryKeyWindow, //
+						VaultComponent.Factory vaultComponentFactory, //
+						List<MountService> mountServices, //
 						FxFSEventList fxFSEventList) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
@@ -105,6 +124,9 @@ public class VaultListController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.appWindows = appWindows;
 		this.dialogs = dialogs;
+		this.recoveryKeyWindow = recoveryKeyWindow;
+		this.vaultComponentFactory = vaultComponentFactory;
+		this.mountServices = mountServices;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.unreadEvents = fxFSEventList.unreadEventsProperty();
@@ -214,9 +236,79 @@ public class VaultListController implements FxController {
 		addVaultWizard.build().showAddExistingVaultWizard(resourceBundle);
 	}
 
+	@FXML
+	public void didClickRecoverExistingVault() {
+		DirectoryChooser directoryChooser = new DirectoryChooser();
+
+		while (true) {
+			File selectedDirectory = directoryChooser.showDialog(mainWindow);
+			if (selectedDirectory == null) {
+				return;
+			}
+
+			boolean hasSubfolderD = new File(selectedDirectory, "d").isDirectory();
+			if (!hasSubfolderD) {
+				dialogs.prepareNoDDirectorySelectedDialog(mainWindow).build().showAndWait();
+				continue;
+			}
+
+			Vault preparedVault = prepareVault(selectedDirectory, vaultComponentFactory, mountServices);
+
+			Optional<Vault> matchingVaultListEntry = vaultListManager.get(preparedVault.getPath());
+			if (matchingVaultListEntry.isPresent()) {
+				dialogs.prepareRecoveryVaultAlreadyExists(mainWindow, matchingVaultListEntry.get().getDisplayName()) //
+						.setOkAction(Stage::close) //
+						.build().showAndWait();
+				break;
+			}
+
+			VaultListManager.redetermineVaultState(preparedVault);
+			VaultState.Value state = preparedVault.getState();
+
+			switch (state) {
+				case VAULT_CONFIG_MISSING ->
+						recoveryKeyWindow.create(preparedVault, mainWindow, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG)).showOnboardingDialogWindow();
+				case ALL_MISSING ->
+						recoveryKeyWindow.create(preparedVault, mainWindow, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_ALL)).showOnboardingDialogWindow();
+				case LOCKED, NEEDS_MIGRATION -> {
+					vaultListManager.addVault(preparedVault);
+					dialogs.prepareRecoveryVaultAdded(mainWindow, preparedVault.getDisplayName()).setOkAction(Stage::close).build().showAndWait();
+				}
+			}
+			break;
+		}
+	}
+
+	public static Vault prepareVault(File selectedDirectory, VaultComponent.Factory vaultComponentFactory, List<MountService> mountServices) {
+		Path selectedPath = selectedDirectory.toPath();
+		VaultSettings vaultSettings = VaultSettings.withRandomId();
+		vaultSettings.path.set(selectedPath);
+		if (selectedPath.getFileName() != null) {
+			vaultSettings.displayName.set(selectedPath.getFileName().toString());
+		} else {
+			vaultSettings.displayName.set("defaultVaultName");
+		}
+
+		var wrapper = new VaultConfigCache(vaultSettings);
+		Vault vault = vaultComponentFactory.create(vaultSettings, wrapper, LOCKED, null).vault();
+		try {
+			VaultListManager.determineVaultState(vault.getPath());
+		} catch (IOException e) {
+			LOG.warn("Failed to determine vault state for {}", vaultSettings.path.get(), e);
+		}
+
+		//due to https://github.com/cryptomator/cryptomator/issues/2880#issuecomment-1680313498
+		var nameOfWinfspLocalMounter = "org.cryptomator.frontend.fuse.mount.WinFspMountProvider";
+		if (SystemUtils.IS_OS_WINDOWS && vaultSettings.path.get().toString().contains("Dropbox") && mountServices.stream().anyMatch(s -> s.getClass().getName().equals(nameOfWinfspLocalMounter))) {
+			vaultSettings.mountService.setValue(nameOfWinfspLocalMounter);
+		}
+
+		return vault;
+	}
+
 	private void pressedShortcutToRemoveVault() {
 		final var vault = selectedVault.get();
-		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION).contains(vault.getState())) {
+		if (vault != null && EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION, ALL_MISSING, VAULT_CONFIG_MISSING).contains(vault.getState())) {
 			dialogs.prepareRemoveVaultDialog(mainWindow, vault, vaults).build().showAndWait();
 		}
 	}

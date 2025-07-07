@@ -23,7 +23,6 @@
 		<Label text="%addvaultwizard.existing.instruction" wrapText="true" labelFor="$finishButton"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
-
 		<ButtonBar buttonMinWidth="120" buttonOrder="+X">
 			<buttons>
 				<Button fx:id="finishButton" text="%addvaultwizard.existing.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" onAction="#chooseFileAndNext" defaultButton="true"/>

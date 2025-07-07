@@ -20,7 +20,7 @@ public class VaultConfigCache {
 	private final VaultSettings settings;
 	private final AtomicReference<VaultConfig.UnverifiedVaultConfig> config;
 
-	VaultConfigCache(VaultSettings settings) {
+	public VaultConfigCache(VaultSettings settings) {
 		this.settings = settings;
 		this.config = new AtomicReference<>(null);
 	}

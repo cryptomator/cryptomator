@@ -5,8 +5,12 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.Nullable;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.cryptolib.api.CryptorProvider;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.ui.addvaultwizard.CreateNewVaultExpertSettingsController;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -19,6 +23,10 @@ import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
@@ -99,12 +107,18 @@ abstract class RecoveryKeyModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS)
+	@FxmlScene(FxmlFile.RECOVERYKEY_ONBOARDING)
 	@RecoveryKeyScoped
-	static Scene provideRecoveryKeyResetPasswordSuccessScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD_SUCCESS);
+	static Scene provideRecoveryKeyOnboardingScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_ONBOARDING);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyExpertSettingsScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_EXPERT_SETTINGS);
+	}
 
 	// ------------------
 
@@ -119,6 +133,25 @@ abstract class RecoveryKeyModule {
 	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, ResourceBundle localization) {
 		return new RecoveryKeyDisplayController(window, vault.getDisplayName(), recoveryKey.get(), localization);
 	}
+
+	@Provides
+	@Named("shorteningThreshold")
+	@RecoveryKeyScoped
+	static IntegerProperty provideShorteningThreshold() {
+		return new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.MAX_SHORTENING_THRESHOLD);
+	}
+
+	@Provides
+	@Named("cipherCombo")
+	@RecoveryKeyScoped
+	static ObjectProperty<CryptorProvider.Scheme> provideCipherCombo() {
+		return new SimpleObjectProperty<>();
+	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyExpertSettingsController.class)
+	abstract FxController provideRecoveryKeyExpertSettingsController(RecoveryKeyExpertSettingsController controller);
 
 	@Binds
 	@IntoMap
@@ -137,14 +170,14 @@ abstract class RecoveryKeyModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(RecoveryKeyResetPasswordSuccessController.class)
-	abstract FxController bindRecoveryKeyResetPasswordSuccessController(RecoveryKeyResetPasswordSuccessController controller);
+	@FxControllerKey(RecoveryKeyOnboardingController.class)
+	abstract FxController bindRecoveryKeyOnboardingController(RecoveryKeyOnboardingController controller);
 
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
-	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
-		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory);
+	static FxController bindRecoveryKeyValidateController(@RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @Named("recoverType") ObjectProperty<RecoveryActionType>  recoverType, @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo, @Nullable MasterkeyFileAccess masterkeyFileAccess) {
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, recoverType, cipherCombo, masterkeyFileAccess);
 	}
 
 	@Provides

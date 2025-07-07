@@ -23,6 +23,7 @@ public interface AddVaultWizardComponent {
 
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	Lazy<Scene> sceneNew();
+
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
 	Lazy<Scene> sceneExisting();
 

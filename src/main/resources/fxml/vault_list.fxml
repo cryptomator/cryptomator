@@ -80,6 +80,11 @@
 						<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14"/>
 					</graphic>
 				</MenuItem>
+				<MenuItem styleClass="dropdown-button-context-menu-item" text="%main.vaultlist.addVaultBtn.menuItemRecover" onAction="#didClickRecoverExistingVault">
+					<graphic>
+						<FontAwesome5IconView glyph="ARROWS_ROTATE" textAlignment="CENTER" wrappingWidth="14"/>
+					</graphic>
+				</MenuItem>
 			</items>
 		</ContextMenu>
 	</fx:define>
