@@ -19,7 +19,6 @@ import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -64,18 +63,21 @@ public final class MasterkeyService {
 
 	public static Optional<CryptorProvider.Scheme> detect(Masterkey masterkey, Path vaultPath) {
 		try (Stream<Path> paths = Files.walk(vaultPath.resolve(DATA_DIR_NAME))) {
-			List<String> excludedFilenames = List.of("dirid.c9r", "dir.c9r");
-			Optional<Path> c9rFile = paths.filter(p -> p.toString().endsWith(".c9r")).filter(p -> excludedFilenames.stream().noneMatch(p.toString()::endsWith)).findFirst();
+			Optional<Path> c9rFile = paths //
+					.filter(p -> p.toString().endsWith(".c9r")) //
+					.filter(p -> !p.toString().equals("dir.c9r")) //
+					.findFirst();
 			if (c9rFile.isEmpty()) {
 				LOG.info("Unable to detect Crypto scheme: No *.c9r file found in {}", vaultPath);
 				return Optional.empty();
 			}
-			return determineScheme(c9rFile.get(), masterkey); //
+			return determineScheme(c9rFile.get(), masterkey);
 		} catch (IOException e) {
 			LOG.info("Unable to detect Crypto scheme: Failed to inspect vault", e);
 			return Optional.empty();
 		}
 	}
+
 
 	private static Optional<CryptorProvider.Scheme> determineScheme(Path c9rFile, Masterkey masterkey) {
 		return Arrays.stream(CryptorProvider.Scheme.values()).filter(scheme -> {
@@ -90,9 +92,13 @@ public final class MasterkeyService {
 
 				headerBuf.flip();
 				cryptor.fileHeaderCryptor().decryptHeader(headerBuf.duplicate());
+				LOG.debug("Detected Crypto scheme: {}", scheme);
 				return true;
-			} catch (IOException | CryptoException | NoSuchAlgorithmException e) {
-				LOG.info("Unable to detect Crypto scheme: Failed to decrypt .c9r file", e);
+			} catch (CryptoException e) {
+				LOG.debug("Could not decrypt with scheme: {}", scheme);
+				return false;
+			} catch (IOException | NoSuchAlgorithmException e) {
+				LOG.warn("Unable to detect Crypto scheme: Failed to decrypt .c9r file", e);
 				return false;
 			}
 		}).findFirst();

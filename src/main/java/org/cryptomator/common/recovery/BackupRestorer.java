@@ -18,7 +18,7 @@ public final class BackupRestorer {
 
 	private BackupRestorer() {}
 
-	public static void restoreIfPresent(Path vaultPath, String filePrefix) {
+	public static void restoreIfBackupPresent(Path vaultPath, String filePrefix) {
 		Path targetFile = vaultPath.resolve(filePrefix);
 
 		try (Stream<Path> files = Files.list(vaultPath)) {
@@ -45,7 +45,9 @@ public final class BackupRestorer {
 	private static void copyBackupFile(Path backupFile, Path configPath) {
 		try {
 			Files.copy(backupFile, configPath, StandardCopyOption.REPLACE_EXISTING);
+			LOG.debug("Backup restored - file: '{}'  path: '{}'", backupFile, configPath);
 		} catch (IOException e) {
-			LOG.warn("Unable to copy backup file from '{}' to '{}'", backupFile, configPath, e);		}
+			LOG.warn("Unable to copy backup file from '{}' to '{}'", backupFile, configPath, e);
+		}
 	}
 }

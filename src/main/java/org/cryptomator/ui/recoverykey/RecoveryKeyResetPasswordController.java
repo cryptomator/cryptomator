@@ -65,7 +65,6 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final Stage owner;
 
 	public NewPasswordController newPasswordController;
-	public Button backButton;
 	public Button nextButton;
 
 	@Inject
@@ -104,18 +103,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	@FXML
 	public void initialize() {
 		switch (recoverType.get()) {
-			case RESTORE_MASTERKEY -> {
-				nextButton.setText(resourceBundle.getString("recoveryKey.recover.recoverBtn"));
-				nextButton.setOnAction((_) -> resetPassword());
-			}
-			case RESTORE_ALL -> {
-				nextButton.setText(resourceBundle.getString("recoveryKey.recover.recoverBtn"));
-				nextButton.setOnAction((_) -> restorePassword());
-			}
-			case RESET_PASSWORD -> {
-				nextButton.setText(resourceBundle.getString("recoveryKey.recover.resetBtn"));
-				nextButton.setOnAction((_) -> resetPassword());
-			}
+			case RESTORE_MASTERKEY, RESTORE_ALL -> nextButton.setText(resourceBundle.getString("recoveryKey.recover.recoverBtn"));
+			case RESET_PASSWORD -> nextButton.setText(resourceBundle.getString("recoveryKey.recover.resetBtn"));
 		}
 	}
 
@@ -129,14 +118,20 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	}
 
 	@FXML
+	public void next() {
+		switch (recoverType.get()) {
+			case RESTORE_ALL -> restorePassword();
+			case RESTORE_MASTERKEY, RESET_PASSWORD -> resetPassword();
+		}
+	}
+
+	@FXML
 	public void restorePassword() {
 		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
 			Path recoveryPath = recoveryDirectory.getRecoveryPath();
 			MasterkeyService.recoverFromRecoveryKey(recoveryKey.get(), recoveryKeyFactory, recoveryPath, newPasswordController.passwordField.getCharacters());
 
-			Path masterkeyFilePath = recoveryPath.resolve(MASTERKEY_FILENAME);
-
-			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, masterkeyFilePath, newPasswordController.passwordField.getCharacters())) {
+			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, recoveryPath.resolve(MASTERKEY_FILENAME), newPasswordController.passwordField.getCharacters())) {
 				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), cipherCombo.get());
 			}
 

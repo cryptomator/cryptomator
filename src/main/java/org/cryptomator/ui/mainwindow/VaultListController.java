@@ -270,7 +270,7 @@ public class VaultListController implements FxController {
 						recoveryKeyWindow.create(preparedVault, mainWindow, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG)).showOnboardingDialogWindow();
 				case ALL_MISSING ->
 						recoveryKeyWindow.create(preparedVault, mainWindow, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_ALL)).showOnboardingDialogWindow();
-				case LOCKED -> {
+				case LOCKED, NEEDS_MIGRATION -> {
 					vaultListManager.addVault(preparedVault);
 					dialogs.prepareRecoveryVaultAdded(mainWindow, preparedVault.getDisplayName()).setOkAction(Stage::close).build().showAndWait();
 				}

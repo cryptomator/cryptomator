@@ -1,10 +1,11 @@
 package org.cryptomator.ui.recoverykey;
 
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.recovery.MasterkeyService;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
@@ -26,12 +27,9 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-import org.cryptomator.common.recovery.MasterkeyService;
-import org.cryptomator.common.recovery.RecoveryActionType;
-
 public class RecoveryKeyValidateController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyCreationController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyValidateController.class);
 	private static final CharMatcher ALLOWED_CHARS = CharMatcher.inRange('a', 'z').or(CharMatcher.is(' '));
 
 	private final Vault vault;
@@ -137,7 +135,7 @@ public class RecoveryKeyValidateController implements FxController {
 	private void validateRecoveryKey() {
 		switch (recoverType.get()) {
 			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> {
-				try{
+				try {
 					var combo = MasterkeyService.validateRecoveryKeyAndDetectCombo(recoveryKeyFactory, vault, recoveryKey.get(), masterkeyFileAccess);
 					combo.ifPresent(cipherCombo::set);
 					if (combo.isPresent()) {
@@ -145,15 +143,13 @@ public class RecoveryKeyValidateController implements FxController {
 					} else {
 						recoveryKeyState.set(RecoveryKeyState.WRONG);
 					}
-				}
-				catch (IllegalArgumentException e){
+				} catch (IllegalArgumentException e) {
 					recoveryKeyState.set(RecoveryKeyState.INVALID);
 				}
 			}
 			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT -> {
 				isWrongKey = false;
-				boolean valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(),
-						unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
+				boolean valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
 				if (valid) {
 					recoveryKeyState.set(RecoveryKeyState.CORRECT);
 				} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()

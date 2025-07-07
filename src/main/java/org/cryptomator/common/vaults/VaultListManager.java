@@ -23,13 +23,7 @@ import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
-import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
-import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
-import static org.cryptomator.common.vaults.VaultState.Value.ALL_MISSING;
-import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
-import static org.cryptomator.common.vaults.VaultState.Value.PROCESSING;
-import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
-import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.*;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
@@ -194,31 +188,32 @@ public class VaultListManager {
 		Path pathToMasterkey = pathToVault.resolve(MASTERKEY_FILENAME);
 
 		if (!Files.exists(pathToVault)) {
-			return VaultState.Value.MISSING;
+			return MISSING;
 		}
 
-		BackupRestorer.restoreIfPresent(pathToVaultConfig.getParent(), VAULTCONFIG_FILENAME);
-
-		BackupRestorer.restoreIfPresent(pathToMasterkey.getParent(), MASTERKEY_FILENAME);
+		if(!Files.exists(pathToVaultConfig)) {
+			BackupRestorer.restoreIfBackupPresent(pathToVault, VAULTCONFIG_FILENAME);
+		}
+		if(!Files.exists(pathToMasterkey)){
+			BackupRestorer.restoreIfBackupPresent(pathToVault, MASTERKEY_FILENAME);
+		}
 
 		if (!Files.exists(pathToVaultConfig) && !Files.exists(pathToMasterkey)) {
 			return ALL_MISSING;
 		}
-
+		var checkedDirStructureVaultState = checkDirStructure(pathToVault);
 		if (!Files.exists(pathToVaultConfig)) {
-			return VAULT_CONFIG_MISSING;
+			return checkedDirStructureVaultState.equals(LOCKED) ? VAULT_CONFIG_MISSING : checkedDirStructureVaultState ;
 		}
 
-		return checkDirStructure(pathToVault);
+		return checkedDirStructureVaultState;
 	}
 
 	private static VaultState.Value checkDirStructure(Path pathToVault) throws IOException {
 		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
-			case VAULT -> VaultState.Value.LOCKED;
-			case UNRELATED -> VaultState.Value.MISSING;
-			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ? //
-					VaultState.Value.NEEDS_MIGRATION //
-					: VaultState.Value.MISSING;
+			case VAULT -> LOCKED;
+			case UNRELATED -> MISSING;
+			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ? NEEDS_MIGRATION : MISSING;
 		};
 	}
 
