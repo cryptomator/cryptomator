@@ -46,15 +46,16 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 	/**
 	 * Determines whether the provided key loader scheme corresponds to a Masterkey File Vault.
 	 * <p>
-	 * This method checks if the {@code keyLoader} parameter matches the known Masterkey File Vault scheme
+	 * This method checks if the {@code keyLoader} parameter starts with the known Masterkey File Vault scheme
 	 * {@link MasterkeyFileLoadingStrategy#SCHEME}.
+	 * This allows identifying not only exact matches but also variants or extended schemes based on the Masterkey scheme.
 	 * </p>
 	 *
 	 * @param keyLoader A string representing the key loader scheme to be checked.
-	 * @return {@code true} if the given key loader scheme represents a Masterkey File Vault; {@code false} otherwise.
+	 * @return {@code true} if the given key loader scheme starts with the Masterkey File Vault scheme; {@code false} otherwise.
 	 */
 	static boolean isMasterkeyFileVault(String keyLoader) {
-		return MasterkeyFileLoadingStrategy.SCHEME.equals(keyLoader);
+		return keyLoader.startsWith(MasterkeyFileLoadingStrategy.SCHEME);
 	}
 
 	/**
