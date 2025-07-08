@@ -9,13 +9,13 @@
 package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.Constants;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +125,7 @@ public class VaultListManager {
 					vaultSettings.lastKnownKeyLoader.set(keyIdScheme);
 				}
 			} else if (vaultState == NEEDS_MIGRATION) {
-				vaultSettings.lastKnownKeyLoader.set(Constants.DEFAULT_KEY_ID.toString());
+				vaultSettings.lastKnownKeyLoader.set(MasterkeyFileLoadingStrategy.SCHEME);
 			}
 			return vaultComponentFactory.create(vaultSettings, wrapper, vaultState, null).vault();
 		} catch (IOException e) {
