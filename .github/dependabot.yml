@@ -14,8 +14,6 @@ updates:
         versions: ["2.0.1.MR"]
       - dependency-name: "org.openjfx:*"
         update-types: ["version-update:semver-major"]
-      - dependency-name: "org.openjfx:*"
-        versions: ["*-ea*"]
     groups:
       java-test-dependencies:
         patterns:
