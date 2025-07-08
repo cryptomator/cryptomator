@@ -9,8 +9,14 @@ Param(
 	[Parameter(Mandatory, HelpMessage="Please provide an update url")][string] $UpdateUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an about url")][string] $AboutUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an alias for localhost")][string] $LoopbackAlias,
-	[bool] $clean
+	[bool] $clean = $false # if true, cleans up previous build artifacts
 )
+
+# ============================
+# Function Definitions Section
+# ============================
+
+function Main {
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
@@ -50,11 +56,11 @@ $version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.
 $semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
 
-Write-Output "`$version=$version"
-Write-Output "`$semVerNo=$semVerNo"
-Write-Output "`$revisionNo=$revisionNo"
-Write-Output "`$buildDir=$buildDir"
-Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
+Write-Host "`$version=$version"
+Write-Host "`$semVerNo=$semVerNo"
+Write-Host "`$revisionNo=$revisionNo"
+Write-Host "`$buildDir=$buildDir"
+Write-Host "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
@@ -71,7 +77,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 ## download jfx jmods for X64, while they are part of the Arm64 JDK
 $archCode = (Get-CimInstance Win32_Processor).Architecture
 $archName = switch ($archCode) {
-    9  { "x64 (AMD64)" }
+    9  { "x64" }
     12 { "ARM64" }
     default { "WMI Win32_Processor.Architecture code ($archCode)" }
 }
@@ -86,14 +92,14 @@ switch ($archName) {
 
         $jmodPaths = "$Env:JAVA_HOME/jmods"
     }
-    'x64 (AMD64)' {
+    'x64' {
 		$javaFxVersion='24.0.1'
 		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
 		$javaFxJmodsSHA256 = 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
 		$javaFxJmods = '.\resources\jfxJmods.zip'
 
 		if( !(Test-Path -Path $javaFxJmods) ) {
-			Write-Output "Downloading ${javaFxJmodsUrl}..."
+			Write-Host "Downloading ${javaFxJmodsUrl}..."
 			Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
 		}
 
@@ -139,6 +145,29 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
 }
 
+
+$javaOptions = @(
+"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+"--java-options", "-Xss5m"
+"--java-options", "-Xmx256m"
+"--java-options", "-Dcryptomator.appVersion=`"$semVerNo`""
+"--java-options", "-Dfile.encoding=`"utf-8`""
+"--java-options", "-Djava.net.useSystemProxies=true"
+"--java-options", "-Dcryptomator.logDir=`"@{localappdata}/$AppName`""
+"--java-options", "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`""
+"--java-options", "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`""
+"--java-options", "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`""
+"--java-options", "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`""
+"--java-options", "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`""
+"--java-options", "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`""
+"--java-options", "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`""
+"--java-options", "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`""
+"--java-options", "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`""
+"--java-options", "-Dcryptomator.showTrayIcon=true"
+"--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
+)
+
+
 # create app dir
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
@@ -151,28 +180,16 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--name $AppName `
 	--vendor $Vendor `
 	--copyright $copyright `
-	--java-options "--enable-preview" `
-	--java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win" `
-	--java-options "-Xss5m" `
-	--java-options "-Xmx256m" `
-	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
 	--app-version "$semVerNo.$revisionNo" `
-	--java-options "-Dfile.encoding=`"utf-8`"" `
-	--java-options "-Djava.net.useSystemProxies=true" `
-	--java-options "-Dcryptomator.logDir=`"@{localappdata}/$AppName`"" `
-	--java-options "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`"" `
-	--java-options "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`"" `
-	--java-options "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`"" `
-	--java-options "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`"" `
-	--java-options "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`"" `
-	--java-options "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`"" `
-	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`"" `
-	--java-options "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`"" `
-	--java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`"" `
-	--java-options "-Dcryptomator.showTrayIcon=true" `
-	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
-	--icon resources/$AppName.ico
+	--icon resources/$AppName.ico `
+	--add-launcher "${AppName} (Debug)=$buildDir\debug-launcher.properties" `
+	@javaOptions
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "jpackage Appimage failed with exit code $LASTEXITCODE"
+	return 1;
+}
 
 #Create RTF license for msi
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
@@ -187,6 +204,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
+attrib -r "$AppName\${AppName} (Debug).exe"
 # patch batch script to set hostfile
 $webDAVPatcher = "$AppName\patchWebDAV.bat"
 try {
@@ -237,7 +255,7 @@ if ($LASTEXITCODE -ne 0) {
 # download Winfsp
 $winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
 $winfspMsiHash = '073A70E00F77423E34BED98B86E600DEF93393BA5822204FAC57A29324DB9F7A'
-Write-Output "Downloading ${winfspMsiUrl}..."
+Write-Host "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 $computedHash = $(Get-FileHash -Path '.\bundle\resources\winfsp.msi' -Algorithm SHA256).Hash
 if (! $computedHash.Equals($winfspMsiHash)) {
@@ -251,7 +269,7 @@ if (! $computedHash.Equals($winfspMsiHash)) {
 
 # download legacy-winfsp uninstaller
 $winfspUninstaller= 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
-Write-Output "Downloading ${winfspUninstaller}..."
+Write-Host "Downloading ${winfspUninstaller}..."
 Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninstaller.exe" # redirects are followed by default
 
 # copy MSI to bundle resources
@@ -271,4 +289,18 @@ Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName
     .\bundle\bundleWithWinfsp.wxs `
     -out "installer\$AppName-Installer.exe"
 
-Write-Output "Created EXE installer .\installer\$AppName-Installer.exe"
+Write-Host "Created EXE installer .\installer\$AppName-Installer.exe"
+return 0;
+}
+
+# ============================
+# Script Execution Starts Here
+# ============================
+if ($clean) {
+	Write-Host "Cleaning up previous build artifacts..."
+	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore
+}
+return Main
+

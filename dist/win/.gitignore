@@ -4,6 +4,7 @@ installer
 *.wixobj
 *.pdb
 *.msi
+*Debug.properties
 *.exe
 *.jmod
 resources/jfxJmods.zip
