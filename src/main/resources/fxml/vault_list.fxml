@@ -82,7 +82,7 @@
 				</MenuItem>
 				<MenuItem styleClass="dropdown-button-context-menu-item" text="%main.vaultlist.addVaultBtn.menuItemRecover" onAction="#didClickRecoverExistingVault">
 					<graphic>
-						<FontAwesome5IconView glyph="ARROWS_ROTATE" textAlignment="CENTER" wrappingWidth="14"/>
+						<FontAwesome5IconView glyph="SYNC" textAlignment="CENTER" wrappingWidth="14"/>
 					</graphic>
 				</MenuItem>
 			</items>
