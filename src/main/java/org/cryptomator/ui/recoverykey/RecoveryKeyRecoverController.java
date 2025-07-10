@@ -59,9 +59,7 @@ public class RecoveryKeyRecoverController implements FxController {
 				window.setTitle(resourceBundle.getString("recoveryKey.display.title"));
 				yield resetPasswordScene;
 			}
-			default -> {
-				yield null;
-			}
+			default -> throw new IllegalArgumentException("Unexpected recovery action type: " + recoverType.get());
 		};
 
 	}
