@@ -194,16 +194,6 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		return newPasswordController.isGoodPassword();
 	}
 
-	private final ReadOnlyBooleanWrapper vaultConfigMissing = new ReadOnlyBooleanWrapper();
-
-	public ReadOnlyBooleanProperty vaultConfigMissingProperty() {
-		return vaultConfigMissing.getReadOnlyProperty();
-	}
-
-	public boolean isVaultConfigMissing() {
-		return vault.isMissingVaultConfig();
-	}
-
 	private static class ResetPasswordTask extends Task<Void> {
 
 		private static final Logger LOG = LoggerFactory.getLogger(ResetPasswordTask.class);
