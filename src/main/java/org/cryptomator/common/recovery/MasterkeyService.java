@@ -52,20 +52,19 @@ public final class MasterkeyService {
 
 			try (Masterkey mk = load(masterkeyFileAccess, masterkeyFilePath, tmpPass)) {
 				return detect(mk, vault.getPath());
-			} catch (IOException | CryptoException e) {
-				LOG.info("Recovery key validation failed", e);
-				return Optional.empty();
 			}
 		} catch (IOException | CryptoException e) {
 			LOG.info("Recovery key validation failed");
+			return Optional.empty();
 		}
-		return Optional.empty();
 	}
 
 	public static Optional<CryptorProvider.Scheme> detect(Masterkey masterkey, Path vaultPath) {
 		try (Stream<Path> paths = Files.walk(vaultPath.resolve(DATA_DIR_NAME))) {
-			List<String> excludedFilenames = List.of("dirid.c9r", "dir.c9r");
-			Optional<Path> c9rFile = paths.filter(p -> p.toString().endsWith(".c9r")).filter(p -> excludedFilenames.stream().noneMatch(p.toString()::endsWith)).findFirst();
+			Optional<Path> c9rFile = paths //
+					.filter(p -> p.toString().endsWith(".c9r")) //
+					.filter(p -> !p.toString().equals("dir.c9r")) //
+					.findFirst();
 			if (c9rFile.isEmpty()) {
 				LOG.info("Unable to detect Crypto scheme: No *.c9r file found in {}", vaultPath);
 				return Optional.empty();
@@ -92,7 +91,7 @@ public final class MasterkeyService {
 				cryptor.fileHeaderCryptor().decryptHeader(headerBuf.duplicate());
 				LOG.debug("Detected Crypto scheme: {}", scheme);
 				return true;
-			} catch (CryptoException e) {
+			} catch (IllegalArgumentException | CryptoException e) {
 				LOG.debug("Could not decrypt with scheme: {}", scheme);
 				return false;
 			} catch (IOException | NoSuchAlgorithmException e) {
