@@ -160,9 +160,10 @@ public class RecoveryKeyCreationController implements FxController {
 				vaultListManager.add(vault.getPath());
 			}
 			window.close();
-			dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle) //
+			dialogs.prepareRecoverPasswordSuccess(window) //
 					.setTitleKey("recoveryKey.recoverVaultConfig.title") //
 					.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message") //
+					.setDescriptionKey("recoveryKey.recover.resetMasterkeyFileSuccess.description")
 					.build().showAndWait();
 
 		} catch (InvalidPassphraseException e) {

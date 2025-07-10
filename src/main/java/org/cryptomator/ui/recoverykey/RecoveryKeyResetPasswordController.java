@@ -142,7 +142,10 @@ public class RecoveryKeyResetPasswordController implements FxController {
 				vaultListManager.add(vault.getPath());
 			}
 			window.close();
-			dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).setTitleKey("recoveryKey.recoverVaultConfig.title").setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message").build().showAndWait();
+			dialogs.prepareRecoverPasswordSuccess(window) //
+					.setTitleKey("recoveryKey.recoverVaultConfig.title") //
+					.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message") //
+					.build().showAndWait();
 
 		} catch (IOException | CryptoException e) {
 			LOG.error("Recovery process failed", e);
@@ -158,14 +161,11 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 		task.setOnSucceeded(_ -> {
 			LOG.info("Used recovery key to reset password for {}.", vault.getDisplayablePath());
-			if (recoverType.get().equals(RecoveryActionType.RESET_PASSWORD)) {
-				window.close();
-				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).build().showAndWait();
-			} else {
-				window.close();
-				dialogs.prepareRecoverPasswordSuccess(window, owner, resourceBundle).setTitleKey("recoveryKey.recoverMasterkey.title").setMessageKey("recoveryKey.recover.resetMasterkeyFileSuccess.message").build().showAndWait();
-			}
 			window.close();
+			switch (recoverType.get()){
+				case RESET_PASSWORD -> dialogs.prepareRecoverPasswordSuccess(window).build().showAndWait();
+				case RESTORE_MASTERKEY -> dialogs.prepareRecoverPasswordSuccess(window).setTitleKey("recoveryKey.recoverMasterkey.title").setMessageKey("recoveryKey.recover.resetMasterkeyFileSuccess.message").build().showAndWait();
+			}
 		});
 
 		task.setOnFailed(_ -> {

@@ -75,20 +75,14 @@ public class Dialogs {
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
-	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window, Stage owner, ResourceBundle resourceBundle) {
+	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window) {
 		return createDialogBuilder()
 				.setOwner(window) //
 				.setTitleKey("recoveryKey.recover.title") //
 				.setMessageKey("recoveryKey.recover.resetSuccess.message") //
 				.setDescriptionKey("recoveryKey.recover.resetSuccess.description") //
 				.setIcon(FontAwesome5Icon.CHECK)
-				.setOkAction(stage -> {
-					stage.close();
-					String ownerTitle = owner.getTitle();
-					if (ownerTitle != null && ownerTitle.equals(resourceBundle.getString("addvaultwizard.existing.title"))) {
-						owner.close();
-					}
-				})
+				.setOkAction(Stage::close)
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 

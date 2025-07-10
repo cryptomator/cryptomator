@@ -77,7 +77,6 @@ public final class MasterkeyService {
 		}
 	}
 
-
 	private static Optional<CryptorProvider.Scheme> determineScheme(Path c9rFile, Masterkey masterkey) {
 		return Arrays.stream(CryptorProvider.Scheme.values()).filter(scheme -> {
 			try (Cryptor cryptor = CryptorProvider.forScheme(scheme).provide(masterkey.copy(), SecureRandom.getInstanceStrong())) {
