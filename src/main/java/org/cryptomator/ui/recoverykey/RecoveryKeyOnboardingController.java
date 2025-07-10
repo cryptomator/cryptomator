@@ -31,13 +31,12 @@ public class RecoveryKeyOnboardingController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> recoverykeyRecoverScene;
 	private final Lazy<Scene> recoverykeyExpertSettingsScene;
-	private ObjectProperty<RecoveryActionType> recoverType;
+	private final ObjectProperty<RecoveryActionType> recoverType;
+	private final ResourceBundle resourceBundle;
 
 	public Label titleLabel;
 	public Label messageLabel;
 	public Label secondTextDesc;
-	public Label thirdTextIndex;
-	public Label thirdTextDesc;
 
 	@FXML
 	private CheckBox affirmationBox;
@@ -50,7 +49,7 @@ public class RecoveryKeyOnboardingController implements FxController {
 	@FXML
 	private VBox chooseMethodeBox;
 	private final ToggleGroup methodToggleGroup = new ToggleGroup();
-
+	private final BooleanProperty showThirdText = new SimpleBooleanProperty(true);
 
 	@Inject
 	public RecoveryKeyOnboardingController(@RecoveryKeyWindow Stage window, //
@@ -64,6 +63,7 @@ public class RecoveryKeyOnboardingController implements FxController {
 		this.recoverykeyRecoverScene = recoverykeyRecoverScene;
 		this.recoverykeyExpertSettingsScene = recoverykeyExpertSettingsScene;
 		this.recoverType = recoverType;
+		this.resourceBundle = resourceBundle;
 	}
 
 	@FXML
@@ -83,29 +83,17 @@ public class RecoveryKeyOnboardingController implements FxController {
 
 		switch (recoverType.get()) {
 			case RESTORE_VAULT_CONFIG -> {
-				window.setTitle("Recover Vault Config");
-				messageLabel.setText("Read this:");
-				secondTextDesc.setText("You will need the vault password or recovery key, a new password and possible some expert settings.");
-				thirdTextIndex.setVisible(false);
-				thirdTextIndex.setManaged(false);
-				thirdTextDesc.setVisible(false);
-				thirdTextDesc.setManaged(false);
+				window.setTitle(resourceBundle.getString("recoveryKey.recoverVaultConfig.title"));
+				messageLabel.setText(resourceBundle.getString("recoveryKey.recover.onBoarding.readThis"));
+				secondTextDesc.setText(resourceBundle.getString("recoveryKey.recover.onBoarding.recoverVaultConfig.intro2"));
+				showThirdText.set(false);
 			}
 			case RESTORE_MASTERKEY -> {
-				window.setTitle("Recover Masterkey");
-				messageLabel.setText("Read this:");
-				titleLabel.setText("Recover Masterkey");
-				secondTextDesc.setText("You will need the vault recovery key.");
-				thirdTextIndex.setVisible(false);
-				thirdTextIndex.setManaged(false);
-				thirdTextDesc.setVisible(false);
-				thirdTextDesc.setManaged(false);
-			}
-			default -> {
-				thirdTextIndex.setVisible(true);
-				thirdTextIndex.setManaged(true);
-				thirdTextDesc.setVisible(true);
-				thirdTextDesc.setManaged(true);
+				window.setTitle(resourceBundle.getString("recoveryKey.recoverMasterkey.title"));
+				messageLabel.setText(resourceBundle.getString("recoveryKey.recover.onBoarding.readThis"));
+				titleLabel.setText(resourceBundle.getString("recoveryKey.recoverMasterkey.title"));
+				secondTextDesc.setText(resourceBundle.getString("recoveryKey.recover.onBoarding.recoverMasterkey.intro2"));
+				showThirdText.set(false);
 			}
 		}
 	}
@@ -138,5 +126,14 @@ public class RecoveryKeyOnboardingController implements FxController {
 		}
 		window.centerOnScreen();
 	}
+
+	public BooleanProperty showThirdTextProperty() {
+		return showThirdText;
+	}
+
+	public boolean getShowThirdText() {
+		return showThirdText.get();
+	}
+
 }
 

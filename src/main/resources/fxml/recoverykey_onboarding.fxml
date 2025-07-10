@@ -56,8 +56,8 @@
 						<Label text="%recoveryKey.recover.onBoarding.intro1" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 						<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0" />
 						<Label fx:id="secondTextDesc" text="%recoveryKey.recover.onBoarding.intro2" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1" />
-						<Label fx:id="thirdTextIndex" text="3." GridPane.rowIndex="2" GridPane.columnIndex="0" />
-						<Label fx:id="thirdTextDesc" text="%recoveryKey.recover.onBoarding.intro3" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+						<Label text="3." GridPane.rowIndex="2" GridPane.columnIndex="0" visible="${controller.showThirdText}" managed="${controller.showThirdText}" />
+						<Label text="%recoveryKey.recover.onBoarding.intro3" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1" visible="${controller.showThirdText}" managed="${controller.showThirdText}" />
 					</GridPane>
 					<Region minHeight="15"/>
 					<VBox fx:id="chooseMethodeBox">
