@@ -203,7 +203,10 @@ public class VaultListManager {
 		}
 		var checkedDirStructureVaultState = checkDirStructure(pathToVault);
 		if (!Files.exists(pathToVaultConfig)) {
-			return checkedDirStructureVaultState.equals(LOCKED) ? VAULT_CONFIG_MISSING : checkedDirStructureVaultState ;
+			return switch (checkedDirStructureVaultState) {
+				case LOCKED, MISSING -> VAULT_CONFIG_MISSING;
+				default -> checkedDirStructureVaultState;
+			};
 		}
 
 		return checkedDirStructureVaultState;
