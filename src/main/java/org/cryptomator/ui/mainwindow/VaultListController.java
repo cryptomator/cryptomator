@@ -8,9 +8,9 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultConfigCache;
 import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
+import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
@@ -49,6 +49,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
@@ -239,44 +240,42 @@ public class VaultListController implements FxController {
 	@FXML
 	public void didClickRecoverExistingVault() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
+		File selectedDirectory;
 
-		while (true) {
-			File selectedDirectory = directoryChooser.showDialog(mainWindow);
+		do {
+			selectedDirectory = directoryChooser.showDialog(mainWindow);
 			if (selectedDirectory == null) {
 				return;
 			}
 
-			boolean hasSubfolderD = new File(selectedDirectory, "d").isDirectory();
-			if (!hasSubfolderD) {
+			Path selectedPath = selectedDirectory.toPath();
+			if (!Files.isDirectory(selectedPath.resolve(Constants.DATA_DIR_NAME))) {
 				dialogs.prepareNoDDirectorySelectedDialog(mainWindow).build().showAndWait();
-				continue;
+				selectedDirectory = null;
 			}
+		} while (selectedDirectory == null);
 
-			Vault preparedVault = prepareVault(selectedDirectory, vaultComponentFactory, mountServices);
+		Vault preparedVault = prepareVault(selectedDirectory, vaultComponentFactory, mountServices);
 
-			Optional<Vault> matchingVaultListEntry = vaultListManager.get(preparedVault.getPath());
-			if (matchingVaultListEntry.isPresent()) {
-				dialogs.prepareRecoveryVaultAlreadyExists(mainWindow, matchingVaultListEntry.get().getDisplayName()) //
-						.setOkAction(Stage::close) //
-						.build().showAndWait();
-				break;
-			}
-
-			VaultListManager.redetermineVaultState(preparedVault);
-			VaultState.Value state = preparedVault.getState();
-
-			switch (state) {
-				case VAULT_CONFIG_MISSING ->
-						recoveryKeyWindow.create(preparedVault, mainWindow, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG)).showOnboardingDialogWindow();
-				case ALL_MISSING ->
-						recoveryKeyWindow.create(preparedVault, mainWindow, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_ALL)).showOnboardingDialogWindow();
-				case LOCKED, NEEDS_MIGRATION -> {
-					vaultListManager.addVault(preparedVault);
-					dialogs.prepareRecoveryVaultAdded(mainWindow, preparedVault.getDisplayName()).setOkAction(Stage::close).build().showAndWait();
-				}
-			}
-			break;
+		Optional<Vault> matchingVaultListEntry = vaultListManager.get(preparedVault.getPath());
+		if (matchingVaultListEntry.isPresent()) {
+			dialogs.prepareRecoveryVaultAlreadyExists(mainWindow, matchingVaultListEntry.get().getDisplayName()) //
+					.setOkAction(Stage::close) //
+					.build().showAndWait();
+			return;
 		}
+
+		VaultListManager.redetermineVaultState(preparedVault);
+
+		switch (preparedVault.getState()) {
+			case VAULT_CONFIG_MISSING -> recoveryKeyWindow.create(preparedVault, mainWindow, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG)).showOnboardingDialogWindow();
+			case ALL_MISSING -> recoveryKeyWindow.create(preparedVault, mainWindow, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_ALL)).showOnboardingDialogWindow();
+			case LOCKED, NEEDS_MIGRATION -> {
+				vaultListManager.addVault(preparedVault);
+				dialogs.prepareRecoveryVaultAdded(mainWindow, preparedVault.getDisplayName()).setOkAction(Stage::close).build().showAndWait();
+			}
+		}
+
 	}
 
 	public static Vault prepareVault(File selectedDirectory, VaultComponent.Factory vaultComponentFactory, List<MountService> mountServices) {
