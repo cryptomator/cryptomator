@@ -42,7 +42,7 @@
 		<cryptomator.webdav.version>2.0.10</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
-		<commons-lang3.version>3.17.0</commons-lang3.version>
+		<commons-lang3.version>3.18.0</commons-lang3.version>
 		<dagger.version>2.56.2</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.19.1</jackson.version>
