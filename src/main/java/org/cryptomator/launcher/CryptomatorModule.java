@@ -5,7 +5,6 @@ import dagger.Provides;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
-import org.cryptomator.integrations.update.UpdateService;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
 
 import javax.inject.Named;
@@ -49,9 +48,4 @@ class CryptomatorModule {
 		return TrayIntegrationProvider.get();
 	}
 
-	@Provides
-	@Singleton
-	static Optional<UpdateService> provideUpdateService() {
-		return UpdateService.get();
-	}
 }
