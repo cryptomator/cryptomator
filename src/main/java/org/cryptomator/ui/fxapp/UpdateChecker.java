@@ -4,6 +4,7 @@ import org.cryptomator.common.Environment;
 import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.updates.AppUpdateChecker;
+import org.cryptomator.integrations.common.DistributionChannel;
 import org.cryptomator.integrations.update.UpdateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +57,13 @@ public class UpdateChecker {
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
 		if (!env.disableUpdateCheck() && settings.checkForUpdates.get()) {
-			if (updateChecker.isUpdateServiceAvailable()) { // prefer AppUpdateChecker
-				var x = updateChecker.checkForUpdates(UpdateService.DistributionChannel.LINUX_FLATPAK);
-				LOG.info("Retrieved version from Update Service {}", x);
+			if (updateChecker.isUpdateServiceAvailable(env.getBuildNumber())) { // prefer AppUpdateChecker
+				String version = "";
+				switch (env.getBuildNumber().get()) {
+					case "flatpak-1" -> version = updateChecker.checkForUpdates(DistributionChannel.Value.LINUX_FLATPAK);
+					default -> LOG.error("Unexpected value 'buildNumber': {}", env.getBuildNumber().get());
+				}
+				LOG.info("Retrieved version from Update Service {}", version);
 			} else { // fallback is the "redirect user to website" approach
 				LOG.info("Common \"redirect user to website\" approach");
 				startCheckingForUpdates(AUTO_CHECK_DELAY);
