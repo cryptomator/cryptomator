@@ -53,18 +53,26 @@ class Server implements IpcCommunicator {
 	@Override
 	public void listen(IpcMessageListener listener, Executor executor) {
 		executor.execute(() -> {
+			int errorCount = 0;
 			while (serverSocketChannel.isOpen()) {
 				try (var ch = serverSocketChannel.accept()) {
 					while (ch.isConnected()) {
 						var msg = IpcMessage.receive(ch);
 						listener.handleMessage(msg);
 					}
+					errorCount = 0;
 				} catch (AsynchronousCloseException e) {
+					LOG.info("Closing server socket due to closed channel.");
 					return; // serverSocketChannel closed or listener interrupted
 				} catch (EOFException | ClosedChannelException e) {
 					// continue with next connected client
 				} catch (IOException e) {
+					errorCount++;
 					LOG.error("Failed to read IPC message", e);
+					if(errorCount > 100) { //apparently something is broken, prevent log spam
+						LOG.info("Closing server socket due to too many failed requests.");
+						return;
+					}
 				}
 			}
 		});
