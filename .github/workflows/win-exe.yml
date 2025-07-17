@@ -223,7 +223,7 @@ jobs:
           $signer = Get-ChildItem -Path ".\actalis-signer" -Recurse -Filter "ActalisCodeSigner.exe" | Select-Object -First 1
           $files = Get-ChildItem -Path ".\appdir\*" -Recurse -Include "*.exe", "*.dll", "*.ps1"
           foreach ($file in $files) {
-            & $signer -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME}}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" -pr "https://cryptomator.org" -in $($file.FullName)
+            & $signer -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME}}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -in $($file.FullName)
             if ($LASTEXITCODE -ne 0) {
               Write-Host "Signing failed for $($file.FullName)."
               exit 1
