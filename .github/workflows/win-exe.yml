@@ -219,26 +219,24 @@ jobs:
         shell: pwsh
       - name: Sign DLLs with Actalis CodeSigner
         shell: pwsh
-        continue-on-error: true
         run: |
           $signer = Get-ChildItem -Path ".\actalis-signer" -Recurse -Filter "ActalisCodeSigner.exe" | Select-Object -First 1
           $files = Get-ChildItem -Path ".\appdir\*" -Recurse -Include "*.exe", "*.dll", "*.ps1"
           foreach ($file in $files) {
             & $signer -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME}}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" -pr "https://cryptomator.org" -in $($file.FullName)
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "Signing failed for $($file.FullName)."
+              exit 1
+            }
           }
       - name: Upload logs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          fail-on-error: true
+          if-no-files-found: error
           name: signer-logs-${{ matrix.arch }}
           path: |
             .Acsi/log/acsi.log
-      - name: Abort on signing errors
-        if: failure()
-        run: |
-          echo "Signing failed, please check the logs."
-          exit 1
       - name: Replace DLLs inside jars with signed ones
         shell: pwsh
         run: |
