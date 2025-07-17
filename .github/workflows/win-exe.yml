@@ -236,7 +236,7 @@ jobs:
           if-no-files-found: error
           name: signer-logs-${{ matrix.arch }}
           path: |
-            .Acsi/log/acsi.log
+            ~/.Acsi/log/acsi.log
       - name: Replace DLLs inside jars with signed ones
         shell: pwsh
         run: |
