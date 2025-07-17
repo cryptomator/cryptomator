@@ -7,6 +7,7 @@ import dagger.multibindings.IntoMap;
 import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.changepassword.PasswordStrengthUtil;
 import org.cryptomator.ui.common.DefaultSceneFactory;
@@ -121,8 +122,8 @@ abstract class ConvertVaultModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
-	static FxController bindRecoveryKeyValidateController(@ConvertVaultWindow Vault vault, @ConvertVaultWindow VaultConfig.UnverifiedVaultConfig vaultConfig, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
-		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, new SimpleObjectProperty<>(RecoveryActionType.CONVERT_VAULT), null, null);
+	static FxController bindRecoveryKeyValidateController(@ConvertVaultWindow Vault vault, @ConvertVaultWindow VaultConfig.UnverifiedVaultConfig vaultConfig, @ConvertVaultWindow StringProperty recoveryKey, MasterkeyService service) {
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, new SimpleObjectProperty<>(RecoveryActionType.CONVERT_VAULT), new SimpleObjectProperty<>()); //we don't need the ciphercombo
 	}
 
 }
