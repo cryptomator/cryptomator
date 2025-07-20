@@ -9,7 +9,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.text.TextFlow?>
@@ -53,5 +52,6 @@
 			</graphic>
 		</Label>
 		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
+		<Button text="Hello Flatpak!" onAction="#updateNow" visible="${controller.appUpdateAvailable}"/>
 	</VBox>
 </VBox>

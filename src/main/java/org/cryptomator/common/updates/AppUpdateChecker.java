@@ -35,7 +35,7 @@ public class AppUpdateChecker {
 		}
 	}
 
-	public String checkForUpdates(DistributionChannel.Value channel) {
+	public Object getUpdater(DistributionChannel.Value channel) {
 		if (updateServices.isEmpty()) {
 			LOG.error("No UpdateService found");
 			return null;
@@ -47,7 +47,7 @@ public class AppUpdateChecker {
 					LOG.error("Required service for channel LINUX_FLATPAK not available");
 					return null;
 				} else {
-					return flatpakService.isUpdateAvailable(DistributionChannel.Value.LINUX_FLATPAK);
+					return flatpakService.getLatestReleaseChecker(DistributionChannel.Value.LINUX_FLATPAK);
 				}
 			}
 			default -> throw new IllegalStateException("Unexpected value 'channel': " + channel);
@@ -68,4 +68,10 @@ public class AppUpdateChecker {
 		}).findFirst().orElse(null);
 	}
 
+	public UpdateService getServiceForChannel(DistributionChannel.Value requiredChannel) {
+		return updateServices.stream().filter(service -> {
+			DistributionChannel annotation = service.getClass().getAnnotation(DistributionChannel.class);
+			return annotation != null && annotation.value() == requiredChannel;
+		}).findFirst().orElse(null);
+	}
 }

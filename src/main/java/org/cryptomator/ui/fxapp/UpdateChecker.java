@@ -5,7 +5,8 @@ import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.updates.AppUpdateChecker;
 import org.cryptomator.integrations.common.DistributionChannel;
-import org.cryptomator.integrations.update.UpdateService;
+import org.cryptomator.integrations.update.UpdateFailedException;
+import org.purejava.portal.rest.UpdateCheckerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,7 @@ import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 
 @FxApplicationScoped
@@ -33,11 +35,13 @@ public class UpdateChecker {
 	private final Environment env;
 	private final Settings settings;
 	private final StringProperty latestVersion = new SimpleStringProperty();
+	private final StringProperty latestAppUpdaterVersion = new SimpleStringProperty();
 	private final ScheduledService<String> updateCheckerService;
 	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
 	private final Comparator<String> versionComparator = new SemVerComparator();
 	private final BooleanBinding updateAvailable;
+	private final BooleanBinding appUpdateAvailable;
 	private final BooleanBinding checkFailed;
 	private final AppUpdateChecker updateChecker;
 
@@ -51,6 +55,7 @@ public class UpdateChecker {
 		this.updateCheckerService = updateCheckerService;
 		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
 		this.updateAvailable = Bindings.createBooleanBinding(this::isUpdateAvailable, latestVersion);
+		this.appUpdateAvailable = Bindings.createBooleanBinding(this::isAppUpdateAvailable, latestAppUpdaterVersion);
 		this.checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, state);
 		this.updateChecker = updateChecker;
 	}
@@ -58,14 +63,11 @@ public class UpdateChecker {
 	public void automaticallyCheckForUpdatesIfEnabled() {
 		if (!env.disableUpdateCheck() && settings.checkForUpdates.get()) {
 			if (updateChecker.isUpdateServiceAvailable(env.getBuildNumber())) { // prefer AppUpdateChecker
-				String version = "";
 				switch (env.getBuildNumber().get()) {
-					case "flatpak-1" -> version = updateChecker.checkForUpdates(DistributionChannel.Value.LINUX_FLATPAK);
+					case "flatpak-1" -> startCheckingWithFlatpakUpdater((UpdateCheckerTask) updateChecker.getUpdater(DistributionChannel.Value.LINUX_FLATPAK), AUTO_CHECK_DELAY);
 					default -> LOG.error("Unexpected value 'buildNumber': {}", env.getBuildNumber().get());
 				}
-				LOG.info("Retrieved version from Update Service {}", version);
 			} else { // fallback is the "redirect user to website" approach
-				LOG.info("Common \"redirect user to website\" approach");
 				startCheckingForUpdates(AUTO_CHECK_DELAY);
 			}
 		}
@@ -73,6 +75,11 @@ public class UpdateChecker {
 
 	public void checkForUpdatesNow() {
 		startCheckingForUpdates(Duration.ZERO);
+	}
+
+	public void updateAppNow() throws UpdateFailedException {
+		var service = updateChecker.getServiceForChannel(DistributionChannel.Value.LINUX_FLATPAK);
+		service.triggerUpdate();
 	}
 
 	private void startCheckingForUpdates(Duration initialDelay) {
@@ -85,7 +92,27 @@ public class UpdateChecker {
 		updateCheckerService.start();
 	}
 
+	private void startCheckingWithFlatpakUpdater(UpdateCheckerTask service, Duration initialDelay) {
+		service.cancel();
+		service.reset();
+		service.setDelay(convertFxToJavaTime(initialDelay));
+		service.setOnRunning(this::checkStarted);
+		service.setOnSucceeded(this::checkSucceeded);
+		service.setOnFailed(this::checkFailed);
+		service.start();
+	}
+
+	private java.time.Duration convertFxToJavaTime(javafx.util.Duration fxDuration) {
+		double millis = fxDuration.toMillis();
+		return java.time.Duration.of((long) millis, ChronoUnit.MILLIS);
+	}
+
 	private void checkStarted(WorkerStateEvent event) {
+		LOG.debug("Checking for updates...");
+		state.set(UpdateCheckState.IS_CHECKING);
+	}
+
+	private void checkStarted() {
 		LOG.debug("Checking for updates...");
 		state.set(UpdateCheckState.IS_CHECKING);
 	}
@@ -98,7 +125,18 @@ public class UpdateChecker {
 		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
 	}
 
+	private void checkSucceeded(String version) {
+		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), version);
+		lastSuccessfulUpdateCheck.set(Instant.now());
+		latestAppUpdaterVersion.set(version);
+		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
+	}
+
 	private void checkFailed(WorkerStateEvent event) {
+		state.set(UpdateCheckState.CHECK_FAILED);
+	}
+
+	private void checkFailed(Throwable throwable) {
 		state.set(UpdateCheckState.CHECK_FAILED);
 	}
 
@@ -106,7 +144,7 @@ public class UpdateChecker {
 		NOT_CHECKED,
 		IS_CHECKING,
 		CHECK_SUCCESSFUL,
-		CHECK_FAILED;
+		CHECK_FAILED
 	}
 
 	/* Observable Properties */
@@ -118,23 +156,38 @@ public class UpdateChecker {
 		return latestVersion;
 	}
 
+	public ReadOnlyStringProperty latestAppUpdaterVersionProperty() {
+		return latestAppUpdaterVersion;
+	}
+
 	public BooleanBinding updateAvailableProperty() {
 		return updateAvailable;
+	}
+
+	public BooleanBinding appUpdateAvailableProperty() {
+		return appUpdateAvailable;
 	}
 
 	public BooleanBinding checkFailedProperty() {
 		return checkFailed;
 	}
 
-	public boolean isUpdateAvailable() {
+	public boolean isUpdateAvailable(StringProperty versionProperty) {
 		String currentVersion = getCurrentVersion();
-		String latestVersionString = latestVersion.get();
+		String latestVersionString = versionProperty.get();
 
 		if (currentVersion == null || latestVersionString == null) {
 			return false;
-		} else {
-			return versionComparator.compare(currentVersion, latestVersionString) < 0;
 		}
+		return versionComparator.compare(currentVersion, latestVersionString) < 0;
+	}
+
+	public boolean isUpdateAvailable() {
+		return isUpdateAvailable(latestVersion);
+	}
+
+	public boolean isAppUpdateAvailable() {
+		return isUpdateAvailable(latestAppUpdaterVersion);
 	}
 
 	public ObjectProperty<Instant> lastSuccessfulUpdateCheckProperty() {

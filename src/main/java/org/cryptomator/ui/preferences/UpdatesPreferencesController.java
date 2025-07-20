@@ -2,6 +2,7 @@ package org.cryptomator.ui.preferences;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.integrations.update.UpdateFailedException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 
@@ -51,6 +52,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final String currentVersion;
 	private final BooleanBinding updateAvailable;
+	private final BooleanBinding appUpdateAvailable;
 	private final BooleanBinding checkFailed;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final DateTimeFormatter formatter;
@@ -73,6 +75,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, lastSuccessfulUpdateCheck);
 		this.currentVersion = environment.getAppVersion();
 		this.updateAvailable = updateChecker.updateAvailableProperty();
+		this.appUpdateAvailable = updateChecker.appUpdateAvailableProperty();
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 		this.upToDate = updateChecker.updateCheckStateProperty().isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 		this.checkFailed = updateChecker.checkFailedProperty();
@@ -96,6 +99,11 @@ public class UpdatesPreferencesController implements FxController {
 	@FXML
 	public void checkNow() {
 		updateChecker.checkForUpdatesNow();
+	}
+
+	@FXML
+	public void updateNow() throws UpdateFailedException {
+		updateChecker.updateAppNow();
 	}
 
 	@FXML
@@ -174,8 +182,16 @@ public class UpdatesPreferencesController implements FxController {
 		return updateAvailable;
 	}
 
+	public BooleanBinding appUdateAvailableProperty() {
+		return appUpdateAvailable;
+	}
+
 	public boolean isUpdateAvailable() {
 		return updateAvailable.get();
+	}
+
+	public boolean isAppUpdateAvailable() {
+		return appUpdateAvailable.get();
 	}
 
 	public BooleanBinding checkFailedProperty() {

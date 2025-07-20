@@ -50,6 +50,7 @@ open module org.cryptomator.desktop {
 	requires io.github.coffeelibs.tinyoauth2client;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
+	requires org.purejava.portal;
 
 	/* dagger bs */
 	requires jakarta.inject;
