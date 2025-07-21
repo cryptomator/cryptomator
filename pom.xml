@@ -42,10 +42,10 @@
 		<cryptomator.webdav.version>2.0.10</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
-		<commons-lang3.version>3.17.0</commons-lang3.version>
-		<dagger.version>2.56.2</dagger.version>
+		<commons-lang3.version>3.18.0</commons-lang3.version>
+		<dagger.version>2.57</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.19.1</jackson.version>
+		<jackson.version>2.19.2</jackson.version>
 		<javafx.version>24.0.1</javafx.version>
 		<jwt.version>4.5.0</jwt.version>
 		<nimbus-jose.version>9.37.3</nimbus-jose.version>
@@ -225,7 +225,7 @@
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
-			<version>3.2.1</version>
+			<version>3.2.2</version>
 		</dependency>
 		<!-- JUnit / Mockito / Hamcrest -->
 		<dependency>
