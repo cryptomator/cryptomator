@@ -53,9 +53,10 @@ public class RecoveryKeyValidateController implements FxController {
 										 @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, //
 										 StringProperty recoveryKey, //
 										 RecoveryKeyFactory recoveryKeyFactory, //
+										 MasterkeyFileAccess masterkeyFileAccess, //
 										 @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
-										 @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo,//
-										 MasterkeyFileAccess masterkeyFileAccess) {
+										 @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo
+										 ) {
 		this.vault = vault;
 		this.unverifiedVaultConfig = vaultConfig;
 		this.recoveryKey = recoveryKey;

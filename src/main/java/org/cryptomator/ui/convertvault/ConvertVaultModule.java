@@ -122,8 +122,8 @@ abstract class ConvertVaultModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyValidateController.class)
-	static FxController bindRecoveryKeyValidateController(@ConvertVaultWindow Vault vault, @ConvertVaultWindow VaultConfig.UnverifiedVaultConfig vaultConfig, @ConvertVaultWindow StringProperty recoveryKey, MasterkeyService service) {
-		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, new SimpleObjectProperty<>(RecoveryActionType.CONVERT_VAULT), new SimpleObjectProperty<>()); //we don't need the ciphercombo
+	static FxController provideRecoveryKeyValidateController(@ConvertVaultWindow Vault vault, @ConvertVaultWindow VaultConfig.UnverifiedVaultConfig vaultConfig, @ConvertVaultWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, MasterkeyFileAccess masterkeyFileAccess) {
+		return new RecoveryKeyValidateController(vault, vaultConfig, recoveryKey, recoveryKeyFactory, masterkeyFileAccess, new SimpleObjectProperty<>(RecoveryActionType.CONVERT_VAULT), new SimpleObjectProperty<>(null));
 	}
 
 }
