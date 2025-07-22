@@ -34,6 +34,7 @@ env:
   SIGNER_URL: 'https://static.cryptomator.org/other/CodeSigner-win-x64-latest.zip'
   SIGNER_HASH: '44a1e09ab72707d049d3e59656e3e35de92e8cda357eec1cfc367016e45835ab'
   SIGN_FILES: ${{ inputs.sign || github.event_name == 'release' }}
+  SIGNER_PATH: actalis-signer/ActalisCodeSigner.exe #set in download step
 
 defaults:
   run:
@@ -63,7 +64,6 @@ jobs:
             java-version: '24.0.1+11'
             java-package: 'jdk+fx' #This is needed, as liberica contains JFX 24 Jmods for Windows ARM64
     env:
-      SIGNER_PATH: "" # This will be set in the download step
       LOOPBACK_ALIAS: 'cryptomator-vault'
       WIN_CONSOLE_FLAG: ''
     steps:
@@ -90,7 +90,6 @@ jobs:
             throw "Wrong checksum of Actalis code signer downloaded from $env:SIGNER_URL.";
           }
           Expand-Archive -Path "$env:SIGNER_NAME.zip" -DestinationPath "actalis-signer"
-          echo "SIGNER_PATH=actalis-signer/ActalisCodeSigner.exe" >> "$GITHUB_ENV"
         shell: pwsh
       - name: Download and extract JavaFX jmods from Gluon
         if: matrix.arch == 'x64'
@@ -232,7 +231,7 @@ jobs:
           $files = Get-ChildItem -Path ".\appdir\*" -Recurse -Include "*.exe", "*.dll", "*.ps1"
           $files | ForEach-Object -Parallel {
             param($file)
-            & "${{ env.SIGNER_PATH }}" -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in $($file.FullName)
+            & "${{ env.SIGNER_PATH }}" -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in $($file.FullName) *> $null
             if ($LASTEXITCODE -ne 0) {
               Write-Host "Signing failed for $($file.FullName)."
               exit 1
@@ -267,7 +266,7 @@ jobs:
           $files = Get-ChildItem -Path ".\appdir\*" -Recurse -Include "*.jar"
           $files | ForEach-Object -Parallel {
             param($file)
-            & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in $($file.FullName)
+            & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in $($file.FullName) *> $null
             if ($LASTEXITCODE -ne 0) {
               throw "Signing failed for $($file.FullName)."
             }
@@ -311,7 +310,7 @@ jobs:
         shell: pwsh
         run: |
           $msi = Get-ChildItem -Path ".\installer\*" -Include "*.msi" | Get-First 1
-          & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator Installer" --program-url "https://cryptomator.org" -in $($msi.FullName)
+          & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator Installer" --program-url "https://cryptomator.org" -in $($msi.FullName) *> $null
       - name: Add possible alpha/beta tags and architecture to installer name
         run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
@@ -349,8 +348,6 @@ jobs:
             java-dist: 'liberica'
             java-version: '24.0.1+11'
             java-package: 'jdk+fx' #This is needed, as liberica contains JFX 24 Jmods for Windows ARM64
-    env:
-      SIGNER_PATH: "" # This will be set in the download step
     steps:
       - uses: actions/checkout@v4
       - name: Install wix and extensions
@@ -381,7 +378,6 @@ jobs:
             throw "Wrong checksum of Actalis code signer downloaded from $env:SIGNER_URL.";
           }
           Expand-Archive -Path "$env:SIGNER_NAME.zip" -DestinationPath "actalis-signer"
-          echo "SIGNER_PATH=actalis-signer/ActalisCodeSigner.exe" >> "$GITHUB_ENV"
         shell: pwsh
       - name: Generate license for exe
         run: >
@@ -430,7 +426,7 @@ jobs:
         if: env.SIGN_FILES
         shell: pwsh
         run: |
-          & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in "tmp/engine.exe"
+          & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in "tmp/engine.exe" *> $null
       - name: Reattach signed burn engine to installer
         run: >
           wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
@@ -438,7 +434,7 @@ jobs:
         if: env.SIGN_FILES
         shell: pwsh
         run: |
-          & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator Bundle Installer" --program-url "https://cryptomator.org" -in "installer/Cryptomator-Installer.exe"
+          & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator Bundle Installer" --program-url "https://cryptomator.org" -in "installer/Cryptomator-Installer.exe" *> $null
       - name: Add possible alpha/beta tags to installer name
         run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.executable-suffix }}.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
