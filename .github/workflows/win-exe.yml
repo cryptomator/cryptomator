@@ -33,7 +33,6 @@ env:
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
   SIGNER_URL: 'https://static.cryptomator.org/other/CodeSigner-win-x64-latest.zip'
   SIGNER_HASH: '44a1e09ab72707d049d3e59656e3e35de92e8cda357eec1cfc367016e45835ab'
-  SIGN_FILES: ${{ inputs.sign || github.event_name == 'release' }}
   SIGNER_PATH: actalis-signer/ActalisCodeSigner.exe #set in download step
 
 defaults:
@@ -82,7 +81,7 @@ jobs:
           wix.exe extension add WixToolset.UI.wixext/6.0.0 --global
           wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
       - name: Download external signing tool
-        if: env.SIGN_FILES
+        if: inputs.sign || github.event_name == 'release'
         id: download-signer
         run: |
           curl --output "$env:SIGNER_NAME.zip" -L "$env:SIGNER_URL"
@@ -225,7 +224,7 @@ jobs:
           & $env:JAVA_HOME\bin\jmod.exe extract --dir jpackage-jmod "${env:JAVA_HOME}\jmods\jdk.jpackage.jmod"
           Get-ChildItem -Recurse -Path "jpackage-jmod" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
       - name: Sign DLLs with Actalis CodeSigner
-        if: env.SIGN_FILES
+        if: inputs.sign || github.event_name == 'release'
         shell: pwsh
         run: |
           $files = Get-ChildItem -Path ".\appdir\*" -Recurse -Include "*.exe", "*.dll", "*.ps1"
@@ -260,7 +259,7 @@ jobs:
               }
           }
       - name: Sign jars with Actalis CodeSigner
-        if: env.SIGN_FILES
+        if: inputs.sign || github.event_name == 'release'
         shell: pwsh
         run: |
           $files = Get-ChildItem -Path ".\appdir\*" -Recurse -Include "*.jar"
@@ -306,7 +305,7 @@ jobs:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
       - name: Sign msi with Actalis CodeSigner
-        if: env.SIGN_FILES
+        if: inputs.sign || github.event_name == 'release'
         shell: pwsh
         run: |
           $msi = Get-ChildItem -Path ".\installer\*" -Include "*.msi" | Get-First 1
@@ -371,7 +370,7 @@ jobs:
           check-latest: true
           cache: 'maven'
       - name: Download external signing tool
-        if: env.SIGN_FILES
+        if: inputs.sign || github.event_name == 'release'
         run: |
           curl --output "$env:SIGNER_NAME.zip" -L "$env:SIGNER_URL"
           if(!(Get-FileHash -Path "$env:SIGNER_NAME.zip" -Algorithm SHA256).Hash.ToLower().equals("$env:SIGNER_HASH")) {
@@ -423,7 +422,7 @@ jobs:
         run: >
           wix burn detach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe
       - name: Sign burn engine with Actalis CodeSigner
-        if: env.SIGN_FILES
+        if: inputs.sign || github.event_name == 'release'
         shell: pwsh
         run: |
           & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in "tmp/engine.exe" *> $null
@@ -431,7 +430,7 @@ jobs:
         run: >
           wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
       - name: Sign installer with Actalis CodeSigner
-        if: env.SIGN_FILES
+        if: inputs.sign || github.event_name == 'release'
         shell: pwsh
         run: |
           & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator Bundle Installer" --program-url "https://cryptomator.org" -in "installer/Cryptomator-Installer.exe" *> $null
