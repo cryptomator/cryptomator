@@ -230,14 +230,14 @@ jobs:
         shell: pwsh
         run: |
           $files = Get-ChildItem -Path ".\appdir\*" -Recurse -Include "*.exe", "*.dll", "*.ps1"
-          $files | ForEach-Object -Parallel -ThrottleLimit 10 {
+          $files | ForEach-Object -Parallel {
             param($file)
             & "${{ env.SIGNER_PATH }}" -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in $($file.FullName)
             if ($LASTEXITCODE -ne 0) {
               Write-Host "Signing failed for $($file.FullName)."
               exit 1
             }
-          }
+          } -ThrottleLimit 10
       - name: Upload logs
         if: failure()
         uses: actions/upload-artifact@v4
@@ -265,14 +265,13 @@ jobs:
         shell: pwsh
         run: |
           $files = Get-ChildItem -Path ".\appdir\*" -Recurse -Include "*.jar"
-          $files | ForEach-Object -Parallel -ThrottleLimit 10 {
+          $files | ForEach-Object -Parallel {
             param($file)
             & ${{ env.SIGNER_PATH }} -ts -fu "${{ secrets.WIN_CODESIGN_USERNAME }}" -fp "${{ secrets.WIN_CODESIGN_PW }}" -pm "Cryptomator" --program-url "https://cryptomator.org" -in $($file.FullName)
             if ($LASTEXITCODE -ne 0) {
-              Write-Host "Signing failed for $($file.FullName)."
-              exit 1
+              throw "Signing failed for $($file.FullName)."
             }
-          }
+          } -ThrottleLimit 10
       - name: Generate license for MSI
         run: >
           mvn -B license:add-third-party "-Djavafx.platform=win"
