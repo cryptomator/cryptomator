@@ -233,15 +233,6 @@ jobs:
                   jar --file="$jarFile" --update $(Resolve-Path -Relative -Path $_)
               }
           }
-      - name: Sign jars with Actalis CodeSigner
-        if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign-action
-        with:
-          base-dir: 'appdir'
-          file-glob: '*.jar'
-          recursive: true
-          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
-          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Generate license for MSI
         run: >
           mvn -B license:add-third-party "-Djavafx.platform=win"
