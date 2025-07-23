@@ -212,7 +212,7 @@ jobs:
           Get-ChildItem -Recurse -Path "jpackage-jmod" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
       - name: Sign DLLs with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign.yml
+        uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'appdir'
           file-glob: '*.dll, *.exe, *.ps1'
@@ -233,7 +233,7 @@ jobs:
           }
       - name: Sign jars with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign.yml
+        uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'appdir'
           file-glob: '*.jar'
@@ -274,7 +274,7 @@ jobs:
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
       - name: Sign msi with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign.yml
+        uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'installer'
           file-glob: '*.msi'
@@ -383,7 +383,7 @@ jobs:
           wix burn detach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe
       - name: Sign burn engine with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign.yml
+        uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'tmp'
           file-glob: 'engine.exe'
@@ -392,7 +392,7 @@ jobs:
           wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
       - name: Sign installer with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign.yml
+        uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'installer'
           file-glob: 'Cryptomator-Installer.exe'
