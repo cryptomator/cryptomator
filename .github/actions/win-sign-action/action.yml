@@ -65,7 +65,7 @@ runs:
       shell: bash
     - name: Sign DLLs with Actalis CodeSigner
       run: |
-        $ThrottleLimit = 5
+        $ThrottleLimit = 3
         $recursive = ${{ inputs.recursive }} -eq 'true'
         $files = Get-ChildItem -Path "${{ inputs.base-dir }}" -Include "${{ inputs.file-glob }}" -Recurse:$recursive
         $cancellationSource = [System.Threading.CancellationTokenSource]::new()
