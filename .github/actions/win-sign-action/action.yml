@@ -61,7 +61,7 @@ runs:
       run: |
         $ThrottleLimit = 3
         $recursive = '${{ inputs.recursive }}' -eq 'true'
-        $files = Get-ChildItem -Path '${{ inputs.base-dir }}' -Include '${{ inputs.file-glob }}' -Recurse:$recursive
+        $files = Get-ChildItem -Path '${{ inputs.base-dir }}/*' -Include '${{ inputs.file-glob }}' -Recurse:$recursive
         $cancellationSource = [System.Threading.CancellationTokenSource]::new()
         $token = $cancellationSource.Token
         $errors = [System.Collections.Concurrent.ConcurrentBag[string]]::new()
