@@ -32,7 +32,7 @@ runs:
     - name: Download Actalis CodeSigner if not present
       id: download-signer
       run: |
-        if (! Test-Path -Path '${{ env.SIGNER_PATH }}') {
+        if (! (Test-Path -Path '${{ env.SIGNER_PATH }}')) {
           echo "Downloading Actalis CodeSigner..."
           curl --output "${{ env.SIGNER_NAME }}.zip" -L "${{ env.SIGNER_URL }}"
           if (!(Get-FileHash -Path "${{ env.SIGNER_NAME }}.zip" -Algorithm SHA256).Hash.ToLower().equals("${{ env.SIGNER_HASH }}")) {
