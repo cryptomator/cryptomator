@@ -31,11 +31,13 @@ runs:
   steps:
     - name: Check if signer is available
       run: |
-        if (Test-Path ${{ env.SIGNER_PATH }}) {
+        if (Test-Path -Path ${{ env.SIGNER_PATH }}) {
           echo "signer-available=true" >> $GITHUB_OUTPUT
         } else {
           echo "signer-available=false" >> $GITHUB_OUTPUT
         }
+      env:
+        SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
       shell: pwsh
     - name: Download signer if not present
       if: steps.check.outputs.signer-available == 'false'
@@ -47,7 +49,6 @@ runs:
         }
         Expand-Archive -Path "${{ env.SIGNER_NAME }}.zip" -DestinationPath "${{ env.SIGNER_NAME }}" -Force
       env:
-        SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
         SIGNER_NAME: actalis-signer
         SIGNER_URL: 'https://static.cryptomator.org/other/CodeSigner-win-x64-latest.zip'
         SIGNER_HASH: '44a1e09ab72707d049d3e59656e3e35de92e8cda357eec1cfc367016e45835ab'
