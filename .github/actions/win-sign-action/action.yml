@@ -29,27 +29,20 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Check if signer is available
-      id: download-check
+    - name: Download Actalis CodeSigner if not present
+      id: download-signer
       run: |
-        if (Test-Path -Path ${{ env.SIGNER_PATH }}) {
-          echo "signer-available=true" >> $GITHUB_OUTPUT
-        } else {
-          echo "signer-available=false" >> $GITHUB_OUTPUT
+        if (! Test-Path -Path '${{ env.SIGNER_PATH }}') {
+          echo "Downloading Actalis CodeSigner..."
+          curl --output "${{ env.SIGNER_NAME }}.zip" -L "${{ env.SIGNER_URL }}"
+          if (!(Get-FileHash -Path "${{ env.SIGNER_NAME }}.zip" -Algorithm SHA256).Hash.ToLower().equals("${{ env.SIGNER_HASH }}")) {
+            echo "Signer hash mismatch, exiting."
+            exit 1
+          }
+          Expand-Archive -Path "${{ env.SIGNER_NAME }}.zip" -DestinationPath "${{ env.SIGNER_NAME }}" -Force
         }
       env:
         SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
-      shell: pwsh
-    - name: Download signer if not present
-      run: |
-        echo "Just a test. Signer available: ${{ steps.download-check.outputs.signer-available }}"
-        curl --output "${{ env.SIGNER_NAME }}.zip" -L "${{ env.SIGNER_URL }}"
-        if (!(Get-FileHash -Path "${{ env.SIGNER_NAME }}.zip" -Algorithm SHA256).Hash.ToLower().equals("${{ env.SIGNER_HASH }}")) {
-          echo "Signer hash mismatch, exiting."
-          exit 1
-        }
-        Expand-Archive -Path "${{ env.SIGNER_NAME }}.zip" -DestinationPath "${{ env.SIGNER_NAME }}" -Force
-      env:
         SIGNER_NAME: actalis-signer
         SIGNER_URL: 'https://static.cryptomator.org/other/CodeSigner-win-x64-latest.zip'
         SIGNER_HASH: '44a1e09ab72707d049d3e59656e3e35de92e8cda357eec1cfc367016e45835ab'
