@@ -64,7 +64,6 @@ runs:
         echo "password=$s2" >> "$GITHUB_OUTPUT"
       shell: bash
     - name: Sign DLLs with Actalis CodeSigner
-      if: inputs.sign || github.event_name == 'release'
       run: |
         $ThrottleLimit = 5
         $recursive = ${{ inputs.recursive }} -eq 'true'

@@ -282,7 +282,7 @@ jobs:
         with:
           base-dir: 'installer'
           file-glob: '*.msi'
-          program-description: 'Cryptomator Installer'
+          sign-description: 'Cryptomator Installer'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Add possible alpha/beta tags and architecture to installer name
@@ -404,7 +404,7 @@ jobs:
         with:
           base-dir: 'installer'
           file-glob: 'Cryptomator-Installer.exe'
-          program-description: 'Cryptomator Bundle Installer'
+          sign-description: 'Cryptomator Bundle Installer'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Add possible alpha/beta tags to installer name
