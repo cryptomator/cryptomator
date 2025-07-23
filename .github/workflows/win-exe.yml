@@ -217,6 +217,8 @@ jobs:
           base-dir: 'appdir'
           file-glob: '*.dll, *.exe, *.ps1'
           recursive: true
+          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
+          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Replace DLLs inside jars with signed ones
         shell: pwsh
         run: |
@@ -238,6 +240,8 @@ jobs:
           base-dir: 'appdir'
           file-glob: '*.jar'
           recursive: true
+          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
+          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Generate license for MSI
         run: >
           mvn -B license:add-third-party "-Djavafx.platform=win"
@@ -279,6 +283,8 @@ jobs:
           base-dir: 'installer'
           file-glob: '*.msi'
           program-description: 'Cryptomator Installer'
+          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
+          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Add possible alpha/beta tags and architecture to installer name
         run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
@@ -387,6 +393,8 @@ jobs:
         with:
           base-dir: 'tmp'
           file-glob: 'engine.exe'
+          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
+          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Reattach signed burn engine to installer
         run: >
           wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
@@ -397,6 +405,8 @@ jobs:
           base-dir: 'installer'
           file-glob: 'Cryptomator-Installer.exe'
           program-description: 'Cryptomator Bundle Installer'
+          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
+          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Add possible alpha/beta tags to installer name
         run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.executable-suffix }}.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
