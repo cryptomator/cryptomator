@@ -89,7 +89,7 @@ runs:
                 & ${{ env.SIGNER_PATH }} -ts -fu ${{ steps.set-secrets.outputs.username }} -fp ${{ steps.set-secrets.outputs.password }} -pm "${{ inputs.sign-description }}" --program-url "${{ inputs.sign-url }}" -in $filePath *> $null
 
                 if ($LASTEXITCODE -ne 0) {
-                    $errors.Add("Signing failed for $filePath")
+                    $errors.Add("Signing failed for $filePath. Signing process exited with code $LASTEXITCODE.")
                     $cancellationSource.Cancel()  # Trigger cancellation for other jobs
                 }
             } -ArgumentList $file.FullName, $token, $errors, $cancellationSource
@@ -98,7 +98,7 @@ runs:
         }
 
         # Wait for remaining jobs
-        $jobs | Wait-Job
+        $jobs | Wait-Job | Out-Null
 
         # Final result
         if ($errors.Count -gt 0) {
@@ -112,3 +112,9 @@ runs:
       env:
         SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
       shell: pwsh
+    - name: Upload log on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: signing-log-${{ runner.arch }}
+        path: ~/.Acsi/log/acsi.log
