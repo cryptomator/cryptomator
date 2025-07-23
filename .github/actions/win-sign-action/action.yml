@@ -42,6 +42,7 @@ runs:
       shell: pwsh
     - name: Download signer if not present
       run: |
+        echo "Just a test. Signer available: ${{ steps.download-check.outputs.signer-available }}"
         curl --output "${{ env.SIGNER_NAME }}.zip" -L "${{ env.SIGNER_URL }}"
         if (!(Get-FileHash -Path "${{ env.SIGNER_NAME }}.zip" -Algorithm SHA256).Hash.ToLower().equals("${{ env.SIGNER_HASH }}")) {
           echo "Signer hash mismatch, exiting."
