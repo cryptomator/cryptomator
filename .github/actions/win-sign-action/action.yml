@@ -30,6 +30,7 @@ runs:
   using: "composite"
   steps:
     - name: Check if signer is available
+      id: download-check
       run: |
         if (Test-Path -Path ${{ env.SIGNER_PATH }}) {
           echo "signer-available=true" >> $GITHUB_OUTPUT
@@ -40,7 +41,7 @@ runs:
         SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
       shell: pwsh
     - name: Download signer if not present
-      if: steps.check.outputs.signer-available == 'false'
+      if: steps.download-check.outputs.signer-available == 'false'
       run: |
         curl --output "${{ env.SIGNER_NAME }}.zip" -L "${{ env.SIGNER_URL }}"
         if (!(Get-FileHash -Path "${{ env.SIGNER_NAME }}.zip" -Algorithm SHA256).Hash.ToLower().equals("${{ env.SIGNER_HASH }}")) {
