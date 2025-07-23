@@ -74,6 +74,11 @@ runs:
         $jobs = [System.Collections.Generic.List[object]]::new()
 
         # PROCESSING LOOP WITH THROTTLING
+        if($files.Count -eq 0) {
+            Write-Host "`n❌ No files found to sign."
+            exit 1
+        }
+
         foreach ($file in $files) {
             # Throttle: wait for a slot
             while (($jobs | Where-Object { $_.State -eq 'Running' }).Count -ge $ThrottleLimit) {
