@@ -66,8 +66,8 @@ runs:
     - name: Sign DLLs with Actalis CodeSigner
       run: |
         $ThrottleLimit = 3
-        $recursive = ${{ inputs.recursive }} -eq 'true'
-        $files = Get-ChildItem -Path "${{ inputs.base-dir }}" -Include "${{ inputs.file-glob }}" -Recurse:$recursive
+        $recursive = '${{ inputs.recursive }}' -eq 'true'
+        $files = Get-ChildItem -Path '${{ inputs.base-dir }}' -Include '${{ inputs.file-glob }}' -Recurse:$recursive
         $cancellationSource = [System.Threading.CancellationTokenSource]::new()
         $token = $cancellationSource.Token
         $errors = [System.Collections.Concurrent.ConcurrentBag[string]]::new()
@@ -86,9 +86,9 @@ runs:
 
                 if ($token.IsCancellationRequested) { return }
 
-                & ${{ env.SIGNER_PATH }} -ts -fu ${{ steps.set-secrets.outputs.username }} -fp ${{ steps.set-secrets.outputs.password }} -pm "${{ inputs.sign-description }}" --program-url "${{ inputs.sign-url }}" -in $filePath
+                & ${{ env.SIGNER_PATH }} -ts -fu '${{ steps.set-secrets.outputs.username }}' -fp '${{ steps.set-secrets.outputs.password }}' -pm '${{ inputs.sign-description }}' --program-url '${{ inputs.sign-url }}' -in $filePath > ~/.Acsi/log/$(Split-Path -Leaf $filePath).log 2>&1
                 $exitCode = $LASTEXITCODE;
-                if ($exitCode -ne 0) {
+                if ($exitCode -ne 0 && !$token.IsCancellationRequested) {
                     $errors.Add("Signing $filePath failed. Exit code: $exitCode.")
                     $cancellationSource.Cancel()  # Trigger cancellation for other jobs
                 }
