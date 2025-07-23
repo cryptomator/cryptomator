@@ -86,10 +86,10 @@ runs:
 
                 if ($token.IsCancellationRequested) { return }
 
-                & ${{ env.SIGNER_PATH }} -ts -fu ${{ steps.set-secrets.outputs.username }} -fp ${{ steps.set-secrets.outputs.password }} -pm "${{ inputs.sign-description }}" --program-url "${{ inputs.sign-url }}" -in $filePath *> $null
-
-                if ($LASTEXITCODE -ne 0) {
-                    $errors.Add("Signing failed for $filePath. Signing process exited with code $LASTEXITCODE.")
+                & ${{ env.SIGNER_PATH }} -ts -fu ${{ steps.set-secrets.outputs.username }} -fp ${{ steps.set-secrets.outputs.password }} -pm "${{ inputs.sign-description }}" --program-url "${{ inputs.sign-url }}" -in $filePath
+                $exitCode = $LASTEXITCODE;
+                if ($exitCode -ne 0) {
+                    $errors.Add("Signing $filePath failed. Exit code: $exitCode.")
                     $cancellationSource.Cancel()  # Trigger cancellation for other jobs
                 }
             } -ArgumentList $file.FullName, $token, $errors, $cancellationSource
@@ -117,4 +117,5 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: signing-log-${{ runner.arch }}
-        path: ~/.Acsi/log/acsi.log
+        path: |
+          ~/.Acsi/log/*.log
