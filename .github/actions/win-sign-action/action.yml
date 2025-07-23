@@ -7,10 +7,16 @@ inputs:
   file-glob:
     description: 'List of file glob patterns to sign, separated by commas'
     required: true
+  username:
+    description: 'Username for signing'
+    required: true
+  password:
+    description: 'Password for signing'
+    required: true
   recursive:
     description: 'Whether to search recursively in subdirectories'
     required: false
-    default: false
+    default: 'false'
   sign-description:
     description: 'Signature description'
     required: false
@@ -20,11 +26,6 @@ inputs:
     required: false
     default: 'https://cryptomator.org'
 
-env:
-  SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
-  SIGNER_NAME: actalis-signer
-  SIGNER_URL: 'https://static.cryptomator.org/other/CodeSigner-win-x64-latest.zip'
-  SIGNER_HASH: '44a1e09ab72707d049d3e59656e3e35de92e8cda357eec1cfc367016e45835ab'
 runs:
   using: "composite"
   steps:
@@ -45,10 +46,24 @@ runs:
           exit 1
         }
         Expand-Archive -Path "${{ env.SIGNER_NAME }}.zip" -DestinationPath "${{ env.SIGNER_NAME }}" -Force
+      env:
+        SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
+        SIGNER_NAME: actalis-signer
+        SIGNER_URL: 'https://static.cryptomator.org/other/CodeSigner-win-x64-latest.zip'
+        SIGNER_HASH: '44a1e09ab72707d049d3e59656e3e35de92e8cda357eec1cfc367016e45835ab'
       shell: pwsh
+    - name: Generate, mask, and output a secret
+      id: set-secrets
+      run: |
+        s1=${{ inputs.username }}
+        s2=${{ inputs.password }}
+        echo "::add-mask::$s1"
+        echo "::add-mask::$s2"
+        echo "username=$s1" >> "$GITHUB_OUTPUT"
+        echo "password=$s2" >> "$GITHUB_OUTPUT"
+      shell: bash
     - name: Sign DLLs with Actalis CodeSigner
       if: inputs.sign || github.event_name == 'release'
-      shell: pwsh
       run: |
         $ThrottleLimit = 5
         $recursive = ${{ inputs.recursive }} -eq 'true'
@@ -71,7 +86,7 @@ runs:
 
                 if ($token.IsCancellationRequested) { return }
 
-                & ${{ env.SIGNER_PATH }} -ts -fu ${{ secrets.WIN_CODESIGN_USERNAME }} -fp ${{ secrets.WIN_CODESIGN_PASSWORD }} -pm "${{ inputs.sign-description }}" --program-url "${{ inputs.sign-url }}" -in $filePath *> $null
+                & ${{ env.SIGNER_PATH }} -ts -fu ${{ steps.set-secrets.outputs.username }} -fp ${{ steps.set-secrets.outputs.password }} -pm "${{ inputs.sign-description }}" --program-url "${{ inputs.sign-url }}" -in $filePath *> $null
 
                 if ($LASTEXITCODE -ne 0) {
                     $errors.Add("Signing failed for $filePath")
@@ -94,3 +109,6 @@ runs:
         else {
             Write-Host "`n✅ All files signed successfully."
         }
+      env:
+        SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
+      shell: pwsh
