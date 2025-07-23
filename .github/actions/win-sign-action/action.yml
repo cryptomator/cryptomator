@@ -47,7 +47,7 @@ runs:
         SIGNER_URL: 'https://static.cryptomator.org/other/CodeSigner-win-x64-latest.zip'
         SIGNER_HASH: '44a1e09ab72707d049d3e59656e3e35de92e8cda357eec1cfc367016e45835ab'
       shell: pwsh
-    - name: Generate, mask, and output a secret
+    - name: Generate, mask, and output the input secrets
       id: set-secrets
       run: |
         s1=${{ inputs.username }}
