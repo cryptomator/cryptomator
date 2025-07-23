@@ -41,7 +41,6 @@ runs:
         SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
       shell: pwsh
     - name: Download signer if not present
-      if: steps.download-check.outputs.signer-available == 'false'
       run: |
         curl --output "${{ env.SIGNER_NAME }}.zip" -L "${{ env.SIGNER_URL }}"
         if (!(Get-FileHash -Path "${{ env.SIGNER_NAME }}.zip" -Algorithm SHA256).Hash.ToLower().equals("${{ env.SIGNER_HASH }}")) {
