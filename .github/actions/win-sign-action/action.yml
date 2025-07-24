@@ -60,8 +60,14 @@ runs:
     - name: Sign DLLs with Actalis CodeSigner
       run: |
         $ThrottleLimit = 3
+        $signerPath = '${{ env.SIGNER_PATH }}'
+        $username = '${{ steps.set-secrets.outputs.username }}'
+        $password = '${{ steps.set-secrets.outputs.password }}'
+        $signDescription = '${{ inputs.sign-description }}'
+        $signUrl = '${{ inputs.sign-url }}'
+        $extensions = '${{ inputs.file-glob }}'.split(",") | ForEach-Object { "*.$($_.Trim())" }
         $recursive = '${{ inputs.recursive }}' -eq 'true'
-        $files = Get-ChildItem -Path '${{ inputs.base-dir }}/*' -Include '${{ inputs.file-glob }}' -Recurse:$recursive
+        $files = Get-ChildItem -Path '${{ inputs.base-dir }}\*' -Include $extensions -Recurse:$recursive
         $cancellationSource = [System.Threading.CancellationTokenSource]::new()
         $token = $cancellationSource.Token
         $errors = [System.Collections.Concurrent.ConcurrentBag[string]]::new()
@@ -72,7 +78,6 @@ runs:
             Write-Host "`n❌ No files found to sign."
             exit 1
         }
-
         foreach ($file in $files) {
             # Throttle: wait for a slot
             while (($jobs | Where-Object { $_.State -eq 'Running' }).Count -ge $ThrottleLimit) {
@@ -81,17 +86,27 @@ runs:
 
             # Start the signing job
             $job = Start-ThreadJob -ScriptBlock {
-                param($filePath, $token, $errors, $cancellationSource)
+                param($filePath, $token, $errors, $cancellationSource, $signerPath, $username, $password, $signDescription, $signUrl)
 
                 if ($token.IsCancellationRequested) { return }
-
-                & ${{ env.SIGNER_PATH }} -ts -fu '${{ steps.set-secrets.outputs.username }}' -fp '${{ steps.set-secrets.outputs.password }}' -pm '${{ inputs.sign-description }}' --program-url '${{ inputs.sign-url }}' -in $filePath > ~/.Acsi/log/$(Split-Path -Leaf $filePath).log 2>&1
-                $exitCode = $LASTEXITCODE;
-                if ($exitCode -ne 0 && !$token.IsCancellationRequested) {
-                    $errors.Add("Signing $filePath failed. Exit code: $exitCode.")
-                    $cancellationSource.Cancel()  # Trigger cancellation for other jobs
+                try {
+                    $logDir = "~/.Acsi/log"
+                    if (!(Test-Path $logDir)) {
+                        New-Item -Path $logDir -ItemType Directory -Force | Out-Null
+                    }
+                    $logFile = "~/.Acsi/log/$(Split-Path -Leaf $filePath).log"
+                    $process = Start-Process -FilePath $signerPath -ArgumentList @('-ts', '-fu', $username, '-fp', $password, '-pm', $signDescription, '--program-url', $signUrl, '-in', $filePath) -Wait -PassThru -RedirectStandardOutput $logFile -RedirectStandardError $logFile -NoNewWindow
+                    if (($process.ExitCode -ne 0)) {
+                        $errors.Add("Signing failed for $filePath with exit code $($process.ExitCode)")
+                        $cancellationSource.Cancel()
+                    }
+                } catch {
+                    if (!($token.IsCancellationRequested)) {
+                        $errors.Add("Signing failed for $filePath with exception: $($_.Exception.Message)")
+                        $cancellationSource.Cancel()
+                    }
                 }
-            } -ArgumentList $file.FullName, $token, $errors, $cancellationSource
+            } -ArgumentList $file.FullName, $token, $errors, $cancellationSource, $signerPath, $username, $password, $signDescription, $signUrl
 
             $jobs.Add($job)
         }

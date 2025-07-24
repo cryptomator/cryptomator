@@ -37,7 +37,27 @@ defaults:
     shell: bash
 
 jobs:
+  debug-job:
+    name: Debug Job
+    runs-on: windows-latest
+    steps:
+      - name: Print debug info
+        run: |
+          echo "This is a debug job. Inputs: ${{ toJson(github.event.inputs) }}"
+      - uses: actions/checkout@v4
+      - name: Sign files
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: 'dist/win'
+          file-glob: 'dll,exe,ps1'
+          recursive: true
+          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
+          password: ${{ secrets.WIN_CODESIGN_PW }}
+      - name: Fail
+        run: exit 1
+
   get-version:
+    needs: [ debug-job ]
     uses: ./.github/workflows/get-version.yml
     with:
       version: ${{ inputs.version }}
