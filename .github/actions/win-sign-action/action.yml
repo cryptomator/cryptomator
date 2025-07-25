@@ -84,8 +84,8 @@ runs:
         $successCount = 0
         $jobs = @()
         foreach ($file in $files) {
-            # Throttle to max 3 concurrent jobs
-            if ($jobs.Count -ge 3) {
+            # Throttle to max 5 concurrent jobs
+            if ($jobs.Count -ge 5) {
                 $completed = $jobs | Wait-Job -Any
                 $result = $completed | Receive-Job
                 $jobs = $jobs | Where-Object { $_.Id -ne $completed.Id }
