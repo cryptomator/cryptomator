@@ -107,8 +107,8 @@ runs:
                     
                     Write-Host "`n🔐 Signing: $($filePath)"
                     $logFile = "~/.Acsi/log/$(Split-Path -Leaf $filePath).log"
-                    $process = Start-Process -FilePath $signerPath -ArgumentList @('-ts', 'https://zeitstempel.dfn.de/', '-fu', $username, '-fp', $password, '-pm', $signDescription, '--program-url', $signUrl, '-in', "$filePath") -Wait -PassThru -RedirectStandardError $logFile -NoNewWindow
-                    
+                    $process = Start-Process -FilePath "$signerPath" -ArgumentList @('-ts', 'http://zeitstempel.dfn.de/', '-fu', $username, '-fp', $password, '-pm', "`"$signDescription`"", '--program-url', $signUrl, '-in', "`"$filePath`"") -Wait -PassThru -RedirectStandardError "$logFile" -NoNewWindow
+
                     return @{
                         FilePath = $filePath
                         ExitCode = $process.ExitCode
