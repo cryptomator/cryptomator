@@ -50,12 +50,10 @@ runs:
     - name: Generate, mask, and output the input secrets
       id: set-secrets
       run: |
-        s1=${{ inputs.username }}
-        s2=${{ inputs.password }}
-        echo "::add-mask::$s1"
-        echo "::add-mask::$s2"
-        echo "username=$s1" >> "$GITHUB_OUTPUT"
-        echo "password=$s2" >> "$GITHUB_OUTPUT"
+        echo "::add-mask::${{ inputs.username }}"
+        echo "::add-mask::${{ inputs.password }}"
+        echo "username=${{ inputs.username }}" >> "$GITHUB_OUTPUT"
+        echo "password=${{ inputs.password }}" >> "$GITHUB_OUTPUT"
       shell: bash
     - name: Sign DLLs with Actalis CodeSigner
       run: |
@@ -83,28 +81,22 @@ runs:
 
         $jobs = @()
         foreach ($file in $files) {
-            # Throttle to max 5 concurrent jobs
-            if ($jobs.Count -ge 5) {
-                $completed = $jobs | Wait-Job -Any
-                $result = $completed | Receive-Job
-                $jobs = $jobs | Where-Object { $_.Id -ne $completed.Id }
-                $completed | Remove-Job
-                
-                # Check result and exit on failure
-                if ($result.ExitCode -ne 0) {
-                    $jobs | Stop-Job | Remove-Job
-                    Write-Host "❌ Signing failed for $($result.FilePath) with exit code: $($result.ExitCode)"
-                    exit 1
-                }
-                Write-Host "  ✅ Successfully signed $($result.FilePath)"
-            }
             # Run signing in a job
             $job = Start-Job -ScriptBlock {
                     param($signerPath, $username, $password, $signDescription, $signUrl, $filePath)
-                    
+
                     Write-Host "`n🔐 Signing: $($filePath)"
                     $logFile = "~/.Acsi/log/$(Split-Path -Leaf $filePath).log"
-                    $process = Start-Process -FilePath "$signerPath" -ArgumentList @('-ts', 'http://timestamp.digicert.com', '-fu', $username, '-fp', $password, '-pm', "`"$signDescription`"", '--program-url', $signUrl, '-in', "`"$filePath`"") -Wait -PassThru -RedirectStandardOutput "$logFile" -NoNewWindow
+                    $arguments = @(
+                        '-ts',
+                        'http://timestamp.digicert.com',
+                        '-fu', $username,
+                        '-fp', $password,
+                        '-pm', "`"$signDescription`"",
+                        '--program-url', $signUrl,
+                        '-in', "`"$filePath`""
+                    )
+                    $process = Start-Process -FilePath "$signerPath" -ArgumentList $arguments -Wait -PassThru -RedirectStandardOutput "$logFile" -NoNewWindow
 
                     return @{
                         FilePath = $filePath
@@ -113,6 +105,24 @@ runs:
                     }
             } -ArgumentList $signerPath, $username, $password, $signDescription, $signUrl, $file.FullName
             $jobs += $job
+
+            # Throttle to max 5 concurrent jobs
+            if ($jobs.Count -ge 5) {
+                $completed = $jobs | Wait-Job -Any
+                $result = $completed | Receive-Job
+
+                # Check result and exit on failure
+                if ($result.ExitCode -ne 0) {
+                    $jobs | Stop-Job | Remove-Job
+                    Write-Host "❌ Signing failed for $($result.FilePath) with exit code: $($result.ExitCode)"
+                    exit 1
+                }
+                Write-Host "  ✅ Successfully signed $($result.FilePath)"
+
+                $jobs = $jobs | Where-Object { $_.Id -ne $completed.Id }
+                $completed | Remove-Job
+
+            }
         }
         # Wait for remaining jobs
         $jobs | Wait-Job | Receive-Job | ForEach-Object {
@@ -120,6 +130,7 @@ runs:
                 Write-Host "❌ Signing failed for $($_.FilePath) with exit code: $($_.ExitCode)"
                 exit 1
             }
+            Write-Host "  ✅ Successfully signed $($_.FilePath)"
         }
         Write-Host "`n✅ Successfully signed $($files.Count) files."
       env:
