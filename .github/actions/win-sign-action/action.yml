@@ -59,7 +59,6 @@ runs:
       shell: bash
     - name: Sign DLLs with Actalis CodeSigner
       run: |
-        $ThrottleLimit = 3
         $signerPath = '${{ env.SIGNER_PATH }}'
         $username = '${{ steps.set-secrets.outputs.username }}'
         $password = '${{ steps.set-secrets.outputs.password }}'
@@ -68,61 +67,64 @@ runs:
         $extensions = '${{ inputs.file-glob }}'.split(",") | ForEach-Object { "*.$($_.Trim())" }
         $recursive = '${{ inputs.recursive }}' -eq 'true'
         $files = Get-ChildItem -Path '${{ inputs.base-dir }}\*' -Include $extensions -Recurse:$recursive
-        $cancellationSource = [System.Threading.CancellationTokenSource]::new()
-        $token = $cancellationSource.Token
-        $errors = [System.Collections.Concurrent.ConcurrentBag[string]]::new()
-        $jobs = [System.Collections.Generic.List[object]]::new()
 
-        # PROCESSING LOOP WITH THROTTLING
         if($files.Count -eq 0) {
             Write-Host "`n❌ No files found to sign."
             exit 1
         }
+        Write-Host "`n📝 Found $($files.Count) files to sign:"
+        $files | ForEach-Object { Write-Host "  - $($_.FullName)" }
+
+        # Create log directory
+        $logDir = "~/.Acsi/log"
+        if (!(Test-Path $logDir)) {
+            New-Item -Path $logDir -ItemType Directory -Force | Out-Null
+        }
+
+        $successCount = 0
+        $jobs = @()
         foreach ($file in $files) {
-            # Throttle: wait for a slot
-            while (($jobs | Where-Object { $_.State -eq 'Running' }).Count -ge $ThrottleLimit) {
-                Start-Sleep -Milliseconds 1000
-            }
-
-            # Start the signing job
-            $job = Start-ThreadJob -ScriptBlock {
-                param($filePath, $token, $errors, $cancellationSource, $signerPath, $username, $password, $signDescription, $signUrl)
-
-                if ($token.IsCancellationRequested) { return }
-                try {
-                    $logDir = "~/.Acsi/log"
-                    if (!(Test-Path $logDir)) {
-                        New-Item -Path $logDir -ItemType Directory -Force | Out-Null
-                    }
-                    $logFile = "~/.Acsi/log/$(Split-Path -Leaf $filePath).log"
-                    $process = Start-Process -FilePath $signerPath -ArgumentList @('-ts', '-fu', $username, '-fp', $password, '-pm', $signDescription, '--program-url', $signUrl, '-in', $filePath) -Wait -PassThru -RedirectStandardOutput $logFile -RedirectStandardError $logFile -NoNewWindow
-                    if (($process.ExitCode -ne 0)) {
-                        $errors.Add("Signing failed for $filePath with exit code $($process.ExitCode)")
-                        $cancellationSource.Cancel()
-                    }
-                } catch {
-                    if (!($token.IsCancellationRequested)) {
-                        $errors.Add("Signing failed for $filePath with exception: $($_.Exception.Message)")
-                        $cancellationSource.Cancel()
-                    }
+            
+            # Throttle to max 3 concurrent jobs
+            if ($jobs.Count -ge 3) {
+                $completed = $jobs | Wait-Job -Any
+                $result = $completed | Receive-Job
+                $jobs = $jobs | Where-Object { $_.Id -ne $completed.Id }
+                $completed | Remove-Job
+                
+                # Check result and exit on failure
+                if ($result.ExitCode -ne 0) {
+                    $jobs | Stop-Job | Remove-Job
+                    Write-Host "❌ Signing failed for $($result.FilePath) with exit code: $($result.ExitCode)"
+                    exit 1
+                } else {
+                    $successCount++
+                    Write-Host "  ✅ Successfully signed $($result.FilePath)"
                 }
-            } -ArgumentList $file.FullName, $token, $errors, $cancellationSource, $signerPath, $username, $password, $signDescription, $signUrl
-
-            $jobs.Add($job)
+            }
+            $job = Start-Job -ScriptBlock {
+                    param($signerPath, $username, $password, $signDescription, $signUrl, $filePath)
+                    
+                    Write-Host "`n🔐 Signing: $($filePath)"
+                    $logFile = "~/.Acsi/log/$(Split-Path -Leaf $filePath).log"
+                    $process = Start-Process -FilePath $signerPath -ArgumentList @('-ts', 'https://zeitstempel.dfn.de/', '-fu', $username, '-fp', $password, '-pm', $signDescription, '--program-url', $signUrl, '-in', $filePath) -Wait -PassThru -RedirectStandardError $logFile -NoNewWindow
+                    
+                    return @{
+                        FilePath = $filePath
+                        ExitCode = $process.ExitCode
+                        LogFile = $logFile
+                    }
+            } -ArgumentList $signerPath, $username, $password, $signDescription, $signUrl, $file.FullName
+            $jobs += $job
         }
-
         # Wait for remaining jobs
-        $jobs | Wait-Job | Out-Null
-
-        # Final result
-        if ($errors.Count -gt 0) {
-            Write-Host "`n❌ Error occurred:"
-            $errors | Select-Object -First 1 | Write-Host
-            exit 1
+        $jobs | Wait-Job | Receive-Job | ForEach-Object {
+            if ($_.ExitCode -ne 0) {
+                Write-Host "❌ Signing failed for $($_.FilePath)"
+                exit 1
+            }
         }
-        else {
-            Write-Host "`n✅ All files signed successfully."
-        }
+        Write-Host "`n✅ Successfully signed $successCount/$($files.Count) files."
       env:
         SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
       shell: pwsh
