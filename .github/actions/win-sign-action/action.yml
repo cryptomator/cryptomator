@@ -84,7 +84,6 @@ runs:
         $successCount = 0
         $jobs = @()
         foreach ($file in $files) {
-            
             # Throttle to max 3 concurrent jobs
             if ($jobs.Count -ge 3) {
                 $completed = $jobs | Wait-Job -Any
@@ -102,12 +101,13 @@ runs:
                     Write-Host "  ✅ Successfully signed $($result.FilePath)"
                 }
             }
+            # Run signing in a job
             $job = Start-Job -ScriptBlock {
                     param($signerPath, $username, $password, $signDescription, $signUrl, $filePath)
                     
                     Write-Host "`n🔐 Signing: $($filePath)"
                     $logFile = "~/.Acsi/log/$(Split-Path -Leaf $filePath).log"
-                    $process = Start-Process -FilePath $signerPath -ArgumentList @('-ts', 'https://zeitstempel.dfn.de/', '-fu', $username, '-fp', $password, '-pm', $signDescription, '--program-url', $signUrl, '-in', $filePath) -Wait -PassThru -RedirectStandardError $logFile -NoNewWindow
+                    $process = Start-Process -FilePath $signerPath -ArgumentList @('-ts', 'https://zeitstempel.dfn.de/', '-fu', $username, '-fp', $password, '-pm', $signDescription, '--program-url', $signUrl, '-in', "$filePath") -Wait -PassThru -RedirectStandardError $logFile -NoNewWindow
                     
                     return @{
                         FilePath = $filePath
