@@ -5,12 +5,16 @@ import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.updates.AppUpdateChecker;
 import org.cryptomator.integrations.common.DistributionChannel;
+import org.cryptomator.integrations.update.Progress;
+import org.cryptomator.integrations.update.ProgressListener;
 import org.cryptomator.integrations.update.UpdateFailedException;
+import org.cryptomator.ui.preferences.UpdatesPreferencesController;
 import org.purejava.portal.rest.UpdateCheckerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
@@ -44,12 +48,14 @@ public class UpdateChecker {
 	private final BooleanBinding appUpdateAvailable;
 	private final BooleanBinding checkFailed;
 	private final AppUpdateChecker updateChecker;
+	private final FxApplicationTerminator appTerminator;
 
 	@Inject
 	UpdateChecker(Settings settings, //
 				  Environment env, //
-				  ScheduledService<String> updateCheckerService,
-				  AppUpdateChecker updateChecker) {
+				  ScheduledService<String> updateCheckerService, //
+				  AppUpdateChecker updateChecker, //
+				  FxApplicationTerminator appTerminator) {
 		this.env = env;
 		this.settings = settings;
 		this.updateCheckerService = updateCheckerService;
@@ -58,28 +64,57 @@ public class UpdateChecker {
 		this.appUpdateAvailable = Bindings.createBooleanBinding(this::isAppUpdateAvailable, latestAppUpdaterVersion);
 		this.checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, state);
 		this.updateChecker = updateChecker;
+		this.appTerminator = appTerminator;
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
 		if (!env.disableUpdateCheck() && settings.checkForUpdates.get()) {
-			if (updateChecker.isUpdateServiceAvailable(env.getBuildNumber())) { // prefer AppUpdateChecker
-				switch (env.getBuildNumber().get()) {
-					case "flatpak-1" -> startCheckingWithFlatpakUpdater((UpdateCheckerTask) updateChecker.getUpdater(DistributionChannel.Value.LINUX_FLATPAK), AUTO_CHECK_DELAY);
-					default -> LOG.error("Unexpected value 'buildNumber': {}", env.getBuildNumber().get());
-				}
-			} else { // fallback is the "redirect user to website" approach
-				startCheckingForUpdates(AUTO_CHECK_DELAY);
-			}
+			decideOnUpdateChecker();
 		}
 	}
 
 	public void checkForUpdatesNow() {
-		startCheckingForUpdates(Duration.ZERO);
+		decideOnUpdateChecker();
+	}
+
+	private void decideOnUpdateChecker() {
+		if (updateChecker.isUpdateServiceAvailable(env.getBuildNumber())) { // prefer AppUpdateChecker
+			switch (env.getBuildNumber().get()) {
+				case "flatpak-1" -> startCheckingWithFlatpakUpdater((UpdateCheckerTask) updateChecker.getUpdater(DistributionChannel.Value.LINUX_FLATPAK), Duration.ZERO);
+				default -> LOG.error("Unexpected value 'buildNumber': {}", env.getBuildNumber().get());
+			}
+		} else { // fallback is the "redirect user to website" approach
+			startCheckingForUpdates(Duration.ZERO);
+		}
 	}
 
 	public void updateAppNow() throws UpdateFailedException {
 		var service = updateChecker.getServiceForChannel(DistributionChannel.Value.LINUX_FLATPAK);
 		service.triggerUpdate();
+	}
+
+	public void terminateFlatpakOnUpdateCompleted(Runnable onComplete, UpdatesPreferencesController controller) {
+		var service = updateChecker.getServiceForChannel(DistributionChannel.Value.LINUX_FLATPAK);
+		service.addProgressListener(new ProgressListener() {
+			@Override
+			public void onProgress(Progress progress) {
+				LOG.debug("Update progess is at percentage: {} and has status: {}", progress.getProgress(), progress.getStatus());
+
+				if (progress.getStatus() == 0 || progress.getStatus() == 2) {
+					controller.flatpakProgressProperty().set(progress.getProgress() / 100.0);
+				}
+
+				if (progress.getStatus() == 2 && progress.getProgress() == 100) {
+					LOG.debug("Update successfully finished, restarting App now");
+					service.removeProgressListener(this);
+					if (onComplete != null) {
+						Platform.runLater(onComplete);
+					}
+					service.spawnApp();
+					appTerminator.terminate();
+				}
+			}
+		});
 	}
 
 	private void startCheckingForUpdates(Duration initialDelay) {
