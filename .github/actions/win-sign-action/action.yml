@@ -1,0 +1,145 @@
+name: 'Windows Signing'
+description: 'Sign files on Windows'
+inputs:
+  base-dir:
+    description: 'The base directory to search for files'
+    required: true
+  file-extensions:
+    description: 'List of file extensions to sign, separated by comma'
+    required: true
+  username:
+    description: 'Username for signing'
+    required: true
+  password:
+    description: 'Password for signing'
+    required: true
+  recursive:
+    description: 'Whether to search recursively in subdirectories'
+    required: false
+    default: 'false'
+  sign-description:
+    description: 'Signature description'
+    required: false
+    default: 'Cryptomator'
+  sign-url:
+    description: 'Signature URL'
+    required: false
+    default: 'https://cryptomator.org'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download Actalis CodeSigner if not present
+      id: download-signer
+      run: |
+        if (! (Test-Path -Path '${{ env.SIGNER_PATH }}')) {
+          echo "Downloading Actalis CodeSigner..."
+          curl --output "${{ env.SIGNER_NAME }}.zip" -L "${{ env.SIGNER_URL }}"
+          if (!(Get-FileHash -Path "${{ env.SIGNER_NAME }}.zip" -Algorithm SHA256).Hash.ToLower().equals("${{ env.SIGNER_HASH }}")) {
+            echo "Signer hash mismatch, exiting."
+            exit 1
+          }
+          Expand-Archive -Path "${{ env.SIGNER_NAME }}.zip" -DestinationPath "${{ env.SIGNER_NAME }}" -Force
+        }
+      env:
+        SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
+        SIGNER_NAME: actalis-signer
+        SIGNER_URL: 'https://static.cryptomator.org/other/CodeSigner-win-x64-latest.zip'
+        SIGNER_HASH: '44a1e09ab72707d049d3e59656e3e35de92e8cda357eec1cfc367016e45835ab'
+      shell: pwsh
+    - name: Generate, mask, and output the input secrets
+      id: set-secrets
+      run: |
+        echo "::add-mask::${{ inputs.username }}"
+        echo "::add-mask::${{ inputs.password }}"
+        echo "username=${{ inputs.username }}" >> "$GITHUB_OUTPUT"
+        echo "password=${{ inputs.password }}" >> "$GITHUB_OUTPUT"
+      shell: bash
+    - name: Sign DLLs with Actalis CodeSigner
+      run: |
+        $signerPath = '${{ env.SIGNER_PATH }}'
+        $username = '${{ steps.set-secrets.outputs.username }}'
+        $password = '${{ steps.set-secrets.outputs.password }}'
+        $signDescription = '${{ inputs.sign-description }}'
+        $signUrl = '${{ inputs.sign-url }}'
+        $extensions = '${{ inputs.file-extensions }}'.split(",") | ForEach-Object { "*.$($_.Trim())" }
+        $recursive = '${{ inputs.recursive }}' -eq 'true'
+        $files = Get-ChildItem -Path '${{ inputs.base-dir }}\*' -Include $extensions -Recurse:$recursive
+
+        if($files.Count -eq 0) {
+            Write-Host "`n❌ No files found to sign."
+            exit 1
+        }
+        Write-Host "`n📝 Found $($files.Count) files to sign:"
+        $files | ForEach-Object { Write-Host "  - $($_.FullName)" }
+
+        # Create log directory
+        $logDir = "~/.Acsi/log"
+        if (!(Test-Path $logDir)) {
+            New-Item -Path $logDir -ItemType Directory -Force | Out-Null
+        }
+
+        $jobs = @()
+        foreach ($file in $files) {
+            # Run signing in a job
+            $job = Start-Job -ScriptBlock {
+                    param($signerPath, $username, $password, $signDescription, $signUrl, $filePath)
+
+                    Write-Host "`n🔐 Signing: $($filePath)"
+                    $logFile = "~/.Acsi/log/$(Split-Path -Leaf $filePath).log"
+                    $arguments = @(
+                        '-ts',
+                        'http://timestamp.digicert.com',
+                        '-fu', $username,
+                        '-fp', $password,
+                        '-pm', "`"$signDescription`"",
+                        '--program-url', $signUrl,
+                        '-in', "`"$filePath`""
+                    )
+                    $process = Start-Process -FilePath "$signerPath" -ArgumentList $arguments -Wait -PassThru -RedirectStandardOutput "$logFile" -NoNewWindow
+
+                    return @{
+                        FilePath = $filePath
+                        ExitCode = $process.ExitCode
+                        LogFile = $logFile
+                    }
+            } -ArgumentList $signerPath, $username, $password, $signDescription, $signUrl, $file.FullName
+            $jobs += $job
+
+            # Throttle to max 5 concurrent jobs
+            if ($jobs.Count -ge 5) {
+                $completed = $jobs | Wait-Job -Any
+                $result = $completed | Receive-Job
+
+                # Check result and exit on failure
+                if ($result.ExitCode -ne 0) {
+                    $jobs | Stop-Job | Remove-Job
+                    Write-Host "❌ Signing failed for $($result.FilePath) with exit code: $($result.ExitCode)"
+                    exit 1
+                }
+                Write-Host "  ✅ Successfully signed $($result.FilePath)"
+
+                $jobs = $jobs | Where-Object { $_.Id -ne $completed.Id }
+                $completed | Remove-Job
+
+            }
+        }
+        # Wait for remaining jobs
+        $jobs | Wait-Job | Receive-Job | ForEach-Object {
+            if ($_.ExitCode -ne 0) {
+                Write-Host "❌ Signing failed for $($_.FilePath) with exit code: $($_.ExitCode)"
+                exit 1
+            }
+            Write-Host "  ✅ Successfully signed $($_.FilePath)"
+        }
+        Write-Host "`n✅ Successfully signed $($files.Count) files."
+      env:
+        SIGNER_PATH: ${{ github.workspace }}/actalis-signer/ActalisCodeSigner.exe
+      shell: pwsh
+    - name: Upload log on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: signing-log-${{ runner.arch }}
+        path: |
+          ~/.Acsi/log/*.log
