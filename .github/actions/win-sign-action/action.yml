@@ -4,8 +4,8 @@ inputs:
   base-dir:
     description: 'The base directory to search for files'
     required: true
-  file-glob:
-    description: 'List of file glob patterns to sign, separated by commas'
+  file-extensions:
+    description: 'List of file extensions to sign, separated by comma'
     required: true
   username:
     description: 'Username for signing'
@@ -62,7 +62,7 @@ runs:
         $password = '${{ steps.set-secrets.outputs.password }}'
         $signDescription = '${{ inputs.sign-description }}'
         $signUrl = '${{ inputs.sign-url }}'
-        $extensions = '${{ inputs.file-glob }}'.split(",") | ForEach-Object { "*.$($_.Trim())" }
+        $extensions = '${{ inputs.file-extensions }}'.split(",") | ForEach-Object { "*.$($_.Trim())" }
         $recursive = '${{ inputs.recursive }}' -eq 'true'
         $files = Get-ChildItem -Path '${{ inputs.base-dir }}\*' -Include $extensions -Recurse:$recursive
 

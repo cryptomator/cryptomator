@@ -215,7 +215,7 @@ jobs:
         uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'appdir'
-          file-glob: 'dll,exe,ps1'
+          file-extensions: 'dll,exe,ps1'
           recursive: true
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
@@ -272,7 +272,7 @@ jobs:
         uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'installer'
-          file-glob: 'msi'
+          file-extensions: 'msi'
           sign-description: 'Cryptomator Installer'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
@@ -383,7 +383,7 @@ jobs:
         uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'tmp'
-          file-glob: 'exe'
+          file-extensions: 'exe'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Reattach signed burn engine to installer
@@ -394,7 +394,7 @@ jobs:
         uses: ./.github/actions/win-sign-action
         with:
           base-dir: 'installer'
-          file-glob: 'exe'
+          file-extensions: 'exe'
           sign-description: 'Cryptomator Bundle Installer'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
