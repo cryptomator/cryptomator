@@ -101,7 +101,7 @@ public class UpdateChecker {
 				LOG.debug("Update progess is at percentage: {} and has status: {}", progress.getProgress(), progress.getStatus());
 
 				if (progress.getStatus() == 0 || progress.getStatus() == 2) {
-					controller.flatpakProgressProperty().set(progress.getProgress() / 100.0);
+					Platform.runLater(() -> controller.flatpakProgressProperty().set(progress.getProgress() / 100.0));
 				}
 
 				if (progress.getStatus() == 2 && progress.getProgress() == 100) {

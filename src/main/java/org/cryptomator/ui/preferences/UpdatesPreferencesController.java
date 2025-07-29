@@ -27,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -74,8 +75,7 @@ public class UpdatesPreferencesController implements FxController {
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
-	@FXML
-	public Button flatpakUpdateButton;
+	public Label flatpakButtonLabel;
 
 	@Inject
 	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, AppUpdateChecker appUpdateChecker, Environment env) {
@@ -103,7 +103,7 @@ public class UpdatesPreferencesController implements FxController {
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 		switch (env.getBuildNumber().get()) {
-			case "flatpak-1" -> flatpakUpdateButton.setText(appUpdateChecker.getServiceForChannel(DistributionChannel.Value.LINUX_FLATPAK).getDisplayName());
+			case "flatpak-1" -> flatpakButtonLabel.setText(appUpdateChecker.getServiceForChannel(DistributionChannel.Value.LINUX_FLATPAK).getDisplayName());
 			default -> LOG.error("Unexpected value 'buildNumber': {}", env.getBuildNumber().get());
 		}
 
@@ -242,5 +242,9 @@ public class UpdatesPreferencesController implements FxController {
 
 	public DoubleProperty flatpakProgressProperty() {
 		return flatpakProgress;
+	}
+
+	public double getFlatpakProgress() {
+		return flatpakProgress.get();
 	}
 }
