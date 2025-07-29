@@ -212,11 +212,13 @@ jobs:
           Get-ChildItem -Recurse -Path "jpackage-jmod" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
       - name: Sign DLLs with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign-action
+        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f
         with:
           base-dir: 'appdir'
           file-extensions: 'dll,exe,ps1'
           recursive: true
+          sign-description: 'Cryptomator'
+          sign-url: 'https://cryptomator.org'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Replace DLLs inside jars with signed ones
@@ -269,11 +271,12 @@ jobs:
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
       - name: Sign msi with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign-action
+        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f
         with:
           base-dir: 'installer'
           file-extensions: 'msi'
           sign-description: 'Cryptomator Installer'
+          sign-url: 'https://cryptomator.org'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Add possible alpha/beta tags and architecture to installer name
@@ -380,10 +383,12 @@ jobs:
           wix burn detach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe
       - name: Sign burn engine with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign-action
+        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f
         with:
           base-dir: 'tmp'
           file-extensions: 'exe'
+          sign-description: 'Cryptomator Bundle Installer'
+          sign-url: 'https://cryptomator.org'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Reattach signed burn engine to installer
@@ -391,11 +396,12 @@ jobs:
           wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
       - name: Sign installer with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: ./.github/actions/win-sign-action
+        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f
         with:
           base-dir: 'installer'
           file-extensions: 'exe'
           sign-description: 'Cryptomator Bundle Installer'
+          sign-url: 'https://cryptomator.org'
           username: ${{ secrets.WIN_CODESIGN_USERNAME }}
           password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Add possible alpha/beta tags to installer name
