@@ -98,9 +98,19 @@ public class UpdateChecker {
 		service.addProgressListener(new ProgressListener() {
 			@Override
 			public void onProgress(Progress progress) {
-				LOG.debug("Update progess is at percentage: {} and has status: {}", progress.getProgress(), progress.getStatus());
+
+				if (progress.getStatus() == 1) {
+					LOG.info("No update to install");
+					return;
+				}
+
+				if (progress.getStatus() == 3) {
+					LOG.info("Update failed: {} / {}", progress.getError(), progress.getErrorMessage());
+					return;
+				}
 
 				if (progress.getStatus() == 0 || progress.getStatus() == 2) {
+					LOG.debug("Update progess is at percentage: {} and has status: {}", progress.getProgress(), progress.getStatus());
 					Platform.runLater(() -> controller.flatpakProgressProperty().set(progress.getProgress() / 100.0));
 				}
 
