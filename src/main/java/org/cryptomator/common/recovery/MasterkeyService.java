@@ -63,7 +63,7 @@ public final class MasterkeyService {
 		try (Stream<Path> paths = Files.walk(vaultPath.resolve(DATA_DIR_NAME))) {
 			Optional<Path> c9rFile = paths //
 					.filter(p -> p.toString().endsWith(".c9r")) //
-					.filter(p -> !p.toString().equals("dir.c9r")) //
+					.filter(p -> !p.endsWith("dir.c9r")) //
 					.findFirst();
 			if (c9rFile.isEmpty()) {
 				LOG.info("Unable to detect Crypto scheme: No *.c9r file found in {}", vaultPath);
