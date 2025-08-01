@@ -19,7 +19,6 @@ import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -41,9 +40,9 @@ public final class MasterkeyService {
 		return masterkeyFileAccess.load(masterkeyFilePath, password);
 	}
 
-	public static Optional<CryptorProvider.Scheme> validateRecoveryKeyAndDetectCombo(RecoveryKeyFactory recoveryKeyFactory, //
-																					 Vault vault, String recoveryKey, //
-																					 MasterkeyFileAccess masterkeyFileAccess) throws IllegalArgumentException {
+	public static CryptorProvider.Scheme validateRecoveryKeyAndDetectCombo(RecoveryKeyFactory recoveryKeyFactory, //
+																		   Vault vault, String recoveryKey, //
+																		   MasterkeyFileAccess masterkeyFileAccess) throws IOException, CryptoException {
 		String tmpPass = UUID.randomUUID().toString();
 		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
 			Path tempRecoveryPath = recoveryDirectory.getRecoveryPath();
@@ -51,11 +50,8 @@ public final class MasterkeyService {
 			Path masterkeyFilePath = tempRecoveryPath.resolve(MASTERKEY_FILENAME);
 
 			try (Masterkey mk = load(masterkeyFileAccess, masterkeyFilePath, tmpPass)) {
-				return detect(mk, vault.getPath());
+				return detect(mk, vault.getPath()).orElseThrow();
 			}
-		} catch (IOException | CryptoException e) {
-			LOG.info("Recovery key validation failed");
-			return Optional.empty();
 		}
 	}
 

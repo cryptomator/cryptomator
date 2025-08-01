@@ -10,6 +10,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
+import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.FxController;
@@ -26,6 +27,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import java.io.IOException;
 
 public class RecoveryKeyValidateController implements FxController {
 
@@ -137,14 +139,17 @@ public class RecoveryKeyValidateController implements FxController {
 		switch (recoverType.get()) {
 			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> {
 				try {
-					var combo = MasterkeyService.validateRecoveryKeyAndDetectCombo(recoveryKeyFactory, vault, recoveryKey.get(), masterkeyFileAccess);
-					combo.ifPresent(cipherCombo::set);
-					if (combo.isPresent()) {
-						recoveryKeyState.set(RecoveryKeyState.CORRECT);
-					} else {
-						recoveryKeyState.set(RecoveryKeyState.WRONG);
-					}
+					var scheme = MasterkeyService.validateRecoveryKeyAndDetectCombo(recoveryKeyFactory, vault, recoveryKey.get(), masterkeyFileAccess);
+					cipherCombo.set(scheme);
+					recoveryKeyState.set(RecoveryKeyState.CORRECT);
+				} catch (CryptoException e) {
+					LOG.info("Recovery key is valid but crypto scheme couldn't be determined", e);
+					recoveryKeyState.set(RecoveryKeyState.WRONG);
 				} catch (IllegalArgumentException e) {
+					LOG.info("Recovery key is syntactically invalid", e);
+					recoveryKeyState.set(RecoveryKeyState.INVALID);
+				} catch (IOException e) {
+					LOG.warn("IO error while validating recovery key", e);
 					recoveryKeyState.set(RecoveryKeyState.INVALID);
 				}
 			}
