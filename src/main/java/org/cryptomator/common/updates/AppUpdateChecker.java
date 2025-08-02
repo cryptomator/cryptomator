@@ -1,6 +1,6 @@
 package org.cryptomator.common.updates;
 
-import org.cryptomator.integrations.common.DistributionChannel;
+import org.cryptomator.integrations.common.DisplayName;
 import org.cryptomator.integrations.update.UpdateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,7 @@ import java.util.Optional;
 public class AppUpdateChecker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppUpdateChecker.class);
+	private static final String DISPLAY_NAME_FLATPAK = "Update via Flatpak update";
 	private final List<UpdateService> updateServices;
 
 	@Inject
@@ -25,7 +26,7 @@ public class AppUpdateChecker {
 		}
 		switch (buildNumber.get()) {
 			case "flatpak-1" -> {
-				return !updateServices.isEmpty() && doServicesContainChannel(updateServices, DistributionChannel.Value.LINUX_FLATPAK);
+				return !updateServices.isEmpty() && doServicesContainChannel(updateServices, DISPLAY_NAME_FLATPAK);
 			}
 
 			default -> {
@@ -35,43 +36,43 @@ public class AppUpdateChecker {
 		}
 	}
 
-	public Object getUpdater(DistributionChannel.Value channel) {
+	public Object getUpdater(Optional<String> buildNumber) {
 		if (updateServices.isEmpty()) {
 			LOG.error("No UpdateService found");
 			return null;
 		}
-		switch (channel) {
-			case LINUX_FLATPAK -> {
-				var flatpakService = getServiceForChannel(updateServices, DistributionChannel.Value.LINUX_FLATPAK);
+		switch (buildNumber.get()) {
+			case "flatpak-1" -> {
+				var flatpakService = getServiceForChannel(updateServices, DISPLAY_NAME_FLATPAK);
 				if(null == flatpakService) {
 					LOG.error("Required service for channel LINUX_FLATPAK not available");
 					return null;
 				} else {
-					return flatpakService.getLatestReleaseChecker(DistributionChannel.Value.LINUX_FLATPAK);
+					return flatpakService.getLatestReleaseChecker();
 				}
 			}
-			default -> throw new IllegalStateException("Unexpected value 'channel': " + channel);
+			default -> throw new IllegalStateException("Unexpected value 'buildNumber': " + buildNumber.get());
 		}
 	}
 
-	private boolean doServicesContainChannel(List<UpdateService> services, DistributionChannel.Value requiredChannel) {
+	private boolean doServicesContainChannel(List<UpdateService> services, String displayName) {
 		return services.stream().anyMatch(service -> {
-			DistributionChannel annotation = service.getClass().getAnnotation(DistributionChannel.class);
-			return annotation != null && annotation.value() == requiredChannel;
+			DisplayName annotation = service.getClass().getAnnotation(DisplayName.class);
+			return annotation != null && annotation.value().equals(displayName);
 		});
 	}
 
-	private UpdateService getServiceForChannel(List<UpdateService> services, DistributionChannel.Value requiredChannel) {
+	private UpdateService getServiceForChannel(List<UpdateService> services, String displayName) {
 		return services.stream().filter(service -> {
-			DistributionChannel annotation = service.getClass().getAnnotation(DistributionChannel.class);
-			return annotation != null && annotation.value() == requiredChannel;
+			DisplayName annotation = service.getClass().getAnnotation(DisplayName.class);
+			return annotation != null && annotation.value().equals(displayName);
 		}).findFirst().orElse(null);
 	}
 
-	public UpdateService getServiceForChannel(DistributionChannel.Value requiredChannel) {
+	public UpdateService getServiceForChannel(String displayName) {
 		return updateServices.stream().filter(service -> {
-			DistributionChannel annotation = service.getClass().getAnnotation(DistributionChannel.class);
-			return annotation != null && annotation.value() == requiredChannel;
+			DisplayName annotation = service.getClass().getAnnotation(DisplayName.class);
+			return annotation != null && annotation.value().equals(displayName);
 		}).findFirst().orElse(null);
 	}
 }

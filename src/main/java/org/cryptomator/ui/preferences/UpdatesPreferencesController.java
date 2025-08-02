@@ -3,7 +3,7 @@ package org.cryptomator.ui.preferences;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.updates.AppUpdateChecker;
-import org.cryptomator.integrations.common.DistributionChannel;
+import org.cryptomator.integrations.common.DisplayName;
 import org.cryptomator.integrations.update.UpdateFailedException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
@@ -24,7 +24,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -49,6 +48,7 @@ public class UpdatesPreferencesController implements FxController {
 			+ "?utm_source=cryptomator-desktop" //
 			+ "&utm_medium=update-notification&" //
 			+ "utm_campaign=app-update-%s";
+	private static final String DISPLAY_NAME_FLATPAK = "Update via Flatpak update";
 
 	private final Application application;
 	private final Environment environment;
@@ -103,7 +103,7 @@ public class UpdatesPreferencesController implements FxController {
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
 		switch (env.getBuildNumber().get()) {
-			case "flatpak-1" -> flatpakButtonLabel.setText(appUpdateChecker.getServiceForChannel(DistributionChannel.Value.LINUX_FLATPAK).getDisplayName());
+			case "flatpak-1" -> flatpakButtonLabel.setText(appUpdateChecker.getServiceForChannel(DISPLAY_NAME_FLATPAK).getClass().getAnnotation(DisplayName.class).value());
 			default -> LOG.error("Unexpected value 'buildNumber': {}", env.getBuildNumber().get());
 		}
 

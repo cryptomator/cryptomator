@@ -4,7 +4,6 @@ import org.cryptomator.common.Environment;
 import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.updates.AppUpdateChecker;
-import org.cryptomator.integrations.common.DistributionChannel;
 import org.cryptomator.integrations.update.Progress;
 import org.cryptomator.integrations.update.ProgressListener;
 import org.cryptomator.integrations.update.UpdateFailedException;
@@ -35,6 +34,7 @@ public class UpdateChecker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateChecker.class);
 	private static final Duration AUTO_CHECK_DELAY = Duration.seconds(5);
+	private static final String DISPLAY_NAME_FLATPAK = "Update via Flatpak update";
 
 	private final Environment env;
 	private final Settings settings;
@@ -80,7 +80,7 @@ public class UpdateChecker {
 	private void decideOnUpdateChecker() {
 		if (updateChecker.isUpdateServiceAvailable(env.getBuildNumber())) { // prefer AppUpdateChecker
 			switch (env.getBuildNumber().get()) {
-				case "flatpak-1" -> startCheckingWithFlatpakUpdater((UpdateCheckerTask) updateChecker.getUpdater(DistributionChannel.Value.LINUX_FLATPAK), Duration.ZERO);
+				case "flatpak-1" -> startCheckingWithFlatpakUpdater((UpdateCheckerTask) updateChecker.getUpdater(env.getBuildNumber()), Duration.ZERO);
 				default -> LOG.error("Unexpected value 'buildNumber': {}", env.getBuildNumber().get());
 			}
 		} else { // fallback is the "redirect user to website" approach
@@ -89,12 +89,12 @@ public class UpdateChecker {
 	}
 
 	public void updateAppNow() throws UpdateFailedException {
-		var service = updateChecker.getServiceForChannel(DistributionChannel.Value.LINUX_FLATPAK);
+		var service = updateChecker.getServiceForChannel(DISPLAY_NAME_FLATPAK);
 		service.triggerUpdate();
 	}
 
 	public void terminateFlatpakOnUpdateCompleted(Runnable onComplete, UpdatesPreferencesController controller) {
-		var service = updateChecker.getServiceForChannel(DistributionChannel.Value.LINUX_FLATPAK);
+		var service = updateChecker.getServiceForChannel(DISPLAY_NAME_FLATPAK);
 		service.addProgressListener(new ProgressListener() {
 			@Override
 			public void onProgress(Progress progress) {
@@ -105,7 +105,7 @@ public class UpdateChecker {
 				}
 
 				if (progress.getStatus() == 3) {
-					LOG.info("Update failed: {} / {}", progress.getError(), progress.getErrorMessage());
+					LOG.info("Update failed");
 					return;
 				}
 
