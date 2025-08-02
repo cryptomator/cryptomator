@@ -11,6 +11,7 @@ import org.cryptomator.common.keychain.KeychainModule;
 import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
+import org.cryptomator.common.updates.UpdatesModule;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
@@ -30,7 +31,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Module(subcomponents = {VaultComponent.class}, includes = {VaultListModule.class, KeychainModule.class, MountModule.class})
+@Module(subcomponents = {VaultComponent.class}, includes = {VaultListModule.class, KeychainModule.class, MountModule.class, UpdatesModule.class})
 public abstract class CommonsModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CommonsModule.class);

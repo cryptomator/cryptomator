@@ -2,8 +2,13 @@ package org.cryptomator.ui.preferences;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.updates.AppUpdateChecker;
+import org.cryptomator.integrations.common.DisplayName;
+import org.cryptomator.integrations.update.UpdateFailedException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.animation.PauseTransition;
@@ -13,12 +18,16 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -34,16 +43,20 @@ import java.util.ResourceBundle;
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {
 
+	private static final Logger LOG = LoggerFactory.getLogger(UpdatesPreferencesController.class);
 	private static final String DOWNLOADS_URI_TEMPLATE = "https://cryptomator.org/downloads/" //
 			+ "?utm_source=cryptomator-desktop" //
 			+ "&utm_medium=update-notification&" //
 			+ "utm_campaign=app-update-%s";
+	private static final String DISPLAY_NAME_FLATPAK = "Update via Flatpak update";
 
 	private final Application application;
 	private final Environment environment;
 	private final ResourceBundle resourceBundle;
 	private final Settings settings;
+	private final Environment env;
 	private final UpdateChecker updateChecker;
+	private final AppUpdateChecker appUpdateChecker;
 	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
 	private final ReadOnlyStringProperty latestVersion;
 	private final ObservableValue<Instant> lastSuccessfulUpdateCheck;
@@ -51,28 +64,35 @@ public class UpdatesPreferencesController implements FxController {
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final String currentVersion;
 	private final BooleanBinding updateAvailable;
+	private final BooleanBinding appUpdateAvailable;
 	private final BooleanBinding checkFailed;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final DateTimeFormatter formatter;
 	private final BooleanBinding upToDate;
 	private final String downloadsUri;
+	private final BooleanProperty updatingFlatpak = new SimpleBooleanProperty(false);
+	private final DoubleProperty flatpakProgress = new SimpleDoubleProperty(ProgressBar.INDETERMINATE_PROGRESS);
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
+	public Label flatpakButtonLabel;
 
 	@Inject
-	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker) {
+	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, AppUpdateChecker appUpdateChecker, Environment env) {
 		this.application = application;
 		this.environment = environment;
 		this.resourceBundle = resourceBundle;
 		this.settings = settings;
+		this.env = env;
 		this.updateChecker = updateChecker;
+		this.appUpdateChecker = appUpdateChecker;
 		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.latestVersion = updateChecker.latestVersionProperty();
 		this.lastSuccessfulUpdateCheck = updateChecker.lastSuccessfulUpdateCheckProperty();
 		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, lastSuccessfulUpdateCheck);
 		this.currentVersion = environment.getAppVersion();
 		this.updateAvailable = updateChecker.updateAvailableProperty();
+		this.appUpdateAvailable = updateChecker.appUpdateAvailableProperty();
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 		this.upToDate = updateChecker.updateCheckStateProperty().isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 		this.checkFailed = updateChecker.checkFailedProperty();
@@ -82,6 +102,10 @@ public class UpdatesPreferencesController implements FxController {
 
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
+		switch (env.getBuildNumber().get()) {
+			case "flatpak-1" -> flatpakButtonLabel.setText(appUpdateChecker.getServiceForChannel(DISPLAY_NAME_FLATPAK).getClass().getAnnotation(DisplayName.class).value());
+			default -> LOG.error("Unexpected value 'buildNumber': {}", env.getBuildNumber().get());
+		}
 
 		upToDate.addListener((_, _, newVal) -> {
 			if (newVal) {
@@ -96,6 +120,20 @@ public class UpdatesPreferencesController implements FxController {
 	@FXML
 	public void checkNow() {
 		updateChecker.checkForUpdatesNow();
+	}
+
+	@FXML
+	public void updateFlatpakNow() {
+		updatingFlatpak.set(true);
+		updateChecker.terminateFlatpakOnUpdateCompleted(
+				() -> updatingFlatpak.set(false), this
+		);
+
+		try {
+			updateChecker.updateAppNow();
+		} catch (UpdateFailedException e) {
+			updatingFlatpak.set(false);
+		}
 	}
 
 	@FXML
@@ -174,8 +212,16 @@ public class UpdatesPreferencesController implements FxController {
 		return updateAvailable;
 	}
 
+	public BooleanBinding appUdateAvailableProperty() {
+		return appUpdateAvailable;
+	}
+
 	public boolean isUpdateAvailable() {
 		return updateAvailable.get();
+	}
+
+	public boolean isAppUpdateAvailable() {
+		return appUpdateAvailable.get();
 	}
 
 	public BooleanBinding checkFailedProperty() {
@@ -186,4 +232,19 @@ public class UpdatesPreferencesController implements FxController {
 		return checkFailed.getValue();
 	}
 
+	public BooleanProperty updatingFlatpakProperty() {
+		return updatingFlatpak;
+	}
+
+	public boolean isUpdatingFlatpak() {
+		return updatingFlatpak.get();
+	}
+
+	public DoubleProperty flatpakProgressProperty() {
+		return flatpakProgress;
+	}
+
+	public double getFlatpakProgress() {
+		return flatpakProgress.get();
+	}
 }

@@ -9,11 +9,11 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.ProgressBar?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -53,5 +53,19 @@
 			</graphic>
 		</Label>
 		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
+		<Button onAction="#updateFlatpakNow"
+				visible="${controller.appUpdateAvailable}">
+			<graphic>
+				<VBox spacing="5" alignment="CENTER">
+					<Label fx:id="flatpakButtonLabel"/>
+					<ProgressBar maxWidth="200"
+								 maxHeight="12"
+								 visible="${controller.updatingFlatpak}"
+								 managed="${controller.updatingFlatpak}"
+								 progress="${controller.flatpakProgress}"/>
+				</VBox>
+			</graphic>
+		</Button>
+
 	</VBox>
 </VBox>
