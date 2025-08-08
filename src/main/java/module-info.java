@@ -1,4 +1,5 @@
 import ch.qos.logback.classic.spi.Configurator;
+import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
@@ -21,7 +22,6 @@ import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 import org.cryptomator.updater.MacOsDmgUpdateMechanism;
-import org.cryptomator.updater.UpdateMechanism;
 
 open module org.cryptomator.desktop {
 	requires static org.jetbrains.annotations;
@@ -64,7 +64,7 @@ open module org.cryptomator.desktop {
 	uses org.cryptomator.event.NotificationHandler;
 
 	// opens org.cryptomator.updater to org.cryptomator.integrations.api;
-	provides UpdateMechanism with MacOsDmgUpdateMechanism; // TODO: move to integrations-mac
+	provides UpdateMechanism with MacOsDmgUpdateMechanism;
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;

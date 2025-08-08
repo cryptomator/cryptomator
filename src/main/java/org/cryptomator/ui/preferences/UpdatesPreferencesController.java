@@ -2,10 +2,10 @@ package org.cryptomator.ui.preferences;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.integrations.update.UpdateMechanism;
+import org.cryptomator.integrations.update.UpdateProcess;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
-import org.cryptomator.updater.UpdateMechanism;
-import org.cryptomator.updater.UpdateProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +139,11 @@ public class UpdatesPreferencesController implements FxController {
 			try {
 				// TODO: check if all vaults closed?
 				var restartProcess = updatePreparationTask.get().applyUpdate();
-				assert restartProcess.isAlive();
+				if (restartProcess.isAlive()) {
+					Platform.exit();
+				} else {
+					LOG.error("Update process terminated prematurely: {}", restartProcess.info().commandLine());
+				}
 				Platform.exit(); // TODO: prompt?
 			} catch (IOException | InterruptedException | ExecutionException e) {
 				LOG.error("Oh no", e); // TODO: Show error dialog
