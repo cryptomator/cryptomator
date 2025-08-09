@@ -51,7 +51,7 @@ public class MainWindowController implements FxController {
 		this.selectedVault = selectedVault;
 		this.settings = settings;
 		this.appWindows = appWindows;
-		this.updateAvailable = updateChecker.updateAvailableProperty().or(updateChecker.appUpdateAvailableProperty());
+		this.updateAvailable = updateChecker.updateAvailableProperty();
 		this.licenseHolder = licenseHolder;
 		updateChecker.automaticallyCheckForUpdatesIfEnabled();
 

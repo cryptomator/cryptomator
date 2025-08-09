@@ -53,16 +53,15 @@
 			</graphic>
 		</Label>
 		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
-		<Button onAction="#updateFlatpakNow"
-				visible="${controller.appUpdateAvailable}">
+		<Button onAction="#doUpdate"> <!-- TODO: visible="${controller.updateAvailable}" -->
 			<graphic>
 				<VBox spacing="5" alignment="CENTER">
-					<Label fx:id="flatpakButtonLabel"/>
+					<Label text="${controller.updateButtonTitle}"/>
 					<ProgressBar maxWidth="200"
 								 maxHeight="12"
-								 visible="${controller.updatingFlatpak}"
-								 managed="${controller.updatingFlatpak}"
-								 progress="${controller.flatpakProgress}"/>
+								 visible="${controller.updatePreparationTask.running}"
+								 managed="${controller.updatePreparationTask.running}"
+								 progress="${controller.updatePreparationTask.progress}"/>
 				</VBox>
 			</graphic>
 		</Button>

@@ -1,4 +1,5 @@
 import ch.qos.logback.classic.spi.Configurator;
+import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
@@ -20,6 +21,7 @@ import org.cryptomator.networking.SSLContextWithWindowsCertStore;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
+import org.cryptomator.updater.MacOsDmgUpdateMechanism;
 
 open module org.cryptomator.desktop {
 	requires static org.jetbrains.annotations;
@@ -50,7 +52,6 @@ open module org.cryptomator.desktop {
 	requires io.github.coffeelibs.tinyoauth2client;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
-	requires org.purejava.portal;
 
 	/* dagger bs */
 	requires jakarta.inject;
@@ -61,6 +62,9 @@ open module org.cryptomator.desktop {
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
 	uses SSLContextProvider;
 	uses org.cryptomator.event.NotificationHandler;
+
+	// opens org.cryptomator.updater to org.cryptomator.integrations.api;
+	provides UpdateMechanism with MacOsDmgUpdateMechanism;
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
