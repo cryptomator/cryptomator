@@ -49,7 +49,7 @@ public class EventViewController implements FxController {
 	}
 
 	/**
-	 * Comparison method for the lru cache. During comparsion the map is accessed.
+	 * Comparison method for the lru cache. During comparison the map is accessed.
 	 * First the entries are compared by the event timestamp, then vaultId, then identifying path and lastly by class name.
 	 *
 	 * @param left an entry of a {@link FSEventBucket} and its content
