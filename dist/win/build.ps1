@@ -165,6 +165,7 @@ $javaOptions = @(
 "--java-options", "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`""
 "--java-options", "-Dcryptomator.showTrayIcon=true"
 "--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
+"--java-options", "-Dcryptomator.disableUpdateCheck=false"
 )
 
 

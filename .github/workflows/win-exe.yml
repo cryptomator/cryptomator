@@ -165,7 +165,7 @@ jobs:
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"@{appdata}/Cryptomator/keychain.json;@{userhome}/AppData/Roaming/Cryptomator/keychain.json\""
           --java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=\"@{appdata}/Cryptomator/windowsHelloKeychain.json\""
-          --java-options "-Djavafx.verbose=${{ inputs.isDebug }}"
+          --java-options "-Dcryptomator.disableUpdateCheck=false"
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
           --add-launcher "Cryptomator (Debug)=dist/win/debug-launcher.properties"
