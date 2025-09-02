@@ -51,12 +51,12 @@ jobs:
     if: github.event_name == 'workflow_call' || inputs.kaspersky
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
@@ -71,7 +71,7 @@ jobs:
     if: github.event_name == 'workflow_call'  || inputs.avast
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload

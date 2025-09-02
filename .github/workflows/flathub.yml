@@ -46,7 +46,7 @@ jobs:
     env:
       FLATHUB_PR_URL: tbd
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: 'flathub/org.cryptomator.Cryptomator'
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}

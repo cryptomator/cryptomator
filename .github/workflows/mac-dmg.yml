@@ -45,9 +45,9 @@ jobs:
           openjfx-url: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_osx-aarch64_bin-jmods.zip'
           openjfx-sha: 'b5a94a13077507003fa852512bfa33f4fb680bc8076d8002e4227a84c85171d4'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
