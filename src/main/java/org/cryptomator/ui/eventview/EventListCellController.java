@@ -1,5 +1,6 @@
 package org.cryptomator.ui.eventview;
 
+import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.event.FSEventBucket;
 import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.event.FileSystemEventAggregator;
@@ -124,6 +125,19 @@ public class EventListCellController implements FxController {
 			case DecryptionFailedEvent fse -> this.adjustToDecryptionFailedEvent(fse);
 			case BrokenDirFileEvent fse -> this.adjustToBrokenDirFileEvent(fse);
 			case BrokenFileNodeEvent fse -> this.adjustToBrokenFileNodeEvent(fse);
+			case FileIsInUseEvent fse -> this.adjustToFileInUseEvent(fse);
+		}
+	}
+
+	private void adjustToFileInUseEvent(FileIsInUseEvent fse) {
+		eventIcon.setValue(FontAwesome5Icon.TIMES);
+		//eventMessage.setValue(resourceBundle.getString("eventView.entry.brokenFileNode.message"));
+		eventMessage.setValue("File is in use");
+		eventDescription.setValue(fse.ciphertext().getFileName().toString());
+		if (revealService != null) {
+			addAction("Show encrypted Path", () -> reveal(revealService, fse.ciphertext()));
+		} else {
+			addAction("Copy encrypted Path", () -> copyToClipboard(fse.ciphertext().toString()));
 		}
 	}
 

@@ -5,6 +5,7 @@ import org.cryptomator.cryptofs.event.BrokenFileNodeEvent;
 import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
+import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.event.VaultEvent;
 import org.jetbrains.annotations.NotNull;
@@ -154,6 +155,7 @@ public class EventMap implements ObservableMap<EventMap.EventKey, VaultEvent> {
 			case ConflictResolutionFailedEvent(_, _, Path conflictingCiphertext, _) -> conflictingCiphertext;
 			case BrokenDirFileEvent(_, Path ciphertext) -> ciphertext;
 			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
+			case FileIsInUseEvent(_,_, Path ciphertext,_) -> ciphertext;
 		};
 		return new EventKey(p, e.getClass());
 	}
