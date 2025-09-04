@@ -59,9 +59,6 @@ jobs:
             java-dist: 'liberica'
             java-version: '24.0.1+11'
             java-package: 'jdk+fx' #This is needed, as liberica contains JFX 24 Jmods for Windows ARM64
-    env:
-      LOOPBACK_ALIAS: 'cryptomator-vault'
-      WIN_CONSOLE_FLAG: ''
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -172,16 +169,6 @@ jobs:
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
-      - name: Set LOOPBACK_ALIAS in patchWebDAV.bat
-        shell: pwsh
-        run: |
-          $patchScript = "appdir\Cryptomator\patchWebDAV.bat"
-          try {
-            (Get-Content $patchScript ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"${{ env.LOOPBACK_ALIAS}}`"" | Set-Content $patchScript
-          } catch {
-            Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
-            exit 1
-          }
       - name: Fix permissions
         run: |
           attrib -r appdir/Cryptomator/Cryptomator.exe

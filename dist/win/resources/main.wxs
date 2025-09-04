@@ -26,6 +26,7 @@
   <?define IconFileEncryptedData= "Cryptomator-Vault.ico" ?>
   <?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
   <?define CloseApplicationTarget= "cryptomator.exe" ?>
+  <?define LoopbackAlias= "cryptomator-vault" ?>
 
   <?include $(var.JpConfigDir)/overrides.wxi ?>
 
@@ -131,7 +132,7 @@
     <ns0:Property Id="DISABLEUPDATECHECK" Secure="yes" />
 
     <!-- WebDAV patches -->
-    <ns0:SetProperty Id="PatchWebDAV" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot;" Sequence="execute" Before="PatchWebDAV" />
+    <ns0:SetProperty Id="PatchWebDAV" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot; &quot;$(var.LoopbackAlias)&quot;" Sequence="execute" Before="PatchWebDAV" />
     <ns0:CustomAction Id="PatchWebDAV" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
 
     <!-- Update check configuration -->

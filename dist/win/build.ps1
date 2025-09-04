@@ -206,14 +206,6 @@ if ($LASTEXITCODE -ne 0) {
 Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
 attrib -r "$AppName\${AppName} (Debug).exe"
-# patch batch script to set hostfile
-$webDAVPatcher = "$AppName\patchWebDAV.bat"
-try {
-	(Get-Content $webDAVPatcher ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"$LoopbackAlias`"" | Set-Content $webDAVPatcher
-} catch {
-   Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
-   exit 1
-}
 
 # create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
