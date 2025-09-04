@@ -299,9 +299,9 @@ return 0;
 # ============================
 if ($clean) {
 	Write-Host "Cleaning up previous build artifacts..."
-	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore
-	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore
-	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 }
 return Main
 
