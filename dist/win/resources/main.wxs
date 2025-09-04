@@ -126,16 +126,16 @@
 
     <ns0:Property Id="WixQuietExec64CmdTimeout" Value="20" />
     <!-- Note for custom actions: Immediate CAs run BEFORE the files are installed, hence if you depend on installed files, the CAs must be deferred.-->
-    
+
     <!-- Property for controlling update check behavior (can be set via command line) -->
     <ns0:Property Id="DISABLEUPDATECHECK" Secure="yes" />
-    
+
     <!-- WebDAV patches -->
     <ns0:SetProperty Id="PatchWebDAV" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot;" Sequence="execute" Before="PatchWebDAV" />
     <ns0:CustomAction Id="PatchWebDAV" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
-    
+
     <!-- Update check configuration -->
-    <ns0:SetProperty Id="PatchUpdateCheck" Value="&quot;[INSTALLDIR]patchUpdateCheck.bat&quot; &quot;[INSTALLDIR]&quot; &quot;[DISABLEUPDATECHECK]&quot;" Sequence="execute" Before="PatchUpdateCheck" />
+    <ns0:SetProperty Id="PatchUpdateCheck" Value="&quot;[INSTALLDIR]patchUpdateCheck.bat&quot; &quot;[DISABLEUPDATECHECK]&quot;" Sequence="execute" Before="PatchUpdateCheck" />
     <ns0:CustomAction Id="PatchUpdateCheck" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec64" Execute="deferred" Return="ignore" Impersonate="no"/>
 
     <!-- Running App detection and exit -->

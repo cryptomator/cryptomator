@@ -1,18 +1,16 @@
 # PowerShell script to modify Cryptomator.cfg to set disableUpdateCheck property
 # This script is executed as a Custom Action during MSI installation
-# It reads the DISABLEUPDATECHECK property from the MSI and modifies the .cfg file accordingly
-# NOTE: This script only modifies the config, if the config already contains the cryptomator.disableUpdateCheck property!
+# If the DisableUpdateCheck parameter is set to true, it disables the update check in Cryptomator by modifying the Cryptomator.cfg file.
+# NOTE: This file must be located in the same directory as set in the MSI property INSTALLDIR
 
 param(
-    [Parameter(Mandatory)][string]$InstallDir,
     [Parameter(Mandatory)][string]$DisableUpdateCheck
 )
 
 try {
     # Log parameters for debugging (visible in MSI verbose logs)
-    Write-Host "InstallDir: $InstallDir"
     Write-Host "DisableUpdateCheck: $DisableUpdateCheck"
-    
+
     # Parse DisableUpdateCheck value (handle various input formats)
     $shouldDisable = $false
     if ($DisableUpdateCheck) {
@@ -22,21 +20,21 @@ try {
 
     Write-Host "Setting cryptomator.disableUpdateCheck to: $shouldDisable"
     if (-not $shouldDisable) {
-        Write-Host "Disable-Update-Check property is set to 'false'. Skipping config modification, nothing to do."
+        Write-Host "Disable-Update-Check property is by default 'false'. Skipping config modification."
         exit 0
     }
 
     # Determine the .cfg file path
-    $cfgFile = Join-Path $($InstallDir.Trim()) "app\Cryptomator.cfg"
+    $cfgFile = Join-Path $($PSScriptRoot) "app\Cryptomator.cfg"
 
     if (-not (Test-Path $cfgFile)) {
         Write-Error "Configuration file not found at: $cfgFile"
         exit 1
     }
-    
+
     # Read the current configuration
     $content = Get-Content $cfgFile -Raw
-       
+
     # Add the new option based on the property value
     # Use regular expressions substitutions to replace the property
     $searchExpression = '(?<Prefix>java-options=-Dcryptomator\.disableUpdateCheck)=false'

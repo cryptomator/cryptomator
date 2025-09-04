@@ -1,23 +1,18 @@
 @echo off
 :: Batch wrapper for PowerShell script to modify Cryptomator update check settings
 :: This is executed as a Custom Action during MSI installation
+:: This file must be located in the INSTALLDIR
 
-:: Get the install directory from the Custom Action property
-set "INSTALLDIR=%~dp1"
-set "DISABLEUPDATECHECK=%~2"
+set "DISABLEUPDATECHECK=%~1"
 
 :: Log for debugging
-echo INSTALLDIR=%INSTALLDIR%
 echo DISABLEUPDATECHECK=%DISABLEUPDATECHECK%
 
-:: Normalize install directory (remove trailing slash if present)
-if "%INSTALLDIR:~-1%"=="\" set "INSTALLDIR=%INSTALLDIR:~0,-1%"
-
-
+:: Change to INSTALLDIR
+cd %~dp0
 :: Execute the PowerShell script
-powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File "%INSTALLDIR%\patchUpdateCheck.ps1"^
- -InstallDir "%INSTALLDIR%"^
- -DisableUpdateCheck "%DISABLEUPDATECHECK%" 
+powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File ".\patchUpdateCheck.ps1"^
+ -DisableUpdateCheck "%DISABLEUPDATECHECK%"
 
 :: Return the exit code from PowerShell
 exit /b %ERRORLEVEL%
