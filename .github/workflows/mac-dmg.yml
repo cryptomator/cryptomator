@@ -136,6 +136,7 @@ jobs:
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
+          --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
           --mac-package-identifier org.cryptomator
           --resource-dir dist/mac/resources
       - name: Patch Cryptomator.app

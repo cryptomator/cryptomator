@@ -133,6 +133,7 @@ jobs:
           --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\""
           --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
           --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\""
+          --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
           --resource-dir dist/linux/resources
       - name: Patch Cryptomator.AppDir
         run: |
