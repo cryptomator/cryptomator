@@ -151,6 +151,20 @@ jobs:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NO: ${{ needs.get-version.outputs.revNum }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+      - name: Extract and install dock tile plugin
+        run: |
+          INTEGRATIONS_MAC_JAR=$(find Cryptomator.app/Contents/app/mods -name "integrations-mac-*.jar" | head -1)
+          echo "Extracting and installing Cryptomator.docktileplugin..."
+          TEMP_DIR=$(mktemp -d)
+          unzip -q ${INTEGRATIONS_MAC_JAR} -d ${TEMP_DIR}
+          mkdir -p Cryptomator.app/Contents/PlugIns
+          mv ${TEMP_DIR}/Cryptomator.docktileplugin Cryptomator.app/Contents/PlugIns/
+          chmod +x Cryptomator.app/Contents/PlugIns/Cryptomator.docktileplugin/Contents/MacOS/Cryptomator
+          echo "Repackaging ${INTEGRATIONS_MAC_JAR} without dock tile plugin..."
+          pushd ${TEMP_DIR} > /dev/null
+          zip -qr ${INTEGRATIONS_MAC_JAR} *
+          popd > /dev/null
+          rm -rf ${TEMP_DIR}
       - name: Generate license for dmg
         run: >
           mvn -B -Djavafx.platform=mac license:add-third-party
@@ -187,6 +201,8 @@ jobs:
           echo "Codesigning jdk files..."
           find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
           find Cryptomator.app/Contents/runtime/Contents/Home/lib/ \( -name 'jspawnhelper' -o -name 'pauseengine' -o -name 'simengine' \) -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+          echo "Codesigning dock tile plugin..."
+          codesign --force --deep -s ${CODESIGN_IDENTITY} Cryptomator.app/Contents/PlugIns/Cryptomator.docktileplugin
           echo "Codesigning jar contents..."
           find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
           for JAR_PATH in `find Cryptomator.app -name "*.jar"`; do

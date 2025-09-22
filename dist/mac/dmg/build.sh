@@ -133,6 +133,20 @@ sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
+# extract and install dock tile plugin from integrations-mac jar
+INTEGRATIONS_MAC_JAR=$(find ${APP_NAME}.app/Contents/app/mods -name "integrations-mac-*.jar" | head -1)
+echo "Extracting and installing Cryptomator.docktileplugin..."
+TEMP_DIR=$(mktemp -d)
+unzip -q ${INTEGRATIONS_MAC_JAR} -d ${TEMP_DIR}
+mkdir -p ${APP_NAME}.app/Contents/PlugIns
+mv ${TEMP_DIR}/Cryptomator.docktileplugin ${APP_NAME}.app/Contents/PlugIns/
+chmod +x ${APP_NAME}.app/Contents/PlugIns/Cryptomator.docktileplugin/Contents/MacOS/Cryptomator
+echo "Repackaging ${INTEGRATIONS_MAC_JAR} without dock tile plugin..."
+pushd ${TEMP_DIR} > /dev/null
+zip -qr ${INTEGRATIONS_MAC_JAR} *
+popd > /dev/null
+rm -rf ${TEMP_DIR}
+
 # generate license
 mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
@@ -148,6 +162,8 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     echo "Codesigning jdk files..."
     find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+    echo "Codesigning dock tile plugin..."
+    codesign --force --deep -s ${CODESIGN_IDENTITY} ${APP_NAME}.app/Contents/PlugIns/Cryptomator.docktileplugin
     echo "Codesigning jar contents..."
     find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     for JAR_PATH in `find ${APP_NAME}.app -name "*.jar"`; do
