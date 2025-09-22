@@ -34,11 +34,11 @@
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.9.0</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>1.6.0</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.5.0</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.4.0</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.6.0</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>5.0.5</cryptomator.fuse.version>
+		<cryptomator.integrations.version>1.7.0</cryptomator.integrations.version>
+		<cryptomator.integrations.win.version>1.5.1</cryptomator.integrations.win.version>
+		<cryptomator.integrations.mac.version>1.4.1</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.linux.version>1.6.1</cryptomator.integrations.linux.version>
+		<cryptomator.fuse.version>5.1.0</cryptomator.fuse.version>
 		<cryptomator.webdav.version>3.0.0</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
