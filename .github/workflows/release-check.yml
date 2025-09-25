@@ -12,7 +12,7 @@ defaults:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: 23
+  JAVA_VERSION: 25
 
 jobs:
   check-preconditions:

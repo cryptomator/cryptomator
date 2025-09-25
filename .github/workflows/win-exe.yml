@@ -51,13 +51,13 @@ jobs:
         include:
           - arch: x64
             os: windows-latest
-            java-dist: 'zulu'
-            java-version: '24.0.1+9'
+            java-dist: 'zulu' #TODO: is finally temurin possible?
+            java-version: '25.0.0+36'
             java-package: 'jdk'
           - arch: arm64
             os: windows-11-arm
             java-dist: 'liberica'
-            java-version: '24.0.1+11'
+            java-version: '24.0.1+11' #TODO: which distro to use here?
             java-package: 'jdk+fx' #This is needed, as liberica contains JFX 24 Jmods for Windows ARM64
     steps:
       - uses: actions/checkout@v5
