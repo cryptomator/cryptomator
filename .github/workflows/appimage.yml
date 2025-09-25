@@ -38,7 +38,7 @@ jobs:
           - os: ubuntu-latest
             appimage-suffix: x86_64
             openjfx-url: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-x64_bin-jmods.zip'
-            openjfx-sha: 'a72157506746f03de493171313ec93425f1ec1b5cb4b446eee9a568ff484af4e'
+            openjfx-sha: '96e520f48610d8ffb94ca30face1f11ffe8a977ddc1c4ff80b1a9e9f048bd94e'
           - os: ubuntu-24.04-arm
             appimage-suffix: aarch64
             openjfx-url: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-aarch64_bin-jmods.zip'
