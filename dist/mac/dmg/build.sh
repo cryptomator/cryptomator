@@ -162,7 +162,7 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
     echo "Codesigning dock tile plugin..."
-    codesign --force --deep -s ${CODESIGN_IDENTITY} ${APP_NAME}.app/Contents/PlugIns/Cryptomator.docktileplugin
+    codesign --force -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app/Contents/PlugIns/Cryptomator.docktileplugin/Contents/MacOS/Cryptomator
     echo "Codesigning jar contents..."
     find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     for JAR_PATH in `find ${APP_NAME}.app -name "*.jar"`; do
