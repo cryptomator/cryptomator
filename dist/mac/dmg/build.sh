@@ -133,19 +133,18 @@ sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
-# extract and install dock tile plugin from integrations-mac jar
-INTEGRATIONS_MAC_JAR=$(find ${APP_NAME}.app/Contents/app/mods -name "integrations-mac-*.jar" | head -1)
-echo "Extracting and installing Cryptomator.docktileplugin..."
-TEMP_DIR=$(mktemp -d)
-unzip -q ${INTEGRATIONS_MAC_JAR} -d ${TEMP_DIR}
+# build and install dock tile plugin
+echo "Building and installing Cryptomator.docktileplugin..."
+DERIVED_DATA_PATH=../DockTilePlugin/build
+xcodebuild -project ../DockTilePlugin/DockTilePlugin.xcodeproj \
+           -scheme DockTilePlugin \
+           -configuration Release \
+           -derivedDataPath ${DERIVED_DATA_PATH} \
+           -quiet \
+           clean build
 mkdir -p ${APP_NAME}.app/Contents/PlugIns
-mv ${TEMP_DIR}/Cryptomator.docktileplugin ${APP_NAME}.app/Contents/PlugIns/
-chmod +x ${APP_NAME}.app/Contents/PlugIns/Cryptomator.docktileplugin/Contents/MacOS/Cryptomator
-echo "Repackaging ${INTEGRATIONS_MAC_JAR} without dock tile plugin..."
-pushd ${TEMP_DIR} > /dev/null
-zip -qr ${INTEGRATIONS_MAC_JAR} *
-popd > /dev/null
-rm -rf ${TEMP_DIR}
+cp -R ${DERIVED_DATA_PATH}/Build/Products/Release/Cryptomator.docktileplugin ${APP_NAME}.app/Contents/PlugIns/
+rm -rf ${DERIVED_DATA_PATH}
 
 # generate license
 mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
