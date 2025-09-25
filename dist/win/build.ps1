@@ -86,16 +86,16 @@ switch ($archName) {
     'ARM64' {
 		$javafxBaseJmod = Join-Path $Env:JAVA_HOME "jmods\javafx.base.jmod"
 		if (!(Test-Path $javafxBaseJmod)) {
-			Write-Error "JavaFX module not found in JDK. Please ensure full JDK (including jmods) is installed."
+			Write-Error "JavaFX module not found in JDK. Please ensure a JDK with JavaFX (including jmods) is installed."
 			exit 1
 		}
 
         $jmodPaths = "$Env:JAVA_HOME/jmods"
     }
     'x64' {
-		$javaFxVersion='24.0.1'
+		$javaFxVersion='25'
 		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-		$javaFxJmodsSHA256 = 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
+		$javaFxJmodsSHA256 = 'c8eb9fd039b00e0020cf6c3db8ed7876bf3ee4d27860aa697a247b83b8296ae7'
 		$javaFxJmods = '.\resources\jfxJmods.zip'
 
 		if( !(Test-Path -Path $javaFxJmods) ) {

@@ -23,12 +23,12 @@ mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests -Djavafx.platform=l
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
-JAVAFX_VERSION=24.0.1
+JAVAFX_VERSION=25
 JAVAFX_ARCH="x64"
-JAVAFX_JMODS_SHA256='425fac742b9fbd095b2ce868cff82d1024620f747c94a7144d0a4879e756146c'
+JAVAFX_JMODS_SHA256='a72157506746f03de493171313ec93425f1ec1b5cb4b446eee9a568ff484af4e'
 if [ "${CPU_ARCH}" = "aarch64" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256='7e02edd0f4ee5527a27c94b0bbba66fcaaff41009119e45d0eca0f96ddfb6e7b'
+    JAVAFX_JMODS_SHA256='951c52481af0ec5885b06f1ebaa8a10da7e8ea23c5e1ef3e2f6f11fa1b3a7ce1'
 fi
 
 # download javaFX jmods
