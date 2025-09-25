@@ -161,8 +161,6 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     echo "Codesigning jdk files..."
     find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
-    echo "Codesigning dock tile plugin..."
-    codesign --force -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app/Contents/PlugIns/Cryptomator.docktileplugin/Contents/MacOS/Cryptomator
     echo "Codesigning jar contents..."
     find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
     for JAR_PATH in `find ${APP_NAME}.app -name "*.jar"`; do
@@ -185,6 +183,8 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" ${APP_NAME}.entitlements
     sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" ${APP_NAME}.entitlements
     codesign --force --deep --entitlements ${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
+    echo "Codesigning Cryptomator.docktileplugin..."
+    codesign --force -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app/Contents/PlugIns/Cryptomator.docktileplugin/Contents/MacOS/Cryptomator
 fi
 
 # prepare dmg contents
