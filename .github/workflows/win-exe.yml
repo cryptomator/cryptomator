@@ -293,12 +293,6 @@ jobs:
             java-dist: 'zulu'
             java-version: '24.0.1+9'
             java-package: 'jdk'
-          - arch: arm64
-            os: windows-11-arm
-            executable-suffix: arm64
-            java-dist: 'liberica'
-            java-version: '24.0.1+11'
-            java-package: 'jdk+fx' #This is needed, as liberica contains JFX 24 Jmods for Windows ARM64
     steps:
       - uses: actions/checkout@v5
       - name: Install wix and extensions
@@ -412,9 +406,7 @@ jobs:
     needs: [ build-msi, build-exe ]
     outputs:
       download-url-msi-x64: ${{ fromJSON(steps.publish.outputs.assets)[0].browser_download_url }}
-      download-url-msi-arm64: ${{ fromJSON(steps.publish.outputs.assets)[1].browser_download_url }}
       download-url-exe-x64: ${{ fromJSON(steps.publish.outputs.assets)[2].browser_download_url }}
-      download-url-exe-arm64: ${{ fromJSON(steps.publish.outputs.assets)[3].browser_download_url }}
     steps:
       - name: Download installers
         uses: actions/download-artifact@v5
@@ -429,9 +421,7 @@ jobs:
           # do not change ordering of filelist, required for correct job output
           files: |
             *x64.msi
-            *arm64.msi
             *x64.exe
-            *arm64.exe
             *.asc
 
   allowlist-msi-x64:
@@ -441,25 +431,11 @@ jobs:
       url: ${{ needs.publish.outputs.download-url-msi-x64 }}
     secrets: inherit
 
-  allowlist-msi-arm64:
-    uses: ./.github/workflows/av-whitelist.yml
-    needs: [ publish ]
-    with:
-      url: ${{ needs.publish.outputs.download-url-msi-arm64 }}
-    secrets: inherit
-
   allowlist-exe-x64:
     uses: ./.github/workflows/av-whitelist.yml
     needs: [ publish, allowlist-msi-x64 ]
     with:
       url: ${{ needs.publish.outputs.download-url-exe-x64 }}
-    secrets: inherit
-
-  allowlist-exe-arm64:
-    uses: ./.github/workflows/av-whitelist.yml
-    needs: [ publish, allowlist-msi-arm64 ]
-    with:
-      url: ${{ needs.publish.outputs.download-url-exe-arm64 }}
     secrets: inherit
 
   notify-winget:
