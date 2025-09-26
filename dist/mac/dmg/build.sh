@@ -183,8 +183,6 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" ${APP_NAME}.entitlements
     sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" ${APP_NAME}.entitlements
     codesign --force --deep --entitlements ${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
-    echo "Codesigning Cryptomator.docktileplugin..."
-    codesign --force -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app/Contents/PlugIns/Cryptomator.docktileplugin/Contents/MacOS/Cryptomator
 fi
 
 # prepare dmg contents
