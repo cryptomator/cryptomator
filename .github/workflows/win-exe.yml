@@ -151,7 +151,7 @@ jobs:
           --java-options "-Dcryptomator.p12Path=\"@{appdata}/Cryptomator/key.p12;@{userhome}/AppData/Roaming/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"@{localappdata}/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Cryptomator\""
-          --java-options "-Dcryptomator.loopbackAlias=\"${{ env.LOOPBACK_ALIAS }}\""
+          --java-options "-Dcryptomator.loopbackAlias=\"cryptomator-vault\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
