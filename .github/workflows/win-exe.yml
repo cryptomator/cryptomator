@@ -219,7 +219,7 @@ jobs:
           }
       - name: Generate license for MSI
         run: >
-          mvn -B license:add-third-party "
+          mvn -B license:add-third-party
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.outputDirectory=dist/win/resources"
           "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
