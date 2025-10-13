@@ -65,7 +65,7 @@ Write-Host "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
-&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin "-Djavafx.platform=win"
+&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -194,7 +194,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 #Create RTF license for msi
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\resources\" `
@@ -237,7 +237,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 #Create RTF license for bundle
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `
