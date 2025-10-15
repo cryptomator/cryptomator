@@ -151,7 +151,7 @@ public class Vault {
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
 				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
 				.withFilesystemEventConsumer(this::consumeVaultEvent) //
-				.withOwner("cryptobot")
+				.withOwner(System.getProperty("user.name"))
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
