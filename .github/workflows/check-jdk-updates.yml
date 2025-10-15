@@ -26,7 +26,7 @@ jobs:
         run: echo 'JDK_MAJOR_VERSION=${{ env.JDK_VERSION }}'.substring(0,20) >> "$env:GITHUB_ENV"
         shell: pwsh
       - name: Checkout latest JDK ${{ env.JDK_MAJOR_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: ${{ env.JDK_MAJOR_VERSION}}
           distribution: ${{ env.JDK_VENDOR }}
@@ -70,7 +70,7 @@ jobs:
           }
       - name: Notify
         if: steps.determine.outputs.UPDATE_AVAILABLE == 'true'
-        uses: rtCamp/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_USERNAME: 'Cryptobot'

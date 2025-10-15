@@ -102,6 +102,12 @@ public class VaultListContextMenuController implements FxController {
 		vaultService.reveal(vault);
 	}
 
+	@FXML
+	public void didClickShareVault() {
+		var vault = Objects.requireNonNull(selectedVault.get());
+		appWindows.showShareVaultWindow(vault);
+	}
+
 	// Getter and Setter
 
 	public ObservableValue<Boolean> selectedVaultUnlockableProperty() {

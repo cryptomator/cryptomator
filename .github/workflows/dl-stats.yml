@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Get download count of latest releases
         id: get-stats
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const query = `query($owner:String!, $name:String!) {
@@ -53,7 +53,7 @@ jobs:
           INTERVAL: 900
           JSON_DATA: ${{ steps.get-stats.outputs.result }}
       - name: Upload Results
-        uses: fjogeleit/http-request-action@v1
+        uses: fjogeleit/http-request-action@1297c6fc63a79b147d1676540a3fd9d2e37817c5 # v1.16.5
         with:
           url: 'https://graphite-us-central1.grafana.net/metrics'
           method: 'POST'

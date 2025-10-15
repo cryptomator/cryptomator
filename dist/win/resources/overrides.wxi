@@ -41,7 +41,7 @@ Media Type of the encrypted data files. Default is "application/vnd.cryptomator.
 
 Close Application settings:
 - CloseApplicationTarget
-Full name of executable to be checkd in the close application util. Default is "cryptomator.exe"
+Full name of executable to be checked in the close application util. Default is "cryptomator.exe"
 
 Legacy Installation settings:
 - SkipCryptomatorLegacyCheck

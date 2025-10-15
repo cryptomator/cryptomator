@@ -26,10 +26,10 @@ env:
   JAVA_VERSION: '24.0.1+9'
   COFFEELIBS_JDK: 24
   COFFEELIBS_JDK_VERSION: '24.0.1+9-0ppa3'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '425fac742b9fbd095b2ce868cff82d1024620f747c94a7144d0a4879e756146c'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: '7e02edd0f4ee5527a27c94b0bbba66fcaaff41009119e45d0eca0f96ddfb6e7b'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '96e520f48610d8ffb94ca30face1f11ffe8a977ddc1c4ff80b1a9e9f048bd94e'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: '951c52481af0ec5885b06f1ebaa8a10da7e8ea23c5e1ef3e2f6f11fa1b3a7ce1'
 
 jobs:
   get-version:
@@ -41,13 +41,15 @@ jobs:
     name: Build Debian Package
     runs-on: ubuntu-22.04
     needs: [get-version]
+    env:
+      INPUT_PPAVER: ${{ inputs.ppaver }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - id: deb-version
         name: Determine deb-version
         run: |
-          if [ -n "${{inputs.ppaver}}" ]; then
-            echo "debVersion=${{inputs.ppaver }}" >> "$GITHUB_OUTPUT"
+          if [ -n "${INPUT_PPAVER}" ]; then
+            echo "debVersion=${INPUT_PPAVER}" >> "$GITHUB_OUTPUT"
           else
             echo "debVersion=${{needs.get-version.outputs.semVerStr}}" >> "$GITHUB_OUTPUT"
           fi
@@ -57,14 +59,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.COFFEELIBS_JDK }}=${{ env.COFFEELIBS_JDK_VERSION }}
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
           cache: 'maven'
       - name: Run maven
-        run: mvn -B clean package -Plinux -Djavafx.platform=linux -DskipTests
+        run: mvn -B clean package -Plinux -DskipTests
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
@@ -140,7 +142,7 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: linux-deb-package
           path: |

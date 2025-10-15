@@ -30,16 +30,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       fileName: ${{ steps.extractName.outputs.fileName}}
+    env:
+      INPUT_URL: ${{ inputs.url }}
     steps:
       - name: Extract file name
         id: extractName
         run: |
-          url="${{ inputs.url }}"
+          url="${INPUT_URL}"
           echo "fileName=${url##*/}" >> $GITHUB_OUTPUT
       - name: Download file
-        run: curl --remote-name ${{ inputs.url }} -L -o ${{steps.extractName.outputs.fileName}}
+        run: curl --remote-name ${INPUT_URL} -L -o ${{steps.extractName.outputs.fileName}}
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ steps.extractName.outputs.fileName }}
           path: ${{ steps.extractName.outputs.fileName }}
@@ -51,12 +53,12 @@ jobs:
     if: github.event_name == 'workflow_call' || inputs.kaspersky
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@a51268f67f6605236975928ae28b0f7e9971d50a # v4.6.3
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
@@ -71,12 +73,12 @@ jobs:
     if: github.event_name == 'workflow_call'  || inputs.avast
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
-      - name: Upload to Avast 
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+      - name: Upload to Avast
+        uses: wlixcc/SFTP-Deploy-Action@a5ccb9c6211a94cc59404f0fdb2a9936a6dfee64 # v1.2.6
         with:
           server: whitelisting.avast.com
           port: 22

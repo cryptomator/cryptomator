@@ -102,7 +102,7 @@ public class FileSystemEventAggregator {
 			case ConflictResolutionFailedEvent(_, _, Path conflictingCiphertext, _) -> conflictingCiphertext;
 			case BrokenDirFileEvent(_, Path ciphertext) -> ciphertext;
 			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
-			case FileIsInUseEvent(_, _, Path ciphertext, _) -> ciphertext;
+			case FileIsInUseEvent(_, _, Path ciphertext, _, _, _) -> ciphertext;
 		};
 		return new FSEventBucket(v, p, event.getClass());
 	}

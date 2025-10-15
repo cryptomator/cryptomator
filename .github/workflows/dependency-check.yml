@@ -7,12 +7,13 @@ on:
 
 jobs:
   check-dependencies:
-    uses: skymatic/workflows/.github/workflows/run-dependency-check.yml@v1
+    uses: skymatic/workflows/.github/workflows/run-dependency-check.yml@1074588008ae3326a2221ea451783280518f0366 # v3.0.1
     with:
       runner-os: 'ubuntu-latest'
       java-distribution: 'temurin'
       java-version: 24
-      check-command: 'mvn -B validate -Pdependency-check -Djavafx.platform=linux'
     secrets:
       nvd-api-key: ${{ secrets.NVD_API_KEY }}
+      ossindex-username: ${{ secrets.OSSINDEX_USERNAME }}
+      ossindex-token: ${{ secrets.OSSINDEX_API_TOKEN }}
       slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}

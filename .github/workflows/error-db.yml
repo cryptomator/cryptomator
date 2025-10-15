@@ -14,7 +14,7 @@ jobs:
       - name: Query Discussion Data
         if: github.event_name == 'discussion_comment' || github.event_name == 'discussion' && github.event.action != 'deleted'
         id: query-data
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const query = `query ($owner: String!, $name: String!, $discussionNumber: Int!) {
@@ -42,7 +42,7 @@ jobs:
             return await github.graphql(query, variables)
       - name: Get Gist
         id: get-gist
-        uses: andymckay/get-gist-action@master
+        uses: andymckay/get-gist-action@cf3bc8164af24126f7e5979eb6d3dc0c12309bd1 # not_tagged
         with:
           gistURL: https://gist.github.com/cryptobot/accba9fb9555e7192271b85606f97230
       - name: Merge Error Code Data
@@ -58,7 +58,7 @@ jobs:
         env:
           DISCUSSION: ${{ steps.query-data.outputs.result }}
       - name: Patch Gist
-        uses: exuanbo/actions-deploy-gist@v1
+        uses: exuanbo/actions-deploy-gist@47697fceaeea2006a90594ee24eb9cd0a1121ef8 # v1.1.4
         with:
           token: ${{ secrets.CRYPTOBOT_GIST_TOKEN }}
           gist_id: accba9fb9555e7192271b85606f97230
