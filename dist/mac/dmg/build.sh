@@ -85,7 +85,7 @@ fi
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JMOD_PATHS}" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,java.compiler \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,java.compiler \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
