@@ -28,7 +28,7 @@ import static org.cryptomator.common.vaults.VaultState.Value.*;
 @FxApplicationScoped
 public class FxApplicationTerminator {
 
-	private static final Set<VaultState.Value> STATES_ALLOWING_TERMINATION = EnumSet.of(LOCKED, NEEDS_MIGRATION, MISSING, ERROR);
+	private static final Set<VaultState.Value> STATES_ALLOWING_TERMINATION = EnumSet.of(LOCKED, NEEDS_MIGRATION, MISSING, ERROR, VAULT_CONFIG_MISSING, ALL_MISSING);
 	private static final Set<VaultState.Value> STATES_PREVENT_TERMINATION = EnumSet.of(PROCESSING);
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplicationTerminator.class);
 

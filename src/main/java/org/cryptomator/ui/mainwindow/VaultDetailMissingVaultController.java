@@ -1,20 +1,26 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_GLOB;
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 @MainWindowScoped
 public class VaultDetailMissingVaultController implements FxController {
@@ -23,6 +29,7 @@ public class VaultDetailMissingVaultController implements FxController {
 	private final ObservableList<Vault> vaults;
 	private final ResourceBundle resourceBundle;
 	private final Stage window;
+	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final Dialogs dialogs;
 
 	@Inject
@@ -30,11 +37,13 @@ public class VaultDetailMissingVaultController implements FxController {
 											 ObservableList<Vault> vaults, //
 											 ResourceBundle resourceBundle, //
 											 @MainWindow Stage window, //
-											 Dialogs dialogs) {
+											 Dialogs dialogs, //
+											 RecoveryKeyComponent.Factory recoveryKeyWindow) {
 		this.vault = vault;
 		this.vaults = vaults;
 		this.resourceBundle = resourceBundle;
 		this.window = window;
+		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.dialogs = dialogs;
 	}
 
@@ -46,6 +55,19 @@ public class VaultDetailMissingVaultController implements FxController {
 	@FXML
 	void didClickRemoveVault() {
 		dialogs.prepareRemoveVaultDialog(window, vault.get(), vaults).build().showAndWait();
+	}
+
+	@FXML
+	void restoreVaultConfig() {
+		if(KeyLoadingStrategy.isHubVault(vault.get().getVaultSettings().lastKnownKeyLoader.get())){
+			dialogs.prepareContactHubVaultOwner(window).build().showAndWait();
+		}
+		else if(Files.exists(vault.get().getPath().resolve(MASTERKEY_FILENAME))){
+			recoveryKeyWindow.create(vault.get(), window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_VAULT_CONFIG)).showOnboardingDialogWindow();
+		}
+		else {
+			recoveryKeyWindow.create(vault.get(), window, new SimpleObjectProperty<>(RecoveryActionType.RESTORE_ALL)).showOnboardingDialogWindow();
+		}
 	}
 
 	@FXML

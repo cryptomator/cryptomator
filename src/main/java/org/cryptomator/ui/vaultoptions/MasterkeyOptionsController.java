@@ -1,24 +1,22 @@
 package org.cryptomator.ui.vaultoptions;
 
 import org.cryptomator.common.keychain.KeychainManager;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
 @VaultOptionsScoped
 public class MasterkeyOptionsController implements FxController {
-
-	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyOptionsController.class);
 
 	private final Vault vault;
 	private final Stage window;
@@ -51,12 +49,12 @@ public class MasterkeyOptionsController implements FxController {
 
 	@FXML
 	public void showRecoveryKey() {
-		recoveryKeyWindow.create(vault, window).showRecoveryKeyCreationWindow();
+		recoveryKeyWindow.create(vault, window, new SimpleObjectProperty<>(RecoveryActionType.SHOW_KEY)).showRecoveryKeyCreationWindow();
 	}
 
 	@FXML
 	public void showRecoverVaultDialog() {
-		recoveryKeyWindow.create(vault, window).showRecoveryKeyRecoverWindow();
+		recoveryKeyWindow.create(vault, window, new SimpleObjectProperty<>(RecoveryActionType.RESET_PASSWORD)).showRecoveryKeyRecoverWindow();
 	}
 
 	@FXML

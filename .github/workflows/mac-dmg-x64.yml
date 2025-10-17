@@ -44,12 +44,12 @@ jobs:
           architecture: x64
           output-suffix: x64
           fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_osx-x64_bin-jmods.zip'
-          openjfx-sha: '6e62a426d43c168a488521f904a523f3dd6ee2cf103e08136f2fd465c828a105'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_osx-x64_bin-jmods.zip'
+          openjfx-sha: '0eba73fb28a24c845175d16fa2f8c081c936ce6de1be9b79eb6119fa32e53d52'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -79,7 +79,7 @@ jobs:
       - name: Set version
         run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
       - name: Run maven
-        run: mvn -B -Djavafx.platform=mac clean package -Pmac -DskipTests
+        run: mvn -B clean package -Pmac -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
@@ -99,7 +99,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
@@ -121,7 +121,6 @@ jobs:
           --app-version "${{ needs.get-version.outputs.semVerNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac"
-          --java-options "--sun-misc-unsafe-memory-access=allow"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""
@@ -151,9 +150,23 @@ jobs:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NO: ${{ needs.get-version.outputs.revNum }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+      - name: Build and install DockTilePlugin
+        env:
+          DERIVED_DATA_PATH: dist/mac/DockTilePlugin/build
+        run: |
+          xcodebuild -project dist/mac/DockTilePlugin/DockTilePlugin.xcodeproj \
+                     -scheme DockTilePlugin \
+                     -configuration Release \
+                     -destination "platform=macOS,arch=x86_64" \
+                     -derivedDataPath ${DERIVED_DATA_PATH} \
+                     -quiet \
+                     clean build
+          mkdir -p Cryptomator.app/Contents/PlugIns
+          cp -R ${DERIVED_DATA_PATH}/Build/Products/Release/Cryptomator.docktileplugin Cryptomator.app/Contents/PlugIns/
+          rm -rf ${DERIVED_DATA_PATH}
       - name: Generate license for dmg
         run: >
-          mvn -B -Djavafx.platform=mac license:add-third-party
+          mvn -B license:add-third-party
           -Dlicense.thirdPartyFilename=license.rtf
           -Dlicense.outputDirectory=dist/mac/dmg/resources
           -Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl
@@ -248,7 +261,7 @@ jobs:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
       - name: Notarize .dmg
         if: startsWith(github.ref, 'refs/tags/') || inputs.notarize
-        uses: cocoalibs/xcode-notarization-action@v1
+        uses: cocoalibs/xcode-notarization-action@5cf433d494b6fa26504b574c591f4dd120388846 # v1.0.3
         with:
           app-path: 'Cryptomator-*.dmg'
           apple-id: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
@@ -269,7 +282,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dmg-${{ matrix.output-suffix }}
           path: |
@@ -278,7 +291,7 @@ jobs:
           if-no-files-found: error
       - name: Publish dmg on GitHub Releases
         if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}

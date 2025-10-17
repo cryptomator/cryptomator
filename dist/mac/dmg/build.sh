@@ -32,15 +32,15 @@ REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
-JAVAFX_VERSION=24.0.1
+JAVAFX_VERSION=25
 JAVAFX_ARCH="undefined"
 JAVAFX_JMODS_SHA256="undefined"
 if [ "$(machine)" = "arm64e" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256="b5a94a13077507003fa852512bfa33f4fb680bc8076d8002e4227a84c85171d4"
+    JAVAFX_JMODS_SHA256="13f8c0513c40c95881479fbcf0465a29a60217393fb0656f5e4eab78a9442fba"
 else
     JAVAFX_ARCH="x64"
-    JAVAFX_JMODS_SHA256="6e62a426d43c168a488521f904a523f3dd6ee2cf103e08136f2fd465c828a105"
+    JAVAFX_JMODS_SHA256="0eba73fb28a24c845175d16fa2f8c081c936ce6de1be9b79eb6119fa32e53d52"
 fi
 JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_osx-${JAVAFX_ARCH}_bin-jmods.zip"
 
@@ -71,7 +71,7 @@ if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
 fi
 
 # compile
-mvn -B -Djavafx.platform=mac -f../../../pom.xml clean package -DskipTests -Pmac
+mvn -B -f../../../pom.xml clean package -DskipTests -Pmac
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 
@@ -85,7 +85,7 @@ fi
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JMOD_PATHS}" \
-    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,java.compiler \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,java.compiler \
     --strip-native-commands \
     --no-header-files \
     --no-man-pages \
@@ -133,8 +133,21 @@ sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
+# build and install dock tile plugin
+echo "Building and installing Cryptomator.docktileplugin..."
+DERIVED_DATA_PATH=../DockTilePlugin/build
+xcodebuild -project ../DockTilePlugin/DockTilePlugin.xcodeproj \
+           -scheme DockTilePlugin \
+           -configuration Release \
+           -derivedDataPath ${DERIVED_DATA_PATH} \
+           -quiet \
+           clean build
+mkdir -p ${APP_NAME}.app/Contents/PlugIns
+cp -R ${DERIVED_DATA_PATH}/Build/Products/Release/Cryptomator.docktileplugin ${APP_NAME}.app/Contents/PlugIns/
+rm -rf ${DERIVED_DATA_PATH}
+
 # generate license
-mvn -B -Djavafx.platform=mac -f../../../pom.xml license:add-third-party \
+mvn -B -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
     -Dlicense.outputDirectory=dist/mac/dmg/resources \
     -Dlicense.fileTemplate=resources/licenseTemplate.ftl \

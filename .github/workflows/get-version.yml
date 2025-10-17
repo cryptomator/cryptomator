@@ -35,11 +35,11 @@ jobs:
       revNum: ${{ steps.versions.outputs.revNum }}
       type: ${{ steps.versions.outputs.type}}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -49,8 +49,8 @@ jobs:
         run: |
           if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
             SEM_VER_STR=${GITHUB_REF##*/}
-          elif [[ "${{ inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
-            SEM_VER_STR="${{ inputs.version }}"
+          elif [[ "${VERSION_STRING}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR="${VERSION_STRING}"
           else
             SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
           fi
@@ -70,7 +70,9 @@ jobs:
           echo "semVerNum=${SEM_VER_NUM}" >> $GITHUB_OUTPUT
           echo "revNum=${REVCOUNT}" >> $GITHUB_OUTPUT
           echo "type=${TYPE}" >> $GITHUB_OUTPUT
+        env:
+          VERSION_STRING: ${{ inputs.version }}
       - name: Validate Version
-        uses: skymatic/semver-validation-action@v3
+        uses: skymatic/semver-validation-action@7a6ae1c9e121540d11c9c7e4e667c83d583aa153 # v3.0.0
         with:
           version: ${{ steps.versions.outputs.semVerStr }}

@@ -42,14 +42,14 @@
 		<cryptomator.webdav.version>3.0.0</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
-		<commons-lang3.version>3.18.0</commons-lang3.version>
-		<dagger.version>2.57.1</dagger.version>
+		<commons-lang3.version>3.19.0</commons-lang3.version>
+		<dagger.version>2.57.2</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.20.0</jackson.version>
-		<javafx.version>24.0.1</javafx.version>
+		<javafx.version>25</javafx.version>
 		<jwt.version>4.5.0</jwt.version>
-		<nimbus-jose.version>9.37.3</nimbus-jose.version>
-		<logback.version>1.5.18</logback.version>
+		<nimbus-jose.version>10.5</nimbus-jose.version>
+		<logback.version>1.5.19</logback.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>

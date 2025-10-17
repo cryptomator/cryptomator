@@ -30,7 +30,7 @@ public class SimpleDialog {
 
 		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController( //
 				new SimpleDialogController(resolveText(builder.messageKey, null), //
-						resolveText(builder.descriptionKey, null), //
+						resolveText(builder.descriptionKey, builder.descriptionArgs), //
 						builder.icon, //
 						resolveText(builder.okButtonKey, null), //
 						builder.cancelButtonKey != null ? resolveText(builder.cancelButtonKey, null) : null, //
@@ -66,6 +66,7 @@ public class SimpleDialog {
 		private String[] titleArgs;
 		private String messageKey;
 		private String descriptionKey;
+		private String[] descriptionArgs;
 		private String okButtonKey;
 		private String cancelButtonKey;
 		private FontAwesome5Icon icon;
@@ -93,8 +94,9 @@ public class SimpleDialog {
 			return this;
 		}
 
-		public Builder setDescriptionKey(String descriptionKey) {
+		public Builder setDescriptionKey(String descriptionKey, String... args) {
 			this.descriptionKey = descriptionKey;
+			this.descriptionArgs = args;
 			return this;
 		}
 
