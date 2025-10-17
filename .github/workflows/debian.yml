@@ -23,7 +23,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '25.0.0+36'
+  JAVA_VERSION: '25.0.0'
   COFFEELIBS_JDK: 25
   COFFEELIBS_JDK_VERSION: '25.0.0+36-0ppa3' #TODO: update coffeelibs
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_linux-x64_bin-jmods.zip'
