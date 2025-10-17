@@ -14,15 +14,15 @@
         <option name="dagger.fastInit" value="enabled" />
         <option name="dagger.formatGeneratedSource" value="enabled" />
         <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-compiler/2.56.2/dagger-compiler-2.56.2.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger/2.56.2/dagger-2.56.2.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-compiler/2.57.1/dagger-compiler-2.57.1.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger/2.57.1/dagger-2.57.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/javax/inject/javax.inject/1/javax.inject-1.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-spi/2.56.2/dagger-spi-2.56.2.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-spi/2.57.1/dagger-spi-2.57.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/devtools/ksp/symbol-processing-api/2.1.10-1.0.31/symbol-processing-api-2.1.10-1.0.31.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib/2.1.10/kotlin-stdlib-2.1.10.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/devtools/ksp/symbol-processing-api/2.1.21-2.0.2/symbol-processing-api-2.1.21-2.0.2.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib/2.1.21/kotlin-stdlib-2.1.21.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/annotations/13.0/annotations-13.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/guava/failureaccess/1.0.2/failureaccess-1.0.2.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/guava/guava/33.0.0-jre/guava-33.0.0-jre.jar" />
@@ -39,15 +39,16 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-reflect/1.6.10/kotlin-reflect-1.6.10.jar" />
           <entry name="$MAVEN_REPOSITORY$/net/ltgt/gradle/incap/incap/0.2/incap-0.2.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/checkerframework/checker-compat-qual/2.5.3/checker-compat-qual-2.5.3.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-compiler/2.56.2/dagger-compiler-2.56.2.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger/2.56.2/dagger-2.56.2.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-metadata-jvm/2.1.21/kotlin-metadata-jvm-2.1.21.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-compiler/2.57.1/dagger-compiler-2.57.1.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger/2.57.1/dagger-2.57.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/javax/inject/javax.inject/1/javax.inject-1.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-spi/2.56.2/dagger-spi-2.56.2.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-spi/2.57.1/dagger-spi-2.57.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/devtools/ksp/symbol-processing-api/2.1.10-1.0.31/symbol-processing-api-2.1.10-1.0.31.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib/2.1.10/kotlin-stdlib-2.1.10.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/devtools/ksp/symbol-processing-api/2.1.21-2.0.2/symbol-processing-api-2.1.21-2.0.2.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib/2.1.21/kotlin-stdlib-2.1.21.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/annotations/13.0/annotations-13.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/guava/failureaccess/1.0.2/failureaccess-1.0.2.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/guava/guava/33.0.0-jre/guava-33.0.0-jre.jar" />
@@ -64,6 +65,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-reflect/1.6.10/kotlin-reflect-1.6.10.jar" />
           <entry name="$MAVEN_REPOSITORY$/net/ltgt/gradle/incap/incap/0.2/incap-0.2.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/checkerframework/checker-compat-qual/2.5.3/checker-compat-qual-2.5.3.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-metadata-jvm/2.1.21/kotlin-metadata-jvm-2.1.21.jar" />
         </processorPath>
         <module name="cryptomator" />
       </profile>

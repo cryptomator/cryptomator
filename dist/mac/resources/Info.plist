@@ -116,5 +116,8 @@
   <!-- allow utilization of integrated GPU, see https://developer.apple.com/library/mac/qa/qa1734/_index.html -->
   <key>NSSupportsAutomaticGraphicsSwitching</key>
   <true/>
+  <!-- register dock tile plugin -->
+  <key>NSDockTilePlugIn</key>
+  <string>Cryptomator.docktileplugin</string>
 </dict>
 </plist>

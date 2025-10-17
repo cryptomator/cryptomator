@@ -20,11 +20,13 @@ import javafx.stage.Stage;
 import java.util.EnumSet;
 import java.util.Objects;
 
+import static org.cryptomator.common.vaults.VaultState.Value.ALL_MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 import static org.cryptomator.common.vaults.VaultState.Value.MISSING;
 import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
 import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
 
 @MainWindowScoped
 public class VaultListContextMenuController implements FxController {
@@ -63,7 +65,7 @@ public class VaultListContextMenuController implements FxController {
 
 		this.selectedVaultState = selectedVault.flatMap(Vault::stateProperty).orElse(null);
 		this.selectedVaultPassphraseStored = selectedVault.map(this::isPasswordStored).orElse(false);
-		this.selectedVaultRemovable = selectedVaultState.map(EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION)::contains).orElse(false);
+		this.selectedVaultRemovable = selectedVaultState.map(EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION, ALL_MISSING, VAULT_CONFIG_MISSING)::contains).orElse(false);
 		this.selectedVaultUnlockable = selectedVaultState.map(LOCKED::equals).orElse(false);
 		this.selectedVaultLockable = selectedVaultState.map(UNLOCKED::equals).orElse(false);
 	}
@@ -100,6 +102,12 @@ public class VaultListContextMenuController implements FxController {
 	public void didClickRevealVault() {
 		var vault = Objects.requireNonNull(selectedVault.get());
 		vaultService.reveal(vault);
+	}
+
+	@FXML
+	public void didClickShareVault() {
+		var vault = Objects.requireNonNull(selectedVault.get());
+		appWindows.showShareVaultWindow(vault);
 	}
 
 	// Getter and Setter

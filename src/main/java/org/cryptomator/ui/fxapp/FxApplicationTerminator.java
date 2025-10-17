@@ -28,7 +28,7 @@ import static org.cryptomator.common.vaults.VaultState.Value.*;
 @FxApplicationScoped
 public class FxApplicationTerminator {
 
-	private static final Set<VaultState.Value> STATES_ALLOWING_TERMINATION = EnumSet.of(LOCKED, NEEDS_MIGRATION, MISSING, ERROR);
+	private static final Set<VaultState.Value> STATES_ALLOWING_TERMINATION = EnumSet.of(LOCKED, NEEDS_MIGRATION, MISSING, ERROR, VAULT_CONFIG_MISSING, ALL_MISSING);
 	private static final Set<VaultState.Value> STATES_PREVENT_TERMINATION = EnumSet.of(PROCESSING);
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplicationTerminator.class);
 
@@ -110,7 +110,7 @@ public class FxApplicationTerminator {
 		} else if (settings.autoCloseVaults.get() && !preventQuitWithGracefulLock.get()) {
 			var lockAllTask = vaultService.createLockAllTask(vaults.filtered(Vault::isUnlocked), false);
 			lockAllTask.setOnSucceeded(event -> {
-				LOG.info("Locked remaining vaults was succesful.");
+				LOG.info("Locked remaining vaults was successful.");
 				exitingResponse.performQuit();
 			});
 			lockAllTask.setOnFailed(event -> {

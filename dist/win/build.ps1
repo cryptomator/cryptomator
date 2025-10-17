@@ -65,7 +65,7 @@ Write-Host "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
-&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin "-Djavafx.platform=win"
+&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -86,16 +86,16 @@ switch ($archName) {
     'ARM64' {
 		$javafxBaseJmod = Join-Path $Env:JAVA_HOME "jmods\javafx.base.jmod"
 		if (!(Test-Path $javafxBaseJmod)) {
-			Write-Error "JavaFX module not found in JDK. Please ensure full JDK (including jmods) is installed."
+			Write-Error "JavaFX module not found in JDK. Please ensure a JDK with JavaFX (including jmods) is installed."
 			exit 1
 		}
 
         $jmodPaths = "$Env:JAVA_HOME/jmods"
     }
     'x64' {
-		$javaFxVersion='24.0.1'
+		$javaFxVersion='25'
 		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-		$javaFxJmodsSHA256 = 'f13d17c7caf88654fc835f1b4e75a9b0f34a888eb8abef381796c0002e63b03f'
+		$javaFxJmodsSHA256 = 'c8eb9fd039b00e0020cf6c3db8ed7876bf3ee4d27860aa697a247b83b8296ae7'
 		$javaFxJmods = '.\resources\jfxJmods.zip'
 
 		if( !(Test-Path -Path $javaFxJmods) ) {
@@ -133,7 +133,7 @@ if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from 
 	--verbose `
 	--output runtime `
 	--module-path $jmodPaths `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
 	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
@@ -154,6 +154,7 @@ $javaOptions = @(
 "--java-options", "-Dfile.encoding=`"utf-8`""
 "--java-options", "-Djava.net.useSystemProxies=true"
 "--java-options", "-Dcryptomator.logDir=`"@{localappdata}/$AppName`""
+"--java-options", "-XX:ErrorFile=`"C:/cryptomator/cryptomator_crash.log`""
 "--java-options", "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`""
 "--java-options", "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`""
 "--java-options", "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`""
@@ -165,6 +166,7 @@ $javaOptions = @(
 "--java-options", "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`""
 "--java-options", "-Dcryptomator.showTrayIcon=true"
 "--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
+"--java-options", "-Dcryptomator.disableUpdateCheck=false"
 )
 
 
@@ -192,7 +194,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 #Create RTF license for msi
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\resources\" `
@@ -205,14 +207,6 @@ if ($LASTEXITCODE -ne 0) {
 Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
 attrib -r "$AppName\${AppName} (Debug).exe"
-# patch batch script to set hostfile
-$webDAVPatcher = "$AppName\patchWebDAV.bat"
-try {
-	(Get-Content $webDAVPatcher ) -replace '::REPLACE ME', "SET LOOPBACK_ALIAS=`"$LoopbackAlias`"" | Set-Content $webDAVPatcher
-} catch {
-   Write-Host "Failed to set LOOPBACK_ALIAS for patchWebDAV.bat"
-   exit 1
-}
 
 # create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
@@ -243,7 +237,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 #Create RTF license for bundle
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party "-Djavafx.platform=win" `
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `
@@ -298,9 +292,9 @@ return 0;
 # ============================
 if ($clean) {
 	Write-Host "Cleaning up previous build artifacts..."
-	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore
-	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore
-	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 }
 return Main
 

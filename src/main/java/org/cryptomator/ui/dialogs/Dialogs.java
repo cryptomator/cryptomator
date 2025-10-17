@@ -20,6 +20,8 @@ public class Dialogs {
 	private final ResourceBundle resourceBundle;
 	private final StageFactory stageFactory;
 
+	private static final String BUTTON_KEY_CLOSE = "generic.button.close";
+
 	@Inject
 	public Dialogs(ResourceBundle resourceBundle, StageFactory stageFactory) {
 		this.resourceBundle = resourceBundle;
@@ -47,6 +49,43 @@ public class Dialogs {
 				});
 	}
 
+	public SimpleDialog.Builder prepareContactHubVaultOwner(Stage window) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("contactHubVaultOwner.title") //
+				.setMessageKey("contactHubVaultOwner.message") //
+				.setDescriptionKey("contactHubVaultOwner.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION)//
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+
+	public SimpleDialog.Builder prepareRecoveryVaultAdded(Stage window, String displayName) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("recover.existing.title") //
+				.setMessageKey("recover.existing.message") //
+				.setDescriptionKey("recover.existing.description", displayName) //
+				.setIcon(FontAwesome5Icon.CHECK)//
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+	public SimpleDialog.Builder prepareRecoveryVaultAlreadyExists(Stage window, String displayName) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("recover.alreadyExists.title") //
+				.setMessageKey("recover.alreadyExists.message") //
+				.setDescriptionKey("recover.alreadyExists.description", displayName) //
+				.setIcon(FontAwesome5Icon.EXCLAMATION)//
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+
+	public SimpleDialog.Builder prepareRecoverPasswordSuccess(Stage window) {
+		return createDialogBuilder()
+				.setOwner(window) //
+				.setTitleKey("recoveryKey.recover.title") //
+				.setMessageKey("recoveryKey.recover.resetSuccess.message") //
+				.setDescriptionKey("recoveryKey.recover.resetSuccess.description") //
+				.setIcon(FontAwesome5Icon.CHECK)
+				.setOkAction(Stage::close)
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+
 	public SimpleDialog.Builder prepareRemoveCertDialog(Stage window, Settings settings) {
 		return createDialogBuilder() //
 				.setOwner(window) //
@@ -69,7 +108,7 @@ public class Dialogs {
 				.setMessageKey("dokanySupportEnd.message") //
 				.setDescriptionKey("dokanySupportEnd.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION) //
-				.setOkButtonKey("generic.button.close") //
+				.setOkButtonKey(BUTTON_KEY_CLOSE) //
 				.setCancelButtonKey("dokanySupportEnd.preferencesBtn") //
 				.setOkAction(Stage::close) //
 				.setCancelAction(cancelAction);
@@ -83,8 +122,20 @@ public class Dialogs {
 				.setDescriptionKey("retryIfReadonly.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION) //
 				.setOkButtonKey("retryIfReadonly.retry") //
-				.setCancelButtonKey("generic.button.close") //
+				.setCancelButtonKey(BUTTON_KEY_CLOSE) //
 				.setOkAction(okAction) //
 				.setCancelAction(Stage::close);
 	}
+
+	public SimpleDialog.Builder prepareNoDDirectorySelectedDialog(Stage window) {
+		return createDialogBuilder() //
+				.setOwner(window) //
+				.setTitleKey("recover.invalidSelection.title") //
+				.setMessageKey("recover.invalidSelection.message") //
+				.setDescriptionKey("recover.invalidSelection.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
+				.setOkButtonKey("generic.button.change") //
+				.setOkAction(Stage::close);
+	}
+
 }
