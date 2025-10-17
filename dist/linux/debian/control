@@ -2,7 +2,7 @@ Source: cryptomator
 Maintainer: Cryptobot <releases@cryptomator.org>
 Section: utils
 Priority: optional
-Build-Depends: debhelper (>=10), coffeelibs-jdk-25 (>= 25.0.0+36-0ppa1), libgtk-3-0 (>= 3.20.0), libxxf86vm1, libgl1
+Build-Depends: debhelper (>=10), openjdk-25-jdk (>= 25+36), libgtk-3-0 (>= 3.20.0), libxxf86vm1, libgl1
 Standards-Version: 4.5.0
 Homepage: https://cryptomator.org
 Vcs-Git: https://github.com/cryptomator/cryptomator.git
