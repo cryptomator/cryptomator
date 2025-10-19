@@ -321,6 +321,7 @@ public class Vault {
 			if (!success) {
 				currentIdentity.set(null);
 				destroyCryptoFileSystem();
+				cleanupTempVaultConfig();  // Clean up temp config file on failure
 			}
 		}
 	}
