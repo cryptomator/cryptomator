@@ -137,25 +137,25 @@ public class MultiKeyslotFile {
 			byte[] slotData = extractSlot(fileData, i);
 			
 			try {
-				LOG.debug("Attempting to decrypt slot {}", i);
+				LOG.info("🔓 Attempting to decrypt slot {}", i);
 				Masterkey masterkey = decryptSlot(slotData, password);
 				// Success - but don't reveal which slot!
-				LOG.trace("Vault unlock successful from slot {}", i);
+				LOG.info("✓ Vault unlock successful from slot {}", i);
 				return masterkey;
 			} catch (InvalidPassphraseException e) {
 				// Could be: wrong password, or this slot is just random padding
 				// Either way, silently try the next slot
-				LOG.debug("Slot {} decryption failed: {}", i, e.getMessage());
+				LOG.info("✗ Slot {} decryption failed", i);
 				continue;
 			} catch (IOException e) {
 				// IO error - might indicate corruption
-				LOG.warn("IO error decrypting slot {}: {}", i, e.getMessage());
+				LOG.warn("⚠ IO error decrypting slot {}: {}", i, e.getMessage());
 				continue;
 			}
 		}
 		
 		// None of the slots decrypted - either wrong password or no matching keyslot
-		LOG.debug("All {} slots failed to decrypt", NUM_SLOTS);
+		LOG.info("❌ All {} slots failed to decrypt - wrong password", NUM_SLOTS);
 		throw new InvalidPassphraseException();
 	}
 	
@@ -226,6 +226,7 @@ public class MultiKeyslotFile {
 	 */
 	public void addKeyslot(Path path, Masterkey masterkey, CharSequence password, CharSequence primaryPassword, int scryptCostParam) throws IOException {
 		byte[] fileData;
+		boolean wasLegacyConversion = false;
 		
 		if (isMultiKeyslotFile(path)) {
 			fileData = Files.readAllBytes(path);
@@ -235,6 +236,7 @@ public class MultiKeyslotFile {
 			LOG.trace("Converting legacy format - using primary password for slot 0");
 			byte[] legacyData = Files.readAllBytes(path);
 			fileData = new byte[FILE_SIZE];
+			wasLegacyConversion = true;
 			
 			// Slot 0: Legacy keyslot (AEAD-encrypted with PRIMARY password)
 			try {
@@ -253,26 +255,43 @@ public class MultiKeyslotFile {
 		}
 		
 		// Find first available slot using AEAD authentication
-		// Step 1: Check for duplicate passwords across all slots
-		// Step 2: Find first slot that doesn't decrypt with new password (empty or different password)
+		// Step 1: Check for duplicate passwords (NEW password) across ALL slots
+		// Step 2: Check if slot is occupied by PRIMARY password (don't overwrite it!)
+		// Step 3: Find first slot that's truly empty (random padding)
 		int availableSlot = -1;
 		for (int i = 0; i < NUM_SLOTS; i++) {
 			byte[] slotData = extractSlot(fileData, i);
+			
+			// Check 1: Is this slot already using the NEW password we're trying to add?
 			try {
-				// Try AEAD-decrypting with the NEW password we're adding
 				aeadDecryptSlot(slotData, password);
-				// If we reach here, this slot already has this password
+				// If we reach here, this slot already has the NEW password
 				throw new IOException("A keyslot with this password already exists");
 			} catch (GeneralSecurityException e) {
-				// AEAD authentication failed - slot is either:
-				// a) Empty (random padding), or
-				// b) Occupied with a DIFFERENT password
-				// In AEAD-based design, these are cryptographically indistinguishable
-				// We use the first such slot we find
-				if (availableSlot == -1) {
-					availableSlot = i;
-					// Continue checking remaining slots for duplicates
+				// Slot doesn't have the new password, continue checking...
+			}
+			
+			// Check 2: Is this slot occupied by the PRIMARY password?
+			boolean occupiedByPrimary = false;
+			if (primaryPassword != null && !password.equals(primaryPassword)) {
+				try {
+					aeadDecryptSlot(slotData, primaryPassword);
+					// If we reach here, this slot has the PRIMARY password
+					occupiedByPrimary = true;
+					LOG.trace("Slot {} occupied by primary password, skipping", i);
+				} catch (GeneralSecurityException e) {
+					// Slot doesn't have primary password either
 				}
+			}
+			
+			// Check 3: If slot is not occupied by primary, it's available
+			if (!occupiedByPrimary && availableSlot == -1) {
+				if (wasLegacyConversion && i == 0) {
+					// Skip slot 0 during legacy conversion (shouldn't happen with Check 2, but belt-and-suspenders)
+					continue;
+				}
+				availableSlot = i;
+				// Continue checking remaining slots for duplicates
 			}
 		}
 		
@@ -402,27 +421,27 @@ public class MultiKeyslotFile {
 	private Masterkey decryptSlot(byte[] slotData, CharSequence password) throws InvalidPassphraseException, IOException {
 		try {
 			// AEAD-decrypt the slot to get original keyslot data
-			LOG.debug("Attempting AEAD decryption of slot");
+			LOG.info("  → Attempting AEAD decryption");
 			byte[] keyslotData = aeadDecryptSlot(slotData, password);
-			LOG.debug("AEAD decryption successful, keyslot data length: {}", keyslotData.length);
+			LOG.info("  → AEAD decryption successful! Keyslot data length: {}", keyslotData.length);
 			
 			// Write to temp file for MasterkeyFileAccess.load()
 			Path tempFile = Files.createTempFile("keyslot-", ".tmp");
 			try {
 				Files.write(tempFile, keyslotData);
-				LOG.debug("Loading masterkey from decrypted keyslot data");
+				LOG.info("  → Loading masterkey from decrypted keyslot data");
 				Masterkey result = masterkeyFileAccess.load(tempFile, password);
-				LOG.debug("Masterkey loaded successfully");
+				LOG.info("  → Masterkey loaded successfully!");
 				return result;
 			} catch (InvalidPassphraseException e) {
-				LOG.warn("Inner masterkey load failed: wrong password for inner encryption");
+				LOG.error("  ✗ Inner masterkey load failed: wrong password for inner encryption!");
 				throw e;
 			} finally {
 				Files.deleteIfExists(tempFile);
 			}
 		} catch (GeneralSecurityException e) {
 			// AEAD authentication failed - wrong password OR empty slot
-			LOG.debug("AEAD authentication failed: {}", e.getMessage());
+			LOG.info("  → AEAD authentication failed: {}", e.getMessage());
 			throw new InvalidPassphraseException();
 		}
 	}
@@ -446,6 +465,7 @@ public class MultiKeyslotFile {
 		// Generate random salt for key derivation
 		byte[] salt = new byte[SALT_LENGTH];
 		secureRandom.nextBytes(salt);
+		LOG.info("  🔑 Generated salt: {}...", bytesToHex(salt, 0, 8));
 		
 		// Derive encryption key from password using PBKDF2
 		SecretKey encryptionKey = deriveKey(password, salt);
@@ -453,6 +473,7 @@ public class MultiKeyslotFile {
 		// Generate random IV for GCM
 		byte[] iv = new byte[IV_LENGTH];
 		secureRandom.nextBytes(iv);
+		LOG.info("  🔑 Generated IV: {}...", bytesToHex(iv, 0, 8));
 		
 		// Pad plaintext to fixed size BEFORE encryption
 		// This ensures entire slot is AEAD-authenticated (no unauthenticated padding)
@@ -485,6 +506,8 @@ public class MultiKeyslotFile {
 		// Encrypt: returns ciphertext + authentication tag
 		// Now the entire slot content is authenticated!
 		byte[] ciphertextWithTag = cipher.doFinal(paddedPlaintext);
+		LOG.info("  🔐 Encrypted: plaintext={} bytes → ciphertext+tag={} bytes", 
+			paddedPlaintext.length, ciphertextWithTag.length);
 		
 		// Build slot: [salt][iv][ciphertext+tag]
 		// NO unauthenticated padding!
@@ -493,6 +516,14 @@ public class MultiKeyslotFile {
 		buffer.put(salt);
 		buffer.put(iv);
 		buffer.put(ciphertextWithTag);
+		
+		int finalPosition = buffer.position();
+		LOG.info("  📦 Slot built: salt={} + iv={} + ciphertext={} = {} bytes (target={})", 
+			SALT_LENGTH, IV_LENGTH, ciphertextWithTag.length, finalPosition, SLOT_SIZE);
+		
+		if (finalPosition != SLOT_SIZE) {
+			LOG.error("  ⚠️  WARNING: Slot size mismatch! Expected {} but got {}", SLOT_SIZE, finalPosition);
+		}
 		
 		return slot;
 	}
@@ -514,15 +545,19 @@ public class MultiKeyslotFile {
 		// Extract salt
 		byte[] salt = new byte[SALT_LENGTH];
 		buffer.get(salt);
+		LOG.info("  🔑 Read salt: {}...", bytesToHex(salt, 0, 8));
 		
 		// Extract IV
 		byte[] iv = new byte[IV_LENGTH];
 		buffer.get(iv);
+		LOG.info("  🔑 Read IV: {}...", bytesToHex(iv, 0, 8));
 		
 		// Remaining is ciphertext + tag
 		int ciphertextLength = SLOT_SIZE - SALT_LENGTH - IV_LENGTH;
 		byte[] ciphertextWithTag = new byte[ciphertextLength];
 		buffer.get(ciphertextWithTag);
+		LOG.info("  📦 Reading slot: salt={} + iv={} + ciphertext+tag={} = {} bytes", 
+			SALT_LENGTH, IV_LENGTH, ciphertextLength, SLOT_SIZE);
 		
 		// Derive decryption key from password
 		SecretKey decryptionKey = deriveKey(password, salt);
@@ -532,10 +567,12 @@ public class MultiKeyslotFile {
 		GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
 		cipher.init(Cipher.DECRYPT_MODE, decryptionKey, gcmSpec);
 		
+		LOG.info("  🔓 Attempting GCM decrypt of {} bytes...", ciphertextWithTag.length);
 		// Decrypt and authenticate
 		// If this succeeds: valid encrypted data
 		// If this fails: wrong password OR random padding (indistinguishable!)
 		byte[] paddedPlaintext = cipher.doFinal(ciphertextWithTag);
+		LOG.info("  ✓ GCM decrypt successful! Got {} bytes plaintext", paddedPlaintext.length);
 		
 		// Extract length from first 4 bytes (little-endian)
 		int actualLength = (paddedPlaintext[0] & 0xFF) |
@@ -553,6 +590,17 @@ public class MultiKeyslotFile {
 		System.arraycopy(paddedPlaintext, 4, keyslotData, 0, actualLength);
 		
 		return keyslotData;
+	}
+	
+	/**
+	 * Convert bytes to hex string for logging.
+	 */
+	private String bytesToHex(byte[] bytes, int start, int length) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = start; i < start + length && i < bytes.length; i++) {
+			sb.append(String.format("%02x", bytes[i]));
+		}
+		return sb.toString();
 	}
 	
 	/**
