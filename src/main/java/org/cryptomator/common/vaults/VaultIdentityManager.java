@@ -103,6 +103,8 @@ public class VaultIdentityManager {
 	/**
 	 * Delete a keyslot from the vault file.
 	 * WARNING: Requires the password of the keyslot to remove it.
+	 * NOTE: This method only removes the keyslot. The corresponding config slot
+	 * must be removed separately by the caller using MultiKeyslotVaultConfig.
 	 * 
 	 * @param password Password of the keyslot to remove
 	 * @return true if a keyslot was removed
@@ -110,10 +112,8 @@ public class VaultIdentityManager {
 	public boolean removeKeyslot(CharSequence password) {
 		try {
 			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
-			Path hiddenVaultConfig = vaultPath.resolve("vault.bak");
 			
 			boolean keyslotRemoved = multiKeyslotFile.removeKeyslot(masterkeyPath, password);
-			boolean configDeleted = Files.deleteIfExists(hiddenVaultConfig);
 			
 			if (keyslotRemoved) {
 				LOG.debug("Removed keyslot from vault");
