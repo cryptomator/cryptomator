@@ -216,15 +216,19 @@ public class MultiKeyslotFile {
 			// Replace empty slot with new keyslot
 			System.arraycopy(paddedSlot, 0, fileData, emptySlot * SLOT_SIZE, SLOT_SIZE);
 			
-			// Write back atomically
-			Path tempFile = Files.createTempFile(path.getParent(), ".keyslot-", ".tmp");
+		// Write back atomically
+		Path tempFile = Files.createTempFile(path.getParent(), ".keyslot-", ".tmp");
+		try {
+			Files.write(tempFile, fileData);
 			try {
-				Files.write(tempFile, fileData);
 				Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-				LOG.trace("Keyslot added");
-			} finally {
-				Files.deleteIfExists(tempFile);
+			} catch (java.nio.file.AtomicMoveNotSupportedException e) {
+				Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING);
 			}
+			LOG.trace("Keyslot added");
+		} finally {
+			Files.deleteIfExists(tempFile);
+		}
 		} finally {
 			Files.deleteIfExists(tempKeyslot);
 		}
@@ -281,17 +285,21 @@ public class MultiKeyslotFile {
 		secureRandom.nextBytes(randomSlot);
 		System.arraycopy(randomSlot, 0, fileData, slotToRemove * SLOT_SIZE, SLOT_SIZE);
 		
-		// Write back atomically
-		Path tempFile = Files.createTempFile(path.getParent(), ".keyslot-", ".tmp");
+	// Write back atomically
+	Path tempFile = Files.createTempFile(path.getParent(), ".keyslot-", ".tmp");
+	try {
+		Files.write(tempFile, fileData);
 		try {
-			Files.write(tempFile, fileData);
 			Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-			LOG.trace("Keyslot removed");
-		} finally {
-			Files.deleteIfExists(tempFile);
+		} catch (java.nio.file.AtomicMoveNotSupportedException e) {
+			Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING);
 		}
-		
-		return true;
+		LOG.trace("Keyslot removed");
+	} finally {
+		Files.deleteIfExists(tempFile);
+	}
+	
+	return true;
 	}
 	
 	// ========== Private Helper Methods ==========
