@@ -1,6 +1,8 @@
 package org.cryptomator.common.vaults;
 
 import org.cryptomator.common.keychain.MultiKeyslotFile;
+import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.Masterkey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -101,27 +104,61 @@ public class VaultIdentityManager {
 	}
 
 	/**
-	 * Delete a keyslot from the vault file.
-	 * WARNING: Requires the password of the keyslot to remove it.
-	 * NOTE: This method only removes the keyslot. The corresponding config slot
-	 * must be removed separately by the caller using MultiKeyslotVaultConfig.
+	 * Delete a keyslot AND its corresponding config slot from the vault.
+	 * This ensures complete removal of hidden identities for plausible deniability.
 	 * 
-	 * @param password Password of the keyslot to remove
-	 * @return true if a keyslot was removed
+	 * SECURITY: Requires the password of the identity to remove.
+	 * Both masterkey keyslot and vault config slot must be removed to prevent
+	 * orphaned data that could reveal hidden vault existence.
+	 * 
+	 * @param password Password of the identity to remove
+	 * @return true if the identity was successfully removed
 	 */
 	public boolean removeKeyslot(CharSequence password) {
+		Masterkey hiddenMasterkey = null;
+		byte[] masterkeyBytes = null;
+		
 		try {
 			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
+			Path vaultConfigPath = vaultPath.resolve("vault.cryptomator");
 			
+			// Step 1: Load the masterkey using the password
+			// This is needed to identify which config slot to remove
+			try {
+				hiddenMasterkey = multiKeyslotFile.load(masterkeyPath, password);
+				masterkeyBytes = hiddenMasterkey.getEncoded();
+			} catch (InvalidPassphraseException e) {
+				LOG.warn("Password doesn't match any identity");
+				return false;
+			}
+			
+			// Step 2: Remove config slot from vault.cryptomator
+			MultiKeyslotVaultConfig configHandler = new MultiKeyslotVaultConfig();
+			boolean configRemoved = configHandler.removeConfigSlot(vaultConfigPath, masterkeyBytes);
+			if (!configRemoved) {
+				LOG.warn("Failed to remove config slot - may be single-config format");
+				// Continue anyway to remove keyslot
+			}
+			
+			// Step 3: Remove keyslot from masterkey.cryptomator
 			boolean keyslotRemoved = multiKeyslotFile.removeKeyslot(masterkeyPath, password);
 			
 			if (keyslotRemoved) {
-				LOG.debug("Removed keyslot from vault");
+				LOG.debug("Removed identity from vault (keyslot and config)");
 			}
 			return keyslotRemoved;
+			
 		} catch (IOException e) {
-			LOG.error("Failed to remove keyslot", e);
+			LOG.error("Failed to remove identity", e);
 			return false;
+		} finally {
+			// SECURITY: Always clean up sensitive masterkey data
+			if (hiddenMasterkey != null) {
+				hiddenMasterkey.destroy();
+			}
+			if (masterkeyBytes != null) {
+				Arrays.fill(masterkeyBytes, (byte) 0);
+			}
 		}
 	}
 	
