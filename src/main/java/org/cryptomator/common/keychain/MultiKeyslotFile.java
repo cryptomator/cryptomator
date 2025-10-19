@@ -412,10 +412,10 @@ public class MultiKeyslotFile {
 	/**
 	 * AEAD-encrypt keyslot data to fixed slot size using AES-256-GCM.
 	 * 
-	 * Format: [salt:32][iv:12][ciphertext + auth_tag]
+	 * Format: [salt:32][iv:12][AEAD(padded_plaintext)]
 	 * 
 	 * Security: AEAD provides both encryption and authentication.
-	 * Authentication tag ensures tampering detection and proves occupancy.
+	 * Plaintext is padded to fixed size BEFORE encryption so entire slot is authenticated.
 	 * 
 	 * @throws IllegalArgumentException if keyslot data too large
 	 */
@@ -436,28 +436,45 @@ public class MultiKeyslotFile {
 		byte[] iv = new byte[IV_LENGTH];
 		secureRandom.nextBytes(iv);
 		
+		// Pad plaintext to fixed size BEFORE encryption
+		// This ensures entire slot is AEAD-authenticated (no unauthenticated padding)
+		int plaintextSize = SLOT_SIZE - SALT_LENGTH - IV_LENGTH - (GCM_TAG_LENGTH / 8);
+		byte[] paddedPlaintext = new byte[plaintextSize];
+		
+		// Store length at the start (little-endian, 4 bytes)
+		// This is OK because it will be ENCRYPTED by AEAD
+		paddedPlaintext[0] = (byte) (keyslotData.length & 0xFF);
+		paddedPlaintext[1] = (byte) ((keyslotData.length >> 8) & 0xFF);
+		paddedPlaintext[2] = (byte) ((keyslotData.length >> 16) & 0xFF);
+		paddedPlaintext[3] = (byte) ((keyslotData.length >> 24) & 0xFF);
+		
+		// Copy actual keyslot data after length marker
+		System.arraycopy(keyslotData, 0, paddedPlaintext, 4, keyslotData.length);
+		
+		// Fill remainder with random padding (will be encrypted)
+		if (keyslotData.length + 4 < plaintextSize) {
+			byte[] padding = new byte[plaintextSize - keyslotData.length - 4];
+			secureRandom.nextBytes(padding);
+			System.arraycopy(padding, 0, paddedPlaintext, keyslotData.length + 4, padding.length);
+		}
+		
 		// Encrypt with AES-GCM (AEAD)
+		// This encrypts AND authenticates the entire paddedPlaintext
 		Cipher cipher = Cipher.getInstance(AES_GCM_ALGORITHM);
 		GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
 		cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, gcmSpec);
 		
 		// Encrypt: returns ciphertext + authentication tag
-		byte[] ciphertextWithTag = cipher.doFinal(keyslotData);
+		// Now the entire slot content is authenticated!
+		byte[] ciphertextWithTag = cipher.doFinal(paddedPlaintext);
 		
-		// Build slot: [salt][iv][ciphertext+tag][random padding]
+		// Build slot: [salt][iv][ciphertext+tag]
+		// NO unauthenticated padding!
 		byte[] slot = new byte[SLOT_SIZE];
 		ByteBuffer buffer = ByteBuffer.wrap(slot);
 		buffer.put(salt);
 		buffer.put(iv);
 		buffer.put(ciphertextWithTag);
-		
-		// Fill remaining space with random data for indistinguishability
-		int remaining = SLOT_SIZE - buffer.position();
-		if (remaining > 0) {
-			byte[] padding = new byte[remaining];
-			secureRandom.nextBytes(padding);
-			buffer.put(padding);
-		}
 		
 		return slot;
 	}
@@ -484,7 +501,7 @@ public class MultiKeyslotFile {
 		byte[] iv = new byte[IV_LENGTH];
 		buffer.get(iv);
 		
-		// Remaining is ciphertext + tag (we don't know exact size, try to decrypt all)
+		// Remaining is ciphertext + tag
 		int ciphertextLength = SLOT_SIZE - SALT_LENGTH - IV_LENGTH;
 		byte[] ciphertextWithTag = new byte[ciphertextLength];
 		buffer.get(ciphertextWithTag);
@@ -500,11 +517,24 @@ public class MultiKeyslotFile {
 		// Decrypt and authenticate
 		// If this succeeds: valid encrypted data
 		// If this fails: wrong password OR random padding (indistinguishable!)
-		byte[] plaintext = cipher.doFinal(ciphertextWithTag);
+		byte[] paddedPlaintext = cipher.doFinal(ciphertextWithTag);
 		
-		// Remove any padding from plaintext to get original keyslot data
-		// The plaintext may have trailing zeros from our padding
-		return trimTrailingZeros(plaintext);
+		// Extract length from first 4 bytes (little-endian)
+		int actualLength = (paddedPlaintext[0] & 0xFF) |
+		                  ((paddedPlaintext[1] & 0xFF) << 8) |
+		                  ((paddedPlaintext[2] & 0xFF) << 16) |
+		                  ((paddedPlaintext[3] & 0xFF) << 24);
+		
+		// Sanity check
+		if (actualLength < 0 || actualLength > paddedPlaintext.length - 4) {
+			throw new GeneralSecurityException("Invalid length marker in decrypted data");
+		}
+		
+		// Extract actual keyslot data (skip 4-byte length header)
+		byte[] keyslotData = new byte[actualLength];
+		System.arraycopy(paddedPlaintext, 4, keyslotData, 0, actualLength);
+		
+		return keyslotData;
 	}
 	
 	/**
@@ -531,15 +561,4 @@ public class MultiKeyslotFile {
 		}
 	}
 	
-	/**
-	 * Remove trailing zeros from decrypted data.
-	 * This handles the padding we added during encryption.
-	 */
-	private byte[] trimTrailingZeros(byte[] data) {
-		int end = data.length;
-		while (end > 0 && data[end - 1] == 0) {
-			end--;
-		}
-		return Arrays.copyOf(data, end);
-	}
 }
