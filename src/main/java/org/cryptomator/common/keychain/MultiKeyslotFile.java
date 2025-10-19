@@ -100,10 +100,10 @@ public class MultiKeyslotFile {
 			byte[] slotData = extractSlot(fileData, i);
 			
 			try {
-				Masterkey masterkey = decryptSlot(slotData, password);
-				// Success - but don't reveal which slot!
-				LOG.debug("Successfully unlocked vault");
-				return masterkey;
+			Masterkey masterkey = decryptSlot(slotData, password);
+			// Success - but don't reveal which slot!
+			LOG.trace("Vault unlock successful");
+			return masterkey;
 			} catch (InvalidPassphraseException e) {
 				// Could be: wrong password, or this slot is just random padding
 				// Either way, silently try the next slot
@@ -146,9 +146,20 @@ public class MultiKeyslotFile {
 				System.arraycopy(randomSlot, 0, fileData, i * SLOT_SIZE, SLOT_SIZE);
 			}
 			
-			// Write atomically
-			Files.write(path, fileData, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-			LOG.debug("Created multi-keyslot vault file");
+		// Write atomically via temp file + rename
+		Path tempFile = Files.createTempFile(path.getParent(), ".vault-", ".tmp");
+		try {
+			Files.write(tempFile, fileData, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+			// Attempt atomic move, fallback to non-atomic if not supported
+			try {
+				Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			} catch (java.nio.file.AtomicMoveNotSupportedException e) {
+				Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING);
+			}
+			LOG.trace("Vault file created");
+		} finally {
+			Files.deleteIfExists(tempFile);
+		}
 		} finally {
 			Files.deleteIfExists(tempKeyslot);
 		}
@@ -171,7 +182,7 @@ public class MultiKeyslotFile {
 			fileData = Files.readAllBytes(path);
 		} else {
 			// Convert legacy single-keyslot file to multi-keyslot format
-			LOG.debug("Converting legacy masterkey file to multi-keyslot format");
+			LOG.trace("Converting legacy format");
 			byte[] legacyData = Files.readAllBytes(path);
 			fileData = new byte[FILE_SIZE];
 			
@@ -187,31 +198,9 @@ public class MultiKeyslotFile {
 			}
 		}
 		
-		// Find first empty slot by trying to decrypt each one
-		int emptySlot = -1;
-		for (int i = 0; i < NUM_SLOTS; i++) {
-			byte[] slotData = extractSlot(fileData, i);
-			// Try with a dummy password - if it fails, this slot might be empty
-			// More robust: check if slot decrypts successfully with ANY known password
-			// For simplicity: assume slots tried in order and first that fails is empty
-			// Better approach: track which slots are known to be used
-			try {
-				// Attempt decrypt with null - will fail if it's random data
-				decryptSlot(slotData, "test-for-empty");
-				// Decrypted successfully - slot is occupied
-			} catch (InvalidPassphraseException e) {
-				// Failed to decrypt - likely empty slot (or we don't know the password)
-				// To be safe, we'll use the first slot that fails
-				emptySlot = i;
-				break;
-			}
-		}
-		
-		// For now, use simpler approach: find first empty by trying all existing passwords
-		// Actually, better approach: just scan sequentially and use first available
-		// Most robust: let caller specify which slot to use
-		// For MVP: Use next available slot (slots filled sequentially)
-		emptySlot = findFirstEmptySlot(fileData);
+	// Find first empty slot using unpadding detection
+	// Empty slots contain random data and fail unpadding validation
+	int emptySlot = findFirstEmptySlot(fileData);
 		
 		if (emptySlot == -1) {
 			throw new IOException("All keyslots are full (maximum " + NUM_SLOTS + " identities)");
@@ -232,7 +221,7 @@ public class MultiKeyslotFile {
 			try {
 				Files.write(tempFile, fileData);
 				Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-				LOG.debug("Added hidden keyslot to vault");
+				LOG.trace("Keyslot added");
 			} finally {
 				Files.deleteIfExists(tempFile);
 			}
@@ -297,7 +286,7 @@ public class MultiKeyslotFile {
 		try {
 			Files.write(tempFile, fileData);
 			Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-			LOG.debug("Removed keyslot from vault");
+			LOG.trace("Keyslot removed");
 		} finally {
 			Files.deleteIfExists(tempFile);
 		}
