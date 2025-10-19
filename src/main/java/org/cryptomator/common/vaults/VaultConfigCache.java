@@ -38,7 +38,11 @@ public class VaultConfigCache {
 
 	void reloadConfig() throws IOException {
 		try {
-			config.set(readConfigFromStorage(this.settings.path.get()));
+			Path vaultPath = this.settings.path.get();
+			if (vaultPath == null) {
+				throw new IllegalStateException("Vault path is not set");
+			}
+			config.set(readConfigFromStorage(vaultPath));
 		} catch (IOException e) {
 			config.set(null);
 			throw e;
@@ -74,6 +78,9 @@ public class VaultConfigCache {
 	public VaultConfig.UnverifiedVaultConfig getWithMasterkey(byte[] masterkey) 
 			throws IOException, VaultConfigLoadException {
 		Path vaultPath = settings.path.get();
+		if (vaultPath == null) {
+			throw new IllegalStateException("Vault path is not set");
+		}
 		Path configPath = vaultPath.resolve(Constants.VAULTCONFIG_FILENAME);
 		return multiKeyslotVaultConfig.load(configPath, masterkey);
 	}
