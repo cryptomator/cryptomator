@@ -374,21 +374,30 @@ public class MultiKeyslotFile {
 		}
 		
 		// Try to find length marker within reasonable range
-		// Masterkey files are typically 500-2000 bytes
-		for (int possibleLength = 400; possibleLength < SLOT_SIZE - 4; possibleLength++) {
+		// Masterkey files are typically 300-2000 bytes
+		// Search from smallest to largest likely size
+		for (int possibleLength = 100; possibleLength <= SLOT_SIZE - 4; possibleLength++) {
 			int lengthPos = possibleLength;
+			
+			// Read 4-byte length stored at this position (little-endian)
 			int storedLength = (paddedSlot[lengthPos] & 0xFF) |
 			                  ((paddedSlot[lengthPos + 1] & 0xFF) << 8) |
 			                  ((paddedSlot[lengthPos + 2] & 0xFF) << 16) |
 			                  ((paddedSlot[lengthPos + 3] & 0xFF) << 24);
 			
-			if (storedLength == possibleLength && storedLength > 0 && storedLength < SLOT_SIZE - 4) {
-				// Found valid length marker
+			// Length marker is valid if:
+			// 1. Stored length equals its position (self-referential)
+			// 2. Length is positive and reasonable
+			// 3. Length leaves room for the marker itself
+			if (storedLength == possibleLength && 
+			    storedLength > 50 && 
+			    storedLength < SLOT_SIZE - 4) {
+				// Found valid length marker - extract original data
 				return Arrays.copyOfRange(paddedSlot, 0, storedLength);
 			}
 		}
 		
-		// No valid length marker found - likely random padding
+		// No valid length marker found - this is random padding or wrong password
 		throw new InvalidPassphraseException();
 	}
 	
