@@ -94,29 +94,7 @@ public class VaultConfigCache {
 		if (multiKeyslot.isMultiKeyslotFile(configPath)) {
 			// For multi-keyslot files, we can't determine which config without a masterkey
 			// So we return the first config (primary vault) for vault state checking
-			try {
-				// Read first config slot manually
-				byte[] fileData = Files.readAllBytes(configPath);
-				if (fileData.length < 16) { // Header is 12 bytes + at least 4 for size
-					throw new IOException("Multi-keyslot file too small");
-				}
-				
-				// Skip header (12 bytes: magic + version + count)
-				int offset = 12;
-				
-				// Read first config size (4 bytes, big-endian)
-				int configSize = ((fileData[offset] & 0xFF) << 24) |
-								 ((fileData[offset + 1] & 0xFF) << 16) |
-								 ((fileData[offset + 2] & 0xFF) << 8) |
-								 (fileData[offset + 3] & 0xFF);
-				offset += 4;
-				
-				// Read first config token
-				String token = new String(fileData, offset, configSize, StandardCharsets.US_ASCII);
-				return VaultConfig.decode(token);
-			} catch (Exception e) {
-				throw new IOException("Failed to read first config from multi-keyslot file", e);
-			}
+			return multiKeyslot.loadFirstSlotUnverified(configPath);
 		} else {
 			// Legacy single-config file
 			String token = Files.readString(configPath, StandardCharsets.US_ASCII);

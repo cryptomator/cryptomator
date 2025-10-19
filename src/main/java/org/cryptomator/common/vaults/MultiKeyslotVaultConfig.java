@@ -75,6 +75,10 @@ public class MultiKeyslotVaultConfig {
 	private static final int VERSION = 1;
 	private static final int HEADER_SIZE = 12; // magic(4) + version(4) + count(4)
 	
+	// Bounds checking constants
+	private static final int MAX_CONFIG_COUNT = 256;  // Reasonable upper limit
+	private static final int MAX_CONFIG_SIZE = 10_000_000;  // 10 MB max per config token
+	
 	/**
 	 * Check if a file is a multi-keyslot vault config file.
 	 * 
@@ -275,6 +279,22 @@ public class MultiKeyslotVaultConfig {
 	}
 	
 	/**
+	 * Load the first config slot without masterkey verification.
+	 * This is used for vault state checking where we need a config but don't have the masterkey yet.
+	 * 
+	 * @param path Path to multi-keyslot vault config file
+	 * @return Unverified config from first slot
+	 * @throws IOException on I/O errors
+	 */
+	public VaultConfig.UnverifiedVaultConfig loadFirstSlotUnverified(Path path) throws IOException {
+		List<String> tokens = readConfigSlots(path);
+		if (tokens.isEmpty()) {
+			throw new IOException("No config slots found in file");
+		}
+		return VaultConfig.decode(tokens.get(0));
+	}
+	
+	/**
 	 * Read all config slots from the file.
 	 * 
 	 * @param path Path to multi-keyslot vault config file
@@ -287,7 +307,10 @@ public class MultiKeyslotVaultConfig {
 		try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
 			// Read header
 			ByteBuffer header = ByteBuffer.allocate(HEADER_SIZE);
-			channel.read(header);
+			int bytesRead = channel.read(header);
+			if (bytesRead < HEADER_SIZE) {
+				throw new IOException("File too small: expected " + HEADER_SIZE + " bytes for header, got " + bytesRead);
+			}
 			header.flip();
 			
 			byte[] magic = new byte[4];
@@ -302,17 +325,33 @@ public class MultiKeyslotVaultConfig {
 				throw new IOException("Unsupported multi-keyslot vault config version: " + version);
 			}
 			
+			// SECURITY: Bounds check on count to prevent OOM attacks
+			if (count < 0 || count > MAX_CONFIG_COUNT) {
+				throw new IOException("Invalid config count: " + count + " (max: " + MAX_CONFIG_COUNT + ")");
+			}
+			
 			// Read each config slot
 			for (int i = 0; i < count; i++) {
 				// Read size
 				ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
-				channel.read(sizeBuffer);
+				bytesRead = channel.read(sizeBuffer);
+				if (bytesRead < 4) {
+					throw new IOException("Truncated config size field for slot " + i);
+				}
 				sizeBuffer.flip();
 				int configSize = sizeBuffer.getInt();
 				
+				// SECURITY: Bounds check on configSize to prevent OOM attacks
+				if (configSize < 0 || configSize > MAX_CONFIG_SIZE) {
+					throw new IOException("Invalid config size for slot " + i + ": " + configSize + " (max: " + MAX_CONFIG_SIZE + ")");
+				}
+				
 				// Read config data
 				ByteBuffer configBuffer = ByteBuffer.allocate(configSize);
-				channel.read(configBuffer);
+				bytesRead = channel.read(configBuffer);
+				if (bytesRead < configSize) {
+					throw new IOException("Truncated config data for slot " + i + ": expected " + configSize + " bytes, got " + bytesRead);
+				}
 				configBuffer.flip();
 				
 				byte[] configData = new byte[configSize];
