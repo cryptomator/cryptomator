@@ -69,7 +69,7 @@ public final class IdentityInitializer {
 		
 		// SECURITY: Verify primary password before making any changes
 		// This prevents unauthorized keyslot addition
-		try (Masterkey verifyKey = multiKeyslotFile.load(masterkeyPath, primaryPassword)) {
+		try (var verifyKey = multiKeyslotFile.load(masterkeyPath, primaryPassword)) {
 			LOG.debug("Primary password verified");
 			// Password is valid, proceed with hidden vault creation
 		} catch (org.cryptomator.cryptolib.api.InvalidPassphraseException e) {
@@ -95,7 +95,7 @@ public final class IdentityInitializer {
 		// Step 2: Create hidden vault config in temporary location
 		Path tempVaultDir = Files.createTempDirectory("vlt-");
 			try {
-				MasterkeyLoader loader = ignored -> hiddenMasterkey.copy();
+				MasterkeyLoader loader = _ignored -> hiddenMasterkey.copy();
 				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties()
 						.withKeyLoader(loader)
 						.withVaultConfigFilename("vault.cryptomator")
