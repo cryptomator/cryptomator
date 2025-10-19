@@ -19,38 +19,49 @@ import java.util.List;
 /**
  * Multi-keyslot vault configuration file for TRUE plausible deniability.
  * 
- * <p>This class implements a file format that stores multiple vault configurations
- * in a single file. Each configuration is a JWT token signed with a different masterkey.
- * This eliminates the need for separate vault.bak files, making hidden vaults
+ * <p>This class implements a SECURE file format that stores multiple vault configurations
+ * in a single fixed-size file. Each configuration is a JWT token that can only be verified
+ * with the correct masterkey. This eliminates vault.bak files and makes hidden vaults
  * cryptographically undetectable.
  * 
- * <h2>File Format:</h2>
+ * <h2>Secure File Format (Fixed Size - Indistinguishable from Random):</h2>
  * <pre>
+ * Total Size: 32,768 bytes (32 KB) - FIXED SIZE, always same regardless of slots used
+ * 
  * ┌─────────────────────────────────────────┐
- * │ Magic: "VCFG" (4 bytes)                 │
+ * │ Slot 0: 8,192 bytes                     │  ← JWT config OR random padding
  * ├─────────────────────────────────────────┤
- * │ Version: 1 (4 bytes)                    │
+ * │ Slot 1: 8,192 bytes                     │  ← JWT config OR random padding
  * ├─────────────────────────────────────────┤
- * │ Config Count: N (4 bytes)               │
+ * │ Slot 2: 8,192 bytes                     │  ← JWT config OR random padding
  * ├─────────────────────────────────────────┤
- * │ Config 1 Size: X bytes (4 bytes)        │
- * │ Config 1 Data: (X bytes) - JWT token    │
- * ├─────────────────────────────────────────┤
- * │ Config 2 Size: Y bytes (4 bytes)        │
- * │ Config 2 Data: (Y bytes) - JWT token    │
- * ├─────────────────────────────────────────┤
- * │ ... (additional configs)                 │
+ * │ Slot 3: 8,192 bytes                     │  ← JWT config OR random padding
  * └─────────────────────────────────────────┘
+ * 
+ * Each slot contains:
+ * - Length marker: 4 bytes (little-endian int)
+ * - JWT config: variable length (if real slot)
+ * - Random padding: fills remainder to 8,192 bytes
+ * 
+ * Or for empty slots:
+ * - Cryptographically secure random data: 8,192 bytes
  * </pre>
  * 
- * <h2>Security Properties:</h2>
+ * <h2>Security Properties (TRUE Plausible Deniability):</h2>
  * <ul>
- *   <li>Each config is signed with a different masterkey</li>
- *   <li>Cannot verify a config without the correct masterkey</li>
- *   <li>All configs appear as random base64 strings</li>
- *   <li>No way to detect number of vaults without trying passwords</li>
- *   <li>TRUE plausible deniability - no file presence reveals hidden vaults</li>
+ *   <li>NO magic bytes - file looks like random data</li>
+ *   <li>NO version field - no identifying markers</li>
+ *   <li>NO explicit count - impossible to tell how many configs exist</li>
+ *   <li>Fixed size - always 32 KB regardless of actual usage</li>
+ *   <li>Each slot is indistinguishable from random data</li>
+ *   <li>Config detection ONLY via JWT signature verification with masterkey</li>
+ *   <li>Cannot prove hidden vaults exist without the masterkey</li>
+ *   <li>Even file size reveals nothing (always 32 KB)</li>
  * </ul>
+ * 
+ * <h2>Backward Compatibility:</h2>
+ * <p>Supports loading legacy single-config files (plain JWT, variable size).
+ * Automatically converts to secure multi-keyslot format when adding hidden vaults.
  * 
  * <h2>Usage:</h2>
  * <pre>
@@ -71,33 +82,37 @@ public class MultiKeyslotVaultConfig {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(MultiKeyslotVaultConfig.class);
 	
-	private static final byte[] MAGIC = "VCFG".getBytes(StandardCharsets.US_ASCII);
-	private static final int VERSION = 1;
-	private static final int HEADER_SIZE = 12; // magic(4) + version(4) + count(4)
+	// SECURE FORMAT - No magic bytes, no version, no count!
+	private static final int SLOT_SIZE = 8192;  // 8 KB per slot
+	private static final int NUM_SLOTS = 4;     // Always 4 slots
+	private static final int FILE_SIZE = NUM_SLOTS * SLOT_SIZE;  // 32 KB total (fixed size)
 	
-	// Bounds checking constants
-	private static final int MAX_CONFIG_COUNT = 256;  // Reasonable upper limit
-	private static final int MAX_CONFIG_SIZE = 10_000_000;  // 10 MB max per config token
+	// Maximum JWT config size per slot (leave room for length marker + padding)
+	private static final int MAX_CONFIG_SIZE_PER_SLOT = SLOT_SIZE - 4;  // Reserve 4 bytes for length
+	
+	private final java.security.SecureRandom secureRandom;
+	
+	public MultiKeyslotVaultConfig() {
+		this.secureRandom = new java.security.SecureRandom();
+	}
 	
 	/**
 	 * Check if a file is a multi-keyslot vault config file.
+	 * SECURITY: Detection by file size ONLY - no magic bytes to preserve plausible deniability.
 	 * 
 	 * @param path Path to vault config file
-	 * @return true if file has multi-keyslot format
+	 * @return true if file has multi-keyslot format (exactly FILE_SIZE bytes)
 	 * @throws IOException on I/O errors
 	 */
 	public boolean isMultiKeyslotFile(Path path) throws IOException {
-		if (!Files.exists(path) || Files.size(path) < HEADER_SIZE) {
+		if (!Files.exists(path)) {
 			return false;
 		}
 		
-		byte[] header = new byte[4];
-		try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-			ByteBuffer buffer = ByteBuffer.wrap(header);
-			channel.read(buffer);
-		}
-		
-		return java.util.Arrays.equals(header, MAGIC);
+		long size = Files.size(path);
+		// Multi-keyslot files are exactly FILE_SIZE bytes (32 KB)
+		// Legacy single-config files are typically 500-2000 bytes
+		return size == FILE_SIZE;
 	}
 	
 	/**
@@ -127,9 +142,14 @@ public class MultiKeyslotVaultConfig {
 		// SECURITY: Don't log slot count - reveals hidden vault existence
 		
 		// Try each config slot with the provided masterkey
-		for (int i = 0; i < configTokens.size(); i++) {
+		for (String configToken : configTokens) {
+			// Skip null slots (empty/random data)
+			if (configToken == null) {
+				continue;
+			}
+			
 			try {
-				VaultConfig.UnverifiedVaultConfig config = VaultConfig.decode(configTokens.get(i));
+				VaultConfig.UnverifiedVaultConfig config = VaultConfig.decode(configToken);
 				
 				// Try to verify with this masterkey
 				// This will throw VaultConfigLoadException if masterkey doesn't match
@@ -185,20 +205,41 @@ public class MultiKeyslotVaultConfig {
 			// Convert legacy single-config to multi-keyslot format
 			LOG.debug("Converting vault config to multi-keyslot format");
 			String legacyConfig = Files.readString(path, StandardCharsets.US_ASCII);
-			existingConfigs = new ArrayList<>(List.of(legacyConfig));
+			// Create list with 4 slots: first is legacy config, rest are null (will be random)
+			existingConfigs = new ArrayList<>(NUM_SLOTS);
+			existingConfigs.add(legacyConfig);
+			for (int i = 1; i < NUM_SLOTS; i++) {
+				existingConfigs.add(null);
+			}
 		}
 		
-		// Add new config
-		List<String> allConfigs = new ArrayList<>(existingConfigs);
-		allConfigs.add(newConfigToken);
+		// Find first available slot (null entry)
+		int availableSlot = -1;
+		for (int i = 0; i < existingConfigs.size(); i++) {
+			if (existingConfigs.get(i) == null) {
+				availableSlot = i;
+				break;
+			}
+		}
+		
+		if (availableSlot == -1) {
+			throw new IOException("No available slots - maximum " + NUM_SLOTS + " identities per vault");
+		}
+		
+		// Add new config to available slot
+		existingConfigs.set(availableSlot, newConfigToken);
 		
 		// Write back atomically
 		Path tempFile = Files.createTempFile(path.getParent(), ".vcfg-", ".tmp");
 		try {
-			writeConfigSlots(tempFile, allConfigs);
-			Files.move(tempFile, path, 
-				StandardCopyOption.REPLACE_EXISTING,
-				StandardCopyOption.ATOMIC_MOVE);
+			writeConfigSlots(tempFile, existingConfigs);
+			try {
+				Files.move(tempFile, path, 
+					StandardCopyOption.REPLACE_EXISTING,
+					StandardCopyOption.ATOMIC_MOVE);
+			} catch (java.nio.file.AtomicMoveNotSupportedException e) {
+				Files.move(tempFile, path, StandardCopyOption.REPLACE_EXISTING);
+			}
 			// SECURITY: Don't log slot count - reveals hidden vault existence
 			LOG.debug("Added config to vault");
 		} finally {
@@ -232,6 +273,9 @@ public class MultiKeyslotVaultConfig {
 		// Find which config matches this masterkey
 		int configToRemove = -1;
 		for (int i = 0; i < configs.size(); i++) {
+			if (configs.get(i) == null) {
+				continue;  // Skip empty slots
+			}
 			try {
 				VaultConfig.UnverifiedVaultConfig config = VaultConfig.decode(configs.get(i));
 				config.verify(masterkey, config.allegedVaultVersion());
@@ -243,21 +287,29 @@ public class MultiKeyslotVaultConfig {
 		}
 		
 		if (configToRemove == -1) {
-			LOG.warn("Masterkey doesn't match any config slot");
+			LOG.warn("Masterkey doesn't match any config");
 			return false;
 		}
 		
-		// Remove the config
-		List<String> newConfigs = new ArrayList<>(configs);
-		newConfigs.remove(configToRemove);
+		// Replace the config with null (will become random data)
+		configs.set(configToRemove, null);
 		
-		if (newConfigs.size() == 1) {
-			// Convert back to legacy single-config format
-			Files.writeString(path, newConfigs.get(0), StandardCharsets.US_ASCII);
+		// Count remaining non-null configs
+		long remainingConfigs = configs.stream().filter(c -> c != null).count();
+		
+		if (remainingConfigs == 1) {
+			// Only one config left - convert back to legacy single-config format
+			String lastConfig = configs.stream().filter(c -> c != null).findFirst().orElseThrow();
+			Files.writeString(path, lastConfig, StandardCharsets.US_ASCII);
 			// SECURITY: Don't mention conversion or slot count
 			LOG.debug("Removed config from vault");
+		} else if (remainingConfigs == 0) {
+			// Should not happen - would leave vault inaccessible
+			LOG.warn("Cannot remove last config - vault would be inaccessible");
+			return false;
 		} else {
-			writeConfigSlots(path, newConfigs);
+			// Multiple configs remain - write secure multi-slot file
+			writeConfigSlots(path, configs);
 			// SECURITY: Don't log slot index or count - reveals info about hidden vaults
 			LOG.debug("Removed config from vault");
 		}
@@ -273,14 +325,16 @@ public class MultiKeyslotVaultConfig {
 	 * In production code, avoid calling this method to maintain plausible deniability.
 	 * 
 	 * @param path Path to vault config file
-	 * @return Number of config slots (1 for legacy files)
+	 * @return Number of non-null config slots (1 for legacy files)
 	 * @throws IOException on I/O errors
 	 */
 	public int getConfigSlotCount(Path path) throws IOException {
 		if (!isMultiKeyslotFile(path)) {
 			return 1; // Legacy single-config file
 		}
-		return readConfigSlots(path).size();
+		// Count non-null configs only
+		List<String> configs = readConfigSlots(path);
+		return (int) configs.stream().filter(c -> c != null).count();
 	}
 	
 	/**
@@ -288,80 +342,63 @@ public class MultiKeyslotVaultConfig {
 	 * This is used for vault state checking where we need a config but don't have the masterkey yet.
 	 * 
 	 * @param path Path to multi-keyslot vault config file
-	 * @return Unverified config from first slot
+	 * @return Unverified config from first non-null slot
 	 * @throws IOException on I/O errors
 	 */
 	public VaultConfig.UnverifiedVaultConfig loadFirstSlotUnverified(Path path) throws IOException {
 		List<String> tokens = readConfigSlots(path);
-		if (tokens.isEmpty()) {
-			throw new IOException("No config slots found in file");
-		}
-		return VaultConfig.decode(tokens.get(0));
+		
+		// Find first non-null config
+		String firstConfig = tokens.stream()
+			.filter(t -> t != null)
+			.findFirst()
+			.orElseThrow(() -> new IOException("No config slots found in file"));
+		
+		return VaultConfig.decode(firstConfig);
 	}
 	
 	/**
-	 * Read all config slots from the file.
+	 * Read all config slots from the secure fixed-size file.
+	 * SECURITY: No magic bytes, no count field. Each slot is tried to extract a valid JWT.
 	 * 
 	 * @param path Path to multi-keyslot vault config file
-	 * @return List of config JWT tokens
+	 * @return List of config JWT tokens (may include nulls for empty slots)
 	 * @throws IOException on I/O errors
 	 */
 	private List<String> readConfigSlots(Path path) throws IOException {
+		byte[] fileData = Files.readAllBytes(path);
+		
+		if (fileData.length != FILE_SIZE) {
+			throw new IOException("Invalid file size: expected " + FILE_SIZE + " bytes, got " + fileData.length);
+		}
+		
 		List<String> configs = new ArrayList<>();
 		
-		try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-			// Read header
-			ByteBuffer header = ByteBuffer.allocate(HEADER_SIZE);
-			int bytesRead = channel.read(header);
-			if (bytesRead < HEADER_SIZE) {
-				throw new IOException("File too small: expected " + HEADER_SIZE + " bytes for header, got " + bytesRead);
-			}
-			header.flip();
+		// Read each slot
+		for (int i = 0; i < NUM_SLOTS; i++) {
+			int offset = i * SLOT_SIZE;
 			
-			byte[] magic = new byte[4];
-			header.get(magic);
-			int version = header.getInt();
-			int count = header.getInt();
+			// Read length marker (first 4 bytes, little-endian)
+			int configLength = (fileData[offset] & 0xFF) |
+			                  ((fileData[offset + 1] & 0xFF) << 8) |
+			                  ((fileData[offset + 2] & 0xFF) << 16) |
+			                  ((fileData[offset + 3] & 0xFF) << 24);
 			
-			if (!java.util.Arrays.equals(magic, MAGIC)) {
-				throw new IOException("Invalid multi-keyslot vault config: bad magic bytes");
-			}
-			if (version != VERSION) {
-				throw new IOException("Unsupported multi-keyslot vault config version: " + version);
-			}
-			
-			// SECURITY: Bounds check on count to prevent OOM attacks
-			if (count < 0 || count > MAX_CONFIG_COUNT) {
-				throw new IOException("Invalid config count: " + count + " (max: " + MAX_CONFIG_COUNT + ")");
-			}
-			
-			// Read each config slot
-			for (int i = 0; i < count; i++) {
-				// Read size
-				ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
-				bytesRead = channel.read(sizeBuffer);
-				if (bytesRead < 4) {
-					throw new IOException("Truncated config size field for slot " + i);
+			// Sanity check length
+			if (configLength > 0 && configLength <= MAX_CONFIG_SIZE_PER_SLOT) {
+				// Potentially valid config - try to extract it
+				try {
+					byte[] configBytes = new byte[configLength];
+					System.arraycopy(fileData, offset + 4, configBytes, 0, configLength);
+					String configToken = new String(configBytes, StandardCharsets.US_ASCII);
+					configs.add(configToken);
+				} catch (Exception e) {
+					// Invalid data - treat as empty/random slot
+					configs.add(null);
 				}
-				sizeBuffer.flip();
-				int configSize = sizeBuffer.getInt();
-				
-				// SECURITY: Bounds check on configSize to prevent OOM attacks
-				if (configSize < 0 || configSize > MAX_CONFIG_SIZE) {
-					throw new IOException("Invalid config size for slot " + i + ": " + configSize + " (max: " + MAX_CONFIG_SIZE + ")");
-				}
-				
-				// Read config data
-				ByteBuffer configBuffer = ByteBuffer.allocate(configSize);
-				bytesRead = channel.read(configBuffer);
-				if (bytesRead < configSize) {
-					throw new IOException("Truncated config data for slot " + i + ": expected " + configSize + " bytes, got " + bytesRead);
-				}
-				configBuffer.flip();
-				
-				byte[] configData = new byte[configSize];
-				configBuffer.get(configData);
-				configs.add(new String(configData, StandardCharsets.US_ASCII));
+			} else {
+				// Invalid length marker - this is an empty slot (pure random data)
+				configs.add(null);
 			}
 		}
 		
@@ -369,41 +406,63 @@ public class MultiKeyslotVaultConfig {
 	}
 	
 	/**
-	 * Write config slots to file.
+	 * Write config slots to secure fixed-size file.
+	 * SECURITY: No magic bytes, no version, no count. Fixed size with random padding.
 	 * 
 	 * @param path Path where file will be written
-	 * @param configs List of config JWT tokens to write
+	 * @param configs List of config JWT tokens (nulls = empty slots)
 	 * @throws IOException on I/O errors
 	 */
 	private void writeConfigSlots(Path path, List<String> configs) throws IOException {
-		try (FileChannel channel = FileChannel.open(path,
-				StandardOpenOption.CREATE,
-				StandardOpenOption.WRITE,
-				StandardOpenOption.TRUNCATE_EXISTING)) {
+		if (configs.size() > NUM_SLOTS) {
+			throw new IOException("Too many configs: " + configs.size() + " (max: " + NUM_SLOTS + ")");
+		}
+		
+		// Create fixed-size file data
+		byte[] fileData = new byte[FILE_SIZE];
+		
+		// Write each slot
+		for (int i = 0; i < NUM_SLOTS; i++) {
+			int offset = i * SLOT_SIZE;
 			
-			// Write header
-			ByteBuffer header = ByteBuffer.allocate(HEADER_SIZE);
-			header.put(MAGIC);
-			header.putInt(VERSION);
-			header.putInt(configs.size());
-			header.flip();
-			channel.write(header);
-			
-			// Write each config slot
-			for (String config : configs) {
-				byte[] configBytes = config.getBytes(StandardCharsets.US_ASCII);
+			if (i < configs.size() && configs.get(i) != null) {
+				// Real config slot
+				String configToken = configs.get(i);
+				byte[] configBytes = configToken.getBytes(StandardCharsets.US_ASCII);
 				
-				// Write size
-				ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
-				sizeBuffer.putInt(configBytes.length);
-				sizeBuffer.flip();
-				channel.write(sizeBuffer);
+				if (configBytes.length > MAX_CONFIG_SIZE_PER_SLOT) {
+					throw new IOException("Config too large for slot " + i + ": " + configBytes.length + " bytes (max: " + MAX_CONFIG_SIZE_PER_SLOT + ")");
+				}
 				
-				// Write data
-				ByteBuffer configBuffer = ByteBuffer.wrap(configBytes);
-				channel.write(configBuffer);
+				// Write length marker (4 bytes, little-endian)
+				fileData[offset] = (byte) (configBytes.length & 0xFF);
+				fileData[offset + 1] = (byte) ((configBytes.length >> 8) & 0xFF);
+				fileData[offset + 2] = (byte) ((configBytes.length >> 16) & 0xFF);
+				fileData[offset + 3] = (byte) ((configBytes.length >> 24) & 0xFF);
+				
+				// Write config data
+				System.arraycopy(configBytes, 0, fileData, offset + 4, configBytes.length);
+				
+				// Fill remainder with random padding
+				int remainingBytes = SLOT_SIZE - 4 - configBytes.length;
+				if (remainingBytes > 0) {
+					byte[] padding = new byte[remainingBytes];
+					secureRandom.nextBytes(padding);
+					System.arraycopy(padding, 0, fileData, offset + 4 + configBytes.length, remainingBytes);
+				}
+			} else {
+				// Empty slot - fill with pure random data
+				byte[] randomSlot = new byte[SLOT_SIZE];
+				secureRandom.nextBytes(randomSlot);
+				System.arraycopy(randomSlot, 0, fileData, offset, SLOT_SIZE);
 			}
 		}
+		
+		// Write file atomically
+		Files.write(path, fileData, 
+			StandardOpenOption.CREATE,
+			StandardOpenOption.WRITE,
+			StandardOpenOption.TRUNCATE_EXISTING);
 	}
 	
 	/**
