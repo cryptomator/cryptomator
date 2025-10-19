@@ -189,9 +189,10 @@ public class Vault {
 		
 		LOG.info("Detected multi-keyslot vault config, extracting appropriate config");
 		
+		byte[] masterkeyBytes = null;
 		try {
 			// Load the masterkey to determine which config to use
-			byte[] masterkeyBytes = keyLoader.loadKey(URI.create("masterkeyfile:masterkey.cryptomator")).getEncoded();
+			masterkeyBytes = keyLoader.loadKey(URI.create("masterkeyfile:masterkey.cryptomator")).getEncoded();
 			
 			// Read the config slots and find the one that matches this masterkey
 			java.util.List<String> configTokens = readConfigSlotsFromMultiKeyslot(configPath);
@@ -222,7 +223,18 @@ public class Vault {
 			return ".vault.cryptomator.unlock";
 			
 		} catch (Exception e) {
+			// Clean up temp file on failure
+			try {
+				Files.deleteIfExists(getPath().resolve(".vault.cryptomator.unlock"));
+			} catch (IOException ignored) {
+				// Ignore cleanup errors
+			}
 			throw new IOException("Failed to extract config from multi-keyslot file", e);
+		} finally {
+			// SECURITY: Always zero sensitive masterkey bytes after use
+			if (masterkeyBytes != null) {
+				java.util.Arrays.fill(masterkeyBytes, (byte) 0);
+			}
 		}
 	}
 	
