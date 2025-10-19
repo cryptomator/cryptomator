@@ -4,7 +4,6 @@ import org.cryptomator.common.keychain.MultiKeyslotFile;
 import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.MultiKeyslotVaultConfig;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.NumericTextField;
 import org.cryptomator.ui.health.HealthCheckComponent;
@@ -30,7 +29,6 @@ public class GeneralVaultOptionsController implements FxController {
 	private final Vault vault;
 	private final HealthCheckComponent.Builder healthCheckWindow;
 	private final ResourceBundle resourceBundle;
-	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final MultiKeyslotFile multiKeyslotFile;
 	private final MultiKeyslotVaultConfig multiKeyslotVaultConfig;
 
@@ -41,12 +39,11 @@ public class GeneralVaultOptionsController implements FxController {
 	public NumericTextField lockTimeInMinutesTextField;
 
 	@Inject
-	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, HealthCheckComponent.Builder healthCheckWindow, ResourceBundle resourceBundle, MasterkeyFileAccess masterkeyFileAccess, MultiKeyslotFile multiKeyslotFile, MultiKeyslotVaultConfig multiKeyslotVaultConfig) {
+	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, HealthCheckComponent.Builder healthCheckWindow, ResourceBundle resourceBundle, MultiKeyslotFile multiKeyslotFile, MultiKeyslotVaultConfig multiKeyslotVaultConfig) {
 		this.window = window;
 		this.vault = vault;
 		this.healthCheckWindow = healthCheckWindow;
 		this.resourceBundle = resourceBundle;
-		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.multiKeyslotFile = multiKeyslotFile;
 		this.multiKeyslotVaultConfig = multiKeyslotVaultConfig;
 	}
