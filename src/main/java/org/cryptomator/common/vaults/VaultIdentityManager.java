@@ -17,12 +17,13 @@ import java.util.Optional;
  * 
  * TrueCrypt-Style Design (SECURE):
  * - All vaults use: masterkey.cryptomator (single file, multiple keyslots)
- * - Cannot detect hidden vault by file presence
- * - Must try passwords to discover keyslots
+ * - CANNOT detect how many identities exist without trying passwords
+ * - NO enumeration of identities - violates plausible deniability
+ * - Unlock process discovers identity by password match
  * - No .vault-identities.json (reveals nothing)
  * 
- * Previous design flaw: masterkey.bak file presence revealed hidden vault!
- * New design: All identities in same file = true plausible deniability
+ * Security principle: Identity count is unknowable without passwords.
+ * UI should NOT show "you have N identities" - that defeats the purpose!
  */
 public class VaultIdentityManager {
 
@@ -31,59 +32,26 @@ public class VaultIdentityManager {
 
 	private final Path vaultPath;
 	private final MultiKeyslotFile multiKeyslotFile;
-	private List<VaultIdentity> detectedIdentities;
 
 	private VaultIdentityManager(Path vaultPath, MultiKeyslotFile multiKeyslotFile) {
 		this.vaultPath = vaultPath;
 		this.multiKeyslotFile = multiKeyslotFile;
-		this.detectedIdentities = new ArrayList<>();
 	}
 
 	/**
-	 * Load identity manager and detect identities from multi-keyslot file.
-	 * NO JSON files - detection is based solely on keyslot count.
+	 * Load identity manager for a vault.
+	 * Does NOT detect/enumerate identities (that would violate plausible deniability).
 	 */
 	public static VaultIdentityManager load(Path vaultPath, MultiKeyslotFile multiKeyslotFile) throws IOException {
 		VaultIdentityManager manager = new VaultIdentityManager(vaultPath, multiKeyslotFile);
-		manager.detectIdentities();
-		return manager;
-	}
-
-	/**
-	 * Detect identities by checking keyslot count in masterkey file.
-	 * TrueCrypt-style: We can see how many keyslots exist, but can't tell which
-	 * password unlocks which keyslot without trying.
-	 */
-	private void detectIdentities() throws IOException {
-		detectedIdentities.clear();
 		
+		// Verify masterkey file exists
 		Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
 		if (!Files.exists(masterkeyPath)) {
-			LOG.warn("No masterkey file found at {}", vaultPath);
-			return;
+			throw new IOException("No masterkey file found at " + vaultPath);
 		}
 		
-		try {
-			int keyslotCount = multiKeyslotFile.getKeyslotCount(masterkeyPath);
-			
-			// Primary identity (always first keyslot)
-			VaultIdentity primary = VaultIdentity.createPrimary("Primary", "Main vault");
-			detectedIdentities.add(primary);
-			
-			// Additional identities (hidden vaults)
-			for (int i = 1; i < keyslotCount; i++) {
-				VaultIdentity hidden = VaultIdentity.createSecondary("Hidden-" + i, "Hidden vault #" + i);
-				detectedIdentities.add(hidden);
-			}
-			
-			LOG.debug("Detected {} keyslot(s) in vault at {}", keyslotCount, vaultPath);
-			
-		} catch (IOException e) {
-			LOG.error("Failed to detect identities", e);
-			// Fall back to single identity
-			VaultIdentity primary = VaultIdentity.createPrimary("Primary", "Main vault");
-			detectedIdentities.add(primary);
-		}
+		return manager;
 	}
 
 	/**
@@ -95,34 +63,23 @@ public class VaultIdentityManager {
 	}
 
 	/**
-	 * Get all detected identities.
+	 * Get identities - returns empty list for secure design.
+	 * 
+	 * SECURITY: Cannot enumerate identities without violating plausible deniability.
+	 * Unlock process discovers the identity by password match.
 	 */
 	public List<VaultIdentity> getIdentities() {
-		return Collections.unmodifiableList(detectedIdentities);
+		// Return empty list - identities are not enumerable for security reasons
+		return Collections.emptyList();
 	}
 
 	/**
-	 * Get primary identity (always first).
+	 * Get primary identity - returns empty for secure design.
+	 * 
+	 * SECURITY: Identities are discovered during unlock, not pre-enumerated.
 	 */
 	public Optional<VaultIdentity> getPrimaryIdentity() {
-		return detectedIdentities.stream()
-				.filter(VaultIdentity::isPrimary)
-				.findFirst();
-	}
-
-	/**
-	 * Check if hidden vault exists (multiple keyslots in masterkey file).
-	 * NOTE: This reveals that a hidden vault exists! Use with caution.
-	 * In true plausible deniability scenarios, avoid calling this method.
-	 */
-	public boolean hasHiddenVault() {
-		try {
-			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
-			return multiKeyslotFile.getKeyslotCount(masterkeyPath) > 1;
-		} catch (IOException e) {
-			LOG.error("Failed to check for hidden vault", e);
-			return false;
-		}
+		return Optional.empty();
 	}
 
 	/**
@@ -144,28 +101,26 @@ public class VaultIdentityManager {
 	}
 
 	/**
-	 * Delete hidden vault (remove keyslot from multi-keyslot file).
-	 * WARNING: Requires the password of the hidden vault to remove it.
+	 * Delete a keyslot from the vault file.
+	 * WARNING: Requires the password of the keyslot to remove it.
 	 * 
-	 * @param hiddenPassword Password of the hidden vault to remove
+	 * @param password Password of the keyslot to remove
 	 * @return true if a keyslot was removed
 	 */
-	public boolean removeHiddenVault(CharSequence hiddenPassword) {
+	public boolean removeKeyslot(CharSequence password) {
 		try {
 			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
 			Path hiddenVaultConfig = vaultPath.resolve("vault.bak");
 			
-			boolean keyslotRemoved = multiKeyslotFile.removeKeyslot(masterkeyPath, hiddenPassword);
+			boolean keyslotRemoved = multiKeyslotFile.removeKeyslot(masterkeyPath, password);
 			boolean configDeleted = Files.deleteIfExists(hiddenVaultConfig);
 			
 			if (keyslotRemoved) {
-				detectIdentities(); // Refresh detection
-				LOG.info("Removed hidden vault from {} (keyslot: {}, config: {})", 
-						vaultPath, keyslotRemoved, configDeleted);
+				LOG.debug("Removed keyslot from vault");
 			}
 			return keyslotRemoved;
 		} catch (IOException e) {
-			LOG.error("Failed to remove hidden vault", e);
+			LOG.error("Failed to remove keyslot", e);
 			return false;
 		}
 	}

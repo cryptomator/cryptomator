@@ -173,9 +173,9 @@ public final class IdentityInitializer {
 		VaultIdentityManager manager = VaultIdentityManager.load(vaultPath, multiKeyslotFile);
 		
 		// Remove the keyslot that matches the hidden password
-		boolean removed = manager.removeHiddenVault(hiddenPassword);
+		boolean removed = manager.removeKeyslot(hiddenPassword);
 		if (removed) {
-			LOG.info("Removed hidden keyslot from {}", vaultPath);
+			LOG.info("Removed keyslot from vault");
 		}
 		
 		return removed;
