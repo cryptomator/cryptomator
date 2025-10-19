@@ -82,8 +82,8 @@ public final class IdentityInitializer {
 			// Pass primaryPassword for legacy conversion (if needed)
 			multiKeyslotFile.addKeyslot(masterkeyPath, hiddenMasterkey, hiddenPassword, primaryPassword, 9);
 			
-			// Step 2: Create hidden vault config in temporary location
-			Path tempVaultDir = Files.createTempDirectory("hidden-vault-init");
+		// Step 2: Create hidden vault config in temporary location
+		Path tempVaultDir = Files.createTempDirectory("vlt-");
 			try {
 				MasterkeyLoader loader = ignored -> hiddenMasterkey.copy();
 				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties()

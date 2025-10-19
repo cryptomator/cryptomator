@@ -1,0 +1,9 @@
+# Local documentation (not for PR)
+CODERABBIT_REVIEW_RESPONSE.md
+PR_CHECKLIST.md
+RUNTIME_FIX_APPLIED.md
+SECURITY_FIX_SUMMARY.md
+
+# Development files
+run-cryptomator.sh
+META-INF/

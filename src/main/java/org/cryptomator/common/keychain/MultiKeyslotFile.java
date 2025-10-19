@@ -169,7 +169,7 @@ public class MultiKeyslotFile {
 	 */
 	public void persist(Path path, Masterkey masterkey, CharSequence password, int scryptCostParam) throws IOException {
 		// Create temp file with encrypted masterkey
-		Path tempKeyslot = Files.createTempFile("keyslot-", ".tmp");
+		Path tempKeyslot = Files.createTempFile("vlt-", ".tmp");
 		try {
 			masterkeyFileAccess.persist(masterkey, tempKeyslot, password, scryptCostParam);
 			byte[] keyslotData = Files.readAllBytes(tempKeyslot);
@@ -305,7 +305,7 @@ public class MultiKeyslotFile {
 		}
 		
 		// Create new encrypted keyslot
-		Path tempKeyslot = Files.createTempFile("keyslot-", ".tmp");
+		Path tempKeyslot = Files.createTempFile("vlt-", ".tmp");
 		try {
 			masterkeyFileAccess.persist(masterkey, tempKeyslot, password, scryptCostParam);
 			byte[] newKeyslotData = Files.readAllBytes(tempKeyslot);
@@ -322,7 +322,7 @@ public class MultiKeyslotFile {
 			System.arraycopy(aeadEncryptedSlot, 0, fileData, availableSlot * SLOT_SIZE, SLOT_SIZE);
 			
 			// Write back atomically
-			Path tempFile = Files.createTempFile(path.getParent(), ".keyslot-", ".tmp");
+			Path tempFile = Files.createTempFile(path.getParent(), ".vlt-", ".tmp");
 			try {
 				Files.write(tempFile, fileData);
 				try {
@@ -390,7 +390,7 @@ public class MultiKeyslotFile {
 		System.arraycopy(randomSlot, 0, fileData, slotToRemove * SLOT_SIZE, SLOT_SIZE);
 		
 		// Write back atomically
-		Path tempFile = Files.createTempFile(path.getParent(), ".keyslot-", ".tmp");
+		Path tempFile = Files.createTempFile(path.getParent(), ".vlt-", ".tmp");
 		try {
 			Files.write(tempFile, fileData);
 			try {

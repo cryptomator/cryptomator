@@ -1,0 +1,4 @@
+org.cryptomator.frontend.webdav.mount.MacAppleScriptMounter
+org.cryptomator.frontend.webdav.mount.FallbackMounter
+org.cryptomator.frontend.webdav.mount.WindowsMounter
+org.cryptomator.frontend.webdav.mount.LinuxGioMounter

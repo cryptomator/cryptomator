@@ -187,7 +187,7 @@ public class MultiKeyslotVaultConfig {
 		allConfigs.add(newConfigToken);
 		
 		// Write back atomically
-		Path tempFile = Files.createTempFile(path.getParent(), ".vault-config-", ".tmp");
+		Path tempFile = Files.createTempFile(path.getParent(), ".vcfg-", ".tmp");
 		try {
 			writeConfigSlots(tempFile, allConfigs);
 			Files.move(tempFile, path, 
