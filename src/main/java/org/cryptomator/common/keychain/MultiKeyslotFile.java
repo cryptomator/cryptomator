@@ -296,8 +296,14 @@ public class MultiKeyslotFile {
 		}
 		
 		if (availableSlot == -1) {
-			// This shouldn't happen - at least one slot should have failed AEAD
-			throw new IOException("All keyslots are occupied with this password");
+			// All slots either:
+			// a) Already have the new password (duplicate check above), OR
+			// b) All slots are occupied with OTHER passwords
+			// Since we can't distinguish (b) from random padding without passwords,
+			// we cannot safely determine if overwriting is safe.
+			throw new IOException("Cannot safely add keyslot: all 4 slots appear occupied. " +
+				"Either a slot already uses this password, or all slots are in use with other passwords. " +
+				"Maximum 4 identities per vault supported.");
 		}
 		
 		// Create new encrypted keyslot
@@ -457,9 +463,10 @@ public class MultiKeyslotFile {
 	 * @throws IllegalArgumentException if keyslot data too large
 	 */
 	private byte[] aeadEncryptSlot(byte[] keyslotData, CharSequence password) throws GeneralSecurityException {
-		if (keyslotData.length > MAX_KEYSLOT_SIZE) {
+		// Reserve 4 bytes for length header in plaintext before encryption
+		if (keyslotData.length > MAX_KEYSLOT_SIZE - 4) {
 			throw new IllegalArgumentException("Keyslot data too large: " + keyslotData.length + 
-				" bytes (max " + MAX_KEYSLOT_SIZE + " with AEAD overhead)");
+				" bytes (max " + (MAX_KEYSLOT_SIZE - 4) + " with length header and AEAD overhead)");
 		}
 		
 		// Generate random salt for key derivation
