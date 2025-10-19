@@ -4,6 +4,7 @@ import dagger.Lazy;
 import org.cryptomator.common.mount.ConflictingMountServiceException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultIdentity;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.integrations.mount.MountFailedException;
@@ -26,8 +27,10 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.ReadOnlyFileSystemException;
 import java.util.concurrent.TimeUnit;
+import org.cryptomator.cryptolib.api.Masterkey;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -79,15 +82,70 @@ public class UnlockWorkflow extends Task<Void> {
 	@Override
 	protected Void call() throws InterruptedException, IOException, CryptoException, MountFailedException {
 		try {
-			keyLoadingStrategy.use(vault::unlock);
+			// For masterkey file strategy, we need to load the key first to detect which identity
+			if (keyLoadingStrategy instanceof org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy masterkeyStrategy) {
+				// Load the key first - this will detect which identity (primary or hidden)
+				URI keyId = vault.getVaultConfigCache().get().getKeyId();
+				Masterkey masterkey = masterkeyStrategy.loadKey(keyId);
+				
+				try {
+					// Now get the detected identity
+					VaultIdentity selectedIdentity = masterkeyStrategy.getSelectedIdentity();
+					if (selectedIdentity != null) {
+						// Create a loader that returns our already-loaded masterkey
+						org.cryptomator.cryptolib.api.MasterkeyLoader loader = ignored -> masterkey.copy();
+						vault.unlock(loader, selectedIdentity);
+					} else {
+						// Fallback to primary
+						org.cryptomator.cryptolib.api.MasterkeyLoader loader = ignored -> masterkey.copy();
+						vault.unlock(loader);
+					}
+				} finally {
+					// Clean up the masterkey
+					masterkey.destroy();
+				}
+			} else {
+				// For other strategies (e.g., Hub), use default behavior
+				keyLoadingStrategy.<RuntimeException>use(keyLoader -> {
+					try {
+						vault.unlock(keyLoader);
+					} catch (IOException | CryptoException | MountFailedException e) {
+						throw new WrappedException(e);
+					}
+				});
+			}
 			return null;
 		} catch (UnlockCancelledException e) {
 			cancel(false); // set Tasks state to cancelled
 			return null;
-		} catch (IOException | RuntimeException | MountFailedException e) {
+		} catch (WrappedException e) {
+			Exception cause = e.getCause();
+			if (cause instanceof IOException ioe) {
+				throw ioe;
+			} else if (cause instanceof CryptoException ce) {
+				throw ce;
+			} else if (cause instanceof MountFailedException mfe) {
+				throw mfe;
+			}
+			throw new IllegalStateException("Unexpected exception type", cause);
+		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException("Unexpected exception type", e);
+		}
+	}
+
+	/**
+	 * Wrapper for checked exceptions that need to be thrown from lambdas.
+	 */
+	private static class WrappedException extends RuntimeException {
+		WrappedException(Exception cause) {
+			super(cause);
+		}
+
+		@Override
+		public synchronized Exception getCause() {
+			return (Exception) super.getCause();
 		}
 	}
 

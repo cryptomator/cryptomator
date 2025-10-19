@@ -1,7 +1,10 @@
 package org.cryptomator.ui.vaultoptions;
 
+import org.cryptomator.common.keychain.MultiKeyslotFile;
 import org.cryptomator.common.settings.WhenUnlocked;
+import org.cryptomator.common.vaults.MultiKeyslotVaultConfig;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.NumericTextField;
 import org.cryptomator.ui.health.HealthCheckComponent;
@@ -9,7 +12,6 @@ import org.cryptomator.ui.health.HealthCheckComponent;
 import javax.inject.Inject;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -28,6 +30,9 @@ public class GeneralVaultOptionsController implements FxController {
 	private final Vault vault;
 	private final HealthCheckComponent.Builder healthCheckWindow;
 	private final ResourceBundle resourceBundle;
+	private final MasterkeyFileAccess masterkeyFileAccess;
+	private final MultiKeyslotFile multiKeyslotFile;
+	private final MultiKeyslotVaultConfig multiKeyslotVaultConfig;
 
 	public TextField vaultName;
 	public CheckBox unlockOnStartupCheckbox;
@@ -36,11 +41,14 @@ public class GeneralVaultOptionsController implements FxController {
 	public NumericTextField lockTimeInMinutesTextField;
 
 	@Inject
-	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, HealthCheckComponent.Builder healthCheckWindow, ResourceBundle resourceBundle) {
+	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, HealthCheckComponent.Builder healthCheckWindow, ResourceBundle resourceBundle, MasterkeyFileAccess masterkeyFileAccess, MultiKeyslotFile multiKeyslotFile, MultiKeyslotVaultConfig multiKeyslotVaultConfig) {
 		this.window = window;
 		this.vault = vault;
 		this.healthCheckWindow = healthCheckWindow;
 		this.resourceBundle = resourceBundle;
+		this.masterkeyFileAccess = masterkeyFileAccess;
+		this.multiKeyslotFile = multiKeyslotFile;
+		this.multiKeyslotVaultConfig = multiKeyslotVaultConfig;
 	}
 
 	@FXML
@@ -54,6 +62,11 @@ public class GeneralVaultOptionsController implements FxController {
 		actionAfterUnlockChoiceBox.setConverter(new WhenUnlockedConverter(resourceBundle));
 		lockAfterTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().autoLockWhenIdle);
 		Bindings.bindBidirectional(lockTimeInMinutesTextField.textProperty(), vault.getVaultSettings().autoLockIdleSeconds, new IdleTimeSecondsConverter());
+	}
+
+	@FXML
+	public void createHiddenVault() {
+		new HiddenVaultCreationDialog(vault, multiKeyslotFile, multiKeyslotVaultConfig, window).show();
 	}
 
 	private void trimVaultNameOnFocusLoss(Observable observable, Boolean wasFocussed, Boolean isFocussed) {

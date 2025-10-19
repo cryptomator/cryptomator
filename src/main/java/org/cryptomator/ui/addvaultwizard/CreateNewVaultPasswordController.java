@@ -1,6 +1,7 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
+import org.cryptomator.common.keychain.MultiKeyslotFile;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -71,6 +72,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final ReadmeGenerator readmeGenerator;
 	private final SecureRandom csprng;
 	private final MasterkeyFileAccess masterkeyFileAccess;
+	private final MultiKeyslotFile multiKeyslotFile;
 	private final BooleanProperty processing;
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
@@ -96,10 +98,11 @@ public class CreateNewVaultPasswordController implements FxController {
 									 @Named("recoveryKey") StringProperty recoveryKey, //
 									 VaultListManager vaultListManager, //
 									 ResourceBundle resourceBundle, //
-									 @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
-									 ReadmeGenerator readmeGenerator, //
-									 SecureRandom csprng, //
-									 MasterkeyFileAccess masterkeyFileAccess) {
+								 @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
+								 ReadmeGenerator readmeGenerator, //
+								 SecureRandom csprng, //
+								 MasterkeyFileAccess masterkeyFileAccess, //
+								 MultiKeyslotFile multiKeyslotFile) {
 		this.window = window;
 		this.chooseExpertSettingsScene = chooseExpertSettingsScene;
 		this.recoveryKeyScene = recoveryKeyScene;
@@ -116,6 +119,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.readmeGenerator = readmeGenerator;
 		this.csprng = csprng;
 		this.masterkeyFileAccess = masterkeyFileAccess;
+		this.multiKeyslotFile = multiKeyslotFile;
 		this.processing = new SimpleBooleanProperty();
 		this.readyToCreateVault = new SimpleBooleanProperty();
 		this.createVaultButtonState = Bindings.when(processing).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
@@ -124,7 +128,34 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void initialize() {
+		LOG.info("Initializing CreateNewVaultPasswordController");
+		
+		if (newPasswordSceneController == null) {
+			LOG.error("newPasswordSceneController is null!");
+			return;
+		}
+		if (recoveryKeyChoice == null) {
+			LOG.error("recoveryKeyChoice is null!");
+			return;
+		}
+		
+		LOG.info("Binding readyToCreateVault property");
 		readyToCreateVault.bind(newPasswordSceneController.goodPasswordProperty().and(recoveryKeyChoice.selectedToggleProperty().isNotNull()).and(processing.not()));
+		
+		// Debug bindings
+		newPasswordSceneController.goodPasswordProperty().addListener((obs, oldVal, newVal) -> {
+			LOG.info("Good password changed: {}", newVal);
+		});
+		recoveryKeyChoice.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+			LOG.info("Recovery key choice changed: {}", newVal);
+		});
+		processing.addListener((obs, oldVal, newVal) -> {
+			LOG.info("Processing changed: {}", newVal);
+		});
+		readyToCreateVault.addListener((obs, oldVal, newVal) -> {
+			LOG.info("Ready to create vault: {}", newVal);
+		});
+		
 		window.setOnHiding(event -> {
 			newPasswordSceneController.passwordField.wipe();
 			newPasswordSceneController.reenterField.wipe();
@@ -138,6 +169,15 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void next() {
+		LOG.info("Create vault button clicked");
+		Path vaultPath = vaultPathProperty.get();
+		if (vaultPath == null) {
+			LOG.error("Vault path is null!");
+			appWindows.showErrorWindow(new IllegalStateException("Vault path is not set"), window, window.getScene());
+			return;
+		}
+		LOG.info("Vault will be created at: {}", vaultPath);
+		
 		if (showRecoveryKey.equals(recoveryKeyChoice.getSelectedToggle())) {
 			showRecoveryKeyScene();
 		} else if (skipRecoveryKey.equals(recoveryKeyChoice.getSelectedToggle())) {
@@ -157,7 +197,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			creationSucceeded(pathToVault);
 			recoveryKeyProperty.set(recoveryKey);
 			window.setScene(recoveryKeyScene.get());
-		}).onError(IOException.class, e -> {
+		}).onError(Exception.class, e -> {
 			LOG.error("Failed to create vault.", e);
 			appWindows.showErrorWindow(e, window, window.getScene());
 		}).andFinally(() -> {
@@ -173,7 +213,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		}).onSuccess(() -> {
 			creationSucceeded(pathToVault);
 			window.setScene(successScene.get());
-		}).onError(IOException.class, e -> {
+		}).onError(Exception.class, e -> {
 			LOG.error("Failed to create vault.", e);
 			appWindows.showErrorWindow(e, window, window.getScene());
 		}).andFinally(() -> {
@@ -183,12 +223,34 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	private void createVault(Path path) throws IOException {
 		// 0. create directory
-		Files.createDirectory(path);
+		if (Files.exists(path)) {
+			if (!Files.isDirectory(path)) {
+				throw new IOException("Path exists but is not a directory: " + path);
+			}
+			// Check if directory is empty
+			try (var stream = Files.list(path)) {
+				if (stream.findAny().isPresent()) {
+					throw new IOException("Directory already exists and is not empty: " + path);
+				}
+			}
+			LOG.info("Using existing empty directory at {}", path);
+		} else {
+			Files.createDirectory(path);
+		}
 
-		// 1. write masterkey:
-		Path masterkeyFilePath = path.resolve(MASTERKEY_FILENAME);
+		// 1. write masterkey and initialize identity:
 		try (Masterkey masterkey = Masterkey.generate(csprng)) {
-			masterkeyFileAccess.persist(masterkey, masterkeyFilePath, newPasswordSceneController.passwordField.getCharacters());
+			// Note: IdentityInitializer handles masterkey persistence now
+			
+		// Initialize primary identity (this will create the masterkey file)
+		org.cryptomator.common.recovery.IdentityInitializer.initializePrimaryIdentity(
+			path, 
+			"Primary", 
+			"Default vault identity", 
+			masterkey, 
+			newPasswordSceneController.passwordField.getCharacters(),
+			multiKeyslotFile
+		);
 
 			// 2. initialize vault:
 			try {
@@ -217,7 +279,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			ch.write(US_ASCII.encode(readmeGenerator.createVaultStorageLocationReadmeRtf()));
 		}
 
-		LOG.info("Created vault at {}", path);
+		LOG.info("Created vault at {} with primary identity", path);
 	}
 
 	private void creationSucceeded(Path pathToVault) {

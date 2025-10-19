@@ -24,6 +24,11 @@ public enum SelectedVaultOptionsTab {
 	/**
 	 * Show hub tab
 	 */
-	HUB
+	HUB,
+
+	/**
+	 * Show identity management tab
+	 */
+	IDENTITY
 
 }

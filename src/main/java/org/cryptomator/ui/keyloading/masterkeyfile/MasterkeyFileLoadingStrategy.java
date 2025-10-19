@@ -3,7 +3,9 @@ package org.cryptomator.ui.keyloading.masterkeyfile;
 import com.google.common.base.Preconditions;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
+import org.cryptomator.common.keychain.MultiKeyslotFile;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultIdentity;
 import org.cryptomator.cryptofs.common.BackupHelper;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.Masterkey;
@@ -11,6 +13,7 @@ import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.keyloading.IdentitySelectionComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.unlock.UnlockCancelledException;
@@ -18,8 +21,12 @@ import org.cryptomator.ui.unlock.UnlockCancelledException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -31,30 +38,38 @@ import java.util.concurrent.ExecutionException;
 
 @KeyLoading
 public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyFileLoadingStrategy.class);
 
 	public static final String SCHEME = "masterkeyfile";
 
 	private final Vault vault;
 	private final MasterkeyFileAccess masterkeyFileAccess;
+	private final MultiKeyslotFile multiKeyslotFile;
 	private final Stage window;
 	private final PassphraseEntryComponent.Builder passphraseEntry;
 	private final ChooseMasterkeyFileComponent.Builder masterkeyFileChoice;
+	private final IdentitySelectionComponent.Builder identitySelection;
 	private final KeychainManager keychain;
 	private final ResourceBundle resourceBundle;
+	private final ObjectProperty<VaultIdentity> selectedIdentity;
 
 	private Passphrase passphrase;
 	private boolean savePassphrase;
 	private boolean wrongPassphrase;
 
 	@Inject
-	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, KeychainManager keychain, ResourceBundle resourceBundle) {
+	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, MultiKeyslotFile multiKeyslotFile, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, IdentitySelectionComponent.Builder identitySelection, KeychainManager keychain, ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.masterkeyFileAccess = masterkeyFileAccess;
+		this.multiKeyslotFile = multiKeyslotFile;
 		this.window = window;
 		this.passphraseEntry = passphraseEntry;
 		this.masterkeyFileChoice = masterkeyFileChoice;
+		this.identitySelection = identitySelection;
 		this.keychain = keychain;
 		this.resourceBundle = resourceBundle;
+		this.selectedIdentity = new SimpleObjectProperty<>();
 		this.passphrase = savedPassphrase.map(Passphrase::new).orElse(null);
 		this.savePassphrase = savedPassphrase.isPresent();
 	}
@@ -64,29 +79,66 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		window.setTitle(resourceBundle.getString("unlock.title").formatted(vault.getDisplayName()));
 		Preconditions.checkArgument(SCHEME.equalsIgnoreCase(keyId.getScheme()), "Only supports keys with scheme " + SCHEME);
 		try {
-			Path filePath = vault.getPath().resolve(keyId.getSchemeSpecificPart());
-			if (!Files.exists(filePath)) {
-				filePath = askUserForMasterkeyFilePath();
-			}
+			// Get password from user if not already provided
 			if (passphrase == null) {
 				askForPassphrase();
 			}
-			var masterkey = masterkeyFileAccess.load(filePath, passphrase);
-			//backup
-			if (filePath.startsWith(vault.getPath())) {
-				try {
-					BackupHelper.attemptBackup(filePath);
-				} catch (IOException e) {
-					LOG.warn("Unable to create backup for masterkey file.");
-				}
-			} else {
-				LOG.info("Masterkey file not stored inside vault. Not creating a backup.");
+			
+			// TrueCrypt-style: Use multi-keyslot file that tries all keyslots automatically
+			// This provides true plausible deniability - no way to detect keyslot count
+			Path masterkeyPath = vault.getPath().resolve("masterkey.cryptomator");
+			
+			if (!Files.exists(masterkeyPath)) {
+				throw new IOException("Masterkey file not found: " + masterkeyPath);
 			}
+			
+			// MultiKeyslotFile.load() automatically tries all keyslots with the password
+			// Whichever keyslot decrypts successfully is used (user never knows which)
+			Masterkey masterkey = multiKeyslotFile.load(masterkeyPath, passphrase);
+			LOG.info("Successfully loaded masterkey from multi-keyslot file");
+			
+			// Backup the masterkey file
+			try {
+				BackupHelper.attemptBackup(masterkeyPath);
+			} catch (IOException e) {
+				LOG.warn("Unable to create backup for masterkey file.");
+			}
+			
+			// Note: We don't know which keyslot was used (that's the point!)
+			// The identity detection is handled internally by MultiKeyslotFile
+			selectedIdentity.set(VaultIdentity.createPrimary("Vault", "Unlocked vault"));
+			
 			return masterkey;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UnlockCancelledException("Unlock interrupted", e);
+		} catch (InvalidPassphraseException e) {
+			throw new MasterkeyLoadingFailedException("Wrong password", e);
+		} catch (IOException e) {
+			throw new MasterkeyLoadingFailedException("Failed to load masterkey", e);
 		}
+	}
+
+	/**
+	 * Detect which identity was used based on the masterkey file path.
+	 * TrueCrypt-style: We can't detect which keyslot was used (by design).
+	 * This is for internal tracking only - NO UI indication for plausible deniability.
+	 */
+	private void detectUsedIdentity(Path masterkeyPath) {
+		// With multi-keyslot files, we cannot and should not try to detect
+		// which keyslot was used. This would break plausible deniability.
+		// Just set a generic identity.
+		try {
+			var manager = vault.getIdentityProvider().getManager();
+			manager.getPrimaryIdentity().ifPresent(selectedIdentity::set);
+			LOG.debug("Vault unlocked (keyslot identity unknown - plausible deniability)");
+		} catch (Exception e) {
+			LOG.warn("Failed to detect identity", e);
+		}
+	}
+
+	public VaultIdentity getSelectedIdentity() {
+		return selectedIdentity.get();
 	}
 
 	@Override
@@ -113,11 +165,21 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 
 	private void savePasswordToSystemkeychain(Passphrase passphrase) {
 		try {
+			// Don't save passwords for multi-identity vaults
+			// Each identity may have a different password
+			var manager = vault.getIdentityProvider().getManager();
+			if (manager.getIdentities().size() > 1) {
+				LOG.debug("Skipping password save for multi-identity vault");
+				return;
+			}
+			
 			if (keychain.isSupported() && !keychain.getPassphraseStoredProperty(vault.getId()).get()) {
 				keychain.storePassphrase(vault.getId(), vault.getDisplayName(), passphrase);
 			}
 		} catch (KeychainAccessException e) {
 			LOG.error("Failed to store passphrase in system keychain.", e);
+		} catch (Exception e) {
+			LOG.warn("Failed to check identity count when saving password", e);
 		}
 	}
 

@@ -46,5 +46,11 @@
 				<FontAwesome5IconView glyph="STETHOSCOPE"/>
 			</graphic>
 		</Button>
+
+		<Button fx:id="createHiddenVaultButton" text="%vaultOptions.general.createHiddenVaultBtn" onAction="#createHiddenVault">
+			<graphic>
+				<FontAwesome5IconView glyph="EYE_SLASH"/>
+			</graphic>
+		</Button>
 	</children>
 </VBox>

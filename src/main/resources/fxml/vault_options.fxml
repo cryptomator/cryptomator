@@ -44,5 +44,16 @@
 				<fx:include source="vault_options_hub.fxml"/>
 			</content>
 		</Tab>
+		<!-- Identity tab removed for plausible deniability - revealing hidden vaults defeats the purpose -->
+		<!--
+		<Tab fx:id="identityTab" id="IDENTITY" text="%vaultOptions.identity">
+			<graphic>
+				<FontAwesome5IconView glyph="USER_COG"/>
+			</graphic>
+			<content>
+				<fx:include source="vaultoptions_identity_management.fxml"/>
+			</content>
+		</Tab>
+		-->
 	</tabs>
 </TabPane>

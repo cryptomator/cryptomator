@@ -54,8 +54,10 @@ public enum FxmlFile {
 	UNLOCK_REQUIRES_RESTART("/fxml/unlock_requires_restart.fxml"), //
 	UNLOCK_INVALID_MOUNT_POINT("/fxml/unlock_invalid_mount_point.fxml"), //
 	UNLOCK_SELECT_MASTERKEYFILE("/fxml/unlock_select_masterkeyfile.fxml"), //
+	UNLOCK_SELECT_IDENTITY("/fxml/keyloading_identity_selection.fxml"), //
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //
 	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
+	VAULT_OPTIONS_IDENTITY_MANAGEMENT("/fxml/vaultoptions_identity_management.fxml"), //
 	VAULT_STATISTICS("/fxml/stats.fxml"), //
 	WRONGFILEALERT("/fxml/wrongfilealert.fxml");
 

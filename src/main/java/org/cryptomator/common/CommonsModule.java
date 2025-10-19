@@ -11,7 +11,9 @@ import org.cryptomator.common.keychain.KeychainModule;
 import org.cryptomator.common.mount.MountModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
+import org.cryptomator.common.vaults.MultiKeyslotVaultConfig;
 import org.cryptomator.common.vaults.VaultComponent;
+import org.cryptomator.common.vaults.VaultConfigMigration;
 import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.revealpath.RevealPathService;
@@ -72,6 +74,18 @@ public abstract class CommonsModule {
 	@Singleton
 	static MasterkeyFileAccess provideMasterkeyFileAccess(SecureRandom csprng) {
 		return new MasterkeyFileAccess(Constants.PEPPER, csprng);
+	}
+
+	@Provides
+	@Singleton
+	static MultiKeyslotVaultConfig provideMultiKeyslotVaultConfig() {
+		return new MultiKeyslotVaultConfig();
+	}
+
+	@Provides
+	@Singleton
+	static VaultConfigMigration provideVaultConfigMigration(MultiKeyslotVaultConfig multiKeyslotVaultConfig) {
+		return new VaultConfigMigration(multiKeyslotVaultConfig);
 	}
 
 	@Provides

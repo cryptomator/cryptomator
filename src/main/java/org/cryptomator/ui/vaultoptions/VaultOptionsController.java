@@ -30,6 +30,7 @@ public class VaultOptionsController implements FxController {
 	public Tab mountTab;
 	public Tab keyTab;
 	public Tab hubTab;
+	// identityTab removed for plausible deniability
 
 	@Inject
 	VaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ObjectProperty<SelectedVaultOptionsTab> selectedTabProperty) {
@@ -67,6 +68,7 @@ public class VaultOptionsController implements FxController {
 			case MOUNT -> mountTab;
 			case KEY -> keyTab;
 			case HUB -> hubTab;
+			case IDENTITY -> generalTab; // Identity tab removed for plausible deniability, default to general
 		};
 	}
 

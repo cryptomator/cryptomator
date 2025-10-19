@@ -3,6 +3,7 @@ package org.cryptomator.common.keychain;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
 import javax.inject.Singleton;
@@ -31,6 +32,12 @@ public class KeychainModule {
 			var fallbackProvider = providers.stream().findFirst().orElse(null);
 			return selectedProvider.orElse(fallbackProvider);
 		}, settings.keychainProvider, settings.useKeychain);
+	}
+
+	@Provides
+	@Singleton
+	static MultiKeyslotFile provideMultiKeyslotFile(MasterkeyFileAccess masterkeyFileAccess) {
+		return new MultiKeyslotFile(masterkeyFileAccess);
 	}
 
 }

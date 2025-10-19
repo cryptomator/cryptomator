@@ -60,6 +60,8 @@ open module org.cryptomator.desktop {
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
 	uses SSLContextProvider;
 	uses org.cryptomator.event.NotificationHandler;
+	uses java.nio.file.spi.FileSystemProvider;
+	uses org.cryptomator.integrations.mount.MountService;
 
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;

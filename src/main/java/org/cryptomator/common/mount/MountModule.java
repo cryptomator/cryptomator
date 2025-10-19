@@ -9,7 +9,10 @@ import org.cryptomator.integrations.mount.MountService;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javafx.beans.value.ObservableValue;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,7 +22,19 @@ public class MountModule {
 	@Provides
 	@Singleton
 	static List<MountService> provideSupportedMountServices() {
-		return MountService.get().toList();
+		List<MountService> services = new ArrayList<>();
+		ServiceLoader<MountService> loader = ServiceLoader.load(MountService.class);
+		
+		for (var iterator = loader.iterator(); iterator.hasNext();) {
+			try {
+				services.add(iterator.next());
+			} catch (ServiceConfigurationError e) {
+				// Skip services that can't be loaded (e.g., platform-specific services on wrong platform)
+				System.err.println("Skipping mount service due to error: " + e.getMessage());
+			}
+		}
+		
+		return services;
 	}
 
 	@Provides

@@ -8,6 +8,7 @@ package org.cryptomator.common.vaults;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.Nullable;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,12 @@ public class VaultModule {
 	@PerVault
 	public ObjectProperty<Exception> provideLastKnownException(@Named("lastKnownException") @Nullable Exception initialErrorCause) {
 		return new SimpleObjectProperty<>(initialErrorCause);
+	}
+
+	@Provides
+	@PerVault
+	public java.nio.file.Path provideVaultPath(VaultSettings vaultSettings) {
+		return vaultSettings.path.get();
 	}
 
 }

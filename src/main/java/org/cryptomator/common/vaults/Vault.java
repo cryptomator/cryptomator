@@ -44,6 +44,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.ReadOnlyFileSystemException;
@@ -66,6 +68,7 @@ public class Vault {
 	private final ObjectProperty<Exception> lastKnownException;
 	private final VaultConfigCache configCache;
 	private final VaultStats stats;
+	private final VaultIdentityProvider identityProvider;
 	private final StringBinding displayablePath;
 	private final BooleanBinding locked;
 	private final BooleanBinding processing;
@@ -81,6 +84,7 @@ public class Vault {
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
+	private final AtomicReference<VaultIdentity> currentIdentity = new AtomicReference<>(null);
 
 	@Inject
 	Vault(VaultSettings vaultSettings, //
@@ -89,6 +93,7 @@ public class Vault {
 		  VaultState state, //
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
+		  VaultIdentityProvider identityProvider, //
 		  Mounter mounter, Settings settings, //
 		  FileSystemEventAggregator fileSystemEventAggregator) {
 		this.vaultSettings = vaultSettings;
@@ -97,6 +102,7 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
+		this.identityProvider = identityProvider;
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path);
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
@@ -117,7 +123,7 @@ public class Vault {
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem createCryptoFileSystem(MasterkeyLoader keyLoader) throws IOException, MasterkeyLoadingFailedException {
+	private CryptoFileSystem createCryptoFileSystem(MasterkeyLoader keyLoader, VaultIdentity identity) throws IOException, MasterkeyLoadingFailedException {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
 		var createReadOnly = vaultSettings.usesReadOnlyMode.get();
 		try {
@@ -130,7 +136,7 @@ public class Vault {
 		if (createReadOnly) {
 			flags.add(FileSystemFlags.READONLY);
 		} else if (vaultSettings.maxCleartextFilenameLength.get() == -1) {
-			LOG.debug("Determining cleartext filename length limitations...");
+			LOG.debug("Determining cleartext filename limitations...");
 			int shorteningThreshold = configCache.get().allegedShorteningThreshold();
 			int ciphertextLimit = FileSystemCapabilityChecker.determineSupportedCiphertextFileNameLength(getPath());
 			if (ciphertextLimit < shorteningThreshold) {
@@ -145,14 +151,113 @@ public class Vault {
 			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength.get());
 		}
 
+		// Use identity-specific vault config file (vault.cryptomator or vault.bak)
+		String vaultConfigFilename = identity.getVaultConfigFilename();
+		LOG.info("UNLOCK: Using identity '{}' (primary={}) with vault config file: {}", 
+				identity.getName(), identity.isPrimary(), vaultConfigFilename);
+
+		// Handle multi-keyslot vault configs: extract the correct config for this masterkey
+		String actualConfigFilename = prepareVaultConfigForUnlock(keyLoader, vaultConfigFilename);
+		
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withKeyLoader(keyLoader) //
 				.withFlags(flags) //
-				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
-				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
+				.withVaultConfigFilename(actualConfigFilename) //
 				.withFilesystemEventConsumer(this::consumeVaultEvent) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
+	}
+	
+	/**
+	 * Prepares vault config for unlocking. If the config file is in multi-keyslot format,
+	 * extracts the appropriate config for the given masterkey and writes it temporarily.
+	 * 
+	 * @param keyLoader Loader that can provide the masterkey
+	 * @param configFilename Original config filename
+	 * @return Filename to use for unlocking (may be temporary)
+	 * @throws IOException on errors
+	 */
+	private String prepareVaultConfigForUnlock(MasterkeyLoader keyLoader, String configFilename) throws IOException {
+		Path configPath = getPath().resolve(configFilename);
+		
+		// Check if this is a multi-keyslot file
+		MultiKeyslotVaultConfig multiKeyslot = new MultiKeyslotVaultConfig();
+		if (!multiKeyslot.isMultiKeyslotFile(configPath)) {
+			// Legacy single-config file, use as-is
+			return configFilename;
+		}
+		
+		LOG.info("Detected multi-keyslot vault config, extracting appropriate config");
+		
+		try {
+			// Load the masterkey to determine which config to use
+			byte[] masterkeyBytes = keyLoader.loadKey(URI.create("masterkeyfile:masterkey.cryptomator")).getEncoded();
+			
+			// Read the config slots and find the one that matches this masterkey
+			java.util.List<String> configTokens = readConfigSlotsFromMultiKeyslot(configPath);
+			
+			// Try each config to find which one verifies with this masterkey
+			String matchingToken = null;
+			for (String token : configTokens) {
+				try {
+					var config = org.cryptomator.cryptofs.VaultConfig.decode(token);
+					config.verify(masterkeyBytes, config.allegedVaultVersion());
+					matchingToken = token;
+					LOG.info("Found matching config slot");
+					break;
+				} catch (Exception e) {
+					// Not this config, try next
+				}
+			}
+			
+			if (matchingToken == null) {
+				throw new IOException("No config matches the loaded masterkey");
+			}
+			
+			// Write to temporary config file
+			Path tempConfigPath = getPath().resolve(".vault.cryptomator.unlock");
+			Files.writeString(tempConfigPath, matchingToken, java.nio.charset.StandardCharsets.US_ASCII);
+			
+			LOG.info("Extracted config to temporary file for unlock");
+			return ".vault.cryptomator.unlock";
+			
+		} catch (Exception e) {
+			throw new IOException("Failed to extract config from multi-keyslot file", e);
+		}
+	}
+	
+	/**
+	 * Reads all config tokens from a multi-keyslot file.
+	 */
+	private java.util.List<String> readConfigSlotsFromMultiKeyslot(Path path) throws IOException {
+		java.util.List<String> configs = new java.util.ArrayList<>();
+		byte[] fileData = Files.readAllBytes(path);
+		
+		if (fileData.length < 16) {
+			throw new IOException("Multi-keyslot file too small");
+		}
+		
+		// Skip header (12 bytes: magic + version + count)
+		int offset = 12;
+		int count = ((fileData[8] & 0xFF) << 24) |
+					((fileData[9] & 0xFF) << 16) |
+					((fileData[10] & 0xFF) << 8) |
+					(fileData[11] & 0xFF);
+		
+		// Read each config slot
+		for (int i = 0; i < count; i++) {
+			int configSize = ((fileData[offset] & 0xFF) << 24) |
+							 ((fileData[offset + 1] & 0xFF) << 16) |
+							 ((fileData[offset + 2] & 0xFF) << 8) |
+							 (fileData[offset + 3] & 0xFF);
+			offset += 4;
+			
+			String token = new String(fileData, offset, configSize, java.nio.charset.StandardCharsets.US_ASCII);
+			configs.add(token);
+			offset += configSize;
+		}
+		
+		return configs;
 	}
 
 	private void destroyCryptoFileSystem() {
@@ -166,15 +271,39 @@ public class Vault {
 			}
 		}
 	}
+	
+	/**
+	 * Cleans up temporary vault config file created during unlock.
+	 */
+	private void cleanupTempVaultConfig() {
+		try {
+			Path tempConfigPath = getPath().resolve(".vault.cryptomator.unlock");
+			Files.deleteIfExists(tempConfigPath);
+		} catch (IOException e) {
+			LOG.warn("Failed to clean up temporary vault config", e);
+		}
+	}
 
 	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, MountFailedException {
+		// Use primary identity by default
+		try {
+			VaultIdentity identity = identityProvider.getManager().getPrimaryIdentity()
+					.orElseThrow(() -> new IllegalStateException("No primary identity found"));
+			unlock(keyLoader, identity);
+		} catch (IOException e) {
+			throw new IOException("Failed to load vault identities", e);
+		}
+	}
+
+	public synchronized void unlock(MasterkeyLoader keyLoader, VaultIdentity identity) throws CryptoException, IOException, MountFailedException {
 		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
 		}
-		CryptoFileSystem fs = createCryptoFileSystem(keyLoader);
+		CryptoFileSystem fs = createCryptoFileSystem(keyLoader, identity);
 		boolean success = false;
 		try {
 			cryptoFileSystem.set(fs);
+			currentIdentity.set(identity);
 			var rootPath = fs.getRootDirectories().iterator().next();
 			var mountHandle = mounter.mount(vaultSettings, rootPath);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
@@ -183,6 +312,7 @@ public class Vault {
 			}
 		} finally {
 			if (!success) {
+				currentIdentity.set(null);
 				destroyCryptoFileSystem();
 			}
 		}
@@ -207,6 +337,8 @@ public class Vault {
 		} finally {
 			removeFromQuickAccess();
 			destroyCryptoFileSystem();
+			cleanupTempVaultConfig();
+			currentIdentity.set(null);
 		}
 
 		this.mountHandle.set(null);
@@ -450,6 +582,14 @@ public class Vault {
 
 	public String getId() {
 		return vaultSettings.id;
+	}
+
+	public VaultIdentityProvider getIdentityProvider() {
+		return identityProvider;
+	}
+
+	public VaultIdentity getCurrentIdentity() {
+		return currentIdentity.get();
 	}
 
 	// ******************************************************************************

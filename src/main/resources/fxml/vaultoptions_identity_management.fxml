@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.cryptomator.ui.vaultoptions.IdentityManagementController"
+      spacing="20"
+      styleClass="root">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Vault Identities (Plausibly Deniable Encryption)" styleClass="header"/>
+    
+    <Label text="Manage multiple identities for this vault. Each identity has its own password and presents a different view of encrypted data. This enables plausible deniability - you can reveal one identity while keeping others hidden." 
+           wrapText="true"/>
+
+    <TableView fx:id="identitiesTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="nameColumn" text="Name" prefWidth="150"/>
+            <TableColumn fx:id="typeColumn" text="Type" prefWidth="100"/>
+            <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button fx:id="addButton" text="Add Identity" onAction="#onAddIdentity"/>
+        <Button fx:id="removeButton" text="Remove Identity" onAction="#onRemoveIdentity" disable="true"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Close" onAction="#onClose" defaultButton="true"/>
+    </HBox>
+</VBox>
