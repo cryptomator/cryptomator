@@ -9,6 +9,7 @@ import org.cryptomator.common.vaults.VaultIdentityManager;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.PasswordDialogHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,24 +126,24 @@ public class IdentityManagementController implements FxController {
 		String description = descDialog.showAndWait().orElse("");
 
 		// Get primary password first (needed to read the masterkey)
-		TextInputDialog primaryPasswordDialog = new TextInputDialog();
-		primaryPasswordDialog.setTitle("Add Identity");
-		primaryPasswordDialog.setHeaderText("Enter primary vault password");
-		primaryPasswordDialog.setContentText("Primary password:");
-		
-		Optional<String> primaryPasswordResult = primaryPasswordDialog.showAndWait();
+		Optional<String> primaryPasswordResult = PasswordDialogHelper.promptPassword(
+			window,
+			"Add Identity",
+			"Enter primary vault password",
+			"Primary password:"
+		);
 		if (primaryPasswordResult.isEmpty()) {
 			return;
 		}
 		String primaryPassword = primaryPasswordResult.get();
 
 		// Show dialog to get new identity password
-		TextInputDialog newPasswordDialog = new TextInputDialog();
-		newPasswordDialog.setTitle("Add Identity");
-		newPasswordDialog.setHeaderText("Set password for new identity");
-		newPasswordDialog.setContentText("New identity password:");
-		
-		Optional<String> newPasswordResult = newPasswordDialog.showAndWait();
+		Optional<String> newPasswordResult = PasswordDialogHelper.promptPassword(
+			window,
+			"Add Identity",
+			"Set password for new identity",
+			"New identity password:"
+		);
 		if (newPasswordResult.isEmpty()) {
 			return;
 		}
@@ -175,12 +176,12 @@ public class IdentityManagementController implements FxController {
 		}
 
 		// Ask for password to identify the keyslot to remove
-		TextInputDialog passwordDialog = new TextInputDialog();
-		passwordDialog.setTitle("Remove Identity");
-		passwordDialog.setHeaderText("Enter password for identity: " + selected.getName());
-		passwordDialog.setContentText("Password:");
-		
-		Optional<String> passwordResult = passwordDialog.showAndWait();
+		Optional<String> passwordResult = PasswordDialogHelper.promptPassword(
+			window,
+			"Remove Identity",
+			"Enter password for identity: " + selected.getName(),
+			"Password:"
+		);
 		if (passwordResult.isEmpty()) {
 			return;
 		}
