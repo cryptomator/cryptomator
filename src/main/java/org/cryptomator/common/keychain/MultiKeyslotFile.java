@@ -278,7 +278,7 @@ public class MultiKeyslotFile {
 					aeadDecryptSlot(slotData, primaryPassword);
 					// If we reach here, this slot has the PRIMARY password
 					occupiedByPrimary = true;
-					LOG.trace("Slot {} occupied by primary password, skipping", i);
+					// NO LOGGING: revealing which slot has primary password breaks plausible deniability
 				} catch (GeneralSecurityException e) {
 					// Slot doesn't have primary password either
 				}
