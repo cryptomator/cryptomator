@@ -66,6 +66,15 @@ public final class IdentityInitializer {
 		Path masterkeyPath = vaultPath.resolve("masterkey.cryptomator");
 		Path vaultConfigPath = vaultPath.resolve("vault.cryptomator");
 		
+		// SECURITY: Verify primary password before making any changes
+		// This prevents unauthorized keyslot addition
+		try (Masterkey verifyKey = multiKeyslotFile.load(masterkeyPath, primaryPassword)) {
+			LOG.debug("Primary password verified");
+			// Password is valid, proceed with hidden vault creation
+		} catch (org.cryptomator.cryptolib.api.InvalidPassphraseException e) {
+			throw new IOException("Primary password verification failed - access denied", e);
+		}
+		
 		// Generate DIFFERENT masterkey for hidden vault (true plausible deniability)
 		Masterkey hiddenMasterkey;
 		try {
