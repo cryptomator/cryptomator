@@ -240,36 +240,31 @@ public class Vault {
 	
 	/**
 	 * Reads all config tokens from a multi-keyslot file.
+	 * Uses centralized parsing logic from MultiKeyslotVaultConfig for consistency
+	 * and security (bounds checks).
 	 */
 	private java.util.List<String> readConfigSlotsFromMultiKeyslot(Path path) throws IOException {
-		java.util.List<String> configs = new java.util.ArrayList<>();
-		byte[] fileData = Files.readAllBytes(path);
+		// Delegate to MultiKeyslotVaultConfig for centralized parsing with bounds checks
+		MultiKeyslotVaultConfig multiKeyslot = new MultiKeyslotVaultConfig();
 		
-		if (fileData.length < 16) {
-			throw new IOException("Multi-keyslot file too small");
+		// Use reflection to call private readConfigSlots method
+		// This ensures we use the same parsing logic with bounds checks everywhere
+		try {
+			java.lang.reflect.Method method = MultiKeyslotVaultConfig.class.getDeclaredMethod("readConfigSlots", Path.class);
+			method.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			java.util.List<String> result = (java.util.List<String>) method.invoke(multiKeyslot, path);
+			return result;
+		} catch (java.lang.reflect.InvocationTargetException e) {
+			// Unwrap the real exception
+			Throwable cause = e.getCause();
+			if (cause instanceof IOException) {
+				throw (IOException) cause;
+			}
+			throw new IOException("Failed to read config slots", cause);
+		} catch (Exception e) {
+			throw new IOException("Failed to access config slot parsing", e);
 		}
-		
-		// Skip header (12 bytes: magic + version + count)
-		int offset = 12;
-		int count = ((fileData[8] & 0xFF) << 24) |
-					((fileData[9] & 0xFF) << 16) |
-					((fileData[10] & 0xFF) << 8) |
-					(fileData[11] & 0xFF);
-		
-		// Read each config slot
-		for (int i = 0; i < count; i++) {
-			int configSize = ((fileData[offset] & 0xFF) << 24) |
-							 ((fileData[offset + 1] & 0xFF) << 16) |
-							 ((fileData[offset + 2] & 0xFF) << 8) |
-							 (fileData[offset + 3] & 0xFF);
-			offset += 4;
-			
-			String token = new String(fileData, offset, configSize, java.nio.charset.StandardCharsets.US_ASCII);
-			configs.add(token);
-			offset += configSize;
-		}
-		
-		return configs;
 	}
 
 	private void destroyCryptoFileSystem() {
