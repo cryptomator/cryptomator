@@ -40,7 +40,8 @@ public final class IdentityInitializer {
 		Path masterkeyPath = vaultPath.resolve("masterkey.cryptomator");
 		multiKeyslotFile.persist(masterkeyPath, masterkey, password, 9);
 		
-		LOG.info("Initialized primary vault at {} (multi-keyslot format)", vaultPath);
+		// SECURITY: Don't mention "multi-keyslot" format
+		LOG.info("Initialized primary vault at {}", vaultPath);
 	}
 
 	/**
@@ -132,11 +133,9 @@ public final class IdentityInitializer {
 					LOG.info("Copied hidden vault directory structure from temp location");
 				}
 				
-				LOG.info("Added hidden vault '{}' at {} - TRUE plausible deniability!", identityName, vaultPath);
-				LOG.info("  ✓ Keyslot added to masterkey.cryptomator");
-				LOG.info("  ✓ Config slot added to vault.cryptomator");
-				LOG.info("  ✓ Directory structure initialized");
-				LOG.info("  ✓ NO vault.bak created - undetectable!");
+				// SECURITY: Generic log message, no mention of "hidden", "keyslot", or "slot"
+				LOG.info("Added secondary identity '{}' to vault at {}", identityName, vaultPath);
+				LOG.debug("Identity files updated successfully");
 				
 			} finally {
 				// Clean up temp directory recursively
@@ -182,10 +181,11 @@ public final class IdentityInitializer {
 										 MultiKeyslotFile multiKeyslotFile) throws IOException {
 		VaultIdentityManager manager = VaultIdentityManager.load(vaultPath, multiKeyslotFile);
 		
-		// Remove the keyslot that matches the hidden password
+		// Remove the identity that matches the password
 		boolean removed = manager.removeKeyslot(hiddenPassword);
 		if (removed) {
-			LOG.info("Removed keyslot from vault");
+			// SECURITY: Generic log message, don't mention "keyslot"
+			LOG.info("Removed identity from vault");
 		}
 		
 		return removed;

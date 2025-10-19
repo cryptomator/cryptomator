@@ -187,7 +187,8 @@ public class Vault {
 			return configFilename;
 		}
 		
-		LOG.info("Detected multi-keyslot vault config, extracting appropriate config");
+		// SECURITY: Don't log "multi-keyslot" detection - reveals hidden vault capability
+		LOG.debug("Preparing vault config for unlock");
 		
 		byte[] masterkeyBytes = null;
 		try {
@@ -204,7 +205,8 @@ public class Vault {
 					var config = org.cryptomator.cryptofs.VaultConfig.decode(token);
 					config.verify(masterkeyBytes, config.allegedVaultVersion());
 					matchingToken = token;
-					LOG.info("Found matching config slot");
+					// SECURITY: Don't log "slot" terminology
+					LOG.debug("Vault config matched");
 					break;
 				} catch (Exception e) {
 					// Not this config, try next
@@ -219,7 +221,7 @@ public class Vault {
 			Path tempConfigPath = getPath().resolve(".vault.cryptomator.unlock");
 			Files.writeString(tempConfigPath, matchingToken, java.nio.charset.StandardCharsets.US_ASCII);
 			
-			LOG.info("Extracted config to temporary file for unlock");
+			LOG.debug("Prepared config for unlock");
 			return ".vault.cryptomator.unlock";
 			
 		} catch (Exception e) {

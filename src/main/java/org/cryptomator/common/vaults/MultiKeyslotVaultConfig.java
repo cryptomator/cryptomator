@@ -124,7 +124,7 @@ public class MultiKeyslotVaultConfig {
 		}
 		
 		List<String> configTokens = readConfigSlots(path);
-		LOG.debug("Found {} config slot(s) in {}", configTokens.size(), path.getFileName());
+		// SECURITY: Don't log slot count - reveals hidden vault existence
 		
 		// Try each config slot with the provided masterkey
 		for (int i = 0; i < configTokens.size(); i++) {
@@ -136,12 +136,13 @@ public class MultiKeyslotVaultConfig {
 				config.verify(masterkey, config.allegedVaultVersion());
 				
 				// Success! This config matches this masterkey
-				LOG.info("Masterkey matched config slot {} of {}", i + 1, configTokens.size());
+				// SECURITY: Don't log slot index - reveals which vault was accessed
+				LOG.debug("Vault config matched successfully");
 				return config;
 				
 			} catch (VaultConfigLoadException e) {
 				// This config doesn't match this masterkey, try next slot
-				LOG.trace("Masterkey didn't match config slot {}", i + 1);
+				// SECURITY: Don't log anything - silent try maintains plausible deniability
 				continue;
 			}
 		}
@@ -160,7 +161,8 @@ public class MultiKeyslotVaultConfig {
 	public void persist(Path path, String configToken) throws IOException {
 		List<String> configs = List.of(configToken);
 		writeConfigSlots(path, configs);
-		LOG.info("Created multi-keyslot vault config with 1 slot at {}", path.getFileName());
+		// SECURITY: Don't mention "multi-keyslot" or slot count
+		LOG.debug("Created vault config");
 	}
 	
 	/**
@@ -181,7 +183,7 @@ public class MultiKeyslotVaultConfig {
 			existingConfigs = readConfigSlots(path);
 		} else {
 			// Convert legacy single-config to multi-keyslot format
-			LOG.info("Converting legacy vault.cryptomator to multi-keyslot format");
+			LOG.debug("Converting vault config to multi-keyslot format");
 			String legacyConfig = Files.readString(path, StandardCharsets.US_ASCII);
 			existingConfigs = new ArrayList<>(List.of(legacyConfig));
 		}
@@ -197,7 +199,8 @@ public class MultiKeyslotVaultConfig {
 			Files.move(tempFile, path, 
 				StandardCopyOption.REPLACE_EXISTING,
 				StandardCopyOption.ATOMIC_MOVE);
-			LOG.info("Added config slot to {} (now {} slots)", path.getFileName(), allConfigs.size());
+			// SECURITY: Don't log slot count - reveals hidden vault existence
+			LOG.debug("Added config to vault");
 		} finally {
 			Files.deleteIfExists(tempFile);
 		}
@@ -251,10 +254,12 @@ public class MultiKeyslotVaultConfig {
 		if (newConfigs.size() == 1) {
 			// Convert back to legacy single-config format
 			Files.writeString(path, newConfigs.get(0), StandardCharsets.US_ASCII);
-			LOG.info("Removed config slot, converted back to single-config format");
+			// SECURITY: Don't mention conversion or slot count
+			LOG.debug("Removed config from vault");
 		} else {
 			writeConfigSlots(path, newConfigs);
-			LOG.info("Removed config slot {} (now {} slots remaining)", configToRemove + 1, newConfigs.size());
+			// SECURITY: Don't log slot index or count - reveals info about hidden vaults
+			LOG.debug("Removed config from vault");
 		}
 		
 		return true;
