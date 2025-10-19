@@ -614,23 +614,34 @@ public class MultiKeyslotFile {
 	 * Derive AES-256 key from password using PBKDF2-HMAC-SHA256.
 	 */
 	private SecretKey deriveKey(CharSequence password, byte[] salt) throws GeneralSecurityException {
+		char[] passwordChars = null;
+		byte[] keyBytes = null;
 		try {
-			char[] passwordChars = new char[password.length()];
+			passwordChars = new char[password.length()];
 			for (int i = 0; i < password.length(); i++) {
 				passwordChars[i] = password.charAt(i);
 			}
 			
 			PBEKeySpec spec = new PBEKeySpec(passwordChars, salt, PBKDF2_ITERATIONS, AES_KEY_SIZE);
-			SecretKeyFactory factory = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
-			byte[] keyBytes = factory.generateSecret(spec).getEncoded();
-			
-			// Clear sensitive data
-			Arrays.fill(passwordChars, '\0');
-			spec.clearPassword();
-			
-			return new SecretKeySpec(keyBytes, "AES");
+			try {
+				SecretKeyFactory factory = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
+				keyBytes = factory.generateSecret(spec).getEncoded();
+				
+				return new SecretKeySpec(keyBytes, "AES");
+			} finally {
+				// Clear sensitive data immediately after use
+				spec.clearPassword();
+			}
 		} catch (Exception e) {
 			throw new GeneralSecurityException("Key derivation failed", e);
+		} finally {
+			// Clear all sensitive data even if exception occurs
+			if (passwordChars != null) {
+				Arrays.fill(passwordChars, '\0');
+			}
+			if (keyBytes != null) {
+				Arrays.fill(keyBytes, (byte) 0);
+			}
 		}
 	}
 	
