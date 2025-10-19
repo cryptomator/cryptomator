@@ -51,7 +51,7 @@ public final class IdentityInitializer {
 	 * @param vaultPath Path to vault
 	 * @param identityName Name for hidden vault (not persisted)
 	 * @param identityDescription Description (not persisted)
-	 * @param primaryPassword Password to verify ownership (unused in new design)
+	 * @param primaryPassword Password for primary keyslot (needed for legacy conversion)
 	 * @param hiddenPassword Password for hidden keyslot
 	 * @param multiKeyslotFile Multi-keyslot file handler
 	 * @param multiKeyslotVaultConfig Multi-keyslot vault config handler
@@ -79,7 +79,8 @@ public final class IdentityInitializer {
 			VaultIdentity hiddenIdentity = VaultIdentity.createSecondary(identityName, identityDescription);
 			
 			// Step 1: Add keyslot to existing masterkey.cryptomator file
-			multiKeyslotFile.addKeyslot(masterkeyPath, hiddenMasterkey, hiddenPassword, 9);
+			// Pass primaryPassword for legacy conversion (if needed)
+			multiKeyslotFile.addKeyslot(masterkeyPath, hiddenMasterkey, hiddenPassword, primaryPassword, 9);
 			
 			// Step 2: Create hidden vault config in temporary location
 			Path tempVaultDir = Files.createTempDirectory("hidden-vault-init");

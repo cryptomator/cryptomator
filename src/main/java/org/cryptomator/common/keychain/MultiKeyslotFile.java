@@ -137,18 +137,25 @@ public class MultiKeyslotFile {
 			byte[] slotData = extractSlot(fileData, i);
 			
 			try {
-			Masterkey masterkey = decryptSlot(slotData, password);
-			// Success - but don't reveal which slot!
-			LOG.trace("Vault unlock successful");
-			return masterkey;
+				LOG.debug("Attempting to decrypt slot {}", i);
+				Masterkey masterkey = decryptSlot(slotData, password);
+				// Success - but don't reveal which slot!
+				LOG.trace("Vault unlock successful from slot {}", i);
+				return masterkey;
 			} catch (InvalidPassphraseException e) {
 				// Could be: wrong password, or this slot is just random padding
 				// Either way, silently try the next slot
+				LOG.debug("Slot {} decryption failed: {}", i, e.getMessage());
+				continue;
+			} catch (IOException e) {
+				// IO error - might indicate corruption
+				LOG.warn("IO error decrypting slot {}: {}", i, e.getMessage());
 				continue;
 			}
 		}
 		
 		// None of the slots decrypted - either wrong password or no matching keyslot
+		LOG.debug("All {} slots failed to decrypt", NUM_SLOTS);
 		throw new InvalidPassphraseException();
 	}
 	
@@ -213,23 +220,25 @@ public class MultiKeyslotFile {
 	 * @param path Path to existing multi-keyslot file
 	 * @param masterkey Hidden masterkey to add
 	 * @param password Password for hidden keyslot
+	 * @param primaryPassword Password for primary keyslot (used for legacy conversion)
 	 * @param scryptCostParam scrypt cost parameter
 	 * @throws IOException on I/O errors or if all slots are full
 	 */
-	public void addKeyslot(Path path, Masterkey masterkey, CharSequence password, int scryptCostParam) throws IOException {
+	public void addKeyslot(Path path, Masterkey masterkey, CharSequence password, CharSequence primaryPassword, int scryptCostParam) throws IOException {
 		byte[] fileData;
 		
 		if (isMultiKeyslotFile(path)) {
 			fileData = Files.readAllBytes(path);
 		} else {
 			// Convert legacy single-keyslot file to multi-keyslot format
-			LOG.trace("Converting legacy format");
+			// CRITICAL: Use PRIMARY password for slot 0, not hidden password!
+			LOG.trace("Converting legacy format - using primary password for slot 0");
 			byte[] legacyData = Files.readAllBytes(path);
 			fileData = new byte[FILE_SIZE];
 			
-			// Slot 0: Legacy keyslot (AEAD-encrypted)
+			// Slot 0: Legacy keyslot (AEAD-encrypted with PRIMARY password)
 			try {
-				byte[] slot0 = aeadEncryptSlot(legacyData, password);
+				byte[] slot0 = aeadEncryptSlot(legacyData, primaryPassword);  // ← FIX: use primaryPassword!
 				System.arraycopy(slot0, 0, fileData, 0, SLOT_SIZE);
 			} catch (GeneralSecurityException e) {
 				throw new IOException("Failed to encrypt legacy keyslot", e);
@@ -393,18 +402,27 @@ public class MultiKeyslotFile {
 	private Masterkey decryptSlot(byte[] slotData, CharSequence password) throws InvalidPassphraseException, IOException {
 		try {
 			// AEAD-decrypt the slot to get original keyslot data
+			LOG.debug("Attempting AEAD decryption of slot");
 			byte[] keyslotData = aeadDecryptSlot(slotData, password);
+			LOG.debug("AEAD decryption successful, keyslot data length: {}", keyslotData.length);
 			
 			// Write to temp file for MasterkeyFileAccess.load()
 			Path tempFile = Files.createTempFile("keyslot-", ".tmp");
 			try {
 				Files.write(tempFile, keyslotData);
-				return masterkeyFileAccess.load(tempFile, password);
+				LOG.debug("Loading masterkey from decrypted keyslot data");
+				Masterkey result = masterkeyFileAccess.load(tempFile, password);
+				LOG.debug("Masterkey loaded successfully");
+				return result;
+			} catch (InvalidPassphraseException e) {
+				LOG.warn("Inner masterkey load failed: wrong password for inner encryption");
+				throw e;
 			} finally {
 				Files.deleteIfExists(tempFile);
 			}
 		} catch (GeneralSecurityException e) {
 			// AEAD authentication failed - wrong password OR empty slot
+			LOG.debug("AEAD authentication failed: {}", e.getMessage());
 			throw new InvalidPassphraseException();
 		}
 	}
