@@ -84,12 +84,21 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 				askForPassphrase();
 			}
 			
-			// TrueCrypt-style: Use multi-keyslot file that tries all keyslots automatically
-			// This provides true plausible deniability - no way to detect keyslot count
-			Path masterkeyPath = vault.getPath().resolve("masterkey.cryptomator");
+			// Determine masterkey path from keyId, or fallback to user selection
+			Path masterkeyPath;
+			String keyIdPath = keyId.getSchemeSpecificPart();
+			if (keyIdPath != null && !keyIdPath.isEmpty() && !keyIdPath.equals("masterkey.cryptomator")) {
+				// keyId specifies a specific path
+				masterkeyPath = vault.getPath().resolve(keyIdPath);
+			} else {
+				// Default path
+				masterkeyPath = vault.getPath().resolve("masterkey.cryptomator");
+			}
 			
 			if (!Files.exists(masterkeyPath)) {
-				throw new IOException("Masterkey file not found: " + masterkeyPath);
+				// Masterkey file not found, ask user to choose
+				LOG.debug("Masterkey file not found at {}, asking user to choose", masterkeyPath);
+				masterkeyPath = askUserForMasterkeyFilePath();
 			}
 			
 			// MultiKeyslotFile.load() automatically tries all keyslots with the password
@@ -104,9 +113,8 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 				LOG.warn("Unable to create backup for masterkey file.");
 			}
 			
-			// Note: We don't know which keyslot was used (that's the point!)
-			// The identity detection is handled internally by MultiKeyslotFile
-			selectedIdentity.set(VaultIdentity.createPrimary("Vault", "Unlocked vault"));
+			// Detect which identity was used based on the masterkey
+			detectUsedIdentity(masterkeyPath);
 			
 			return masterkey;
 		} catch (InterruptedException e) {
