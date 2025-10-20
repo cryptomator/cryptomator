@@ -57,7 +57,6 @@ public enum FxmlFile {
 	UNLOCK_SELECT_IDENTITY("/fxml/keyloading_identity_selection.fxml"), //
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //
 	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
-	VAULT_OPTIONS_IDENTITY_MANAGEMENT("/fxml/vaultoptions_identity_management.fxml"), //
 	VAULT_STATISTICS("/fxml/stats.fxml"), //
 	WRONGFILEALERT("/fxml/wrongfilealert.fxml");
 
