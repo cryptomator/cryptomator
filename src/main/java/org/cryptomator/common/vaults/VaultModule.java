@@ -39,7 +39,11 @@ public class VaultModule {
 	@Provides
 	@PerVault
 	public java.nio.file.Path provideVaultPath(VaultSettings vaultSettings) {
-		return vaultSettings.path.get();
+		java.nio.file.Path path = vaultSettings.path.get();
+		if (path == null) {
+			throw new IllegalStateException("Vault path is null. VaultSettings.path must be set before unlocking.");
+		}
+		return path;
 	}
 
 }
