@@ -13,7 +13,6 @@ import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.keyloading.IdentitySelectionComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.unlock.UnlockCancelledException;
@@ -49,7 +48,6 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private final Stage window;
 	private final PassphraseEntryComponent.Builder passphraseEntry;
 	private final ChooseMasterkeyFileComponent.Builder masterkeyFileChoice;
-	private final IdentitySelectionComponent.Builder identitySelection;
 	private final KeychainManager keychain;
 	private final ResourceBundle resourceBundle;
 	private final ObjectProperty<VaultIdentity> selectedIdentity;
@@ -59,14 +57,13 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private boolean wrongPassphrase;
 
 	@Inject
-	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, MultiKeyslotFile multiKeyslotFile, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, IdentitySelectionComponent.Builder identitySelection, KeychainManager keychain, ResourceBundle resourceBundle) {
+	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, MultiKeyslotFile multiKeyslotFile, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, KeychainManager keychain, ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.multiKeyslotFile = multiKeyslotFile;
 		this.window = window;
 		this.passphraseEntry = passphraseEntry;
 		this.masterkeyFileChoice = masterkeyFileChoice;
-		this.identitySelection = identitySelection;
 		this.keychain = keychain;
 		this.resourceBundle = resourceBundle;
 		this.selectedIdentity = new SimpleObjectProperty<>();
@@ -113,10 +110,10 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 				LOG.warn("Unable to create backup for masterkey file.");
 			}
 			
-			// Detect which identity was used based on the masterkey
-			detectUsedIdentity(masterkeyPath);
-			
-			return masterkey;
+		// Detect which identity was used based on the masterkey
+		detectUsedIdentity();
+		
+		return masterkey;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UnlockCancelledException("Unlock interrupted", e);
@@ -128,21 +125,12 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	}
 
 	/**
-	 * Detect which identity was used based on the masterkey file path.
-	 * TrueCrypt-style: We can't detect which keyslot was used (by design).
-	 * This is for internal tracking only - NO UI indication for plausible deniability.
+	 * Identity is intentionally unknown by design for plausible deniability.
+	 * We cannot and should not try to detect which keyslot was used.
 	 */
-	private void detectUsedIdentity(Path masterkeyPath) {
-		// With multi-keyslot files, we cannot and should not try to detect
-		// which keyslot was used. This would break plausible deniability.
-		// Just set a generic identity.
-		try {
-			var manager = vault.getIdentityProvider().getManager();
-			manager.getPrimaryIdentity().ifPresent(selectedIdentity::set);
-			LOG.debug("Vault unlocked (keyslot identity unknown - plausible deniability)");
-		} catch (Exception e) {
-			LOG.warn("Failed to detect identity", e);
-		}
+	private void detectUsedIdentity() {
+		// Identity intentionally unknown by design for plausible deniability.
+		selectedIdentity.set(null);
 	}
 
 	public VaultIdentity getSelectedIdentity() {
@@ -177,7 +165,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 			// Each identity may have a different password
 			var manager = vault.getIdentityProvider().getManager();
 			if (manager.getIdentities().size() > 1) {
-				LOG.debug("Skipping password save for multi-identity vault");
+				// Intentionally avoid logging identity-related details
 				return;
 			}
 			
