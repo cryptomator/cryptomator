@@ -17,25 +17,25 @@
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <Label text="Vault Identities (Plausibly Deniable Encryption)" styleClass="header"/>
+    <Label text="%vaultOptions.identity.title" styleClass="header"/>
     
-    <Label text="Manage multiple identities for this vault. Each identity has its own password and presents a different view of encrypted data. This enables plausible deniability - you can reveal one identity while keeping others hidden." 
+    <Label text="%vaultOptions.identity.description" 
            wrapText="true"/>
 
     <TableView fx:id="identitiesTable" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="nameColumn" text="Name" prefWidth="150"/>
-            <TableColumn fx:id="typeColumn" text="Type" prefWidth="100"/>
-            <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300"/>
+            <TableColumn fx:id="nameColumn" text="%vaultOptions.identity.nameColumn" prefWidth="150"/>
+            <TableColumn fx:id="typeColumn" text="%vaultOptions.identity.typeColumn" prefWidth="100"/>
+            <TableColumn fx:id="descriptionColumn" text="%vaultOptions.identity.descriptionColumn" prefWidth="300"/>
         </columns>
     </TableView>
 
     <HBox spacing="10">
-        <Button fx:id="addButton" text="Add Identity" onAction="#onAddIdentity"/>
-        <Button fx:id="removeButton" text="Remove Identity" onAction="#onRemoveIdentity" disable="true"/>
+        <Button fx:id="addButton" text="%vaultOptions.identity.addButton" onAction="#onAddIdentity"/>
+        <Button fx:id="removeButton" text="%vaultOptions.identity.removeButton" onAction="#onRemoveIdentity" disable="true"/>
     </HBox>
 
     <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="Close" onAction="#onClose" defaultButton="true"/>
+        <Button text="%generic.button.close" onAction="#onClose" defaultButton="true"/>
     </HBox>
 </VBox>
