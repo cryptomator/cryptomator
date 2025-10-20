@@ -16,15 +16,15 @@
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
 
-    <Label fx:id="titleLabel" styleClass="header" text="Select Identity" wrapText="true"/>
+    <Label fx:id="titleLabel" styleClass="header" text="%unlock.selectIdentity.title" wrapText="true"/>
 
     <VBox spacing="10">
-        <Label text="Choose which identity to unlock:"/>
-        <ComboBox fx:id="identityComboBox" maxWidth="Infinity" promptText="Select an identity"/>
+        <Label text="%unlock.selectIdentity.instruction"/>
+        <ComboBox fx:id="identityComboBox" maxWidth="Infinity" promptText="%unlock.selectIdentity.prompt"/>
     </VBox>
 
     <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="Cancel" onAction="#onCancel" cancelButton="true"/>
-        <Button text="Continue" onAction="#onContinue" defaultButton="true" styleClass="button-primary"/>
+        <Button text="%generic.button.cancel" onAction="#onCancel" cancelButton="true"/>
+        <Button text="%unlock.selectIdentity.continueBtn" onAction="#onContinue" defaultButton="true" styleClass="button-primary"/>
     </HBox>
 </VBox>
