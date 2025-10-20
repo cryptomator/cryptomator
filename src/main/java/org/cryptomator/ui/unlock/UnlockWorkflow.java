@@ -109,7 +109,8 @@ public class UnlockWorkflow extends Task<Void> {
 				keyLoadingStrategy.<RuntimeException>use(keyLoader -> {
 					try {
 						vault.unlock(keyLoader);
-					} catch (IOException | CryptoException | MountFailedException e) {
+					} catch (Exception e) {
+						// Catch all exceptions to preserve specific UI handling
 						throw new WrappedException(e);
 					}
 				});
@@ -120,12 +121,15 @@ public class UnlockWorkflow extends Task<Void> {
 			return null;
 		} catch (WrappedException e) {
 			Exception cause = e.getCause();
+			// Unwrap specific exception types so UI handlers can process them correctly
 			if (cause instanceof IOException ioe) {
 				throw ioe;
 			} else if (cause instanceof CryptoException ce) {
 				throw ce;
 			} else if (cause instanceof MountFailedException mfe) {
 				throw mfe;
+			} else if (cause instanceof RuntimeException re) {
+				throw re;
 			}
 			throw new IllegalStateException("Unexpected exception type", cause);
 		} catch (RuntimeException e) {
