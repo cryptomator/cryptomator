@@ -19,7 +19,7 @@
     <Label fx:id="titleLabel" styleClass="header" text="%unlock.selectIdentity.title" wrapText="true"/>
 
     <VBox spacing="10">
-        <Label text="%unlock.selectIdentity.instruction"/>
+        <Label text="%unlock.selectIdentity.instruction" labelFor="$identityComboBox"/>
         <ComboBox fx:id="identityComboBox" maxWidth="Infinity" promptText="%unlock.selectIdentity.prompt"/>
     </VBox>
 
