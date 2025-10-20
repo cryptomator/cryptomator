@@ -139,10 +139,12 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 
 	@Override
 	public boolean recoverFromException(MasterkeyLoadingFailedException exception) {
-		if (exception instanceof InvalidPassphraseException) {
+		if (exception.getCause() instanceof InvalidPassphraseException) {
 			this.wrongPassphrase = true;
-			passphrase.destroy();
-			this.passphrase = null;
+			if (passphrase != null) {
+				passphrase.destroy();
+				this.passphrase = null;
+			}
 			return true; // reattempting key load
 		} else {
 			return false; // nothing we can do
