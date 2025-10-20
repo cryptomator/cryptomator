@@ -101,10 +101,10 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 				masterkeyPath = askUserForMasterkeyFilePath();
 			}
 			
-			// MultiKeyslotFile.load() automatically tries all keyslots with the password
-			// Whichever keyslot decrypts successfully is used (user never knows which)
-			Masterkey masterkey = multiKeyslotFile.load(masterkeyPath, passphrase);
-			LOG.info("Successfully loaded masterkey from multi-keyslot file");
+		// MultiKeyslotFile.load() automatically tries all keyslots with the password
+		// Whichever keyslot decrypts successfully is used (user never knows which)
+		Masterkey masterkey = multiKeyslotFile.load(masterkeyPath, passphrase);
+		LOG.debug("Successfully loaded master key");
 			
 			// Backup the masterkey file
 			try {
