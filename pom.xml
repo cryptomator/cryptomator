@@ -49,7 +49,7 @@
 		<javafx.version>25</javafx.version>
 		<jwt.version>4.5.0</jwt.version>
 		<nimbus-jose.version>10.5</nimbus-jose.version>
-		<logback.version>1.5.19</logback.version>
+		<logback.version>1.5.20</logback.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
