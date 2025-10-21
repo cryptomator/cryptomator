@@ -132,13 +132,14 @@ public class EventListCellController implements FxController {
 	private void adjustToFileInUseEvent(FileIsInUseEvent fse) {
 		eventIcon.setValue(FontAwesome5Icon.TIMES);
 		eventMessage.setValue("File is in use by " + fse.owner());
-		eventDescription.setValue(fse.cleartext().getFileName().toString());
+		var indexFileName = fse.cleartextPath().lastIndexOf("/");
+		eventDescription.setValue(fse.cleartextPath().substring(indexFileName + 1));
 		if (revealService != null) {
-			addAction("Show decrypted file", () -> reveal(revealService, convertVaultPathToSystemPath(fse.cleartext())));
-			addAction("Show encrypted Path", () -> reveal(revealService, fse.ciphertext()));
+			addAction("Show decrypted file", () -> reveal(revealService, convertVaultPathToSystemPath(fse.cleartextPath())));
+			addAction("Show encrypted Path", () -> reveal(revealService, fse.ciphertextPath()));
 		} else {
-			addAction("Copy decrypted Path", () -> copyToClipboard(convertVaultPathToSystemPath(fse.cleartext()).toString()));
-			addAction("Copy encrypted Path", () -> copyToClipboard(fse.ciphertext().toString()));
+			addAction("Copy decrypted Path", () -> copyToClipboard(convertVaultPathToSystemPath(fse.cleartextPath()).toString()));
+			addAction("Copy encrypted Path", () -> copyToClipboard(fse.ciphertextPath().toString()));
 		}
 		addAction("Discard use status for 2minutes", fse.ignoreMethod());
 	}
@@ -255,18 +256,14 @@ public class EventListCellController implements FxController {
 		}
 	}
 
-	private Path convertVaultPathToSystemPath(Path p) {
-		if (!(p instanceof CryptoPath)) {
-			throw new IllegalArgumentException("Path " + p + " is not a vault path");
-		}
+	private Path convertVaultPathToSystemPath(String vaultInternalPath) {
 		var v = eventEntry.getValue().getKey().vault();
 		if (!v.isUnlocked()) {
 			return Path.of(System.getProperty("user.home"));
 		}
 
 		var mountUri = v.getMountPoint().uri();
-		var internalPath = p.toString().substring(1);
-		return Path.of(mountUri.getPath().concat(internalPath).substring(1));
+		return Path.of(mountUri.getPath().concat(vaultInternalPath.substring(1)).substring(1));
 	}
 
 	private void reveal(RevealPathService s, Path p) {
