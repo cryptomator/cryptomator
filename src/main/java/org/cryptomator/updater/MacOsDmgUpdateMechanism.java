@@ -3,9 +3,10 @@ package org.cryptomator.updater;
 import org.cryptomator.integrations.common.DisplayName;
 import org.cryptomator.integrations.common.OperatingSystem;
 import org.cryptomator.integrations.common.Priority;
-import org.cryptomator.integrations.update.DownloadUpdateProcess;
+import org.cryptomator.integrations.update.DownloadUpdateStep;
 import org.cryptomator.integrations.update.UpdateFailedException;
-import org.cryptomator.integrations.update.UpdateProcess;
+import org.cryptomator.integrations.update.UpdateStep;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,16 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacOsDmgUpdateMechanism.class);
 
+	public MacOsDmgUpdateMechanism() {
+		String suffix = switch (System.getProperty("os.arch")) {
+			case "aarch64", "arm64" -> "arm64.dmg";
+			default -> "x64.dmg";
+		};
+		super(suffix);
+	}
+
 	@Override
-	public UpdateProcess prepareUpdate() throws UpdateFailedException {
+	public UpdateStep firstStep() throws UpdateFailedException {
 		try {
 			Path workDir = Files.createTempDirectory("cryptomator-update");
 			return new UpdateProcessImpl(workDir);
@@ -36,18 +45,30 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 		}
 	}
 
-	private static class UpdateProcessImpl extends DownloadUpdateProcess {
+	private static class UpdateProcessImpl extends DownloadUpdateStep {
 
 		// FIXME: use URI and CHECKSUM from update API
 		private static final URI UPDATE_URI = URI.create("https://github.com/cryptomator/cryptomator/releases/download/1.17.0/Cryptomator-1.17.0-arm64.dmg");
 		private static final byte[] CHECKSUM = HexFormat.of().withLowerCase().parseHex("03f45e203204e93b39925cbb04e19c9316da4f77debaba4fb5071f0ec8e727e8");
+		private final Path workDir;
 
-		public UpdateProcessImpl(Path downloadPath) {
-			super(downloadPath, "update.dmg", UPDATE_URI, CHECKSUM,60_000_000L); // initially assume 60 MB for the update size
+		public UpdateProcessImpl(Path workDir) {
+			var destination = workDir.resolve("update.dmg");
+			super(UPDATE_URI, destination, CHECKSUM, 60_000_000L); // initially assume 60 MB for the update size
+			this.workDir = workDir;
 		}
 
 		@Override
-		protected void postDownload(Path downloadPath) throws IOException {
+		public @Nullable UpdateStep nextStep() throws IllegalStateException, IOException {
+			if (!isDone()) {
+				throw new IllegalStateException("Update not yet downloaded");
+			} else if (downloadException != null) {
+				throw new UpdateFailedException("Download failed", downloadException);
+			}
+			return UpdateStep.of("Mounting...", this::mount);
+		}
+
+		private UpdateStep mount() throws IOException {
 			// Extract Cryptomator.app from the .dmg file
 			String script = """
 					hdiutil attach 'update.dmg' -mountpoint "/Volumes/Cryptomator_${MOUNT_ID}" -nobrowse -quiet &&
@@ -68,16 +89,10 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 			} catch (InterruptedException e) {
 				throw new InterruptedIOException("Failed to extract DMG, interrupted");
 			}
+			return UpdateStep.of("Restarting...", this::restart);
 		}
 
-		@Override
-		public ProcessHandle applyUpdate() throws IllegalStateException, IOException {
-			if (!isDone()) {
-				throw new IllegalStateException("Update not yet downloaded");
-			} else if (downloadException != null) {
-				throw new IllegalStateException("Downloading update failed", downloadException);
-			}
-
+		public UpdateStep restart() throws IllegalStateException, IOException {
 			String selfPath = ProcessHandle.current().info().command().orElse("");
 			String installPath;
 			if (selfPath.startsWith("/Applications/Cryptomator.app")) {
@@ -85,7 +100,8 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 			} else if (selfPath.contains("/Cryptomator.app/")) {
 				installPath = selfPath.substring(0, selfPath.indexOf("/Cryptomator.app/")) + "/Cryptomator.app";
 			} else {
-				throw new UpdateFailedException("Cannot determine destination path for Cryptomator.app, current path: " + selfPath);
+				installPath = "/Applications/Cryptomator.app";
+				// throw new UpdateFailedException("Cannot determine destination path for Cryptomator.app, current path: " + selfPath);
 			}
 			String script = """
 					while kill -0 ${CRYPTOMATOR_PID} 2> /dev/null; do sleep 0.5; done;
@@ -97,9 +113,10 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 			processBuilder.directory(workDir.toFile());
 			processBuilder.environment().put("CRYPTOMATOR_PID", String.valueOf(ProcessHandle.current().pid()));
 			processBuilder.environment().put("CRYPTOMATOR_INSTALL_PATH", installPath);
-			return processBuilder.start().toHandle();
+			processBuilder.start();
+
+			return UpdateStep.EXIT;
 		}
 	}
-
 
 }

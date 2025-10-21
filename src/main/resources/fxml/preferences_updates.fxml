@@ -9,11 +9,11 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.text.TextFlow?>
-<?import javafx.scene.text.Text?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -53,15 +53,15 @@
 			</graphic>
 		</Label>
 		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
-		<Button onAction="#doUpdate"> <!-- TODO: visible="${controller.updateAvailable}" -->
+		<Button onAction="#doUpdate" disable="${!controller.updateReady}"> <!-- TODO: visible="${controller.updateAvailable}" -->
 			<graphic>
 				<VBox spacing="5" alignment="CENTER">
 					<Label text="${controller.updateButtonTitle}"/>
 					<ProgressBar maxWidth="200"
 								 maxHeight="12"
-								 visible="${controller.updatePreparationTask.running}"
-								 managed="${controller.updatePreparationTask.running}"
-								 progress="${controller.updatePreparationTask.progress}"/>
+								 visible="${controller.updateService.running}"
+								 managed="${controller.updateService.running}"
+								 progress="${controller.updateService.progress}"/>
 				</VBox>
 			</graphic>
 		</Button>

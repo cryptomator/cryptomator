@@ -17,8 +17,14 @@ public abstract class DownloadUpdateMechanism implements UpdateMechanism {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
+	private final String assetSuffix;
+
+	protected DownloadUpdateMechanism(String assetSuffix) {
+		this.assetSuffix = assetSuffix;
+	}
+
 	@Override
-	public boolean isUpdateAvailable() {
+	public boolean isUpdateAvailable(String currentVersion) {
 		try (var client = HttpClient.newHttpClient()) {
 			// TODO: check different source
 			HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api.github.com/repos/cryptomator/cryptomator/releases/latest")).header("Accept", "application/vnd.github+json").build();
@@ -31,7 +37,8 @@ public abstract class DownloadUpdateMechanism implements UpdateMechanism {
 
 			var release = MAPPER.readValue(response.body(), GitHubRelease.class);
 
-			return release.assets.stream().anyMatch(a -> a.name.endsWith("arm64.dmg"));
+			return release.assets.stream().anyMatch(a -> a.name.endsWith(assetSuffix))
+					&& UpdateMechanism.isUpdateAvailable(release.tagName, currentVersion);
 		} catch (IOException | InterruptedException e) {
 			return false;
 		}

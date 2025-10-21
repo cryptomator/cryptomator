@@ -3,9 +3,11 @@ package org.cryptomator.ui.preferences;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.update.UpdateMechanism;
-import org.cryptomator.integrations.update.UpdateProcess;
+import org.cryptomator.integrations.update.UpdateStep;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.updater.FallbackUpdateMechanism;
+import org.cryptomator.updater.UpdateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +23,13 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
+import javafx.concurrent.Service;
+import javafx.concurrent.Worker;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -36,8 +40,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 
 @PreferencesScoped
@@ -68,14 +70,15 @@ public class UpdatesPreferencesController implements FxController {
 	private final BooleanBinding upToDate;
 	private final String downloadsUri;
 	private final UpdateMechanism updateMechanism;
-	public final Task<UpdateProcess> updatePreparationTask;
+	private final Service<UpdateStep> updateService;
 	private final StringBinding updateButtonTitle;
+	private final BooleanBinding updateReady;
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
 
 	@Inject
-	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, Environment env) {
+	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, Environment env, FallbackUpdateMechanism fallbackUpdateMechanism) {
 		this.application = application;
 		this.environment = environment;
 		this.resourceBundle = resourceBundle;
@@ -93,18 +96,13 @@ public class UpdatesPreferencesController implements FxController {
 		this.checkFailed = updateChecker.checkFailedProperty();
 		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, lastSuccessfulUpdateCheck);
 		this.downloadsUri = DOWNLOADS_URI_TEMPLATE.formatted(URLEncoder.encode(currentVersion, StandardCharsets.US_ASCII));
-		this.updateMechanism = UpdateMechanism.get();
-		this.updatePreparationTask = new Task<>() { // TODO custom class?
-			@Override
-			protected UpdateProcess call() throws IOException, InterruptedException {
-				var updateProcess = updateMechanism.prepareUpdate();
-				do {
-					updateProgress(updateProcess.preparationProgress(), 1.0);
-				} while (!updateProcess.await(100, TimeUnit.MILLISECONDS));
-				return updateProcess;
-			}
-		};
-		this.updateButtonTitle = Bindings.createStringBinding(this::getUpdateButtonTitle, updatePreparationTask.stateProperty());
+		this.updateMechanism = UpdateMechanism.get().orElse(fallbackUpdateMechanism);
+		this.updateService = new UpdateService(updateMechanism);
+		this.updateButtonTitle = Bindings.createStringBinding(this::getUpdateButtonTitle, updateService.stateProperty(), updateService.messageProperty());
+		this.updateReady = updateService.stateProperty().isEqualTo(Worker.State.READY);
+
+		updateService.setOnSucceeded(this::updateSucceeded);
+		updateService.setOnFailed(this::updateFailed);
 	}
 
 	public void initialize() {
@@ -136,26 +134,25 @@ public class UpdatesPreferencesController implements FxController {
 
 	@FXML
 	public void doUpdate() {
-		if (updatePreparationTask.isDone()) {
-			try {
-				// TODO: check if all vaults closed?
-				var restartProcess = updatePreparationTask.get().applyUpdate();
-				if (restartProcess.isAlive()) {
-					Platform.exit();
-				} else {
-					LOG.error("Update process terminated prematurely: {}", restartProcess.info().commandLine());
-				}
-				Platform.exit(); // TODO: prompt?
-			} catch (IOException | InterruptedException | ExecutionException e) {
-				LOG.error("Oh no", e); // TODO: Show error dialog
-			}
-		} else if (updatePreparationTask.isRunning()) {
-			throw new IllegalStateException("Update already in progress");
-		} else if (updatePreparationTask.isCancelled()) {
-			throw new IllegalStateException("Update preparation task was cancelled");
+		updateService.start();
+	}
+
+	private void updateSucceeded(WorkerStateEvent workerStateEvent) {
+		assert workerStateEvent.getSource() == updateService;
+		var lastStep = updateService.getValue();
+		if (lastStep == UpdateStep.EXIT) {
+			LOG.info("Exiting app to update...");
+			Platform.exit();
+		} else if (lastStep == UpdateStep.RETRY) {
+			updateService.reset();
 		} else {
-			Thread.startVirtualThread(updatePreparationTask);
+			LOG.info("Update succeeded.");
 		}
+	}
+
+	private void updateFailed(WorkerStateEvent workerStateEvent) {
+		assert workerStateEvent.getSource() == updateService;
+		LOG.error("Update failed.", updateService.getException());
 	}
 
 	/* Observable Properties */
@@ -236,8 +233,8 @@ public class UpdatesPreferencesController implements FxController {
 		return checkFailed.getValue();
 	}
 
-	public Task<UpdateProcess> getUpdatePreparationTask() {
-		return updatePreparationTask;
+	public Service<UpdateStep> getUpdateService() {
+		return updateService;
 	}
 
 	public StringBinding updateButtonTitleProperty() {
@@ -245,11 +242,20 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public String getUpdateButtonTitle() {
-		return switch (updatePreparationTask.getState()) {
+		return switch (updateService.getState()) {
 			case READY -> updateMechanism.getName();
-			case SCHEDULED, RUNNING -> "Preparing Update..."; // TODO: resourceBundle.getString("preferences.updates.preparingUpdate")...
+			case SCHEDULED, RUNNING -> updateService.getMessage(); // "Preparing Update..."; // TODO: resourceBundle.getString("preferences.updates.preparingUpdate")...
 			case SUCCEEDED -> "Restart to Update"; // TODO: resourceBundle.getString("preferences.updates.readyToRestart")...
 			case FAILED, CANCELLED -> "failed";
 		};
 	}
+
+	public boolean isUpdateReady() {
+		return updateReady.get();
+	}
+
+	public BooleanBinding updateReadyProperty() {
+		return updateReady;
+	}
+
 }
