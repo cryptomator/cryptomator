@@ -2,6 +2,7 @@ package org.cryptomator.ui.dialogs;
 
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
@@ -19,19 +20,21 @@ public class Dialogs {
 
 	private final ResourceBundle resourceBundle;
 	private final StageFactory stageFactory;
+	private final DefaultSceneFactory sceneFactory;
 
 	private static final String BUTTON_KEY_CLOSE = "generic.button.close";
 
 	@Inject
-	public Dialogs(ResourceBundle resourceBundle, StageFactory stageFactory) {
+	public Dialogs(ResourceBundle resourceBundle, StageFactory stageFactory, DefaultSceneFactory sceneFactory) {
 		this.resourceBundle = resourceBundle;
 		this.stageFactory = stageFactory;
+		this.sceneFactory = sceneFactory;
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(Dialogs.class);
 
 	private SimpleDialog.Builder createDialogBuilder() {
-		return new SimpleDialog.Builder(resourceBundle, stageFactory);
+		return new SimpleDialog.Builder(resourceBundle, stageFactory, sceneFactory);
 	}
 
 	public SimpleDialog.Builder prepareRemoveVaultDialog(Stage window, Vault vault, ObservableList<Vault> vaults) {
