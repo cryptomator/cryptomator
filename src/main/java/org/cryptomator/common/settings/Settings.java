@@ -46,7 +46,7 @@ public class Settings {
 	@Deprecated // to be changed to "whatever is available" eventually
 	static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : //
 			SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : //
-					"org.cryptomator.linux.keychain.GnomeKeyringKeychainAccess";
+					"org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
 	static final String DEFAULT_QUICKACCESS_SERVICE = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.quickaccess.ExplorerQuickAccessService" : //
 			SystemUtils.IS_OS_LINUX ? "org.cryptomator.linux.quickaccess.NautilusBookmarks" : null;
 
