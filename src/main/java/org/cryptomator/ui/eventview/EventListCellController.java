@@ -141,7 +141,7 @@ public class EventListCellController implements FxController {
 			addAction("Copy decrypted Path", () -> copyToClipboard(convertVaultPathToSystemPath(fse.cleartextPath()).toString()));
 			addAction("Copy encrypted Path", () -> copyToClipboard(fse.ciphertextPath().toString()));
 		}
-		addAction("Discard use status for 2minutes", fse.ignoreMethod());
+		addAction("Ignore in use status ", fse.ignoreMethod());
 	}
 
 
