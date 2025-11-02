@@ -5,6 +5,8 @@ import org.cryptomator.integrations.common.OperatingSystem;
 import org.cryptomator.integrations.common.Priority;
 import org.cryptomator.integrations.update.DownloadUpdateStep;
 import org.cryptomator.integrations.update.UpdateFailedException;
+import org.cryptomator.integrations.update.UpdateInfo;
+import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.integrations.update.UpdateStep;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -27,12 +29,18 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MacOsDmgUpdateMechanism.class);
 
-	public MacOsDmgUpdateMechanism() {
+	@Override
+	UpdateInfo checkForUpdate(String currentVersion, LatestVersionResponse response) {
 		String suffix = switch (System.getProperty("os.arch")) {
 			case "aarch64", "arm64" -> "arm64.dmg";
 			default -> "x64.dmg";
 		};
-		super(suffix);
+		if (UpdateMechanism.isUpdateAvailable(response.latestVersion().macVersion(), currentVersion)
+		 && response.assets().stream().map(Asset::name).anyMatch(s -> s.endsWith(suffix))) {
+			return new UpdateInfo(response.latestVersion().macVersion(), this);
+		} else {
+			return null;
+		}
 	}
 
 	@Override

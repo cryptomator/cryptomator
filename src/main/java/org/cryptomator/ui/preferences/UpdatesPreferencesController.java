@@ -2,7 +2,7 @@ package org.cryptomator.ui.preferences;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.integrations.update.UpdateMechanism;
+import org.cryptomator.integrations.update.UpdateInfo;
 import org.cryptomator.integrations.update.UpdateStep;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
@@ -17,21 +17,18 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -46,60 +43,56 @@ import java.util.ResourceBundle;
 public class UpdatesPreferencesController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdatesPreferencesController.class);
-	private static final String DOWNLOADS_URI_TEMPLATE = "https://cryptomator.org/downloads/" //
-			+ "?utm_source=cryptomator-desktop" //
-			+ "&utm_medium=update-notification&" //
-			+ "utm_campaign=app-update-%s";
 
 	private final Application application;
 	private final Environment environment;
 	private final ResourceBundle resourceBundle;
 	private final Settings settings;
-	private final Environment env;
 	private final UpdateChecker updateChecker;
-	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
-	private final ReadOnlyStringProperty latestVersion;
+	private final ObjectBinding<ContentDisplay> updateButtonState;
+	private final StringExpression latestVersion;
 	private final ObservableValue<Instant> lastSuccessfulUpdateCheck;
 	private final StringBinding lastUpdateCheckMessage;
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final String currentVersion;
-	private final BooleanBinding updateAvailable;
 	private final BooleanBinding checkFailed;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 	private final DateTimeFormatter formatter;
 	private final BooleanBinding upToDate;
-	private final String downloadsUri;
-	private final UpdateMechanism updateMechanism;
-	private final Service<UpdateStep> updateService;
+	private final UpdateService updateService;
 	private final StringBinding updateButtonTitle;
-	private final BooleanBinding updateReady;
+
+	private final ObjectBinding<Worker<?>> worker;
+	private final BooleanExpression running;
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
 
 	@Inject
-	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, Environment env, FallbackUpdateMechanism fallbackUpdateMechanism) {
+	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, FallbackUpdateMechanism fallbackUpdateMechanism) {
 		this.application = application;
 		this.environment = environment;
 		this.resourceBundle = resourceBundle;
 		this.settings = settings;
-		this.env = env;
 		this.updateChecker = updateChecker;
-		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
+
 		this.latestVersion = updateChecker.latestVersionProperty();
 		this.lastSuccessfulUpdateCheck = updateChecker.lastSuccessfulUpdateCheckProperty();
 		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, lastSuccessfulUpdateCheck);
-		this.currentVersion = environment.getAppVersion();
-		this.updateAvailable = updateChecker.updateAvailableProperty();
+		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, lastSuccessfulUpdateCheck);
+
+		this.currentVersion = updateChecker.getCurrentVersion();
 		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 		this.upToDate = updateChecker.updateCheckStateProperty().isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
 		this.checkFailed = updateChecker.checkFailedProperty();
-		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, lastSuccessfulUpdateCheck);
-		this.downloadsUri = DOWNLOADS_URI_TEMPLATE.formatted(URLEncoder.encode(currentVersion, StandardCharsets.US_ASCII));
-		this.updateMechanism = UpdateMechanism.get().orElse(fallbackUpdateMechanism);
-		this.updateService = new UpdateService(updateMechanism);
-		this.updateButtonTitle = Bindings.createStringBinding(this::getUpdateButtonTitle, updateService.stateProperty(), updateService.messageProperty());
-		this.updateReady = updateService.stateProperty().isEqualTo(Worker.State.READY);
+
+		this.updateService = new UpdateService(updateChecker.lastValueProperty().map(UpdateInfo::updateMechanism));
+		this.worker = Bindings.when(updateChecker.updateAvailableProperty()).<Worker<?>>then(updateService).otherwise(updateChecker);
+		this.running = Bindings.createBooleanBinding(this::isRunning, updateService.stateProperty(), updateChecker.stateProperty());
+		this.updateButtonTitle = Bindings.createStringBinding(this::getUpdateButtonTitle, worker, updateService.stateProperty(), updateService.messageProperty());
+		this.updateButtonState = Bindings.createObjectBinding(this::getUpdateButtonState, updateChecker.stateProperty(), updateService.stateProperty());
+
+		updateChecker.updateAvailableProperty().addListener((_, _, newVal) -> LOG.info("Update available: {}", newVal));
 
 		updateService.setOnSucceeded(this::updateSucceeded);
 		updateService.setOnFailed(this::updateFailed);
@@ -118,23 +111,17 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	@FXML
-	public void checkNow() {
-		updateChecker.checkForUpdatesNow();
-	}
-
-	@FXML
-	public void visitDownloadsPage() {
-		application.getHostServices().showDocument(downloadsUri);
-	}
-
-	@FXML
 	public void showLogfileDirectory() {
 		environment.getLogDir().ifPresent(logDirPath -> application.getHostServices().showDocument(logDirPath.toUri().toString()));
 	}
 
 	@FXML
-	public void doUpdate() {
-		updateService.start();
+	public void startWork() {
+		if (worker.get().equals(updateChecker)) {
+			updateChecker.checkForUpdatesNow();
+		} else if (worker.get().equals(updateService)) {
+			updateService.start();
+		}
 	}
 
 	private void updateSucceeded(WorkerStateEvent workerStateEvent) {
@@ -157,15 +144,21 @@ public class UpdatesPreferencesController implements FxController {
 
 	/* Observable Properties */
 
-	public ObjectBinding<ContentDisplay> checkForUpdatesButtonStateProperty() {
-		return checkForUpdatesButtonState;
+	public ObjectBinding<ContentDisplay> updateButtonStateProperty() {
+		return updateButtonState;
 	}
 
-	public ContentDisplay getCheckForUpdatesButtonState() {
-		return checkForUpdatesButtonState.get();
+	public ContentDisplay getUpdateButtonState() {
+		if (updateService.isRunning()) { // isRunning() covers RUNNING and SCHEDULED states
+			return ContentDisplay.BOTTOM;
+		} else if (updateChecker.getState() == Worker.State.RUNNING) {
+			return ContentDisplay.LEFT;
+		} else {
+			return ContentDisplay.TEXT_ONLY;
+		}
 	}
 
-	public ReadOnlyStringProperty latestVersionProperty() {
+	public StringExpression latestVersionProperty() {
 		return latestVersion;
 	}
 
@@ -217,14 +210,6 @@ public class UpdatesPreferencesController implements FxController {
 		return upToDateLabelVisible.get();
 	}
 
-	public BooleanBinding updateAvailableProperty() {
-		return updateAvailable;
-	}
-
-	public boolean isUpdateAvailable() {
-		return updateAvailable.get();
-	}
-
 	public BooleanBinding checkFailedProperty() {
 		return checkFailed;
 	}
@@ -233,8 +218,20 @@ public class UpdatesPreferencesController implements FxController {
 		return checkFailed.getValue();
 	}
 
-	public Service<UpdateStep> getUpdateService() {
-		return updateService;
+	public ObjectBinding<Worker<?>> workerProperty() {
+		return worker;
+	}
+
+	public Worker<?> getWorker() {
+		return worker.get();
+	}
+
+	public BooleanExpression runningProperty() {
+		return running;
+	}
+
+	public boolean isRunning() {
+		return updateChecker.getState() == Worker.State.RUNNING || updateService.getState() == Worker.State.RUNNING;
 	}
 
 	public StringBinding updateButtonTitleProperty() {
@@ -242,20 +239,20 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public String getUpdateButtonTitle() {
-		return switch (updateService.getState()) {
-			case READY -> updateMechanism.getName();
-			case SCHEDULED, RUNNING -> updateService.getMessage(); // "Preparing Update..."; // TODO: resourceBundle.getString("preferences.updates.preparingUpdate")...
-			case SUCCEEDED -> "Restart to Update"; // TODO: resourceBundle.getString("preferences.updates.readyToRestart")...
-			case FAILED, CANCELLED -> "failed";
-		};
+		if (worker.get() == updateChecker) {
+			return resourceBundle.getString("preferences.updates.checkNowBtn");
+		} else {
+			return switch (updateService.getState()) {
+				case READY -> updateChecker.getLastValue().updateMechanism().getName();
+				case SCHEDULED, RUNNING -> updateService.getMessage(); // "Preparing Update..."; // TODO: resourceBundle.getString("preferences.updates.preparingUpdate")...
+				case SUCCEEDED -> "Restart to Update"; // TODO: resourceBundle.getString("preferences.updates.readyToRestart")...
+				case FAILED, CANCELLED -> "failed";
+			};
+		}
 	}
 
-	public boolean isUpdateReady() {
-		return updateReady.get();
-	}
-
-	public BooleanBinding updateReadyProperty() {
-		return updateReady;
+	public UpdateChecker getUpdateChecker() {
+		return updateChecker;
 	}
 
 }

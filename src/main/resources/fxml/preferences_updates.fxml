@@ -18,9 +18,6 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
 	  spacing="12">
-	<fx:define>
-		<FormattedString fx:id="linkLabel" format="%preferences.updates.updateAvailable" arg1="${controller.latestVersion}"/>
-	</fx:define>
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
@@ -29,9 +26,20 @@
 	<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
 	<VBox alignment="CENTER" spacing="12">
-		<Button text="%preferences.updates.checkNowBtn" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
+		<FormattedLabel format="%preferences.updates.updateAvailable" arg1="${controller.latestVersion}" textAlignment="CENTER" wrapText="true" visible="${controller.updateChecker.updateAvailable}"/>
+
+		<Button text="${controller.updateButtonTitle}" defaultButton="true" onAction="#startWork" disable="${controller.running}" contentDisplay="${controller.updateButtonState}">
 			<graphic>
-				<FontAwesome5Spinner glyphSize="12"/>
+				<VBox spacing="5" alignment="CENTER">
+					<ProgressBar maxWidth="200"
+								 maxHeight="12"
+								 visible="${controller.running &amp;&amp; controller.worker.progress != -1.0}"
+								 managed="${controller.running &amp;&amp; controller.worker.progress != -1.0}"
+								 progress="${controller.worker.progress}"/>
+					<FontAwesome5Spinner glyphSize="12"
+										 visible="${controller.running &amp;&amp; controller.worker.progress == -1.0}"
+										 managed="${controller.running &amp;&amp; controller.worker.progress == -1.0}"/>
+				</VBox>
 			</graphic>
 		</Button>
 
@@ -52,19 +60,5 @@
 				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-primary" glyph="CHECK"/>
 			</graphic>
 		</Label>
-		<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}" managed="${controller.updateAvailable}"/>
-		<Button onAction="#doUpdate" disable="${!controller.updateReady}"> <!-- TODO: visible="${controller.updateAvailable}" -->
-			<graphic>
-				<VBox spacing="5" alignment="CENTER">
-					<Label text="${controller.updateButtonTitle}"/>
-					<ProgressBar maxWidth="200"
-								 maxHeight="12"
-								 visible="${controller.updateService.running}"
-								 managed="${controller.updateService.running}"
-								 progress="${controller.updateService.progress}"/>
-				</VBox>
-			</graphic>
-		</Button>
-
 	</VBox>
 </VBox>

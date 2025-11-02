@@ -3,10 +3,12 @@ package org.cryptomator.updater;
 import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.integrations.update.UpdateStep;
 
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -15,18 +17,25 @@ import java.util.concurrent.TimeUnit;
  */
 public class UpdateService extends Service<UpdateStep> {
 
-	private final UpdateMechanism updateMechanism;
+	private ObservableValue<UpdateMechanism> updateMechanism;
 
-	public UpdateService(UpdateMechanism updateMechanism) {
+	public UpdateService(ObservableValue<UpdateMechanism> updateMechanism) {
+		setExecutor(Executors.newVirtualThreadPerTaskExecutor());
 		this.updateMechanism = updateMechanism;
-		setExecutor(Executors.newVirtualThreadPerTaskExecutor());	}
+	}
 
 	@Override
 	protected Task<UpdateStep> createTask() {
-		return new RunAllStepsTask();
+		return new RunAllStepsTask(updateMechanism.getValue());
 	}
 
-	private class RunAllStepsTask extends Task<UpdateStep> {
+	private static class RunAllStepsTask extends Task<UpdateStep> {
+
+		private final UpdateMechanism updateMechanism;
+
+		public RunAllStepsTask(UpdateMechanism updateMechanism) {
+			this.updateMechanism = Objects.requireNonNull(updateMechanism);
+		}
 
 		@Override
 		protected UpdateStep call() throws IOException {
@@ -52,8 +61,6 @@ public class UpdateService extends Service<UpdateStep> {
 				updateMessage(step.description());
 			} while (!step.await(100, TimeUnit.MILLISECONDS));
 		}
-
 	}
-
 
 }

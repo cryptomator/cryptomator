@@ -1,53 +1,68 @@
 package org.cryptomator.ui.fxapp;
 
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.SemVerComparator;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.integrations.update.UpdateFailedException;
+import org.cryptomator.integrations.update.UpdateInfo;
+import org.cryptomator.integrations.update.UpdateMechanism;
+import org.cryptomator.updater.FallbackUpdateMechanism;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
+import java.net.http.HttpClient;
 import java.time.Instant;
-import java.util.Comparator;
+import java.util.concurrent.Executors;
 
-@Deprecated(forRemoval = true) // to be replaced by fallback org.cryptomator.integrations.update.UpdateMechanism
 @FxApplicationScoped
-public class UpdateChecker {
+public class UpdateChecker extends ScheduledService<UpdateInfo> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateChecker.class);
 	private static final Duration AUTO_CHECK_DELAY = Duration.seconds(5);
+	private static final Duration UPDATE_CHECK_INTERVAL = Duration.hours(3);
+	private static final Duration DISABLED_UPDATE_CHECK_INTERVAL = Duration.hours(100000); // Duration.INDEFINITE leads to overflows...
+
+	public enum UpdateCheckState {
+		NOT_CHECKED,
+		IS_CHECKING,
+		CHECK_SUCCESSFUL,
+		CHECK_FAILED
+	}
 
 	private final Environment env;
 	private final Settings settings;
-	private final StringProperty latestVersion = new SimpleStringProperty();
-	private final ScheduledService<String> updateCheckerService;
-	private final ObjectProperty<UpdateCheckState> state = new SimpleObjectProperty<>(UpdateCheckState.NOT_CHECKED);
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
-	private final Comparator<String> versionComparator = new SemVerComparator();
-	private final BooleanBinding updateAvailable;
-	private final BooleanBinding checkFailed;
+	private final StringExpression latestVersion = StringExpression.stringExpression(lastValueProperty().map(UpdateInfo::version));
+	private final BooleanBinding updateAvailable = lastValueProperty().isNotNull();
+	private final ObjectBinding<UpdateCheckState> updateState = Bindings.createObjectBinding(this::getUpdateCheckState, stateProperty());
+	private final BooleanBinding checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, updateState);
+	private final HttpClient httpClient;
+	private final UpdateMechanism primaryUpdateMechanism;
+	private final UpdateMechanism fallbackUpdateMechanism;
 
 	@Inject
 	UpdateChecker(Settings settings, //
-				  Environment env, //
-				  ScheduledService<String> updateCheckerService) {
+				  Environment env,
+				  FallbackUpdateMechanism fallbackUpdateMechanism,
+				  UpdateCheckerHttpClient httpClient) {
 		this.env = env;
 		this.settings = settings;
-		this.updateCheckerService = updateCheckerService;
 		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
-		this.updateAvailable = Bindings.createBooleanBinding(this::isUpdateAvailable, latestVersion);
-		this.checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, state);
+		this.httpClient = httpClient;
+		this.primaryUpdateMechanism = UpdateMechanism.get().orElse(fallbackUpdateMechanism);
+		this.fallbackUpdateMechanism = fallbackUpdateMechanism;
+
+		setExecutor(Executors.newVirtualThreadPerTaskExecutor());
+		periodProperty().bind(Bindings.when(settings.checkForUpdates).then(UPDATE_CHECK_INTERVAL).otherwise(DISABLED_UPDATE_CHECK_INTERVAL));
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -61,46 +76,42 @@ public class UpdateChecker {
 	}
 
 	private void startCheckingForUpdates(Duration initialDelay) {
-		updateCheckerService.cancel();
-		updateCheckerService.reset();
-		updateCheckerService.setDelay(initialDelay);
-		updateCheckerService.setOnRunning(this::checkStarted);
-		updateCheckerService.setOnSucceeded(this::checkSucceeded);
-		updateCheckerService.setOnFailed(this::checkFailed);
-		updateCheckerService.start();
+		cancel();
+		reset();
+		setDelay(initialDelay);
+		start();
 	}
 
-	private void checkStarted(WorkerStateEvent event) {
-		LOG.debug("Checking for updates...");
-		state.set(UpdateCheckState.IS_CHECKING);
+	@Override
+	protected void succeeded() {
+		var updateInfo = getValue();
+		super.succeeded(); // this will nil the value property!
+		if (updateInfo != null) {
+			LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), updateInfo.version());
+			lastSuccessfulUpdateCheck.set(Instant.now());
+		}
 	}
 
-	private void checkSucceeded(WorkerStateEvent event) {
-		var latestVersionString = updateCheckerService.getValue();
-		LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), latestVersionString);
-		lastSuccessfulUpdateCheck.set(Instant.now());
-		latestVersion.set(latestVersionString);
-		state.set(UpdateCheckState.CHECK_SUCCESSFUL);
+	@Override
+	protected Task<UpdateInfo> createTask() {
+		return new UpdateCheckTask();
 	}
 
-	private void checkFailed(WorkerStateEvent event) {
-		state.set(UpdateCheckState.CHECK_FAILED);
+	@Override
+	protected void failed() {
+		super.failed();
+		LOG.error("Update check failed.", getException());
 	}
 
-	public enum UpdateCheckState {
-		NOT_CHECKED,
-		IS_CHECKING,
-		CHECK_SUCCESSFUL,
-		CHECK_FAILED
-	}
 
 	/* Observable Properties */
-	public BooleanBinding checkingForUpdatesProperty() {
-		return updateCheckerService.stateProperty().isEqualTo(Worker.State.RUNNING);
+
+	public StringExpression latestVersionProperty() {
+		return latestVersion;
 	}
 
-	public ReadOnlyStringProperty latestVersionProperty() {
-		return latestVersion;
+	public boolean isUpdateAvailable() {
+		return updateAvailable.get();
 	}
 
 	public BooleanBinding updateAvailableProperty() {
@@ -111,26 +122,38 @@ public class UpdateChecker {
 		return checkFailed;
 	}
 
-	public boolean isUpdateAvailable() {
-		String currentVersion = getCurrentVersion();
-		String latestVersionString = latestVersion.get();
-
-		if (currentVersion == null || latestVersionString == null) {
-			return false;
-		} else {
-			return versionComparator.compare(currentVersion, latestVersionString) < 0;
-		}
-	}
-
 	public ObjectProperty<Instant> lastSuccessfulUpdateCheckProperty() {
 		return lastSuccessfulUpdateCheck;
 	}
 
-	public ObjectProperty<UpdateCheckState> updateCheckStateProperty() {
-		return state;
+	public ObjectBinding<UpdateCheckState> updateCheckStateProperty() {
+		return updateState;
+	}
+
+	private UpdateCheckState getUpdateCheckState() {
+		return switch (getState()) {
+			case READY -> UpdateCheckState.NOT_CHECKED;
+			case SCHEDULED, RUNNING -> UpdateCheckState.IS_CHECKING;
+			case SUCCEEDED -> UpdateCheckState.CHECK_SUCCESSFUL;
+			case FAILED, CANCELLED -> UpdateCheckState.CHECK_FAILED;
+		};
 	}
 
 	public String getCurrentVersion() {
 		return env.getAppVersion();
 	}
+
+	private class UpdateCheckTask extends Task<UpdateInfo> {
+
+		@Override
+		protected UpdateInfo call() throws UpdateFailedException, InterruptedException {
+			var result = primaryUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
+			if (result == null && primaryUpdateMechanism != fallbackUpdateMechanism) {
+				LOG.debug("Primary update mechanism did not find an update. Try fallback update mechanism...");
+				result = fallbackUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
+			}
+			return result;
+		}
+	}
+
 }

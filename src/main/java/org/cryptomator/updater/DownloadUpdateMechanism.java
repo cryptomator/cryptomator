@@ -3,7 +3,12 @@ package org.cryptomator.updater;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cryptomator.integrations.update.UpdateInfo;
 import org.cryptomator.integrations.update.UpdateMechanism;
+import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,45 +20,53 @@ import java.util.List;
 
 public abstract class DownloadUpdateMechanism implements UpdateMechanism {
 
+	private static final Logger LOG = LoggerFactory .getLogger(DownloadUpdateMechanism.class);
+	private static final String LATEST_VERSION_API_URL = "https://api.cryptomator.org/connect/apps/desktop/latest-version?format=1";
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	private final String assetSuffix;
-
-	protected DownloadUpdateMechanism(String assetSuffix) {
-		this.assetSuffix = assetSuffix;
-	}
-
 	@Override
-	public boolean isUpdateAvailable(String currentVersion) {
-		try (var client = HttpClient.newHttpClient()) {
-			// TODO: check different source
-			HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api.github.com/repos/cryptomator/cryptomator/releases/latest")).header("Accept", "application/vnd.github+json").build();
-
-			HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
-
+	public UpdateInfo checkForUpdate(String currentVersion, HttpClient httpClient) {
+		try {
+			HttpRequest request = HttpRequest.newBuilder().uri(URI.create(LATEST_VERSION_API_URL)).build();
+			HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 			if (response.statusCode() != 200) {
 				throw new RuntimeException("Failed to fetch release: " + response.statusCode());
 			}
-
-			var release = MAPPER.readValue(response.body(), GitHubRelease.class);
-
-			return release.assets.stream().anyMatch(a -> a.name.endsWith(assetSuffix))
-					&& UpdateMechanism.isUpdateAvailable(release.tagName, currentVersion);
-		} catch (IOException | InterruptedException e) {
-			return false;
+			var release = MAPPER.readValue(response.body(), LatestVersionResponse.class);
+			return checkForUpdate(currentVersion, release);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			LOG.debug("Update check interrupted.");
+			return null;
+		} catch (IOException e) {
+			LOG.warn("Update check failed", e);
+			return null;
 		}
 	}
 
+	@Nullable
+	@Blocking
+	abstract UpdateInfo checkForUpdate(String currentVersion, LatestVersionResponse response);
+
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record GitHubRelease(
-			@JsonProperty("tag_name") String tagName,
-			List<Asset> assets
+	public record LatestVersionResponse(
+			@JsonProperty("latestVersion") LatestVersion latestVersion,
+			@JsonProperty("assets") List<Asset> assets
+	) {}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public record LatestVersion(
+			@JsonProperty("mac") String macVersion,
+			@JsonProperty("win") String winVersion,
+			@JsonProperty("linux") String linuxVersion
 	) {}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public record Asset(
-			String name,
-			@JsonProperty("browser_download_url") String downloadUrl
+			@JsonProperty("name") String name,
+			@JsonProperty("digest") String digest,
+			@JsonProperty("size") long size,
+			@JsonProperty("downloadUrl") String downloadUrl
 	) {}
 
 }

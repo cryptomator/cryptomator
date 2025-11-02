@@ -52,12 +52,13 @@ open module org.cryptomator.desktop {
 	requires io.github.coffeelibs.tinyoauth2client;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
+	requires com.github.benmanes.caffeine;
+	requires com.fasterxml.jackson.annotation;
 
 	/* dagger bs */
 	requires jakarta.inject;
 	requires static javax.inject;
 	requires java.compiler;
-	requires com.github.benmanes.caffeine;
 
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
 	uses SSLContextProvider;
