@@ -23,7 +23,7 @@ import java.time.Instant;
 import java.util.concurrent.Executors;
 
 @FxApplicationScoped
-public class UpdateChecker extends ScheduledService<UpdateInfo> {
+public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateChecker.class);
 	private static final Duration AUTO_CHECK_DELAY = Duration.seconds(5);
@@ -45,8 +45,8 @@ public class UpdateChecker extends ScheduledService<UpdateInfo> {
 	private final ObjectBinding<UpdateCheckState> updateState = Bindings.createObjectBinding(this::getUpdateCheckState, stateProperty());
 	private final BooleanBinding checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, updateState);
 	private final HttpClient httpClient;
-	private final UpdateMechanism primaryUpdateMechanism;
-	private final UpdateMechanism fallbackUpdateMechanism;
+	private final UpdateMechanism<?> primaryUpdateMechanism;
+	private final UpdateMechanism<?> fallbackUpdateMechanism;
 
 	@Inject
 	UpdateChecker(Settings settings, //
@@ -92,7 +92,7 @@ public class UpdateChecker extends ScheduledService<UpdateInfo> {
 	}
 
 	@Override
-	protected Task<UpdateInfo> createTask() {
+	protected Task<UpdateInfo<?>> createTask() {
 		return new UpdateCheckTask();
 	}
 
@@ -154,10 +154,10 @@ public class UpdateChecker extends ScheduledService<UpdateInfo> {
 		return env.getAppVersion();
 	}
 
-	private class UpdateCheckTask extends Task<UpdateInfo> {
+	private class UpdateCheckTask extends Task<UpdateInfo<?>> {
 
 		@Override
-		protected UpdateInfo call() throws UpdateFailedException, InterruptedException {
+		protected UpdateInfo<?> call() throws UpdateFailedException {
 			var result = primaryUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
 			if (result == null && primaryUpdateMechanism != fallbackUpdateMechanism) {
 				LOG.debug("Primary update mechanism did not find an update. Try fallback update mechanism...");

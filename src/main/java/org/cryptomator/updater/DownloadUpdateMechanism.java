@@ -28,7 +28,7 @@ public abstract class DownloadUpdateMechanism implements UpdateMechanism<Downloa
 			DownloadUpdateMechanism updateMechanism,
 			String version,
 			Asset asset
-	) implements UpdateInfo {}
+	) implements UpdateInfo<DownloadUpdateInfo> {}
 
 	@Override
 	public DownloadUpdateInfo checkForUpdate(String currentVersion, HttpClient httpClient) {

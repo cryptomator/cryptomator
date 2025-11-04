@@ -18,9 +18,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class UpdateService extends Service<UpdateStep> {
 
-	private ObservableValue<UpdateInfo> updateInfo;
+	private ObservableValue<UpdateInfo<?>> updateInfo;
 
-	public UpdateService(ObservableValue<UpdateInfo> updateInfo) {
+	public UpdateService(ObservableValue<UpdateInfo<?>> updateInfo) {
 		setExecutor(Executors.newVirtualThreadPerTaskExecutor());
 		this.updateInfo = updateInfo;
 	}
@@ -32,16 +32,17 @@ public class UpdateService extends Service<UpdateStep> {
 
 	private static class RunAllStepsTask extends Task<UpdateStep> {
 
+		@SuppressWarnings("rawtypes")
 		private final UpdateInfo updateInfo;
 
-		public RunAllStepsTask(UpdateInfo updateInfo) {
+		public RunAllStepsTask(UpdateInfo<?> updateInfo) {
 			this.updateInfo = Objects.requireNonNull(updateInfo);
 		}
 
 		@Override
 		protected UpdateStep call() throws IOException {
 			try {
-				UpdateStep step = updateInfo.updateMechanism().firstStep(updateInfo);
+				UpdateStep step = updateInfo.useToPrepareFirstStep();
 				UpdateStep lastStep;
 				do {
 					step.start();

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.integrations.common.DisplayName;
 import org.cryptomator.integrations.common.Priority;
+import org.cryptomator.integrations.update.BasicUpdateInfo;
 import org.cryptomator.integrations.update.UpdateInfo;
 import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.integrations.update.UpdateStep;
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 @FxApplicationScoped
 @Priority(Priority.FALLBACK)
 @DisplayName("Show Download Page") // TODO localize
-public class FallbackUpdateMechanism implements UpdateMechanism<UpdateInfo> {
+public class FallbackUpdateMechanism implements UpdateMechanism<BasicUpdateInfo> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FallbackUpdateMechanism.class);
 	private static final String LATEST_VERSION_API_URL = "https://api.cryptomator.org/connect/apps/desktop/latest-version";
@@ -52,7 +53,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism<UpdateInfo> {
 	}
 
 	@Override
-	public UpdateInfo checkForUpdate(String currentVersion, HttpClient httpClient) {
+	public BasicUpdateInfo checkForUpdate(String currentVersion, HttpClient httpClient) {
 		try {
 			HttpRequest request = HttpRequest.newBuilder().uri(URI.create(LATEST_VERSION_API_URL)).build();
 			HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -62,7 +63,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism<UpdateInfo> {
 			var release = MAPPER.readValue(response.body(), LatestVersion.class);
 			var updateVersion = release.versionForCurrentOS();
 			if (UpdateMechanism.isUpdateAvailable(updateVersion, currentVersion)) {
-				return UpdateInfo.of(updateVersion, this);
+				return new BasicUpdateInfo(updateVersion, this);
 			} else {
 				return null;
 			}
@@ -77,7 +78,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism<UpdateInfo> {
 	}
 
 	@Override
-	public UpdateStep firstStep(UpdateInfo updateInfo) {
+	public UpdateStep firstStep(BasicUpdateInfo updateInfo) {
 		return UpdateStep.of("Go to download page", this::openDownloadPage); // TODO localize
 	}
 
