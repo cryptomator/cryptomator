@@ -3,7 +3,6 @@
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
-<?import org.cryptomator.ui.controls.FormattedString?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -21,12 +20,12 @@
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
-	<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
+	<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.updateChecker.currentVersion}" textAlignment="CENTER" wrapText="true"/>
 
 	<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
 	<VBox alignment="CENTER" spacing="12">
-		<FormattedLabel format="%preferences.updates.updateAvailable" arg1="${controller.latestVersion}" textAlignment="CENTER" wrapText="true" visible="${controller.updateChecker.updateAvailable}"/>
+		<FormattedLabel format="%preferences.updates.updateAvailable" arg1="${controller.updateChecker.latestVersion}" textAlignment="CENTER" wrapText="true" visible="${controller.updateChecker.updateAvailable}"/>
 
 		<Button text="${controller.updateButtonTitle}" defaultButton="true" onAction="#startWork" disable="${controller.running}" contentDisplay="${controller.updateButtonState}">
 			<graphic>
@@ -43,7 +42,7 @@
 			</graphic>
 		</Button>
 
-		<TextFlow styleClass="text-flow" textAlignment="CENTER" visible="${controller.checkFailed}" managed="${controller.checkFailed}">
+		<TextFlow styleClass="text-flow" textAlignment="CENTER" visible="${controller.updateChecker.checkFailed}" managed="${controller.updateChecker.checkFailed}">
 			<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
 			<Text text=" "/>
 			<Text text="%preferences.updates.checkFailed"/>

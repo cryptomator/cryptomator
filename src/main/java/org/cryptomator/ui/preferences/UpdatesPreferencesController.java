@@ -2,7 +2,6 @@ package org.cryptomator.ui.preferences;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.integrations.update.UpdateInfo;
 import org.cryptomator.integrations.update.UpdateStep;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
@@ -16,11 +15,9 @@ import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.binding.StringExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -43,27 +40,21 @@ import java.util.ResourceBundle;
 public class UpdatesPreferencesController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdatesPreferencesController.class);
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 
 	private final Application application;
 	private final Environment environment;
 	private final ResourceBundle resourceBundle;
 	private final Settings settings;
 	private final UpdateChecker updateChecker;
-	private final ObjectBinding<ContentDisplay> updateButtonState;
-	private final StringExpression latestVersion;
-	private final ObservableValue<Instant> lastSuccessfulUpdateCheck;
-	private final StringBinding lastUpdateCheckMessage;
-	private final ObservableValue<String> timeDifferenceMessage;
-	private final String currentVersion;
-	private final BooleanBinding checkFailed;
-	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
-	private final DateTimeFormatter formatter;
-	private final BooleanBinding upToDate;
 	private final UpdateService updateService;
-	private final StringBinding updateButtonTitle;
-
 	private final ObjectBinding<Worker<?>> worker;
 	private final BooleanExpression running;
+	private final StringBinding updateButtonTitle;
+	private final ObjectBinding<ContentDisplay> updateButtonState;
+	private final ObservableValue<String> timeDifferenceMessage;
+	private final StringBinding lastUpdateCheckMessage;
+	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
@@ -75,39 +66,27 @@ public class UpdatesPreferencesController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.settings = settings;
 		this.updateChecker = updateChecker;
-
-		this.latestVersion = updateChecker.latestVersionProperty();
-		this.lastSuccessfulUpdateCheck = updateChecker.lastSuccessfulUpdateCheckProperty();
-		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, lastSuccessfulUpdateCheck);
-		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, lastSuccessfulUpdateCheck);
-
-		this.currentVersion = updateChecker.getCurrentVersion();
-		this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
-		this.upToDate = updateChecker.updateCheckStateProperty().isEqualTo(UpdateChecker.UpdateCheckState.CHECK_SUCCESSFUL).and(latestVersion.isEqualTo(currentVersion));
-		this.checkFailed = updateChecker.checkFailedProperty();
-
-		this.updateService = new UpdateService(updateChecker.lastValueProperty().map(UpdateInfo::updateMechanism));
-		this.worker = Bindings.when(updateChecker.updateAvailableProperty()).<Worker<?>>then(updateService).otherwise(updateChecker);
+		this.updateService = new UpdateService(updateChecker.lastValueProperty());
+		this.worker = Bindings.when(updateChecker.updateAvailableProperty()).<Worker<?>>then(this.updateService).otherwise(this.updateChecker);
 		this.running = Bindings.createBooleanBinding(this::isRunning, updateService.stateProperty(), updateChecker.stateProperty());
 		this.updateButtonTitle = Bindings.createStringBinding(this::getUpdateButtonTitle, worker, updateService.stateProperty(), updateService.messageProperty());
 		this.updateButtonState = Bindings.createObjectBinding(this::getUpdateButtonState, updateChecker.stateProperty(), updateService.stateProperty());
-
-		updateChecker.updateAvailableProperty().addListener((_, _, newVal) -> LOG.info("Update available: {}", newVal));
-
-		updateService.setOnSucceeded(this::updateSucceeded);
-		updateService.setOnFailed(this::updateFailed);
+		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, updateChecker.lastSuccessfulUpdateCheckProperty());
+		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, updateChecker.lastSuccessfulUpdateCheckProperty());
 	}
 
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates);
-		upToDate.addListener((_, _, newVal) -> {
-			if (newVal) {
+		updateChecker.updateAvailableProperty().addListener((_, _, hasUpdate) -> {
+			if (!hasUpdate) {
 				upToDateLabelVisible.set(true);
 				PauseTransition delay = new PauseTransition(javafx.util.Duration.seconds(5));
 				delay.setOnFinished(_ -> upToDateLabelVisible.set(false));
 				delay.play();
 			}
 		});
+		updateService.setOnSucceeded(this::updateSucceeded);
+		updateService.setOnFailed(this::updateFailed);
 	}
 
 	@FXML
@@ -158,26 +137,14 @@ public class UpdatesPreferencesController implements FxController {
 		}
 	}
 
-	public StringExpression latestVersionProperty() {
-		return latestVersion;
-	}
-
-	public String getLatestVersion() {
-		return latestVersion.get();
-	}
-
-	public String getCurrentVersion() {
-		return currentVersion;
-	}
-
 	public StringBinding lastUpdateCheckMessageProperty() {
 		return lastUpdateCheckMessage;
 	}
 
 	public String getLastUpdateCheckMessage() {
-		Instant lastCheck = lastSuccessfulUpdateCheck.getValue();
+		Instant lastCheck = updateChecker.getLastSuccessfulUpdateCheck();
 		if (lastCheck != null && !lastCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
-			return formatter.format(LocalDateTime.ofInstant(lastCheck, ZoneId.systemDefault()));
+			return FORMATTER.format(LocalDateTime.ofInstant(lastCheck, ZoneId.systemDefault()));
 		} else {
 			return "-";
 		}
@@ -188,7 +155,7 @@ public class UpdatesPreferencesController implements FxController {
 	}
 
 	public String getTimeDifferenceMessage() {
-		var lastSuccessCheck = lastSuccessfulUpdateCheck.getValue();
+		var lastSuccessCheck = updateChecker.getLastSuccessfulUpdateCheck();
 		var duration = Duration.between(lastSuccessCheck, Instant.now());
 		var hours = duration.toHours();
 		if (lastSuccessCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
@@ -208,14 +175,6 @@ public class UpdatesPreferencesController implements FxController {
 
 	public boolean isUpToDateLabelVisible() {
 		return upToDateLabelVisible.get();
-	}
-
-	public BooleanBinding checkFailedProperty() {
-		return checkFailed;
-	}
-
-	public boolean isCheckFailed() {
-		return checkFailed.getValue();
 	}
 
 	public ObjectBinding<Worker<?>> workerProperty() {

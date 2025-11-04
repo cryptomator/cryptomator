@@ -1,5 +1,6 @@
 package org.cryptomator.updater;
 
+import org.cryptomator.integrations.update.UpdateInfo;
 import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.integrations.update.UpdateStep;
 
@@ -17,30 +18,30 @@ import java.util.concurrent.TimeUnit;
  */
 public class UpdateService extends Service<UpdateStep> {
 
-	private ObservableValue<UpdateMechanism> updateMechanism;
+	private ObservableValue<UpdateInfo> updateInfo;
 
-	public UpdateService(ObservableValue<UpdateMechanism> updateMechanism) {
+	public UpdateService(ObservableValue<UpdateInfo> updateInfo) {
 		setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-		this.updateMechanism = updateMechanism;
+		this.updateInfo = updateInfo;
 	}
 
 	@Override
 	protected Task<UpdateStep> createTask() {
-		return new RunAllStepsTask(updateMechanism.getValue());
+		return new RunAllStepsTask(updateInfo.getValue());
 	}
 
 	private static class RunAllStepsTask extends Task<UpdateStep> {
 
-		private final UpdateMechanism updateMechanism;
+		private final UpdateInfo updateInfo;
 
-		public RunAllStepsTask(UpdateMechanism updateMechanism) {
-			this.updateMechanism = Objects.requireNonNull(updateMechanism);
+		public RunAllStepsTask(UpdateInfo updateInfo) {
+			this.updateInfo = Objects.requireNonNull(updateInfo);
 		}
 
 		@Override
 		protected UpdateStep call() throws IOException {
 			try {
-				UpdateStep step = updateMechanism.firstStep();
+				UpdateStep step = updateInfo.updateMechanism().firstStep(updateInfo);
 				UpdateStep lastStep;
 				do {
 					step.start();

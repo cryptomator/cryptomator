@@ -5,7 +5,6 @@ import org.cryptomator.integrations.common.OperatingSystem;
 import org.cryptomator.integrations.common.Priority;
 import org.cryptomator.integrations.update.DownloadUpdateStep;
 import org.cryptomator.integrations.update.UpdateFailedException;
-import org.cryptomator.integrations.update.UpdateInfo;
 import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.integrations.update.UpdateStep;
 import org.jetbrains.annotations.Nullable;
@@ -15,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
@@ -30,24 +31,25 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 	private static final Logger LOG = LoggerFactory.getLogger(MacOsDmgUpdateMechanism.class);
 
 	@Override
-	UpdateInfo checkForUpdate(String currentVersion, LatestVersionResponse response) {
+	DownloadUpdateInfo checkForUpdate(String currentVersion, LatestVersionResponse response) {
 		String suffix = switch (System.getProperty("os.arch")) {
 			case "aarch64", "arm64" -> "arm64.dmg";
 			default -> "x64.dmg";
 		};
-		if (UpdateMechanism.isUpdateAvailable(response.latestVersion().macVersion(), currentVersion)
-		 && response.assets().stream().map(Asset::name).anyMatch(s -> s.endsWith(suffix))) {
-			return new UpdateInfo(response.latestVersion().macVersion(), this);
+		var updateVersion = response.latestVersion().macVersion();
+		var asset = response.assets().stream().filter(a -> a.name().endsWith(suffix)).findAny().orElse(null);
+		if (UpdateMechanism.isUpdateAvailable(updateVersion, currentVersion) && asset != null) {
+			return new DownloadUpdateMechanism.DownloadUpdateInfo(this, updateVersion, asset);
 		} else {
 			return null;
 		}
 	}
 
 	@Override
-	public UpdateStep firstStep() throws UpdateFailedException {
+	public UpdateStep firstStep(DownloadUpdateInfo updateInfo) throws UpdateFailedException {
 		try {
 			Path workDir = Files.createTempDirectory("cryptomator-update");
-			return new UpdateProcessImpl(workDir);
+			return new UpdateProcessImpl(workDir, updateInfo);
 		} catch (IOException e) {
 			throw new UpdateFailedException("Failed to create temporary directory for update", e);
 		}
@@ -55,14 +57,13 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 
 	private static class UpdateProcessImpl extends DownloadUpdateStep {
 
-		// FIXME: use URI and CHECKSUM from update API
-		private static final URI UPDATE_URI = URI.create("https://github.com/cryptomator/cryptomator/releases/download/1.17.0/Cryptomator-1.17.0-arm64.dmg");
-		private static final byte[] CHECKSUM = HexFormat.of().withLowerCase().parseHex("03f45e203204e93b39925cbb04e19c9316da4f77debaba4fb5071f0ec8e727e8");
 		private final Path workDir;
 
-		public UpdateProcessImpl(Path workDir) {
+		public UpdateProcessImpl(Path workDir, DownloadUpdateInfo updateInfo) {
 			var destination = workDir.resolve("update.dmg");
-			super(UPDATE_URI, destination, CHECKSUM, 60_000_000L); // initially assume 60 MB for the update size
+			var downloadUri = URI.create(updateInfo.asset().downloadUrl());
+			var checksum = HexFormat.of().withLowerCase().parseHex(updateInfo.asset().digest().substring(7)); // remove "sha256:" prefix
+			super(downloadUri, destination, checksum, 60_000_000L); // initially assume 60 MB for the update size
 			this.workDir = workDir;
 		}
 
@@ -111,12 +112,18 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 				installPath = "/Applications/Cryptomator.app";
 				// throw new UpdateFailedException("Cannot determine destination path for Cryptomator.app, current path: " + selfPath);
 			}
+			LOG.info("Restarting to apply Update in {} now...", workDir);
 			String script = """
 					while kill -0 ${CRYPTOMATOR_PID} 2> /dev/null; do sleep 0.5; done;
-					cp -R 'Cryptomator.app' "${CRYPTOMATOR_INSTALL_PATH}";
-					open -a "${CRYPTOMATOR_INSTALL_PATH}"
+					if [ -d "${CRYPTOMATOR_INSTALL_PATH}" ]; then
+					  echo "Removing old installation at ${CRYPTOMATOR_INSTALL_PATH}";
+					  rm -rf "${CRYPTOMATOR_INSTALL_PATH}"
+					fi
+					mv 'Cryptomator.app' "${CRYPTOMATOR_INSTALL_PATH}";
+					open -a "${CRYPTOMATOR_INSTALL_PATH}";
 					""";
-			var command = List.of("bash", "-c", "nohup bash -c \"" + script + "\" >/Users/sebastian/Downloads/nohup.out 2>&1 &");
+			Files.writeString(workDir.resolve("install.sh"), script, StandardCharsets.US_ASCII, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
+			var command = List.of("bash", "-c", "nohup bash install.sh >install.log 2>&1 &");
 			var processBuilder = new ProcessBuilder(command);
 			processBuilder.directory(workDir.toFile());
 			processBuilder.environment().put("CRYPTOMATOR_PID", String.valueOf(ProcessHandle.current().pid()));

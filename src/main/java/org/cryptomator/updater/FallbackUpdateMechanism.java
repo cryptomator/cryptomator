@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 @FxApplicationScoped
 @Priority(Priority.FALLBACK)
 @DisplayName("Show Download Page") // TODO localize
-public class FallbackUpdateMechanism implements UpdateMechanism {
+public class FallbackUpdateMechanism implements UpdateMechanism<UpdateInfo> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FallbackUpdateMechanism.class);
 	private static final String LATEST_VERSION_API_URL = "https://api.cryptomator.org/connect/apps/desktop/latest-version";
@@ -62,7 +62,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism {
 			var release = MAPPER.readValue(response.body(), LatestVersion.class);
 			var updateVersion = release.versionForCurrentOS();
 			if (UpdateMechanism.isUpdateAvailable(currentVersion, updateVersion)) {
-				return new UpdateInfo(updateVersion, this);
+				return UpdateInfo.of(updateVersion, this);
 			} else {
 				return null;
 			}
@@ -73,7 +73,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism {
 	}
 
 	@Override
-	public UpdateStep firstStep() {
+	public UpdateStep firstStep(UpdateInfo updateInfo) {
 		return UpdateStep.of("Go to download page", this::openDownloadPage); // TODO localize
 	}
 

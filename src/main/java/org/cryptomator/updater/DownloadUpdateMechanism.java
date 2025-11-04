@@ -18,14 +18,20 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-public abstract class DownloadUpdateMechanism implements UpdateMechanism {
+public abstract class DownloadUpdateMechanism implements UpdateMechanism<DownloadUpdateMechanism.DownloadUpdateInfo> {
 
 	private static final Logger LOG = LoggerFactory .getLogger(DownloadUpdateMechanism.class);
 	private static final String LATEST_VERSION_API_URL = "https://api.cryptomator.org/connect/apps/desktop/latest-version?format=1";
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
+	public record DownloadUpdateInfo(
+			DownloadUpdateMechanism updateMechanism,
+			String version,
+			Asset asset
+	) implements UpdateInfo {}
+
 	@Override
-	public UpdateInfo checkForUpdate(String currentVersion, HttpClient httpClient) {
+	public DownloadUpdateInfo checkForUpdate(String currentVersion, HttpClient httpClient) {
 		try {
 			HttpRequest request = HttpRequest.newBuilder().uri(URI.create(LATEST_VERSION_API_URL)).build();
 			HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -46,7 +52,7 @@ public abstract class DownloadUpdateMechanism implements UpdateMechanism {
 
 	@Nullable
 	@Blocking
-	abstract UpdateInfo checkForUpdate(String currentVersion, LatestVersionResponse response);
+	abstract DownloadUpdateInfo checkForUpdate(String currentVersion, LatestVersionResponse response);
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public record LatestVersionResponse(

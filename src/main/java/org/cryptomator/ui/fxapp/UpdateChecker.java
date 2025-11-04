@@ -17,7 +17,6 @@ import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
 import javafx.util.Duration;
 import java.net.http.HttpClient;
 import java.time.Instant;
@@ -106,6 +105,10 @@ public class UpdateChecker extends ScheduledService<UpdateInfo> {
 
 	/* Observable Properties */
 
+	public String getLatestVersion() {
+		return latestVersion.get();
+	}
+
 	public StringExpression latestVersionProperty() {
 		return latestVersion;
 	}
@@ -118,8 +121,16 @@ public class UpdateChecker extends ScheduledService<UpdateInfo> {
 		return updateAvailable;
 	}
 
+	public boolean isCheckFailed() {
+		return checkFailed.get();
+	}
+
 	public BooleanBinding checkFailedProperty() {
 		return checkFailed;
+	}
+
+	public Instant getLastSuccessfulUpdateCheck() {
+		return lastSuccessfulUpdateCheck.get();
 	}
 
 	public ObjectProperty<Instant> lastSuccessfulUpdateCheckProperty() {
