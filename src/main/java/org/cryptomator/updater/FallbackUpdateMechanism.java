@@ -61,7 +61,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism<UpdateInfo> {
 			}
 			var release = MAPPER.readValue(response.body(), LatestVersion.class);
 			var updateVersion = release.versionForCurrentOS();
-			if (UpdateMechanism.isUpdateAvailable(currentVersion, updateVersion)) {
+			if (UpdateMechanism.isUpdateAvailable(updateVersion, currentVersion)) {
 				return UpdateInfo.of(updateVersion, this);
 			} else {
 				return null;
