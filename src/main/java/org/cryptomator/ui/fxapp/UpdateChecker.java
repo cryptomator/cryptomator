@@ -85,9 +85,9 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 	protected void succeeded() {
 		var updateInfo = getValue();
 		super.succeeded(); // this will nil the value property!
+		lastSuccessfulUpdateCheck.set(Instant.now());
 		if (updateInfo != null) {
 			LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), updateInfo.version());
-			lastSuccessfulUpdateCheck.set(Instant.now());
 		}
 	}
 

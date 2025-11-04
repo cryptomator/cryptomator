@@ -60,7 +60,7 @@ public class UpdatesPreferencesController implements FxController {
 	public CheckBox checkForUpdatesCheckbox;
 
 	@Inject
-	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, FallbackUpdateMechanism fallbackUpdateMechanism) {
+	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker) {
 		this.application = application;
 		this.environment = environment;
 		this.resourceBundle = resourceBundle;
