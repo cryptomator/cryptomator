@@ -66,7 +66,11 @@ public class FallbackUpdateMechanism implements UpdateMechanism<UpdateInfo> {
 			} else {
 				return null;
 			}
-		} catch (IOException | InterruptedException e) {
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			LOG.warn("Update check interrupted", e);
+			return null;
+		} catch (IOException e) {
 			LOG.warn("Update check failed", e);
 			return null;
 		}

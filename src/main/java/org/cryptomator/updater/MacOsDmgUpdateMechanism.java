@@ -96,6 +96,7 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 				}
 				LOG.debug("Update ready: {}", workDir.resolve("Cryptomator.app"));
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new InterruptedIOException("Failed to extract DMG, interrupted");
 			}
 			return UpdateStep.of("Restarting...", this::restart);

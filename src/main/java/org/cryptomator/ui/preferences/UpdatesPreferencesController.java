@@ -119,6 +119,7 @@ public class UpdatesPreferencesController implements FxController {
 	private void updateFailed(WorkerStateEvent workerStateEvent) {
 		assert workerStateEvent.getSource() == updateService;
 		LOG.error("Update failed.", updateService.getException());
+		updateService.reset();
 	}
 
 	/* Observable Properties */
