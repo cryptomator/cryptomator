@@ -124,6 +124,15 @@ public class Environment {
 		return Optional.ofNullable(System.getProperty(BUILD_NUMBER_PROP_NAME));
 	}
 
+	/**
+	 * Returns the app version concatenated with the build number (if defined).
+	 *
+	 * @return version string formatted like {@code 1.2.3-4567} or {@code 1.2.3} if no build number is defined.
+	 */
+	public String getAppVersionWithBuildNumber() {
+		return getAppVersion() + getBuildNumber().map("-"::concat).orElse("");
+	}
+
 	public Optional<Path> getPluginDir() {
 		return getPath(PLUGIN_DIR_PROP_NAME);
 	}
