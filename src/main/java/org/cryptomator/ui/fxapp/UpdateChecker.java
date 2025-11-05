@@ -57,8 +57,16 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 		this.settings = settings;
 		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
 		this.httpClient = httpClient;
-		this.primaryUpdateMechanism = UpdateMechanism.get().orElse(fallbackUpdateMechanism);
 		this.fallbackUpdateMechanism = fallbackUpdateMechanism;
+
+		// Prefer the safer fallback mechanism if the last update attempt was already made by this app version
+		var currentVersion = env.getAppVersionWithBuildNumber();
+		var lastAttemptedBy = settings.lastUpdateAttemptedByVersion.get();
+		if (currentVersion != null && currentVersion.equals(lastAttemptedBy)) {
+			this.primaryUpdateMechanism = fallbackUpdateMechanism; // immediately use fallback mechanism
+		} else {
+			this.primaryUpdateMechanism = UpdateMechanism.get().orElse(fallbackUpdateMechanism);
+		}
 
 		setExecutor(Executors.newVirtualThreadPerTaskExecutor());
 		periodProperty().bind(Bindings.when(settings.checkForUpdates).then(UPDATE_CHECK_INTERVAL).otherwise(DISABLED_UPDATE_CHECK_INTERVAL));

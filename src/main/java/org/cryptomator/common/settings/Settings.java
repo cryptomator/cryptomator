@@ -77,6 +77,7 @@ public class Settings {
 	public final ObjectProperty<Instant> lastUpdateCheckReminder;
 	public final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
 	public final ObjectProperty<Path> previouslyUsedVaultDirectory;
+	public final StringProperty lastUpdateAttemptedByVersion;
 
 	public static Settings create(SettingsProvider provider, Environment env) {
 		var defaults = new SettingsJson();
@@ -116,6 +117,7 @@ public class Settings {
 		this.lastUpdateCheckReminder = new SimpleObjectProperty<>(this, "lastUpdateCheckReminder", json.lastReminderForUpdateCheck);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
 		this.previouslyUsedVaultDirectory = new SimpleObjectProperty<>(this, "previouslyUsedVaultDirectory", json.previouslyUsedVaultDirectory);
+		this.lastUpdateAttemptedByVersion = new SimpleStringProperty(this, "lastUpdateAttemptedByVersion", json.lastUpdateAttemptedByVersion);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
@@ -146,6 +148,7 @@ public class Settings {
 		lastUpdateCheckReminder.addListener(this::somethingChanged);
 		lastSuccessfulUpdateCheck.addListener(this::somethingChanged);
 		previouslyUsedVaultDirectory.addListener(this::somethingChanged);
+		lastUpdateAttemptedByVersion.addListener(this::somethingChanged);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -208,6 +211,7 @@ public class Settings {
 		json.lastReminderForUpdateCheck = lastUpdateCheckReminder.get();
 		json.lastSuccessfulUpdateCheck = lastSuccessfulUpdateCheck.get();
 		json.previouslyUsedVaultDirectory = previouslyUsedVaultDirectory.get();
+		json.lastUpdateAttemptedByVersion = lastUpdateAttemptedByVersion.get();
 		return json;
 	}
 

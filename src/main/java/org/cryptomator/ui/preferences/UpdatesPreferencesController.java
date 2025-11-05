@@ -5,7 +5,6 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.update.UpdateStep;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
-import org.cryptomator.updater.FallbackUpdateMechanism;
 import org.cryptomator.updater.UpdateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +98,7 @@ public class UpdatesPreferencesController implements FxController {
 		if (worker.get().equals(updateChecker)) {
 			updateChecker.checkForUpdatesNow();
 		} else if (worker.get().equals(updateService)) {
+			// TODO: only allow starting if all vaults are locked; show info label beneath button otherwise
 			updateService.start();
 		}
 	}
@@ -107,6 +107,9 @@ public class UpdatesPreferencesController implements FxController {
 		assert workerStateEvent.getSource() == updateService;
 		var lastStep = updateService.getValue();
 		if (lastStep == UpdateStep.EXIT) {
+			// Record that this version attempted an update, so next launch can choose fallback if needed
+			settings.lastUpdateAttemptedByVersion.set(environment.getAppVersionWithBuildNumber());
+			settings.saveNow();
 			LOG.info("Exiting app to update...");
 			Platform.exit();
 		} else if (lastStep == UpdateStep.RETRY) {
