@@ -15,6 +15,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
@@ -40,13 +41,14 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 	private final Environment env;
 	private final Settings settings;
 	private final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
-	private final StringExpression latestVersion = StringExpression.stringExpression(lastValueProperty().map(UpdateInfo::version));
-	private final BooleanBinding updateAvailable = lastValueProperty().isNotNull();
+	private final ObjectProperty<UpdateInfo<?>> update = new SimpleObjectProperty<>();
+	private final StringExpression latestVersion = StringExpression.stringExpression(update.map(UpdateInfo::version));
+	private final BooleanBinding updateAvailable = update.isNotNull();
 	private final ObjectBinding<UpdateCheckState> updateState = Bindings.createObjectBinding(this::getUpdateCheckState, stateProperty());
 	private final BooleanBinding checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, updateState);
 	private final HttpClient httpClient;
-	private final UpdateMechanism<?> primaryUpdateMechanism;
 	private final UpdateMechanism<?> fallbackUpdateMechanism;
+	private UpdateMechanism<?> updateMechanism;
 
 	@Inject
 	UpdateChecker(Settings settings, //
@@ -63,9 +65,9 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 		var currentVersion = env.getAppVersionWithBuildNumber();
 		var lastAttemptedBy = settings.lastUpdateAttemptedByVersion.get();
 		if (currentVersion != null && currentVersion.equals(lastAttemptedBy)) {
-			this.primaryUpdateMechanism = fallbackUpdateMechanism; // immediately use fallback mechanism
+			this.updateMechanism = fallbackUpdateMechanism; // immediately use fallback mechanism
 		} else {
-			this.primaryUpdateMechanism = UpdateMechanism.get().orElse(fallbackUpdateMechanism);
+			this.updateMechanism = UpdateMechanism.get().orElse(fallbackUpdateMechanism);
 		}
 
 		setExecutor(Executors.newVirtualThreadPerTaskExecutor());
@@ -76,6 +78,14 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 		if (!env.disableUpdateCheck() && settings.checkForUpdates.get()) {
 			startCheckingForUpdates(AUTO_CHECK_DELAY);
 		}
+	}
+
+	public void recheckWithFallbackMechanism() {
+		if (updateMechanism == fallbackUpdateMechanism) {
+			return; // already using fallback mechanism
+		}
+		updateMechanism = fallbackUpdateMechanism;
+		checkForUpdatesNow();
 	}
 
 	public void checkForUpdatesNow() {
@@ -96,6 +106,7 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 		lastSuccessfulUpdateCheck.set(Instant.now());
 		if (updateInfo != null) {
 			LOG.info("Current version: {}, latest version: {}", getCurrentVersion(), updateInfo.version());
+			update.set(updateInfo);
 		}
 	}
 
@@ -105,6 +116,14 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 	}
 
 	/* Observable Properties */
+
+	public UpdateInfo<?> getUpdate() {
+		return update.get();
+	}
+
+	public ObjectProperty<UpdateInfo<?>> updateProperty() {
+		return update;
+	}
 
 	public String getLatestVersion() {
 		return latestVersion.get();
@@ -160,14 +179,14 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 		@Override
 		protected UpdateInfo<?> call() {
 			try {
-				var result = primaryUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
+				var result = updateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
 				if (result != null) {
 					return result;
 				}
 			} catch (UpdateFailedException e) {
-				LOG.error("Primary update check failed.", e);
+				LOG.error("Update check using {} failed.", updateMechanism.getClass(), e);
 			}
-			if (primaryUpdateMechanism == fallbackUpdateMechanism) {
+			if (updateMechanism == fallbackUpdateMechanism) {
 				return null;
 			}
 			LOG.debug("Trying fallback update check...");

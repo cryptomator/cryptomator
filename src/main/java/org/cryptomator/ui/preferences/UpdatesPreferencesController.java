@@ -75,7 +75,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.settings = settings;
 		this.updateChecker = updateChecker;
-		this.updateService = new UpdateService(updateChecker.lastValueProperty());
+		this.updateService = new UpdateService(updateChecker.updateProperty());
 		this.vaultService = vaultService;
 		this.worker = Bindings.when(updateChecker.updateAvailableProperty()).<Worker<?>>then(this.updateService).otherwise(this.updateChecker);
 		this.running = Bindings.createBooleanBinding(this::isRunning, updateService.stateProperty(), updateChecker.stateProperty());
@@ -84,7 +84,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, updateChecker.lastSuccessfulUpdateCheckProperty());
 		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, updateChecker.lastSuccessfulUpdateCheckProperty());
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
-		this.prohibitUpdateWhileUnlocked = Bindings.createBooleanBinding(this::isProhibitUpdateWhileUnlocked, unlockedVaults, updateChecker.lastValueProperty());
+		this.prohibitUpdateWhileUnlocked = Bindings.createBooleanBinding(this::isProhibitUpdateWhileUnlocked, unlockedVaults, updateChecker.updateProperty());
 		this.updateButtonDisabled = Bindings.when(worker.isEqualTo(updateChecker)).then(running).otherwise(prohibitUpdateWhileUnlocked.or(running));
 	}
 
@@ -114,7 +114,7 @@ public class UpdatesPreferencesController implements FxController {
 		} else if (!unlockedVaults.isEmpty()) {
 			LOG.warn("Cannot start update due to unlocked vaults.");
 		} else if (worker.get().equals(updateService)) {
-			LOG.info("User started update to version {}", updateChecker.getLastValue().version());
+			LOG.info("User started update to version {}", updateChecker.getUpdate().version());
 			updateService.start();
 		}
 	}
@@ -138,7 +138,8 @@ public class UpdatesPreferencesController implements FxController {
 	private void updateFailed(WorkerStateEvent workerStateEvent) {
 		assert workerStateEvent.getSource() == updateService;
 		LOG.error("Update failed.", updateService.getException());
-		// TODO: show error to user? use fallback update service?
+		// try fallback mechanism:
+		updateChecker.recheckWithFallbackMechanism();
 		updateService.reset();
 	}
 
@@ -178,7 +179,7 @@ public class UpdatesPreferencesController implements FxController {
 			return resourceBundle.getString("preferences.updates.checkNowBtn");
 		} else {
 			return switch (updateService.getState()) {
-				case READY -> updateChecker.getLastValue().updateMechanism().getName();
+				case READY -> updateChecker.getUpdate().updateMechanism().getName();
 				case SCHEDULED, RUNNING -> updateService.getMessage(); // "Preparing Update..."; // TODO: resourceBundle.getString("preferences.updates.preparingUpdate")...
 				case SUCCEEDED -> "Restart to Update"; // TODO: resourceBundle.getString("preferences.updates.readyToRestart")...
 				case FAILED, CANCELLED -> "failed";
@@ -234,7 +235,7 @@ public class UpdatesPreferencesController implements FxController {
 
 	public boolean isProhibitUpdateWhileUnlocked() {
 		// If the result of the last update check was from the fallback mechanism, we don't need to show the warning
-		return !unlockedVaults.isEmpty() && !FallbackUpdateInfo.class.isInstance(updateChecker.getLastValue());
+		return !unlockedVaults.isEmpty() && !FallbackUpdateInfo.class.isInstance(updateChecker.getUpdate());
 	}
 
 	public BooleanBinding prohibitUpdateWhileUnlockedProperty() {
