@@ -127,58 +127,8 @@ public class UpdatesPreferencesController implements FxController {
 
 	/* Observable Properties */
 
-	public ObjectBinding<ContentDisplay> updateButtonStateProperty() {
-		return updateButtonState;
-	}
-
-	public ContentDisplay getUpdateButtonState() {
-		if (updateService.isRunning()) { // isRunning() covers RUNNING and SCHEDULED states
-			return ContentDisplay.BOTTOM;
-		} else if (updateChecker.getState() == Worker.State.RUNNING) {
-			return ContentDisplay.LEFT;
-		} else {
-			return ContentDisplay.TEXT_ONLY;
-		}
-	}
-
-	public StringBinding lastUpdateCheckMessageProperty() {
-		return lastUpdateCheckMessage;
-	}
-
-	public String getLastUpdateCheckMessage() {
-		Instant lastCheck = updateChecker.getLastSuccessfulUpdateCheck();
-		if (lastCheck != null && !lastCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
-			return FORMATTER.format(LocalDateTime.ofInstant(lastCheck, ZoneId.systemDefault()));
-		} else {
-			return "-";
-		}
-	}
-
-	public ObservableValue<String> timeDifferenceMessageProperty() {
-		return timeDifferenceMessage;
-	}
-
-	public String getTimeDifferenceMessage() {
-		var lastSuccessCheck = updateChecker.getLastSuccessfulUpdateCheck();
-		var duration = Duration.between(lastSuccessCheck, Instant.now());
-		var hours = duration.toHours();
-		if (lastSuccessCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
-			return resourceBundle.getString("preferences.updates.lastUpdateCheck.never");
-		} else if (hours < 1) {
-			return resourceBundle.getString("preferences.updates.lastUpdateCheck.recently");
-		} else if (hours < 24) {
-			return String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.hoursAgo"), hours);
-		} else {
-			return String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.daysAgo"), duration.toDays());
-		}
-	}
-
-	public BooleanProperty upToDateLabelVisibleProperty() {
-		return upToDateLabelVisible;
-	}
-
-	public boolean isUpToDateLabelVisible() {
-		return upToDateLabelVisible.get();
+	public UpdateChecker getUpdateChecker() {
+		return updateChecker;
 	}
 
 	public ObjectBinding<Worker<?>> workerProperty() {
@@ -214,8 +164,59 @@ public class UpdatesPreferencesController implements FxController {
 		}
 	}
 
-	public UpdateChecker getUpdateChecker() {
-		return updateChecker;
+	public ObjectBinding<ContentDisplay> updateButtonStateProperty() {
+		return updateButtonState;
+	}
+
+	public ContentDisplay getUpdateButtonState() {
+		if (updateService.isRunning()) { // isRunning() covers RUNNING and SCHEDULED states
+			return ContentDisplay.BOTTOM;
+		} else if (updateChecker.getState() == Worker.State.RUNNING) {
+			return ContentDisplay.LEFT;
+		} else {
+			return ContentDisplay.TEXT_ONLY;
+		}
+	}
+
+	public ObservableValue<String> timeDifferenceMessageProperty() {
+		return timeDifferenceMessage;
+	}
+
+	public String getTimeDifferenceMessage() {
+		var lastSuccessCheck = updateChecker.getLastSuccessfulUpdateCheck();
+		var duration = Duration.between(lastSuccessCheck, Instant.now());
+		var hours = duration.toHours();
+		if (lastSuccessCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
+			return resourceBundle.getString("preferences.updates.lastUpdateCheck.never");
+		} else if (hours < 1) {
+			return resourceBundle.getString("preferences.updates.lastUpdateCheck.recently");
+		} else if (hours < 24) {
+			return String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.hoursAgo"), hours);
+		} else {
+			return String.format(resourceBundle.getString("preferences.updates.lastUpdateCheck.daysAgo"), duration.toDays());
+		}
+	}
+
+
+	public StringBinding lastUpdateCheckMessageProperty() {
+		return lastUpdateCheckMessage;
+	}
+
+	public String getLastUpdateCheckMessage() {
+		Instant lastCheck = updateChecker.getLastSuccessfulUpdateCheck();
+		if (lastCheck != null && !lastCheck.equals(Settings.DEFAULT_TIMESTAMP)) {
+			return FORMATTER.format(LocalDateTime.ofInstant(lastCheck, ZoneId.systemDefault()));
+		} else {
+			return "-";
+		}
+	}
+
+	public BooleanProperty upToDateLabelVisibleProperty() {
+		return upToDateLabelVisible;
+	}
+
+	public boolean isUpToDateLabelVisible() {
+		return upToDateLabelVisible.get();
 	}
 
 }
