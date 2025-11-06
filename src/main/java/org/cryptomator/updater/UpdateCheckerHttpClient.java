@@ -1,6 +1,5 @@
-package org.cryptomator.ui.fxapp;
+package org.cryptomator.updater;
 
-import jakarta.inject.Inject;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 
@@ -12,12 +11,10 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
-@FxApplicationScoped
 public class UpdateCheckerHttpClient extends DelegatingHttpClient {
 
 	private final String userAgent;
 
-	@Inject
 	public UpdateCheckerHttpClient(Environment env) {
 		var delegate = HttpClient.newBuilder() //
 				.followRedirects(HttpClient.Redirect.NORMAL) // from version 1.6.11 onwards, Cryptomator can follow redirects, in case this URL ever changes

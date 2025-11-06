@@ -6,7 +6,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.update.UpdateStep;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.updater.UpdateChecker;
 import org.cryptomator.updater.FallbackUpdateInfo;
 import org.cryptomator.updater.UpdateService;
 import org.slf4j.Logger;
@@ -22,7 +22,10 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
@@ -60,9 +63,9 @@ public class UpdatesPreferencesController implements FxController {
 	private final ObjectBinding<ContentDisplay> updateButtonState;
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final StringBinding lastUpdateCheckMessage;
-
 	private final BooleanBinding prohibitUpdateWhileUnlocked;
 	private final BooleanBinding updateButtonDisabled;
+	private final StringProperty errorMessage = new SimpleStringProperty("");
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 
 	/* FXML */
@@ -76,6 +79,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.settings = settings;
 		this.updateChecker = updateChecker;
 		this.updateService = new UpdateService(updateChecker.updateProperty());
+		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.vaultService = vaultService;
 		this.worker = Bindings.when(updateChecker.updateAvailableProperty()).<Worker<?>>then(this.updateService).otherwise(this.updateChecker);
 		this.running = Bindings.createBooleanBinding(this::isRunning, updateService.stateProperty(), updateChecker.stateProperty());
@@ -83,7 +87,6 @@ public class UpdatesPreferencesController implements FxController {
 		this.updateButtonState = Bindings.createObjectBinding(this::getUpdateButtonState, updateChecker.stateProperty(), updateService.stateProperty());
 		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, updateChecker.lastSuccessfulUpdateCheckProperty());
 		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, updateChecker.lastSuccessfulUpdateCheckProperty());
-		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
 		this.prohibitUpdateWhileUnlocked = Bindings.createBooleanBinding(this::isProhibitUpdateWhileUnlocked, unlockedVaults, updateChecker.updateProperty());
 		this.updateButtonDisabled = Bindings.when(worker.isEqualTo(updateChecker)).then(running).otherwise(prohibitUpdateWhileUnlocked.or(running));
 	}
@@ -98,6 +101,7 @@ public class UpdatesPreferencesController implements FxController {
 				delay.play();
 			}
 		});
+		updateChecker.setOnFailed(this::checkFailed);
 		updateService.setOnSucceeded(this::updateSucceeded);
 		updateService.setOnFailed(this::updateFailed);
 	}
@@ -119,6 +123,12 @@ public class UpdatesPreferencesController implements FxController {
 		}
 	}
 
+	private void checkFailed(WorkerStateEvent workerStateEvent) {
+		assert workerStateEvent.getSource() == updateChecker;
+		LOG.error("Update check failed.", updateChecker.getException());
+		errorMessage.set(resourceBundle.getString("preferences.updates.checkFailed"));
+	}
+
 	private void updateSucceeded(WorkerStateEvent workerStateEvent) {
 		assert workerStateEvent.getSource() == updateService;
 		var lastStep = updateService.getValue();
@@ -138,9 +148,10 @@ public class UpdatesPreferencesController implements FxController {
 	private void updateFailed(WorkerStateEvent workerStateEvent) {
 		assert workerStateEvent.getSource() == updateService;
 		LOG.error("Update failed.", updateService.getException());
+		updateService.reset();
+		errorMessage.set(resourceBundle.getString("preferences.updates.updateFailed"));
 		// try fallback mechanism:
 		updateChecker.recheckWithFallbackMechanism();
-		updateService.reset();
 	}
 
 	@FXML
@@ -180,9 +191,9 @@ public class UpdatesPreferencesController implements FxController {
 		} else {
 			return switch (updateService.getState()) {
 				case READY -> updateChecker.getUpdate().updateMechanism().getName();
-				case SCHEDULED, RUNNING -> updateService.getMessage(); // "Preparing Update..."; // TODO: resourceBundle.getString("preferences.updates.preparingUpdate")...
-				case SUCCEEDED -> "Restart to Update"; // TODO: resourceBundle.getString("preferences.updates.readyToRestart")...
-				case FAILED, CANCELLED -> "failed";
+				case SCHEDULED, RUNNING -> updateService.getMessage();
+				case SUCCEEDED -> resourceBundle.getString("generic.button.done");
+				case FAILED, CANCELLED -> "failed"; // should never be visible
 			};
 		}
 	}
@@ -231,6 +242,14 @@ public class UpdatesPreferencesController implements FxController {
 		} else {
 			return "-";
 		}
+	}
+
+	public String getErrorMessage() {
+		return errorMessage.get();
+	}
+
+	public ReadOnlyStringProperty errorMessageProperty() {
+		return errorMessage;
 	}
 
 	public boolean isProhibitUpdateWhileUnlocked() {

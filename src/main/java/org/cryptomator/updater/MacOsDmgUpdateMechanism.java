@@ -110,8 +110,7 @@ public class MacOsDmgUpdateMechanism extends DownloadUpdateMechanism {
 			} else if (selfPath.contains("/Cryptomator.app/")) {
 				installPath = selfPath.substring(0, selfPath.indexOf("/Cryptomator.app/")) + "/Cryptomator.app";
 			} else {
-				installPath = "/Applications/Cryptomator.app";
-				// throw new UpdateFailedException("Cannot determine destination path for Cryptomator.app, current path: " + selfPath);
+				throw new UpdateFailedException("Cannot determine destination path for Cryptomator.app, current path: " + selfPath);
 			}
 			LOG.info("Restarting to apply Update in {} now...", workDir);
 			String script = """

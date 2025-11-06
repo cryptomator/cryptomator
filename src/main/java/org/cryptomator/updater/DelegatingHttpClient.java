@@ -1,4 +1,4 @@
-package org.cryptomator.ui.fxapp;
+package org.cryptomator.updater;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;

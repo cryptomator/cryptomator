@@ -3,7 +3,7 @@ package org.cryptomator.ui.preferences;
 import com.google.common.io.CharStreams;
 import org.cryptomator.common.Environment;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.updater.UpdateChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

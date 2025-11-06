@@ -52,18 +52,20 @@
 			<Text text="%preferences.updates.prohibitedDueToUnlockedVaults.3"/>
 		</TextFlow>
 
-		<TextFlow styleClass="text-flow" textAlignment="CENTER" visible="${controller.updateChecker.checkFailed}" managed="${controller.updateChecker.checkFailed}">
+		<TextFlow styleClass="text-flow" textAlignment="CENTER" visible="${!controller.errorMessage.empty}" managed="${!controller.errorMessage.empty}">
 			<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
 			<Text text=" "/>
-			<Text text="%preferences.updates.checkFailed"/>
+			<Text text="${controller.errorMessage}"/>
 			<Text text=" "/>
 			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
 		</TextFlow>
+
 		<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.timeDifferenceMessage}" textAlignment="CENTER" wrapText="true" visible="${!controller.updateChecker.updateAvailable}" managed="${!controller.updateChecker.updateAvailable}">
 			<tooltip>
 				<Tooltip text="${controller.lastUpdateCheckMessage}" showDelay="10ms"/>
 			</tooltip>
 		</FormattedLabel>
+
 		<Label text="%preferences.updates.upToDate" visible="${controller.upToDateLabelVisible}" managed="${controller.upToDateLabelVisible}">
 			<graphic>
 				<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-primary" glyph="CHECK"/>

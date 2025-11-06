@@ -4,6 +4,8 @@ import org.cryptomator.integrations.update.UpdateInfo;
 import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.integrations.update.UpdateStep;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -17,6 +19,8 @@ import java.util.concurrent.TimeUnit;
  * A service that performs all update steps provided by the given {@link UpdateMechanism} in sequence.
  */
 public class UpdateService extends Service<UpdateStep> {
+
+	private final BooleanBinding updateFailed = Bindings.equal(State.FAILED, stateProperty());
 
 	private ObservableValue<UpdateInfo<?>> updateInfo;
 
@@ -65,4 +69,13 @@ public class UpdateService extends Service<UpdateStep> {
 		}
 	}
 
+	/* Observable Properties */
+
+	public boolean isUpdateFailed() {
+		return updateFailed.get();
+	}
+
+	public BooleanBinding updateFailedProperty() {
+		return updateFailed;
+	}
 }

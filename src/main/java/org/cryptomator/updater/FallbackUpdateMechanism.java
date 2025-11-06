@@ -5,15 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
-import org.cryptomator.integrations.common.DisplayName;
-import org.cryptomator.integrations.common.Priority;
-import org.cryptomator.integrations.update.BasicUpdateInfo;
-import org.cryptomator.integrations.update.UpdateInfo;
+import org.cryptomator.integrations.common.LocalizedDisplayName;
 import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.integrations.update.UpdateStep;
-import org.cryptomator.integrations.update.UpdateStepAdapter;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +23,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
-@Priority(Priority.FALLBACK)
-@DisplayName("Show Download Page") // TODO localize
+@LocalizedDisplayName(bundle = "i18n.strings", key = "preferences.updates.visitDownloadPage")
 public class FallbackUpdateMechanism implements UpdateMechanism<FallbackUpdateInfo> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FallbackUpdateMechanism.class);

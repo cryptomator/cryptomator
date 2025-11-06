@@ -1,11 +1,11 @@
-package org.cryptomator.ui.fxapp;
+package org.cryptomator.updater;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.update.UpdateFailedException;
 import org.cryptomator.integrations.update.UpdateInfo;
 import org.cryptomator.integrations.update.UpdateMechanism;
-import org.cryptomator.updater.FallbackUpdateMechanism;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
-import java.net.http.HttpClient;
 import java.time.Instant;
 import java.util.concurrent.Executors;
 
@@ -46,19 +45,16 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 	private final BooleanBinding updateAvailable = update.isNotNull();
 	private final ObjectBinding<UpdateCheckState> updateState = Bindings.createObjectBinding(this::getUpdateCheckState, stateProperty());
 	private final BooleanBinding checkFailed = Bindings.equal(UpdateCheckState.CHECK_FAILED, updateState);
-	private final HttpClient httpClient;
 	private final UpdateMechanism<?> fallbackUpdateMechanism;
 	private UpdateMechanism<?> updateMechanism;
 
 	@Inject
 	UpdateChecker(Settings settings, //
 				  Environment env,
-				  FallbackUpdateMechanism fallbackUpdateMechanism,
-				  UpdateCheckerHttpClient httpClient) {
+				  FallbackUpdateMechanism fallbackUpdateMechanism) {
 		this.env = env;
 		this.settings = settings;
 		this.lastSuccessfulUpdateCheck = settings.lastSuccessfulUpdateCheck;
-		this.httpClient = httpClient;
 		this.fallbackUpdateMechanism = fallbackUpdateMechanism;
 
 		// Prefer the safer fallback mechanism if the last update attempt was already made by this app version
@@ -178,7 +174,7 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 
 		@Override
 		protected UpdateInfo<?> call() {
-			try {
+			try (var httpClient = new UpdateCheckerHttpClient(env)) {
 				var result = updateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
 				if (result != null) {
 					return result;
@@ -190,7 +186,7 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 				return null;
 			}
 			LOG.debug("Trying fallback update check...");
-			try {
+			try (var httpClient = new UpdateCheckerHttpClient(env)) {
 				return fallbackUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
 			} catch (UpdateFailedException e) {
 				LOG.error("Fallback update check failed.", e);
