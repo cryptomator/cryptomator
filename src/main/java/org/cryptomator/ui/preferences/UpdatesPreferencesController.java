@@ -2,9 +2,12 @@ package org.cryptomator.ui.preferences;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.update.UpdateStep;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.updater.FallbackUpdateInfo;
 import org.cryptomator.updater.UpdateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +17,14 @@ import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
@@ -47,31 +52,40 @@ public class UpdatesPreferencesController implements FxController {
 	private final Settings settings;
 	private final UpdateChecker updateChecker;
 	private final UpdateService updateService;
+	private final ObservableList<Vault> unlockedVaults;
+	private final VaultService vaultService;
 	private final ObjectBinding<Worker<?>> worker;
 	private final BooleanExpression running;
 	private final StringBinding updateButtonTitle;
 	private final ObjectBinding<ContentDisplay> updateButtonState;
 	private final ObservableValue<String> timeDifferenceMessage;
 	private final StringBinding lastUpdateCheckMessage;
+
+	private final BooleanBinding prohibitUpdateWhileUnlocked;
+	private final BooleanBinding updateButtonDisabled;
 	private final BooleanProperty upToDateLabelVisible = new SimpleBooleanProperty(false);
 
 	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
 
 	@Inject
-	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker) {
+	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, ObservableList<Vault> vaults, VaultService vaultService) {
 		this.application = application;
 		this.environment = environment;
 		this.resourceBundle = resourceBundle;
 		this.settings = settings;
 		this.updateChecker = updateChecker;
 		this.updateService = new UpdateService(updateChecker.lastValueProperty());
+		this.vaultService = vaultService;
 		this.worker = Bindings.when(updateChecker.updateAvailableProperty()).<Worker<?>>then(this.updateService).otherwise(this.updateChecker);
 		this.running = Bindings.createBooleanBinding(this::isRunning, updateService.stateProperty(), updateChecker.stateProperty());
 		this.updateButtonTitle = Bindings.createStringBinding(this::getUpdateButtonTitle, worker, updateService.stateProperty(), updateService.messageProperty());
 		this.updateButtonState = Bindings.createObjectBinding(this::getUpdateButtonState, updateChecker.stateProperty(), updateService.stateProperty());
 		this.timeDifferenceMessage = Bindings.createStringBinding(this::getTimeDifferenceMessage, updateChecker.lastSuccessfulUpdateCheckProperty());
 		this.lastUpdateCheckMessage = Bindings.createStringBinding(this::getLastUpdateCheckMessage, updateChecker.lastSuccessfulUpdateCheckProperty());
+		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
+		this.prohibitUpdateWhileUnlocked = Bindings.createBooleanBinding(this::isProhibitUpdateWhileUnlocked, unlockedVaults, updateChecker.lastValueProperty());
+		this.updateButtonDisabled = Bindings.when(worker.isEqualTo(updateChecker)).then(running).otherwise(prohibitUpdateWhileUnlocked.or(running));
 	}
 
 	public void initialize() {
@@ -97,8 +111,10 @@ public class UpdatesPreferencesController implements FxController {
 	public void startWork() {
 		if (worker.get().equals(updateChecker)) {
 			updateChecker.checkForUpdatesNow();
+		} else if (!unlockedVaults.isEmpty()) {
+			LOG.warn("Cannot start update due to unlocked vaults.");
 		} else if (worker.get().equals(updateService)) {
-			// TODO: only allow starting if all vaults are locked; show info label beneath button otherwise
+			LOG.info("User started update to version {}", updateChecker.getLastValue().version());
 			updateService.start();
 		}
 	}
@@ -122,7 +138,13 @@ public class UpdatesPreferencesController implements FxController {
 	private void updateFailed(WorkerStateEvent workerStateEvent) {
 		assert workerStateEvent.getSource() == updateService;
 		LOG.error("Update failed.", updateService.getException());
+		// TODO: show error to user? use fallback update service?
 		updateService.reset();
+	}
+
+	@FXML
+	public void lockAllGracefully() {
+		vaultService.lockAll(unlockedVaults, false);
 	}
 
 	/* Observable Properties */
@@ -197,7 +219,6 @@ public class UpdatesPreferencesController implements FxController {
 		}
 	}
 
-
 	public StringBinding lastUpdateCheckMessageProperty() {
 		return lastUpdateCheckMessage;
 	}
@@ -209,6 +230,23 @@ public class UpdatesPreferencesController implements FxController {
 		} else {
 			return "-";
 		}
+	}
+
+	public boolean isProhibitUpdateWhileUnlocked() {
+		// If the result of the last update check was from the fallback mechanism, we don't need to show the warning
+		return !unlockedVaults.isEmpty() && !FallbackUpdateInfo.class.isInstance(updateChecker.getLastValue());
+	}
+
+	public BooleanBinding prohibitUpdateWhileUnlockedProperty() {
+		return prohibitUpdateWhileUnlocked;
+	}
+
+	public boolean isUpdateButtonDisabled() {
+		return updateButtonDisabled.get();
+	}
+
+	public BooleanBinding updateButtonDisabledProperty() {
+		return updateButtonDisabled;
 	}
 
 	public BooleanProperty upToDateLabelVisibleProperty() {

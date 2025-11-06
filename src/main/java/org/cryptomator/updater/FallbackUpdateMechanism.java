@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 @FxApplicationScoped
 @Priority(Priority.FALLBACK)
 @DisplayName("Show Download Page") // TODO localize
-public class FallbackUpdateMechanism implements UpdateMechanism<BasicUpdateInfo> {
+public class FallbackUpdateMechanism implements UpdateMechanism<FallbackUpdateInfo> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FallbackUpdateMechanism.class);
 	private static final String LATEST_VERSION_API_URL = "https://api.cryptomator.org/connect/apps/desktop/latest-version";
@@ -53,7 +53,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism<BasicUpdateInfo>
 	}
 
 	@Override
-	public BasicUpdateInfo checkForUpdate(String currentVersion, HttpClient httpClient) {
+	public FallbackUpdateInfo checkForUpdate(String currentVersion, HttpClient httpClient) {
 		try {
 			HttpRequest request = HttpRequest.newBuilder().uri(URI.create(LATEST_VERSION_API_URL)).build();
 			HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -63,7 +63,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism<BasicUpdateInfo>
 			var release = MAPPER.readValue(response.body(), LatestVersion.class);
 			var updateVersion = release.versionForCurrentOS();
 			if (UpdateMechanism.isUpdateAvailable(updateVersion, currentVersion)) {
-				return new BasicUpdateInfo(updateVersion, this);
+				return new FallbackUpdateInfo(updateVersion, this);
 			} else {
 				return null;
 			}
@@ -78,7 +78,7 @@ public class FallbackUpdateMechanism implements UpdateMechanism<BasicUpdateInfo>
 	}
 
 	@Override
-	public UpdateStep firstStep(BasicUpdateInfo updateInfo) {
+	public UpdateStep firstStep(FallbackUpdateInfo updateInfo) {
 		return UpdateStep.of("Go to download page", this::openDownloadPage); // TODO localize
 	}
 

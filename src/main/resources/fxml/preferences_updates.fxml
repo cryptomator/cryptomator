@@ -27,7 +27,7 @@
 	<VBox alignment="CENTER" spacing="12">
 		<FormattedLabel format="%preferences.updates.updateAvailable" arg1="${controller.updateChecker.latestVersion}" textAlignment="CENTER" wrapText="true" visible="${controller.updateChecker.updateAvailable}"/>
 
-		<Button text="${controller.updateButtonTitle}" defaultButton="true" onAction="#startWork" disable="${controller.running}" contentDisplay="${controller.updateButtonState}">
+		<Button text="${controller.updateButtonTitle}" defaultButton="true" onAction="#startWork" disable="${controller.updateButtonDisabled}" contentDisplay="${controller.updateButtonState}">
 			<graphic>
 				<VBox spacing="5" alignment="CENTER">
 					<ProgressBar maxWidth="200"
@@ -42,6 +42,16 @@
 			</graphic>
 		</Button>
 
+		<TextFlow styleClass="text-flow" textAlignment="CENTER" visible="${controller.prohibitUpdateWhileUnlocked}" managed="${controller.prohibitUpdateWhileUnlocked}">
+			<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-primary" glyph="LOCK_OPEN"/>
+			<Text text=" "/>
+			<Text text="%preferences.updates.prohibitedDueToUnlockedVaults.1"/>
+			<Text text=" "/>
+			<Hyperlink styleClass="hyperlink-underline" text="%preferences.updates.prohibitedDueToUnlockedVaults.2" onAction="#lockAllGracefully"/>
+			<Text text=" "/>
+			<Text text="%preferences.updates.prohibitedDueToUnlockedVaults.3"/>
+		</TextFlow>
+
 		<TextFlow styleClass="text-flow" textAlignment="CENTER" visible="${controller.updateChecker.checkFailed}" managed="${controller.updateChecker.checkFailed}">
 			<FontAwesome5IconView glyphSize="12" styleClass="glyph-icon-orange" glyph="EXCLAMATION_TRIANGLE"/>
 			<Text text=" "/>
@@ -49,7 +59,7 @@
 			<Text text=" "/>
 			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
 		</TextFlow>
-		<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.timeDifferenceMessage}" textAlignment="CENTER" wrapText="true">
+		<FormattedLabel format="%preferences.updates.lastUpdateCheck" arg1="${controller.timeDifferenceMessage}" textAlignment="CENTER" wrapText="true" visible="${!controller.updateChecker.updateAvailable}" managed="${!controller.updateChecker.updateAvailable}">
 			<tooltip>
 				<Tooltip text="${controller.lastUpdateCheckMessage}" showDelay="10ms"/>
 			</tooltip>

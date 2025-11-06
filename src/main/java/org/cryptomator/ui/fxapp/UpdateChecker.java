@@ -104,13 +104,6 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 		return new UpdateCheckTask();
 	}
 
-	@Override
-	protected void failed() {
-		super.failed();
-		LOG.error("Update check failed.", getException());
-	}
-
-
 	/* Observable Properties */
 
 	public String getLatestVersion() {
@@ -165,13 +158,25 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 	private class UpdateCheckTask extends Task<UpdateInfo<?>> {
 
 		@Override
-		protected UpdateInfo<?> call() throws UpdateFailedException {
-			var result = primaryUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
-			if (result == null && primaryUpdateMechanism != fallbackUpdateMechanism) {
-				LOG.debug("Primary update mechanism did not find an update. Try fallback update mechanism...");
-				result = fallbackUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
+		protected UpdateInfo<?> call() {
+			try {
+				var result = primaryUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
+				if (result != null) {
+					return result;
+				}
+			} catch (UpdateFailedException e) {
+				LOG.error("Primary update check failed.", e);
 			}
-			return result;
+			if (primaryUpdateMechanism == fallbackUpdateMechanism) {
+				return null;
+			}
+			LOG.debug("Trying fallback update check...");
+			try {
+				return fallbackUpdateMechanism.checkForUpdate(env.getAppVersion(), httpClient);
+			} catch (UpdateFailedException e) {
+				LOG.error("Fallback update check failed.", e);
+				return null;
+			}
 		}
 	}
 
