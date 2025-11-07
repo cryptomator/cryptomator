@@ -281,11 +281,10 @@ jobs:
           certificate-profile-name: SkymaticCertTest
           files-folder: ${{ github.workspace }}\installer
           files-folder-filter: msi
-          files-folder-recurse: true
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-          append-signature: true
+          append-signature: false
           description: 'Cryptomator Installer'
           description-url: 'https://cryptomator.org'
           exclude-environment-credential: false
