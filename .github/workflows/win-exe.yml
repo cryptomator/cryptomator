@@ -269,16 +269,35 @@ jobs:
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
-      - name: Sign msi with Actalis CodeSigner
+      - name: Sign MSI with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
+        uses: azure/trusted-signing-action@v0
         with:
-          base-dir: 'installer'
-          file-extensions: 'msi'
-          sign-description: 'Cryptomator Installer'
-          sign-url: 'https://cryptomator.org'
-          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
-          password: ${{ secrets.WIN_CODESIGN_PW }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: https://weu.codesigning.azure.net/
+          trusted-signing-account-name: skymatic
+          certificate-profile-name: SkymaticCertTest
+          files-folder: ${{ github.workspace }}\installer
+          files-folder-filter: msi
+          files-folder-recurse: true
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          append-signature: true
+          description: 'Cryptomator Installer'
+          description-url: 'https://cryptomator.org'
+          exclude-environment-credential: false
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-shared-token-cache-credential: true
+          exclude-visual-studio-credential: true
+          exclude-visual-studio-code-credential: true
+          exclude-azure-cli-credential: true
+          exclude-azure-powershell-credential: true
+          exclude-azure-developer-cli-credential: true
+          exclude-interactive-browser-credential: true
       - name: Add possible alpha/beta tags and architecture to installer name
         run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
