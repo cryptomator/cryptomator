@@ -1,5 +1,4 @@
 import ch.qos.logback.classic.spi.Configurator;
-import org.cryptomator.integrations.update.UpdateMechanism;
 import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
@@ -52,7 +51,6 @@ open module org.cryptomator.desktop {
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
 	requires com.github.benmanes.caffeine;
-	requires com.fasterxml.jackson.annotation;
 
 	/* dagger bs */
 	requires jakarta.inject;
