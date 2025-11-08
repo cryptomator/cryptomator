@@ -133,8 +133,8 @@ jobs:
           --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support/Cryptomator/mnt\""
-          --java-options "-Dcryptomator.showTrayIcon=true" \
-          --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism" \
+          --java-options "-Dcryptomator.showTrayIcon=true"
+          --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
           --mac-package-identifier org.cryptomator
