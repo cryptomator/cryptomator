@@ -8,10 +8,6 @@ on:
       version:
         description: 'Version'
         required: false
-      isDebug:
-        description: 'Build debug version with console output'
-        type: boolean
-        default: false
       sign:
         description: 'Sign binaries'
         required: false
@@ -196,32 +192,15 @@ jobs:
           Get-ChildItem -Recurse -Path "jpackage-jmod" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
       - name: Sign DLLs with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'release'
-        uses: azure/trusted-signing-action@v0
+        uses: ./.github/actions/win-sign-action
         with:
-          files-folder: ${{ github.workspace }}\appdir
-          files-folder-filter: dll,exe, ps1
-          files-folder-recurse: true
+          base-dir: ${{ github.workspace }}\appdir
+          recursive: true
           append-signature: true
-          description: 'Cryptomator'
-          description-url: 'https://cryptomator.org'
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          trusted-signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ env.AZURE_CERT_PROFILE }}
-          endpoint: https://weu.codesigning.azure.net/
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-          exclude-environment-credential: false
-          exclude-workload-identity-credential: true
-          exclude-managed-identity-credential: true
-          exclude-shared-token-cache-credential: true
-          exclude-visual-studio-credential: true
-          exclude-visual-studio-code-credential: true
-          exclude-azure-cli-credential: true
-          exclude-azure-powershell-credential: true
-          exclude-azure-developer-cli-credential: true
-          exclude-interactive-browser-credential: true
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          use-production: ${{ github.event_name == 'release' }}
       - name: Replace DLLs inside jars with signed ones
         shell: pwsh
         run: |
@@ -272,31 +251,15 @@ jobs:
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
       - name: Sign MSI with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'release'
-        uses: azure/trusted-signing-action@v0
+        uses: ./.github/actions/win-sign-action
         with:
-          files-folder: ${{ github.workspace }}\installer
-          files-folder-filter: msi
-          append-signature: false
+          base-dir: ${{ github.workspace }}\installer
+          file-extensions: msi
           description: 'Cryptomator Installer'
-          description-url: 'https://cryptomator.org'
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          trusted-signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ env.AZURE_CERT_PROFILE }}
-          endpoint: https://weu.codesigning.azure.net/
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-          exclude-environment-credential: false
-          exclude-workload-identity-credential: true
-          exclude-managed-identity-credential: true
-          exclude-shared-token-cache-credential: true
-          exclude-visual-studio-credential: true
-          exclude-visual-studio-code-credential: true
-          exclude-azure-cli-credential: true
-          exclude-azure-powershell-credential: true
-          exclude-azure-developer-cli-credential: true
-          exclude-interactive-browser-credential: true
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          use-production: ${{ github.event_name == 'release' }}
       - name: Add possible alpha/beta tags and architecture to installer name
         run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
@@ -395,61 +358,31 @@ jobs:
           wix burn detach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe
       - name: Sign WiX burn engine with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'release'
-        uses: azure/trusted-signing-action@v0
+        uses: ./.github/actions/win-sign-action
         with:
-          files-folder: ${{ github.workspace }}\tmp
-          files-folder-filter: exe
+          base-dir: ${{ github.workspace }}\tmp
+          file-extensions: exe
           append-signature: true
           description: 'Cryptomator Bundle Installer'
-          description-url: 'https://cryptomator.org'
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          trusted-signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ env.AZURE_CERT_PROFILE }}
-          endpoint: https://weu.codesigning.azure.net/
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-          exclude-environment-credential: false
-          exclude-workload-identity-credential: true
-          exclude-managed-identity-credential: true
-          exclude-shared-token-cache-credential: true
-          exclude-visual-studio-credential: true
-          exclude-visual-studio-code-credential: true
-          exclude-azure-cli-credential: true
-          exclude-azure-powershell-credential: true
-          exclude-azure-developer-cli-credential: true
-          exclude-interactive-browser-credential: true
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          use-production: ${{ github.event_name == 'release' }}
       - name: Reattach signed burn engine to installer
         run: >
           wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
       - name: Sign EXE installer with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'release'
-        uses: azure/trusted-signing-action@v0
+        uses: ./.github/actions/win-sign-action
         with:
-          files-folder: ${{ github.workspace }}\installer
-          files-folder-filter: exe
+          base-dir: ${{ github.workspace }}\installer
+          file-extensions: exe
           append-signature: true
           description: 'Cryptomator Bundle Installer'
-          description-url: 'https://cryptomator.org'
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          trusted-signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ env.AZURE_CERT_PROFILE }}
-          endpoint: https://weu.codesigning.azure.net/
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-          exclude-environment-credential: false
-          exclude-workload-identity-credential: true
-          exclude-managed-identity-credential: true
-          exclude-shared-token-cache-credential: true
-          exclude-visual-studio-credential: true
-          exclude-visual-studio-code-credential: true
-          exclude-azure-cli-credential: true
-          exclude-azure-powershell-credential: true
-          exclude-azure-developer-cli-credential: true
-          exclude-interactive-browser-credential: true
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          use-production: ${{ github.event_name == 'release' }}
       - name: Add possible alpha/beta tags to installer name
         run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.executable-suffix }}.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
