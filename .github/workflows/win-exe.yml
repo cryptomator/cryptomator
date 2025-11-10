@@ -31,6 +31,8 @@ env:
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
   WINFSP_MSI_HASH: '073a70e00f77423e34bed98b86e600def93393ba5822204fac57a29324db9f7a'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
+  AZURE_TRUSTED_SIGNING_ACCOUNT: 'skymatic'
+  AZURE_CERT_PROFILE: 'SkymaticCertTest'
 
 defaults:
   run:
@@ -196,21 +198,20 @@ jobs:
         if: inputs.sign || github.event_name == 'release'
         uses: azure/trusted-signing-action@v0
         with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: https://weu.codesigning.azure.net/
-          trusted-signing-account-name: skymatic
-          certificate-profile-name: SkymaticCertTest
           files-folder: ${{ github.workspace }}\appdir
           files-folder-filter: dll,exe, ps1
           files-folder-recurse: true
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
           append-signature: true
           description: 'Cryptomator'
           description-url: 'https://cryptomator.org'
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          trusted-signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ env.AZURE_CERT_PROFILE }}
+          endpoint: https://weu.codesigning.azure.net/
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
           exclude-environment-credential: false
           exclude-workload-identity-credential: true
           exclude-managed-identity-credential: true
@@ -273,20 +274,19 @@ jobs:
         if: inputs.sign || github.event_name == 'release'
         uses: azure/trusted-signing-action@v0
         with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: https://weu.codesigning.azure.net/
-          trusted-signing-account-name: skymatic
-          certificate-profile-name: SkymaticCertTest
           files-folder: ${{ github.workspace }}\installer
           files-folder-filter: msi
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
           append-signature: false
           description: 'Cryptomator Installer'
           description-url: 'https://cryptomator.org'
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          trusted-signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ env.AZURE_CERT_PROFILE }}
+          endpoint: https://weu.codesigning.azure.net/
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
           exclude-environment-credential: false
           exclude-workload-identity-credential: true
           exclude-managed-identity-credential: true
@@ -397,20 +397,19 @@ jobs:
         if: inputs.sign || github.event_name == 'release'
         uses: azure/trusted-signing-action@v0
         with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: https://weu.codesigning.azure.net/
-          trusted-signing-account-name: skymatic
-          certificate-profile-name: SkymaticCertTest
           files-folder: ${{ github.workspace }}\tmp
           files-folder-filter: exe
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
           append-signature: true
           description: 'Cryptomator Bundle Installer'
           description-url: 'https://cryptomator.org'
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          trusted-signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ env.AZURE_CERT_PROFILE }}
+          endpoint: https://weu.codesigning.azure.net/
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
           exclude-environment-credential: false
           exclude-workload-identity-credential: true
           exclude-managed-identity-credential: true
@@ -428,20 +427,19 @@ jobs:
         if: inputs.sign || github.event_name == 'release'
         uses: azure/trusted-signing-action@v0
         with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: https://weu.codesigning.azure.net/
-          trusted-signing-account-name: skymatic
-          certificate-profile-name: SkymaticCertTest
           files-folder: ${{ github.workspace }}\installer
           files-folder-filter: exe
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
           append-signature: true
           description: 'Cryptomator Bundle Installer'
           description-url: 'https://cryptomator.org'
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          trusted-signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ env.AZURE_CERT_PROFILE }}
+          endpoint: https://weu.codesigning.azure.net/
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
           exclude-environment-credential: false
           exclude-workload-identity-credential: true
           exclude-managed-identity-credential: true
