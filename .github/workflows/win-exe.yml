@@ -8,10 +8,6 @@ on:
       version:
         description: 'Version'
         required: false
-      isDebug:
-        description: 'Build debug version with console output'
-        type: boolean
-        default: false
       sign:
         description: 'Sign binaries'
         required: false
@@ -192,6 +188,16 @@ jobs:
           New-Item -Path appdir/jpackage-jmod -ItemType Directory
           & $env:JAVA_HOME\bin\jmod.exe extract --dir jpackage-jmod "${env:JAVA_HOME}\jmods\jdk.jpackage.jmod"
           Get-ChildItem -Recurse -Path "jpackage-jmod" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
+      - name: Sign DLLs with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'release'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\appdir
+          recursive: true
+          append-signature: true
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign DLLs with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
         uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
@@ -251,16 +257,16 @@ jobs:
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir
-      - name: Sign msi with Actalis CodeSigner
+      - name: Sign MSI with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
+        uses: ./.github/actions/win-sign-action
         with:
-          base-dir: 'installer'
-          file-extensions: 'msi'
-          sign-description: 'Cryptomator Installer'
-          sign-url: 'https://cryptomator.org'
-          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
-          password: ${{ secrets.WIN_CODESIGN_PW }}
+          base-dir: ${{ github.workspace }}\installer
+          file-extensions: msi
+          description: 'Cryptomator Installer'
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Add possible alpha/beta tags and architecture to installer name
         run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
@@ -357,6 +363,17 @@ jobs:
       - name: Detach burn engine in preparation to sign
         run: >
           wix burn detach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe
+      - name: Sign WiX burn engine with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'release'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\tmp
+          file-extensions: exe
+          append-signature: true
+          description: 'Cryptomator Bundle Installer'
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign burn engine with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
         uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
@@ -370,6 +387,17 @@ jobs:
       - name: Reattach signed burn engine to installer
         run: >
           wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
+      - name: Sign EXE installer with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'release'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\installer
+          file-extensions: exe
+          append-signature: true
+          description: 'Cryptomator Bundle Installer'
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign installer with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
         uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
