@@ -200,7 +200,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          use-production: ${{ github.event_name == 'release' }}
       - name: Sign DLLs with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
         uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
@@ -270,7 +269,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          use-production: ${{ github.event_name == 'release' }}
       - name: Add possible alpha/beta tags and architecture to installer name
         run: mv installer/Cryptomator-*.msi Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.arch }}.msi
       - name: Create detached GPG signature with key 615D449FE6E6A235
@@ -378,7 +376,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          use-production: ${{ github.event_name == 'release' }}
       - name: Sign burn engine with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
         uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
@@ -403,7 +400,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          use-production: ${{ github.event_name == 'release' }}
       - name: Sign installer with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
         uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version

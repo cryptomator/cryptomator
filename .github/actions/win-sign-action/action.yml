@@ -33,10 +33,6 @@ inputs:
   client-secret:
     description: 'Azure Client Secret'
     required: true
-  use-production:
-    description: 'Whether to use the production environment'
-    required: false
-    default: 'false'
 
 runs:
   using: 'composite'
@@ -64,7 +60,7 @@ runs:
         azure-client-id: ${{ steps.set-secrets.outputs.client-id }}
         azure-client-secret: ${{ steps.set-secrets.outputs.client-secret }}
         trusted-signing-account-name: cryptomatorSigning
-        certificate-profile-name: ${{ inputs.use-production == 'true' && 'production' || 'development' }}
+        certificate-profile-name: production
         endpoint: https://weu.codesigning.azure.net/
         timestamp-rfc3161: http://timestamp.acs.microsoft.com
         timestamp-digest: SHA256
