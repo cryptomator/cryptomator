@@ -23,7 +23,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '25.0.0'
+  JAVA_VERSION: '25.0.1+8.0.LTS'
   DEB_BUILD_DEPENDS: 'debhelper (>=10), openjdk-25-jdk (>= 25+36), libgtk-3-0 (>= 3.20.0), libxxf86vm1, libgl1'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: '96e520f48610d8ffb94ca30face1f11ffe8a977ddc1c4ff80b1a9e9f048bd94e'
