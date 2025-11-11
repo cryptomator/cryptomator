@@ -48,7 +48,7 @@ runs:
         echo "client-secret=${{ inputs.client-secret }}" >> "$GITHUB_OUTPUT"
       shell: bash
     - name: Sign DLLs with Azure Trusted Signing
-      uses: azure/trusted-signing-action@fc390cf8ed0f14e248a542af1d838388a47c7a7c #  v0.5.10
+      uses: azure/trusted-signing-action@fc390cf8ed0f14e248a542af1d838388a47c7a7c # v0.5.10
       with:
         files-folder: ${{ inputs.base-dir }}
         files-folder-filter: ${{ inputs.file-extensions }}
