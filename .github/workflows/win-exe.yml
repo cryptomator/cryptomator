@@ -185,16 +185,6 @@ jobs:
               }
               $jar.Dispose()
           }
-      - name: Extract wixhelper.dll for Codesigning #see https://github.com/cryptomator/cryptomator/issues/3130
-        shell: pwsh
-        run: |
-          $extractDir = New-Item -Path ".\dir-with-wixhelper" -ItemType Directory
-          if( '${{ steps.jep-493-check.outputs.jvm-with-jmods }}' -eq 'true' ) {
-              & $env:JAVA_HOME\bin\jmod.exe extract --dir=$extractDir "${env:JAVA_HOME}\jmods\jdk.jpackage.jmod"
-          } else {
-              & $env:JAVA_HOME\bin\jimage.exe extract --dir=$extractDir "${env:JAVA_HOME}\lib\modules"
-          }
-          Get-ChildItem -Recurse -Path $extractDir -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
       - name: Sign DLLs with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'release'
         uses: ./.github/actions/win-sign-action
