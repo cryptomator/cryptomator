@@ -20,6 +20,10 @@
 
 Translations are not managed directly in this repository. Instead, we use [Crowdin](https://translate.cryptomator.org/), which automatically synchronizes translations with this repository. If you want to help us with translations, please visit our translation project on Crowdin.
 
+## Use of Generative AI
+
+AI tools may assist your work, but every contribution must be fully understood, reviewed, and tested by you. Only submit changes you can clearly explain and justify. Unverified or low-quality AI output that wastes our time and resources will be closed without further review.
+
 ## Code of Conduct
 
 Help us keep Cryptomator open and inclusive. Please read and follow our [Code of Conduct](https://github.com/cryptomator/cryptomator/blob/develop/.github/CODE_OF_CONDUCT.md).
