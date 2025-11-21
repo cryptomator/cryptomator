@@ -13,8 +13,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
 <?import javafx.scene.shape.Circle?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.layout.AnchorPane?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
@@ -78,6 +76,11 @@
 				<MenuItem styleClass="dropdown-button-context-menu-item" text="%main.vaultlist.addVaultBtn.menuItemExisting" onAction="#didClickAddExistingVault">
 					<graphic>
 						<FontAwesome5IconView glyph="FOLDER_OPEN" textAlignment="CENTER" wrappingWidth="14"/>
+					</graphic>
+				</MenuItem>
+				<MenuItem styleClass="dropdown-button-context-menu-item" text="%main.vaultlist.addVaultBtn.menuItemRecover" onAction="#didClickRecoverExistingVault">
+					<graphic>
+						<FontAwesome5IconView glyph="SYNC" textAlignment="CENTER" wrappingWidth="14"/>
 					</graphic>
 				</MenuItem>
 			</items>

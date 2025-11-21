@@ -1,5 +1,6 @@
 package org.cryptomator.ui.dialogs;
 
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.StageFactory;
@@ -30,15 +31,15 @@ public class SimpleDialog {
 
 		FxmlLoaderFactory loaderFactory = FxmlLoaderFactory.forController( //
 				new SimpleDialogController(resolveText(builder.messageKey, null), //
-						resolveText(builder.descriptionKey, null), //
+						resolveText(builder.descriptionKey, builder.descriptionArgs), //
 						builder.icon, //
 						resolveText(builder.okButtonKey, null), //
 						builder.cancelButtonKey != null ? resolveText(builder.cancelButtonKey, null) : null, //
 						() -> builder.okAction.accept(dialogStage), //
 						() -> builder.cancelAction.accept(dialogStage)), //
-				Scene::new, builder.resourceBundle);
+				builder.sceneFactory, builder.resourceBundle);
 
-		dialogStage.setScene(new Scene(loaderFactory.load(FxmlFile.SIMPLE_DIALOG.getRessourcePathString()).getRoot()));
+		dialogStage.setScene(loaderFactory.createScene(FxmlFile.SIMPLE_DIALOG));
 	}
 
 	public void showAndWait() {
@@ -62,19 +63,22 @@ public class SimpleDialog {
 		private Stage owner;
 		private final ResourceBundle resourceBundle;
 		private final StageFactory stageFactory;
+		private final DefaultSceneFactory sceneFactory;
 		private String titleKey;
 		private String[] titleArgs;
 		private String messageKey;
 		private String descriptionKey;
+		private String[] descriptionArgs;
 		private String okButtonKey;
 		private String cancelButtonKey;
 		private FontAwesome5Icon icon;
 		private Consumer<Stage> okAction = Stage::close;
 		private Consumer<Stage> cancelAction = Stage::close;
 
-		public Builder(ResourceBundle resourceBundle, StageFactory stageFactory) {
+		public Builder(ResourceBundle resourceBundle, StageFactory stageFactory, DefaultSceneFactory sceneFactory) {
 			this.resourceBundle = resourceBundle;
 			this.stageFactory = stageFactory;
+			this.sceneFactory = sceneFactory;
 		}
 
 		public Builder setOwner(Stage owner) {
@@ -93,8 +97,9 @@ public class SimpleDialog {
 			return this;
 		}
 
-		public Builder setDescriptionKey(String descriptionKey) {
+		public Builder setDescriptionKey(String descriptionKey, String... args) {
 			this.descriptionKey = descriptionKey;
+			this.descriptionArgs = args;
 			return this;
 		}
 

@@ -1,18 +1,23 @@
 package org.cryptomator.ui.recoverykey;
 
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
+import org.cryptomator.common.recovery.MasterkeyService;
+import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
+import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.CryptorProvider;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -22,10 +27,12 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import java.io.IOException;
+import java.util.NoSuchElementException;
 
 public class RecoveryKeyValidateController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyCreationController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyValidateController.class);
 	private static final CharMatcher ALLOWED_CHARS = CharMatcher.inRange('a', 'z').or(CharMatcher.is(' '));
 
 	private final Vault vault;
@@ -36,13 +43,23 @@ public class RecoveryKeyValidateController implements FxController {
 	private final ObservableValue<Boolean> recoveryKeyInvalid;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final ObjectProperty<RecoveryKeyState> recoveryKeyState;
+	private final ObjectProperty<CryptorProvider.Scheme> cipherCombo;
 	private final AutoCompleter autoCompleter;
+	private final ObjectProperty<RecoveryActionType> recoverType;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	private volatile boolean isWrongKey;
 
 	public TextArea textarea;
 
-	public RecoveryKeyValidateController(Vault vault, @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
+	public RecoveryKeyValidateController(Vault vault, //
+										 @Nullable VaultConfig.UnverifiedVaultConfig vaultConfig, //
+										 StringProperty recoveryKey, //
+										 RecoveryKeyFactory recoveryKeyFactory, //
+										 MasterkeyFileAccess masterkeyFileAccess, //
+										 @Named("recoverType") ObjectProperty<RecoveryActionType> recoverType, //
+										 @Named("cipherCombo") ObjectProperty<CryptorProvider.Scheme> cipherCombo
+										 ) {
 		this.vault = vault;
 		this.unverifiedVaultConfig = vaultConfig;
 		this.recoveryKey = recoveryKey;
@@ -52,6 +69,9 @@ public class RecoveryKeyValidateController implements FxController {
 		this.recoveryKeyCorrect = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.CORRECT::equals, false);
 		this.recoveryKeyWrong = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.WRONG::equals, false);
 		this.recoveryKeyInvalid = ObservableUtil.mapWithDefault(recoveryKeyState, RecoveryKeyState.INVALID::equals, false);
+		this.recoverType = recoverType;
+		this.cipherCombo = cipherCombo;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 	}
 
 	@FXML
@@ -117,14 +137,37 @@ public class RecoveryKeyValidateController implements FxController {
 	}
 
 	private void validateRecoveryKey() {
-		isWrongKey = false;
-		var valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
-		if (valid) {
-			recoveryKeyState.set(RecoveryKeyState.CORRECT);
-		} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()
-			recoveryKeyState.set(RecoveryKeyState.WRONG);
-		} else {
-			recoveryKeyState.set(RecoveryKeyState.INVALID);
+		switch (recoverType.get()) {
+			case RESTORE_ALL, RESTORE_VAULT_CONFIG -> {
+				try {
+					var scheme = MasterkeyService.validateRecoveryKeyAndDetectCombo(recoveryKeyFactory, vault, recoveryKey.get(), masterkeyFileAccess);
+					cipherCombo.set(scheme);
+					recoveryKeyState.set(RecoveryKeyState.CORRECT);
+				} catch (CryptoException e) {
+					LOG.info("Recovery key is valid but crypto scheme couldn't be determined", e);
+					recoveryKeyState.set(RecoveryKeyState.WRONG);
+				} catch (IllegalArgumentException e) {
+					LOG.info("Recovery key is syntactically invalid", e);
+					recoveryKeyState.set(RecoveryKeyState.INVALID);
+				} catch (IOException e) {
+					LOG.warn("IO error while validating recovery key", e);
+					recoveryKeyState.set(RecoveryKeyState.INVALID);
+				} catch (NoSuchElementException e) {
+					LOG.warn("Could not determine scheme from masterkey during recovery key validation, because no valid *.c9r file is present in vault", e);
+					recoveryKeyState.set(RecoveryKeyState.INVALID);
+				}
+			}
+			case RESTORE_MASTERKEY, RESET_PASSWORD, SHOW_KEY, CONVERT_VAULT -> {
+				isWrongKey = false;
+				boolean valid = recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), unverifiedVaultConfig != null ? this::checkKeyAgainstVaultConfig : null);
+				if (valid) {
+					recoveryKeyState.set(RecoveryKeyState.CORRECT);
+				} else if (isWrongKey) { //set via side effect in checkKeyAgainstVaultConfig()
+					recoveryKeyState.set(RecoveryKeyState.WRONG);
+				} else {
+					recoveryKeyState.set(RecoveryKeyState.INVALID);
+				}
+			}
 		}
 	}
 

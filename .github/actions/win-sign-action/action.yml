@@ -1,0 +1,76 @@
+name: 'Windows Code Signing'
+description: 'Sign files on Windows with the Azure Trusted Signing'
+inputs:
+  base-dir:
+    description: 'Absolute path to the base directory to search for files'
+    required: true
+  recursive:
+    description: 'Whether to search recursively in subdirectories'
+    required: false
+    default: 'false'
+  file-extensions:
+    description: 'List of file extensions to sign, separated by comma'
+    required: true
+    default: 'exe,dll,ps1'
+  description:
+    description: 'Signature description'
+    required: true
+    default: 'Cryptomator'
+  url:
+    description: 'Signature URL'
+    required: false
+    default: 'https://cryptomator.org'
+  append-signature:
+    description: 'Whether to append the signature to existing signatures'
+    required: false
+    default: 'false'
+  tenant-id:
+    description: 'Azure Tenant ID'
+    required: true
+  client-id:
+    description: 'Azure Client ID'
+    required: true
+  client-secret:
+    description: 'Azure Client Secret'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Generate, mask, and output the input secrets
+      id: set-secrets
+      run: |
+        echo "::add-mask::${{ inputs.tenant-id }}"
+        echo "::add-mask::${{ inputs.client-id }}"
+        echo "::add-mask::${{ inputs.client-secret }}"
+        echo "tenant-id=${{ inputs.tenant-id }}" >> "$GITHUB_OUTPUT"
+        echo "client-id=${{ inputs.client-id }}" >> "$GITHUB_OUTPUT"
+        echo "client-secret=${{ inputs.client-secret }}" >> "$GITHUB_OUTPUT"
+      shell: bash
+    - name: Sign DLLs with Azure Trusted Signing
+      uses: azure/trusted-signing-action@fc390cf8ed0f14e248a542af1d838388a47c7a7c # v0.5.10
+      with:
+        files-folder: ${{ inputs.base-dir }}
+        files-folder-filter: ${{ inputs.file-extensions }}
+        files-folder-recurse: ${{ inputs.recursive }}
+        append-signature: ${{ inputs.append-signature }}
+        description: ${{ inputs.description }}
+        description-url: ${{ inputs.url }}
+        azure-tenant-id: ${{ steps.set-secrets.outputs.tenant-id }}
+        azure-client-id: ${{ steps.set-secrets.outputs.client-id }}
+        azure-client-secret: ${{ steps.set-secrets.outputs.client-secret }}
+        trusted-signing-account-name: cryptomatorSigning
+        certificate-profile-name: production
+        endpoint: https://weu.codesigning.azure.net/
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
+        exclude-environment-credential: false
+        exclude-workload-identity-credential: true
+        exclude-managed-identity-credential: true
+        exclude-shared-token-cache-credential: true
+        exclude-visual-studio-credential: true
+        exclude-visual-studio-code-credential: true
+        exclude-azure-cli-credential: true
+        exclude-azure-powershell-credential: true
+        exclude-azure-developer-cli-credential: true
+        exclude-interactive-browser-credential: true

@@ -58,9 +58,15 @@ public class ShareVaultController implements FxController {
 
 	private static URI getHubUri(Vault vault) {
 		try {
-			var keyID = new URI(vault.getVaultConfigCache().get().getKeyId().toString());
-			assert keyID.getScheme().startsWith(SCHEME_PREFIX);
-			return new URI(keyID.getScheme().substring(SCHEME_PREFIX.length()) + "://" + keyID.getHost() + "/app/vaults");
+			var keyId = new URI(vault.getVaultConfigCache().get().getKeyId().toString());
+			assert keyId.getScheme().startsWith(SCHEME_PREFIX);
+			var path = keyId.getPath();
+			var apiIdx = path.indexOf("/api/");
+			if (apiIdx < 0) {
+				throw new IllegalArgumentException("Path does not contain /api/: " + path);
+			}
+			var appPath = path.substring(0, apiIdx) + "/app/vaults";
+			return new URI(keyId.getScheme().substring(SCHEME_PREFIX.length()), keyId.getAuthority(), appPath, null, null);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} catch (URISyntaxException e) {

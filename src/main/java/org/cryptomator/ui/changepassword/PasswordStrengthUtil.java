@@ -20,7 +20,6 @@ import java.util.ResourceBundle;
 public class PasswordStrengthUtil {
 
 	private static final int PW_TRUNC_LEN = 100; // truncate very long passwords, since zxcvbn memory and runtime depends vastly on the length
-	private static final String RESSOURCE_PREFIX = "passwordStrength.messageLabel.";
 	private static final List<String> SANITIZED_INPUTS = List.of("cryptomator");
 
 	private final ResourceBundle resourceBundle;
@@ -48,13 +47,15 @@ public class PasswordStrengthUtil {
 	}
 
 	public String getStrengthDescription(Number score) {
-		if (score.intValue() == -1) {
-			return String.format(resourceBundle.getString(RESSOURCE_PREFIX + "tooShort"), minPwLength);
-		} else if (resourceBundle.containsKey(RESSOURCE_PREFIX + score.intValue())) {
-			return resourceBundle.getString(RESSOURCE_PREFIX + score.intValue());
-		} else {
-			return "";
-		}
+		return switch (score.intValue()) {
+			case -1 -> String.format(resourceBundle.getString("passwordStrength.messageLabel.tooShort"), minPwLength);
+			case 0 -> resourceBundle.getString("passwordStrength.messageLabel.0");
+			case 1 -> resourceBundle.getString("passwordStrength.messageLabel.1");
+			case 2 -> resourceBundle.getString("passwordStrength.messageLabel.2");
+			case 3 -> resourceBundle.getString("passwordStrength.messageLabel.3");
+			case 4 -> resourceBundle.getString("passwordStrength.messageLabel.4");
+			default -> "";
+		};
 	}
 
 }

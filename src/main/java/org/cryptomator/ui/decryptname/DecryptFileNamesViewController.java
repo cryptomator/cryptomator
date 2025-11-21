@@ -194,7 +194,7 @@ public class DecryptFileNamesViewController implements FxController {
 		}
 	}
 
-	//obvservable getter
+	//observable getter
 
 	public ObservableValue<String> dropZoneTextProperty() {
 		return dropZoneText;

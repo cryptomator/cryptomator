@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.18.0-SNAPSHOT</version>
+	<version>1.19.0-SNAPSHOT</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -26,7 +26,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>24</project.jdk.version>
+		<project.jdk.version>25</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<!-- remove them, as soon they got modularized or support is dropped (i.e., WebDAV) -->
@@ -62,7 +62,7 @@
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>26.0.2-1</jetbrains.annotations.version>
 		<dependency-check.version>12.1.5</dependency-check.version>
-		<jacoco.version>0.8.13</jacoco.version>
+		<jacoco.version>0.8.14</jacoco.version>
 		<license-generator.version>2.7.0</license-generator.version>
 		<junit-tree-reporter.version>1.4.0</junit-tree-reporter.version>
 		<mvn-compiler.version>3.14.1</mvn-compiler.version>
