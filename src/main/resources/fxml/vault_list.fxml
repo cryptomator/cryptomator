@@ -38,14 +38,14 @@
 			</VBox>
 		</StackPane>
 		<HBox styleClass="button-bar">
-			<Button fx:id="addVaultButton" onMouseClicked="#toggleMenu" styleClass="button-left" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
+			<Button fx:id="addVaultButton" onAction="#toggleMenu" styleClass="button-left" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
 				<graphic>
 					<FontAwesome5IconView glyph="PLUS" glyphSize="16"/>
 				</graphic>
 			</Button>
 			<Region HBox.hgrow="ALWAYS"/>
 			<StackPane>
-				<Button onMouseClicked="#showEventViewer" styleClass="button-right" minWidth="20" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false">
+				<Button onAction="#showEventViewer" styleClass="button-right" minWidth="20" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false">
 					<graphic>
 						<FontAwesome5IconView glyph="BELL" glyphSize="16"/>
 					</graphic>
@@ -57,7 +57,7 @@
 					<Circle radius="4" styleClass="icon-update-indicator" AnchorPane.topAnchor="-8" AnchorPane.rightAnchor="-6" visible="${controller.unreadEventsPresent}" />
 				</AnchorPane>
 			</StackPane>
-			<Button onMouseClicked="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
+	<Button onAction="#showPreferences" styleClass="button-right" alignment="CENTER" minWidth="20" contentDisplay="GRAPHIC_ONLY">
 				<graphic>
 					<FontAwesome5IconView glyph="COG" glyphSize="16"/>
 				</graphic>
