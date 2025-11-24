@@ -10,7 +10,10 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.18.0...HEAD)
 
 ### Added
-* New Self-Update Mechanism (initially for .dmg and Flatpak packages) (#3948)
+* New Self-Update Mechanism (#3948)
+  * Implemented `.dmg` update mechanism
+  * Implemented Flatpak update mechanism
 
 ### Changed
 * Built using JDK 25 (#4031)
+* Modernized Templage for GitHub Releases
