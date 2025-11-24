@@ -56,22 +56,21 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           generate_release_notes: true
           body: |-
-            :construction: Work in Progress
+            > [!NOTE]
+            > 🚧 Work in Progress 🚧
+            >
+            > Please be patient, the [builds are still running](https://github.com/cryptomator/cryptomator/actions). Binary packages can be found here in a few moments.   
+            
+            <!--REPLACE with auto-generated release notes (see below)
             ### What's New 🎉
-            
             ### Bugfixes 🐛
-            
             ### Other Changes 📎
+            END REPLACE-->
+            
+            Feel free to also read our [CHANGELOG.md](https://github.com/cryptomator/cryptomator/blob/develop/CHANGELOG.md).
             
             ---
             
-            ### Full Changelog
-            See [CHANGELOG.md](https://github.com/cryptomator/cryptomator/blob/develop/CHANGELOG.md).
-            
-            📜 List of closed issues is available [here](TODO)
-            
-            ---
-            ⏳ Please be patient, the builds are still [running](https://github.com/cryptomator/cryptomator/actions). New versions of Cryptomator can be found here in a few moments. ⏳
             
             <!-- Don't forget to include the
             💾 SHA-256 checksums of release artifacts:
@@ -79,4 +78,9 @@ jobs:
             ```
             -->
             
-            As usual, the GPG signatures can be checked using [our public key `5811 7AFA 1F85 B3EE C154  677D 615D 449F E6E6 A235`](https://gist.github.com/cryptobot/211111cf092037490275f39d408f461a).
+            > [!TIP]
+            > You can verify the GPG signature of all assets using our public key: [`5811 7AFA 1F85 B3EE C154  677D 615D 449F E6E6 A235`](https://gist.github.com/cryptobot/211111cf092037490275f39d408f461a).
+            
+            
+            
+            <!-- Auto-Generated Release Notes: -->
