@@ -2,7 +2,7 @@ package org.cryptomator.ui.updatereminder;
 
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.updater.UpdateChecker;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;

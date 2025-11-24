@@ -34,10 +34,10 @@
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.9.0</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>1.7.0</cryptomator.integrations.version>
+		<cryptomator.integrations.version>1.8.0-beta1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.5.1</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.4.1</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.6.1</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.mac.version>1.5.0-beta1</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.linux.version>1.7.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>5.1.0</cryptomator.fuse.version>
 		<cryptomator.webdav.version>3.0.0</cryptomator.webdav.version>
 
@@ -74,6 +74,20 @@
 		<!-- Property used by surefire to determine jacoco engine -->
 		<surefire.jacoco.args></surefire.jacoco.args>
 	</properties>
+
+	<repositories>
+		<repository>
+			<name>Central Portal Snapshots</name>
+			<id>central-portal-snapshots</id>
+			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<!-- Cryptomator Libs -->

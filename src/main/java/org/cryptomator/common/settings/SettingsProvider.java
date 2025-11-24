@@ -26,7 +26,9 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -61,8 +63,7 @@ public class SettingsProvider implements Supplier<Settings> {
 		Settings settings = env.getSettingsPath() //
 				.flatMap(this::tryLoad) //
 				.findFirst() //
-				.orElseGet(() -> Settings.create(env));
-		settings.setSaveCmd(this::scheduleSave);
+				.orElseGet(() -> Settings.create(this, env));
 		return settings;
 	}
 
@@ -71,7 +72,7 @@ public class SettingsProvider implements Supplier<Settings> {
 		try (InputStream in = Files.newInputStream(path, StandardOpenOption.READ)) {
 			var json = JSON.reader().readValue(in, SettingsJson.class);
 			LOG.info("Settings loaded from {}", path);
-			var settings = new Settings(json);
+			var settings = new Settings(this, json);
 			return Stream.of(settings);
 		} catch (JacksonException e) {
 			LOG.warn("Failed to parse json file {}", path, e);
@@ -84,19 +85,33 @@ public class SettingsProvider implements Supplier<Settings> {
 		}
 	}
 
-	private void scheduleSave(Settings settings) {
-		if (settings == null) {
-			return;
+	void saveNow(Settings settings) {
+		try {
+			scheduleSave(settings, 0L).get();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			LOG.error("Saving settings was interrupted.", e);
+		} catch (ExecutionException e) {
+			LOG.error("Unexpected exception while saving.", e);
 		}
-		final Optional<Path> settingsPath = env.getSettingsPath().findFirst(); // always save to preferred (first) path
-		settingsPath.ifPresent(path -> {
-			Runnable saveCommand = () -> this.save(settings, path);
-			ScheduledFuture<?> scheduledTask = scheduler.schedule(saveCommand, SAVE_DELAY_MS, TimeUnit.MILLISECONDS);
-			ScheduledFuture<?> previouslyScheduledTask = scheduledSaveCmd.getAndSet(scheduledTask);
-			if (previouslyScheduledTask != null) {
-				previouslyScheduledTask.cancel(false);
-			}
-		});
+	}
+
+	void scheduleSave(Settings settings) {
+		scheduleSave(settings, SAVE_DELAY_MS);
+	}
+
+	private Future<?> scheduleSave(Settings settings, long delayMillis) {
+		if (settings == null) {
+			return CompletableFuture.completedFuture(null);
+		}
+		final Path settingsPath = env.getSettingsPath().findFirst().orElseThrow(); // always save to preferred (first) path
+		Runnable saveCommand = () -> this.save(settings, settingsPath);
+		ScheduledFuture<?> scheduledTask = scheduler.schedule(saveCommand, delayMillis, TimeUnit.MILLISECONDS);
+		ScheduledFuture<?> previouslyScheduledTask = scheduledSaveCmd.getAndSet(scheduledTask);
+		if (previouslyScheduledTask != null) {
+			previouslyScheduledTask.cancel(false);
+		}
+		return scheduledTask;
 	}
 
 	private void save(Settings settings, Path settingsPath) {
@@ -107,7 +122,7 @@ public class SettingsProvider implements Supplier<Settings> {
 			Path tmpPath = settingsPath.resolveSibling(settingsPath.getFileName().toString() + ".tmp");
 			try (OutputStream out = Files.newOutputStream(tmpPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
 				var jsonObj = settings.serialized();
-				jsonObj.writtenByVersion = env.getAppVersion() + env.getBuildNumber().map("-"::concat).orElse("");
+				jsonObj.writtenByVersion = env.getAppVersionWithBuildNumber();
 				JSON.writerWithDefaultPrettyPrinter().writeValue(out, jsonObj);
 			}
 			Files.move(tmpPath, settingsPath, StandardCopyOption.REPLACE_EXISTING);
