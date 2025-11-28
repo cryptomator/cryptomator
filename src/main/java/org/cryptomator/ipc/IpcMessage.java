@@ -10,11 +10,12 @@ import java.nio.channels.WritableByteChannel;
 import java.util.function.Function;
 
 //TODO can the enum be removed?
-sealed interface IpcMessage permits HandleLaunchArgsMessage, RevealRunningAppMessage {
+sealed interface IpcMessage permits HandleLaunchArgsMessage, RevealRunningAppMessage, HandleNotificationCallbackMessage {
 
 	enum MessageType {
 		REVEAL_RUNNING_APP(RevealRunningAppMessage::decode),
-		HANDLE_LAUNCH_ARGS(HandleLaunchArgsMessage::decode);
+		HANDLE_LAUNCH_ARGS(HandleLaunchArgsMessage::decode),
+		HANDLE_NOTIFICATION_CALLBACK(HandleNotificationCallbackMessage::decode);
 
 		private final Function<ByteBuffer, IpcMessage> decoder;
 

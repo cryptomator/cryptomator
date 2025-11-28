@@ -1,4 +1,6 @@
 import ch.qos.logback.classic.spi.Configurator;
+import org.cryptomator.integrations.notify.NotifyService2;
+import org.cryptomator.integrationsbase.JavaFXNotifyService;
 import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
@@ -64,6 +66,7 @@ open module org.cryptomator.desktop {
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
 	provides SSLContextProvider with SSLContextWithWindowsCertStore, SSLContextWithMacKeychain, SSLContextWithPKCS12TrustStore;
+	provides NotifyService2 with JavaFXNotifyService;
 	provides LocationPresetsProvider with //
 			DropboxWindowsLocationPresetsProvider, DropboxMacLocationPresetsProvider, DropboxLinuxLocationPresetsProvider, //
 			GoogleDriveMacLocationPresetsProvider, GoogleDriveWindowsLocationPresetsProvider, //

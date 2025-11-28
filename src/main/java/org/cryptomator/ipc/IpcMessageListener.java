@@ -8,11 +8,14 @@ public interface IpcMessageListener {
 		switch (message) {
 			case RevealRunningAppMessage m -> revealRunningApp(); // TODO: rename to _ with JEP 443
 			case HandleLaunchArgsMessage m -> handleLaunchArgs(m.args());
+			case HandleNotificationCallbackMessage m -> handleNotificationCallback(m.content());
 		}
 	}
 
 	void revealRunningApp();
 
 	void handleLaunchArgs(List<String> args);
+
+	void handleNotificationCallback(String content);
 
 }
