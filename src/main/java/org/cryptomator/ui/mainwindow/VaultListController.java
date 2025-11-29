@@ -11,6 +11,8 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.integrations.mount.MountService;
+import org.cryptomator.integrations.notify.NotifyService;
+import org.cryptomator.integrations.notify.NotifyServiceException;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
@@ -205,11 +207,22 @@ public class VaultListController implements FxController {
 
 	@FXML
 	private void toggleMenu() {
+		/*
 		if (addVaultContextMenu.isShowing()) {
 			addVaultContextMenu.hide();
 		} else {
 			addVaultContextMenu.show(addVaultButton, Side.BOTTOM, 0.0, 0.0);
 		}
+		 */
+		NotifyService.loadAll().findFirst().ifPresent(
+				s -> {
+					try {
+						s.sendNotification("Hello", "Lindsay");
+					} catch (NotifyServiceException e) {
+						throw new RuntimeException(e);
+					}
+				}
+		);
 	}
 
 	private void deselect(MouseEvent released) {

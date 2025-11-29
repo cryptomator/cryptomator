@@ -1,7 +1,4 @@
 import ch.qos.logback.classic.spi.Configurator;
-import org.cryptomator.integrations.notify.NotifyService2;
-import org.cryptomator.integrationsbase.JavaFXNotifyService;
-import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
@@ -16,11 +13,12 @@ import org.cryptomator.common.locationpresets.OneDriveLinuxLocationPresetsProvid
 import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
-import org.cryptomator.networking.SSLContextWithMacKeychain;
-import org.cryptomator.networking.SSLContextProvider;
-import org.cryptomator.networking.SSLContextWithWindowsCertStore;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
+import org.cryptomator.networking.SSLContextProvider;
+import org.cryptomator.networking.SSLContextWithMacKeychain;
+import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
+import org.cryptomator.networking.SSLContextWithWindowsCertStore;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 open module org.cryptomator.desktop {
@@ -66,7 +64,6 @@ open module org.cryptomator.desktop {
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
 	provides SSLContextProvider with SSLContextWithWindowsCertStore, SSLContextWithMacKeychain, SSLContextWithPKCS12TrustStore;
-	provides NotifyService2 with JavaFXNotifyService;
 	provides LocationPresetsProvider with //
 			DropboxWindowsLocationPresetsProvider, DropboxMacLocationPresetsProvider, DropboxLinuxLocationPresetsProvider, //
 			GoogleDriveMacLocationPresetsProvider, GoogleDriveWindowsLocationPresetsProvider, //

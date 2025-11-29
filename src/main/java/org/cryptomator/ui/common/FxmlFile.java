@@ -57,7 +57,8 @@ public enum FxmlFile {
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //
 	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
 	VAULT_STATISTICS("/fxml/stats.fxml"), //
-	WRONGFILEALERT("/fxml/wrongfilealert.fxml");
+	WRONGFILEALERT("/fxml/wrongfilealert.fxml"),
+	NOTIFICATION("/fxml/notification.fxml");
 
 	private final String ressourcePathString;
 

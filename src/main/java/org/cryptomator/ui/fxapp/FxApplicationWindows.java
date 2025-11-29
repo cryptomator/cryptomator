@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
+import org.cryptomator.integrations.notify.NotifyService;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
@@ -11,6 +12,7 @@ import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
+import org.cryptomator.ui.notification.NotificationComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.quit.QuitComponent;
@@ -54,6 +56,7 @@ public class FxApplicationWindows {
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final Lazy<EventViewComponent> eventViewWindow;
+	private final NotificationComponent.Factory notificationWindow;
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
@@ -73,6 +76,7 @@ public class FxApplicationWindows {
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
 								Lazy<EventViewComponent> eventViewWindow, //
+								NotificationComponent.Factory notificationWindow,
 								ExecutorService executor, //
 								Dialogs dialogs) {
 		this.primaryStage = primaryStage;
@@ -85,6 +89,7 @@ public class FxApplicationWindows {
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
 		this.eventViewWindow = eventViewWindow;
+		this.notificationWindow = notificationWindow;
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
@@ -193,6 +198,10 @@ public class FxApplicationWindows {
 		return CompletableFuture.supplyAsync(() -> eventViewWindow.get().showEventViewerWindow(), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
+	public CompletionStage<Stage> showNotification(Runnable action) {
+		return CompletableFuture.supplyAsync(() -> notificationWindow.create(message, description, action).showNotification(), Platform::runLater).whenComplete(this::reportErrors);
+	}
+
 	/**
 	 * Displays the generic error scene in the given window.
 	 *
@@ -210,4 +219,5 @@ public class FxApplicationWindows {
 			LOG.error("Failed to display stage", error);
 		}
 	}
+
 }
