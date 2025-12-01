@@ -22,7 +22,7 @@
 	</padding>
 	<children>
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.general.vaultName"/>
+			<Label text="%vaultOptions.general.vaultName" labelFor="$vaultName"/>
 			<TextField fx:id="vaultName"/>
 		</HBox>
 
@@ -37,7 +37,7 @@
 		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>
 
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.general.actionAfterUnlock"/>
+			<Label text="%vaultOptions.general.actionAfterUnlock" labelFor="$actionAfterUnlockChoiceBox"/>
 			<ChoiceBox fx:id="actionAfterUnlockChoiceBox"/>
 		</HBox>
 

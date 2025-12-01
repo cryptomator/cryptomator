@@ -26,9 +26,9 @@
 	</padding>
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.mount.volume.type"/>
+			<Label text="%vaultOptions.mount.volume.type" labelFor="$vaultVolumeTypeChoiceBox"/>
 			<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}">
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}" accessibleText="%vaultOptions.mount.info">
 				<graphic>
 					<FontAwesome5IconView glyph="COGS" styleClass="glyph-icon-muted"/>
 				</graphic>
@@ -36,7 +36,7 @@
 					<Tooltip text="%vaultOptions.mount.info" showDelay="100ms"/>
 				</tooltip>
 			</Hyperlink>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}">
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}" accessibleText="%preferences.volume.docsTooltip">
 				<graphic>
 					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 				</graphic>
@@ -49,7 +49,7 @@
 		<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.restartRequired" visible="${controller.selectedMountServiceRequiresRestart}" managed="${controller.selectedMountServiceRequiresRestart}"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortChangeable}" managed="${controller.loopbackPortChangeable}">
-			<Label text="%vaultOptions.mount.volume.tcp.port"/>
+			<Label text="%vaultOptions.mount.volume.tcp.port" labelFor="$vaultLoopbackPortField"/>
 			<NumericTextField fx:id="vaultLoopbackPortField"/>
 			<Button text="%generic.button.apply" fx:id="vaultLoopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
 		</HBox>
