@@ -20,7 +20,7 @@
 	</padding>
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
-			<Label text="%preferences.volume.type"/>
+			<Label text="%preferences.volume.type" labelFor="$volumeTypeChoiceBox"/>
 			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
 			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
 				<graphic>
@@ -33,7 +33,7 @@
 		</HBox>
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortSupported}" managed="${controller.loopbackPortSupported}">
-			<Label text="%preferences.volume.tcp.port"/>
+			<Label text="%preferences.volume.tcp.port" labelFor="$loopbackPortField"/>
 			<NumericTextField fx:id="loopbackPortField"/>
 			<Button text="%generic.button.apply" fx:id="loopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
 		</HBox>
