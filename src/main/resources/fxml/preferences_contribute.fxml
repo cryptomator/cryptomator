@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
@@ -32,10 +33,13 @@
 				<FormattedLabel format="%preferences.contribute.registeredFor" arg1="${controller.licenseHolder.licenseSubject}" wrapText="true"/>
 				<Region minHeight="12"/>
 				<HBox alignment="BOTTOM_CENTER" spacing="6">
-					<Button onAction="#didClickRemoveCert">
+					<Button onAction="#didClickRemoveCert" contentDisplay="GRAPHIC_ONLY" accessibleText="%preferences.contribute.removeCert.tooltip">
 						<graphic>
 							<FontAwesome5IconView glyph="TRASH"/>
 						</graphic>
+						<tooltip>
+							<Tooltip text="%preferences.contribute.removeCert.tooltip"/>
+						</tooltip>
 					</Button>
 					<Button text="%preferences.contribute.donate" minWidth="100" onAction="#showDonate">
 						<graphic>

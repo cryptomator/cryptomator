@@ -22,7 +22,7 @@
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.volume.type" labelFor="$volumeTypeChoiceBox"/>
 			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" accessibleText="%preferences.volume.docsTooltip">
 				<graphic>
 					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 				</graphic>
