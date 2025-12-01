@@ -28,7 +28,7 @@
 		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%vaultOptions.mount.volume.type"/>
 			<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}">
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}" accessibleText="%vaultOptions.mount.info">
 				<graphic>
 					<FontAwesome5IconView glyph="COGS" styleClass="glyph-icon-muted"/>
 				</graphic>
@@ -36,7 +36,7 @@
 					<Tooltip text="%vaultOptions.mount.info" showDelay="100ms"/>
 				</tooltip>
 			</Hyperlink>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}">
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}" accessibleText="%preferences.volume.docsTooltip">
 				<graphic>
 					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 				</graphic>

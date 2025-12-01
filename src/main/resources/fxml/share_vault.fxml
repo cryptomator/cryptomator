@@ -68,7 +68,7 @@
 			<TextFlow styleClass="text-flow">
 				<Text text="%shareVault.remarkBestPractices"/>
 				<Text text=" "/>
-				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices">
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices" accessibleText="%shareVault.docsTooltip">
 					<graphic>
 						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 					</graphic>
