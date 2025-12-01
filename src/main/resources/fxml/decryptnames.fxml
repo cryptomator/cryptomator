@@ -22,7 +22,7 @@
 			<Insets left="6"/>
 		</padding>
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#copyTableToClipboard">
+		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#copyTableToClipboard" accessibleText="%decryptNames.copyTable.tooltip">
 			<graphic>
 				<FontAwesome5IconView glyph="CLIPBOARD" glyphSize="16"/>
 			</graphic>
@@ -30,7 +30,7 @@
 				<Tooltip text="%decryptNames.copyTable.tooltip"/>
 			</tooltip>
 		</Button>
-		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#clearTable">
+		<Button styleClass="button-right" contentDisplay="GRAPHIC_ONLY" onAction="#clearTable" accessibleText="%decryptNames.clearTable.tooltip">
 			<graphic>
 				<FontAwesome5IconView glyph="TRASH" glyphSize="16"/>
 			</graphic>
