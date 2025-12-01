@@ -21,6 +21,6 @@
 		<CheckBox fx:id="checkbox" visible="${controller.checkRunnable}"/>
 		<CheckStateIconView check="${controller.check}" glyphSize="20" visible="${!controller.checkRunnable}"/>
 	</StackPane>
-	<Label text="${controller.checkName}"/>
+	<Label text="${controller.checkName}" labelFor="$checkbox"/>
 
 </HBox>
