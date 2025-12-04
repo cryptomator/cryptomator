@@ -1191,7 +1191,89 @@
 	Notification Window
 **/
 .notification-window {
-  	-fx-background-radius: 18 18 18 18;
-    -fx-border-radius: 18 18 18 18;
-    -fx-background-color: MAIN_BG;
+	-fx-background-color: MAIN_BG;
+	-fx-background-radius: 22;
+	-fx-border-radius: 22;
+	-fx-background-insets: 0;
+	-fx-background-color: rgba(255, 255, 255, 0.92);
+	-fx-border-color: rgba(0, 0, 0, 0.1);
+	-fx-border-width: 1px;
+	-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 28, 0.35, 0, 6);
+}
+
+.notification-window .dialog-header {
+	-fx-alignment: center-left;
+}
+
+.notification-window .brand-title {
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 18px;
+}
+
+.notification-window .close-button {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-padding: 6 8 6 8;
+}
+
+.notification-window .close-button:hover {
+	-fx-background-color: CONTROL_BG_HOVER;
+	-fx-background-radius: 8;
+}
+
+.notification-window .close-button:pressed {
+	-fx-background-color: CONTROL_BG_ARMED;
+}
+
+.notification-window .notification-title {
+	-fx-font-family: 'Open Sans Bold';
+	-fx-font-size: 28px;
+	-fx-text-fill: TEXT_FILL;
+}
+
+.notification-window .notification-description {
+	-fx-font-size: 20px;
+	-fx-text-fill: TEXT_FILL;
+	-fx-line-spacing: 6px;
+}
+
+.notification-window .action-button {
+	-fx-background-color: CONTROL_BG_NORMAL;
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-width: 2px;
+	-fx-background-radius: 12;
+	-fx-border-radius: 12;
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 22px;
+	-fx-text-fill: TEXT_FILL;
+	-fx-padding: 10 28 12 28;
+}
+
+.notification-window .action-button:hover {
+	-fx-background-color: CONTROL_BG_HOVER;
+	-fx-border-color: CONTROL_BORDER_FOCUSED;
+}
+
+.notification-window .action-button:pressed {
+	-fx-background-color: CONTROL_BG_ARMED;
+}
+
+.notification-window .nav-button {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-padding: 6 8 6 8;
+}
+
+.notification-window .nav-button:hover {
+	-fx-background-color: CONTROL_BG_HOVER;
+	-fx-background-radius: 8;
+}
+
+.notification-window .nav-button:pressed {
+	-fx-background-color: CONTROL_BG_ARMED;
+}
+
+.notification-window .page-indicator {
+	-fx-font-size: 14px;
+	-fx-text-fill: TEXT_FILL;
 }

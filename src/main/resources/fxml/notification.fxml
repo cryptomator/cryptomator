@@ -4,50 +4,63 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.TextFlow?>
-<?import com.sun.javafx.scene.control.IntegerField?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
-	  fx:controller="org.cryptomator.ui.notification.NotificationController"
-	  maxHeight="200.0" maxWidth="400.0" styleClass="notification-window" spacing="6">
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane xmlns="http://javafx.com/javafx"
+			xmlns:fx="http://javafx.com/fxml"
+			fx:controller="org.cryptomator.ui.notification.NotificationController"
+			prefHeight="360.0" prefWidth="1100.0" maxHeight="600.0" maxWidth="1200.0"
+			styleClass="notification-window">
 	<padding>
-		<Insets topRightBottomLeft="6"/>
+		<Insets top="18" right="24" bottom="22" left="24"/>
 	</padding>
-		<HBox spacing="6">
-			<ImageView fitHeight="16" preserveRatio="true" cache="true">
+	<top>
+		<HBox spacing="12" styleClass="dialog-header" alignment="CENTER_LEFT">
+			<ImageView fitHeight="28" preserveRatio="true" cache="true">
 				<Image url="@../img/logo64.png"/>
 			</ImageView>
-			<Label text="Vault Notification" />
+			<Label text="cryptomator" styleClass="brand-title"/>
 			<Region HBox.hgrow="ALWAYS"/>
-			<Button contentDisplay="GRAPHIC_ONLY" onAction="#close">
+			<Button contentDisplay="GRAPHIC_ONLY" onAction="#close" styleClass="close-button">
 				<graphic>
-					<FontAwesome5IconView glyph="TIMES" glyphSize="16"/>
+					<FontAwesome5IconView glyph="TIMES" glyphSize="18"/>
 				</graphic>
 			</Button>
 		</HBox>
-	<Separator orientation="HORIZONTAL" />
-	<Label text="${controller.message}" styleClass="label-large" wrapText="true"/>
-	<Label text="${controller.description}" wrapText="true"/>
-	<HBox>
-		<Button text="${controller.actionText}" onAction="#handleButtonAction" visible="${controller.buttonVisible}" managed="${controller.buttonVisible}"/>
-		<Region HBox.hgrow="ALWAYS"/>
-		<Button contentDisplay="GRAPHIC_ONLY">
-			<graphic>
-				<FontAwesome5IconView glyph="CHEVRON_LEFT" glyphSize="6"/>
-			</graphic>
-		</Button>
-		<FormattedLabel format="a%d/%d" arg1="${controller.selectionIndex}" arg2="${controller.numberOfNotifications}"/>
-		<Button contentDisplay="GRAPHIC_ONLY">
-			<graphic>
-				<FontAwesome5IconView glyph="CHEVRON_RIGHT" glyphSize="6"/>
-			</graphic>
-		</Button>
-	</HBox>
-</VBox>
+	</top>
+
+	<center>
+		<VBox spacing="10">
+			<Label text="${controller.message}" styleClass="notification-title" wrapText="true"/>
+			<Label text="${controller.description}" styleClass="notification-description" wrapText="true"/>
+		</VBox>
+	</center>
+
+	<bottom>
+		<HBox spacing="12" alignment="CENTER_LEFT">
+			<Button text="${controller.actionText}" onAction="#handleButtonAction"
+					visible="${controller.buttonVisible}" managed="${controller.buttonVisible}"
+					styleClass="action-button"/>
+			<Region HBox.hgrow="ALWAYS"/>
+			<HBox spacing="6" alignment="CENTER">
+				<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#previousNotification">
+					<graphic>
+						<FontAwesome5IconView glyph="CHEVRON_LEFT" glyphSize="10"/>
+					</graphic>
+				</Button>
+				<FormattedLabel format="a%d / %d" arg1="${controller.selectionIndex}" arg2="${controller.numberOfNotifications}"
+								styleClass="page-indicator"/>
+				<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#nextNotification">
+					<graphic>
+						<FontAwesome5IconView glyph="CHEVRON_RIGHT" glyphSize="10"/>
+					</graphic>
+				</Button>
+			</HBox>
+		</HBox>
+	</bottom>
+</BorderPane>
