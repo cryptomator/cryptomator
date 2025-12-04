@@ -26,8 +26,8 @@ import java.util.concurrent.ExecutorService;
 @NotificationScoped
 public class NotificationController implements FxController {
 
-	private static final String LOREM_IPSUM = """
-			Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam""";
+	private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam";
+	private static final String LOREM_BOB = "Let's do it again then, what the heck. Let that brush dance around there and play. In your world you have total and absolute power.";
 
 	private final Stage window;
 	private final SimpleListProperty<FilesystemEvent> notificationsProp;
@@ -61,10 +61,15 @@ public class NotificationController implements FxController {
 
 	private void adjustTexts(ObservableValue<? extends FilesystemEvent> observable, FilesystemEvent oldEvent, FilesystemEvent newEvent) {
 		switch (newEvent) {
-			default -> {
+			case BrokenDirFileEvent bdfe -> {
 				message.set("BABA");
 				description.set(LOREM_IPSUM);
 				actionText.set("ACTION");
+			}
+			default ->  {
+				message.set("YAGA");
+				description.set(LOREM_BOB);
+				actionText.set("ACTION2");
 			}
 		}
 	}

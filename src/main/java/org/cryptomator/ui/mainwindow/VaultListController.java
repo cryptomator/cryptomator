@@ -11,6 +11,7 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.cryptofs.event.BrokenDirFileEvent;
+import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.integrations.mount.MountService;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
@@ -211,6 +212,7 @@ public class VaultListController implements FxController {
 	@FXML
 	private void toggleMenu() {
 		notificationRadar.getEventsRequiringNotification().add(new BrokenDirFileEvent(Path.of("C:\\Your\\Momma\\Does\\Things")));
+		notificationRadar.getEventsRequiringNotification().add(new ConflictResolvedEvent(Path.of("a"), Path.of("b"), Path.of("c"), Path.of("d")));
 		appWindows.showNotification();
 		/*
 		if (addVaultContextMenu.isShowing()) {
