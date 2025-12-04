@@ -1186,3 +1186,12 @@
     -fx-background-color: MAIN_BG;
     -fx-font-size: 1.166667em; /* 14pt - 2 more than the default font */
 }
+
+/**
+	Notification Window
+**/
+.notification-window {
+  	-fx-background-radius: 18 18 18 18;
+    -fx-border-radius: 18 18 18 18;
+    -fx-background-color: MAIN_BG;
+}

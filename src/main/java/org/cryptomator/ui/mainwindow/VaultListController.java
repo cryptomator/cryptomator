@@ -10,15 +10,15 @@ import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.common.Constants;
+import org.cryptomator.cryptofs.event.BrokenDirFileEvent;
 import org.cryptomator.integrations.mount.MountService;
-import org.cryptomator.integrations.notify.NotifyService;
-import org.cryptomator.integrations.notify.NotifyServiceException;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
-import org.cryptomator.ui.fxapp.FxFSEventList;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.fxapp.FxFSEventList;
+import org.cryptomator.ui.fxapp.FxNotificationRadar;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.slf4j.Logger;
@@ -35,7 +35,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
@@ -82,6 +81,7 @@ public class VaultListController implements FxController {
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final BooleanBinding emptyVaultList;
 	private final BooleanProperty unreadEvents;
+	private final FxNotificationRadar notificationRadar;
 	private final VaultListManager vaultListManager;
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	private final ResourceBundle resourceBundle;
@@ -115,7 +115,9 @@ public class VaultListController implements FxController {
 						RecoveryKeyComponent.Factory recoveryKeyWindow, //
 						VaultComponent.Factory vaultComponentFactory, //
 						List<MountService> mountServices, //
-						FxFSEventList fxFSEventList) {
+						FxFSEventList fxFSEventList,
+						FxNotificationRadar notificationRadar
+	) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -132,6 +134,7 @@ public class VaultListController implements FxController {
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.unreadEvents = fxFSEventList.unreadEventsProperty();
+		this.notificationRadar = notificationRadar;
 
 		selectedVault.addListener(this::selectedVaultDidChange);
 		cellSize = settings.compactMode.map(compact -> compact ? 30.0 : 60.0);
@@ -207,6 +210,8 @@ public class VaultListController implements FxController {
 
 	@FXML
 	private void toggleMenu() {
+		notificationRadar.getEventsRequiringNotification().add(new BrokenDirFileEvent(Path.of("C:\\Your\\Momma\\Does\\Things")));
+		appWindows.showNotification();
 		/*
 		if (addVaultContextMenu.isShowing()) {
 			addVaultContextMenu.hide();
@@ -214,15 +219,6 @@ public class VaultListController implements FxController {
 			addVaultContextMenu.show(addVaultButton, Side.BOTTOM, 0.0, 0.0);
 		}
 		 */
-		NotifyService.loadAll().findFirst().ifPresent(
-				s -> {
-					try {
-						s.sendNotification("Hello", "Lindsay");
-					} catch (NotifyServiceException e) {
-						throw new RuntimeException(e);
-					}
-				}
-		);
 	}
 
 	private void deselect(MouseEvent released) {

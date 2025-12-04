@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.integrations.notify.NotifyService;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
@@ -198,8 +197,8 @@ public class FxApplicationWindows {
 		return CompletableFuture.supplyAsync(() -> eventViewWindow.get().showEventViewerWindow(), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
-	public CompletionStage<Stage> showNotification(Runnable action) {
-		return CompletableFuture.supplyAsync(() -> notificationWindow.create(message, description, action).showNotification(), Platform::runLater).whenComplete(this::reportErrors);
+	public CompletionStage<Stage> showNotification() {
+		return CompletableFuture.supplyAsync(() -> notificationWindow.create().showNotification(), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	/**
