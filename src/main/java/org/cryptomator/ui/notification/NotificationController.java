@@ -1,11 +1,12 @@
 package org.cryptomator.ui.notification;
 
+import org.cryptomator.cryptofs.event.BrokenDirFileEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxNotificationRadar;
 
 import javax.inject.Inject;
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -15,6 +16,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableIntegerValue;
+import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
@@ -30,6 +32,7 @@ public class NotificationController implements FxController {
 	private final Stage window;
 	private final SimpleListProperty<FilesystemEvent> notificationsProp;
 	private final IntegerProperty selectionIndex;
+	private final ObservableStringValue paging;
 	private final ObjectProperty<FilesystemEvent> selectedEvent;
 	private final StringProperty message;
 	private final StringProperty description;
@@ -42,8 +45,9 @@ public class NotificationController implements FxController {
 		this.notificationsProp = new SimpleListProperty<>(notificationRadar.getEventsRequiringNotification());
 		this.selectionIndex = new SimpleIntegerProperty(0);
 		this.selectedEvent = new SimpleObjectProperty<>();
-		selectionIndex.addListener((obs, o, n) -> selectedEvent.setValue(notificationsProp.get(n.intValue())));
+		selectionIndex.addListener((_, _, n) -> selectedEvent.setValue(notificationsProp.get(n.intValue())));
 		selectedEvent.addListener(this::adjustTexts);
+		this.paging = Bindings.createStringBinding(() -> selectionIndex.get() + 1 + "/" + notificationsProp.size(), selectionIndex, notificationsProp);
 		this.message = new SimpleStringProperty();
 		this.description = new SimpleStringProperty();
 		this.actionText = new SimpleStringProperty();
@@ -87,6 +91,20 @@ public class NotificationController implements FxController {
 		}
 	}
 
+	@FXML void previousNotification() {
+		int i = selectionIndex.get();
+		if( i != 0) {
+			selectionIndex.set(i-1);
+		}
+	}
+
+	@FXML void nextNotification() {
+		int i = selectionIndex.get();
+		if(i != notificationsProp.size() - 1){
+			selectionIndex.set(i+1);
+		}
+	}
+
 	@FXML
 	public void close() {
 		notificationsProp.clear();
@@ -127,20 +145,12 @@ public class NotificationController implements FxController {
 		return actionText.get() != null;
 	}
 
-	public ObservableIntegerValue selectionIndexProperty() {
-		return selectionIndex;
+	public ObservableStringValue pagingProperty() {
+		return paging;
 	}
 
-	public int getSelectionIndex() {
-		return selectionIndex.get();
-	}
-
-	public ObservableIntegerValue numberOfNotificationsProperty() {
-		return notificationsProp.sizeProperty();
-	}
-
-	public int getNumberOfNotifications() {
-		return notificationsProp.size();
+	public String getPaging() {
+		return paging.get();
 	}
 
 }
