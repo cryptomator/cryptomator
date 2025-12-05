@@ -1,6 +1,5 @@
 package org.cryptomator.ui.notification;
 
-import org.cryptomator.cryptofs.event.BrokenDirFileEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxNotificationRadar;
@@ -15,7 +14,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -25,9 +23,6 @@ import java.util.concurrent.ExecutorService;
 
 @NotificationScoped
 public class NotificationController implements FxController {
-
-	private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam";
-	private static final String LOREM_BOB = "Let's do it again then, what the heck. Let that brush dance around there and play. In your world you have total and absolute power.";
 
 	private final Stage window;
 	private final SimpleListProperty<FilesystemEvent> notificationsProp;
@@ -59,17 +54,12 @@ public class NotificationController implements FxController {
 		selectedEvent.setValue(notificationsProp.get(selectionIndex.get()));
 	}
 
+	//TODO: Translations!
 	private void adjustTexts(ObservableValue<? extends FilesystemEvent> observable, FilesystemEvent oldEvent, FilesystemEvent newEvent) {
 		switch (newEvent) {
-			case BrokenDirFileEvent bdfe -> {
-				message.set("BABA");
-				description.set(LOREM_IPSUM);
-				actionText.set("ACTION");
-			}
-			default ->  {
-				message.set("YAGA");
-				description.set(LOREM_BOB);
-				actionText.set("ACTION2");
+			default -> {
+				message.set("NO CONTENT");
+				description.set("IF YOU SEE THIS MESSAGE, PLEASE CONTACT THE DEVELOPERS OF CRYPTOMATOR ABOUT A BUG IN THE NOTIFICATION DISPLAY");
 			}
 		}
 	}
