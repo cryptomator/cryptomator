@@ -1,6 +1,5 @@
 package org.cryptomator.ui.notification;
 
-import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxNotificationRadar;
@@ -25,6 +24,8 @@ import java.util.concurrent.ExecutorService;
 @NotificationScoped
 public class NotificationController implements FxController {
 
+	private static final String BUG_MSG = "IF YOU SEE THIS MESSAGE, PLEASE CONTACT THE DEVELOPERS OF CRYPTOMATOR ABOUT A BUG IN THE NOTIFICATION DISPLAY";
+
 	private final Stage window;
 	private final SimpleListProperty<VaultEvent> notificationsProp;
 	private final IntegerProperty selectionIndex;
@@ -42,7 +43,7 @@ public class NotificationController implements FxController {
 		this.selectionIndex = new SimpleIntegerProperty(0);
 		this.selectedEvent = new SimpleObjectProperty<>();
 		selectionIndex.addListener((_, _, n) -> {
-			if (! notificationsProp.isEmpty()) {
+			if (!notificationsProp.isEmpty()) {
 				selectedEvent.setValue(notificationsProp.get(n.intValue()));
 			}
 		});
@@ -61,10 +62,18 @@ public class NotificationController implements FxController {
 
 	//TODO: Translations!
 	private void adjustTexts(ObservableValue<? extends VaultEvent> observable, VaultEvent oldEvent, VaultEvent newEvent) {
+		if (newEvent == null) {
+			message.set("NO CONTENT");
+			description.set(BUG_MSG);
+			actionText.set(null);
+			return;
+		}
+
 		switch (newEvent.actualEvent()) {
 			default -> {
 				message.set("NO CONTENT");
-				description.set("IF YOU SEE THIS MESSAGE, PLEASE CONTACT THE DEVELOPERS OF CRYPTOMATOR ABOUT A BUG IN THE NOTIFICATION DISPLAY");
+				description.set(BUG_MSG);
+				actionText.set(null);
 			}
 		}
 	}
@@ -147,7 +156,7 @@ public class NotificationController implements FxController {
 	}
 
 	public boolean isButtonVisible() {
-		return actionText.get() != null;
+		return actionText.get() != null && !actionText.get().isBlank();
 	}
 
 	public ObservableStringValue pagingProperty() {
