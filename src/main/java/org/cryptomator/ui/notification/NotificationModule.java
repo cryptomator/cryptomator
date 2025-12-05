@@ -49,13 +49,13 @@ abstract class NotificationModule {
 			window.setY(vBounds.getMinY());
 		} else {
 			switch (SystemBarUtil.getPlacementOfSystembar(screen)) {
-				case TOP -> {
-					window.setX(vBounds.getMaxX() - window.getWidth());
-					window.setY(vBounds.getMaxY() - window.getHeight());
-				}
-				default -> {
+				case TOP -> { //place to middle top
 					window.setX(vBounds.getMinX() + (vBounds.getWidth() - window.getWidth()) / 2.0);
 					window.setY(vBounds.getMinY());
+				}
+				default -> { //place to right bottom
+					window.setX(vBounds.getMaxX() - window.getWidth());
+					window.setY(vBounds.getMaxY() - window.getHeight());
 				}
 			}
 		}
