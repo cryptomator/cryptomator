@@ -1,7 +1,5 @@
 package org.cryptomator.ui.common;
 
-import ch.qos.logback.classic.filter.LevelFilter;
-
 import javafx.stage.Screen;
 
 public class SystemBarUtil {
