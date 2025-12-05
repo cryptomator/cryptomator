@@ -266,7 +266,7 @@ public class Vault {
 
 	private void consumeVaultEvent(FilesystemEvent e) {
 		fileSystemEventAggregator.put(this, e);
-		notificationManager.tryAddEvent(this, e);
+		notificationManager.offer(this, e);
 	}
 
 	// ******************************************************************************
