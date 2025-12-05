@@ -41,7 +41,11 @@ public class NotificationController implements FxController {
 		this.notificationsProp = new SimpleListProperty<>(notificationRadar.getEventsRequiringNotification());
 		this.selectionIndex = new SimpleIntegerProperty(0);
 		this.selectedEvent = new SimpleObjectProperty<>();
-		selectionIndex.addListener((_, _, n) -> selectedEvent.setValue(notificationsProp.get(n.intValue())));
+		selectionIndex.addListener((_, _, n) -> {
+			if (! notificationsProp.isEmpty()) {
+				selectedEvent.setValue(notificationsProp.get(n.intValue()));
+			}
+		});
 		selectedEvent.addListener(this::adjustTexts);
 		this.paging = Bindings.createStringBinding(() -> selectionIndex.get() + 1 + "/" + notificationsProp.size(), selectionIndex, notificationsProp);
 		this.message = new SimpleStringProperty();
