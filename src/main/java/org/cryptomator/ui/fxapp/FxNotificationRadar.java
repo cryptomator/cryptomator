@@ -1,7 +1,7 @@
 package org.cryptomator.ui.fxapp;
 
-import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.event.NotificationManager;
+import org.cryptomator.event.VaultEvent;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
@@ -19,7 +19,7 @@ public class FxNotificationRadar {
 	private final NotificationManager notificationManager;
 	private final ScheduledExecutorService scheduler;
 	private final FxApplicationWindows applicationWindows;
-	private final ObservableList<FilesystemEvent> eventsRequiringNotification;
+	private final ObservableList<VaultEvent> eventsRequiringNotification;
 
 	@Inject
 	public FxNotificationRadar(NotificationManager notificationManager, ScheduledExecutorService scheduler, FxApplicationWindows applicationWindows) {
@@ -45,7 +45,7 @@ public class FxNotificationRadar {
 
 	}
 
-	public ObservableList<FilesystemEvent> getEventsRequiringNotification() {
+	public ObservableList<VaultEvent> getEventsRequiringNotification() {
 		return eventsRequiringNotification;
 	}
 

@@ -1,6 +1,7 @@
 package org.cryptomator.ui.notification;
 
 import org.cryptomator.cryptofs.event.FilesystemEvent;
+import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxNotificationRadar;
 
@@ -25,10 +26,10 @@ import java.util.concurrent.ExecutorService;
 public class NotificationController implements FxController {
 
 	private final Stage window;
-	private final SimpleListProperty<FilesystemEvent> notificationsProp;
+	private final SimpleListProperty<VaultEvent> notificationsProp;
 	private final IntegerProperty selectionIndex;
 	private final ObservableStringValue paging;
-	private final ObjectProperty<FilesystemEvent> selectedEvent;
+	private final ObjectProperty<VaultEvent> selectedEvent;
 	private final StringProperty message;
 	private final StringProperty description;
 	private final StringProperty actionText;
@@ -55,8 +56,8 @@ public class NotificationController implements FxController {
 	}
 
 	//TODO: Translations!
-	private void adjustTexts(ObservableValue<? extends FilesystemEvent> observable, FilesystemEvent oldEvent, FilesystemEvent newEvent) {
-		switch (newEvent) {
+	private void adjustTexts(ObservableValue<? extends VaultEvent> observable, VaultEvent oldEvent, VaultEvent newEvent) {
+		switch (newEvent.actualEvent()) {
 			default -> {
 				message.set("NO CONTENT");
 				description.set("IF YOU SEE THIS MESSAGE, PLEASE CONTACT THE DEVELOPERS OF CRYPTOMATOR ABOUT A BUG IN THE NOTIFICATION DISPLAY");
@@ -69,7 +70,7 @@ public class NotificationController implements FxController {
 	public void handleButtonAction() {
 		try {
 			var ev = selectedEvent.get();
-			switch (ev) {
+			switch (ev.actualEvent()) {
 				//TODO: executorService.submit(callback.action());
 				default -> {
 				} //normally nothing
