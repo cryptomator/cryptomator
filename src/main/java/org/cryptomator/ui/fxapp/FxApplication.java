@@ -30,9 +30,20 @@ public class FxApplication {
 	private final FxApplicationTerminator applicationTerminator;
 	private final AutoUnlocker autoUnlocker;
 	private final FxFSEventList fxFSEventList;
+	private final FxNotificationRadar notificationRadar;
 
 	@Inject
-	FxApplication(@Named("startupTime") long startupTime, Environment environment, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker, FxFSEventList fxFSEventList) {
+	FxApplication(@Named("startupTime") long startupTime, //
+				  Environment environment, //
+				  Settings settings, //
+				  AppLaunchEventHandler launchEventHandler, //
+				  Lazy<TrayMenuComponent> trayMenu, //
+				  FxApplicationWindows appWindows, //
+				  FxApplicationStyle applicationStyle, //
+				  FxApplicationTerminator applicationTerminator, //
+				  AutoUnlocker autoUnlocker, //
+				  FxFSEventList fxFSEventList, //
+				  FxNotificationRadar notificationRadar) {
 		this.startupTime = startupTime;
 		this.environment = environment;
 		this.settings = settings;
@@ -43,6 +54,7 @@ public class FxApplication {
 		this.applicationTerminator = applicationTerminator;
 		this.autoUnlocker = autoUnlocker;
 		this.fxFSEventList = fxFSEventList;
+		this.notificationRadar = notificationRadar;
 	}
 
 	public void start() {
@@ -88,6 +100,7 @@ public class FxApplication {
 
 		launchEventHandler.startHandlingLaunchEvents();
 		fxFSEventList.schedulePollForUpdates();
+		notificationRadar.schedulePollForUpdates();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
 	}
 

@@ -30,7 +30,7 @@ public class FxNotificationRadar {
 	}
 
 	public void schedulePollForUpdates() {
-		scheduler.schedule(this::checkForPendingNotifications, 1000, TimeUnit.MILLISECONDS);
+		scheduler.scheduleAtFixedRate(this::checkForPendingNotifications, 0, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	/**
