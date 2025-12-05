@@ -23,6 +23,7 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.event.NotificationManager;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
@@ -78,6 +79,7 @@ public class Vault {
 	private final Mounter mounter;
 	private final Settings settings;
 	private final FileSystemEventAggregator fileSystemEventAggregator;
+	private final NotificationManager notificationManager;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -90,7 +92,8 @@ public class Vault {
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
 		  Mounter mounter, Settings settings, //
-		  FileSystemEventAggregator fileSystemEventAggregator) {
+		  FileSystemEventAggregator fileSystemEventAggregator,
+		  NotificationManager notificationManager) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -109,6 +112,7 @@ public class Vault {
 		this.mounter = mounter;
 		this.settings = settings;
 		this.fileSystemEventAggregator = fileSystemEventAggregator;
+		this.notificationManager = notificationManager;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -262,6 +266,7 @@ public class Vault {
 
 	private void consumeVaultEvent(FilesystemEvent e) {
 		fileSystemEventAggregator.put(this, e);
+		notificationManager.tryAddEvent(e);
 	}
 
 	// ******************************************************************************
