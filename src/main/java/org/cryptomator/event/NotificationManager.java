@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manager for notifications.
@@ -53,13 +54,15 @@ public class NotificationManager {
 
 	boolean addEvent(Vault v, Path keyPath, FilesystemEvent e) {
 		var key = new FSEventBucket(v, keyPath, e.getClass());
-		var cachedElement = eventCache.get(key, _ -> {
+		var isAdded = new AtomicBoolean(false);
+		eventCache.asMap().computeIfAbsent(key, _ -> {
 			synchronized (this) {
 				eventsRequiringNotification.add(new VaultEvent(v, e));
+				isAdded.set(true);
 			}
 			return e;
 		});
-		return cachedElement != e;
+		return isAdded.get();
 	}
 
 	/**
