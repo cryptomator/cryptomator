@@ -67,36 +67,41 @@ public class NotificationController implements FxController {
 
 	@FXML
 	public void handleButtonAction() {
-		var ev = selectedEvent.get();
-		switch (ev) {
-			default -> {
-			} //normally nothing
-		}
-		//executorService.submit(callback.action());
-		int i = selectionIndex.get();
-		notificationsProp.remove(i); //remove processed event
-
-		if (notificationsProp.isEmpty()) {
-			close(); //no more events
-		} else if (notificationsProp.size() == i) {
-			i = i - 1;
-			selectionIndex.set(i); //triggers event update
-		} else {
-			selectedEvent.set(notificationsProp.get(i));
-		}
-	}
-
-	@FXML void previousNotification() {
-		int i = selectionIndex.get();
-		if( i != 0) {
-			selectionIndex.set(i-1);
+		try {
+			var ev = selectedEvent.get();
+			switch (ev) {
+				//TODO: executorService.submit(callback.action());
+				default -> {
+				} //normally nothing
+			}
+		} finally {
+			//remove processed event
+			int i = selectionIndex.get();
+			notificationsProp.remove(i);
+			if (notificationsProp.isEmpty()) {
+				close(); //no more events
+			} else if (notificationsProp.size() == i) {
+				i = i - 1;
+				selectionIndex.set(i); //triggers event update
+			} else {
+				selectedEvent.set(notificationsProp.get(i));
+			}
 		}
 	}
 
-	@FXML void nextNotification() {
+	@FXML
+	public void previousNotification() {
 		int i = selectionIndex.get();
-		if(i != notificationsProp.size() - 1){
-			selectionIndex.set(i+1);
+		if (i != 0) {
+			selectionIndex.set(i - 1);
+		}
+	}
+
+	@FXML
+	public void nextNotification() {
+		int i = selectionIndex.get();
+		if (i != notificationsProp.size() - 1) {
+			selectionIndex.set(i + 1);
 		}
 	}
 
