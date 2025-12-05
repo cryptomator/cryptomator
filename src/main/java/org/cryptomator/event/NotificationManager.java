@@ -36,7 +36,7 @@ public class NotificationManager {
 		eventCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(DEBOUNCE_THRESHOLD_SECONDS)).build();
 		eventsRequiringNotification = new ConcurrentLinkedQueue<>();
 	}
-	
+
 	/**
 	 * Offers the given filesystem event to the notification manager.
 	 *

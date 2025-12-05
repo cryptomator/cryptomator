@@ -47,12 +47,12 @@ abstract class NotificationModule {
 		} else if(SystemUtils.IS_OS_MAC) { //place to right top
 			var screenBounds = Screen.getPrimary().getVisualBounds(); //TODO: TEST
 			window.setX(screenBounds.getMaxX() - window.getWidth());
-			window.setY(screenBounds.getMinY() - window.getHeight());
+			window.setY(screenBounds.getMinY());
 		} else { //place to middle top
 			//GNOME; KDE; etc...
 			var screenBounds = Screen.getPrimary().getVisualBounds(); //TODO: TEST
-			window.setX(screenBounds.getMaxX() / 2.0);
-			window.setY(screenBounds.getMinY() - window.getHeight());
+			window.setX(screenBounds.getMinX() + (screenBounds.getWidth() - window.getWidth()) / 2.0);
+			window.setY(screenBounds.getMinY());
 		}
 	}
 

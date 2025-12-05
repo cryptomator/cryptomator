@@ -139,7 +139,7 @@ public class NotificationController implements FxController {
 	}
 
 	public ObservableBooleanValue buttonVisibleProperty() {
-		return actionText.isEmpty();
+		return actionText.isEmpty().not();
 	}
 
 	public boolean isButtonVisible() {
