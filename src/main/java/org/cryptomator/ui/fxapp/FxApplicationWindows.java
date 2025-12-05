@@ -218,5 +218,4 @@ public class FxApplicationWindows {
 			LOG.error("Failed to display stage", error);
 		}
 	}
-
 }

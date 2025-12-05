@@ -89,7 +89,6 @@ public class FxApplication {
 		launchEventHandler.startHandlingLaunchEvents();
 		fxFSEventList.schedulePollForUpdates();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
-		//TODO: init the NotificationListener
 	}
 
 	private void migrateAndInformDokanyRemoval() {

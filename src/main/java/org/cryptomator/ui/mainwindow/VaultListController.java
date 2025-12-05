@@ -139,7 +139,9 @@ public class VaultListController implements FxController {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
 
-		vaultList.prefHeightProperty().bind(vaultList.fixedCellSizeProperty().multiply(Bindings.size(vaultList.getItems())));
+		vaultList.prefHeightProperty().bind( //
+				vaultList.fixedCellSizeProperty().multiply(Bindings.size(vaultList.getItems())) //
+		);
 
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
@@ -155,8 +157,12 @@ public class VaultListController implements FxController {
 		//unlock vault on double click
 		vaultList.addEventFilter(MouseEvent.MOUSE_CLICKED, click -> {
 			if (click.getClickCount() >= 2) {
-				Optional.ofNullable(selectedVault.get()).filter(Vault::isLocked).ifPresent(vault -> appWindows.startUnlockWorkflow(vault, mainWindow));
-				Optional.ofNullable(selectedVault.get()).filter(Vault::isUnlocked).ifPresent(vaultService::reveal);
+				Optional.ofNullable(selectedVault.get()) //
+						.filter(Vault::isLocked) //
+						.ifPresent(vault -> appWindows.startUnlockWorkflow(vault, mainWindow));
+				Optional.ofNullable(selectedVault.get()) //
+						.filter(Vault::isUnlocked) //
+						.ifPresent(vaultService::reveal);
 			}
 		});
 

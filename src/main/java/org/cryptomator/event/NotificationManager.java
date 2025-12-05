@@ -43,12 +43,10 @@ public class NotificationManager {
 			case BrokenFileNodeEvent bfne -> isRecent(bfne.ciphertextPath(), bfne);
 			default -> false;
 		};
-
 		if(notRecentlyAdded) {
 			synchronized (this) {
 				eventsRequiringNotification.add(e);
 			}
-
 		}
 		return notRecentlyAdded;
 	}
@@ -70,6 +68,4 @@ public class NotificationManager {
 			return result;
 		}
 	}
-
-
 }
