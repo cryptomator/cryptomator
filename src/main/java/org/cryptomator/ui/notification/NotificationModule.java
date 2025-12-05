@@ -12,6 +12,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageInitializer;
+import org.cryptomator.ui.common.SystemBarUtil;
 
 import javax.inject.Provider;
 import javafx.scene.Scene;
@@ -35,24 +36,28 @@ abstract class NotificationModule {
 		stage.initModality(Modality.NONE);
 		stage.setAlwaysOnTop(true);
 		initializer.accept(stage);
-		stage.setOnShown(_ -> placeWindow(stage) );
+		stage.setOnShown(_ -> placeWindow(stage));
 		return stage;
 	}
 
+	//TODO: TEST
 	static void placeWindow(Stage window) {
-		if(SystemUtils.IS_OS_WINDOWS) { //place to right bottom
-			var screenBounds = Screen.getPrimary().getVisualBounds();
-			window.setX(screenBounds.getMaxX() - window.getWidth());
-			window.setY(screenBounds.getMaxY() - window.getHeight());
-		} else if(SystemUtils.IS_OS_MAC) { //place to right top
-			var screenBounds = Screen.getPrimary().getVisualBounds(); //TODO: TEST
-			window.setX(screenBounds.getMaxX() - window.getWidth());
-			window.setY(screenBounds.getMinY());
-		} else { //place to middle top
-			//GNOME; KDE; etc...
-			var screenBounds = Screen.getPrimary().getVisualBounds(); //TODO: TEST
-			window.setX(screenBounds.getMinX() + (screenBounds.getWidth() - window.getWidth()) / 2.0);
-			window.setY(screenBounds.getMinY());
+		var screen = Screen.getPrimary();
+		var vBounds = screen.getVisualBounds();
+		if (SystemUtils.IS_OS_MAC) { //place to right top
+			window.setX(vBounds.getMaxX() - window.getWidth());
+			window.setY(vBounds.getMinY());
+		} else {
+			switch (SystemBarUtil.getPlacementOfSystembar(screen)) {
+				case TOP -> {
+					window.setX(vBounds.getMaxX() - window.getWidth());
+					window.setY(vBounds.getMaxY() - window.getHeight());
+				}
+				default -> {
+					window.setX(vBounds.getMinX() + (vBounds.getWidth() - window.getWidth()) / 2.0);
+					window.setY(vBounds.getMinY());
+				}
+			}
 		}
 	}
 
