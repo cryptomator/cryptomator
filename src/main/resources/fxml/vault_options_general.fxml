@@ -29,7 +29,7 @@
 		<TextFlow styleClass="text-flow" prefWidth="-Infinity">
 			<CheckBox text="%vaultOptions.general.autoLock.lockAfterTimePart1" fx:id="lockAfterTimeCheckbox"/>
 			<Text text=" "/>
-			<NumericTextField fx:id="lockTimeInMinutesTextField" prefWidth="50"/>
+			<NumericTextField fx:id="lockTimeInMinutesTextField" prefWidth="50" accessibleText="%vaultOptions.general.autoLock.accessibleText"/>
 			<Text text=" "/>
 			<FormattedLabel format="%vaultOptions.general.autoLock.lockAfterTimePart2"/>
 		</TextFlow>

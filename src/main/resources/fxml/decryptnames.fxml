@@ -48,12 +48,12 @@
 			</Button>
 		</placeholder>
 		<columns>
-			<TableColumn fx:id="ciphertextColumn" prefWidth="${cipherToCleartextTable.width * 0.5}">
+			<TableColumn fx:id="ciphertextColumn" prefWidth="${cipherToCleartextTable.width * 0.5}" text="%decryptNames.column.encrypted">
 				<graphic>
 					<FontAwesome5IconView glyph="LOCK"/>
 				</graphic>
 			</TableColumn>
-			<TableColumn fx:id="cleartextColumn" prefWidth="${cipherToCleartextTable.width * 0.5}">
+			<TableColumn fx:id="cleartextColumn" prefWidth="${cipherToCleartextTable.width * 0.5}" text="%decryptNames.column.decrypted">
 				<graphic>
 					<FontAwesome5IconView glyph="LOCK_OPEN"/>
 				</graphic>

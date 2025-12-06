@@ -40,7 +40,7 @@
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<FormattedLabel fx:id="descriptionLabel" format="%recoveryKey.create.description" arg1="${controller.vault.displayName}" wrapText="true">
+			<FormattedLabel fx:id="descriptionLabel" format="%recoveryKey.create.description" arg1="${controller.vault.displayName}" wrapText="true" labelFor="$passwordField">
 				<padding>
 					<Insets bottom="6"/>
 				</padding>
