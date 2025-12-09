@@ -11,10 +11,18 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Sends notifications
+ * Notification manager inside the UI domain.
+ * <p>
+ * Polls the {@link NotificationManager} for pending events every {@value POLL_INTERVAL_SECONDS } seconds and
+ * triggers the notification window display when events are available.
+ * Returns an observable list of events requiring a user notification with {@link #getEventsRequiringNotification()}.
+ *
+ * @see NotificationManager
  */
 @FxApplicationScoped
-public class FxNotificationRadar {
+public class FxNotificationManager {
+
+	private static final int POLL_INTERVAL_SECONDS = 1;
 
 	private final NotificationManager notificationManager;
 	private final ScheduledExecutorService scheduler;
@@ -22,7 +30,7 @@ public class FxNotificationRadar {
 	private final ObservableList<VaultEvent> eventsRequiringNotification;
 
 	@Inject
-	public FxNotificationRadar(NotificationManager notificationManager, ScheduledExecutorService scheduler, FxApplicationWindows applicationWindows) {
+	public FxNotificationManager(NotificationManager notificationManager, ScheduledExecutorService scheduler, FxApplicationWindows applicationWindows) {
 		this.notificationManager = notificationManager;
 		this.scheduler = scheduler;
 		this.applicationWindows = applicationWindows;
@@ -30,15 +38,12 @@ public class FxNotificationRadar {
 	}
 
 	public void schedulePollForUpdates() {
-		scheduler.scheduleAtFixedRate(this::checkForPendingNotifications, 0, 1000, TimeUnit.MILLISECONDS);
+		scheduler.scheduleAtFixedRate(this::checkForPendingNotifications, 0, POLL_INTERVAL_SECONDS, TimeUnit.SECONDS);
 	}
 
-	/**
-	 * TODO
-	 */
 	private void checkForPendingNotifications() {
 		Platform.runLater(() -> {
-			if (notificationManager.cloneTo(eventsRequiringNotification)) {
+			if (notificationManager.addTo(eventsRequiringNotification)) {
 				applicationWindows.showNotification();
 			}
 		});

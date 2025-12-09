@@ -30,7 +30,7 @@ public class FxApplication {
 	private final FxApplicationTerminator applicationTerminator;
 	private final AutoUnlocker autoUnlocker;
 	private final FxFSEventList fxFSEventList;
-	private final FxNotificationRadar notificationRadar;
+	private final FxNotificationManager notificationRadar;
 
 	@Inject
 	FxApplication(@Named("startupTime") long startupTime, //
@@ -43,7 +43,7 @@ public class FxApplication {
 				  FxApplicationTerminator applicationTerminator, //
 				  AutoUnlocker autoUnlocker, //
 				  FxFSEventList fxFSEventList, //
-				  FxNotificationRadar notificationRadar) {
+				  FxNotificationManager notificationRadar) {
 		this.startupTime = startupTime;
 		this.environment = environment;
 		this.settings = settings;

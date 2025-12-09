@@ -23,19 +23,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *     <li>it is not added within the last {@value DEBOUNCE_THRESHOLD_SECONDS} seconds</li>
  * </ul>
  *
+ * @see org.cryptomator.ui.fxapp.FxNotificationManager
  */
 @Singleton
 public class NotificationManager {
 
 	private static final int DEBOUNCE_THRESHOLD_SECONDS = 5;
 
-	Cache<FSEventBucket, FilesystemEvent> eventCache;
-	ConcurrentLinkedQueue<VaultEvent> eventsRequiringNotification;
+	private final Cache<FSEventBucket, FilesystemEvent> debounceCache;
+	private final ConcurrentLinkedQueue<VaultEvent> pendingEvents;
 
 	@Inject
 	public NotificationManager() {
-		eventCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(DEBOUNCE_THRESHOLD_SECONDS)).build();
-		eventsRequiringNotification = new ConcurrentLinkedQueue<>();
+		debounceCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(DEBOUNCE_THRESHOLD_SECONDS)).build();
+		pendingEvents = new ConcurrentLinkedQueue<>();
 	}
 
 	/**
@@ -55,9 +56,9 @@ public class NotificationManager {
 	boolean addEvent(Vault v, Path keyPath, FilesystemEvent e) {
 		var key = new FSEventBucket(v, keyPath, e.getClass());
 		var isAdded = new AtomicBoolean(false);
-		eventCache.asMap().computeIfAbsent(key, _ -> {
+		debounceCache.asMap().computeIfAbsent(key, _ -> {
 			synchronized (this) {
-				eventsRequiringNotification.add(new VaultEvent(v, e));
+				pendingEvents.add(new VaultEvent(v, e));
 				isAdded.set(true);
 			}
 			return e;
@@ -66,15 +67,15 @@ public class NotificationManager {
 	}
 
 	/**
-	 * Clones all events requiring a notification to the target list and clears afterward the notification manager queue
+	 * Adds all events to the target list and clears afterward the pending-event-queue
 	 *
-	 * @param target list the queue is cloned to
+	 * @param target list where the filesystem events are copied to
 	 * @return {@code true}, if elements were copied
 	 */
-	public boolean cloneTo(List<VaultEvent> target) {
+	public boolean addTo(List<VaultEvent> target) {
 		synchronized (this) {
-			var result = target.addAll(eventsRequiringNotification);
-			eventsRequiringNotification.clear();
+			var result = target.addAll(pendingEvents);
+			pendingEvents.clear();
 			return result;
 		}
 	}

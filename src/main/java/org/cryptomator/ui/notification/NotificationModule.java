@@ -40,7 +40,21 @@ abstract class NotificationModule {
 		return stage;
 	}
 
-	//TODO: TEST
+	/**
+	 * Places the notification window on the screen according to some heuristic based on operating system and system bar placement.
+	 * <p>
+	 * On macOS, the window is placed in the top-right corner of the primary screen, following platform conventions.
+	 * On other operating systems, the window placement depends on the location of the system bar:
+	 * <ul>
+	 *   <li>If the system bar is at the top, the window is centered horizontally at the top of the screen.</li>
+	 *   <li>Otherwise (e.g., system bar at the bottom or elsewhere), the window is placed in the bottom-right corner.</li>
+	 * </ul>
+	 * <p>
+	 * The method uses the visual bounds of the primary screen to avoid overlapping with system UI elements.
+	 * Assumes the window size has already been set before calling this method.
+	 *
+	 * @param window the Stage representing the notification window to be placed
+	 */
 	static void placeWindow(Stage window) {
 		var screen = Screen.getPrimary();
 		var vBounds = screen.getVisualBounds();

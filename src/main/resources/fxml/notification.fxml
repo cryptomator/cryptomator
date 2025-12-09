@@ -42,7 +42,7 @@
 
 	<bottom>
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Button text="${controller.actionText}" onAction="#handleButtonAction"
+			<Button text="${controller.actionText}" onAction="#processEvent"
 					visible="${controller.buttonVisible}" managed="${controller.buttonVisible}"/>
 			<Region HBox.hgrow="ALWAYS"/>
 			<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#previousNotification">

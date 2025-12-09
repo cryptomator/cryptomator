@@ -2,7 +2,7 @@ package org.cryptomator.ui.notification;
 
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.FxNotificationRadar;
+import org.cryptomator.ui.fxapp.FxNotificationManager;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
@@ -27,7 +27,7 @@ public class NotificationController implements FxController {
 	private static final String BUG_MSG = "IF YOU SEE THIS MESSAGE, PLEASE CONTACT THE DEVELOPERS OF CRYPTOMATOR ABOUT A BUG IN THE NOTIFICATION DISPLAY";
 
 	private final Stage window;
-	private final SimpleListProperty<VaultEvent> notificationsProp;
+	private final SimpleListProperty<VaultEvent> events;
 	private final IntegerProperty selectionIndex;
 	private final ObservableStringValue paging;
 	private final ObjectProperty<VaultEvent> selectedEvent;
@@ -37,18 +37,12 @@ public class NotificationController implements FxController {
 	private final ExecutorService executorService;
 
 	@Inject
-	public NotificationController(@NotificationWindow Stage window, FxNotificationRadar notificationRadar, ExecutorService executorService) {
+	public NotificationController(@NotificationWindow Stage window, FxNotificationManager notificationManager, ExecutorService executorService) {
 		this.window = window;
-		this.notificationsProp = new SimpleListProperty<>(notificationRadar.getEventsRequiringNotification());
-		this.selectionIndex = new SimpleIntegerProperty(0);
+		this.events = new SimpleListProperty<>(notificationManager.getEventsRequiringNotification());
+		this.selectionIndex = new SimpleIntegerProperty(-1);
 		this.selectedEvent = new SimpleObjectProperty<>();
-		selectionIndex.addListener((_, _, n) -> {
-			if (!notificationsProp.isEmpty()) {
-				selectedEvent.setValue(notificationsProp.get(n.intValue()));
-			}
-		});
-		selectedEvent.addListener(this::adjustTexts);
-		this.paging = Bindings.createStringBinding(() -> selectionIndex.get() + 1 + "/" + notificationsProp.size(), selectionIndex, notificationsProp);
+		this.paging = Bindings.createStringBinding(() -> selectionIndex.get() + 1 + "/" + events.size(), selectionIndex, events);
 		this.message = new SimpleStringProperty();
 		this.description = new SimpleStringProperty();
 		this.actionText = new SimpleStringProperty();
@@ -57,11 +51,18 @@ public class NotificationController implements FxController {
 
 	@FXML
 	public void initialize() {
-		selectedEvent.setValue(notificationsProp.get(selectionIndex.get()));
+		selectionIndex.addListener((_, _, n) -> {
+			if (!events.isEmpty()) {
+				selectedEvent.setValue(events.get(n.intValue()));
+			}
+		});
+		selectedEvent.addListener(this::selectTexts);
+
+		selectionIndex.setValue(0);
 	}
 
 	//TODO: Translations!
-	private void adjustTexts(ObservableValue<? extends VaultEvent> observable, VaultEvent oldEvent, VaultEvent newEvent) {
+	private void selectTexts(ObservableValue<? extends VaultEvent> observable, VaultEvent oldEvent, VaultEvent newEvent) {
 		if (newEvent == null) {
 			message.set("NO CONTENT");
 			description.set(BUG_MSG);
@@ -80,7 +81,7 @@ public class NotificationController implements FxController {
 
 
 	@FXML
-	public void handleButtonAction() {
+	public void processEvent() {
 		try {
 			var ev = selectedEvent.get();
 			switch (ev.actualEvent()) {
@@ -91,14 +92,14 @@ public class NotificationController implements FxController {
 		} finally {
 			//remove processed event
 			int i = selectionIndex.get();
-			notificationsProp.remove(i);
-			if (notificationsProp.isEmpty()) {
+			events.remove(i);
+			if (events.isEmpty()) {
 				close(); //no more events
-			} else if (notificationsProp.size() == i) {
+			} else if (events.size() == i) {
 				i = i - 1;
 				selectionIndex.set(i); //triggers event update
 			} else {
-				selectedEvent.set(notificationsProp.get(i));
+				selectedEvent.set(events.get(i));
 			}
 		}
 	}
@@ -114,14 +115,14 @@ public class NotificationController implements FxController {
 	@FXML
 	public void nextNotification() {
 		int i = selectionIndex.get();
-		if (i != notificationsProp.size() - 1) {
+		if (i != events.size() - 1) {
 			selectionIndex.set(i + 1);
 		}
 	}
 
 	@FXML
 	public void close() {
-		notificationsProp.clear();
+		events.clear();
 		window.close();
 	}
 
