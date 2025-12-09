@@ -53,7 +53,7 @@ jobs:
           INTERVAL: 900
           JSON_DATA: ${{ steps.get-stats.outputs.result }}
       - name: Upload Results
-        uses: fjogeleit/http-request-action@1297c6fc63a79b147d1676540a3fd9d2e37817c5 # v1.16.5
+        uses: fjogeleit/http-request-action@c0b95d02a088b47c1f2f4db04fd8af8bd19eee54 # v1.16.6
         with:
           url: 'https://graphite-us-central1.grafana.net/metrics'
           method: 'POST'
