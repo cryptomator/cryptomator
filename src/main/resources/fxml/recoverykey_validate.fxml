@@ -12,7 +12,7 @@
 	  minHeight="145"
 	  spacing="12">
 	<children>
-		<FormattedLabel format="%recoveryKey.recover.prompt" arg1="${controller.vault.displayName}" wrapText="true"/>
+		<FormattedLabel format="%recoveryKey.recover.prompt" arg1="${controller.vault.displayName}" wrapText="true" labelFor="$textarea"/>
 
 		<TextArea wrapText="true" prefRowCount="4" fx:id="textarea" textFormatter="${controller.recoveryKeyTextFormatter}" onKeyPressed="#onKeyPressed"/>
 		<VBox>

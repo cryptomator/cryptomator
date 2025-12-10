@@ -76,13 +76,6 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	@Named("SemVer")
-	static Comparator<String> providesSemVerComparator() {
-		return new SemVerComparator();
-	}
-
-	@Provides
-	@Singleton
 	static Optional<RevealPathService> provideRevealPathService() {
 		return RevealPathService.get().findFirst();
 	}

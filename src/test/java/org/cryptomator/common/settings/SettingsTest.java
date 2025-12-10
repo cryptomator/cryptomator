@@ -9,31 +9,28 @@ import org.cryptomator.common.Environment;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.function.Consumer;
-
 public class SettingsTest {
 
 	@Test
 	public void testAutoSave() {
 		Environment env = Mockito.mock(Environment.class);
-		@SuppressWarnings("unchecked") Consumer<Settings> changeListener = Mockito.mock(Consumer.class);
+		SettingsProvider provider = Mockito.mock(SettingsProvider.class);
 
-		Settings settings = Settings.create(env);
-		settings.setSaveCmd(changeListener);
+		Settings settings = Settings.create(provider, env);
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
-		Mockito.verify(changeListener, Mockito.times(0)).accept(settings);
+		Mockito.verify(provider, Mockito.times(0)).scheduleSave(settings);
 
 		// first change (to property):
 		settings.port.set(42428);
-		Mockito.verify(changeListener, Mockito.times(1)).accept(settings);
+		Mockito.verify(provider, Mockito.times(1)).scheduleSave(settings);
 
 		// second change (to list):
 		settings.directories.add(vaultSettings);
-		Mockito.verify(changeListener, Mockito.times(2)).accept(settings);
+		Mockito.verify(provider, Mockito.times(2)).scheduleSave(settings);
 
 		// third change (to property of list item):
 		vaultSettings.displayName.set("asd");
-		Mockito.verify(changeListener, Mockito.times(3)).accept(settings);
+		Mockito.verify(provider, Mockito.times(3)).scheduleSave(settings);
 	}
 
 }

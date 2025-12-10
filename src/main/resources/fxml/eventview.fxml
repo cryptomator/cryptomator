@@ -20,9 +20,9 @@
 		<padding>
 			<Insets left="6" />
 		</padding>
-		<ChoiceBox fx:id="vaultFilterChoiceBox" minWidth="42"/>
+		<ChoiceBox fx:id="vaultFilterChoiceBox" minWidth="42" accessibleText="%eventView.filterVaults"/>
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button styleClass="button-right" onAction="#clearEvents" contentDisplay="GRAPHIC_ONLY">
+		<Button styleClass="button-right" onAction="#clearEvents" contentDisplay="GRAPHIC_ONLY" accessibleText="%eventView.clearListButton.tooltip">
 			<graphic>
 				<FontAwesome5IconView glyph="TRASH" glyphSize="16"/>
 			</graphic>

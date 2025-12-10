@@ -1,10 +1,8 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
-    <inspection_tool class="SpellCheckingInspection" enabled="true" level="TYPO" enabled_by_default="true">
-      <option name="processCode" value="true" />
-      <option name="processLiterals" value="true" />
-      <option name="processComments" value="true" />
-    </inspection_tool>
+    <inspection_tool class="Deprecation" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="DEPRECATED_ATTRIBUTES" />
+    <inspection_tool class="MarkedForRemoval" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="MARKED_FOR_REMOVAL_ATTRIBUTES" />
+    <inspection_tool class="RedundantScheduledForRemovalAnnotation" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="MARKED_FOR_REMOVAL_ATTRIBUTES" />
   </profile>
 </component>

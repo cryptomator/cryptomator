@@ -26,7 +26,7 @@ import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, //
+@Module(subcomponents = {TrayMenuComponent.class, //
 		DecryptNameComponent.class, //
 		MainWindowComponent.class, //
 		PreferencesComponent.class, //

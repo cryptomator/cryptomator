@@ -96,4 +96,7 @@ class SettingsJson {
 
 	@JsonProperty("previouslyUsedVaultDirectory")
 	Path previouslyUsedVaultDirectory;
+
+	@JsonProperty("lastUpdateAttemptedByVersion")
+	String lastUpdateAttemptedByVersion;
 }

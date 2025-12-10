@@ -47,8 +47,8 @@
 					<FontAwesome5IconView glyph="FUNNEL" glyphSize="${filterLbl.height}" styleClass="glyph-icon-muted"/>
 				</graphic>
 			</Label>
-			<ChoiceBox fx:id="severityChoiceBox" />
-			<ChoiceBox fx:id="fixStateChoiceBox" />
+			<ChoiceBox fx:id="severityChoiceBox" accessibleText="%health.check.detail.filterSeverity"/>
+			<ChoiceBox fx:id="fixStateChoiceBox" accessibleText="%health.check.detail.filterFixState"/>
 		</HBox>
 		<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25">
 			<contextMenu>

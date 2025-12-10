@@ -136,6 +136,7 @@ jobs:
           --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
+          --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --mac-package-identifier org.cryptomator
           --resource-dir dist/mac/resources
