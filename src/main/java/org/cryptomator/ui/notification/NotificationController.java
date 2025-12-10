@@ -81,7 +81,7 @@ public class NotificationController implements FxController {
 
 
 	@FXML
-	public void processEvent() {
+	public void processSelectedEvent() {
 		try {
 			var ev = selectedEvent.get();
 			switch (ev.actualEvent()) {
@@ -90,17 +90,19 @@ public class NotificationController implements FxController {
 				} //normally nothing
 			}
 		} finally {
-			//remove processed event
-			int i = selectionIndex.get();
-			events.remove(i);
-			if (events.isEmpty()) {
-				close(); //no more events
-			} else if (events.size() == i) {
-				i = i - 1;
-				selectionIndex.set(i); //triggers event update
-			} else {
-				selectedEvent.set(events.get(i));
-			}
+			removeSelectedEvent();
+		}
+	}
+
+	private void removeSelectedEvent() {
+		int i = selectionIndex.get();
+		events.remove(i);
+		if (events.isEmpty()) {
+			close(); //no more events
+		} else if (events.size() == i) {
+			selectionIndex.set(i-1); //triggers event update
+		} else {
+			selectedEvent.set(events.get(i));
 		}
 	}
 
@@ -144,20 +146,12 @@ public class NotificationController implements FxController {
 		return description.get();
 	}
 
-	public ObservableValue<String> actionTextProperty() {
+	public StringProperty actionTextProperty() {
 		return actionText;
 	}
 
 	public String getActionText() {
 		return Objects.requireNonNullElse(actionText.get(), "");
-	}
-
-	public ObservableBooleanValue buttonVisibleProperty() {
-		return actionText.isEmpty().not();
-	}
-
-	public boolean isButtonVisible() {
-		return actionText.get() != null && !actionText.get().isBlank();
 	}
 
 	public ObservableStringValue pagingProperty() {

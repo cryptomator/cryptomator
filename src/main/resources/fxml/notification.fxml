@@ -13,7 +13,7 @@
 <BorderPane xmlns="http://javafx.com/javafx"
 			xmlns:fx="http://javafx.com/fxml"
 			fx:controller="org.cryptomator.ui.notification.NotificationController"
-			prefHeight="200.0" prefWidth="300.0" maxHeight="300.0" maxWidth="400.0"
+			prefHeight="200.0" prefWidth="400.0" maxHeight="200.0" maxWidth="400.0"
 			styleClass="notification-window">
 	<padding>
 		<Insets top="12" right="12" bottom="12" left="12"/>
@@ -35,15 +35,14 @@
 
 	<center>
 		<VBox spacing="12">
-			<!--Label text="${controller.message}" styleClass="label-large" wrapText="true"/-->
 			<Label text="${controller.description}" styleClass="label" wrapText="true"/>
 		</VBox>
 	</center>
 
 	<bottom>
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Button text="${controller.actionText}" onAction="#processEvent"
-					visible="${controller.buttonVisible}" managed="${controller.buttonVisible}"/>
+			<Button text="${controller.actionText}" onAction="#processSelectedEvent"
+					visible="${!controller.actionText.empty}" managed="${!controller.actionText.empty}"/>
 			<Region HBox.hgrow="ALWAYS"/>
 			<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#previousNotification">
 				<graphic>
