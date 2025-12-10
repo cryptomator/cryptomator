@@ -31,6 +31,7 @@ public class NotificationController implements FxController {
 	private final IntegerProperty selectionIndex;
 	private final ObservableStringValue paging;
 	private final ObjectProperty<VaultEvent> selectedEvent;
+	private final StringProperty vaultName;
 	private final StringProperty message;
 	private final StringProperty description;
 	private final StringProperty actionText;
@@ -43,6 +44,7 @@ public class NotificationController implements FxController {
 		this.selectionIndex = new SimpleIntegerProperty(-1);
 		this.selectedEvent = new SimpleObjectProperty<>();
 		this.paging = Bindings.createStringBinding(() -> selectionIndex.get() + 1 + "/" + events.size(), selectionIndex, events);
+		this.vaultName = new SimpleStringProperty();
 		this.message = new SimpleStringProperty();
 		this.description = new SimpleStringProperty();
 		this.actionText = new SimpleStringProperty();
@@ -64,6 +66,7 @@ public class NotificationController implements FxController {
 	//TODO: Translations!
 	private void selectTexts(ObservableValue<? extends VaultEvent> observable, VaultEvent oldEvent, VaultEvent newEvent) {
 		if (newEvent == null) {
+			vaultName.set("");
 			message.set("NO CONTENT");
 			description.set(BUG_MSG);
 			actionText.set(null);
@@ -72,6 +75,7 @@ public class NotificationController implements FxController {
 
 		switch (newEvent.actualEvent()) {
 			default -> {
+				vaultName.set(newEvent.v().getDisplayName());
 				message.set("NO CONTENT");
 				description.set(BUG_MSG);
 				actionText.set(null);
@@ -130,6 +134,13 @@ public class NotificationController implements FxController {
 
 
 	//FXML bindings
+	public ObservableValue<String> vaultNameProperty() {
+		return vaultName;
+	}
+
+	public String getVaultName() {
+		return vaultName.get();
+	}
 	public ObservableValue<String> messageProperty() {
 		return message;
 	}

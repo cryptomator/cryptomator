@@ -113,6 +113,11 @@
 	-fx-font-size: 1.2em;
 }
 
+.label-window-title {
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 1.0em;
+}
+
 .label-small {
 	-fx-font-size: 0.8em;
 }
