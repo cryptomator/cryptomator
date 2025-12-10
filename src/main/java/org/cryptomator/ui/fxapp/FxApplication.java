@@ -30,7 +30,7 @@ public class FxApplication {
 	private final FxApplicationTerminator applicationTerminator;
 	private final AutoUnlocker autoUnlocker;
 	private final FxFSEventList fxFSEventList;
-	private final FxNotificationManager notificationRadar;
+	private final FxNotificationManager notificationManager;
 
 	@Inject
 	FxApplication(@Named("startupTime") long startupTime, //
@@ -43,7 +43,7 @@ public class FxApplication {
 				  FxApplicationTerminator applicationTerminator, //
 				  AutoUnlocker autoUnlocker, //
 				  FxFSEventList fxFSEventList, //
-				  FxNotificationManager notificationRadar) {
+				  FxNotificationManager notificationManager) {
 		this.startupTime = startupTime;
 		this.environment = environment;
 		this.settings = settings;
@@ -54,7 +54,7 @@ public class FxApplication {
 		this.applicationTerminator = applicationTerminator;
 		this.autoUnlocker = autoUnlocker;
 		this.fxFSEventList = fxFSEventList;
-		this.notificationRadar = notificationRadar;
+		this.notificationManager = notificationManager;
 	}
 
 	public void start() {
@@ -100,7 +100,7 @@ public class FxApplication {
 
 		launchEventHandler.startHandlingLaunchEvents();
 		fxFSEventList.schedulePollForUpdates();
-		notificationRadar.schedulePollForUpdates();
+		notificationManager.schedulePollForUpdates();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
 	}
 
