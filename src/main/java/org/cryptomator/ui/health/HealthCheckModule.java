@@ -63,8 +63,8 @@ abstract class HealthCheckModule {
 	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
-	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @HealthCheckWindow Vault vault, @Named("unlockWindow") Stage window ) {
-		return compBuilder.vault(vault).window(window).build().keyloadingStrategy();
+	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Factory compFactory, @HealthCheckWindow Vault vault, @Named("unlockWindow") Stage window ) {
+		return compFactory.create(vault, window).keyloadingStrategy();
 	}
 
 	@Provides
