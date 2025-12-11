@@ -10,7 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.event.FileSystemEventAggregator;
+import org.cryptomator.common.FilsystemOwnerSupplier;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -23,6 +23,7 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
@@ -145,15 +146,17 @@ public class Vault {
 			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength.get());
 		}
 
-		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
+		var fsPropsBuilder = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withKeyLoader(keyLoader) //
 				.withFlags(flags) //
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
 				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
-				.withFilesystemEventConsumer(this::consumeVaultEvent) //
-				.withOwner(System.getProperty("user.name"))
-				.build();
-		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
+				.withFilesystemEventConsumer(this::consumeVaultEvent);
+		if (keyLoader instanceof FilsystemOwnerSupplier oo) {
+			fsPropsBuilder.withOwnerGetter(oo::getOwner);
+		}
+
+		return CryptoFileSystemProvider.newFileSystem(getPath(), fsPropsBuilder.build());
 	}
 
 	private void destroyCryptoFileSystem() {

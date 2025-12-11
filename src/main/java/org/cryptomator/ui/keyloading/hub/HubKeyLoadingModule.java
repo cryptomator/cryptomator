@@ -67,6 +67,13 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@Named("userName")
+	@KeyLoadingScoped
+	static AtomicReference<String> provideUserNameRef() {
+		return new AtomicReference<>();
+	}
+
+	@Provides
 	@KeyLoadingScoped
 	static CompletableFuture<ReceivedKey> provideResult() {
 		return new CompletableFuture<>();

@@ -2,6 +2,7 @@ package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
 import dagger.Lazy;
+import org.cryptomator.common.FilsystemOwnerSupplier;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.keychain.NoKeychainAccessProviderException;
 import org.cryptomator.common.settings.DeviceKey;
@@ -23,25 +24,28 @@ import java.net.URI;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoading
-public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
+public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilsystemOwnerSupplier {
 
-	private static final String SCHEME_PREFIX = "hub+";
+	public static final String SCHEME_PREFIX = "hub+";
 	public static final String SCHEME_HUB_HTTP = SCHEME_PREFIX + "http";
 	public static final String SCHEME_HUB_HTTPS = SCHEME_PREFIX + "https";
 
 	private final Stage window;
 	private final KeychainManager keychainManager;
+	private final AtomicReference<String> userName;
 	private final Lazy<Scene> authFlowScene;
 	private final Lazy<Scene> noKeychainScene;
 	private final CompletableFuture<ReceivedKey> result;
 	private final DeviceKey deviceKey;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle, @Named("userName") AtomicReference<String> userName) {
 		this.window = window;
 		this.keychainManager = keychainManager;
+		this.userName = userName;
 		window.setTitle(windowTitle);
 		window.setOnCloseRequest(_ -> result.cancel(true));
 		this.authFlowScene = authFlowScene;
@@ -88,6 +92,15 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 				window.centerOnScreen();
 			}
 		});
+	}
+
+	@Override
+	public String getOwner() {
+		var name = userName.get();
+		if (name == null) {
+			throw new IllegalStateException("Owner is not yet determined");
+		}
+		return name;
 	}
 
 }

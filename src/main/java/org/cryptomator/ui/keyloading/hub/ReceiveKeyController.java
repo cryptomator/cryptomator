@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ReceiveKeyController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ReceiveKeyController.class);
-	private static final String SCHEME_PREFIX = "hub+";
 	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
 	private static final Duration REQ_TIMEOUT = Duration.ofSeconds(10);
 
@@ -50,6 +49,7 @@ public class ReceiveKeyController implements FxController {
 	private final String vaultId;
 	private final String deviceId;
 	private final String bearerToken;
+	private final AtomicReference<String> userName;
 	private final CompletableFuture<ReceivedKey> result;
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> legacyRegisterDeviceScene;
@@ -59,12 +59,25 @@ public class ReceiveKeyController implements FxController {
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
+	public ReceiveKeyController(@KeyLoading Vault vault, //
+								ExecutorService executor, //
+								@KeyLoading Stage window, //
+								HubConfig hubConfig, //
+								@Named("deviceId") String deviceId, //
+								@Named("bearerToken") AtomicReference<String> tokenRef, //
+								@Named("userName") AtomicReference<String> userName, //
+								CompletableFuture<ReceivedKey> result, //
+								@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, //
+								@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, //
+								@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, //
+								@FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, //
+								@FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.vaultId = extractVaultId(vault.getVaultConfigCache().getUnchecked().getKeyId()); // TODO: access vault config's JTI directly (requires changes in cryptofs)
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
+		this.userName = userName;
 		this.result = result;
 		this.registerDeviceScene = registerDeviceScene;
 		this.legacyRegisterDeviceScene = legacyRegisterDeviceScene;
@@ -81,7 +94,34 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	public void receiveKey() {
-		requestApiConfig();
+		requestUserData();
+	}
+
+	private void requestUserData() {
+		var userUri = hubConfig.URIs.API.resolve("users/me?withDevices=false");
+		var request = HttpRequest.newBuilder(userUri) //
+				.header("Authorization", "Bearer " + bearerToken) //
+				.GET() //
+				.timeout(REQ_TIMEOUT) //
+				.build();
+		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
+				.thenAcceptAsync(this::receivedUserData) //
+				.exceptionally(this::retrievalFailed);
+	}
+
+	private void receivedUserData(HttpResponse<String> response) {
+		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
+		try {
+			if (response.statusCode() == 200) {
+				var user = JSON.reader().readValue(response.body(), UserDto.class);
+				userName.set(user.name);
+				requestApiConfig();
+			} else {
+				throw new IllegalStateException("Unexpected response " + response.statusCode());
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	/**
@@ -289,10 +329,13 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	private static String extractVaultId(URI vaultKeyUri) {
-		assert vaultKeyUri.getScheme().startsWith(SCHEME_PREFIX);
+		assert vaultKeyUri.getScheme().startsWith(HubKeyLoadingStrategy.SCHEME_PREFIX);
 		var path = vaultKeyUri.getPath();
 		return path.substring(path.lastIndexOf('/') + 1);
 	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private record UserDto(@JsonProperty(value = "name", required = true) String name) {}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	private record DeviceDto(@JsonProperty(value = "userPrivateKey", required = true) String userPrivateKey) {}
