@@ -80,10 +80,9 @@ public class NotificationController implements FxController {
 		vaultName.set(newEvent.v().getDisplayName());
 		switch (newEvent.actualEvent()) {
 			case FileIsInUseEvent fiiue -> {
-				//TODO: Translations!
-				message.set("File is locked");
-				description.set("The file %s is locked by user %s. Ask the user to close the file. Otherwise, you can ignore the lock and open it anyway.".formatted(fiiue.cleartextPath(), fiiue.owner()));
-				actionText.set("Ignore Lock");
+				message.set(resourceBundle.getString("notification.inUse.message"));
+				description.set(resourceBundle.getString("notification.inUse.description").formatted(fiiue.cleartextPath(), fiiue.owner()));
+				actionText.set(resourceBundle.getString("notification.inUse.action"));
 			}
 			default -> {
 				message.set("NO CONTENT");
