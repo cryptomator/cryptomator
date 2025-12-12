@@ -13,7 +13,6 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -31,6 +30,7 @@ public class NotificationController implements FxController {
 	private final IntegerProperty selectionIndex;
 	private final ObservableStringValue paging;
 	private final ObjectProperty<VaultEvent> selectedEvent;
+	private final ObservableValue<Boolean> singleEvent;
 	private final StringProperty vaultName;
 	private final StringProperty message;
 	private final StringProperty description;
@@ -43,6 +43,7 @@ public class NotificationController implements FxController {
 		this.events = new SimpleListProperty<>(notificationManager.getEventsRequiringNotification());
 		this.selectionIndex = new SimpleIntegerProperty(-1);
 		this.selectedEvent = new SimpleObjectProperty<>();
+		this.singleEvent = events.sizeProperty().map(size -> size.intValue() == 1);
 		this.paging = Bindings.createStringBinding(() -> selectionIndex.get() + 1 + "/" + events.size(), selectionIndex, events);
 		this.vaultName = new SimpleStringProperty();
 		this.message = new SimpleStringProperty();
@@ -104,7 +105,7 @@ public class NotificationController implements FxController {
 		if (events.isEmpty()) {
 			close(); //no more events
 		} else if (events.size() == i) {
-			selectionIndex.set(i-1); //triggers event update
+			selectionIndex.set(i - 1); //triggers event update
 		} else {
 			selectedEvent.set(events.get(i));
 		}
@@ -141,6 +142,7 @@ public class NotificationController implements FxController {
 	public String getVaultName() {
 		return vaultName.get();
 	}
+
 	public ObservableValue<String> messageProperty() {
 		return message;
 	}
@@ -171,6 +173,14 @@ public class NotificationController implements FxController {
 
 	public String getPaging() {
 		return paging.get();
+	}
+
+	public ObservableValue<Boolean> singleEventProperty() {
+		return singleEvent;
+	}
+
+	public boolean isSingleEvent() {
+		return singleEvent.getValue();
 	}
 
 }

@@ -27,17 +27,19 @@
 				</ImageView>
 				<Label text="Cryptomator" styleClass="label-window-title"/>
 				<Region HBox.hgrow="ALWAYS"/>
-				<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#previousNotification">
-					<graphic>
-						<FontAwesome5IconView glyph="CHEVRON_LEFT" glyphSize="12"/>
-					</graphic>
-				</Button>
-				<Label text="${controller.paging}" styleClass="label"/>
-				<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#nextNotification">
-					<graphic>
-						<FontAwesome5IconView glyph="CHEVRON_RIGHT" glyphSize="12"/>
-					</graphic>
-				</Button>
+				<HBox styleClass="dialog-header" alignment="CENTER_LEFT" visible="${!controller.singleEvent}">
+					<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#previousNotification">
+						<graphic>
+							<FontAwesome5IconView glyph="CHEVRON_LEFT" glyphSize="12"/>
+						</graphic>
+					</Button>
+					<Label text="${controller.paging}" styleClass="label-window-title"/>
+					<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#nextNotification">
+						<graphic>
+							<FontAwesome5IconView glyph="CHEVRON_RIGHT" glyphSize="12"/>
+						</graphic>
+					</Button>
+				</HBox>
 				<Button contentDisplay="GRAPHIC_ONLY" onAction="#close" styleClass="close-button">
 					<graphic>
 						<FontAwesome5IconView glyph="TIMES" glyphSize="12"/>
@@ -55,7 +57,9 @@
 			</padding>
 			<Label text="${controller.message}" styleClass="label-large" wrapText="true"/>
 			<Label text="${controller.vaultName}" styleClass="label-small" wrapText="true"/>
+			<Region minHeight="6"/>
 			<Label text="${controller.description}" styleClass="label" wrapText="true"/>
+			<Region VBox.vgrow="ALWAYS"/>
 			<Button text="${controller.actionText}" onAction="#processSelectedEvent"
 					visible="${!controller.actionText.empty}" managed="${!controller.actionText.empty}"/>
 		</VBox>
