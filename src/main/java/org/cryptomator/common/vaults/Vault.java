@@ -10,7 +10,6 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -23,6 +22,7 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.event.NotificationManager;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
@@ -92,7 +92,7 @@ public class Vault {
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
 		  Mounter mounter, Settings settings, //
-		  FileSystemEventAggregator fileSystemEventAggregator,
+		  FileSystemEventAggregator fileSystemEventAggregator, //
 		  NotificationManager notificationManager) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
