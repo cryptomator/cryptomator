@@ -1,5 +1,6 @@
 package org.cryptomator.ui.notification;
 
+import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxNotificationManager;
@@ -18,6 +19,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 @NotificationScoped
@@ -27,6 +29,7 @@ public class NotificationController implements FxController {
 
 	private final Stage window;
 	private final SimpleListProperty<VaultEvent> events;
+	private final ResourceBundle resourceBundle;
 	private final IntegerProperty selectionIndex;
 	private final ObservableStringValue paging;
 	private final ObjectProperty<VaultEvent> selectedEvent;
@@ -38,9 +41,10 @@ public class NotificationController implements FxController {
 	private final ExecutorService executorService;
 
 	@Inject
-	public NotificationController(@NotificationWindow Stage window, FxNotificationManager notificationManager, ExecutorService executorService) {
+	public NotificationController(@NotificationWindow Stage window, FxNotificationManager notificationManager, ExecutorService executorService, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.events = new SimpleListProperty<>(notificationManager.getEventsRequiringNotification());
+		this.resourceBundle = resourceBundle;
 		this.selectionIndex = new SimpleIntegerProperty(-1);
 		this.selectedEvent = new SimpleObjectProperty<>();
 		this.singleEvent = events.sizeProperty().map(size -> size.intValue() == 1);
@@ -64,7 +68,6 @@ public class NotificationController implements FxController {
 		selectionIndex.setValue(0);
 	}
 
-	//TODO: Translations!
 	private void selectTexts(ObservableValue<? extends VaultEvent> observable, VaultEvent oldEvent, VaultEvent newEvent) {
 		if (newEvent == null) {
 			vaultName.set("");
@@ -74,9 +77,15 @@ public class NotificationController implements FxController {
 			return;
 		}
 
+		vaultName.set(newEvent.v().getDisplayName());
 		switch (newEvent.actualEvent()) {
+			case FileIsInUseEvent fiiue -> {
+				//TODO: Translations!
+				message.set("File is locked");
+				description.set("The file %s is locked by user %s. Ask the user to close the file. Otherwise, you can ignore the lock and open it anyway.".formatted(fiiue.cleartextPath(), fiiue.owner()));
+				actionText.set("Ignore Lock");
+			}
 			default -> {
-				vaultName.set(newEvent.v().getDisplayName());
 				message.set("NO CONTENT");
 				description.set(BUG_MSG);
 				actionText.set(null);
@@ -90,7 +99,9 @@ public class NotificationController implements FxController {
 		try {
 			var ev = selectedEvent.get();
 			switch (ev.actualEvent()) {
-				//TODO: executorService.submit(callback.action());
+				case FileIsInUseEvent fiiue -> {
+					executorService.submit(fiiue.ignoreMethod());
+				}
 				default -> {
 				} //normally nothing
 			}

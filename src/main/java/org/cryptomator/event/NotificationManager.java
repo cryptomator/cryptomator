@@ -3,6 +3,7 @@ package org.cryptomator.event;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
 
 import javax.inject.Inject;
@@ -48,7 +49,7 @@ public class NotificationManager {
 	 */
 	public boolean offer(Vault v, FilesystemEvent e) {
 		return switch (e) {
-			//example: case BrokenFileNodeEvent bfne -> addEvent(v, bfne.ciphertextPath(), bfne);
+			case FileIsInUseEvent fiiue -> addEvent(v, fiiue.ciphertextPath(), fiiue);
 			default -> false;
 		};
 	}
