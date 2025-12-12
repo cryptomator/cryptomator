@@ -2,7 +2,7 @@ package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
 import dagger.Lazy;
-import org.cryptomator.common.FilsystemOwnerSupplier;
+import org.cryptomator.common.FilesystemOwnerSupplier;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.keychain.NoKeychainAccessProviderException;
 import org.cryptomator.common.settings.DeviceKey;
@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoading
-public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilsystemOwnerSupplier {
+public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwnerSupplier {
 
 	public static final String SCHEME_PREFIX = "hub+";
 	public static final String SCHEME_HUB_HTTP = SCHEME_PREFIX + "http";

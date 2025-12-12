@@ -4,7 +4,7 @@ package org.cryptomator.common;
  * Objects which has some kind of owner.
  */
 @FunctionalInterface
-public interface FilsystemOwnerSupplier {
+public interface FilesystemOwnerSupplier {
 
 	/**
 	 * Get the object owner.

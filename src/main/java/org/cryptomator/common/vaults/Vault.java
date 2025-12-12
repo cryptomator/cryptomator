@@ -10,7 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.common.FilsystemOwnerSupplier;
+import org.cryptomator.common.FilesystemOwnerSupplier;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -156,7 +156,7 @@ public class Vault {
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
 				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
 				.withFilesystemEventConsumer(this::consumeVaultEvent);
-		if (keyLoader instanceof FilsystemOwnerSupplier oo) {
+		if (keyLoader instanceof FilesystemOwnerSupplier oo) {
 			fsPropsBuilder.withOwnerGetter(oo::getOwner);
 		}
 
