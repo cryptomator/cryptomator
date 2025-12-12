@@ -39,9 +39,9 @@
 		<CheckBox fx:id="expertSettingsCheckBox" text="%addvaultwizard.new.expertSettings.enableExpertSettingsCheckbox" onAction="#toggleUseExpertSettings"/>
 		<VBox spacing="6" visible="${expertSettingsCheckBox.selected}">
 			<HBox spacing="2" HBox.hgrow="NEVER">
-				<Label text="%addvaultwizard.new.expertSettings.shorteningThreshold.title"/>
+				<Label text="%addvaultwizard.new.expertSettings.shorteningThreshold.title" labelFor="$shorteningThresholdTextField"/>
 				<Region prefWidth="2"/>
-				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" accessibleText="%addvaultwizard.new.expertSettings.shorteningThreshold.tooltip">
 					<graphic>
 						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 					</graphic>

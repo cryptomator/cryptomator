@@ -22,14 +22,14 @@
 	</padding>
 	<children>
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.general.vaultName"/>
+			<Label text="%vaultOptions.general.vaultName" labelFor="$vaultName"/>
 			<TextField fx:id="vaultName"/>
 		</HBox>
 
 		<TextFlow styleClass="text-flow" prefWidth="-Infinity">
 			<CheckBox text="%vaultOptions.general.autoLock.lockAfterTimePart1" fx:id="lockAfterTimeCheckbox"/>
 			<Text text=" "/>
-			<NumericTextField fx:id="lockTimeInMinutesTextField" prefWidth="50"/>
+			<NumericTextField fx:id="lockTimeInMinutesTextField" prefWidth="50" accessibleText="%vaultOptions.general.autoLock.accessibleText"/>
 			<Text text=" "/>
 			<FormattedLabel format="%vaultOptions.general.autoLock.lockAfterTimePart2"/>
 		</TextFlow>
@@ -37,7 +37,7 @@
 		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>
 
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.general.actionAfterUnlock"/>
+			<Label text="%vaultOptions.general.actionAfterUnlock" labelFor="$actionAfterUnlockChoiceBox"/>
 			<ChoiceBox fx:id="actionAfterUnlockChoiceBox"/>
 		</HBox>
 

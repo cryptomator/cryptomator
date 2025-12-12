@@ -1,5 +1,6 @@
 package org.cryptomator.ui.eventview;
 
+import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.event.FSEventBucket;
 import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.event.FileSystemEventAggregator;
@@ -115,7 +116,7 @@ public class EventListCellController implements FxController {
 		eventActionsMenu.hide();
 		eventActionsMenu.getItems().clear();
 		eventTooltip.setText(item.getKey().vault().getDisplayName());
-		addAction("generic.action.dismiss", () -> {
+		addLocalizedAction("generic.action.dismiss", () -> {
 			fileSystemEventAggregator.remove(item.getKey());
 		});
 		switch (item.getValue().mostRecentEvent()) {
@@ -124,7 +125,23 @@ public class EventListCellController implements FxController {
 			case DecryptionFailedEvent fse -> this.adjustToDecryptionFailedEvent(fse);
 			case BrokenDirFileEvent fse -> this.adjustToBrokenDirFileEvent(fse);
 			case BrokenFileNodeEvent fse -> this.adjustToBrokenFileNodeEvent(fse);
+			case FileIsInUseEvent fse -> this.adjustToFileInUseEvent(fse);
 		}
+	}
+
+	private void adjustToFileInUseEvent(FileIsInUseEvent fse) {
+		eventIcon.setValue(FontAwesome5Icon.TIMES);
+		eventMessage.setValue("File is in use by " + fse.owner());
+		var indexFileName = fse.cleartextPath().lastIndexOf("/");
+		eventDescription.setValue(fse.cleartextPath().substring(indexFileName + 1));
+		if (revealService != null) {
+			addAction("Show decrypted file", () -> reveal(revealService, convertVaultPathToSystemPath(fse.cleartextPath())));
+			addAction("Show encrypted Path", () -> reveal(revealService, fse.ciphertextPath()));
+		} else {
+			addAction("Copy decrypted Path", () -> copyToClipboard(convertVaultPathToSystemPath(fse.cleartextPath()).toString()));
+			addAction("Copy encrypted Path", () -> copyToClipboard(fse.ciphertextPath().toString()));
+		}
+		addAction("Ignore in use status ", fse.ignoreMethod());
 	}
 
 
@@ -133,11 +150,11 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.brokenFileNode.message"));
 		eventDescription.setValue(bfe.ciphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("eventView.entry.brokenFileNode.showEncrypted", () -> reveal(revealService, bfe.ciphertextPath()));
+			addLocalizedAction("eventView.entry.brokenFileNode.showEncrypted", () -> reveal(revealService, bfe.ciphertextPath()));
 		} else {
-			addAction("eventView.entry.brokenFileNode.copyEncrypted", () -> copyToClipboard(bfe.ciphertextPath().toString()));
+			addLocalizedAction("eventView.entry.brokenFileNode.copyEncrypted", () -> copyToClipboard(bfe.ciphertextPath().toString()));
 		}
-		addAction("eventView.entry.brokenFileNode.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.cleartextPath()).toString()));
+		addLocalizedAction("eventView.entry.brokenFileNode.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.cleartextPath()).toString()));
 	}
 
 	private void adjustToConflictResolvedEvent(ConflictResolvedEvent cre) {
@@ -145,9 +162,9 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.conflictResolved.message"));
 		eventDescription.setValue(cre.resolvedCiphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("eventView.entry.conflictResolved.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
+			addLocalizedAction("eventView.entry.conflictResolved.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
 		} else {
-			addAction("eventView.entry.conflictResolved.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cre.resolvedCleartextPath()).toString()));
+			addLocalizedAction("eventView.entry.conflictResolved.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cre.resolvedCleartextPath()).toString()));
 		}
 	}
 
@@ -156,11 +173,11 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.conflict.message"));
 		eventDescription.setValue(cfe.conflictingCiphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("eventView.entry.conflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
-			addAction("eventView.entry.conflict.showEncrypted", () -> reveal(revealService, cfe.conflictingCiphertextPath()));
+			addLocalizedAction("eventView.entry.conflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
+			addLocalizedAction("eventView.entry.conflict.showEncrypted", () -> reveal(revealService, cfe.conflictingCiphertextPath()));
 		} else {
-			addAction("eventView.entry.conflict.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cfe.canonicalCleartextPath()).toString()));
-			addAction("eventView.entry.conflict.copyEncrypted", () -> copyToClipboard(cfe.conflictingCiphertextPath().toString()));
+			addLocalizedAction("eventView.entry.conflict.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cfe.canonicalCleartextPath()).toString()));
+			addLocalizedAction("eventView.entry.conflict.copyEncrypted", () -> copyToClipboard(cfe.conflictingCiphertextPath().toString()));
 		}
 	}
 
@@ -169,9 +186,9 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.decryptionFailed.message"));
 		eventDescription.setValue(dfe.ciphertextPath().getFileName().toString());
 		if (revealService != null) {
-			addAction("eventView.entry.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
+			addLocalizedAction("eventView.entry.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
 		} else {
-			addAction("eventView.entry.decryptionFailed.copyEncrypted", () -> copyToClipboard(dfe.ciphertextPath().toString()));
+			addLocalizedAction("eventView.entry.decryptionFailed.copyEncrypted", () -> copyToClipboard(dfe.ciphertextPath().toString()));
 		}
 	}
 
@@ -180,14 +197,19 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.brokenDirFile.message"));
 		eventDescription.setValue(bde.ciphertextPath().getParent().getFileName().toString());
 		if (revealService != null) {
-			addAction("eventView.entry.brokenDirFile.showEncrypted", () -> reveal(revealService, bde.ciphertextPath()));
+			addLocalizedAction("eventView.entry.brokenDirFile.showEncrypted", () -> reveal(revealService, bde.ciphertextPath()));
 		} else {
-			addAction("eventView.entry.brokenDirFile.copyEncrypted", () -> copyToClipboard(bde.ciphertextPath().toString()));
+			addLocalizedAction("eventView.entry.brokenDirFile.copyEncrypted", () -> copyToClipboard(bde.ciphertextPath().toString()));
 		}
 	}
 
-	private void addAction(String localizationKey, Runnable action) {
-		var entry = new MenuItem(resourceBundle.getString(localizationKey));
+	private void addLocalizedAction(String localizationKey, Runnable action) {
+		var entryText = resourceBundle.getString(localizationKey);
+		addAction(entryText, action);
+	}
+
+	private void addAction(String entryText, Runnable action) {
+		var entry = new MenuItem(entryText);
 		entry.getStyleClass().addLast("dropdown-button-context-menu-item");
 		entry.setOnAction(_ -> action.run());
 		eventActionsMenu.getItems().addLast(entry);
@@ -234,18 +256,14 @@ public class EventListCellController implements FxController {
 		}
 	}
 
-	private Path convertVaultPathToSystemPath(Path p) {
-		if (!(p instanceof CryptoPath)) {
-			throw new IllegalArgumentException("Path " + p + " is not a vault path");
-		}
+	private Path convertVaultPathToSystemPath(String vaultInternalPath) {
 		var v = eventEntry.getValue().getKey().vault();
 		if (!v.isUnlocked()) {
 			return Path.of(System.getProperty("user.home"));
 		}
 
 		var mountUri = v.getMountPoint().uri();
-		var internalPath = p.toString().substring(1);
-		return Path.of(mountUri.getPath().concat(internalPath).substring(1));
+		return Path.of(mountUri.getPath().concat(vaultInternalPath.substring(1)).substring(1));
 	}
 
 	private void reveal(RevealPathService s, Path p) {

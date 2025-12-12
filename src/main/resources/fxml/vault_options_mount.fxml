@@ -26,9 +26,9 @@
 	</padding>
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.mount.volume.type"/>
+			<Label text="%vaultOptions.mount.volume.type" labelFor="$vaultVolumeTypeChoiceBox"/>
 			<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}">
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}" accessibleText="%vaultOptions.mount.info">
 				<graphic>
 					<FontAwesome5IconView glyph="COGS" styleClass="glyph-icon-muted"/>
 				</graphic>
@@ -36,7 +36,7 @@
 					<Tooltip text="%vaultOptions.mount.info" showDelay="100ms"/>
 				</tooltip>
 			</Hyperlink>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}">
+			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}" accessibleText="%preferences.volume.docsTooltip">
 				<graphic>
 					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 				</graphic>
@@ -49,7 +49,7 @@
 		<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.restartRequired" visible="${controller.selectedMountServiceRequiresRestart}" managed="${controller.selectedMountServiceRequiresRestart}"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortChangeable}" managed="${controller.loopbackPortChangeable}">
-			<Label text="%vaultOptions.mount.volume.tcp.port"/>
+			<Label text="%vaultOptions.mount.volume.tcp.port" labelFor="$vaultLoopbackPortField"/>
 			<NumericTextField fx:id="vaultLoopbackPortField"/>
 			<Button text="%generic.button.apply" fx:id="vaultLoopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
 		</HBox>
@@ -58,7 +58,7 @@
 
 		<VBox visible="${controller.mountFlagsSupported}" managed="${controller.mountFlagsSupported}">
 			<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags"/>
-			<TextField fx:id="mountFlagsField" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+			<TextField fx:id="mountFlagsField" HBox.hgrow="ALWAYS" maxWidth="Infinity" accessibleText="%vaultOptions.mount.customMountFlags">
 				<VBox.margin>
 					<Insets left="24"/>
 				</VBox.margin>
@@ -75,7 +75,7 @@
 
 		<HBox spacing="6" visible="${controller.mountpointDriveLetterSupported}" managed="${controller.mountpointDriveLetterSupported}">
 			<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDriveLetterBtn" text="%vaultOptions.mount.mountPoint.driveLetter"/>
-			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointDriveLetterBtn.selected}"/>
+			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointDriveLetterBtn.selected}" accessibleText="%vaultOptions.mount.mountPoint.driveLetter"/>
 		</HBox>
 
 		<VBox spacing="6" visible="${controller.mountpointDirSupported}" managed="${controller.mountpointDirSupported}">
@@ -87,7 +87,7 @@
 					</graphic>
 				</Button>
 			</HBox>
-			<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false">
+			<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false" accessibleText="%vaultOptions.mount.mountPoint.custom">
 				<VBox.margin>
 					<Insets left="24"/>
 				</VBox.margin>
