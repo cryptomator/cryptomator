@@ -13,6 +13,7 @@ import org.cryptomator.ui.eventview.EventViewComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
+import org.cryptomator.ui.notification.NotificationComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
@@ -39,7 +40,8 @@ import java.io.InputStream;
 		UpdateReminderComponent.class, //
 		ShareVaultComponent.class, //
 		EventViewComponent.class, //
-		RecoveryKeyComponent.class})
+		RecoveryKeyComponent.class, //
+		NotificationComponent.class })
 abstract class FxApplicationModule {
 
 	private static Image createImageFromResource(String resourceName) throws IOException {

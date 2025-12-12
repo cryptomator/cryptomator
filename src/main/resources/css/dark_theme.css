@@ -113,6 +113,11 @@
 	-fx-font-size: 1.2em;
 }
 
+.label-window-title {
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 1.0em;
+}
+
 .label-small {
 	-fx-font-size: 0.8em;
 }
@@ -1185,4 +1190,61 @@
 .table-view .empty-table {
     -fx-background-color: MAIN_BG;
     -fx-font-size: 1.166667em; /* 14pt - 2 more than the default font */
+}
+/*******************************************************************************
+ *                                                                             *
+ * Notification Window
+ *                                                                             *
+ ******************************************************************************/
+.notification-window {
+	-fx-background-color: MAIN_BG;
+	-fx-background-radius: 8px;
+	-fx-border-radius: 8px;
+	-fx-background-insets: 0;
+	-fx-border-color: MUTED_BG;
+	-fx-border-width: 1px;
+	-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 28, 0.35, 0, 6);
+}
+
+.notification-window .dialog-header {
+	-fx-alignment: center-left;
+}
+
+.notification-window .close-button {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-padding: 6 8 6 8;
+}
+
+.notification-window .close-button:hover {
+	-fx-background-color: CONTROL_BG_HOVER;
+	-fx-background-radius: 8;
+}
+
+.notification-window .close-button:pressed {
+	-fx-background-color: CONTROL_BG_ARMED;
+}
+
+.notification-window .action-button:hover {
+	-fx-background-color: CONTROL_BG_HOVER;
+	-fx-border-color: CONTROL_BORDER_FOCUSED;
+}
+
+.notification-window .action-button:pressed {
+	-fx-background-color: CONTROL_BG_ARMED;
+}
+
+.notification-window .nav-button {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-padding: 6 8 6 8;
+}
+
+.notification-window .nav-button:hover {
+	-fx-background-color: CONTROL_BG_HOVER;
+	-fx-background-radius: 8;
+}
+
+.notification-window .nav-button:pressed {
+	-fx-background-color: CONTROL_BG_ARMED;
 }

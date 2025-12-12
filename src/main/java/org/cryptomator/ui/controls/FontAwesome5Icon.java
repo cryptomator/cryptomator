@@ -12,6 +12,8 @@ public enum FontAwesome5Icon {
 	CARET_DOWN("\uF0D7"), //
 	CARET_RIGHT("\uF0Da"), //
 	CHECK("\uF00C"), //
+	CHEVRON_LEFT("\uF053"), //
+	CHEVRON_RIGHT("\uF054"), //
 	CLOCK("\uF017"), //
 	CLIPBOARD("\uF328"), //
 	COG("\uF013"), //

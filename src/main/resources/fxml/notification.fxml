@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<BorderPane xmlns="http://javafx.com/javafx"
+			xmlns:fx="http://javafx.com/fxml"
+			fx:controller="org.cryptomator.ui.notification.NotificationController"
+			prefHeight="200.0" prefWidth="400.0" maxHeight="200.0" maxWidth="400.0"
+			styleClass="notification-window">
+	<padding>
+		<Insets top="12" right="12" bottom="12" left="12"/>
+	</padding>
+	<top>
+		<VBox >
+			<HBox spacing="6" styleClass="dialog-header" alignment="CENTER_LEFT">
+				<ImageView fitHeight="12" preserveRatio="true" cache="true">
+					<Image url="@../img/logo64.png"/>
+				</ImageView>
+				<Label text="Cryptomator" styleClass="label-window-title"/>
+				<Region HBox.hgrow="ALWAYS"/>
+				<HBox styleClass="dialog-header" alignment="CENTER_LEFT" visible="${!controller.singleEvent}">
+					<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#previousNotification" accessibleText="%generic.button.previous">
+						<graphic>
+							<FontAwesome5IconView glyph="CHEVRON_LEFT" glyphSize="12"/>
+						</graphic>
+					</Button>
+					<Label text="${controller.paging}" styleClass="label-window-title"/>
+					<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#nextNotification" accessibleText="%generic.button.next">
+						<graphic>
+							<FontAwesome5IconView glyph="CHEVRON_RIGHT" glyphSize="12"/>
+						</graphic>
+					</Button>
+				</HBox>
+				<Button contentDisplay="GRAPHIC_ONLY" onAction="#close" styleClass="close-button" accessibleText="%generic.button.close">
+					<graphic>
+						<FontAwesome5IconView glyph="TIMES" glyphSize="12"/>
+					</graphic>
+				</Button>
+			</HBox>
+			<Separator orientation="HORIZONTAL"/>
+		</VBox>
+	</top>
+
+	<center>
+		<VBox>
+			<padding>
+				<Insets top="6"/>
+			</padding>
+			<Label text="${controller.message}" styleClass="label-large" wrapText="true"/>
+			<Label text="${controller.vaultName}" styleClass="label-small" wrapText="true"/>
+			<Region minHeight="6"/>
+			<Label text="${controller.description}" styleClass="label" wrapText="true"/>
+			<Region VBox.vgrow="ALWAYS"/>
+			<Button text="${controller.actionText}" onAction="#processSelectedEvent"
+					visible="${!controller.actionText.empty}" managed="${!controller.actionText.empty}"/>
+		</VBox>
+	</center>
+</BorderPane>
