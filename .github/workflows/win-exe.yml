@@ -51,9 +51,9 @@ jobs:
             java-version: '25.0.1+8'
             java-package: 'jdk'
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Setup Java
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
         with:
           distribution: ${{ matrix.java-dist }}
           java-version: ${{ matrix.java-version }}
@@ -200,7 +200,7 @@ jobs:
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign DLLs with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
+        uses: skymatic/workflows/.github/actions/win-sign-action@1074588008ae3326a2221ea451783280518f0366 # no specific version
         with:
           base-dir: 'appdir'
           file-extensions: 'dll,exe,ps1'
@@ -277,7 +277,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: msi-${{ matrix.arch }}
           path: |
@@ -299,21 +299,21 @@ jobs:
             java-version: '24.0.1+9'
             java-package: 'jdk'
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Install wix and extensions
         run: |
           dotnet tool install --global wix --version 6.0.0
           wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global
           wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
       - name: Download .msi
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: msi-${{ matrix.arch }}
           path: dist/win/bundle/resources
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
       - name: Setup Java
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
         with:
           distribution: ${{ matrix.java-dist }}
           java-version: ${{ matrix.java-version }}
@@ -376,7 +376,7 @@ jobs:
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign burn engine with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
+        uses: skymatic/workflows/.github/actions/win-sign-action@1074588008ae3326a2221ea451783280518f0366 # no specific version
         with:
           base-dir: 'tmp'
           file-extensions: 'exe'
@@ -400,7 +400,7 @@ jobs:
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign installer with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@450e322ff2214d0be0b079b63343c894f3ef735f # no specific version
+        uses: skymatic/workflows/.github/actions/win-sign-action@1074588008ae3326a2221ea451783280518f0366 # no specific version
         with:
           base-dir: 'installer'
           file-extensions: 'exe'
@@ -418,7 +418,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: exe-${{ matrix.executable-suffix }}
           path: |
@@ -436,12 +436,12 @@ jobs:
       download-url-exe-x64: ${{ fromJSON(steps.publish.outputs.assets)[2].browser_download_url }}
     steps:
       - name: Download installers
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           merge-multiple: true
       - name: Publish installers on GitHub Releases
         id: publish
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
