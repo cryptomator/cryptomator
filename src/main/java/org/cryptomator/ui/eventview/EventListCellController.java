@@ -262,8 +262,8 @@ public class EventListCellController implements FxController {
 			return Path.of(System.getProperty("user.home"));
 		}
 
-		var mountUri = v.getMountPoint().uri();
-		return Path.of(mountUri.getPath().concat(vaultInternalPath.substring(1)).substring(1));
+		var mountPoint = v.getMountPoint().uri().getPath().substring(1);
+		return Path.of(mountPoint, vaultInternalPath.substring(1)); //vaultPaths are always absolute
 	}
 
 	private void reveal(RevealPathService s, Path p) {
