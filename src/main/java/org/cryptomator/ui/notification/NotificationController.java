@@ -4,6 +4,8 @@ import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxNotificationManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
@@ -25,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 @NotificationScoped
 public class NotificationController implements FxController {
 
+	private static final Logger LOG = LoggerFactory.getLogger(NotificationController.class);
 	private static final String BUG_MSG = "IF YOU SEE THIS MESSAGE, PLEASE CONTACT THE DEVELOPERS OF CRYPTOMATOR ABOUT A BUG IN THE NOTIFICATION DISPLAY";
 
 	private final Stage window;
@@ -111,9 +114,15 @@ public class NotificationController implements FxController {
 
 	private void removeSelectedEvent() {
 		int i = selectionIndex.get();
+		var size = events.size();
+		if( i < 0 || i >= size) {
+			LOG.error("Selection index {} is out of bounds of list size {} during event removal. Closing Window.", i, size);
+			close();
+		}
+
 		events.remove(i);
 		if (events.isEmpty()) {
-			close(); //no more events
+			window.close(); //no more events
 		} else if (events.size() == i) {
 			selectionIndex.set(i - 1); //triggers event update
 		} else {
