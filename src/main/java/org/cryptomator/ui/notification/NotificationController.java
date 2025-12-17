@@ -1,5 +1,6 @@
 package org.cryptomator.ui.notification;
 
+import org.cryptomator.common.Constants;
 import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
@@ -84,7 +85,10 @@ public class NotificationController implements FxController {
 		switch (newEvent.actualEvent()) {
 			case FileIsInUseEvent fiiue -> {
 				message.set(resourceBundle.getString("notification.inUse.message"));
-				description.set(resourceBundle.getString("notification.inUse.description").formatted(fiiue.cleartextPath(), fiiue.owner()));
+				var userAndDevice = fiiue.owner().split(Constants.HUB_USER_DEVICE_SEPARATOR);
+				var user = userAndDevice[0];
+				var device = userAndDevice.length == 1? userAndDevice[0]:userAndDevice[1];
+				description.set(resourceBundle.getString("notification.inUse.description").formatted(fiiue.cleartextPath(), user, device));
 				actionText.set(resourceBundle.getString("notification.inUse.action"));
 			}
 			default -> {

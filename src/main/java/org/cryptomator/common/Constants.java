@@ -13,5 +13,6 @@ public interface Constants {
 	String CRYPTOMATOR_FILENAME_GLOB = "*.cryptomator";
 	URI DEFAULT_KEY_ID = URI.create(MasterkeyFileLoadingStrategy.SCHEME + ":" + MASTERKEY_FILENAME);
 	byte[] PEPPER = new byte[0];
+	String HUB_USER_DEVICE_SEPARATOR = "&";
 
 }

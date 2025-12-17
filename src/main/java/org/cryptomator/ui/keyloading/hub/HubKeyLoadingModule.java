@@ -67,9 +67,9 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@Named("userName")
+	@Named("filesystemOwnerId")
 	@KeyLoadingScoped
-	static AtomicReference<String> provideUserNameRef() {
+	static AtomicReference<String> provideFilesystemOwnerIdRef() {
 		return new AtomicReference<>();
 	}
 

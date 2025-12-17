@@ -35,17 +35,17 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 
 	private final Stage window;
 	private final KeychainManager keychainManager;
-	private final AtomicReference<String> userName;
+	private final AtomicReference<String> fsOwnerId;
 	private final Lazy<Scene> authFlowScene;
 	private final Lazy<Scene> noKeychainScene;
 	private final CompletableFuture<ReceivedKey> result;
 	private final DeviceKey deviceKey;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle, @Named("userName") AtomicReference<String> userName) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle, @Named("filesystemOwnerId") AtomicReference<String> fsOwnerId) {
 		this.window = window;
 		this.keychainManager = keychainManager;
-		this.userName = userName;
+		this.fsOwnerId = fsOwnerId;
 		window.setTitle(windowTitle);
 		window.setOnCloseRequest(_ -> result.cancel(true));
 		this.authFlowScene = authFlowScene;
@@ -96,7 +96,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 
 	@Override
 	public String getOwner() {
-		var name = userName.get();
+		var name = fsOwnerId.get();
 		if (name == null) {
 			throw new IllegalStateException("Owner is not yet determined");
 		}
