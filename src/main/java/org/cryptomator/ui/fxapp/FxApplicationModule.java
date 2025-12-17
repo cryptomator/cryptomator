@@ -80,4 +80,10 @@ abstract class FxApplicationModule {
 		return factory.create();
 	}
 
+	@Provides
+	@FxApplicationScoped
+	static NotificationComponent provideNotificationComponent(NotificationComponent.Factory factory) {
+		return factory.create();
+	}
+
 }

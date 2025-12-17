@@ -55,7 +55,7 @@ public class FxApplicationWindows {
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
 	private final Lazy<EventViewComponent> eventViewWindow;
-	private final NotificationComponent.Factory notificationWindow;
+	private final Lazy<NotificationComponent> notificationWindow;
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
@@ -75,7 +75,7 @@ public class FxApplicationWindows {
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
 								Lazy<EventViewComponent> eventViewWindow, //
-								NotificationComponent.Factory notificationWindow,
+								Lazy<NotificationComponent> notificationWindow,
 								ExecutorService executor, //
 								Dialogs dialogs) {
 		this.primaryStage = primaryStage;
@@ -198,7 +198,7 @@ public class FxApplicationWindows {
 	}
 
 	public CompletionStage<Stage> showNotification() {
-		return CompletableFuture.supplyAsync(() -> notificationWindow.create().showNotification(), Platform::runLater).whenComplete(this::reportErrors);
+		return CompletableFuture.supplyAsync(() -> notificationWindow.get().showNotification(), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	/**
