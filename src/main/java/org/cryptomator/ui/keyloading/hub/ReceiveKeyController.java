@@ -54,12 +54,25 @@ public class ReceiveKeyController implements FxController {
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> legacyRegisterDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
+	private final Lazy<Scene> archivedVaultScene;
 	private final Lazy<Scene> accountInitializationScene;
 	private final Lazy<Scene> invalidLicenseScene;
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, HubConfig hubConfig, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<ReceivedKey> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, @FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, @FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
+	public ReceiveKeyController(@KeyLoading Vault vault,
+								ExecutorService executor,
+								@KeyLoading Stage window,
+								HubConfig hubConfig,
+								@Named("deviceId") String deviceId,
+								@Named("bearerToken") AtomicReference<String> tokenRef,
+								CompletableFuture<ReceivedKey> result,
+								@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene,
+								@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene,
+								@FxmlScene(FxmlFile.HUB_ARCHIVED_VAULT) Lazy<Scene> archivedVaultScene,
+								@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene,
+								@FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene,
+								@FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.vaultId = extractVaultId(vault.getVaultConfigCache().getUnchecked().getKeyId()); // TODO: access vault config's JTI directly (requires changes in cryptofs)
@@ -69,6 +82,7 @@ public class ReceiveKeyController implements FxController {
 		this.registerDeviceScene = registerDeviceScene;
 		this.legacyRegisterDeviceScene = legacyRegisterDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
+		this.archivedVaultScene = archivedVaultScene;
 		this.accountInitializationScene = accountInitializationScene;
 		this.invalidLicenseScene = invalidLicenseScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
@@ -184,7 +198,8 @@ public class ReceiveKeyController implements FxController {
 		switch (response.statusCode()) {
 			case 200 -> receivedBothEncryptedKeys(response.body(), encryptedUserKey);
 			case 402 -> licenseExceeded();
-			case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
+			case 403 -> accessNotGranted();
+			case 410 -> accessGoneVaultArchived();
 			case 449 -> accountInitializationRequired();
 			default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
 		}
@@ -228,7 +243,8 @@ public class ReceiveKeyController implements FxController {
 			switch (response.statusCode()) {
 				case 200 -> receivedLegacyAccessTokenSuccess(response.body());
 				case 402 -> licenseExceeded();
-				case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access
+				case 403 -> accessNotGranted();
+				case 410 -> accessGoneVaultArchived();
 				case 404 -> needsLegacyDeviceRegistration();
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
@@ -259,6 +275,10 @@ public class ReceiveKeyController implements FxController {
 
 	private void accessNotGranted() {
 		window.setScene(unauthorizedScene.get());
+	}
+
+	private void accessGoneVaultArchived() {
+		window.setScene(archivedVaultScene.get());
 	}
 
 	private void accountInitializationRequired() {

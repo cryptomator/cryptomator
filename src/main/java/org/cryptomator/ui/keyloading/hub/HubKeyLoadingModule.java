@@ -162,6 +162,13 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_ARCHIVED_VAULT)
+	@KeyLoadingScoped
+	static Scene provideHubArchivedVaultScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_ARCHIVED_VAULT);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT)
 	@KeyLoadingScoped
 	static Scene provideRequireAccountInitScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
@@ -212,6 +219,11 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(RegisterFailedController.class)
 	abstract FxController bindRegisterFailedController(RegisterFailedController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(ArchivedVaultController.class)
+	abstract FxController bindArchivedVaultController(ArchivedVaultController controller);
 
 	@Binds
 	@IntoMap
