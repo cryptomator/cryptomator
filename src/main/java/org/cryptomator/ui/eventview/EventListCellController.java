@@ -1,5 +1,6 @@
 package org.cryptomator.ui.eventview;
 
+import org.cryptomator.common.Constants;
 import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.event.FSEventBucket;
 import org.cryptomator.event.FSEventBucketContent;
@@ -129,19 +130,24 @@ public class EventListCellController implements FxController {
 		}
 	}
 
-	private void adjustToFileInUseEvent(FileIsInUseEvent fse) {
-		eventIcon.setValue(FontAwesome5Icon.TIMES);
-		eventMessage.setValue("File is in use by " + fse.owner());
-		var indexFileName = fse.cleartextPath().lastIndexOf("/");
-		eventDescription.setValue(fse.cleartextPath().substring(indexFileName + 1));
+	private void adjustToFileInUseEvent(FileIsInUseEvent fiiue) {
+		eventIcon.setValue(FontAwesome5Icon.LOCK_OPEN);
+		eventMessage.setValue(resourceBundle.getString("eventView.entry.inUse.message"));
+		var indexFileName = fiiue.cleartextPath().lastIndexOf("/");
+		eventDescription.setValue(fiiue.cleartextPath().substring(indexFileName + 1));
 		if (revealService != null) {
-			addAction("Show decrypted file", () -> reveal(revealService, convertVaultPathToSystemPath(fse.cleartextPath())));
-			addAction("Show encrypted Path", () -> reveal(revealService, fse.ciphertextPath()));
+			addLocalizedAction("eventView.entry.inUse.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(fiiue.cleartextPath())));
+			addLocalizedAction("eventView.entry.inUse.showEncrypted", () -> reveal(revealService, fiiue.ciphertextPath()));
 		} else {
-			addAction("Copy decrypted Path", () -> copyToClipboard(convertVaultPathToSystemPath(fse.cleartextPath()).toString()));
-			addAction("Copy encrypted Path", () -> copyToClipboard(fse.ciphertextPath().toString()));
+			addLocalizedAction("eventView.entry.inUse.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(fiiue.cleartextPath()).toString()));
+			addLocalizedAction("eventView.entry.inUse.copyEncrypted", () -> copyToClipboard(fiiue.ciphertextPath().toString()));
 		}
-		addAction("Ignore in use status ", fse.ignoreMethod());
+
+		var userAndDevice = fiiue.owner().split(Constants.HUB_USER_DEVICE_SEPARATOR);
+		var user = userAndDevice[0];
+		var device = userAndDevice.length == 1 ? userAndDevice[0] : userAndDevice[1];
+		addLocalizedAction("eventView.entry.inUse.copyUserAndDevice", () -> copyToClipboard(user + ", " + device));
+		addLocalizedAction("eventView.entry.inUse.ignoreLock", fiiue.ignoreMethod());
 	}
 
 
