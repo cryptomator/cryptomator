@@ -1,6 +1,7 @@
 package org.cryptomator.ui.notification;
 
 import org.cryptomator.common.Constants;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.event.VaultEvent;
 import org.cryptomator.ui.common.FxController;
@@ -21,6 +22,10 @@ import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +34,7 @@ import java.util.concurrent.ExecutorService;
 public class NotificationController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NotificationController.class);
+	private static final DateTimeFormatter LOCAL_TIME_FORMATTER_TEMPLATE = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 	private static final String BUG_MSG = "IF YOU SEE THIS MESSAGE, PLEASE CONTACT THE DEVELOPERS OF CRYPTOMATOR ABOUT A BUG IN THE NOTIFICATION DISPLAY";
 
 	private final Stage window;
@@ -39,14 +45,18 @@ public class NotificationController implements FxController {
 	private final ObjectProperty<VaultEvent> selectedEvent;
 	private final ObservableValue<Boolean> singleEvent;
 	private final StringProperty vaultName;
+	private final StringProperty eventOccurance;
 	private final StringProperty message;
 	private final StringProperty description;
 	private final StringProperty actionText;
 	private final ExecutorService executorService;
+	private final DateTimeFormatter localizedTimeFormatter;
 
 	@Inject
-	public NotificationController(@NotificationWindow Stage window, FxNotificationManager notificationManager, ExecutorService executorService, ResourceBundle resourceBundle) {
+	public NotificationController(@NotificationWindow Stage window, FxNotificationManager notificationManager, ExecutorService executorService, ResourceBundle resourceBundle, Settings settings) {
 		this.window = window;
+		var preferredLanguage = settings.language.get();
+		this.localizedTimeFormatter = LOCAL_TIME_FORMATTER_TEMPLATE.withLocale(preferredLanguage == null ? Locale.getDefault() : Locale.forLanguageTag(preferredLanguage));
 		this.events = new SimpleListProperty<>(notificationManager.getEventsRequiringNotification());
 		this.resourceBundle = resourceBundle;
 		this.selectionIndex = new SimpleIntegerProperty(-1);
@@ -54,6 +64,7 @@ public class NotificationController implements FxController {
 		this.singleEvent = events.sizeProperty().map(size -> size.intValue() == 1);
 		this.paging = Bindings.createStringBinding(() -> selectionIndex.get() + 1 + "/" + events.size(), selectionIndex, events);
 		this.vaultName = new SimpleStringProperty();
+		this.eventOccurance = new SimpleStringProperty();
 		this.message = new SimpleStringProperty();
 		this.description = new SimpleStringProperty();
 		this.actionText = new SimpleStringProperty();
@@ -84,18 +95,40 @@ public class NotificationController implements FxController {
 		vaultName.set(newEvent.v().getDisplayName());
 		switch (newEvent.actualEvent()) {
 			case FileIsInUseEvent fiiue -> {
-				message.set(resourceBundle.getString("notification.inUse.message"));
 				var userAndDevice = fiiue.owner().split(Constants.HUB_USER_DEVICE_SEPARATOR);
 				var user = userAndDevice[0];
-				var device = userAndDevice.length == 1? userAndDevice[0]:userAndDevice[1];
+				var device = userAndDevice.length == 1 ? userAndDevice[0] : userAndDevice[1];
+				var squashedName = convertPathStringToShortenedFileName(fiiue.cleartextPath());
+				eventOccurance.set(localizedTimeFormatter.format(fiiue.lastUpdated()));
+				message.set("File %s is locked".formatted(squashedName));
+				description.set("Currently this file is opened by %s on device %s. Ask the user to close the file and trigger a sync. Otherwise, you can ignore the lock and open it anyway, but be aware of the data loss risk.".formatted(user, device));
+				actionText.set("Ignore Lock");
+				/* TODO: Once feature is out of beta, activate translations
+				message.set(resourceBundle.getString("notification.inUse.message"));
 				description.set(resourceBundle.getString("notification.inUse.description").formatted(fiiue.cleartextPath(), user, device));
 				actionText.set(resourceBundle.getString("notification.inUse.action"));
+				 */
 			}
 			default -> {
 				message.set("NO CONTENT");
 				description.set(BUG_MSG);
 				actionText.set(null);
 			}
+		}
+	}
+
+	/**
+	 * Extracts the filename of a (string) path and possibly shortens it.
+	 *
+	 * @param path a string path containing a filename. Must not end with "/"
+	 * @return the filename of the path, possibly shortened with an ellipsis
+	 */
+	private String convertPathStringToShortenedFileName(String path) {
+		var filename = path.substring(path.lastIndexOf("/") + 1);
+		if (filename.length() < 20) {
+			return filename;
+		} else {
+			return filename.substring(0, 14) + "…" + filename.substring(filename.length() - 6);
 		}
 	}
 
@@ -119,7 +152,7 @@ public class NotificationController implements FxController {
 	private void removeSelectedEvent() {
 		int i = selectionIndex.get();
 		var size = events.size();
-		if( i < 0 || i >= size) {
+		if (i < 0 || i >= size) {
 			LOG.error("Selection index {} is out of bounds of list size {} during event removal. Closing Window.", i, size);
 			close();
 		}
@@ -158,6 +191,14 @@ public class NotificationController implements FxController {
 
 
 	//FXML bindings
+	public ObservableValue<String> eventTimeProperty() {
+		return eventOccurance;
+	}
+
+	public String getEventTime() {
+		return eventOccurance.get();
+	}
+
 	public ObservableValue<String> vaultNameProperty() {
 		return vaultName;
 	}

@@ -55,7 +55,11 @@
 			<padding>
 				<Insets top="6"/>
 			</padding>
-			<Label text="${controller.message}" styleClass="label-large" wrapText="true"/>
+			<HBox>
+				<Label text="${controller.message}" styleClass="label-large" wrapText="true"/>
+				<Region minWidth="12" HBox.hgrow="ALWAYS"/>
+				<Label text="${controller.eventTime}" styleClass="label-small" />
+			</HBox>
 			<Label text="${controller.vaultName}" styleClass="label-small" wrapText="true"/>
 			<Region minHeight="6"/>
 			<Label text="${controller.description}" styleClass="label" wrapText="true"/>
