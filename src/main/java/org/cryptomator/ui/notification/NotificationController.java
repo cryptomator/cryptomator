@@ -35,7 +35,7 @@ public class NotificationController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NotificationController.class);
 	private static final DateTimeFormatter LOCAL_TIME_FORMATTER_TEMPLATE = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
-	private static final String BUG_MSG = "IF YOU SEE THIS MESSAGE, PLEASE CONTACT THE DEVELOPERS OF CRYPTOMATOR ABOUT A BUG IN THE NOTIFICATION DISPLAY";
+	private static final String BUG_MSG = "If you see this message, please report it on the Cryptomator issue tracker.";
 
 	private final Stage window;
 	private final SimpleListProperty<VaultEvent> events;
@@ -45,7 +45,7 @@ public class NotificationController implements FxController {
 	private final ObjectProperty<VaultEvent> selectedEvent;
 	private final ObservableValue<Boolean> singleEvent;
 	private final StringProperty vaultName;
-	private final StringProperty eventOccurance;
+	private final StringProperty eventTimestamp;
 	private final StringProperty message;
 	private final StringProperty description;
 	private final StringProperty actionText;
@@ -64,7 +64,7 @@ public class NotificationController implements FxController {
 		this.singleEvent = events.sizeProperty().map(size -> size.intValue() == 1);
 		this.paging = Bindings.createStringBinding(() -> selectionIndex.get() + 1 + "/" + events.size(), selectionIndex, events);
 		this.vaultName = new SimpleStringProperty();
-		this.eventOccurance = new SimpleStringProperty();
+		this.eventTimestamp = new SimpleStringProperty();
 		this.message = new SimpleStringProperty();
 		this.description = new SimpleStringProperty();
 		this.actionText = new SimpleStringProperty();
@@ -99,7 +99,7 @@ public class NotificationController implements FxController {
 				var user = userAndDevice[0];
 				var device = userAndDevice.length == 1 ? userAndDevice[0] : userAndDevice[1];
 				var squashedName = convertPathStringToShortenedFileName(fiiue.cleartextPath());
-				eventOccurance.set(localizedTimeFormatter.format(fiiue.lastUpdated()));
+				eventTimestamp.set(localizedTimeFormatter.format(fiiue.lastUpdated()));
 				message.set("File %s is locked".formatted(squashedName));
 				description.set("Currently this file is opened by %s on device %s. Ask the user to close the file and trigger a sync. Otherwise, you can ignore the lock and open it anyway, but be aware of the data loss risk.".formatted(user, device));
 				actionText.set("Ignore Lock");
@@ -193,11 +193,11 @@ public class NotificationController implements FxController {
 
 	//FXML bindings
 	public ObservableValue<String> eventTimeProperty() {
-		return eventOccurance;
+		return eventTimestamp;
 	}
 
 	public String getEventTime() {
-		return eventOccurance.get();
+		return eventTimestamp.get();
 	}
 
 	public ObservableValue<String> vaultNameProperty() {

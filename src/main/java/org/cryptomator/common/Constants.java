@@ -13,6 +13,7 @@ public interface Constants {
 	String CRYPTOMATOR_FILENAME_GLOB = "*.cryptomator";
 	URI DEFAULT_KEY_ID = URI.create(MasterkeyFileLoadingStrategy.SCHEME + ":" + MASTERKEY_FILENAME);
 	byte[] PEPPER = new byte[0];
+	// Separator used to concatenate Hub username and device name in the filesystem owner identifier.
 	String HUB_USER_DEVICE_SEPARATOR = "&";
 
 }
