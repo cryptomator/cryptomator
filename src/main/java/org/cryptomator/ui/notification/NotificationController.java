@@ -154,7 +154,8 @@ public class NotificationController implements FxController {
 		var size = events.size();
 		if (i < 0 || i >= size) {
 			LOG.error("Selection index {} is out of bounds of list size {} during event removal. Closing Window.", i, size);
-			close();
+			window.close();
+			return;
 		}
 
 		events.remove(i);
