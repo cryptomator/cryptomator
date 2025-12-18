@@ -94,6 +94,7 @@
               <ns0:MIME ContentType="$(var.ProgIdContentType)" Default="yes"/>
             </ns0:Extension>
             <ns0:Extension Id="c9s" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
+            <ns0:Extension Id="c9u" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
           </ns0:ProgId>
         </ns0:Component>
     </ns0:DirectoryRef>
