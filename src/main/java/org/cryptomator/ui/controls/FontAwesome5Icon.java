@@ -62,6 +62,7 @@ public enum FontAwesome5Icon {
 	TRASH("\uF1F8"), //
 	UNLINK("\uf127"), //
 	USER_COG("\uf4fe"), //
+	USER_LOCK("\uf502"), //
 	WRENCH("\uF0AD"), //
 	WINDOW_MINIMIZE("\uF2D1"), //
 	;

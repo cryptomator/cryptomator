@@ -132,7 +132,7 @@ public class EventListCellController implements FxController {
 	}
 
 	private void adjustToFileInUseEvent(FileIsInUseEvent fiiue) {
-		eventIcon.setValue(FontAwesome5Icon.LOCK_OPEN);
+		eventIcon.setValue(FontAwesome5Icon.USER_LOCK);
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.inUse.message"));
 		var indexFileName = fiiue.cleartextPath().lastIndexOf("/");
 		eventDescription.setValue(fiiue.cleartextPath().substring(indexFileName + 1));
