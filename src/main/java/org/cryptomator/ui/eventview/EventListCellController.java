@@ -1,5 +1,6 @@
 package org.cryptomator.ui.eventview;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
 import org.cryptomator.cryptofs.event.FileIsInUseEvent;
 import org.cryptomator.event.FSEventBucket;
@@ -268,7 +269,10 @@ public class EventListCellController implements FxController {
 			return Path.of(System.getProperty("user.home"));
 		}
 
-		var mountPoint = v.getMountPoint().uri().getPath().substring(1);
+		var mountPoint = v.getMountPoint().uri().getPath();
+		if(SystemUtils.IS_OS_WINDOWS) {
+			mountPoint = mountPoint.substring(1); //strip away any leading "/", otherwise there are errors
+		}
 		return Path.of(mountPoint, vaultInternalPath.substring(1)); //vaultPaths are always absolute
 	}
 
