@@ -75,14 +75,13 @@ public class NotificationController implements FxController {
 
 	@FXML
 	public void initialize() {
+		window.setOnShowing(_ -> selectionIndex.set(0));
 		selectionIndex.addListener((_, _, n) -> {
 			if (!events.isEmpty()) {
 				selectedEvent.setValue(events.get(n.intValue()));
 			}
 		});
 		selectedEvent.addListener(this::selectTexts);
-
-		selectionIndex.setValue(0);
 	}
 
 	private void selectTexts(ObservableValue<? extends VaultEvent> observable, VaultEvent oldEvent, VaultEvent newEvent) {
