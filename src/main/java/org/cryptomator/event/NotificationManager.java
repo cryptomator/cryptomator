@@ -73,7 +73,9 @@ public class NotificationManager {
 	 * @param target list where the filesystem events are copied to
 	 * @return {@code true}, if elements were copied
 	 */
-	public boolean addTo(List<VaultEvent> target) {
+	public boolean appendToAndClear(List<VaultEvent> target) {
+		//it is not clear, if addAll iterates thread-safe over the pendingEvents
+		//hence we synchronize moving (copy then clear) and adding-single-element operations
 		synchronized (this) {
 			var result = target.addAll(pendingEvents);
 			pendingEvents.clear();

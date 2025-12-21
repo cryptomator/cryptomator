@@ -43,7 +43,7 @@ public class FxNotificationManager {
 
 	private void checkForPendingNotifications() {
 		Platform.runLater(() -> {
-			if (notificationManager.addTo(eventsRequiringNotification)) {
+			if (notificationManager.appendToAndClear(eventsRequiringNotification)) {
 				applicationWindows.showNotification();
 			}
 		});
