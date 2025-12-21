@@ -29,19 +29,19 @@
 				<Label text="Cryptomator" styleClass="label-window-title"/>
 				<Region HBox.hgrow="ALWAYS"/>
 				<HBox styleClass="dialog-header" alignment="CENTER_LEFT" visible="${!controller.singleEvent}">
-					<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#previousNotification" accessibleText="%generic.button.previous">
+					<Button contentDisplay="GRAPHIC_ONLY" styleClass="window-bar-button" onAction="#previousNotification" accessibleText="%generic.button.previous">
 						<graphic>
 							<FontAwesome5IconView glyph="CHEVRON_LEFT" glyphSize="12"/>
 						</graphic>
 					</Button>
 					<Label text="${controller.paging}" styleClass="label-window-title"/>
-					<Button contentDisplay="GRAPHIC_ONLY" styleClass="nav-button" onAction="#nextNotification" accessibleText="%generic.button.next">
+					<Button contentDisplay="GRAPHIC_ONLY" styleClass="window-bar-button" onAction="#nextNotification" accessibleText="%generic.button.next">
 						<graphic>
 							<FontAwesome5IconView glyph="CHEVRON_RIGHT" glyphSize="12"/>
 						</graphic>
 					</Button>
 				</HBox>
-				<Button contentDisplay="GRAPHIC_ONLY" onAction="#close" styleClass="close-button" accessibleText="%generic.button.close">
+				<Button contentDisplay="GRAPHIC_ONLY" onAction="#close" styleClass="window-bar-button" accessibleText="%generic.button.close">
 					<graphic>
 						<FontAwesome5IconView glyph="TIMES" glyphSize="12"/>
 					</graphic>

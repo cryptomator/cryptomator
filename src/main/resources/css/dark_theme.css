@@ -1210,41 +1210,13 @@
 	-fx-alignment: center-left;
 }
 
-.notification-window .close-button {
+.notification-window .window-bar-button {
 	-fx-background-color: transparent;
 	-fx-border-color: transparent;
 	-fx-padding: 6 8 6 8;
 }
 
-.notification-window .close-button:hover {
-	-fx-background-color: CONTROL_BG_HOVER;
+.notification-window .window-bar-button:armed {
+	-fx-background-color: CONTROL_BG_ARMED;
 	-fx-background-radius: 8;
-}
-
-.notification-window .close-button:pressed {
-	-fx-background-color: CONTROL_BG_ARMED;
-}
-
-.notification-window .action-button:hover {
-	-fx-background-color: CONTROL_BG_HOVER;
-	-fx-border-color: CONTROL_BORDER_FOCUSED;
-}
-
-.notification-window .action-button:pressed {
-	-fx-background-color: CONTROL_BG_ARMED;
-}
-
-.notification-window .nav-button {
-	-fx-background-color: transparent;
-	-fx-border-color: transparent;
-	-fx-padding: 6 8 6 8;
-}
-
-.notification-window .nav-button:hover {
-	-fx-background-color: CONTROL_BG_HOVER;
-	-fx-background-radius: 8;
-}
-
-.notification-window .nav-button:pressed {
-	-fx-background-color: CONTROL_BG_ARMED;
 }
