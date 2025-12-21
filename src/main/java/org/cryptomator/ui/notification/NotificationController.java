@@ -44,6 +44,7 @@ public class NotificationController implements FxController {
 	private final ObservableStringValue paging;
 	private final ObjectProperty<VaultEvent> selectedEvent;
 	private final ObservableValue<Boolean> singleEvent;
+	private final StringProperty fileName;
 	private final StringProperty vaultName;
 	private final StringProperty eventTimestamp;
 	private final StringProperty message;
@@ -66,6 +67,7 @@ public class NotificationController implements FxController {
 		this.vaultName = new SimpleStringProperty();
 		this.eventTimestamp = new SimpleStringProperty();
 		this.message = new SimpleStringProperty();
+		this.fileName = new SimpleStringProperty("");
 		this.description = new SimpleStringProperty();
 		this.actionText = new SimpleStringProperty();
 		this.executorService = executorService;
@@ -98,10 +100,11 @@ public class NotificationController implements FxController {
 				var userAndDevice = fiiue.owner().split(Constants.HUB_USER_DEVICE_SEPARATOR);
 				var user = userAndDevice[0];
 				var device = userAndDevice.length == 1 ? userAndDevice[0] : userAndDevice[1];
-				var squashedName = convertPathStringToShortenedFileName(fiiue.cleartextPath());
+				var cleartextFileName = fiiue.cleartextPath().substring(fiiue.cleartextPath().lastIndexOf('/') + 1);
 				eventTimestamp.set(localizedTimeFormatter.format(fiiue.lastUpdated()));
-				message.set("File %s is locked".formatted(squashedName));
-				description.set("Currently this file is opened by %s on device %s. Ask the user to close the file and trigger a sync. Otherwise, you can ignore the lock and open it anyway, but be aware of the data loss risk.".formatted(user, device));
+				message.set("File is opened on another device");
+				fileName.set(cleartextFileName);
+				description.set("The file is opened by %s on device %s. Ask the user to close the file and sync again. Otherwise, you can ignore the lock and open it anyway.".formatted(user, device));
 				actionText.set("Ignore Lock");
 				/* TODO: Once feature is out of beta, activate translations
 				message.set(resourceBundle.getString("notification.inUse.message"));
@@ -116,22 +119,6 @@ public class NotificationController implements FxController {
 			}
 		}
 	}
-
-	/**
-	 * Extracts the filename of a (string) path and possibly shortens it.
-	 *
-	 * @param path a string path containing a filename. Must not end with "/"
-	 * @return the filename of the path, possibly shortened with an ellipsis
-	 */
-	private String convertPathStringToShortenedFileName(String path) {
-		var filename = path.substring(path.lastIndexOf("/") + 1);
-		if (filename.length() < 20) {
-			return filename;
-		} else {
-			return filename.substring(0, 14) + "…" + filename.substring(filename.length() - 6);
-		}
-	}
-
 
 	@FXML
 	public void processSelectedEvent() {
@@ -206,6 +193,14 @@ public class NotificationController implements FxController {
 
 	public String getVaultName() {
 		return vaultName.get();
+	}
+
+	public ObservableValue<String> fileNameProperty() {
+		return fileName;
+	}
+
+	public String getFileName() {
+		return fileName.get();
 	}
 
 	public ObservableValue<String> messageProperty() {
