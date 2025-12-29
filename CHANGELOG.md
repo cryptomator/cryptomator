@@ -10,9 +10,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.18.0...HEAD)
 
 ### Added
-* New Self-Update Mechanism (#3948)
+* Self-Update Mechanism (#3948)
   * Implemented `.dmg` update mechanism
   * Implemented Flatpak update mechanism
+* App notifications (#4069)
+* Mark files in-use for Hub vaults (#4078)
 
 ### Changed
 * Built using JDK 25 (#4031)

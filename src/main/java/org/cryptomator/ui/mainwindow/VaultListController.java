@@ -15,8 +15,8 @@ import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
-import org.cryptomator.ui.fxapp.FxFSEventList;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.fxapp.FxFSEventList;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 import org.slf4j.Logger;
@@ -139,8 +139,8 @@ public class VaultListController implements FxController {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
 
-		vaultList.prefHeightProperty().bind(
-				vaultList.fixedCellSizeProperty().multiply(Bindings.size(vaultList.getItems()))
+		vaultList.prefHeightProperty().bind( //
+				vaultList.fixedCellSizeProperty().multiply(Bindings.size(vaultList.getItems())) //
 		);
 
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
@@ -157,11 +157,11 @@ public class VaultListController implements FxController {
 		//unlock vault on double click
 		vaultList.addEventFilter(MouseEvent.MOUSE_CLICKED, click -> {
 			if (click.getClickCount() >= 2) {
-				Optional.ofNullable(selectedVault.get())
-						.filter(Vault::isLocked)
+				Optional.ofNullable(selectedVault.get()) //
+						.filter(Vault::isLocked) //
 						.ifPresent(vault -> appWindows.startUnlockWorkflow(vault, mainWindow));
-				Optional.ofNullable(selectedVault.get())
-						.filter(Vault::isUnlocked)
+				Optional.ofNullable(selectedVault.get()) //
+						.filter(Vault::isUnlocked) //
 						.ifPresent(vaultService::reveal);
 			}
 		});

@@ -12,6 +12,8 @@ public enum FontAwesome5Icon {
 	CARET_DOWN("\uF0D7"), //
 	CARET_RIGHT("\uF0Da"), //
 	CHECK("\uF00C"), //
+	CHEVRON_LEFT("\uF053"), //
+	CHEVRON_RIGHT("\uF054"), //
 	CLOCK("\uF017"), //
 	CLIPBOARD("\uF328"), //
 	COG("\uF013"), //
@@ -60,6 +62,7 @@ public enum FontAwesome5Icon {
 	TRASH("\uF1F8"), //
 	UNLINK("\uf127"), //
 	USER_COG("\uf4fe"), //
+	USER_LOCK("\uf502"), //
 	WRENCH("\uF0AD"), //
 	WINDOW_MINIMIZE("\uF2D1"), //
 	;

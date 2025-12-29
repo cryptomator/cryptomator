@@ -10,7 +10,7 @@ package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.event.FileSystemEventAggregator;
+import org.cryptomator.common.FilesystemOwnerSupplier;
 import org.cryptomator.common.mount.Mounter;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -23,6 +23,8 @@ import org.cryptomator.cryptofs.event.FilesystemEvent;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.event.FileSystemEventAggregator;
+import org.cryptomator.event.NotificationManager;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
@@ -78,6 +80,7 @@ public class Vault {
 	private final Mounter mounter;
 	private final Settings settings;
 	private final FileSystemEventAggregator fileSystemEventAggregator;
+	private final NotificationManager notificationManager;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -90,7 +93,8 @@ public class Vault {
 		  @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, //
 		  VaultStats stats, //
 		  Mounter mounter, Settings settings, //
-		  FileSystemEventAggregator fileSystemEventAggregator) {
+		  FileSystemEventAggregator fileSystemEventAggregator, //
+		  NotificationManager notificationManager) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -109,6 +113,7 @@ public class Vault {
 		this.mounter = mounter;
 		this.settings = settings;
 		this.fileSystemEventAggregator = fileSystemEventAggregator;
+		this.notificationManager = notificationManager;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -145,14 +150,17 @@ public class Vault {
 			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength.get());
 		}
 
-		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
+		var fsPropsBuilder = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withKeyLoader(keyLoader) //
 				.withFlags(flags) //
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength.get()) //
 				.withVaultConfigFilename(Constants.VAULTCONFIG_FILENAME) //
-				.withFilesystemEventConsumer(this::consumeVaultEvent) //
-				.build();
-		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
+				.withFilesystemEventConsumer(this::consumeVaultEvent);
+		if (keyLoader instanceof FilesystemOwnerSupplier oo) {
+			fsPropsBuilder.withOwnerGetter(oo::getOwner);
+		}
+
+		return CryptoFileSystemProvider.newFileSystem(getPath(), fsPropsBuilder.build());
 	}
 
 	private void destroyCryptoFileSystem() {
@@ -262,6 +270,7 @@ public class Vault {
 
 	private void consumeVaultEvent(FilesystemEvent e) {
 		fileSystemEventAggregator.put(this, e);
+		notificationManager.offer(this, e);
 	}
 
 	// ******************************************************************************
