@@ -19,3 +19,6 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Changed
 * Built using JDK 25 (#4031)
 * Modernized Templage for GitHub Releases
+
+### Fixed
+* Windows: Removed debug launcher start menu entry ([#4089](https://github.com/cryptomator/cryptomator/issues/4089))
