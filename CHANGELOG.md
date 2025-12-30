@@ -10,10 +10,13 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.18.0...HEAD)
 
 ### Added
-* New Self-Update Mechanism (#3948)
+* Self-Update Mechanism ([#3948](https://github.com/cryptomator/cryptomator/pull/3948))
   * Implemented `.dmg` update mechanism
   * Implemented Flatpak update mechanism
+* App notifications ([#4069](https://github.com/cryptomator/cryptomator/pull/4069))
+* Mark files in-use for Hub vaults ([#4078](https://github.com/cryptomator/cryptomator/pull/4078))
+* Accessibility labels for GUI elements ([#4064](https://github.com/cryptomator/cryptomator/issues/4064), [#4066](https://github.com/cryptomator/cryptomator/pull/4066), [#4055](https://github.com/cryptomator/cryptomator/issues/4055))
 
 ### Changed
-* Built using JDK 25 (#4031)
-* Modernized Templage for GitHub Releases
+* Built using JDK 25 ([#4031](https://github.com/cryptomator/cryptomator/issues/4031))
+* Modernized Template for GitHub Releases
