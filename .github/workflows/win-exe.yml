@@ -200,7 +200,7 @@ jobs:
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign DLLs with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@1074588008ae3326a2221ea451783280518f0366 # no specific version
+        uses: skymatic/workflows/.github/actions/win-sign-action@2d0c27a7b04c605afe1ca85e37c0e86517defcc9 # no specific version
         with:
           base-dir: 'appdir'
           file-extensions: 'dll,exe,ps1'
@@ -277,7 +277,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: msi-${{ matrix.arch }}
           path: |
@@ -306,7 +306,7 @@ jobs:
           wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global
           wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
       - name: Download .msi
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: msi-${{ matrix.arch }}
           path: dist/win/bundle/resources
@@ -376,7 +376,7 @@ jobs:
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign burn engine with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@1074588008ae3326a2221ea451783280518f0366 # no specific version
+        uses: skymatic/workflows/.github/actions/win-sign-action@2d0c27a7b04c605afe1ca85e37c0e86517defcc9 # no specific version
         with:
           base-dir: 'tmp'
           file-extensions: 'exe'
@@ -400,7 +400,7 @@ jobs:
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Sign installer with Actalis CodeSigner
         if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@1074588008ae3326a2221ea451783280518f0366 # no specific version
+        uses: skymatic/workflows/.github/actions/win-sign-action@2d0c27a7b04c605afe1ca85e37c0e86517defcc9 # no specific version
         with:
           base-dir: 'installer'
           file-extensions: 'exe'
@@ -418,7 +418,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: exe-${{ matrix.executable-suffix }}
           path: |
@@ -436,7 +436,7 @@ jobs:
       download-url-exe-x64: ${{ fromJSON(steps.publish.outputs.assets)[2].browser_download_url }}
     steps:
       - name: Download installers
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           merge-multiple: true
       - name: Publish installers on GitHub Releases
