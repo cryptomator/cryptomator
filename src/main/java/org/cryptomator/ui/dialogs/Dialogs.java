@@ -61,7 +61,7 @@ public class Dialogs {
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
-	public SimpleDialog.Builder prepareHubVaulArchived(Stage window, Vault vault) {
+	public SimpleDialog.Builder prepareHubVaultArchived(Stage window, Vault vault) {
 		return createDialogBuilder().setOwner(window) //
 				.setTitleKey("unlock.title", vault.getDisplayName()) //
 				.setMessageKey("hub.archived.message") //
