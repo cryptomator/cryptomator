@@ -313,7 +313,7 @@ public class ReceiveKeyController implements FxController {
 
 	private void accessGoneVaultArchived() {
 		window.close();
-		dialogs.prepareHubVaulArchived((Stage)window.getOwner(), vault).build().showAndWait();
+		dialogs.prepareHubVaultArchived((Stage)window.getOwner(), vault).build().showAndWait();
 	}
 
 	private void accountInitializationRequired() {
