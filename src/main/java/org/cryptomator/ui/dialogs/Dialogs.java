@@ -61,6 +61,15 @@ public class Dialogs {
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
+	public SimpleDialog.Builder prepareHubVaulArchived(Stage window, Vault vault) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("unlock.title", vault.getDisplayName()) //
+				.setMessageKey("hub.archived.message") //
+				.setDescriptionKey("hub.archived.description") //
+				.setIcon(FontAwesome5Icon.BAN)//
+				.setOkButtonKey(BUTTON_KEY_CLOSE);
+	}
+
 	public SimpleDialog.Builder prepareRecoveryVaultAdded(Stage window, String displayName) {
 		return createDialogBuilder().setOwner(window) //
 				.setTitleKey("recover.existing.title") //

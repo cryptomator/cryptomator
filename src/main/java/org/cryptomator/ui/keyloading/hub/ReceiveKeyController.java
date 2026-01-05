@@ -11,6 +11,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.slf4j.Logger;
@@ -55,26 +56,27 @@ public class ReceiveKeyController implements FxController {
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> legacyRegisterDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
-	private final Lazy<Scene> archivedVaultScene;
 	private final Lazy<Scene> accountInitializationScene;
 	private final Lazy<Scene> invalidLicenseScene;
 	private final HttpClient httpClient;
+	private final Dialogs dialogs;
+	private final Vault vault;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault,
-								ExecutorService executor,
-								@KeyLoading Stage window,
-								HubConfig hubConfig,
-								@Named("deviceId") String deviceId,
-								@Named("bearerToken") AtomicReference<String> tokenRef,
+	public ReceiveKeyController(@KeyLoading Vault vault, //
+								ExecutorService executor, //
+								@KeyLoading Stage window, //
+								HubConfig hubConfig, //
+								@Named("deviceId") String deviceId, //
+								@Named("bearerToken") AtomicReference<String> tokenRef, //
 								@Named("filesystemOwnerId") AtomicReference<String> fsOwnerId, //
-								CompletableFuture<ReceivedKey> result,
-								@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene,
-								@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene,
-								@FxmlScene(FxmlFile.HUB_ARCHIVED_VAULT) Lazy<Scene> archivedVaultScene,
-								@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene,
-								@FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene,
-								@FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
+								CompletableFuture<ReceivedKey> result, //
+								@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, //
+								@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, //
+								@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, //
+								@FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, //
+								@FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene, //
+								Dialogs dialogs) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.vaultId = extractVaultId(vault.getVaultConfigCache().getUnchecked().getKeyId()); // TODO: access vault config's JTI directly (requires changes in cryptofs)
@@ -85,11 +87,12 @@ public class ReceiveKeyController implements FxController {
 		this.registerDeviceScene = registerDeviceScene;
 		this.legacyRegisterDeviceScene = legacyRegisterDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
-		this.archivedVaultScene = archivedVaultScene;
 		this.accountInitializationScene = accountInitializationScene;
 		this.invalidLicenseScene = invalidLicenseScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
+		this.dialogs = dialogs;
+		this.vault = vault;
 	}
 
 	@FXML
@@ -309,7 +312,8 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	private void accessGoneVaultArchived() {
-		window.setScene(archivedVaultScene.get());
+		window.close();
+		dialogs.prepareHubVaulArchived((Stage)window.getOwner(), vault).build().showAndWait();
 	}
 
 	private void accountInitializationRequired() {
