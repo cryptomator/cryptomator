@@ -219,7 +219,7 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(RegisterFailedController.class)
 	abstract FxController bindRegisterFailedController(RegisterFailedController controller);
-	
+
 	@Binds
 	@IntoMap
 	@FxControllerKey(UnauthorizedDeviceController.class)
