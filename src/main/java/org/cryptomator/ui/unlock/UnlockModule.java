@@ -57,8 +57,8 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @UnlockWindow Vault vault, @UnlockWindow Stage window) {
-		return compBuilder.vault(vault).window(window).build().keyloadingStrategy();
+	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Factory compFactory, @UnlockWindow Vault vault, @UnlockWindow Stage window) {
+		return compFactory.create(vault, window).keyloadingStrategy();
 	}
 
 	@Provides

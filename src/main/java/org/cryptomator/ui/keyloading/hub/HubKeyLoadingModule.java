@@ -67,6 +67,13 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@Named("filesystemOwnerId")
+	@KeyLoadingScoped
+	static AtomicReference<String> provideFilesystemOwnerIdRef() {
+		return new AtomicReference<>();
+	}
+
+	@Provides
 	@KeyLoadingScoped
 	static CompletableFuture<ReceivedKey> provideResult() {
 		return new CompletableFuture<>();

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -41,7 +42,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ReceiveKeyController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ReceiveKeyController.class);
-	private static final String SCHEME_PREFIX = "hub+";
 	private static final ObjectMapper JSON = new ObjectMapper().setDefaultLeniency(true);
 	private static final Duration REQ_TIMEOUT = Duration.ofSeconds(10);
 
@@ -50,6 +50,7 @@ public class ReceiveKeyController implements FxController {
 	private final String vaultId;
 	private final String deviceId;
 	private final String bearerToken;
+	private final AtomicReference<String> fsOwnerId;
 	private final CompletableFuture<ReceivedKey> result;
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> legacyRegisterDeviceScene;
@@ -66,6 +67,7 @@ public class ReceiveKeyController implements FxController {
 								HubConfig hubConfig,
 								@Named("deviceId") String deviceId,
 								@Named("bearerToken") AtomicReference<String> tokenRef,
+								@Named("filesystemOwnerId") AtomicReference<String> fsOwnerId, //
 								CompletableFuture<ReceivedKey> result,
 								@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene,
 								@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene,
@@ -78,6 +80,7 @@ public class ReceiveKeyController implements FxController {
 		this.vaultId = extractVaultId(vault.getVaultConfigCache().getUnchecked().getKeyId()); // TODO: access vault config's JTI directly (requires changes in cryptofs)
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
+		this.fsOwnerId = fsOwnerId;
 		this.result = result;
 		this.registerDeviceScene = registerDeviceScene;
 		this.legacyRegisterDeviceScene = legacyRegisterDeviceScene;
@@ -95,7 +98,34 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	public void receiveKey() {
-		requestApiConfig();
+		requestUserData();
+	}
+
+	private void requestUserData() {
+		var userUri = hubConfig.URIs.API.resolve("users/me?withDevices=false");
+		var request = HttpRequest.newBuilder(userUri) //
+				.header("Authorization", "Bearer " + bearerToken) //
+				.GET() //
+				.timeout(REQ_TIMEOUT) //
+				.build();
+		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)) //
+				.thenAcceptAsync(this::receivedUserData) //
+				.exceptionally(this::retrievalFailed);
+	}
+
+	private void receivedUserData(HttpResponse<String> response) {
+		LOG.debug("GET {} -> Status Code {}", response.request().uri(), response.statusCode());
+		try {
+			if (response.statusCode() == 200) {
+				var user = JSON.reader().readValue(response.body(), UserDto.class);
+				fsOwnerId.set(user.name);
+				requestApiConfig();
+			} else {
+				throw new IllegalStateException("Unexpected response " + response.statusCode());
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	/**
@@ -158,6 +188,7 @@ public class ReceiveKeyController implements FxController {
 			switch (response.statusCode()) {
 				case 200 -> {
 					var device = JSON.reader().readValue(response.body(), DeviceDto.class);
+					fsOwnerId.accumulateAndGet(device.name, (s1, s2) -> s1 + Constants.HUB_USER_DEVICE_SEPARATOR + s2);
 					requestVaultMasterkey(device.userPrivateKey);
 				}
 				case 404 -> Platform.runLater(this::needsDeviceRegistration);
@@ -309,13 +340,16 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	private static String extractVaultId(URI vaultKeyUri) {
-		assert vaultKeyUri.getScheme().startsWith(SCHEME_PREFIX);
+		assert vaultKeyUri.getScheme().startsWith(HubKeyLoadingStrategy.SCHEME_PREFIX);
 		var path = vaultKeyUri.getPath();
 		return path.substring(path.lastIndexOf('/') + 1);
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	private record DeviceDto(@JsonProperty(value = "userPrivateKey", required = true) String userPrivateKey) {}
+	private record UserDto(@JsonProperty(value = "name", required = true) String name) {}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private record DeviceDto(@JsonProperty(value = "name", required = true) String name, @JsonProperty(value = "userPrivateKey", required = true) String userPrivateKey) {}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	private record ConfigDto(@JsonProperty(value = "apiLevel") int apiLevel) {}

@@ -23,6 +23,7 @@ case "$1" in
 
         xdg-desktop-menu uninstall --novendor /usr/share/applications/org.cryptomator.Cryptomator.desktop
         xdg-mime uninstall /usr/share/mime/packages/application-vnd.cryptomator.vault.xml
+        xdg-mime uninstall /usr/share/mime/packages/application-vnd.cryptomator.encrypted.xml
     ;;
 
     failed-upgrade)

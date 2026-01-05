@@ -167,6 +167,7 @@ public class Mounter {
 		usedMountServices.add(mountService);
 
 		var builder = mountService.forFileSystem(cryptoFsRoot);
+		LOG.debug("Using mount service {} for mounting vault {}", mountService.getClass().getName(), vaultSettings.displayName);
 		var internal = new SettledMounter(mountService, builder, vaultSettings); // FIXME: no need for an inner class
 		var cleanup = internal.prepare();
 		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), cleanup);

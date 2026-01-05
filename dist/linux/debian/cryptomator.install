@@ -7,3 +7,4 @@ common/org.cryptomator.Cryptomator256.png usr/share/icons/hicolor/256x256/apps
 common/org.cryptomator.Cryptomator512.png usr/share/icons/hicolor/512x512/apps
 common/org.cryptomator.Cryptomator.metainfo.xml usr/share/metainfo
 common/application-vnd.cryptomator.vault.xml usr/share/mime/packages
+common/application-vnd.cryptomator.encrypted.xml usr/share/mime/packages
