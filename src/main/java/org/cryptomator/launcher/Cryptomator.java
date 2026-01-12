@@ -27,6 +27,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 
 @Singleton
@@ -35,7 +36,8 @@ public class Cryptomator {
 	private static final long STARTUP_TIME = System.currentTimeMillis();
 
 	static {
-		var lazyProcessedProps = new SubstitutingProperties(System.getProperties(), System.getenv());
+		var adjustedSystemProps = AdminPropertiesSetter.adjustSystemProperties();
+		var lazyProcessedProps = new SubstitutingProperties(adjustedSystemProps, System.getenv());
 		System.setProperties(lazyProcessedProps);
 		CRYPTOMATOR_COMPONENT = DaggerCryptomatorComponent.factory().create(STARTUP_TIME);
 		LOG = LoggerFactory.getLogger(Cryptomator.class);
