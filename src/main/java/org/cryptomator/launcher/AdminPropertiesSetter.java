@@ -10,13 +10,12 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
+import java.util.Set;
 
 /**
- * Class to change JVM system properties according to an external properties file
+ * Class to overwrite system properties with an external properties file
  * <p>
- * The app starts with a set of predefined properties (defined in [APPDIR]/../Cryptomator.cfg).
- * That file is difficult to edit and edits do not persist over updates.
- * To allow overwriting these properties, the method {@link #adjustSystemProperties()} loads the properties file {@value PROP_FILENAME} from an OS-dependent location and add the contained properties to the {@link System} properties.
+ * To overwrite system properties, the method {@link #adjustSystemProperties()} loads the properties file {@value PROP_FILENAME} from an OS-dependent location and add all supported properties to the {@link System} properties.
  * The predefined location are:
  *     <ul>
  *         <li>Linux - {@value LINUX_DIR }</li>
@@ -24,6 +23,15 @@ import java.util.Properties;
  *         <li>Windows - {@value WIN_DIR }</li>
  *     </ul>
  * </p>
+ * <p>
+ * Supported properties for override are:
+ * <ul>
+ *     <li>cryptomator.logDir</li>
+ *     <li>cryptomator.pluginDir</li>
+ *     <li>cryptomator.p12Path</li>
+ *     <li>cryptomator.mountPointsDir</li>
+ *     <li>cryptomator.disableUpdateCheck</li>
+ * </ul>
  *
  * @see System#getProperties()
  */
@@ -35,6 +43,13 @@ class AdminPropertiesSetter {
 	private static final String MAC_DIR = "/Library/Application Support/Cryptomator";
 	private static final String WIN_DIR = "%PROGRAMDATA%\\Cryptomator";
 	private static final String PROP_FILENAME = "config.properties";
+	private static final Set<String> ALLOWED_OVERRIDES = Set.of( //
+			"cryptomator.logDir", //
+			"cryptomator.pluginDir", //
+			"cryptomator.p12Path", //
+			"cryptomator.mountPointsDir", //
+			"cryptomator.disableUpdateCheck");
+
 
 	static {
 		final Path adminDir;
@@ -53,9 +68,8 @@ class AdminPropertiesSetter {
 	/**
 	 * Adjusts the system properties by loading administrative properties from a predefined file location.
 	 * <p>
-	 * If the file exists and is a valid properties file, its properties will overwrite the existing system properties.
-	 * <p>
-	 * <em>WARNING:</em> This method modifies the global system properties and should be used with caution. Overwriting some properties has no effect, because they are read only once from the original config during JVM startup.
+	 * If the file exists and is a valid properties file, its content will overwrite existing system properties.
+	 * Only some properties are supported, see {@link AdminPropertiesSetter}
 	 *
 	 * @return The adjusted system properties.
 	 */
@@ -64,9 +78,13 @@ class AdminPropertiesSetter {
 		var adminProps = loadAdminProperties(ADMIN_PROPERTIES_FILE);
 
 		for (var key : adminProps.stringPropertyNames()) {
-			var value = adminProps.getProperty(key);
-			LOG.info("Overwriting {} with value {} from admin properties.", key, value);
-			systemProps.setProperty(key, value);
+			if (ALLOWED_OVERRIDES.contains(key)) {
+				var value = adminProps.getProperty(key);
+				LOG.info("Overwriting {} with value {} from admin properties.", key, value);
+				systemProps.setProperty(key, value);
+			} else {
+				LOG.debug("Property {} in admin properties is not supported for override.", key);
+			}
 		}
 		return systemProps;
 	}
