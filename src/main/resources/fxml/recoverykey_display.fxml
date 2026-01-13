@@ -14,7 +14,8 @@
 	  minWidth="350"
 	  minHeight="280"
 	  spacing="12"
-	  alignment="TOP_LEFT">
+	  alignment="TOP_LEFT"
+	  accessibleRole="DIALOG">
 	<children>
 		<FormattedLabel format="%recoveryKey.display.description" arg1="${controller.vaultName}" wrapText="true" labelFor="$textarea"/>
 

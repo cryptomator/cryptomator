@@ -19,7 +19,8 @@
 	  prefWidth="450"
 	  prefHeight="450"
 	  spacing="12"
-	  alignment="CENTER_LEFT">
+	  alignment="CENTER_LEFT"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>

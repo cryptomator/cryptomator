@@ -10,7 +10,8 @@
 	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyValidateController"
 	  maxWidth="400"
 	  minHeight="145"
-	  spacing="12">
+	  spacing="12"
+	  accessibleRole="DIALOG">
 	<children>
 		<FormattedLabel format="%recoveryKey.recover.prompt" arg1="${controller.vault.displayName}" wrapText="true" labelFor="$textarea"/>
 
