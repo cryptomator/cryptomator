@@ -42,7 +42,7 @@ class AdminPropertiesSetter {
 
 	private static final ObjectMapper JSON = JsonMapper.builder().build();
 
-	private static final String LINUX_DIR = "/etc/cryptmator";
+	private static final String LINUX_DIR = "/etc/cryptomator";
 	private static final String MAC_DIR = "/Library/Application Support/Cryptomator";
 	private static final String WIN_DIR = "%PROGRAMDATA%\\Cryptomator";
 	private static final String CONFIG_NAME = "config.json";
