@@ -71,7 +71,8 @@ public class VaultListCellController implements FxController {
 	}
 
 	private String getAccessibleTextForVaultState(VaultState.Value state) {
-		if (state != null) {
+		var v = vault.get();
+		if (state != null && v != null) {
 			var translationKey = switch (state) {
 				case LOCKED -> "vault.state.locked";
 				case PROCESSING -> "vault.state.processing";
@@ -82,7 +83,7 @@ public class VaultListCellController implements FxController {
 			};
 
 			var localizedState = resourceBundle.getString(translationKey);
-			return resourceBundle.getString("main.vaultlist.listEntry").formatted(vault.get().getDisplayName(), localizedState);
+			return resourceBundle.getString("main.vaultlist.listEntry").formatted(v.getDisplayName(), localizedState);
 		} else {
 			return "";
 		}
