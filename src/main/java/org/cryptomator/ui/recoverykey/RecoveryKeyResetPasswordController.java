@@ -125,30 +125,35 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 	@FXML
 	public void restorePassword() {
-		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
-			Path recoveryPath = recoveryDirectory.getRecoveryPath();
-			MasterkeyService.recoverFromRecoveryKey(recoveryKey.get(), recoveryKeyFactory, recoveryPath, newPasswordController.passwordField.getCharacters());
+		Task<Void> task = new RestorePasswordTask();
 
-			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, recoveryPath.resolve(MASTERKEY_FILENAME), newPasswordController.passwordField.getCharacters())) {
-				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), cipherCombo.get());
+		task.setOnScheduled(_ -> {
+			LOG.debug("Restoring vault configuration for {}.", vault.getDisplayablePath());
+		});
+
+		task.setOnSucceeded(_ -> {
+			LOG.debug("Restored vault configuration for {}.", vault.getDisplayablePath());
+			try {
+				if (!vaultListManager.isAlreadyAdded(vault.getPath())) {
+					vaultListManager.add(vault.getPath());
+				}
+				window.close();
+				dialogs.prepareRecoverPasswordSuccess((Stage) window.getOwner()) //
+						.setTitleKey("recover.recoverVaultConfig.title") //
+						.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message") //
+						.build().showAndWait();
+			} catch (IOException e) {
+				LOG.error("Failed to add vault to list.", e);
+				appWindows.showErrorWindow(e, window, null);
 			}
+		});
 
-			recoveryDirectory.moveRecoveredFile(MASTERKEY_FILENAME);
-			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
+		task.setOnFailed(_ -> {
+			LOG.error("Recovery process failed.", task.getException());
+			appWindows.showErrorWindow(task.getException(), window, null);
+		});
 
-			if (!vaultListManager.isAlreadyAdded(vault.getPath())) {
-				vaultListManager.add(vault.getPath());
-			}
-			window.close();
-			dialogs.prepareRecoverPasswordSuccess((Stage)window.getOwner()) //
-					.setTitleKey("recover.recoverVaultConfig.title") //
-					.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message") //
-					.build().showAndWait();
-
-		} catch (IOException | CryptoException e) {
-			LOG.error("Recovery process failed", e);
-			appWindows.showErrorWindow(e, window, null);
-		}
+		executor.submit(task);
 	}
 
 	@FXML
@@ -188,6 +193,31 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		@Override
 		protected Void call() throws IOException, IllegalArgumentException {
 			recoveryKeyFactory.newMasterkeyFileWithPassphrase(vault.getPath(), recoveryKey.get(), newPasswordController.passwordField.getCharacters());
+			return null;
+		}
+	}
+
+	private class RestorePasswordTask extends Task<Void> {
+
+		private static final Logger LOG = LoggerFactory.getLogger(RestorePasswordTask.class);
+
+		public RestorePasswordTask() {
+			setOnFailed(_ -> LOG.error("Failed to restore vault configuration", getException()));
+		}
+
+		@Override
+		protected Void call() throws IOException, CryptoException {
+			try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
+				Path recoveryPath = recoveryDirectory.getRecoveryPath();
+				MasterkeyService.recoverFromRecoveryKey(recoveryKey.get(), recoveryKeyFactory, recoveryPath, newPasswordController.passwordField.getCharacters());
+
+				try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, recoveryPath.resolve(MASTERKEY_FILENAME), newPasswordController.passwordField.getCharacters())) {
+					CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), cipherCombo.get());
+				}
+
+				recoveryDirectory.moveRecoveredFile(MASTERKEY_FILENAME);
+				recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
+			}
 			return null;
 		}
 	}
