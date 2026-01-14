@@ -11,9 +11,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.common.SubstitutingProperties;
-import org.cryptomator.networking.SSLContextProvider;
 import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
+import org.cryptomator.networking.SSLContextProvider;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,6 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.concurrent.Executors;
 
 @Singleton
@@ -66,6 +65,7 @@ public class Cryptomator {
 	}
 
 	public static void main(String[] args) {
+		BufferedLog.flush(LOG);
 		var printVersion = Optional.ofNullable(args) //
 				.stream() //Streams either one element (the args-array) or zero elements
 				.flatMap(Arrays::stream) //
