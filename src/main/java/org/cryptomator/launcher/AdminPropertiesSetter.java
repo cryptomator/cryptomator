@@ -18,16 +18,16 @@ import java.util.Set;
 /**
  * Class to overwrite system properties with an external properties file
  * <p>
- * To overwrite system properties, the method {@link #adjustSystemProperties()} loads the JSON file {@value CONFIG_NAME} from an OS-dependent location and add all supported properties to the {@link System} properties.
- * The predefined location are:
- *     <ul>
- *         <li>Linux - {@value LINUX_DIR }</li>
- *         <li>macOS - {@value MAC_DIR }</li>
- *         <li>Windows - {@value WIN_DIR }</li>
- *     </ul>
+ * To overwrite system properties, the method {@link #adjustSystemProperties()} loads the JSON file {@value CONFIG_NAME} from an OS-dependent location and adds all whitelisted properties to the {@link System} properties.
+ * The predefined locations are:
+ * <ul>
+ *     <li>Linux - {@value LINUX_DIR }</li>
+ *    <li>macOS - {@value MAC_DIR }</li>
+ *    <li>Windows - {@value WIN_DIR }</li>
+ * </ul>
  * </p>
  * <p>
- * Supported properties for override are:
+ * The overridable properties are:
  * <ul>
  *     <li>cryptomator.logDir</li>
  *     <li>cryptomator.pluginDir</li>
@@ -71,8 +71,8 @@ class AdminPropertiesSetter {
 	/**
 	 * Adjusts the system properties by loading administrative properties from a predefined file location.
 	 * <p>
-	 * If the file exists and is a valid properties file, its content will overwrite existing system properties.
-	 * Only some properties are supported, see {@link AdminPropertiesSetter}
+	 * If the file exists and is a valid JSON file, its content will overwrite existing system properties.
+	 * Only some properties can be overridden, see {@link AdminPropertiesSetter}
 	 *
 	 * @return The adjusted system properties.
 	 */
@@ -100,7 +100,7 @@ class AdminPropertiesSetter {
 			}
 		} catch (NoSuchFileException _) {
 			//NO-OP
-			log("No admin properties found at  {}.", List.of(adminPropertiesPath));
+			log("No admin properties found at {}.", List.of(adminPropertiesPath));
 		} catch (IOException | RuntimeException e) {
 			log("Failed to read administrative properties from {}. Returning empty properties.", List.of(adminPropertiesPath, e));
 		}

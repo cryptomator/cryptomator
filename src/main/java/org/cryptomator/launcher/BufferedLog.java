@@ -14,15 +14,11 @@ class BufferedLog {
 
 	record Entry(String className, String message, List<Object> messageInput) {}
 
-	static void log(String className, String message, List<Object> messageInput) {
-		add(new BufferedLog.Entry(className, message, messageInput));
+	synchronized static void log(String className, String message, List<Object> messageInput) {
+		logMessages.add(new BufferedLog.Entry(className, message, messageInput));
 	}
 
-	synchronized static void add(Entry e) {
-		logMessages.add(e);
-	}
-
-	synchronized static void flush(Logger log) {
+	synchronized static void flushTo(Logger log) {
 		logMessages.forEach(e -> {
 			var message = "PRE LOG INIT Event in %s: %s".formatted(e.className, e.message);
 			log.info(message, e.messageInput.toArray());
