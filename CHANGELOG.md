@@ -17,6 +17,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Mark files in-use for Hub vaults ([#4078](https://github.com/cryptomator/cryptomator/pull/4078))
 * Accessibility labels for GUI elements ([#4064](https://github.com/cryptomator/cryptomator/issues/4064), [#4066](https://github.com/cryptomator/cryptomator/pull/4066), [#4055](https://github.com/cryptomator/cryptomator/issues/4055))
 * Show Archived Vault Dialog on unlock when Hub returns 410 ([#4081](https://github.com/cryptomator/cryptomator/pull/4081))
+* Admin configuration: Allow overwriting some app properties by external config file ([#4105](https://github.com/cryptomator/cryptomator/pull/4105))
 
 ### Changed
 * Built using JDK 25 ([#4031](https://github.com/cryptomator/cryptomator/issues/4031))
