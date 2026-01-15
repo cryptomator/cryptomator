@@ -92,7 +92,7 @@ class AdminPropertiesSetter {
 		return systemProps;
 	}
 
-	private static Map<String, Object> loadAdminProperties(Path adminPropertiesPath) {
+	static Map<String, Object> loadAdminProperties(Path adminPropertiesPath) {
 		try (var in = Files.newInputStream(adminPropertiesPath, StandardOpenOption.READ)) {
 			var map = JSON.readValue(in, new TypeReference<Map<String, Object>>() {});
 			if (map == null) {

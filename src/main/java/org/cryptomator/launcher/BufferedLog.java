@@ -15,7 +15,7 @@ class BufferedLog {
 	record Entry(String className, String message, List<Object> messageInput) {}
 
 	synchronized static void log(String className, String message, List<Object> messageInput) {
-		logMessages.add(new BufferedLog.Entry(className, message, messageInput));
+		logMessages.add(new Entry(className, message, messageInput));
 	}
 
 	synchronized static void flushTo(Logger log) {
