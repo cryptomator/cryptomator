@@ -15,7 +15,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
   * Implemented Flatpak update mechanism
 * App notifications ([#4069](https://github.com/cryptomator/cryptomator/pull/4069))
 * Mark files in-use for Hub vaults ([#4078](https://github.com/cryptomator/cryptomator/pull/4078))
-* Accessibility labels for GUI elements ([#4064](https://github.com/cryptomator/cryptomator/issues/4064), [#4066](https://github.com/cryptomator/cryptomator/pull/4066), [#4055](https://github.com/cryptomator/cryptomator/issues/4055))
+* Accessibility: Adjust app to be used with a screen reader ([#547](https://github.com/cryptomator/cryptomator/issues/547))
 * Show Archived Vault Dialog on unlock when Hub returns 410 ([#4081](https://github.com/cryptomator/cryptomator/pull/4081))
 
 ### Changed

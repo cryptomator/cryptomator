@@ -16,7 +16,8 @@
 			xmlns:fx="http://javafx.com/fxml"
 			fx:controller="org.cryptomator.ui.notification.NotificationController"
 			prefHeight="200.0" prefWidth="400.0" maxHeight="200.0" maxWidth="400.0"
-			styleClass="notification-window">
+			styleClass="notification-window"
+			accessibleRole="DIALOG">
 	<padding>
 		<Insets top="12" right="12" bottom="12" left="12"/>
 	</padding>

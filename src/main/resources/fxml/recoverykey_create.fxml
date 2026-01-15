@@ -20,7 +20,8 @@
 	  maxWidth="400"
 	  minHeight="175"
 	  spacing="12"
-	  alignment="TOP_LEFT">
+	  alignment="TOP_LEFT"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>

@@ -3,7 +3,7 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.NotificationBar?>
+<?import org.cryptomator.ui.controls.InfoBar?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml"
 		   xmlns="http://javafx.com/javafx"
@@ -11,23 +11,23 @@
 		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 		   styleClass="main-window">
 	<VBox minWidth="600">
-		<NotificationBar onMouseClicked="#showUpdatePreferences"
+		<InfoBar onMouseClicked="#showUpdatePreferences"
 						 text="%main.notification.updateAvailable"
 						 dismissable="true"
 						 notify="${controller.updateAvailable}"
-						 styleClass="notification-update"/>
-		<NotificationBar onMouseClicked="#showContributePreferences"
+						 styleClass="info-bar--yellow"/>
+		<InfoBar onMouseClicked="#showContributePreferences"
 						 text="%main.notification.support"
 						 dismissable="true"
 						 notify="${!controller.licenseValid}"
-						 styleClass="notification-support"/>
+						 styleClass="info-bar--green"/>
 		<SplitPane dividerPositions="0.33" orientation="HORIZONTAL" VBox.vgrow="ALWAYS">
 			<fx:include source="vault_list.fxml" SplitPane.resizableWithParent="false"/>
 			<fx:include source="vault_detail.fxml" SplitPane.resizableWithParent="true"/>
 		</SplitPane>
-		<NotificationBar onMouseClicked="#showGeneralPreferences"
+		<InfoBar onMouseClicked="#showGeneralPreferences"
 						 text="DEBUG MODE"
-						 styleClass="notification-debug"
+						 styleClass="info-bar--red"
 						 notify="${controller.debugModeEnabled}"/>
 	</VBox>
 </StackPane>

@@ -25,7 +25,8 @@
 	  prefWidth="480"
 	  minHeight="242"
 	  spacing="12"
-	  VBox.vgrow="ALWAYS">
+	  VBox.vgrow="ALWAYS"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
