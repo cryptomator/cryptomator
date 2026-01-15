@@ -95,9 +95,10 @@ class AdminPropertiesSetter {
 	private static Map<String, Object> loadAdminProperties(Path adminPropertiesPath) {
 		try (var in = Files.newInputStream(adminPropertiesPath, StandardOpenOption.READ)) {
 			var map = JSON.readValue(in, new TypeReference<Map<String, Object>>() {});
-			if (map != null) {
-				return map;
+			if (map == null) {
+				throw new NullPointerException("JSON parsing returned null");
 			}
+			return map;
 		} catch (NoSuchFileException _) {
 			//NO-OP
 			log("No admin properties found at {}.", List.of(adminPropertiesPath));
