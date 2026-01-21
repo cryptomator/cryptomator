@@ -116,7 +116,7 @@
           </ns0:CreateFolder>
         </ns0:Component>
         <ns0:Component Id="AdminConfigFile" NeverOverwrite="yes" Permanent="yes">
-          <ns0:File Id="EmptyAdminConfig" Source="$(env.JP_WIXWIZARD_RESOURCES)\..\..\common\config.json" Name="config.json" KeyPath="yes">
+          <ns0:File Id="EmptyAdminConfig" Source="$(env.JP_WIXWIZARD_RESOURCES)\..\..\common\cryptomator.config" Name="cryptomator.config" KeyPath="yes">
             <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
             <util:PermissionEx User="Administrators" GenericAll="yes"/>
             <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
