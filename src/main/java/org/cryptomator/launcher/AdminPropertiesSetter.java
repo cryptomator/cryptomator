@@ -93,7 +93,7 @@ class AdminPropertiesSetter {
 	static Properties loadAdminProperties(Path adminPropertiesPath) {
 		var adminProps = new Properties();
 		try (var reader = Files.newBufferedReader(adminPropertiesPath, StandardCharsets.UTF_8)) {
-			if(Files.size(adminPropertiesPath) >= MAX_CONFIG_SIZE_BYTES) {
+			if(Files.size(adminPropertiesPath) > MAX_CONFIG_SIZE_BYTES) {
 				throw new IOException("Config file %s exceeds maximum size of %d".formatted(adminPropertiesPath, MAX_CONFIG_SIZE_BYTES));
 			}
 			adminProps.load(reader);
