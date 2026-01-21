@@ -8,6 +8,8 @@ import org.slf4j.event.LoggingEvent;
 import org.slf4j.helpers.AbstractLogger;
 
 import java.util.ArrayDeque;
+import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 
 class EventualLogger extends AbstractLogger {
@@ -28,7 +30,8 @@ class EventualLogger extends AbstractLogger {
 			builder.setCause(event.getThrowable());
 			builder.setMessage(event.getMessage());
 			event.getArguments().forEach(builder::addArgument);
-			event.getMarkers().forEach(builder::addMarker);
+			Objects.requireNonNullElse(event.getMarkers(), List.<Marker>of()).forEach(builder::addMarker);
+			builder.log();
 		}
 		bufferedEvents.clear();
 	}
@@ -40,7 +43,7 @@ class EventualLogger extends AbstractLogger {
 			event.addMarker(marker);
 		}
 		event.setMessage(messagePattern);
-		for (var arg : arguments) {
+		for (var arg : Objects.requireNonNullElse(arguments, new Object[]{})) {
 			event.addArgument(arg);
 		}
 		event.setThrowable(throwable);
