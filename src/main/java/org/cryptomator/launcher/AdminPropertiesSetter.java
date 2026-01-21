@@ -37,6 +37,7 @@ import java.util.Set;
 class AdminPropertiesSetter {
 
 	private static final Logger LOG = EventualLogger.getInstance();
+	private static final long MAX_CONFIG_SIZE_BYTES = 8192;
 
 	private static final String LINUX_DIR = "/etc/cryptomator";
 	private static final String MAC_DIR = "/Library/Application Support/Cryptomator";
@@ -88,9 +89,13 @@ class AdminPropertiesSetter {
 		return systemProps;
 	}
 
-	private static Properties loadAdminProperties(Path adminPropertiesPath) {
+	//visible for testing
+	static Properties loadAdminProperties(Path adminPropertiesPath) {
 		var adminProps = new Properties();
 		try (var reader = Files.newBufferedReader(adminPropertiesPath, StandardCharsets.UTF_8)) {
+			if(Files.size(adminPropertiesPath) >= MAX_CONFIG_SIZE_BYTES) {
+				throw new IOException("Config file %s exceeds maximum size of %d".formatted(adminPropertiesPath, MAX_CONFIG_SIZE_BYTES));
+			}
 			adminProps.load(reader);
 		} catch (NoSuchFileException _) {
 			//NO-OP
