@@ -2,7 +2,6 @@ package org.cryptomator.launcher;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +36,7 @@ import java.util.Set;
  */
 class AdminPropertiesSetter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AdminPropertiesSetter.class);
+	private static final Logger LOG = EventualLogger.getInstance();
 
 	private static final String LINUX_DIR = "/etc/cryptomator";
 	private static final String MAC_DIR = "/Library/Application Support/Cryptomator";

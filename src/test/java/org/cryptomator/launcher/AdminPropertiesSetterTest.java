@@ -1,98 +1,59 @@
 package org.cryptomator.launcher;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Answers;
-import org.mockito.Mockito;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 
 public class AdminPropertiesSetterTest {
 
-	private static final Map<String, Object> NO_STRING_CONFIG = Map.of("list", List.of("a", "b", "c"), //
-			"map", Map.of("a", 1, "b", 2));
-
-	private static final Map<String, Object> CONFIG = Map.of("kack", "dudel", //
-			"list", List.of("a", "b", "c"), //
-			"map", Map.of("a", 1, "b", 2));
+	private static final String PROPS = """
+			fruit=banana
+			vegetable:kärrot
+			method=scan寧""";
 
 	@Test
-	@DisplayName("Loading valid JSON")
-	void loadValidJson(@TempDir Path path) throws IOException {
-		try (var adminPropSetterMock = Mockito.mockStatic(AdminPropertiesSetter.class)) {
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.log(anyString(), any())).thenAnswer(Answers.RETURNS_DEFAULTS);
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.loadAdminProperties(any())).thenCallRealMethod();
-			var configPath = path.resolve("config.json");
-			setupValidJson(configPath);
+	@DisplayName("UTF-8 is supported")
+	void loadUTF8Properties(@TempDir Path path) throws IOException {
+		var config = path.resolve("config.properties");
+		setupValidProperties(config);
 
-			var result = AdminPropertiesSetter.loadAdminProperties(configPath);
-			Assertions.assertAll(CONFIG.entrySet().stream().map((e) -> //
-					() -> MatcherAssert.assertThat(result, hasEntry(e.getKey(), e.getValue()))));
-		}
+		var properties = AdminPropertiesSetter.loadAdminProperties(config);
+		Assertions.assertAll(List.of( //
+				() -> MatcherAssert.assertThat(properties, hasEntry("fruit", "banana")), //
+				() -> MatcherAssert.assertThat(properties, hasEntry("vegetable", "kärrot")), //
+				() -> MatcherAssert.assertThat(properties, hasEntry("method", "scan寧"))));
 	}
 
 	@Test
 	@DisplayName("Loading not existing file")
 	void loadNotExistingFile(@TempDir Path path) {
-		try (var adminPropSetterMock = Mockito.mockStatic(AdminPropertiesSetter.class)) {
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.log(anyString(), any())).thenAnswer(Answers.RETURNS_DEFAULTS);
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.loadAdminProperties(any())).thenCallRealMethod();
-			var configPath = path.resolve("config.json");
-
-			var result = AdminPropertiesSetter.loadAdminProperties(configPath);
-			MatcherAssert.assertThat(result, anEmptyMap());
-			adminPropSetterMock.verify(() -> AdminPropertiesSetter.log(anyString(), any()));
-		}
+		var config = path.resolve("config.properties");
+		var properties = AdminPropertiesSetter.loadAdminProperties(config);
+		MatcherAssert.assertThat(properties, anEmptyMap());
 	}
 
 	@Test
-	@DisplayName("Loading empty file")
+	@DisplayName("Loading invalid properties file")
 	void loadEmptyFile(@TempDir Path path) throws IOException {
-		try (var adminPropSetterMock = Mockito.mockStatic(AdminPropertiesSetter.class)) {
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.log(anyString(), any())).thenAnswer(Answers.RETURNS_DEFAULTS);
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.loadAdminProperties(any())).thenCallRealMethod();
-			var configPath = path.resolve("config.json");
-			Files.createFile(configPath);
-
-			var result = AdminPropertiesSetter.loadAdminProperties(configPath);
-			MatcherAssert.assertThat(result, anEmptyMap());
-			adminPropSetterMock.verify(() -> AdminPropertiesSetter.log(anyString(), any()));
-		}
 	}
 
-	void setupValidJson(Path p) throws IOException {
-		var json = JsonMapper.builder().build();
+	void setupValidProperties(Path p) throws IOException {
 		try (var out = Files.newOutputStream(p, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-			json.writerWithDefaultPrettyPrinter().writeValue(out, CONFIG);
+			var bytes = PROPS.getBytes(StandardCharsets.UTF_8);
+			out.write(bytes);
 		}
 	}
-
-	@Test
-	@DisplayName("Keys with non-String values are ignored")
-	void ignoreValues(@TempDir Path path) {
-		try (var adminPropSetterMock = Mockito.mockStatic(AdminPropertiesSetter.class)) {
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.log(anyString(), any())).thenAnswer(Answers.RETURNS_DEFAULTS);
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.loadAdminProperties(any())).thenReturn(NO_STRING_CONFIG);
-			adminPropSetterMock.when(AdminPropertiesSetter::adjustSystemProperties).thenCallRealMethod();
-
-			AdminPropertiesSetter.adjustSystemProperties();
-			adminPropSetterMock.verify(() -> AdminPropertiesSetter.log(anyString(), any()), Mockito.times(NO_STRING_CONFIG.size()));
-		}
-	}
-
 
 }

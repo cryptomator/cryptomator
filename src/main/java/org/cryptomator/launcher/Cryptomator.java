@@ -65,7 +65,7 @@ public class Cryptomator {
 	}
 
 	public static void main(String[] args) {
-		BufferedLog.flushTo(LOG);
+		EventualLogger.getInstance().drainTo(LOG);
 		var printVersion = Optional.ofNullable(args) //
 				.stream() //Streams either one element (the args-array) or zero elements
 				.flatMap(Arrays::stream) //
