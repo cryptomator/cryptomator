@@ -24,7 +24,9 @@ class EventualLogger extends AbstractLogger {
 
 	synchronized void drainTo(Logger gutter) {
 		for (var event : bufferedEvents) {
-			gutter.atLevel(event.getLevel()).log(event.getMessage(), event.getArgumentArray());
+			gutter.atLevel(event.getLevel())
+					.setCause(event.getThrowable())
+					.log(event.getMessage(), event.getArgumentArray());
 		}
 		bufferedEvents.clear();
 	}
@@ -39,6 +41,7 @@ class EventualLogger extends AbstractLogger {
 		for (var arg : arguments) {
 			event.addArgument(arg);
 		}
+		event.setThrowable(throwable);
 		bufferedEvents.add(event);
 	}
 
