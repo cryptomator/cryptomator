@@ -42,7 +42,7 @@ class AdminPropertiesSetter {
 	private static final String LINUX_DIR = "/etc/cryptomator";
 	private static final String MAC_DIR = "/Library/Application Support/Cryptomator";
 	private static final String WIN_DIR = "C:\\ProgramData\\Cryptomator";
-	private static final String CONFIG_NAME = "config.properties";
+	private static final String CONFIG_NAME = "cryptomator.config";
 	private static final Set<String> ALLOWED_OVERRIDES = Set.of( //
 			"cryptomator.logDir", //
 			"cryptomator.pluginDir", //
