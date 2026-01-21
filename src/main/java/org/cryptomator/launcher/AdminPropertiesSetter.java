@@ -57,7 +57,7 @@ class AdminPropertiesSetter {
 			adminDir = Path.of(WIN_DIR);
 		} else if (SystemUtils.IS_OS_MAC) {
 			adminDir = Path.of(MAC_DIR);
-		} else { //LINUX
+		} else {
 			adminDir = Path.of(LINUX_DIR);
 		}
 		ADMIN_PROPERTIES_FILE = adminDir.resolve(CONFIG_NAME);
