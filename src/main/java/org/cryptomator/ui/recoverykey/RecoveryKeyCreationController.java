@@ -104,7 +104,7 @@ public class RecoveryKeyCreationController implements FxController {
 			descriptionLabel.formatProperty().set(resourceBundle.getString("recoveryKey.recover.description"));
 			cancelButton.setOnAction((_) -> back());
 			cancelButton.setText(resourceBundle.getString("generic.button.back"));
-			nextButton.setOnAction((_) -> restoreWithPassword());
+			nextButton.setOnAction((_) -> restoreWithPasswordAsync());
 		}
 	}
 
@@ -137,8 +137,8 @@ public class RecoveryKeyCreationController implements FxController {
 	}
 
 	@FXML
-	public void restoreWithPassword() {
-		Task<Void> task = new RestoreWithPasswordTask();
+	public void restoreWithPasswordAsync() {
+		Task<Void> task = createTask(this::restoreWithPassword);
 
 		task.setOnScheduled(_ -> {
 			LOG.debug("Restoring vault configuration with password for {}.", vault.getDisplayablePath());
@@ -175,9 +175,40 @@ public class RecoveryKeyCreationController implements FxController {
 		executor.submit(task);
 	}
 
+	void restoreWithPassword() throws IOException, CryptoException {
+		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
+			Path recoveryPath = recoveryDirectory.getRecoveryPath();
+			Path masterkeyFilePath = vault.getPath().resolve(MASTERKEY_FILENAME);
+
+			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, masterkeyFilePath, passwordField.getCharacters())) {
+				var combo = MasterkeyService.detect(masterkey, vault.getPath())
+						.orElseThrow(() -> new IllegalStateException("Could not detect combo for vault path: " + vault.getPath()));
+
+				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), combo);
+			}
+
+			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
+		}
+	}
+
 	@FXML
 	public void close() {
 		window.close();
+	}
+
+	@FunctionalInterface
+	private interface TaskAction {
+		void run() throws Exception;
+	}
+
+	private Task<Void> createTask(TaskAction action) {
+		return new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+				action.run();
+				return null;
+			}
+		};
 	}
 
 	private class RecoveryKeyCreationTask extends Task<String> {
@@ -189,34 +220,6 @@ public class RecoveryKeyCreationController implements FxController {
 		@Override
 		protected String call() throws IOException, CryptoException {
 			return recoveryKeyFactory.createRecoveryKey(vault.getPath(), passwordField.getCharacters());
-		}
-
-	}
-
-	private class RestoreWithPasswordTask extends Task<Void> {
-
-		private static final Logger LOG = LoggerFactory.getLogger(RestoreWithPasswordTask.class);
-
-		private RestoreWithPasswordTask() {
-			setOnFailed(_ -> LOG.error("Failed to restore vault configuration with password", getException()));
-		}
-
-		@Override
-		protected Void call() throws IOException, CryptoException {
-			try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
-				Path recoveryPath = recoveryDirectory.getRecoveryPath();
-				Path masterkeyFilePath = vault.getPath().resolve(MASTERKEY_FILENAME);
-
-				try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, masterkeyFilePath, passwordField.getCharacters())) {
-					var combo = MasterkeyService.detect(masterkey, vault.getPath())
-							.orElseThrow(() -> new IllegalStateException("Could not detect combo for vault path: " + vault.getPath()));
-
-					CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), combo);
-				}
-
-				recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
-			}
-			return null;
 		}
 
 	}

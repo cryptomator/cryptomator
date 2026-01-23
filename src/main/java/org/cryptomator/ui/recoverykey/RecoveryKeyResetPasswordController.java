@@ -117,15 +117,15 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	@FXML
 	public void next() {
 		switch (recoverType.get()) {
-			case RESTORE_ALL -> restorePassword();
+			case RESTORE_ALL -> restorePasswordAsync();
 			case RESTORE_MASTERKEY, RESET_PASSWORD -> resetPassword();
 			default -> resetPassword(); // Fallback
 		}
 	}
 
 	@FXML
-	public void restorePassword() {
-		Task<Void> task = new RestorePasswordTask();
+	public void restorePasswordAsync() {
+		Task<Void> task = createTask(this::restorePassword);
 
 		task.setOnScheduled(_ -> {
 			LOG.debug("Restoring vault configuration for {}.", vault.getDisplayablePath());
@@ -156,6 +156,20 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		executor.submit(task);
 	}
 
+	void restorePassword() throws IOException, CryptoException {
+		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
+			Path recoveryPath = recoveryDirectory.getRecoveryPath();
+			MasterkeyService.recoverFromRecoveryKey(recoveryKey.get(), recoveryKeyFactory, recoveryPath, newPasswordController.passwordField.getCharacters());
+
+			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, recoveryPath.resolve(MASTERKEY_FILENAME), newPasswordController.passwordField.getCharacters())) {
+				CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), cipherCombo.get());
+			}
+
+			recoveryDirectory.moveRecoveredFile(MASTERKEY_FILENAME);
+			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
+		}
+	}
+
 	@FXML
 	public void resetPassword() {
 		Task<Void> task = new ResetPasswordTask();
@@ -182,6 +196,21 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		executor.submit(task);
 	}
 
+	@FunctionalInterface
+	private interface TaskAction {
+		void run() throws Exception;
+	}
+
+	private Task<Void> createTask(TaskAction action) {
+		return new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+				action.run();
+				return null;
+			}
+		};
+	}
+
 	private class ResetPasswordTask extends Task<Void> {
 
 		private static final Logger LOG = LoggerFactory.getLogger(ResetPasswordTask.class);
@@ -193,31 +222,6 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		@Override
 		protected Void call() throws IOException, IllegalArgumentException {
 			recoveryKeyFactory.newMasterkeyFileWithPassphrase(vault.getPath(), recoveryKey.get(), newPasswordController.passwordField.getCharacters());
-			return null;
-		}
-	}
-
-	private class RestorePasswordTask extends Task<Void> {
-
-		private static final Logger LOG = LoggerFactory.getLogger(RestorePasswordTask.class);
-
-		public RestorePasswordTask() {
-			setOnFailed(_ -> LOG.error("Failed to restore vault configuration", getException()));
-		}
-
-		@Override
-		protected Void call() throws IOException, CryptoException {
-			try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
-				Path recoveryPath = recoveryDirectory.getRecoveryPath();
-				MasterkeyService.recoverFromRecoveryKey(recoveryKey.get(), recoveryKeyFactory, recoveryPath, newPasswordController.passwordField.getCharacters());
-
-				try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, recoveryPath.resolve(MASTERKEY_FILENAME), newPasswordController.passwordField.getCharacters())) {
-					CryptoFsInitializer.init(recoveryPath, masterkey, shorteningThreshold.get(), cipherCombo.get());
-				}
-
-				recoveryDirectory.moveRecoveredFile(MASTERKEY_FILENAME);
-				recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
-			}
 			return null;
 		}
 	}
