@@ -138,7 +138,7 @@ public class RecoveryKeyCreationController implements FxController {
 
 	@FXML
 	public void restoreWithPasswordAsync() {
-		Task<Void> task = createTask(this::restoreWithPassword);
+		Task<Void> task = RecoveryKeyTasks.createTask(this::restoreWithPassword);
 
 		task.setOnScheduled(_ -> {
 			LOG.debug("Restoring vault configuration with password for {}.", vault.getDisplayablePath());
@@ -194,21 +194,6 @@ public class RecoveryKeyCreationController implements FxController {
 	@FXML
 	public void close() {
 		window.close();
-	}
-
-	@FunctionalInterface
-	private interface TaskAction {
-		void run() throws Exception;
-	}
-
-	private Task<Void> createTask(TaskAction action) {
-		return new Task<Void>() {
-			@Override
-			protected Void call() throws Exception {
-				action.run();
-				return null;
-			}
-		};
 	}
 
 	private class RecoveryKeyCreationTask extends Task<String> {
