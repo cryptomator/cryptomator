@@ -104,7 +104,7 @@ public class RecoveryKeyCreationController implements FxController {
 			descriptionLabel.formatProperty().set(resourceBundle.getString("recoveryKey.recover.description"));
 			cancelButton.setOnAction((_) -> back());
 			cancelButton.setText(resourceBundle.getString("generic.button.back"));
-			nextButton.setOnAction((_) -> restoreWithPassword());
+			nextButton.setOnAction((_) -> restoreWithPasswordAsync());
 		}
 	}
 
@@ -137,11 +137,47 @@ public class RecoveryKeyCreationController implements FxController {
 	}
 
 	@FXML
-	public void restoreWithPassword() {
+	public void restoreWithPasswordAsync() {
+		Task<Void> task = RecoveryKeyTasks.createTask(this::restoreWithPassword);
 
+		task.setOnScheduled(_ -> {
+			LOG.debug("Restoring vault configuration with password for {}.", vault.getDisplayablePath());
+		});
+
+		task.setOnSucceeded(_ -> {
+			LOG.debug("Restored vault configuration for {}.", vault.getDisplayablePath());
+			try {
+				if (!vaultListManager.isAlreadyAdded(vault.getPath())) {
+					vaultListManager.add(vault.getPath());
+				}
+				window.close();
+				dialogs.prepareRecoverPasswordSuccess((Stage) window.getOwner()) //
+						.setTitleKey("recover.recoverVaultConfig.title") //
+						.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message") //
+						.setDescriptionKey("recoveryKey.recover.resetMasterkeyFileSuccess.description")
+						.build().showAndWait();
+			} catch (IOException e) {
+				LOG.error("Failed to add vault to list.", e);
+				appWindows.showErrorWindow(e, window, null);
+			}
+		});
+
+		task.setOnFailed(_ -> {
+			if (task.getException() instanceof InvalidPassphraseException e) {
+				LOG.info("Password invalid", e);
+				Animations.createShakeWindowAnimation(window).play();
+			} else {
+				LOG.error("Recovery process failed.", task.getException());
+				appWindows.showErrorWindow(task.getException(), window, null);
+			}
+		});
+
+		executor.submit(task);
+	}
+
+	void restoreWithPassword() throws IOException, CryptoException {
 		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
 			Path recoveryPath = recoveryDirectory.getRecoveryPath();
-
 			Path masterkeyFilePath = vault.getPath().resolve(MASTERKEY_FILENAME);
 
 			try (Masterkey masterkey = MasterkeyService.load(masterkeyFileAccess, masterkeyFilePath, passwordField.getCharacters())) {
@@ -152,23 +188,6 @@ public class RecoveryKeyCreationController implements FxController {
 			}
 
 			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
-
-			if (!vaultListManager.isAlreadyAdded(vault.getPath())) {
-				vaultListManager.add(vault.getPath());
-			}
-			window.close();
-			dialogs.prepareRecoverPasswordSuccess((Stage)window.getOwner()) //
-					.setTitleKey("recover.recoverVaultConfig.title") //
-					.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message") //
-					.setDescriptionKey("recoveryKey.recover.resetMasterkeyFileSuccess.description")
-					.build().showAndWait();
-
-		} catch (InvalidPassphraseException e) {
-			LOG.info("Password invalid", e);
-			Animations.createShakeWindowAnimation(window).play();
-		} catch (IOException | CryptoException | IllegalStateException e) {
-			LOG.error("Recovery process failed", e);
-			appWindows.showErrorWindow(e, window, null);
 		}
 	}
 
