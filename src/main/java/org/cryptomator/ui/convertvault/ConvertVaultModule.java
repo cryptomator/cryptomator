@@ -17,7 +17,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
+import org.cryptomator.common.recovery.RecoveryKeyFactory;
 import org.cryptomator.ui.recoverykey.RecoveryKeyValidateController;
 
 import javax.inject.Named;

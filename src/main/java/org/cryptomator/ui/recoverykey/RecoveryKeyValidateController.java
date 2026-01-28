@@ -3,6 +3,7 @@ package org.cryptomator.ui.recoverykey;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import org.cryptomator.common.Nullable;
+import org.cryptomator.common.recovery.RecoveryKeyFactory;
 import org.cryptomator.common.ObservableUtil;
 import org.cryptomator.common.recovery.MasterkeyService;
 import org.cryptomator.common.recovery.RecoveryActionType;

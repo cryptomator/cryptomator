@@ -12,7 +12,7 @@ import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.changepassword.NewPasswordController;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
-import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
+import org.cryptomator.common.recovery.RecoveryKeyFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

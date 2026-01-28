@@ -16,7 +16,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
-import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
+import org.cryptomator.common.recovery.RecoveryKeyFactory;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

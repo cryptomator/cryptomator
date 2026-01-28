@@ -6,6 +6,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.recovery.RecoveryActionType;
+import org.cryptomator.common.recovery.RecoveryKeyFactory;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptolib.api.CryptorProvider;
