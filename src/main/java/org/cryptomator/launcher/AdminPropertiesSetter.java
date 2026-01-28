@@ -38,7 +38,6 @@ class AdminPropertiesSetter {
 
 	private static final Logger LOG = EventualLogger.getInstance();
 	private static final long MAX_CONFIG_SIZE_BYTES = 8192;
-
 	private static final String LINUX_DIR = "/etc/cryptomator";
 	private static final String MAC_DIR = "/Library/Application Support/Cryptomator";
 	private static final String WIN_DIR = "C:\\ProgramData\\Cryptomator";
@@ -50,6 +49,7 @@ class AdminPropertiesSetter {
 			"cryptomator.mountPointsDir", //
 			"cryptomator.disableUpdateCheck");
 
+	private static final Path ADMIN_PROPERTIES_FILE;
 
 	static {
 		final Path adminDir;
@@ -63,7 +63,6 @@ class AdminPropertiesSetter {
 		ADMIN_PROPERTIES_FILE = adminDir.resolve(CONFIG_NAME);
 	}
 
-	private static final Path ADMIN_PROPERTIES_FILE;
 
 	/**
 	 * Adjusts the system properties by loading administrative properties from a predefined file location.
@@ -101,7 +100,7 @@ class AdminPropertiesSetter {
 			}
 		} catch (NoSuchFileException _) {
 			//NO-OP
-			LOG.debug("No admin properties found at  {}.", adminPropertiesPath);
+			LOG.debug("No admin properties found at {}.", adminPropertiesPath);
 		} catch (IOException | IllegalArgumentException e) {
 			LOG.warn("Failed to read administrative properties from {}. Returning empty properties.", adminPropertiesPath, e);
 		}

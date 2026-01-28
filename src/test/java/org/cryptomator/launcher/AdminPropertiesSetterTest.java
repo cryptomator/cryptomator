@@ -50,7 +50,7 @@ public class AdminPropertiesSetterTest {
 
 	@Test
 	@DisplayName("Loading invalid file returns empty properties")
-	void loadEmptyFile(@TempDir Path path) throws IOException {
+	void loadInvalidFile(@TempDir Path path) throws IOException {
 		var config = path.resolve("config.properties");
 		try (var out = Files.newOutputStream(config, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
 			var bytes = "method=\\u2u20".getBytes(StandardCharsets.UTF_8); //only one "u" is allowed in a Unicode escape sequence
