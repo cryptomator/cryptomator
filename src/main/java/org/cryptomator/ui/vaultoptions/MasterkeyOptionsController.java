@@ -1,6 +1,5 @@
 package org.cryptomator.ui.vaultoptions;
 
-import dagger.Lazy;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
@@ -10,7 +9,6 @@ import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Inject;
-import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -24,10 +22,7 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 @VaultOptionsScoped
 public class MasterkeyOptionsController implements FxController {
 
-	private static final String DOCS_URL = "https://docs.cryptomator.org/desktop/"; //TODO: replace with correct docs link
-
 	private final Vault vault;
-	private final Lazy<Application> application;
 	private final Stage window;
 	private final ChangePasswordComponent.Builder changePasswordWindow;
 	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
@@ -38,10 +33,9 @@ public class MasterkeyOptionsController implements FxController {
 
 
 	@Inject
-	MasterkeyOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Factory recoveryKeyWindow, ForgetPasswordComponent.Builder forgetPasswordWindow, KeychainManager keychain, Lazy<Application> application) {
+	MasterkeyOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Factory recoveryKeyWindow, ForgetPasswordComponent.Builder forgetPasswordWindow, KeychainManager keychain) {
 		this.vault = vault;
 		this.window = window;
-		this.application = application;
 		this.changePasswordWindow = changePasswordWindow;
 		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.forgetPasswordWindow = forgetPasswordWindow;
@@ -73,11 +67,6 @@ public class MasterkeyOptionsController implements FxController {
 	public void showForgetPasswordDialog() {
 		assert keychain.isSupported();
 		forgetPasswordWindow.vault(vault).owner(window).build().showForgetPassword();
-	}
-
-	@FXML
-	public void openDocs() {
-		application.get().getHostServices().showDocument(DOCS_URL);
 	}
 
 	public ObservableValue<Boolean> passwordSavedProperty() {
