@@ -36,7 +36,7 @@ import java.util.Set;
  */
 class AdminPropertiesSetter {
 
-	private static final Logger LOG = EventualLogger.getInstance();
+	private static final Logger LOG = EventualLogger.INSTANCE;
 	private static final long MAX_CONFIG_SIZE_BYTES = 8192;
 	private static final String LINUX_DIR = "/etc/cryptomator";
 	private static final String MAC_DIR = "/Library/Application Support/Cryptomator";

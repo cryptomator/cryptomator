@@ -14,10 +14,7 @@ import java.util.Queue;
 
 class EventualLogger extends AbstractLogger {
 
-	static EventualLogger getInstance() {
-		return Wrapped.INSTANCE.get();
-	}
-
+	static final EventualLogger INSTANCE = new EventualLogger();
 
 	private final Queue<LoggingEvent> bufferedEvents = new ArrayDeque<>();
 
@@ -105,19 +102,5 @@ class EventualLogger extends AbstractLogger {
 	@Override
 	public boolean isErrorEnabled(Marker marker) {
 		return true;
-	}
-
-	private enum Wrapped {
-		INSTANCE;
-
-		EventualLogger actualInstance;
-
-		Wrapped() {
-			actualInstance = new EventualLogger();
-		}
-
-		public EventualLogger get() {
-			return actualInstance;
-		}
 	}
 }
