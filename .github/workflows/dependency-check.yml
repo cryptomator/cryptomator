@@ -16,4 +16,4 @@ jobs:
       nvd-api-key: ${{ secrets.NVD_API_KEY }}
       ossindex-username: ${{ secrets.OSSINDEX_USERNAME }}
       ossindex-token: ${{ secrets.OSSINDEX_API_TOKEN }}
-      slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
