@@ -43,7 +43,7 @@
 
 		<!-- 3rd party dependencies -->
 		<commons-lang3.version>3.20.0</commons-lang3.version>
-		<dagger.version>2.59</dagger.version>
+		<dagger.version>2.57.2</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.21.0</jackson.version>
 		<javafx.version>25</javafx.version>
