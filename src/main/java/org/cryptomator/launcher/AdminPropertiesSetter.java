@@ -30,7 +30,7 @@ class AdminPropertiesSetter {
 
 	private static final Logger LOG = EventualLogger.INSTANCE;
 	private static final long MAX_CONFIG_SIZE_BYTES = 8192;
-	private static final String ADMIN_PROP_FILE_KEY = "cryptomator.adminConfig";
+	private static final String ADMIN_PROP_FILE_KEY = "cryptomator.adminConfigPath";
 	private static final Set<String> ALLOWED_OVERRIDES = Set.of( //
 			"cryptomator.logDir", //
 			"cryptomator.pluginDir", //

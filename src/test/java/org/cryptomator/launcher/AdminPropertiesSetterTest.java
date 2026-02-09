@@ -81,7 +81,7 @@ public class AdminPropertiesSetterTest {
 	@Test
 	@DisplayName("If system property for config path is null, skip do not load anything")
 	void skipAdjustSystemPropertiesOnUndefinedProperty() {
-		Assertions.assertNull(System.getProperty("cryptomator.adminConfig"));
+		Assertions.assertNull(System.getProperty("cryptomator.adminConfigPath"));
 
 		try (var adminPropSetterMock = mockStatic(AdminPropertiesSetter.class)) {
 			adminPropSetterMock.when(AdminPropertiesSetter::adjustSystemProperties).thenCallRealMethod();
