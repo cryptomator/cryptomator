@@ -13,9 +13,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Properties;
 
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 
 public class AdminPropertiesSetterTest {
 
@@ -72,6 +76,21 @@ public class AdminPropertiesSetterTest {
 
 		var properties = AdminPropertiesSetter.loadAdminProperties(config);
 		MatcherAssert.assertThat(properties, anEmptyMap());
+	}
+
+	@Test
+	@DisplayName("If system property for config path is null, skip do not load anything")
+	void skipAdjustSystemPropertiesOnUndefinedProperty() {
+		Assertions.assertNull(System.getProperty("cryptomator.adminConfig"));
+
+		try (var adminPropSetterMock = mockStatic(AdminPropertiesSetter.class)) {
+			adminPropSetterMock.when(AdminPropertiesSetter::adjustSystemProperties).thenCallRealMethod();
+			adminPropSetterMock.when(() -> AdminPropertiesSetter.loadAdminProperties(any())).thenReturn(new Properties());
+
+			AdminPropertiesSetter.adjustSystemProperties();
+
+			adminPropSetterMock.verify(() -> AdminPropertiesSetter.loadAdminProperties(any()), never());
+		}
 	}
 
 }
