@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -36,6 +37,11 @@ public class FxApplicationStyle {
 	}
 
 	public void initialize() {
+		appearanceProvider.ifPresent(service -> {
+			if(service instanceof JfxUiAppearanceProvider fxService) {
+				fxService.setJavaFXPlatform(Platform.getPreferences());
+			}
+		});
 		settings.theme.addListener(this::appThemeChanged);
 		loadSelectedStyleSheet(settings.theme.get());
 	}
