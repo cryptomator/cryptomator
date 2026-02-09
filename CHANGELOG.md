@@ -21,3 +21,4 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Changed
 * Built using JDK 25 ([#4031](https://github.com/cryptomator/cryptomator/issues/4031))
 * Modernized Template for GitHub Releases
+* Disable user defined app start config on Windows ([#4132](https://github.com/cryptomator/cryptomator/issues/4132))
