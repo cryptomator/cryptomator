@@ -126,6 +126,7 @@ jobs:
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.adminConfig=\"/Library/Application Support/Cryptomator/cryptomator.config\""
           --java-options "-Dcryptomator.logDir=\"@{userhome}/Library/Logs/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"@{userhome}/Library/Application Support/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"@{userhome}/Library/Application Support/Cryptomator/settings.json\""

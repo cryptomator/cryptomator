@@ -14,8 +14,8 @@ import java.util.Set;
 /**
  * Class to overwrite system properties with an external properties file
  * <p>
- * To overwrite system properties, the method {@link #adjustSystemProperties()} loads the properties file {@value CONFIG_NAME} from an OS-dependent location and adds all supported properties to the {@link System} properties.
- * The predefined location is for
+ * To overwrite system properties, the method {@link #adjustSystemProperties()} loads the properties file {@value CONFIG_NAME} from the file defined in the property {@value #ADMIN_PROP_FILE_KEY}  and writes all supported properties to the {@link System} properties.
+ * If {@value #ADMIN_PROP_FILE_KEY} is {@code null} OS-specific, predefined paths are used:
  *     <ul>
  *         <li>Linux: {@value LINUX_DIR }</li>
  *         <li>macOS: {@value MAC_DIR }</li>
@@ -42,6 +42,7 @@ class AdminPropertiesSetter {
 	private static final String MAC_DIR = "/Library/Application Support/Cryptomator";
 	private static final String WIN_DIR = "C:\\ProgramData\\Cryptomator";
 	private static final String CONFIG_NAME = "cryptomator.config";
+	private static final String ADMIN_PROP_FILE_KEY = "cryptomator.adminConfig";
 	private static final Set<String> ALLOWED_OVERRIDES = Set.of( //
 			"cryptomator.logDir", //
 			"cryptomator.pluginDir", //
@@ -52,15 +53,20 @@ class AdminPropertiesSetter {
 	private static final Path ADMIN_PROPERTIES_FILE;
 
 	static {
-		final Path adminDir;
-		if (SystemUtils.IS_OS_WINDOWS) {
-			adminDir = Path.of(WIN_DIR);
-		} else if (SystemUtils.IS_OS_MAC) {
-			adminDir = Path.of(MAC_DIR);
+		final String systemPropertyDefinedAdminFile = System.getProperty(ADMIN_PROP_FILE_KEY);
+		if (systemPropertyDefinedAdminFile != null) {
+			ADMIN_PROPERTIES_FILE = Path.of(systemPropertyDefinedAdminFile);
 		} else {
-			adminDir = Path.of(LINUX_DIR);
+			final Path defaultAdminDir;
+			if (SystemUtils.IS_OS_WINDOWS) {
+				defaultAdminDir = Path.of(WIN_DIR);
+			} else if (SystemUtils.IS_OS_MAC) {
+				defaultAdminDir = Path.of(MAC_DIR);
+			} else {
+				defaultAdminDir = Path.of(LINUX_DIR);
+			}
+			ADMIN_PROPERTIES_FILE = defaultAdminDir.resolve(CONFIG_NAME);
 		}
-		ADMIN_PROPERTIES_FILE = adminDir.resolve(CONFIG_NAME);
 	}
 
 
