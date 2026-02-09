@@ -21,7 +21,8 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.sharevault.ShareVaultController"
 	  prefWidth="540"
-	  spacing="12">
+	  spacing="12"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>

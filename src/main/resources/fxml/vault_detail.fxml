@@ -36,7 +36,7 @@
 					<Label styleClass="badge,badge-pill,badge-muted" text="…" minWidth="-Infinity" visible="${controller.vault.processing}" managed="${controller.vault.processing}"/>
 					<Label styleClass="badge,badge-pill,badge-primary" text="%main.vaultDetail.unlockedStatus" minWidth="-Infinity" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
 				</HBox>
-				<Hyperlink styleClass="hyperlink-muted,hyperlink-hover-icon" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation">
+				<Hyperlink styleClass="hyperlink-muted,hyperlink-hover-icon" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation" accessibleText="%main.vaultDetail.storageLocation" accessibleRole="BUTTON">
 					<graphic>
 						<FontAwesome5IconView styleClass="glyph-icon-muted" glyph="EYE"/>
 					</graphic>

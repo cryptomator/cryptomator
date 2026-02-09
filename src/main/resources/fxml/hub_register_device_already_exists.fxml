@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<!-- TODO: simple dialog -->
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.hub.RegisterFailedController"
@@ -18,7 +19,8 @@
 	  maxWidth="400"
 	  minHeight="145"
 	  spacing="12"
-	  alignment="TOP_LEFT">
+	  alignment="TOP_LEFT"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
