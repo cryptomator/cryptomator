@@ -132,6 +132,10 @@
     <!-- Property for controlling update check behavior (can be set via command line) -->
     <ns0:Property Id="DISABLEUPDATECHECK" Secure="yes" />
 
+    <!-- Disable user config -->
+    <ns0:SetProperty Id="DisableUserConfig" Value="&quot;[INSTALLDIR]disableUserConfig.bat&quot;" Sequence="execute" Before="DisableUserConfig" />
+    <ns0:CustomAction Id="DisableUserConfig" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
+
     <!-- WebDAV patches -->
     <ns0:SetProperty Id="PatchWebDAV" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot; &quot;$(var.LoopbackAlias)&quot;" Sequence="execute" Before="PatchWebDAV" />
     <ns0:CustomAction Id="PatchWebDAV" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
@@ -188,9 +192,10 @@
       <ns0:Custom Action="FailOnRunningApp" After="Wix4CloseApplications_$(sys.BUILDARCHSHORT)" Condition="FOUNDRUNNINGAPP" />
 
       <ns0:RemoveExistingProducts After="InstallValidate"/> <!-- Moved from CostInitialize, due to Wix4CloseApplications_* -->
+      <ns0:Custom Action="DisableUserConfig" After="InstallFiles" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
       <!-- Skip action on uninstall -->
       <!-- TODO: don't skip action, but remove cryptomator alias from hosts file -->
-      <ns0:Custom Action="PatchWebDAV" After="InstallFiles" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
+      <ns0:Custom Action="PatchWebDAV" After="DisableUserConfig" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
       <!-- Configure update check setting if property is provided -->
       <ns0:Custom Action="PatchUpdateCheck" After="PatchWebDAV" Condition="DISABLEUPDATECHECK AND NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
     </ns0:InstallExecuteSequence>
