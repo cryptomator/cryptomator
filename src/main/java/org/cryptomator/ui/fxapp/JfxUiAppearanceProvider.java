@@ -7,6 +7,8 @@ import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.integrations.uiappearance.UiAppearanceException;
 import org.cryptomator.integrations.uiappearance.UiAppearanceListener;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.application.ColorScheme;
 import javafx.application.Platform;
@@ -21,34 +23,39 @@ import java.util.concurrent.atomic.AtomicReference;
 @Priority(1050)
 public class JfxUiAppearanceProvider implements UiAppearanceProvider {
 
-	final ConcurrentHashMap<UiAppearanceListener, ChangeListener<ColorScheme>> uiAppearanceListeners = new ConcurrentHashMap<>();
-	final AtomicReference<Platform.Preferences> fxPreferencesContainer = new AtomicReference<>();
+	private static final Logger LOG = LoggerFactory.getLogger(JfxUiAppearanceProvider.class);
 
-	public void setJavaFXPlatform(Platform.Preferences preferences) {
-		fxPreferencesContainer.set(preferences);
+	private final AtomicReference<JfxUiAppearanceImpl> realImpl = new AtomicReference<>(null);
+
+	public void initialize(Platform.Preferences preferences) {
+		realImpl.compareAndSet(null, new JfxUiAppearanceImpl(preferences));
+		LOG.debug("Initialized {} with JavaFX preferences", JfxUiAppearanceImpl.class);
 	}
 
-	@Override
-	public Theme getSystemTheme() {
-		var pref = fxPreferencesContainer.get();
-		if (pref != null) {
-			return switch (pref.getColorScheme()) {
+	private static class JfxUiAppearanceImpl implements UiAppearanceProvider {
+
+		private final Platform.Preferences preferences;
+		private final ConcurrentHashMap<UiAppearanceListener, ChangeListener<ColorScheme>> uiAppearanceListeners = new ConcurrentHashMap<>();
+
+		private JfxUiAppearanceImpl(Platform.Preferences preferences) {
+			this.preferences = preferences;
+		}
+
+		@Override
+		public Theme getSystemTheme() {
+			return switch (preferences.getColorScheme()) {
 				case DARK -> Theme.DARK;
 				case LIGHT -> Theme.LIGHT;
 			};
 		}
-		return Theme.LIGHT;
-	}
 
-	@Override
-	public void adjustToTheme(Theme theme) {
-		//no-op
-	}
+		@Override
+		public void adjustToTheme(Theme theme) {
+			//no-op
+		}
 
-	@Override
-	public void addListener(UiAppearanceListener uiAppearanceListener) throws UiAppearanceException {
-		var pref = fxPreferencesContainer.get();
-		if (pref != null) {
+		@Override
+		public void addListener(UiAppearanceListener uiAppearanceListener) throws UiAppearanceException {
 			var fxChangeListener = (ChangeListener<ColorScheme>) (_, _, newScheme) -> {
 				var newTheme = switch (newScheme) {
 					case DARK -> Theme.DARK;
@@ -56,19 +63,56 @@ public class JfxUiAppearanceProvider implements UiAppearanceProvider {
 				};
 				uiAppearanceListener.systemAppearanceChanged(newTheme);
 			};
+			LOG.debug("Register listener for OS theme changes");
 			uiAppearanceListeners.compute(uiAppearanceListener, (k, v) -> {
-				pref.colorSchemeProperty().addListener(fxChangeListener);
+				Platform.runLater(() -> preferences.colorSchemeProperty().addListener(fxChangeListener));
 				return fxChangeListener;
 			});
+		}
+
+		@Override
+		public void removeListener(UiAppearanceListener uiAppearanceListener) throws UiAppearanceException {
+			var fxChangeListener = uiAppearanceListeners.remove(uiAppearanceListener);
+			if (fxChangeListener != null) {
+				LOG.debug("Removing listener for OS theme changes");
+				Platform.runLater(() -> preferences.colorSchemeProperty().removeListener(fxChangeListener));
+			}
+		}
+	}
+
+
+	//just delegate methods
+	@Override
+	public Theme getSystemTheme() {
+		var impl = realImpl.get();
+		if (impl != null) {
+			return impl.getSystemTheme();
+		} else {
+			return Theme.LIGHT;
+		}
+	}
+
+	@Override
+	public void adjustToTheme(Theme theme) {
+		var impl = realImpl.get();
+		if (impl != null) {
+			impl.getSystemTheme();
+		}
+	}
+
+	@Override
+	public void addListener(UiAppearanceListener uiAppearanceListener) throws UiAppearanceException {
+		var impl = realImpl.get();
+		if (impl != null) {
+			impl.addListener(uiAppearanceListener);
 		}
 	}
 
 	@Override
 	public void removeListener(UiAppearanceListener uiAppearanceListener) throws UiAppearanceException {
-		var pref = fxPreferencesContainer.get();
-		var fxChangeListener = uiAppearanceListeners.remove(uiAppearanceListener);
-		if (pref != null && fxChangeListener != null) {
-			pref.colorSchemeProperty().removeListener(fxChangeListener);
+		var impl = realImpl.get();
+		if (impl != null) {
+			impl.removeListener(uiAppearanceListener);
 		}
 	}
 
