@@ -59,7 +59,7 @@ public class ChooseExistingVaultController implements FxController {
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
-		this.screenshot = applicationStyle.appliedThemeProperty().map(this::selectScreenshot);
+		this.screenshot = applicationStyle.appliedAppThemeProperty().map(this::selectScreenshot);
 	}
 
 	private Image selectScreenshot(Theme theme) {
