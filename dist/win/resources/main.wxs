@@ -103,16 +103,9 @@
       <ns0:Directory Id="CryptomatorDesktopProgramData" Name="Cryptomator">
         <ns0:Component Id="AdminConfigDir" Guid="c078b7da-ba6e-4069-a5ab-5c0f0f9856a0">
           <ns0:CreateFolder>
-            <util:PermissionEx
-              User="SYSTEM"
-              GenericAll="yes"/>
-            <util:PermissionEx
-              User="Administrators"
-              GenericAll="yes"/>
-            <util:PermissionEx
-              User="Users"
-              GenericRead="yes"
-              GenericExecute="yes"/>
+            <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
+            <util:PermissionEx User="Administrators" GenericAll="yes"/>
+            <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
           </ns0:CreateFolder>
         </ns0:Component>
         <ns0:Component Id="AdminConfigFile" NeverOverwrite="yes" Permanent="yes">

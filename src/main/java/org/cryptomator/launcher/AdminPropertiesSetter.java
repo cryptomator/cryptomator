@@ -3,10 +3,13 @@ package org.cryptomator.launcher;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import java.util.Set;
 
@@ -72,13 +75,12 @@ class AdminPropertiesSetter {
 	//visible for testing
 	static Properties loadAdminProperties(Path adminPropertiesPath) {
 		var adminProps = new Properties();
-		try {
-			if (Files.size(adminPropertiesPath) > MAX_CONFIG_SIZE_BYTES) {
+		try (FileChannel ch = FileChannel.open(adminPropertiesPath, StandardOpenOption.READ); //
+			 Reader reader = Channels.newReader(ch, StandardCharsets.UTF_8)) {
+			if (ch.size() > MAX_CONFIG_SIZE_BYTES) {
 				throw new IOException("Config file %s exceeds maximum size of %d".formatted(adminPropertiesPath, MAX_CONFIG_SIZE_BYTES));
 			}
-			try (var reader = Files.newBufferedReader(adminPropertiesPath, StandardCharsets.UTF_8)) {
-				adminProps.load(reader);
-			}
+			adminProps.load(reader);
 		} catch (NoSuchFileException _) {
 			//NO-OP
 			LOG.debug("No admin properties found at {}.", adminPropertiesPath);
