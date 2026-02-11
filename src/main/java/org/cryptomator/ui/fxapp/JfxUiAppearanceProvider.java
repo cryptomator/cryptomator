@@ -27,8 +27,10 @@ public class JfxUiAppearanceProvider implements UiAppearanceProvider {
 	private final AtomicReference<JfxUiAppearanceImpl> realImpl = new AtomicReference<>(null);
 
 	public void initialize(Platform.Preferences preferences) {
-		realImpl.compareAndSet(null, new JfxUiAppearanceImpl(preferences));
-		LOG.debug("Initialized {} with JavaFX preferences", JfxUiAppearanceImpl.class);
+		var isSet = realImpl.compareAndSet(null, new JfxUiAppearanceImpl(preferences));
+		if (isSet) {
+			LOG.debug("Initialized {} with JavaFX preferences", JfxUiAppearanceImpl.class);
+		}
 	}
 
 	private static class JfxUiAppearanceImpl implements UiAppearanceProvider {
