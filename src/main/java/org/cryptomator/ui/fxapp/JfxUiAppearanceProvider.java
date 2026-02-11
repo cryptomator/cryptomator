@@ -63,7 +63,7 @@ public class JfxUiAppearanceProvider implements UiAppearanceProvider {
 				uiAppearanceListener.systemAppearanceChanged(newTheme);
 			};
 			LOG.debug("Register listener for OS theme changes");
-			uiAppearanceListeners.compute(uiAppearanceListener, (k, v) -> {
+			uiAppearanceListeners.computeIfAbsent(uiAppearanceListener, k -> {
 				Platform.runLater(() -> preferences.colorSchemeProperty().addListener(fxChangeListener));
 				return fxChangeListener;
 			});
