@@ -95,7 +95,7 @@ public class JfxUiAppearanceProvider implements UiAppearanceProvider {
 	public void adjustToTheme(Theme theme) {
 		var impl = realImpl.get();
 		if (impl != null) {
-			impl.getSystemTheme();
+			impl.adjustToTheme(theme);
 		}
 	}
 
