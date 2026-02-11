@@ -152,11 +152,6 @@ public class Settings {
 
 	@SuppressWarnings("deprecation")
 	private void migrateLegacySettings(SettingsJson json) {
-		// migrate renamed keychainAccess
-		if(this.keychainProvider.getValueSafe().equals("org.cryptomator.linux.keychain.SecretServiceKeychainAccess")) {
-			this.keychainProvider.setValue("org.cryptomator.linux.keychain.GnomeKeyringKeychainAccess");
-		}
-
 		// implicit migration of 1.6.x legacy setting "preferredVolumeImpl":
 		if (this.mountService.get() == null && json.preferredVolumeImpl != null) {
 			this.mountService.set(switch (json.preferredVolumeImpl) {
