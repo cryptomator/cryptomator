@@ -72,14 +72,15 @@ public class FxApplicationStyle {
 	}
 
 	private void registerAutomaticThemeChange() {
-		appearanceProvider.ifPresent(provider -> {
-			try {
-				provider.addListener(systemInterfaceThemeListener);
-			} catch (UiAppearanceException e) {
-				LOG.error("Failed to enable automatic theme switching.");
-			}
-			systemInterfaceThemeChanged(provider.getSystemTheme());
-		});
+		appearanceProvider.ifPresentOrElse(provider -> {
+					try {
+						provider.addListener(systemInterfaceThemeListener);
+					} catch (UiAppearanceException e) {
+						LOG.error("Failed to enable automatic theme switching.");
+					}
+					systemInterfaceThemeChanged(provider.getSystemTheme());
+				}, //
+				() -> LOG.warn("UI theme AUTOMATIC selected, but no supported UiAppearanceProvider present"));
 	}
 
 	private void systemInterfaceThemeChanged(Theme osTheme) {
