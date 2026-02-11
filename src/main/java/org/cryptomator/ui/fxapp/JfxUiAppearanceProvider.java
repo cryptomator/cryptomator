@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @DisplayName("JavaFX Color Scheme switcher")
 @OperatingSystem(OperatingSystem.Value.LINUX)
 @OperatingSystem(OperatingSystem.Value.WINDOWS)
-@OperatingSystem(OperatingSystem.Value.MAC)
 @Priority(1050)
 public class JfxUiAppearanceProvider implements UiAppearanceProvider {
 
