@@ -17,6 +17,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Mark files in-use for Hub vaults ([#4078](https://github.com/cryptomator/cryptomator/pull/4078))
 * Accessibility: Adjust app to be used with a screen reader ([#547](https://github.com/cryptomator/cryptomator/issues/547))
 * Show Archived Vault Dialog on unlock when Hub returns 410 ([#4081](https://github.com/cryptomator/cryptomator/pull/4081))
+* Automatic app color scheme selection according to OS ([#4134](https://github.com/cryptomator/cryptomator/pull/4134))
 
 ### Changed
 * Built using JDK 25 ([#4031](https://github.com/cryptomator/cryptomator/issues/4031))
