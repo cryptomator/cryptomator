@@ -14,9 +14,11 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Class to overwrite system properties with an external properties file
+ * Factory to generate admin properties.
+ *
  * <p>
- * To overwrite system properties, the method {@link #adjustSystemProperties()} reads the properties file defined in the property {@value #ADMIN_PROP_FILE_KEY} and writes all supported properties to the {@link System} properties.
+ * Admin properties are {@link Properties} using system properties as defaults, but allow overwriting a specific set of properties with an external config file.
+ * Those properties are created by calling {@link #create()}. The method first reads system property {@value #ADMIN_PROP_FILE_KEY}. If it contains a path to a valid properties file, all overridable properties from the file are loaded into the returned admin properties.
  * <p>
  * The overridable properties are:
  * <ul>
@@ -27,9 +29,10 @@ import java.util.Set;
  *     <li>cryptomator.disableUpdateCheck</li>
  * </ul>
  *
+ * @see Properties
  * @see System#getProperties()
  */
-class AdminPropertiesSetter {
+class AdminPropertiesFactory {
 
 	private static final Logger LOG = EventualLogger.INSTANCE;
 	private static final long MAX_CONFIG_SIZE_BYTES = 8192;
@@ -43,39 +46,38 @@ class AdminPropertiesSetter {
 
 
 	/**
-	 * Adjusts the system properties by loading administrative properties from a predefined file location.
+	 * Creates new {@link Properties} containing overridable properties from the admin config.
 	 * <p>
-	 * If the file exists and is a valid properties file, its content will overwrite existing system properties.
-	 * Only some properties can be overridden, see {@link AdminPropertiesSetter}
+	 * The returned properties object uses as default the {@link System} properties.
+	 * For a list of overridable properties, see {@link AdminPropertiesFactory}
 	 *
-	 * @return The adjusted system properties.
+	 * @return {@link Properties} containing overridable properties from the admin config and defaulting to system properties.
 	 */
-	static Properties adjustSystemProperties() {
+	static Properties create() {
 		var systemProps = System.getProperties();
+		var adminProps = new Properties(systemProps);
 
 		final String adminCfgPath = System.getProperty(ADMIN_PROP_FILE_KEY);
 		if (adminCfgPath == null) {
-			LOG.debug("Path to admin properties file is not defined.");
-			return systemProps;
+			LOG.debug("Admin config property is not defined. Skipping.");
+			return adminProps;
 		}
-		var adminProps = loadAdminProperties(Path.of(adminCfgPath));
+		var propsFromFile = loadPropertiesFromFile(Path.of(adminCfgPath));
 
-		var newSystemProps = new Properties(systemProps);
-		for (var key : adminProps.stringPropertyNames()) {
+		for (var key : propsFromFile.stringPropertyNames()) {
 			if (ALLOWED_OVERRIDES.contains(key)) {
-				var value = adminProps.getProperty(key);
+				var value = propsFromFile.getProperty(key);
 				LOG.info("Overwriting {} with value {} from admin config.", key, value);
-				newSystemProps.setProperty(key, value);
+				adminProps.setProperty(key, value);
 			} else {
 				LOG.debug("Property {} in admin config is not supported for override.", key);
 			}
 		}
-		System.setProperties(newSystemProps);
-		return newSystemProps;
+		return adminProps;
 	}
 
 	//visible for testing
-	static Properties loadAdminProperties(Path adminPropertiesPath) {
+	static Properties loadPropertiesFromFile(Path adminPropertiesPath) {
 		var adminProps = new Properties();
 		try (FileChannel ch = FileChannel.open(adminPropertiesPath, StandardOpenOption.READ); //
 			 Reader reader = Channels.newReader(ch, StandardCharsets.UTF_8)) {

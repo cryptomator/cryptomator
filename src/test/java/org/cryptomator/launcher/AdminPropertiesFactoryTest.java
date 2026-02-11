@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 
-public class AdminPropertiesSetterTest {
+public class AdminPropertiesFactoryTest {
 
 	private static final String PROPS = """
 			fruit=banana
@@ -37,7 +37,7 @@ public class AdminPropertiesSetterTest {
 			out.write(bytes);
 		}
 
-		var properties = AdminPropertiesSetter.loadAdminProperties(config);
+		var properties = AdminPropertiesFactory.loadPropertiesFromFile(config);
 		Assertions.assertAll(List.of( //
 				() -> MatcherAssert.assertThat(properties, hasEntry("fruit", "banana")), //
 				() -> MatcherAssert.assertThat(properties, hasEntry("vegetable", "kärrot")), //
@@ -48,7 +48,7 @@ public class AdminPropertiesSetterTest {
 	@DisplayName("Loading not existing file returns empty properties")
 	void loadNotExistingFile(@TempDir Path path) {
 		var config = path.resolve("config.properties");
-		var properties = AdminPropertiesSetter.loadAdminProperties(config);
+		var properties = AdminPropertiesFactory.loadPropertiesFromFile(config);
 		MatcherAssert.assertThat(properties, anEmptyMap());
 	}
 
@@ -61,7 +61,7 @@ public class AdminPropertiesSetterTest {
 			out.write(bytes);
 		}
 
-		var properties = AdminPropertiesSetter.loadAdminProperties(config);
+		var properties = AdminPropertiesFactory.loadPropertiesFromFile(config);
 		MatcherAssert.assertThat(properties, anEmptyMap());
 	}
 
@@ -74,22 +74,23 @@ public class AdminPropertiesSetterTest {
 			channel.write(ByteBuffer.wrap("test=test".getBytes()));
 		}
 
-		var properties = AdminPropertiesSetter.loadAdminProperties(config);
+		var properties = AdminPropertiesFactory.loadPropertiesFromFile(config);
 		MatcherAssert.assertThat(properties, anEmptyMap());
 	}
 
 	@Test
-	@DisplayName("If system property for config path is null, skip loading and replacing")
-	void skipAdjustSystemPropertiesOnUndefinedProperty() {
+	@DisplayName("If system properties do not contain config path, skip loading")
+	void skipLoadIfFilePathIsNotDefined() {
 		Assertions.assertNull(System.getProperty("cryptomator.adminConfigPath"));
 
-		try (var adminPropSetterMock = mockStatic(AdminPropertiesSetter.class)) {
-			adminPropSetterMock.when(AdminPropertiesSetter::adjustSystemProperties).thenCallRealMethod();
-			adminPropSetterMock.when(() -> AdminPropertiesSetter.loadAdminProperties(any())).thenReturn(new Properties());
+		try (var adminPropSetterMock = mockStatic(AdminPropertiesFactory.class)) {
+			adminPropSetterMock.when(AdminPropertiesFactory::create).thenCallRealMethod();
+			adminPropSetterMock.when(() -> AdminPropertiesFactory.loadPropertiesFromFile(any())).thenReturn(new Properties());
 
-			AdminPropertiesSetter.adjustSystemProperties();
+			var adminProps = AdminPropertiesFactory.create();
 
-			adminPropSetterMock.verify(() -> AdminPropertiesSetter.loadAdminProperties(any()), never());
+			adminPropSetterMock.verify(() -> AdminPropertiesFactory.loadPropertiesFromFile(any()), never());
+			Assertions.assertEquals(System.getProperty("user.home"), adminProps.getProperty("user.home"));
 		}
 	}
 
