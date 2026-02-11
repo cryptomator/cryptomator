@@ -53,23 +53,25 @@ class AdminPropertiesSetter {
 	static Properties adjustSystemProperties() {
 		var systemProps = System.getProperties();
 
-		final String systemPropertyDefinedAdminFile = System.getProperty(ADMIN_PROP_FILE_KEY);
-		if (systemPropertyDefinedAdminFile == null) {
+		final String adminCfgPath = System.getProperty(ADMIN_PROP_FILE_KEY);
+		if (adminCfgPath == null) {
 			LOG.debug("Path to admin properties file is not defined.");
 			return systemProps;
 		}
-		var adminProps = loadAdminProperties(Path.of(systemPropertyDefinedAdminFile));
+		var adminProps = loadAdminProperties(Path.of(adminCfgPath));
 
+		var newSystemProps = new Properties(systemProps);
 		for (var key : adminProps.stringPropertyNames()) {
 			if (ALLOWED_OVERRIDES.contains(key)) {
 				var value = adminProps.getProperty(key);
-				LOG.info("Overwriting {} with value {} from admin properties.", key, value);
-				systemProps.setProperty(key, value);
+				LOG.info("Overwriting {} with value {} from admin config.", key, value);
+				newSystemProps.setProperty(key, value);
 			} else {
-				LOG.debug("Property {} in admin properties is not supported for override.", key);
+				LOG.debug("Property {} in admin config is not supported for override.", key);
 			}
 		}
-		return systemProps;
+		System.setProperties(newSystemProps);
+		return newSystemProps;
 	}
 
 	//visible for testing

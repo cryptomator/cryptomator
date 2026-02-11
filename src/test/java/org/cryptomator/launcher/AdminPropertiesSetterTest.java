@@ -79,7 +79,7 @@ public class AdminPropertiesSetterTest {
 	}
 
 	@Test
-	@DisplayName("If system property for config path is null, skip do not load anything")
+	@DisplayName("If system property for config path is null, skip loading and replacing")
 	void skipAdjustSystemPropertiesOnUndefinedProperty() {
 		Assertions.assertNull(System.getProperty("cryptomator.adminConfigPath"));
 
