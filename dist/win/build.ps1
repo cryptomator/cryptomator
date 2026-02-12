@@ -155,6 +155,7 @@ $javaOptions = @(
 "--java-options", "-Djava.net.useSystemProxies=true"
 "--java-options", "-Dcryptomator.logDir=`"@{localappdata}/$AppName`""
 "--java-options", "-XX:ErrorFile=`"C:/cryptomator/cryptomator_crash.log`""
+"--java-options", "-Dcryptomator.adminConfigPath=`"C:/ProgramData/$AppName/config.properties`""
 "--java-options", "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`""
 "--java-options", "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`""
 "--java-options", "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`""

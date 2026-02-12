@@ -114,6 +114,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dapple.awt.enableTemplateImages=true" \
     --java-options "-Dsun.java2d.metal=true" \
     --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
+    --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\"" \
     --java-options "-Dcryptomator.logDir=\"@{userhome}/Library/Logs/${APP_NAME}\"" \
     --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log" \
     --java-options "-Dcryptomator.pluginDir=\"@{userhome}/Library/Application Support/${APP_NAME}/Plugins\"" \

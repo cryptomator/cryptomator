@@ -87,7 +87,7 @@
 
     <!-- Non-Opening ProgID -->
     <ns0:DirectoryRef Id="INSTALLDIR">
-        <ns0:Component Bitness="always64" Id="nonStartingProgID" >
+        <ns0:Component Bitness="always64" Id="nonStartingProgID">
           <ns0:File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileEncryptedData)" Name="$(var.IconFileEncryptedData)"/>
           <ns0:ProgId Id="$(var.JpAppName).Encrypted.1" Description="$(var.JpAppName) Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
             <ns0:Extension Id="c9r" Advertise="no" ContentType="$(var.ProgIdContentType)">
@@ -99,6 +99,25 @@
         </ns0:Component>
     </ns0:DirectoryRef>
 
+    <ns0:StandardDirectory Id="CommonAppDataFolder">
+      <ns0:Directory Id="CryptomatorDesktopProgramData" Name="Cryptomator">
+        <ns0:Component Id="AdminConfigDir" Guid="c078b7da-ba6e-4069-a5ab-5c0f0f9856a0">
+          <ns0:CreateFolder>
+            <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
+            <util:PermissionEx User="Administrators" GenericAll="yes"/>
+            <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
+          </ns0:CreateFolder>
+        </ns0:Component>
+        <ns0:Component Id="AdminConfigFile" NeverOverwrite="yes" Permanent="yes">
+          <ns0:File Id="EmptyAdminConfig" Source="$(env.JP_WIXWIZARD_RESOURCES)\..\..\common\cryptomator.config" Name="cryptomator.config" KeyPath="yes">
+            <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
+            <util:PermissionEx User="Administrators" GenericAll="yes"/>
+            <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
+          </ns0:File>
+        </ns0:Component>
+      </ns0:Directory>
+    </ns0:StandardDirectory>
+
     <!-- Standard required root -->
 
     <ns0:Feature Id="DefaultFeature" Title="!(loc.MainFeatureTitle)" Level="1">
@@ -106,7 +125,9 @@
       <ns0:ComponentGroupRef Id="Files"/>
       <ns0:ComponentGroupRef Id="FileAssociations"/>
       <!-- Ref to additional ProgIDs -->
-      <ns0:ComponentRef Id="nonStartingProgID" />
+      <ns0:ComponentRef Id="nonStartingProgID"/>
+      <ns0:ComponentRef Id="AdminConfigDir"/>
+      <ns0:ComponentRef Id="AdminConfigFile"/>
     </ns0:Feature>
 
     <ns0:CustomAction Id="JpSetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
