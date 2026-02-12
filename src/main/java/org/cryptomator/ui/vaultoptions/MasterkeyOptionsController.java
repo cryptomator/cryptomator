@@ -9,11 +9,15 @@ import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Inject;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import java.nio.file.Files;
+
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 @VaultOptionsScoped
 public class MasterkeyOptionsController implements FxController {
@@ -25,6 +29,7 @@ public class MasterkeyOptionsController implements FxController {
 	private final ForgetPasswordComponent.Builder forgetPasswordWindow;
 	private final KeychainManager keychain;
 	private final ObservableValue<Boolean> passwordSaved;
+	private final BooleanProperty masterkeyFileAvailable;
 
 
 	@Inject
@@ -40,6 +45,7 @@ public class MasterkeyOptionsController implements FxController {
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
 		}
+		this.masterkeyFileAvailable = new SimpleBooleanProperty(Files.exists(vault.getPath().resolve(MASTERKEY_FILENAME)));
 	}
 
 	@FXML
@@ -69,5 +75,13 @@ public class MasterkeyOptionsController implements FxController {
 
 	public boolean isPasswordSaved() {
 		return passwordSaved.getValue();
+	}
+
+	public BooleanProperty masterkeyFileAvailableProperty() {
+		return masterkeyFileAvailable;
+	}
+
+	public boolean isMasterkeyFileAvailable() {
+		return masterkeyFileAvailable.get();
 	}
 }
