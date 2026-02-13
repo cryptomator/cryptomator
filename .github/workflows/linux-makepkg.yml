@@ -51,7 +51,7 @@ jobs:
           install -d -m 0755 -o builder -g builder "$PKGDEST" "$SRCDEST"
       - name: Set package version
         run: |
-          sed -i -e 's|^pkgver=.*$|pkgver=${VERSION//-/_}|' dist/linux/makepkg/PKGBUILD
+          sed -i -e "s|^pkgver=.*$|pkgver=${VERSION//-/_}|" dist/linux/makepkg/PKGBUILD
         env:
           VERSION: ${{ needs.get-version.outputs.semVerStr }}
       - name: Build package with makepkg
