@@ -5,8 +5,8 @@
 # Contributor: Armin Schrenk <armin.schrenk@skymatic.de>
 
 pkgname=cryptomator
-pkgver=1.19.0_SNAPSHOT
-pkgrel=1
+pkgver=$PKG_VERSION
+pkgrel=$PKG_RELEASE
 pkgdesc="Multiplatform transparent client-side encryption of your files in the cloud."
 arch=('any')
 url="https://cryptomator.org/"
@@ -17,13 +17,13 @@ optdepends=('keepassxc-cryptomator: Use KeePassXC to store vault passwords' 'ttf
 _jdkver=24.0.1+9
 _jfxver=25
 _src_app_dir=cryptomator-${pkgver//_/-}
-source=("${_src_app_dir}::git+file://${startdir}/../../..");
+source=($SOURCES);
 source_x86_64=("jdk-${_jdkver}.tar.gz::https://github.com/adoptium/temurin${_jdkver:0:2}-binaries/releases/download/jdk-${_jdkver//\+/%2B}/OpenJDK${_jdkver:0:2}U-jdk_x64_linux_hotspot_${_jdkver//\+/_}.tar.gz"
                "openjfx-${_jfxver}.zip::https://download2.gluonhq.com/openjfx/${_jfxver}/openjfx-${_jfxver}_linux-x64_bin-jmods.zip")
 source_aarch64=("jdk-${_jdkver}.tar.gz::https://github.com/adoptium/temurin${_jdkver:0:2}-binaries/releases/download/jdk-${_jdkver//\+/%2B}/OpenJDK${_jdkver:0:2}U-jdk_aarch64_linux_hotspot_${_jdkver//\+/_}.tar.gz"
                 "openjfx-${_jfxver}.zip::https://download2.gluonhq.com/openjfx/${_jfxver}/openjfx-${_jfxver}_linux-aarch64_bin-jmods.zip")
 noextract=("jdk-${_jdkver}.tar.gz" "openjfx-${_jfxver}.zip")
-sha256sums=('SKIP')
+sha256sums=($SOURCES_SHA)
 sha256sums_x86_64=('78832cb5ea4074f2215cde0d01d6192d09c87636fc24b36647aea61fb23b8272'
                    '96e520f48610d8ffb94ca30face1f11ffe8a977ddc1c4ff80b1a9e9f048bd94e')
 sha256sums_aarch64=('a598260e340028d9b2383c23df16aa286769a661bd3bf28a52e8c1a5774b1110'

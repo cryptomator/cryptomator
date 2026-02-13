@@ -38,6 +38,8 @@ jobs:
       SRCDEST: ${{ github.workspace }}/srcdest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: cryptomator
       - name: Prepare pacman
         run: |
           pacman-key --init
@@ -49,13 +51,14 @@ jobs:
           echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/builder
           chown -R builder:builder "$GITHUB_WORKSPACE"
           install -d -m 0755 -o builder -g builder "$PKGDEST" "$SRCDEST"
-      - name: Set package version
-        run: |
-          sed -i -e "s|^pkgver=.*$|pkgver=${VERSION//-/_}|" dist/linux/makepkg/PKGBUILD
+      - name: Prepare PKGBUILD
+        run: envsubst '$PKG_VERSION PKG_RELEASE SOURCES SOURCES_SHA' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
         env:
-          VERSION: ${{ needs.get-version.outputs.semVerStr }}
+          PKG_VERSION: ${{ needs.get-version.outputs.semVerStr }}
+          PKG_RELEASE: 1
+          SOURCES: '"${_src_app_dir}::git+file://${{ github.workspace }}/cryptomator"'
+          SOURCES_SHA: "'SKIP'"
       - name: Build package with makepkg
-        working-directory: dist/linux/makepkg
         run: |
           sudo -u builder env \
             PKGDEST="$PKGDEST" \
