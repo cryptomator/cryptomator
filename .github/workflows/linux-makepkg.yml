@@ -109,7 +109,9 @@ jobs:
             sudo -u builder gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
       - name: Checkout release branch
         run: |
-          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+          git checkout -b release/${BRANCHNAME}
+        env:
+          BRANCH_NAME: ${{ needs.get-version.outputs.semVerStr }}
       - name: Determine pkgrel
         id: pkgrel
         run: |
@@ -119,22 +121,21 @@ jobs:
 
           if [[ "$CURRENT_VERSION" == "$TARGET_VERSION" && "$CURRENT_REL" =~ ^[0-9]+$ ]]; then
             NEXT_REL=$((CURRENT_REL + 1))
-            REL_MODE="bump"
           else
             NEXT_REL=1
-            REL_MODE="reset"
           fi
 
           echo "value=${NEXT_REL}" >> "$GITHUB_OUTPUT"
-          echo "mode=${REL_MODE}" >> "$GITHUB_OUTPUT"
       - name: Update build file
         run: |
-          sed -i -e 's|^pkgver=.*$|pkgver=${{ needs.get-version.outputs.semVerStr }}|' PKGBUILD
-          sed -i -e 's|^pkgrel=.*$|pkgrel=${{ steps.pkgrel.outputs.value }}|' PKGBUILD
+          sed -i -e "s|^pkgver=.*$|pkgver=$SEM_VERSION|" PKGBUILD
+          sed -i -e "s|^pkgrel=.*$|pkgrel=$PKG_REL|" PKGBUILD
           sed -i -e "s|^source=.*$|$TAR_SOURCE|" PKGBUILD
           sed -i -e "s|^sha256sums=.*$|$TAR_SHA|" PKGBUILD
           sudo -u builder makepkg --printsrcinfo > .SRCINFO
         env:
+          SEM_VERSION: ${{ needs.get-version.outputs.semVerStr }}
+          PKG_REL: ${{ steps.pkgrel.outputs.value }}
           TAR_SOURCE: |-
             source=("cryptomator-${pkgver//_/-}.tar.gz::https://github.com/cryptomator/cryptomator/archive/refs/tags/${pkgver//_/-}.tar.gz"
                     "cryptomator-${pkgver//_/-}.tar.gz.asc::https://github.com/cryptomator/cryptomator/releases/download/${pkgver//_/-}/cryptomator-${pkgver//_/-}.tar.gz.asc")
@@ -153,15 +154,18 @@ jobs:
           git config user.email "automation@cryptomator.org"
           git config push.autoSetupRemote true
           git stage .
-          git commit -m "Prepare release ${{ needs.get-version.outputs.semVerStr }}-${{ steps.pkgrel.outputs.value }} (${{ steps.pkgrel.outputs.mode }} pkgrel)"
+          git commit -m "Prepare release ${VERSION}"
           git push
+        env:
+          VERSION: ${{ needs.get-version.outputs.semVerStr }}-${{ steps.pkgrel.outputs.value }}
       - name: Create pull request
         id: create-pr
         run: |
           printf "> [!IMPORTANT]\n> Todos:\n> - [ ] Update build instructions\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
-          PR_URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
+          PR_URL=$(gh pr create --title "Release $VERSION" --body-file pr_body.md)
           echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
         env:
+          VERSION: ${{ needs.get-version.outputs.semVerStr }}-${{ steps.pkgrel.outputs.value }}
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
         if: github.event_name == 'release'
