@@ -52,9 +52,9 @@ jobs:
           chown -R builder:builder "$GITHUB_WORKSPACE"
           install -d -m 0755 -o builder -g builder "$PKGDEST" "$SRCDEST"
       - name: Prepare PKGBUILD
-        run: envsubst '$PKG_VERSION PKG_RELEASE SOURCES SOURCES_SHA' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
+        run: envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
         env:
-          PKG_VERSION: ${{ needs.get-version.outputs.semVerStr }}
+          PKG_VERSION: ${{ needs.get-version.outputs.semVerNum }}
           PKG_RELEASE: 1
           SOURCES: '"${_src_app_dir}::git+file://${{ github.workspace }}/cryptomator"'
           SOURCES_SHA: "'SKIP'"
