@@ -37,8 +37,7 @@ jobs:
       PKGDEST: ${{ github.workspace }}/pkgdest
       SRCDEST: ${{ github.workspace }}/srcdest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Prepare pacman
         run: |
           pacman-key --init
@@ -60,8 +59,7 @@ jobs:
             PKGDEST="$PKGDEST" \
             SRCDEST="$SRCDEST" \
             makepkg --syncdeps --cleanbuild --noconfirm --log
-      - name: Upload package artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: arch-package-${{ github.run_number }}
           if-no-files-found: error
@@ -71,7 +69,7 @@ jobs:
   tarball:
     name: Determines tarball url and compute checksum
     runs-on: ubuntu-latest
-    needs: [get-version]
+    needs: [get-version, makepkg]
     if:  github.event_name == 'workflow_dispatch' && inputs.create-pr || needs.get-version.outputs.versionType == 'stable'
     outputs:
       url: ${{ steps.url.outputs.url}}
