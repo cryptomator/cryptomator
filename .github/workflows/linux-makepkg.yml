@@ -148,7 +148,7 @@ jobs:
         run: |
           sed -i -e 's|^pkgver=.*$|pkgver=${{ needs.get-version.outputs.semVerStr }}|' PKGBUILD
           sed -i -e 's|^pkgrel=.*$|pkgrel=${{ steps.pkgrel.outputs.value }}|' PKGBUILD
-          sed -i -e 's|^source=.*$|$TAR_SOURCE|' PKGBUILD
+          sed -i -e "s|^source=.*$|$TAR_SOURCE|" PKGBUILD
           sed -i -e "s|^sha256sums=.*$|$TAR_SHA|" PKGBUILD
           makepkg --printsrcinfo > .SRCINFO
         env:
