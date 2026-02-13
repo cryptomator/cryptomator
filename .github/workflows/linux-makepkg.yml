@@ -111,9 +111,9 @@ jobs:
             sudo -u builder gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
       - name: Checkout release branch
         run: |
-          git checkout -b release/${BRANCHNAME}
+          git checkout -b release/${VERSION}
         env:
-          BRANCH_NAME: ${{ needs.get-version.outputs.semVerStr }}
+          VERSION: ${{ needs.get-version.outputs.semVerStr }}
       - name: Determine pkgrel
         id: pkgrel
         run: |
@@ -178,7 +178,7 @@ jobs:
           SLACK_ICON: false
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
-          SLACK_TITLE: "AUR release PR created for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
+          SLACK_TITLE: "AUR release PR created for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }}."
           SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.url }}|PR> on how to proceed."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
