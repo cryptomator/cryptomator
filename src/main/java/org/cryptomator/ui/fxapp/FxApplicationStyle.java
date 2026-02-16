@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -37,43 +36,63 @@ public class FxApplicationStyle {
 	}
 
 	public void initialize() {
-		applyTheme(settings.theme.get());
+		var uiTheme = settings.theme.get();
+		if (uiTheme == UiTheme.AUTOMATIC) {
+			registerOsThemeListener();
+		}
+		applyTheme(uiTheme);
 		settings.theme.addListener(this::appThemeChanged);
 	}
 
 	private void appThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, UiTheme oldValue, UiTheme newValue) {
-		if (oldValue == UiTheme.AUTOMATIC && newValue != UiTheme.AUTOMATIC && appearanceProvider.isPresent()) {
-			try {
-				appearanceProvider.get().removeListener(systemInterfaceThemeListener);
-			} catch (UiAppearanceException e) {
-				LOG.warn("Failed to disable automatic theme switching.");
-			}
+		if (oldValue == UiTheme.AUTOMATIC && newValue != UiTheme.AUTOMATIC) {
+			removeOsThemeListener();
 		}
+
+		if (newValue == UiTheme.AUTOMATIC) {
+			registerOsThemeListener();
+		}
+
 		applyTheme(newValue);
 	}
 
-	private void applyTheme(UiTheme theme) {
+	private void removeOsThemeListener() {
+		if (appearanceProvider.isPresent()) {
+			try {
+				appearanceProvider.get().removeListener(systemInterfaceThemeListener);
+			} catch (UiAppearanceException e) {
+				LOG.warn("Failed to disable automatic theme switching.", e);
+			}
+		} else {
+			LOG.debug("Unable to remove listener os theme changes: No supported UiAppearanceProvider present");
+		}
+	}
+
+	private void registerOsThemeListener() {
+		if (appearanceProvider.isPresent()) {
+			try {
+				appearanceProvider.get().addListener(systemInterfaceThemeListener);
+			} catch (UiAppearanceException e) {
+				LOG.warn("Failed to enable automatic theme switching.", e);
+			}
+		} else {
+			LOG.warn("Unable to register for os theme changes: No supported UiAppearanceProvider present");
+		}
+	}
+
+	private void applyTheme(UiTheme uiTheme) {
 		if (!licenseHolder.isValidLicense()) {
 			loadAndApplyLightTheme();
 		} else {
-			switch (theme) {
-				case AUTOMATIC -> registerAutomaticThemeChange();
+			switch (uiTheme) {
+				case AUTOMATIC -> {
+					var osTheme = appearanceProvider.isPresent() ? appearanceProvider.get().getSystemTheme() : Theme.LIGHT;
+					systemInterfaceThemeChanged(osTheme);
+				}
 				case LIGHT -> loadAndApplyLightTheme();
 				case DARK -> loadAndApplyDarkTheme();
 			}
 		}
-	}
-
-	private void registerAutomaticThemeChange() {
-		appearanceProvider.ifPresentOrElse(provider -> {
-					try {
-						provider.addListener(systemInterfaceThemeListener);
-					} catch (UiAppearanceException e) {
-						LOG.error("Failed to enable automatic theme switching.");
-					}
-					systemInterfaceThemeChanged(provider.getSystemTheme());
-				}, //
-				() -> LOG.warn("UI theme AUTOMATIC selected, but no supported UiAppearanceProvider present"));
 	}
 
 	private void systemInterfaceThemeChanged(Theme osTheme) {
