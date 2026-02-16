@@ -26,7 +26,6 @@ public class JfxUiAppearanceProvider implements UiAppearanceProvider {
 	private final ConcurrentHashMap<UiAppearanceListener, ChangeListener<ColorScheme>> uiAppearanceListeners = new ConcurrentHashMap<>();
 	private final Platform.Preferences preferences = Platform.getPreferences(); //Note: this service impl MUST be loaded in the fx application thread
 
-
 	@Override
 	public Theme getSystemTheme() {
 		return switch (preferences.getColorScheme()) {

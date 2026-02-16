@@ -45,12 +45,12 @@ public class FxApplicationStyle {
 	}
 
 	private void appThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, UiTheme oldValue, UiTheme newValue) {
-		if (oldValue == UiTheme.AUTOMATIC && newValue != UiTheme.AUTOMATIC) {
-			removeOsThemeListener();
-		}
-
-		if (newValue == UiTheme.AUTOMATIC) {
+		if (oldValue == newValue) {
+			// no-op
+		} else if (newValue == UiTheme.AUTOMATIC) {
 			registerOsThemeListener();
+		} else if (oldValue == UiTheme.AUTOMATIC) {
+			removeOsThemeListener();
 		}
 
 		applyTheme(newValue);
@@ -86,7 +86,7 @@ public class FxApplicationStyle {
 		} else {
 			switch (uiTheme) {
 				case AUTOMATIC -> {
-					var osTheme = appearanceProvider.isPresent() ? appearanceProvider.get().getSystemTheme() : Theme.LIGHT;
+					var osTheme = appearanceProvider.map(UiAppearanceProvider::getSystemTheme).orElse(Theme.LIGHT);
 					systemInterfaceThemeChanged(osTheme);
 				}
 				case LIGHT -> loadAndApplyLightTheme();
