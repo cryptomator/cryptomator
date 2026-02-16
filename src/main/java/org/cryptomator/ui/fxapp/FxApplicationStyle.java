@@ -37,11 +37,6 @@ public class FxApplicationStyle {
 	}
 
 	public void initialize() {
-		appearanceProvider.ifPresent(service -> {
-			if (service instanceof JfxUiAppearanceProvider fxService) {
-				fxService.initialize(Platform.getPreferences());
-			}
-		});
 		applyTheme(settings.theme.get());
 		settings.theme.addListener(this::appThemeChanged);
 	}

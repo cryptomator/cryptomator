@@ -7,6 +7,7 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.decryptname.DecryptNameComponent;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
@@ -26,6 +27,7 @@ import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 @Module(subcomponents = {TrayMenuComponent.class, //
 		DecryptNameComponent.class, //
@@ -41,13 +43,19 @@ import java.io.InputStream;
 		ShareVaultComponent.class, //
 		EventViewComponent.class, //
 		RecoveryKeyComponent.class, //
-		NotificationComponent.class })
+		NotificationComponent.class})
 abstract class FxApplicationModule {
 
 	private static Image createImageFromResource(String resourceName) throws IOException {
 		try (InputStream in = FxApplicationModule.class.getResourceAsStream(resourceName)) {
 			return new Image(in);
 		}
+	}
+
+	@Provides
+	@FxApplicationScoped
+	static Optional<UiAppearanceProvider> provideAppearanceProvider() {
+		return UiAppearanceProvider.get();
 	}
 
 	@Provides
