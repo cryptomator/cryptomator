@@ -70,10 +70,16 @@ jobs:
             makepkg --syncdeps --cleanbuild --noconfirm --log
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: arch-package-${{ github.run_number }}
+          name: arch-package
           if-no-files-found: error
           path: |
             ${{ env.PKGDEST }}/*.pkg.tar.zst
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: pkgbuild-file
+          if-no-files-found: error
+          path: |
+            cryptomator/dist/linux/makepkg/PKGBUILD.template
 
   create-pr:
     name: Create PR for AUR
@@ -135,22 +141,23 @@ jobs:
           fi
 
           echo "value=${NEXT_REL}" >> "$GITHUB_OUTPUT"
-      - name: Update build file
+      - name: Download PKGBUILD template
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: pkgbuild-file
+      - name: Prepare PKGBUILD
         run: |
-          sed -i -e "s|^pkgver=.*$|pkgver=$SEM_VERSION|" PKGBUILD
-          sed -i -e "s|^pkgrel=.*$|pkgrel=$PKG_REL|" PKGBUILD
-          sed -i -e "s|^source=.*$|$TAR_SOURCE|" PKGBUILD
-          sed -i -e "s|^sha256sums=.*$|$TAR_SHA|" PKGBUILD
+          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA' < PKGBUILD.template > PKGBUILD
           sudo -u builder makepkg --printsrcinfo > .SRCINFO
         env:
-          SEM_VERSION: ${{ needs.get-version.outputs.semVerStr }}
-          PKG_REL: ${{ steps.pkgrel.outputs.value }}
-          TAR_SOURCE: |-
-            source=("cryptomator-${pkgver//_/-}.tar.gz::https://github.com/cryptomator/cryptomator/archive/refs/tags/${pkgver//_/-}.tar.gz"
-                    "cryptomator-${pkgver//_/-}.tar.gz.asc::https://github.com/cryptomator/cryptomator/releases/download/${pkgver//_/-}/cryptomator-${pkgver//_/-}.tar.gz.asc")
-          TAR_SHA: |-
-            sha256sums=('${{steps.sha256.outputs.value}}'
-                        'SKIP')
+          PKG_VERSION: ${{ needs.get-version.outputs.semVerNum }}
+          PKG_RELEASE: ${{ steps.pkgrel.outputs.value }}
+          SOURCES: |-
+            "cryptomator-${pkgver//_/-}.tar.gz::https://github.com/cryptomator/cryptomator/archive/refs/tags/${pkgver//_/-}.tar.gz"
+                    "cryptomator-${pkgver//_/-}.tar.gz.asc::https://github.com/cryptomator/cryptomator/releases/download/${pkgver//_/-}/cryptomator-${pkgver//_/-}.tar.gz.asc"
+          SOURCES_SHA: |-
+            '${{steps.sha256.outputs.value}}'
+                        'SKIP'
       - name: Build package with makepkg
         run: |
           sudo -u builder env \
