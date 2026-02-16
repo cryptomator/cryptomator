@@ -101,15 +101,10 @@ public class NotificationController implements FxController {
 				var device = userAndDevice.length == 1 ? userAndDevice[0] : userAndDevice[1];
 				var cleartextFileName = fiiue.cleartextPath().substring(fiiue.cleartextPath().lastIndexOf('/') + 1);
 				eventTimestamp.set(localizedTimeFormatter.format(fiiue.lastUpdated()));
-				message.set("File is locked by another device");
-				fileName.set(cleartextFileName);
-				description.set("The file is opened by %s on device %s. Ask the user to close the file and sync again. Otherwise, you can ignore the lock and open it anyway.".formatted(user, device));
-				actionText.set("Ignore Lock");
-				/* TODO: Once feature is out of beta, activate translations
 				message.set(resourceBundle.getString("notification.inUse.message"));
-				description.set(resourceBundle.getString("notification.inUse.description").formatted(fiiue.cleartextPath(), user, device));
+				fileName.set(cleartextFileName);
+				description.set(resourceBundle.getString("notification.inUse.description").formatted(user, device));
 				actionText.set(resourceBundle.getString("notification.inUse.action"));
-				 */
 			}
 			default -> {
 				message.set("NO CONTENT");
