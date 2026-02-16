@@ -26,7 +26,7 @@ class EventualLogger extends AbstractLogger {
 			var builder = gutter.atLevel(event.getLevel()) //
 					.setCause(event.getThrowable()) //
 					.setMessage(event.getMessage());
-			event.getArguments().forEach(builder::addArgument);
+			Objects.requireNonNullElse(event.getArguments(), List.of()).forEach(builder::addArgument);
 			Objects.requireNonNullElse(event.getMarkers(), List.<Marker>of()).forEach(builder::addMarker);
 			builder.log();
 		}
