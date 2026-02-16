@@ -108,6 +108,7 @@ package() {
   install -Dm644 "${srcdir}/${_src_app_dir}/dist/linux/common/org.cryptomator.Cryptomator.tray.svg" "${pkgdir}/usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-symbolic.svg"
   install -Dm644 "${srcdir}/${_src_app_dir}/dist/linux/common/org.cryptomator.Cryptomator.tray-unlocked.svg" "${pkgdir}/usr/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-unlocked-symbolic.svg"
 
+  mkdir -p "${pkgdir}/opt/cryptomator/"
   cp -R "${srcdir}/${_src_app_dir}/target/cryptomator" "${pkgdir}/opt/"
   install -Dm644 "${srcdir}/${_src_app_dir}/target/LICENSE.txt" -t "${pkgdir}/usr/share/licenses/${pkgname}"
 
