@@ -101,7 +101,7 @@ jobs:
         id: sha256
         run: |
           URL="https://github.com/cryptomator/cryptomator/archive/refs/tags/${TAG}.tar.gz"
-          curl --silent --fail-with-body -L -H "Accept: application/vnd.github+json" ${URL} --output cryptomator.tar.gz
+          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" ${URL} --output cryptomator.tar.gz
           TARBALL_SHA256=$(sha256sum cryptomator.tar.gz | cut -d ' ' -f1)
           echo "value=${TARBALL_SHA256}" >> "$GITHUB_OUTPUT"
         env:
