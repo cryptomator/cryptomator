@@ -46,7 +46,7 @@
 		<dagger.version>2.57.2</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.20.0</jackson.version>
-		<javafx.version>25</javafx.version>
+		<javafx.version>25.0.2</javafx.version>
 		<jwt.version>4.5.0</jwt.version>
 		<nimbus-jose.version>10.5</nimbus-jose.version>
 		<logback.version>1.5.19</logback.version>
