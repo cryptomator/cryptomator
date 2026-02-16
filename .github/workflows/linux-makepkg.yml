@@ -52,11 +52,15 @@ jobs:
           chown -R builder:builder "$GITHUB_WORKSPACE"
           install -d -m 0755 -o builder -g builder "$PKGDEST" "$SRCDEST"
       - name: Prepare PKGBUILD
-        run: envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
+        # cannot use github.workspace due to https://github.com/actions/runner/issues/2058
+        run: |
+          export SOURCES="${SOURCES_1}${GITHUB_WORKSPACE}${SOURCES_2}"
+          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
         env:
           PKG_VERSION: ${{ needs.get-version.outputs.semVerNum }}
           PKG_RELEASE: 1
-          SOURCES: '"${_src_app_dir}::git+file://${{ github.workspace }}/cryptomator"'
+          SOURCES_1: '"${_src_app_dir}::git+file://'
+          SOURCES_2: '/cryptomator"'
           SOURCES_SHA: "'SKIP'"
       - name: Build package with makepkg
         run: |
