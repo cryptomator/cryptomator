@@ -37,14 +37,14 @@ jobs:
       PKGDEST: ${{ github.workspace }}/pkgdest
       SRCDEST: ${{ github.workspace }}/srcdest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          path: cryptomator
       - name: Prepare pacman
         run: |
           pacman-key --init
           pacman-key --populate archlinux
           pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: cryptomator
       - name: Create build user
         run: |
           useradd -m builder
