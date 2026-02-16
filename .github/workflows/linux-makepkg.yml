@@ -90,7 +90,7 @@ jobs:
         run: |
           pacman-key --init
           pacman-key --populate archlinux
-          pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip github-cli
+          pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip github-cli curl
       - name: Download source tarball and compute checksum
         id: sha256
         run: |
