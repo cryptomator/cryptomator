@@ -75,24 +75,25 @@ build() {
     --name cryptomator \
     --vendor "Skymatic GmbH" \
     --copyright "(C) 2016 - 2025 Skymatic GmbH" \
+    --java-options "--enable-preview" \
     --java-options '--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator' \
-    --java-options "--sun-misc-unsafe-memory-access=allow" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Djava.net.useSystemProxies=true" \
-    --java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
-    --java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
-    --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
-    --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
-    --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
-    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\"" \
-    --java-options "-Dcryptomator.showTrayIcon=true" \
-    --java-options "-Dcryptomator.disableUpdateCheck=true" \
-    --java-options "-Dcryptomator.buildNumber=\"aur-${pkgrel}\"" \
+    --java-options "-Dcryptomator.adminConfigPath=\"/etc/cryptomator/config.properties\"" \
     --java-options "-Dcryptomator.appVersion=\"${pkgver//_/-}\"" \
+    --java-options "-Dcryptomator.buildNumber=\"aur-${pkgrel}\"" \
+    --java-options "-Dcryptomator.disableUpdateCheck=true" \
     --java-options "-Dcryptomator.integrationsLinux.autoStartCmd=\"cryptomator\"" \
+    --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
+    --java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
+    --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\"" \
     --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
+    --java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
+    --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
+    --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
+    --java-options "-Dcryptomator.showTrayIcon=true" \
     --app-version "${pkgver//_*/}" \
     --verbose
 }
