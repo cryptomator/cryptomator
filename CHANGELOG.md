@@ -17,7 +17,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Mark files in-use for Hub vaults ([#4078](https://github.com/cryptomator/cryptomator/pull/4078))
 * Accessibility: Adjust app to be used with a screen reader ([#547](https://github.com/cryptomator/cryptomator/issues/547))
 * Show Archived Vault Dialog on unlock when Hub returns 410 ([#4081](https://github.com/cryptomator/cryptomator/pull/4081))
-* Automatic app color scheme selection according to OS ([#4134](https://github.com/cryptomator/cryptomator/pull/4134))
+* Support automatic app theme selection according to OS theme on Linux ([#4027](https://github.com/cryptomator/cryptomator/issues/4027))
 * Admin configuration: Allow overwriting certain app properties by external config file ([#4105](https://github.com/cryptomator/cryptomator/pull/4105))
 
 ### Changed
