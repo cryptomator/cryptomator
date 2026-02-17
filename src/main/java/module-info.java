@@ -14,11 +14,13 @@ import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider
 import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
 import org.cryptomator.integrations.tray.TrayMenuController;
+import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
 import org.cryptomator.networking.SSLContextProvider;
 import org.cryptomator.networking.SSLContextWithMacKeychain;
 import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
 import org.cryptomator.networking.SSLContextWithWindowsCertStore;
+import org.cryptomator.ui.fxapp.JfxUiAppearanceProvider;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 open module org.cryptomator.desktop {
@@ -61,6 +63,7 @@ open module org.cryptomator.desktop {
 	uses SSLContextProvider;
 	uses org.cryptomator.event.NotificationHandler;
 
+	provides UiAppearanceProvider with JfxUiAppearanceProvider;
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
 	provides SSLContextProvider with SSLContextWithWindowsCertStore, SSLContextWithMacKeychain, SSLContextWithPKCS12TrustStore;

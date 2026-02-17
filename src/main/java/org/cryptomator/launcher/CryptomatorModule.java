@@ -4,7 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
 
 import javax.inject.Named;
@@ -30,11 +29,6 @@ class CryptomatorModule {
 		return new ArrayBlockingQueue<>(10);
 	}
 
-	@Provides
-	@Singleton
-	static Optional<UiAppearanceProvider> provideAppearanceProvider() {
-		return UiAppearanceProvider.get();
-	}
 
 	@Provides
 	@Singleton
