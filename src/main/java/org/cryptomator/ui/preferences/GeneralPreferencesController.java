@@ -101,8 +101,9 @@ public class GeneralPreferencesController implements FxController {
 	}
 
 	private void migrateKeychainEntries(Observable observable, KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider) {
-		//currently, we only migrate on macOS (touchID vs regular keychain)
-		if (SystemUtils.IS_OS_MAC) {
+		//currently, we migrate on macOS (touchID vs regular keychain)
+		//and on Linux (GNOME Keyring / KDE Wallet / Secret Service)
+		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
 			var idsAndNames = settings.directories.stream().collect(Collectors.toMap(vs -> vs.id, vs -> vs.displayName.getValue()));
 			if (!idsAndNames.isEmpty()) {
 				if (LOG.isDebugEnabled()) {
