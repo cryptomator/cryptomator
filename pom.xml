@@ -34,6 +34,7 @@
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.10.0-beta3</cryptomator.cryptofs.version>
+		<cryptomator.cryptolib.version>2.2.2</cryptomator.cryptolib.version>
 		<cryptomator.integrations.version>1.8.0-beta1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.5.1</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.5.0-beta3</cryptomator.integrations.mac.version>
@@ -42,6 +43,7 @@
 		<cryptomator.webdav.version>3.0.0</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
+		<caffeine.version>3.2.3</caffeine.version>
 		<commons-lang3.version>3.20.0</commons-lang3.version>
 		<dagger.version>2.59.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
@@ -94,7 +96,7 @@
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptolib</artifactId>
-			<version>2.2.2</version>
+			<version>${cryptomator.cryptolib.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
@@ -228,7 +230,7 @@
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
-			<version>3.2.3</version>
+			<version>${caffeine.version}</version>
 		</dependency>
 		<!-- JUnit / Mockito / Hamcrest -->
 		<dependency>
