@@ -330,7 +330,6 @@
 					</annotationProcessorPaths>
 					<compilerArgs>
 						<arg>-Adagger.fastInit=enabled</arg>
-						<arg>-Adagger.formatGeneratedSource=enabled</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>
