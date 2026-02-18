@@ -12,7 +12,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <option name="dagger.fastInit" value="enabled" />
-        <option name="dagger.fullBindingGraphValidation" value="ERROR" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-compiler/2.59.1/dagger-compiler-2.59.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger/2.59.1/dagger-2.59.1.jar" />
@@ -71,7 +70,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="cryptomator" options="-Adagger.fastInit=enabled -Adagger.fullBindingGraphValidation=ERROR" />
+      <module name="cryptomator" options="-Adagger.fastInit=enabled" />
     </option>
   </component>
 </project>
