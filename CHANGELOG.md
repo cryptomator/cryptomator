@@ -19,11 +19,18 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Show Archived Vault Dialog on unlock when Hub returns 410 ([#4081](https://github.com/cryptomator/cryptomator/pull/4081))
 * Support automatic app theme selection according to OS theme on Linux ([#4027](https://github.com/cryptomator/cryptomator/issues/4027))
 * Admin configuration: Allow overwriting certain app properties by external config file ([#4105](https://github.com/cryptomator/cryptomator/pull/4105))
+* New keychain backend using [secret service API](https://specifications.freedesktop.org/secret-service/0.2) for Linux ([#4025](https://github.com/cryptomator/cryptomator/pull/4025))
+
+### Fixed
+* Fixed password reset/show recovery possible for vaults without masterkey file ([#4120](https://github.com/cryptomator/cryptomator/pull/4120))
+* Fixed restore vault config failed due to selecting a directory instead of file ([#4141](https://github.com/cryptomator/cryptomator/issues/4141))
 
 ### Changed
-* Built using JDK 25 ([#4031](https://github.com/cryptomator/cryptomator/issues/4031))
-* Modernized Template for GitHub Releases
 * Disable user defined app start config on Windows ([#4132](https://github.com/cryptomator/cryptomator/issues/4132))
+* Disable plugin loading by default ([#4136](https://github.com/cryptomator/cryptomator/4136))
+* Use JDK 25 ([#4031](https://github.com/cryptomator/cryptomator/pull/4031))
+* Update JavaFX to 25.0.2 ([#4145](https://github.com/cryptomator/cryptomator/pull/4145)))
+* Updated translations
 * Updated dependencies
   * `ch.qos.logback:*` from 1.5.19 to 1.5.31
   * `com.fasterxml.jackson.core:jackson-databind` from 2.20.0 to 2.21.0
