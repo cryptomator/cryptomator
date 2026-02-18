@@ -142,7 +142,6 @@ jobs:
           --java-options "-Djava.net.useSystemProxies=true"
           --java-options "-Dcryptomator.adminConfigPath=\"C:/ProgramData/Cryptomator/config.properties\""
           --java-options "-Dcryptomator.logDir=\"@{localappdata}/Cryptomator\""
-          --java-options "-Dcryptomator.pluginDir=\"@{appdata}/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"@{appdata}/Cryptomator/settings.json;@{userhome}/AppData/Roaming/Cryptomator/settings.json\""
           --java-options "-Dcryptomator.p12Path=\"@{appdata}/Cryptomator/key.p12;@{userhome}/AppData/Roaming/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"@{localappdata}/Cryptomator/ipc.socket\""

@@ -90,7 +90,6 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Djava.net.useSystemProxies=true" \
     --java-options "-Dcryptomator.adminConfigPath=\"/etc/cryptomator/config.properties\"" \
     --java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
-    --java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json\"" \
     --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \

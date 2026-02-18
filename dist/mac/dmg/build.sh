@@ -117,7 +117,6 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\"" \
     --java-options "-Dcryptomator.logDir=\"@{userhome}/Library/Logs/${APP_NAME}\"" \
     --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log" \
-    --java-options "-Dcryptomator.pluginDir=\"@{userhome}/Library/Application Support/${APP_NAME}/Plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"@{userhome}/Library/Application Support/${APP_NAME}/settings.json\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/${APP_NAME}/ipc.socket\"" \
     --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/${APP_NAME}/key.p12\"" \
