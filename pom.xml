@@ -36,11 +36,11 @@
 		<cryptomator.cryptofs.version>2.10.0-beta3</cryptomator.cryptofs.version>
 		<cryptomator.cryptolib.version>2.2.2</cryptomator.cryptolib.version>
 		<cryptomator.integrations.version>1.8.0-beta1</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.5.1</cryptomator.integrations.win.version>
+		<cryptomator.integrations.win.version>1.6.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.5.0-beta3</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.7.0-beta4</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>6.0.0</cryptomator.fuse.version>
-		<cryptomator.webdav.version>3.0.0</cryptomator.webdav.version>
+		<cryptomator.webdav.version>3.0.1</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<caffeine.version>3.2.3</caffeine.version>
