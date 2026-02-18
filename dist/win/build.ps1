@@ -34,20 +34,20 @@ if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
 }
 if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
 {
-   Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.0)'
+   Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.2)'
    exit 1
 }
 $wixExtensions = & wix.exe extension list --global | Out-String
 if ($wixExtensions -notmatch 'WixToolset.UI.wixext') {
-    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.0 --global)'
+    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.2 --global)'
     exit 1
 }
 if ($wixExtensions -notmatch 'WixToolset.Util.wixext') {
-    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.0 --global)'
+    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.2 --global)'
     exit 1
 }
 if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
-    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global)'
+    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.2 --global)'
     exit 1
 }
 
