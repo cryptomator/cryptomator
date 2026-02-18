@@ -61,6 +61,7 @@ public final class MasterkeyService {
 			Optional<Path> c9rFile = paths //
 					.filter(p -> p.toString().endsWith(".c9r")) //
 					.filter(p -> !p.endsWith("dir.c9r")) //
+					.filter(Files::isRegularFile) //
 					.findFirst();
 			if (c9rFile.isEmpty()) {
 				LOG.info("Unable to detect Crypto scheme: No *.c9r file found in {}", vaultPath);
