@@ -93,9 +93,9 @@ switch ($archName) {
         $jmodPaths = "$Env:JAVA_HOME/jmods"
     }
     'x64' {
-		$javaFxVersion='25'
+		$javaFxVersion='25.0.2'
 		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-		$javaFxJmodsSHA256 = 'c8eb9fd039b00e0020cf6c3db8ed7876bf3ee4d27860aa697a247b83b8296ae7'
+		$javaFxJmodsSHA256 = '33d878dfac85590c4d77c518ed413e512d34a8479d90132b230a7ddd173576b3'
 		$javaFxJmods = '.\resources\jfxJmods.zip'
 
 		if( !(Test-Path -Path $javaFxJmods) ) {
