@@ -11,6 +11,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.slf4j.Logger;
@@ -58,6 +59,8 @@ public class ReceiveKeyController implements FxController {
 	private final Lazy<Scene> accountInitializationScene;
 	private final Lazy<Scene> invalidLicenseScene;
 	private final HttpClient httpClient;
+	private final Dialogs dialogs;
+	private final Vault vault;
 
 	@Inject
 	public ReceiveKeyController(@KeyLoading Vault vault, //
@@ -72,7 +75,8 @@ public class ReceiveKeyController implements FxController {
 								@FxmlScene(FxmlFile.HUB_LEGACY_REGISTER_DEVICE) Lazy<Scene> legacyRegisterDeviceScene, //
 								@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, //
 								@FxmlScene(FxmlFile.HUB_REQUIRE_ACCOUNT_INIT) Lazy<Scene> accountInitializationScene, //
-								@FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene) {
+								@FxmlScene(FxmlFile.HUB_INVALID_LICENSE) Lazy<Scene> invalidLicenseScene, //
+								Dialogs dialogs) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.vaultId = extractVaultId(vault.getVaultConfigCache().getUnchecked().getKeyId()); // TODO: access vault config's JTI directly (requires changes in cryptofs)
@@ -87,6 +91,8 @@ public class ReceiveKeyController implements FxController {
 		this.invalidLicenseScene = invalidLicenseScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
+		this.dialogs = dialogs;
+		this.vault = vault;
 	}
 
 	@FXML
@@ -226,7 +232,8 @@ public class ReceiveKeyController implements FxController {
 		switch (response.statusCode()) {
 			case 200 -> receivedBothEncryptedKeys(response.body(), encryptedUserKey);
 			case 402 -> licenseExceeded();
-			case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access - TODO: add specific dialog?
+			case 403 -> accessNotGranted();
+			case 410 -> accessGoneVaultArchived();
 			case 449 -> accountInitializationRequired();
 			default -> throw new IllegalStateException("Unexpected response " + response.statusCode());
 		}
@@ -270,7 +277,8 @@ public class ReceiveKeyController implements FxController {
 			switch (response.statusCode()) {
 				case 200 -> receivedLegacyAccessTokenSuccess(response.body());
 				case 402 -> licenseExceeded();
-				case 403, 410 -> accessNotGranted(); // or vault has been archived, effectively disallowing access
+				case 403 -> accessNotGranted();
+				case 410 -> accessGoneVaultArchived();
 				case 404 -> needsLegacyDeviceRegistration();
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
@@ -301,6 +309,11 @@ public class ReceiveKeyController implements FxController {
 
 	private void accessNotGranted() {
 		window.setScene(unauthorizedScene.get());
+	}
+
+	private void accessGoneVaultArchived() {
+		window.close();
+		dialogs.prepareHubVaultArchived((Stage)window.getOwner(), vault).build().showAndWait();
 	}
 
 	private void accountInitializationRequired() {

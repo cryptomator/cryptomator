@@ -23,12 +23,12 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '25.0.1+8.0.LTS'
+  JAVA_VERSION: '25.0.2+10.0.LTS'
   DEB_BUILD_DEPENDS: 'debhelper (>=10), openjdk-25-jdk (>= 25+36), libgtk-3-0 (>= 3.20.0), libxxf86vm1, libgl1'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '96e520f48610d8ffb94ca30face1f11ffe8a977ddc1c4ff80b1a9e9f048bd94e'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: '9ad4ca7b769ca4ee6419f1e99143dd6ff812f8be4fddb46a7d7cacbeea148af4'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'e0a9c29d8cf3af9b8b48848b43f87b5785bc107c53a951b19668ce05842bba1b'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: 'c3408f818693cce09e59829a8e862a82c7695fdfcd585c41cfd527f5fc3fe646'
 
 jobs:
   get-version:
@@ -43,7 +43,7 @@ jobs:
     env:
       INPUT_PPAVER: ${{ inputs.ppaver }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: deb-version
         name: Determine deb-version
         run: |
@@ -60,7 +60,7 @@ jobs:
         env:
           DEB_BUILD_DEPENDS: ${{ env.DEB_BUILD_DEPENDS }}
       - name: Setup Java
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -143,7 +143,7 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
       - name: Upload artifacts
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: linux-deb-package
           path: |

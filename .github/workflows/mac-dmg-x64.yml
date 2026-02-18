@@ -24,7 +24,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '25.0.1+8.0.LTS'
+  JAVA_VERSION: '25.0.2+10.0.LTS'
 
 jobs:
   get-version:
@@ -44,12 +44,12 @@ jobs:
           architecture: x64
           output-suffix: x64
           fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_osx-x64_bin-jmods.zip'
-          openjfx-sha: '0eba73fb28a24c845175d16fa2f8c081c936ce6de1be9b79eb6119fa32e53d52'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_osx-x64_bin-jmods.zip'
+          openjfx-sha: '0b4d8463f03901b7425d94628e4116b7078abb8dd540fbec415266fac20bda5c'
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup Java
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -128,8 +128,8 @@ jobs:
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\""
           --java-options "-Dcryptomator.logDir=\"@{userhome}/Library/Logs/Cryptomator\""
-          --java-options "-Dcryptomator.pluginDir=\"@{userhome}/Library/Application Support/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"@{userhome}/Library/Application Support/Cryptomator/settings.json\""
           --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/Cryptomator/ipc.socket\""
@@ -283,7 +283,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: dmg-${{ matrix.output-suffix }}
           path: |

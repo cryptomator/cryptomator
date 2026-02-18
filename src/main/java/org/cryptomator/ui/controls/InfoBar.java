@@ -4,24 +4,27 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.AccessibleRole;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import java.util.ResourceBundle;
 
-public class NotificationBar extends HBox {
+public class InfoBar extends HBox {
 
 	@FXML
-	private Label notificationLabel;
+	private Label infoMessage;
 
 	private final BooleanProperty dismissable = new SimpleBooleanProperty();
 	private final BooleanProperty notify = new SimpleBooleanProperty();
 
 
-	public NotificationBar() {
+	public InfoBar() {
 		setAlignment(Pos.CENTER);
-		setStyle("-fx-alignment: center;");
+		getStyleClass().addAll("info-bar");
 
 		Region spacer = new Region();
 		spacer.setMinWidth(40);
@@ -36,14 +39,21 @@ public class NotificationBar extends HBox {
 		vbox.setAlignment(Pos.CENTER);
 		HBox.setHgrow(vbox, javafx.scene.layout.Priority.ALWAYS);
 
-		notificationLabel = new Label();
-		notificationLabel.getStyleClass().add("notification-label");
-		notificationLabel.setStyle("-fx-alignment: center;");
-		vbox.getChildren().add(notificationLabel);
+		infoMessage = new Label();
+		infoMessage.setFocusTraversable(true);
+		infoMessage.setAccessibleRole(AccessibleRole.BUTTON);
+		vbox.getChildren().add(infoMessage);
 
-		Button closeButton = new Button("X");
+		var closeGraphic = new FontAwesome5IconView();
+		closeGraphic.setGlyph(FontAwesome5Icon.TIMES);
+		closeGraphic.setGlyphSize(12);
+		closeGraphic.getStyleClass().add("glyph");
+
+		Button closeButton = new Button();
+		closeButton.setGraphic(closeGraphic);
+		closeButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		closeButton.setAccessibleText(ResourceBundle.getBundle("i18n.strings").getString("main.notification.closeButton.tooltip"));
 		closeButton.setMinWidth(40);
-		closeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;");
 		closeButton.visibleProperty().bind(dismissable);
 
 		closeButton.setOnAction(_ -> {
@@ -61,11 +71,11 @@ public class NotificationBar extends HBox {
 	}
 
 	public String getText() {
-		return notificationLabel.getText();
+		return infoMessage.getText();
 	}
 
 	public void setText(String text) {
-		notificationLabel.setText(text);
+		infoMessage.setText(text);
 	}
 
 	public void setStyleClass(String styleClass) {

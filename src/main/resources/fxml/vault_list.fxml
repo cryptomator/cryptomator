@@ -22,7 +22,7 @@
 	<VBox>
 		<StackPane VBox.vgrow="ALWAYS">
 			<VBox>
-				<ListView fx:id="vaultList" editable="true" fixedCellSize="${controller.cellSize}">
+				<ListView fx:id="vaultList" editable="true" fixedCellSize="${controller.cellSize}" accessibleText="%main.vaultlist">
 					<contextMenu>
 						<fx:include source="vault_list_contextmenu.fxml"/>
 					</contextMenu>

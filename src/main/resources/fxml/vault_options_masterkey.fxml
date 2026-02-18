@@ -4,8 +4,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.Group?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.MasterkeyOptionsController"
@@ -15,7 +19,21 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<VBox spacing="6" alignment="CENTER">
+		<HBox spacing="12" visible="${!controller.masterkeyFileAvailable}" managed="${!controller.masterkeyFileAvailable}">
+			<padding>
+				<Insets bottom="12"/>
+			</padding>
+			<Group>
+				<StackPane>
+					<Circle styleClass="glyph-icon-primary" radius="18"/>
+					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="INFO" glyphSize="18"/>
+				</StackPane>
+			</Group>
+			<HBox spacing="6" HBox.hgrow="ALWAYS">
+				<Label text="%vaultOptions.masterkey.missingMasterkeyFile" wrapText="true" HBox.hgrow="ALWAYS"/>
+			</HBox>
+		</HBox>
+		<VBox spacing="6" alignment="CENTER" disable="${!controller.masterkeyFileAvailable}">
 			<Button text="%vaultOptions.masterkey.changePasswordBtn" onAction="#changePassword" contentDisplay="LEFT" maxWidth="Infinity">
 				<graphic>
 					<FontAwesome5IconView glyph="KEY"/>
@@ -29,8 +47,8 @@
 			</Button>
 		</VBox>
 		<Region VBox.vgrow="ALWAYS"/>
-		<Label maxWidth="-Infinity" text="%vaultOptions.masterkey.recoveryKeyExplanation" wrapText="true"/>
-		<VBox spacing="6" alignment="CENTER">
+		<Label maxWidth="-Infinity" text="%vaultOptions.masterkey.recoveryKeyExplanation" wrapText="true" disable="${!controller.masterkeyFileAvailable}"/>
+		<VBox spacing="6" alignment="CENTER" disable="${!controller.masterkeyFileAvailable}">
 			<Button text="%vaultOptions.masterkey.showRecoveryKeyBtn" onAction="#showRecoveryKey" contentDisplay="LEFT" maxWidth="Infinity">
 				<graphic>
 					<FontAwesome5IconView glyph="EYE"/>

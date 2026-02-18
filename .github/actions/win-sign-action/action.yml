@@ -48,7 +48,7 @@ runs:
         echo "client-secret=${{ inputs.client-secret }}" >> "$GITHUB_OUTPUT"
       shell: bash
     - name: Sign DLLs with Azure Trusted Signing
-      uses: azure/trusted-signing-action@fc390cf8ed0f14e248a542af1d838388a47c7a7c # v0.5.10
+      uses: azure/artifact-signing-action@87c2e83e6868da99d3380aa309851b32ed9a8346 # v1.1.0
       with:
         files-folder: ${{ inputs.base-dir }}
         files-folder-filter: ${{ inputs.file-extensions }}
@@ -59,7 +59,7 @@ runs:
         azure-tenant-id: ${{ steps.set-secrets.outputs.tenant-id }}
         azure-client-id: ${{ steps.set-secrets.outputs.client-id }}
         azure-client-secret: ${{ steps.set-secrets.outputs.client-secret }}
-        trusted-signing-account-name: cryptomatorSigning
+        signing-account-name: cryptomatorSigning
         certificate-profile-name: production
         endpoint: https://weu.codesigning.azure.net/
         timestamp-rfc3161: http://timestamp.acs.microsoft.com

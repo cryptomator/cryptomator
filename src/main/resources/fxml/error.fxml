@@ -22,7 +22,8 @@
 	  minHeight="450"
 	  prefWidth="450"
 	  prefHeight="450"
-	  spacing="12">
+	  spacing="12"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>

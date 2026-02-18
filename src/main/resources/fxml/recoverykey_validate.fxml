@@ -10,28 +10,29 @@
 	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyValidateController"
 	  maxWidth="400"
 	  minHeight="145"
-	  spacing="12">
+	  spacing="12"
+	  accessibleRole="DIALOG">
 	<children>
 		<FormattedLabel format="%recoveryKey.recover.prompt" arg1="${controller.vault.displayName}" wrapText="true" labelFor="$textarea"/>
 
 		<TextArea wrapText="true" prefRowCount="4" fx:id="textarea" textFormatter="${controller.recoveryKeyTextFormatter}" onKeyPressed="#onKeyPressed"/>
 		<VBox>
-			<Label text="Just some Filler" visible="false" managed="${textarea.text.empty}" graphicTextGap="6">
+			<Label text="%recoveryKey.recover.wrongKey" visible="false" managed="${textarea.text.empty}" graphicTextGap="6" wrapText="true" >
 				<graphic>
 					<FontAwesome5IconView glyph="ANCHOR"/>
 				</graphic>
 			</Label>
-			<Label text="%recoveryKey.recover.correctKey" graphicTextGap="6" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyCorrect}" managed="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyCorrect}">
+			<Label text="%recoveryKey.recover.correctKey" graphicTextGap="6" wrapText="true" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyCorrect}" managed="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyCorrect}">
 				<graphic>
 					<FontAwesome5IconView glyph="CHECK"/>
 				</graphic>
 			</Label>
-			<Label text="%recoveryKey.recover.wrongKey" graphicTextGap="6"  visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyWrong}" managed="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyWrong}">
+			<Label text="%recoveryKey.recover.wrongKey" graphicTextGap="6" wrapText="true" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyWrong}" managed="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyWrong}">
 				<graphic>
 					<FontAwesome5IconView glyph="TIMES" styleClass="glyph-icon-red"/>
 				</graphic>
 			</Label>
-			<Label text="%recoveryKey.recover.invalidKey" graphicTextGap="6"  visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyInvalid}" managed="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyInvalid}">
+			<Label text="%recoveryKey.recover.invalidKey" graphicTextGap="6" wrapText="true" visible="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyInvalid}" managed="${(!textarea.text.empty) &amp;&amp; controller.recoveryKeyInvalid}">
 				<graphic>
 					<FontAwesome5IconView glyph="TIMES" styleClass="glyph-icon-red"/>
 				</graphic>

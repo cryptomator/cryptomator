@@ -23,12 +23,12 @@ mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
-JAVAFX_VERSION=25
+JAVAFX_VERSION=25.0.2
 JAVAFX_ARCH="x64"
-JAVAFX_JMODS_SHA256='96e520f48610d8ffb94ca30face1f11ffe8a977ddc1c4ff80b1a9e9f048bd94e'
+JAVAFX_JMODS_SHA256='e0a9c29d8cf3af9b8b48848b43f87b5785bc107c53a951b19668ce05842bba1b'
 if [ "${CPU_ARCH}" = "aarch64" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256='951c52481af0ec5885b06f1ebaa8a10da7e8ea23c5e1ef3e2f6f11fa1b3a7ce1'
+    JAVAFX_JMODS_SHA256='c3408f818693cce09e59829a8e862a82c7695fdfcd585c41cfd527f5fc3fe646'
 fi
 
 # download javaFX jmods
@@ -88,8 +88,8 @@ ${JAVA_HOME}/bin/jpackage \
     --app-version "${VERSION}.${REVISION_NO}" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Djava.net.useSystemProxies=true" \
+    --java-options "-Dcryptomator.adminConfigPath=\"/etc/cryptomator/config.properties\"" \
     --java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
-    --java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json\"" \
     --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \
