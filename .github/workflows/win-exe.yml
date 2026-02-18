@@ -185,9 +185,18 @@ jobs:
       - name: Extract wixhelper.dll for Codesigning #see https://github.com/cryptomator/cryptomator/issues/3130
         shell: pwsh
         run: |
-          New-Item -Path appdir/jpackage-jmod -ItemType Directory
-          & $env:JAVA_HOME\bin\jmod.exe extract --dir jpackage-jmod "${env:JAVA_HOME}\jmods\jdk.jpackage.jmod"
-          Get-ChildItem -Recurse -Path "jpackage-jmod" -File wixhelper.dll | Select-Object -Last 1 | Copy-Item -Destination "appdir"
+          $extractDir = "appdir/jpackage-jimage"
+          New-Item -Path $extractDir -ItemType Directory -Force | Out-Null
+
+          & "$env:JAVA_HOME\bin\jimage.exe" extract --dir $extractDir "$env:JAVA_HOME\lib\modules"
+
+          $wixhelper = Get-ChildItem -Path $extractDir -Recurse -File -Filter "wixhelper.dll" | Select-Object -First 1
+          if (-not $wixhelper) {
+            throw "wixhelper.dll not found in $env:JAVA_HOME\lib\modules"
+          }
+
+          Copy-Item -Path $wixhelper.FullName -Destination "appdir/wixhelper.dll" -Force
+          Remove-Item -Path $extractDir -Recurse -Force
       - name: Sign DLLs with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'release'
         uses: ./.github/actions/win-sign-action
