@@ -167,7 +167,7 @@ jobs:
       - name: Commit and push
         run: |
           git config user.name "cryptobot"
-          git config user.email "automation@cryptomator.org"
+          git config user.email "cryptobot@users.noreply.github.com"
           git config push.autoSetupRemote true
           git stage .
           git commit -m "Prepare release ${VERSION}"
