@@ -63,11 +63,10 @@ jobs:
           SOURCES_2: '/cryptomator"'
           SOURCES_SHA: "'SKIP'"
       - name: Build package with makepkg
-        run: |
-          sudo -u builder env \
-            PKGDEST="$PKGDEST" \
-            SRCDEST="$SRCDEST" \
-            makepkg --syncdeps --cleanbuild --noconfirm --log
+        run: >
+          sudo -u builder
+          env PKGDEST="$PKGDEST" SRCDEST="$SRCDEST"
+          makepkg --syncdeps --cleanbuild --noconfirm --log
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: arch-package
@@ -119,12 +118,11 @@ jobs:
           install -d -m 0755 -o builder -g builder "$PKGDEST" "$SRCDEST"
       - name: Import Cryptomator release signing key
         # try first ubuntu. on failure try openpgp keyservers
-        run: |
-          sudo -u builder gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235 || \
-            sudo -u builder gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
+        run: >
+          sudo -u builder gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
+          || sudo -u builder gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
       - name: Checkout release branch
-        run: |
-          git checkout -b release/${VERSION}
+        run: git checkout -b release/${VERSION}
         env:
           VERSION: ${{ needs.get-version.outputs.semVerStr }}
       - name: Determine pkgrel
@@ -159,11 +157,10 @@ jobs:
             '${{steps.sha256.outputs.value}}'
                         'SKIP'
       - name: Build package with makepkg
-        run: |
-          sudo -u builder env \
-            PKGDEST="$PKGDEST" \
-            SRCDEST="$SRCDEST" \
-            makepkg --syncdeps --cleanbuild --noconfirm --log
+        run: >
+          sudo -u builder
+          env PKGDEST="$PKGDEST" SRCDEST="$SRCDEST"
+          makepkg --syncdeps --cleanbuild --noconfirm --log
       - name: Commit and push
         run: |
           git config user.name "cryptobot"
