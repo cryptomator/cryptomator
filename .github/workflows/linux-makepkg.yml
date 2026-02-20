@@ -177,7 +177,7 @@ jobs:
       - name: Create pull request
         id: create-pr
         run: |
-          printf "> [!IMPORTANT]\n> Todos:\n> - [ ] Update build instructions\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
+          printf "Created by event $GITHUB_EVENT_NAME in workflow $GITHUB_WORKFLOW in run $GITHUB_RUN_ID" > pr_body.md
           PR_URL=$(gh pr create --title "Release $VERSION" --body-file pr_body.md)
           echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
         env:
