@@ -122,7 +122,9 @@ jobs:
           sudo -u builder gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
           || sudo -u builder gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
       - name: Checkout release branch
-        run: git checkout -b release/${VERSION}
+        run: |
+          git config --global safe.directory '*'
+          git checkout -b release/${VERSION}
         env:
           VERSION: ${{ needs.get-version.outputs.semVerStr }}
       - name: Determine pkgrel
