@@ -31,16 +31,20 @@ jobs:
     name: Build AppImage
     runs-on: ${{ matrix.os }}
     needs: [get-version]
+    env:
+      SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+      SEMVER_NUM: ${{ needs.get-version.outputs.semVerNum }}
+      REV_NUM: ${{ needs.get-version.outputs.revNum }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
-            appimage-suffix: x86_64
+            arch: x86_64
             openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-x64_bin-jmods.zip'
             openjfx-sha: 'e0a9c29d8cf3af9b8b48848b43f87b5785bc107c53a951b19668ce05842bba1b'
           - os: ubuntu-24.04-arm
-            appimage-suffix: aarch64
+            arch: aarch64
             openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-aarch64_bin-jmods.zip'
             openjfx-sha: 'c3408f818693cce09e59829a8e862a82c7695fdfcd585c41cfd527f5fc3fe646'
     steps:
@@ -73,7 +77,7 @@ jobs:
             exit 1
           fi
       - name: Set version
-        run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
+        run : mvn versions:set -DnewVersion="$SEMVER_STR"
       - name: Run maven
         run: mvn -B clean package -Plinux -DskipTests
       - name: Patch target dir
@@ -94,13 +98,15 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
+          --module-path "${JMOD_PATHS}"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
           --strip-debug
           --compress zip-0
+        env:
+          JMOD_PATHS: ${{ steps.jep-493-check.outputs.jmod_paths }}
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -114,12 +120,12 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2025 Skymatic GmbH"
-          --app-version "${{  needs.get-version.outputs.semVerNum }}.${{  needs.get-version.outputs.revNum }}"
+          --app-version "${SEMVER_NUM}.${REV_NUM}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
-          --java-options "-Dcryptomator.appVersion=\"${{  needs.get-version.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\""
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Djava.net.useSystemProxies=true"
           --java-options "-Dcryptomator.adminConfigPath=\"/etc/cryptomator/config.properties\""
@@ -130,7 +136,7 @@ jobs:
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\""
-          --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
+          --java-options "-Dcryptomator.buildNumber=\"appimage-${REV_NUM}\""
           --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\""
           --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
           --resource-dir dist/linux/resources
@@ -155,7 +161,7 @@ jobs:
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
       - name: Download AppImageKit
         run: |
-          curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.appimage-suffix }}.AppImage -o appimagetool.AppImage
+          curl -L "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.arch }}.AppImage" -o appimagetool.AppImage
           chmod +x appimagetool.AppImage
           ./appimagetool.AppImage --appimage-extract
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
@@ -167,8 +173,8 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Build AppImage
         run: >
-          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{  needs.get-version.outputs.semVerStr }}-${{ matrix.appimage-suffix }}.AppImage
-          -u "gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${{ matrix.appimage-suffix }}.AppImage.zsync"
+          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${SEMVER_STR}-${{ matrix.arch }}.AppImage
+          -u "gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${{ matrix.arch }}.AppImage.zsync"
           --sign --sign-key=615D449FE6E6A235
       - name: Create detached GPG signatures
         run: |
@@ -177,7 +183,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: appimage-${{ matrix.appimage-suffix }}
+          name: appimage-${{ matrix.arch }}
           path: |
             cryptomator-*.AppImage
             cryptomator-*.AppImage.zsync
@@ -199,6 +205,8 @@ jobs:
     needs: [build, get-version]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable'
+    env:
+      SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
     steps:
       - name: Download AppImages
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -222,34 +230,37 @@ jobs:
           sudo apt-get -y install makepkg pacman-package-manager
       - name: Checkout release branch
         run: |
-          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+          git checkout -b "release/${SEMVER_STR}"
       - name: Update build file
         run: |
-          sed -i -e 's|^pkgver=.*$|pkgver=${{ needs.get-version.outputs.semVerStr }}|' PKGBUILD
+          sed -i -e "s|^pkgver=.*$|pkgver=${SEMVER_STR}|" PKGBUILD
           sed -i -e 's|^pkgrel=.*$|pkgrel=1|' PKGBUILD
-          sed -i -e "s|^sha256sums_x86_64=.*$|sha256sums_x86_64=('${{ steps.checksums.outputs.x64-sha256sum }}'|" PKGBUILD
-          sed -i -e "s|^sha256sums_aarch64=.*$|sha256sums_aarch64=('${{ steps.checksums.outputs.aarch64-sha256sum}}'|" PKGBUILD
+          sed -i -e "s|^sha256sums_x86_64=.*$|sha256sums_x86_64=('${AUR_SHA256_X64}'|" PKGBUILD
+          sed -i -e "s|^sha256sums_aarch64=.*$|sha256sums_aarch64=('${AUR_SHA256_AARCH64}'|" PKGBUILD
           makepkg --printsrcinfo > .SRCINFO
+        env:
+          AUR_SHA256_X64: ${{ steps.checksums.outputs.x64-sha256sum }}
+          AUR_SHA256_AARCH64: ${{ steps.checksums.outputs.aarch64-sha256sum }}
       - name: Commit and push
         run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git config user.name "cryptobot"
+          git config user.email "cryptobot@users.noreply.github.com"
           git config push.autoSetupRemote true
-          git stage .
-          git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
+          git stage PKGBUILD .SRCINFO
+          git commit -m "Prepare release ${SEMVER_STR}"
           git push
       - name: Create pull request
         id: create-pr
         run: |
-          printf "> [!IMPORTANT]\n> Todos:\n> - [ ] Update build instructions\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
-          URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
+          printf "Created by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > pr_body.md
+          PR_URL=$(gh pr create --title "Release ${SEMVER_STR}" --body-file pr_body.md)
           echo "PR_URL=$URL" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'
           SLACK_ICON: false
           SLACK_ICON_EMOJI: ':bot:'
