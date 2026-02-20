@@ -104,7 +104,7 @@ jobs:
           TARBALL_SHA256=$(sha256sum cryptomator.tar.gz | cut -d ' ' -f1)
           echo "value=${TARBALL_SHA256}" >> "$GITHUB_OUTPUT"
         env:
-          TAG: ${{ needs.get-version.outputs.semVerNum || github.event.release.tag_name }}
+          TAG: ${{ needs.get-version.outputs.semVerStr || github.event.release.tag_name }}
       - name: Checkout cryptomator/aur repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
