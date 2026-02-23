@@ -266,7 +266,7 @@ jobs:
         run: |
           printf "Created by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > pr_body.md
           PR_URL=$(gh pr create --title "Release ${SEMVER_STR}" --body-file pr_body.md)
-          echo "PR_URL=$URL" >> "$GITHUB_OUTPUT"
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
@@ -278,6 +278,6 @@ jobs:
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
           SLACK_TITLE: "AUR-bin release PR for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
-          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.PR_URL }}|PR> on how to proceed."
+          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.url }}|PR> on how to proceed."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
