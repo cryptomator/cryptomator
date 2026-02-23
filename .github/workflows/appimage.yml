@@ -8,6 +8,10 @@ on:
       version:
         description: 'Version'
         required: false
+      create-pr:
+        description: 'Create a PR for aur-bin repo'
+        type: boolean
+        default: false
   push:
     branches-ignore:
       - 'dependabot/**'
@@ -202,45 +206,52 @@ jobs:
 
   create-aur-bin-pr:
     name: Create PR for aur-bin repo
-    needs: [build, get-version]
+    if:  github.event_name == 'workflow_dispatch' && inputs.create-pr || github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable'
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable'
+    needs: [build, get-version]
+    container:
+      image: archlinux:base-devel
     env:
       SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+      PKGDEST: ${{ github.workspace }}/pkgdest
+      SRCDEST: ${{ github.workspace }}/srcdest
     steps:
-      - name: Download AppImages
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          path: downloads/
-          merge-multiple: true
-      - name: Compute sha256 hash of AppImages
-        id: checksums
+      - name: Prepare pacman
         run: |
-          X64_SHA256=$(sha256sum downloads/cryptomator-*-x86_64.AppImage | cut -d ' ' -f1)
-          echo "x64-sha256sum=${X64_SHA256}" >> "$GITHUB_OUTPUT"
-          AARCH64_SHA256=$(sha256sum downloads/cryptomator-*-aarch64.AppImage | cut -d ' ' -f1)
-          echo "aarch64-sha256sum=${AARCH64_SHA256}" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+          pacman-key --init
+          pacman-key --populate archlinux
+          pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip github-cli curl pacman-contrib
+      - name: Checkout cryptomator/aur-bin
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: 'cryptomator/aur-bin'
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
-      - name: Install dependencies
+      - name: Create build user
         run: |
-          sudo apt-get update
-          sudo apt-get -y install makepkg pacman-package-manager
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          install -d -m 0755 -o builder -g builder "$PKGDEST" "$SRCDEST"
+      - name: Import Cryptomator release signing key
+        # try first ubuntu. on failure try openpgp keyservers
+        run: >
+          sudo -u builder gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
+          || sudo -u builder gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
       - name: Checkout release branch
         run: |
+          git config --global safe.directory '*'
           git checkout -b "release/${SEMVER_STR}"
       - name: Update build file
         run: |
           sed -i -e "s|^pkgver=.*$|pkgver=${SEMVER_STR}|" PKGBUILD
           sed -i -e 's|^pkgrel=.*$|pkgrel=1|' PKGBUILD
-          sed -i -e "s|^sha256sums_x86_64=.*$|sha256sums_x86_64=('${AUR_SHA256_X64}'|" PKGBUILD
-          sed -i -e "s|^sha256sums_aarch64=.*$|sha256sums_aarch64=('${AUR_SHA256_AARCH64}'|" PKGBUILD
-          makepkg --printsrcinfo > .SRCINFO
-        env:
-          AUR_SHA256_X64: ${{ steps.checksums.outputs.x64-sha256sum }}
-          AUR_SHA256_AARCH64: ${{ steps.checksums.outputs.aarch64-sha256sum }}
+          sudo -u builder updpkgsums
+          sudo -u builder makepkg --printsrcinfo > .SRCINFO
+      - name: Build package with makepkg
+        run: >
+          sudo -u builder
+          env PKGDEST="$PKGDEST" SRCDEST="$SRCDEST"
+          makepkg --syncdeps --cleanbuild --noconfirm --log
       - name: Commit and push
         run: |
           git config user.name "cryptobot"
@@ -254,7 +265,7 @@ jobs:
         run: |
           printf "Created by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > pr_body.md
           PR_URL=$(gh pr create --title "Release ${SEMVER_STR}" --body-file pr_body.md)
-          echo "PR_URL=$URL" >> "$GITHUB_OUTPUT"
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
@@ -265,7 +276,7 @@ jobs:
           SLACK_ICON: false
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
-          SLACK_TITLE: "AUR-bin release PR for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
-          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.PR_URL }}|PR> on how to proceed."
+          SLACK_TITLE: "AUR-bin release PR for ${{ github.event.repository.name }} ${{ needs.get-version.outputs.semVerStr }} created."
+          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.url }}|PR> on how to proceed."
           SLACK_FOOTER: false
           MSG_MINIMAL: true
