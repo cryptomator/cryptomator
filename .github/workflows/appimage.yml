@@ -9,9 +9,9 @@ on:
         description: 'Version'
         required: false
       create-pr:
-          description: 'Create a PR for aur-bin repo'
-          type: boolean
-          default: false
+        description: 'Create a PR for aur-bin repo'
+        type: boolean
+        default: false
   push:
     branches-ignore:
       - 'dependabot/**'
@@ -245,7 +245,6 @@ jobs:
         run: |
           sed -i -e "s|^pkgver=.*$|pkgver=${SEMVER_STR}|" PKGBUILD
           sed -i -e 's|^pkgrel=.*$|pkgrel=1|' PKGBUILD
-          updpkgsums && makepkg --printsrcinfo > .SRCINFO
           sudo -u builder updpkgsums
           sudo -u builder makepkg --printsrcinfo > .SRCINFO
       - name: Build package with makepkg
