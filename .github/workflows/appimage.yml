@@ -246,9 +246,8 @@ jobs:
           sed -i -e "s|^pkgver=.*$|pkgver=${SEMVER_STR}|" PKGBUILD
           sed -i -e 's|^pkgrel=.*$|pkgrel=1|' PKGBUILD
           updpkgsums && makepkg --printsrcinfo > .SRCINFO
-        env:
-          AUR_SHA256_X64: ${{ steps.checksums.outputs.x64-sha256sum }}
-          AUR_SHA256_AARCH64: ${{ steps.checksums.outputs.aarch64-sha256sum }}
+          sudo -u builder updpkgsums
+          sudo -u builder makepkg --printsrcinfo > .SRCINFO
       - name: Build package with makepkg
         run: >
           sudo -u builder
