@@ -65,7 +65,6 @@ public class Cryptomator {
 	}
 
 	public static void main(String[] args) {
-		EventualLogger.INSTANCE.drainTo(LOG);
 		var printVersion = Optional.ofNullable(args) //
 				.stream() //Streams either one element (the args-array) or zero elements
 				.flatMap(Arrays::stream) //
@@ -91,10 +90,11 @@ public class Cryptomator {
 	 * @return Nonzero exit code in case of an error.
 	 */
 	private int run(String[] args) {
+		debugMode.initialize();
+		EventualLogger.INSTANCE.drainTo(LOG);
 		env.log();
 		LOG.debug("Dagger graph initialized after {}ms", System.currentTimeMillis() - STARTUP_TIME);
 		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion(), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
-		debugMode.initialize();
 		supportedLanguages.applyPreferred();
 		changeDefaultSSLContext();
 		/*
