@@ -49,7 +49,7 @@ jobs:
           url="${INPUT_URL}"
           echo "fileName=${url##*/}" >> $GITHUB_OUTPUT
       - name: Download file
-        run: curl "${INPUT_URL}" -L -o "${{steps.extractName.outputs.fileName}}" --fail-with-body
+        run: curl --silent --fail-with-body --proto "=https" -L "${INPUT_URL}" -o "${{steps.extractName.outputs.fileName}}"
       - name: Upload artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
