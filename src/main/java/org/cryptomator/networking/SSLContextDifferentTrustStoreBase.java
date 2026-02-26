@@ -18,7 +18,7 @@ abstract class SSLContextDifferentTrustStoreBase implements SSLContextProvider {
 	public SSLContext getContext(SecureRandom csprng) throws SSLContextBuildException {
 		try {
 			KeyStore truststore = getTruststore();
-			truststore.load(null, null);
+			ensureLoaded(truststore);
 
 			TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 			tmf.init(truststore);
@@ -28,6 +28,15 @@ abstract class SSLContextDifferentTrustStoreBase implements SSLContextProvider {
 			return context;
 		} catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | KeyManagementException | IOException e) {
 			throw new SSLContextBuildException(e);
+		}
+	}
+
+	static void ensureLoaded(KeyStore truststore) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+		try {
+			truststore.aliases();
+		} catch (KeyStoreException e) {
+			// Not initialized yet (e.g. custom KeyStore SPI); initialize without replacing preloaded stores.
+			truststore.load(null, null);
 		}
 	}
 }
