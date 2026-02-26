@@ -59,7 +59,7 @@ jobs:
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
-          curl -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
           echo "${{ matrix.openjfx-sha }} *openjfx-jmods.zip" | shasum -a256 --check
           mkdir -p openjfx-jmods/
           unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods

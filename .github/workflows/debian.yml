@@ -71,11 +71,11 @@ jobs:
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
-          curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
           echo "${{ env.OPENJFX_JMODS_AMD64_HASH }}  openjfx-amd64.zip" | shasum -a256 --check
           mkdir -p jmods/amd64
           unzip -j openjfx-amd64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/amd64
-          curl -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
           echo "${{ env.OPENJFX_JMODS_AARCH64_HASH }}  openjfx-aarch64.zip" | shasum -a256 --check
           mkdir -p jmods/aarch64
           unzip -j openjfx-aarch64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/aarch64
