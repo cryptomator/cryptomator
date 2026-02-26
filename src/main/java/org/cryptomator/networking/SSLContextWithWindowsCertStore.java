@@ -2,6 +2,7 @@ package org.cryptomator.networking;
 
 import org.cryptomator.common.Nullable;
 import org.cryptomator.integrations.common.OperatingSystem;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * SSLContextProvider for Windows using the Windows certificate store as trust store and the bundled JDK cacerts as fallback
@@ -47,8 +49,15 @@ public class SSLContextWithWindowsCertStore extends SSLContextDifferentTrustStor
 
 	@Nullable
 	KeyStore getShippedCaCertsStore() {
-		var javaHome = Path.of(System.getProperty("java.home"));
-		var trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword", DEFAULT_TRUSTSTORE_PASSWORD).toCharArray();
+		return getCaCertsStoreByProperties(System.getProperties());
+	}
+
+	//for testability
+	@VisibleForTesting
+	@Nullable
+	KeyStore getCaCertsStoreByProperties(Properties props) {
+		var javaHome = Path.of(props.getProperty("java.home"));
+		var trustStorePassword = props.getProperty("javax.net.ssl.trustStorePassword", DEFAULT_TRUSTSTORE_PASSWORD).toCharArray();
 		for (var candidate : List.of(javaHome.resolve("lib/security/cacerts"), javaHome.resolve("conf/security/cacerts"))) {
 			try {
 				if (Files.isRegularFile(candidate)) {
