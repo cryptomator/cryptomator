@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -31,7 +30,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
@@ -40,12 +38,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -60,7 +54,7 @@ public class VaultDetailUnlockedController implements FxController {
 	private final VaultService vaultService;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	private final Stage mainWindow;
-	private final Optional<RevealPathService> revealPathService;
+	private final RevealPathService revealPathService;
 	private final DecryptNameComponent.Factory decryptNameWindowFactory;
 	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
@@ -84,7 +78,7 @@ public class VaultDetailUnlockedController implements FxController {
 										 VaultStatisticsComponent.Builder vaultStatsBuilder, //
 										 WrongFileAlertComponent.Builder wrongFileAlert, //
 										 @MainWindow Stage mainWindow, //
-										 Optional<RevealPathService> revealPathService, //
+										 RevealPathService revealPathService, //
 										 DecryptNameComponent.Factory decryptNameWindowFactory, //
 										 ResourceBundle resourceBundle) {
 		this.vault = vault;
@@ -111,7 +105,7 @@ public class VaultDetailUnlockedController implements FxController {
 
 	public void initialize() {
 		revealEncryptedDropZone.setOnDragOver(e -> handleDragOver(e, draggingOverLocateEncrypted));
-		revealEncryptedDropZone.setOnDragDropped(e -> handleDragDropped(e, this::getCiphertextPath, this::revealOrCopyPaths));
+		revealEncryptedDropZone.setOnDragDropped(e -> handleDragDropped(e, this::getCiphertextPath, this::revealPaths));
 		revealEncryptedDropZone.setOnDragExited(_ -> draggingOverLocateEncrypted.setValue(false));
 
 		decryptNameDropZone.setOnDragOver(e -> handleDragOver(e, draggingOverDecryptName));
@@ -156,7 +150,7 @@ public class VaultDetailUnlockedController implements FxController {
 		if (cleartextFile != null) {
 			var ciphertextPath = getCiphertextPath(cleartextFile.toPath());
 			if (ciphertextPath != null) {
-				revealOrCopyPaths(List.of(ciphertextPath));
+				revealPaths(List.of(ciphertextPath));
 			}
 		}
 	}
@@ -188,31 +182,15 @@ public class VaultDetailUnlockedController implements FxController {
 		}
 	}
 
-	private void revealOrCopyPaths(List<Path> paths) {
-		revealPathService.ifPresentOrElse(svc -> revealPaths(svc, paths), () -> {
-			LOG.warn("No service provider to reveal files found.");
-			copyPathsToClipboard(paths);
-		});
-	}
-
-	private void revealPaths(RevealPathService service, List<Path> paths) {
+	private void revealPaths(List<Path> paths) {
 		paths.forEach(path -> {
 			try {
 				LOG.debug("Revealing {}", path);
-				service.reveal(path);
+				revealPathService.reveal(path);
 			} catch (RevealFailedException e) {
+				//TODO: show popup in ui
 				LOG.error("Revealing ciphertext file failed.", e);
 			}
-		});
-	}
-
-	private void copyPathsToClipboard(List<Path> paths) {
-		StringBuilder clipboardString = new StringBuilder();
-		paths.forEach(p -> clipboardString.append(p.toString()).append("\n"));
-		Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.PLAIN_TEXT, clipboardString.toString()));
-		ciphertextPathsCopied.setValue(true);
-		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
-			ciphertextPathsCopied.set(false);
 		});
 	}
 

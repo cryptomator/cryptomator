@@ -4,9 +4,12 @@ import com.google.common.base.Throwables;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.integrations.revealpath.RevealFailedException;
+import org.cryptomator.integrations.revealpath.RevealPathService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.application.Application;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 @HealthCheckScoped
 public class ReportWriter {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ReportWriter.class);
 	private static final String REPORT_HEADER = """
 			*******************************************
 			*     Cryptomator Vault Health Report     *
@@ -43,14 +47,14 @@ public class ReportWriter {
 
 	private final Vault vault;
 	private final VaultConfig vaultConfig;
-	private final Application application;
+	private final RevealPathService revealPathService;
 	private final Path exportDestination;
 
 	@Inject
-	public ReportWriter(@HealthCheckWindow Vault vault, AtomicReference<VaultConfig> vaultConfigRef, Application application, Environment env) {
+	public ReportWriter(@HealthCheckWindow Vault vault, AtomicReference<VaultConfig> vaultConfigRef, RevealPathService revealPathService, Environment env) {
 		this.vault = vault;
 		this.vaultConfig = Objects.requireNonNull(vaultConfigRef.get());
-		this.application = application;
+		this.revealPathService = revealPathService;
 		this.exportDestination = env.getLogDir().orElse(Path.of(System.getProperty("user.home"))).resolve("healthReport_" + vault.getDisplayName() + "_" + TIME_STAMP.format(Instant.now()) + ".log");
 	}
 
@@ -92,7 +96,11 @@ public class ReportWriter {
 	}
 
 	private void reveal() {
-		application.getHostServices().showDocument(exportDestination.getParent().toUri().toString());
+		try {
+			revealPathService.reveal(exportDestination.getParent());
+		} catch (RevealFailedException e) {
+			LOG.warn("Failed to reveal export destination location of report", e);
+		}
 	}
 
 }
