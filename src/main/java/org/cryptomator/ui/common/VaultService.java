@@ -47,8 +47,8 @@ public class VaultService {
 	 */
 	public Task<Vault> createRevealTask(Vault vault) {
 		Task<Vault> task = new RevealVaultTask(vault, revealPathService);
-		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
-		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
+		task.setOnSucceeded(_ -> LOG.info("Revealed {}", vault.getDisplayName()));
+		task.setOnFailed(evt -> LOG.warn("Failed to reveal {}", vault.getDisplayName(), evt.getSource().getException()));
 		return task;
 	}
 
@@ -114,7 +114,6 @@ public class VaultService {
 		public RevealVaultTask(Vault vault, RevealPathService revealPathService) {
 			this.vault = vault;
 			this.rs = revealPathService;
-			setOnFailed(evt -> LOG.warn("Failed to reveal {}", vault.getDisplayName(), getException()));
 		}
 
 		@Override
