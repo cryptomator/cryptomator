@@ -10,15 +10,19 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.application.Application;
 import javafx.application.Platform;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @FxApplicationScoped
 public class FxApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
+
+	static final AtomicReference<Application> FX_APP_REF = new AtomicReference<>();
 
 	private final long startupTime;
 	private final Environment environment;
@@ -33,7 +37,8 @@ public class FxApplication {
 	private final FxNotificationManager notificationManager;
 
 	@Inject
-	FxApplication(@Named("startupTime") long startupTime, //
+	FxApplication(Application fxApp,
+				   @Named("startupTime") long startupTime, //
 				  Environment environment, //
 				  Settings settings, //
 				  AppLaunchEventHandler launchEventHandler, //
@@ -55,6 +60,8 @@ public class FxApplication {
 		this.autoUnlocker = autoUnlocker;
 		this.fxFSEventList = fxFSEventList;
 		this.notificationManager = notificationManager;
+
+		FX_APP_REF.set(fxApp);
 	}
 
 	public void start() {
