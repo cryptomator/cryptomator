@@ -28,15 +28,23 @@ public interface DecryptNameComponent {
 	@FxmlScene(FxmlFile.DECRYPTNAMES)
 	Lazy<Scene> decryptNamesView();
 
+	DecryptFileNamesViewController controller();
+
 	@DecryptNameWindow
 	Vault vault();
 
 	default void showDecryptFileNameWindow() {
+		showDecryptFileNameWindow(List.of());
+	}
+
+	default void showDecryptFileNameWindow(List<Path> pathsToDecrypt) {
 		Stage s = window();
 		s.setScene(decryptNamesView().get());
 		s.sizeToScene();
 		if (vault().isUnlocked()) {
+			controller().decrypt(pathsToDecrypt);
 			s.show();
+			s.requestFocus();
 		} else {
 			LOG.error("Aborted showing DecryptFileName window: vault state is not {}, but {}.", VaultState.Value.UNLOCKED, vault().getState());
 		}
