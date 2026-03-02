@@ -55,7 +55,6 @@ public class EventListCellController implements FxController {
 	private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
 	private final FileSystemEventAggregator fileSystemEventAggregator;
-	@Nullable
 	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
 	private final ObjectProperty<Map.Entry<FSEventBucket, FSEventBucketContent>> eventEntry;
@@ -80,7 +79,9 @@ public class EventListCellController implements FxController {
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(FileSystemEventAggregator fileSystemEventAggregator, RevealPathService revealService, ResourceBundle resourceBundle) {
+	public EventListCellController(FileSystemEventAggregator fileSystemEventAggregator,
+								   RevealPathService revealService,
+								   ResourceBundle resourceBundle) {
 		this.fileSystemEventAggregator = fileSystemEventAggregator;
 		this.revealService = revealService;
 		this.resourceBundle = resourceBundle;

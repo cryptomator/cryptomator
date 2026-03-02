@@ -109,11 +109,11 @@ public class VaultService {
 	private static class RevealVaultTask extends Task<Vault> {
 
 		private final Vault vault;
-		private final RevealPathService revealPathService1;
+		private final RevealPathService rs;
 
 		public RevealVaultTask(Vault vault, RevealPathService revealPathService) {
 			this.vault = vault;
-			this.revealPathService1 = revealPathService;
+			this.rs = revealPathService;
 			setOnFailed(evt -> LOG.warn("Failed to reveal {}", vault.getDisplayName(), getException()));
 		}
 
@@ -121,7 +121,7 @@ public class VaultService {
 		protected Vault call() throws RevealFailedException {
 			switch (vault.getMountPoint()) {
 				case null -> LOG.warn("Not currently mounted");
-				case Mountpoint.WithPath m -> revealPathService1.reveal(m.path());
+				case Mountpoint.WithPath m -> rs.reveal(m.path());
 				case Mountpoint.WithUri m -> LOG.info("Vault mounted at {}", m.uri()); // TODO show in UI?
 			}
 			return vault;
