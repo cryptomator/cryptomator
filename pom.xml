@@ -41,6 +41,7 @@
 		<cryptomator.integrations.linux.version>1.7.0-beta4</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>6.0.1</cryptomator.fuse.version>
 		<cryptomator.webdav.version>3.0.1</cryptomator.webdav.version>
+		<cryptomator.webdav-servlet.version>1.2.12</cryptomator.webdav-servlet.version>
 
 		<!-- 3rd party dependencies -->
 		<caffeine.version>3.2.3</caffeine.version>
@@ -93,6 +94,11 @@
 
 	<dependencies>
 		<!-- Cryptomator Libs -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>webdav-nio-adapter-servlet</artifactId>
+			<version>${cryptomator.webdav-servlet.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptolib</artifactId>

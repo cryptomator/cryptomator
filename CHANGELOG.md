@@ -24,6 +24,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Fixed
 * Fixed password reset/show recovery possible for vaults without masterkey file ([#4120](https://github.com/cryptomator/cryptomator/pull/4120))
 * Fixed restore vault config failed due to selecting a directory instead of file ([#4141](https://github.com/cryptomator/cryptomator/issues/4141))
+* Fixed leaking of cleartext paths into application log ([GHSA-j83j-mwhc-rcgw](https://github.com/cryptomator/cryptomator/security/advisories/GHSA-j83j-mwhc-rcgw))
 
 ### Changed
 * Disable user defined app start config on Windows ([#4132](https://github.com/cryptomator/cryptomator/issues/4132))
