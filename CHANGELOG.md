@@ -40,7 +40,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
   * `org.apache.commons:commons-lang3` from 3.19.0 to 3.20.0
   * `org.cryptomator:cryptofs` from 2.9.0 to 2.10.0-beta3
   * `org.cryptomator:cryptolib` from 2.2.1 to 2.2.2
-  * `org.cryptomator:fuse-nio-adapter` from 5.1.0 to 6.0.0
+  * `org.cryptomator:fuse-nio-adapter` from 5.1.0 to 6.0.1
   * `org.cryptomator:integrations-api` from 1.7.0 to 1.8.0-beta1
   * `org.cryptomator:integrations-linux` from 1.6.1 to 1.7.0-beta4
   * `org.cryptomator:integrations-mac` from 1.4.1 to 1.5.0-beta3
