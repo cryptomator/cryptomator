@@ -130,22 +130,10 @@ ${JAVA_HOME}/bin/jpackage \
 
 # transform app dir
 cp ../resources/${APP_NAME}-Vault.icns ${APP_NAME}.app/Contents/Resources/
+cp ../resources/Assets.car ${APP_NAME}.app/Contents/Resources/
 sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Info.plist
 cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
-
-# build and install dock tile plugin
-echo "Building and installing Cryptomator.docktileplugin..."
-DERIVED_DATA_PATH=../DockTilePlugin/build
-xcodebuild -project ../DockTilePlugin/DockTilePlugin.xcodeproj \
-           -scheme DockTilePlugin \
-           -configuration Release \
-           -derivedDataPath ${DERIVED_DATA_PATH} \
-           -quiet \
-           clean build
-mkdir -p ${APP_NAME}.app/Contents/PlugIns
-cp -R ${DERIVED_DATA_PATH}/Build/Products/Release/Cryptomator.docktileplugin ${APP_NAME}.app/Contents/PlugIns/
-rm -rf ${DERIVED_DATA_PATH}
 
 # generate license
 mvn -B -f../../../pom.xml license:add-third-party \
