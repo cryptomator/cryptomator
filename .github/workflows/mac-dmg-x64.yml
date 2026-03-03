@@ -144,6 +144,7 @@ jobs:
         run: |
           mv appdir/Cryptomator.app Cryptomator.app
           mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
+          cp dist/mac/resources/Assets.car Cryptomator.app/Contents/Resources/
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output Cryptomator.app/Contents/embedded.provisionprofile
@@ -151,20 +152,6 @@ jobs:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NO: ${{ needs.get-version.outputs.revNum }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
-      - name: Build and install DockTilePlugin
-        env:
-          DERIVED_DATA_PATH: dist/mac/DockTilePlugin/build
-        run: |
-          xcodebuild -project dist/mac/DockTilePlugin/DockTilePlugin.xcodeproj \
-                     -scheme DockTilePlugin \
-                     -configuration Release \
-                     -destination "platform=macOS,arch=x86_64" \
-                     -derivedDataPath ${DERIVED_DATA_PATH} \
-                     -quiet \
-                     clean build
-          mkdir -p Cryptomator.app/Contents/PlugIns
-          cp -R ${DERIVED_DATA_PATH}/Build/Products/Release/Cryptomator.docktileplugin Cryptomator.app/Contents/PlugIns/
-          rm -rf ${DERIVED_DATA_PATH}
       - name: Generate license for dmg
         run: >
           mvn -B license:add-third-party
