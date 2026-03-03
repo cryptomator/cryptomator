@@ -8,14 +8,21 @@ import org.cryptomator.integrations.revealpath.RevealPathService;
 
 import java.nio.file.Path;
 
-@DisplayName("JavaFX Host Service")
+/**
+ * A {@link RevealPathService} service implementation using the JavaFX {@link javafx.application.HostServices#showDocument(String)} to reveal documents.
+ * <p>
+ * Internally the HostServices class uses GTK on Linux.
+ *
+ * @implNote {@link #reveal(Path)} only succeeds when the class {@link FxApplication} is initialized.
+ */
+@DisplayName("JavaFX HostServices (GTK)")
 @OperatingSystem(OperatingSystem.Value.LINUX)
-@Priority(1)
+@Priority(10)
 public class JfxRevealPathService implements RevealPathService {
 
 	@Override
 	public void reveal(Path p) throws RevealFailedException {
-		var fxApp = FxApplication.FX_APP_REF.get();
+		var fxApp = FxApplication.INSTANCE.get();
 		if (fxApp != null) {
 			fxApp.getHostServices().showDocument(p.toUri().toString());
 		} else {

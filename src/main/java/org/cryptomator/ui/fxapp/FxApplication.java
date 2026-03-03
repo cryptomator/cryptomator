@@ -22,7 +22,7 @@ public class FxApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
 
-	static final AtomicReference<Application> FX_APP_REF = new AtomicReference<>();
+	static final AtomicReference<Application> INSTANCE = new AtomicReference<>();
 
 	private final long startupTime;
 	private final Environment environment;
@@ -61,7 +61,7 @@ public class FxApplication {
 		this.fxFSEventList = fxFSEventList;
 		this.notificationManager = notificationManager;
 
-		FX_APP_REF.set(fxApp);
+		INSTANCE.set(fxApp);
 	}
 
 	public void start() {
