@@ -3,18 +3,19 @@ package org.cryptomator.ui.preferences;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.integrations.revealpath.RevealFailedException;
+import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.integrations.update.UpdateStep;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.updater.UpdateChecker;
 import org.cryptomator.updater.FallbackUpdateInfo;
+import org.cryptomator.updater.UpdateChecker;
 import org.cryptomator.updater.UpdateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.animation.PauseTransition;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -49,7 +50,7 @@ public class UpdatesPreferencesController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(UpdatesPreferencesController.class);
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
 
-	private final Application application;
+	private final RevealPathService revealPathService;
 	private final Environment environment;
 	private final ResourceBundle resourceBundle;
 	private final Settings settings;
@@ -72,8 +73,8 @@ public class UpdatesPreferencesController implements FxController {
 	public CheckBox checkForUpdatesCheckbox;
 
 	@Inject
-	UpdatesPreferencesController(Application application, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, ObservableList<Vault> vaults, VaultService vaultService) {
-		this.application = application;
+	UpdatesPreferencesController(RevealPathService revealPathService, Environment environment, ResourceBundle resourceBundle, Settings settings, UpdateChecker updateChecker, ObservableList<Vault> vaults, VaultService vaultService) {
+		this.revealPathService = revealPathService;
 		this.environment = environment;
 		this.resourceBundle = resourceBundle;
 		this.settings = settings;
@@ -106,9 +107,14 @@ public class UpdatesPreferencesController implements FxController {
 		updateService.setOnFailed(this::updateFailed);
 	}
 
+
 	@FXML
 	public void showLogfileDirectory() {
-		environment.getLogDir().ifPresent(logDirPath -> application.getHostServices().showDocument(logDirPath.toUri().toString()));
+		try {
+			revealPathService.reveal(environment.getLogDir().orElseThrow());
+		} catch (RevealFailedException e) {
+			LOG.warn("Failed to reveal log files directory.", e);
+		}
 	}
 
 	@FXML

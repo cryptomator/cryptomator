@@ -2,18 +2,17 @@ package org.cryptomator.ui.eventview;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Constants;
-import org.cryptomator.cryptofs.event.FileIsInUseEvent;
-import org.cryptomator.event.FSEventBucket;
-import org.cryptomator.event.FSEventBucketContent;
-import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.ObservableUtil;
-import org.cryptomator.cryptofs.CryptoPath;
 import org.cryptomator.cryptofs.event.BrokenDirFileEvent;
 import org.cryptomator.cryptofs.event.BrokenFileNodeEvent;
 import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
+import org.cryptomator.cryptofs.event.FileIsInUseEvent;
+import org.cryptomator.event.FSEventBucket;
+import org.cryptomator.event.FSEventBucketContent;
+import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.integrations.revealpath.RevealFailedException;
 import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.common.FxController;
@@ -46,7 +45,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 
@@ -57,7 +55,6 @@ public class EventListCellController implements FxController {
 	private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
 	private final FileSystemEventAggregator fileSystemEventAggregator;
-	@Nullable
 	private final RevealPathService revealService;
 	private final ResourceBundle resourceBundle;
 	private final ObjectProperty<Map.Entry<FSEventBucket, FSEventBucketContent>> eventEntry;
@@ -82,15 +79,17 @@ public class EventListCellController implements FxController {
 	Button eventActionsButton;
 
 	@Inject
-	public EventListCellController(FileSystemEventAggregator fileSystemEventAggregator, Optional<RevealPathService> revealService, ResourceBundle resourceBundle) {
+	public EventListCellController(FileSystemEventAggregator fileSystemEventAggregator,
+								   RevealPathService revealService,
+								   ResourceBundle resourceBundle) {
 		this.fileSystemEventAggregator = fileSystemEventAggregator;
-		this.revealService = revealService.orElseGet(() -> null);
+		this.revealService = revealService;
 		this.resourceBundle = resourceBundle;
 		this.eventEntry = new SimpleObjectProperty<>(null);
 		this.eventMessage = new SimpleStringProperty();
 		this.eventDescription = new SimpleStringProperty();
 		this.eventIcon = new SimpleObjectProperty<>();
-		this.eventCount = ObservableUtil.mapWithDefault(eventEntry, e -> e.getValue().count() == 1? "" : "("+ e.getValue().count() +")", "");
+		this.eventCount = ObservableUtil.mapWithDefault(eventEntry, e -> e.getValue().count() == 1 ? "" : "(" + e.getValue().count() + ")", "");
 		this.vaultUnlocked = ObservableUtil.mapWithDefault(eventEntry.flatMap(e -> e.getKey().vault().unlockedProperty()), Function.identity(), false);
 		this.readableTime = ObservableUtil.mapWithDefault(eventEntry, e -> LOCAL_TIME_FORMATTER.format(e.getValue().mostRecentEvent().getTimestamp()), "");
 		this.readableDate = ObservableUtil.mapWithDefault(eventEntry, e -> LOCAL_DATE_FORMATTER.format(e.getValue().mostRecentEvent().getTimestamp()), "");
@@ -136,13 +135,8 @@ public class EventListCellController implements FxController {
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.inUse.message"));
 		var indexFileName = fiiue.cleartextPath().lastIndexOf("/");
 		eventDescription.setValue(fiiue.cleartextPath().substring(indexFileName + 1));
-		if (revealService != null) {
-			addLocalizedAction("eventView.entry.inUse.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(fiiue.cleartextPath())));
-			addLocalizedAction("eventView.entry.inUse.showEncrypted", () -> reveal(revealService, fiiue.ciphertextPath()));
-		} else {
-			addLocalizedAction("eventView.entry.inUse.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(fiiue.cleartextPath()).toString()));
-			addLocalizedAction("eventView.entry.inUse.copyEncrypted", () -> copyToClipboard(fiiue.ciphertextPath().toString()));
-		}
+		addLocalizedAction("eventView.entry.inUse.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(fiiue.cleartextPath())));
+		addLocalizedAction("eventView.entry.inUse.showEncrypted", () -> reveal(revealService, fiiue.ciphertextPath()));
 
 		var userAndDevice = fiiue.owner().split(Constants.HUB_USER_DEVICE_SEPARATOR);
 		var user = userAndDevice[0];
@@ -156,11 +150,7 @@ public class EventListCellController implements FxController {
 		eventIcon.setValue(FontAwesome5Icon.TIMES);
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.brokenFileNode.message"));
 		eventDescription.setValue(bfe.ciphertextPath().getFileName().toString());
-		if (revealService != null) {
-			addLocalizedAction("eventView.entry.brokenFileNode.showEncrypted", () -> reveal(revealService, bfe.ciphertextPath()));
-		} else {
-			addLocalizedAction("eventView.entry.brokenFileNode.copyEncrypted", () -> copyToClipboard(bfe.ciphertextPath().toString()));
-		}
+		addLocalizedAction("eventView.entry.brokenFileNode.showEncrypted", () -> reveal(revealService, bfe.ciphertextPath()));
 		addLocalizedAction("eventView.entry.brokenFileNode.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(bfe.cleartextPath()).toString()));
 	}
 
@@ -168,46 +158,29 @@ public class EventListCellController implements FxController {
 		eventIcon.setValue(FontAwesome5Icon.CHECK);
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.conflictResolved.message"));
 		eventDescription.setValue(cre.resolvedCiphertextPath().getFileName().toString());
-		if (revealService != null) {
-			addLocalizedAction("eventView.entry.conflictResolved.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
-		} else {
-			addLocalizedAction("eventView.entry.conflictResolved.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cre.resolvedCleartextPath()).toString()));
-		}
+		addLocalizedAction("eventView.entry.conflictResolved.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cre.resolvedCleartextPath())));
 	}
 
 	private void adjustToConflictEvent(ConflictResolutionFailedEvent cfe) {
 		eventIcon.setValue(FontAwesome5Icon.COMPRESS_ALT);
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.conflict.message"));
 		eventDescription.setValue(cfe.conflictingCiphertextPath().getFileName().toString());
-		if (revealService != null) {
-			addLocalizedAction("eventView.entry.conflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
-			addLocalizedAction("eventView.entry.conflict.showEncrypted", () -> reveal(revealService, cfe.conflictingCiphertextPath()));
-		} else {
-			addLocalizedAction("eventView.entry.conflict.copyDecrypted", () -> copyToClipboard(convertVaultPathToSystemPath(cfe.canonicalCleartextPath()).toString()));
-			addLocalizedAction("eventView.entry.conflict.copyEncrypted", () -> copyToClipboard(cfe.conflictingCiphertextPath().toString()));
-		}
+		addLocalizedAction("eventView.entry.conflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(cfe.canonicalCleartextPath())));
+		addLocalizedAction("eventView.entry.conflict.showEncrypted", () -> reveal(revealService, cfe.conflictingCiphertextPath()));
 	}
 
 	private void adjustToDecryptionFailedEvent(DecryptionFailedEvent dfe) {
 		eventIcon.setValue(FontAwesome5Icon.BAN);
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.decryptionFailed.message"));
 		eventDescription.setValue(dfe.ciphertextPath().getFileName().toString());
-		if (revealService != null) {
-			addLocalizedAction("eventView.entry.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
-		} else {
-			addLocalizedAction("eventView.entry.decryptionFailed.copyEncrypted", () -> copyToClipboard(dfe.ciphertextPath().toString()));
-		}
+		addLocalizedAction("eventView.entry.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
 	}
 
 	private void adjustToBrokenDirFileEvent(BrokenDirFileEvent bde) {
 		eventIcon.setValue(FontAwesome5Icon.TIMES);
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.brokenDirFile.message"));
 		eventDescription.setValue(bde.ciphertextPath().getParent().getFileName().toString());
-		if (revealService != null) {
-			addLocalizedAction("eventView.entry.brokenDirFile.showEncrypted", () -> reveal(revealService, bde.ciphertextPath()));
-		} else {
-			addLocalizedAction("eventView.entry.brokenDirFile.copyEncrypted", () -> copyToClipboard(bde.ciphertextPath().toString()));
-		}
+		addLocalizedAction("eventView.entry.brokenDirFile.showEncrypted", () -> reveal(revealService, bde.ciphertextPath()));
 	}
 
 	private void addLocalizedAction(String localizationKey, Runnable action) {
@@ -270,7 +243,7 @@ public class EventListCellController implements FxController {
 		}
 
 		var mountPoint = v.getMountPoint().uri().getPath();
-		if(SystemUtils.IS_OS_WINDOWS) {
+		if (SystemUtils.IS_OS_WINDOWS) {
 			mountPoint = mountPoint.substring(1); //strip away any leading "/", otherwise there are errors
 		}
 		return Path.of(mountPoint, vaultInternalPath.substring(1)); //vaultPaths are always absolute
