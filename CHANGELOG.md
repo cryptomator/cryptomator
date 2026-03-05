@@ -33,11 +33,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Update JavaFX to 25.0.2 ([#4145](https://github.com/cryptomator/cryptomator/pull/4145)))
 * Updated translations
 * Updated dependencies
-  * `ch.qos.logback:*` from 1.5.19 to 1.5.31
-  * `com.fasterxml.jackson.core:jackson-databind` from 2.20.0 to 2.21.0
-  * `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.20.0 to 2.21.0
+  * `ch.qos.logback:*` from 1.5.19 to 1.5.32
+  * `com.fasterxml.jackson.core:jackson-databind` from 2.20.0 to 2.21.1
+  * `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.20.0 to 2.21.1
   * `com.github.ben-manes.caffeine:caffeine` from 3.2.2 to 3.2.3
-  * `com.google.dagger:*` from 2.57.2 to 2.59.1
+  * `com.google.dagger:*` from 2.57.2 to 2.59.2
   * `org.apache.commons:commons-lang3` from 3.19.0 to 3.20.0
   * `org.cryptomator:cryptofs` from 2.9.0 to 2.10.0-beta3
   * `org.cryptomator:cryptolib` from 2.2.1 to 2.2.2
@@ -47,5 +47,4 @@ Changes to prior versions can be found on the [Github release page](https://gith
   * `org.cryptomator:integrations-mac` from 1.4.1 to 1.5.0-beta3
   * `org.cryptomator:integrations-win` from 1.5.1 to 1.6.0
   * `org.cryptomator:webdav-nio-adapter` from 3.0.0 to 3.0.1
-
 

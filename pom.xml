@@ -46,13 +46,13 @@
 		<!-- 3rd party dependencies -->
 		<caffeine.version>3.2.3</caffeine.version>
 		<commons-lang3.version>3.20.0</commons-lang3.version>
-		<dagger.version>2.59.1</dagger.version>
+		<dagger.version>2.59.2</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.21.0</jackson.version>
+		<jackson.version>2.21.1</jackson.version>
 		<javafx.version>25.0.2</javafx.version>
-		<jwt.version>4.5.0</jwt.version>
+		<jwt.version>4.5.1</jwt.version>
 		<nimbus-jose.version>10.5</nimbus-jose.version>
-		<logback.version>1.5.31</logback.version>
+		<logback.version>1.5.32</logback.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
@@ -63,7 +63,7 @@
 		<hamcrest.version>3.0</hamcrest.version>
 
 		<!-- build-time dependencies -->
-		<jetbrains.annotations.version>26.0.2-1</jetbrains.annotations.version>
+		<jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
 		<dependency-check.version>12.2.0</dependency-check.version>
 		<jacoco.version>0.8.14</jacoco.version>
 		<license-generator.version>2.7.1</license-generator.version>
