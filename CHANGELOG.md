@@ -20,6 +20,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Support automatic app theme selection according to OS theme on Linux ([#4027](https://github.com/cryptomator/cryptomator/issues/4027))
 * Admin configuration: Allow overwriting certain app properties by external config file ([#4105](https://github.com/cryptomator/cryptomator/pull/4105))
 * New keychain backend using [secret service API](https://specifications.freedesktop.org/secret-service/0.2) for Linux ([#4025](https://github.com/cryptomator/cryptomator/pull/4025))
+* Liquid Glass icon for macOS ([#4166](https://github.com/cryptomator/cryptomator/pull/4166))
 
 ### Fixed
 * Fixed password reset/show recovery possible for vaults without masterkey file ([#4120](https://github.com/cryptomator/cryptomator/pull/4120))
@@ -47,4 +48,5 @@ Changes to prior versions can be found on the [Github release page](https://gith
   * `org.cryptomator:integrations-mac` from 1.4.1 to 1.5.0-beta3
   * `org.cryptomator:integrations-win` from 1.5.1 to 1.6.0
   * `org.cryptomator:webdav-nio-adapter` from 3.0.0 to 3.0.1
+  * `org.cryptomator:webdav-nio-adapter-servlet` to 1.2.12
 
