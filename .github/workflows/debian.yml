@@ -71,11 +71,11 @@ jobs:
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
-          curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
           echo "${{ env.OPENJFX_JMODS_AMD64_HASH }}  openjfx-amd64.zip" | shasum -a256 --check
           mkdir -p jmods/amd64
           unzip -j openjfx-amd64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/amd64
-          curl -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
           echo "${{ env.OPENJFX_JMODS_AARCH64_HASH }}  openjfx-aarch64.zip" | shasum -a256 --check
           mkdir -p jmods/aarch64
           unzip -j openjfx-aarch64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/aarch64
@@ -143,7 +143,7 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
       - name: Upload artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: linux-deb-package
           path: |

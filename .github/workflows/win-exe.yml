@@ -72,7 +72,7 @@ jobs:
         if: matrix.arch == 'x64'
         #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
-          curl --output openjfx-jmods.zip -L "${{ env.OPENJFX_JMODS_AMD64 }}"
+          curl --silent --fail-with-body --proto "=https" -L "${{ env.OPENJFX_JMODS_AMD64 }}" --output openjfx-jmods.zip
           if(!(Get-FileHash -Path openjfx-jmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
             throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
           }
@@ -280,7 +280,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: msi-${{ matrix.arch }}
           path: |
@@ -311,7 +311,7 @@ jobs:
         env:
           WIX_VERSION: ${{ env.WIX_VERSION }}
       - name: Download .msi
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: msi-${{ matrix.arch }}
           path: dist/win/bundle/resources
@@ -338,7 +338,7 @@ jobs:
         shell: pwsh
       - name: Download WinFsp
         run: |
-          curl --output $env:WINFSP_PATH -L ${{ env.WINFSP_MSI }}
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.WINFSP_MSI }} --output $env:WINFSP_PATH
           $computedHash = (Get-FileHash -Path $env:WINFSP_PATH -Algorithm SHA256).Hash.ToLower()
           if ($computedHash -ne "${{ env.WINFSP_MSI_HASH }}") {
             throw "Checksum mismatch for $env:WINFSP_PATH (expected ${{ env.WINFSP_MSI_HASH }}, got $computedHash)."
@@ -348,7 +348,7 @@ jobs:
         shell: pwsh
       - name: Download Legacy-WinFsp uninstaller
         run: |
-          curl --output dist/win/bundle/resources/winfsp-uninstaller.exe -L ${{ env.WINFSP_UNINSTALLER }}
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.WINFSP_UNINSTALLER }} --output dist/win/bundle/resources/winfsp-uninstaller.exe
         shell: pwsh
       - name: Create Wix Burn bundle
         working-directory: dist/win
@@ -423,7 +423,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: exe-${{ matrix.executable-suffix }}
           path: |
@@ -441,7 +441,7 @@ jobs:
       download-url-exe-x64: ${{ fromJSON(steps.publish.outputs.assets)[2].browser_download_url }}
     steps:
       - name: Download installers
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           merge-multiple: true
       - name: Publish installers on GitHub Releases

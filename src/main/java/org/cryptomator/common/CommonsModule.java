@@ -22,8 +22,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Comparator;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -76,8 +74,8 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static Optional<RevealPathService> provideRevealPathService() {
-		return RevealPathService.get().findFirst();
+	static RevealPathService provideRevealPathService() {
+		return RevealPathService.get().findFirst().orElseThrow();
 	}
 
 

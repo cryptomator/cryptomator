@@ -1,17 +1,16 @@
 package org.cryptomator.ui.common;
 
-import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.mount.Mountpoint;
 import org.cryptomator.integrations.mount.UnmountFailedException;
+import org.cryptomator.integrations.revealpath.RevealFailedException;
+import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.application.Application;
-import javafx.application.HostServices;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -28,12 +27,12 @@ public class VaultService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultService.class);
 
-	private final Lazy<Application> application;
+	private final RevealPathService revealPathService;
 	private final ExecutorService executorService;
 
 	@Inject
-	public VaultService(Lazy<Application> application, ExecutorService executorService) {
-		this.application = application;
+	public VaultService(RevealPathService revealPathService, ExecutorService executorService) {
+		this.revealPathService = revealPathService;
 		this.executorService = executorService;
 	}
 
@@ -47,9 +46,9 @@ public class VaultService {
 	 * @param vault The vault to reveal
 	 */
 	public Task<Vault> createRevealTask(Vault vault) {
-		Task<Vault> task = new RevealVaultTask(vault, application.get().getHostServices());
-		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
-		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
+		Task<Vault> task = new RevealVaultTask(vault, revealPathService);
+		task.setOnSucceeded(_ -> LOG.info("Revealed {}", vault.getDisplayName()));
+		task.setOnFailed(evt -> LOG.warn("Failed to reveal {}", vault.getDisplayName(), evt.getSource().getException()));
 		return task;
 	}
 
@@ -110,19 +109,18 @@ public class VaultService {
 	private static class RevealVaultTask extends Task<Vault> {
 
 		private final Vault vault;
-		private final HostServices hostServices;
+		private final RevealPathService rs;
 
-		public RevealVaultTask(Vault vault, HostServices hostServices) {
+		public RevealVaultTask(Vault vault, RevealPathService revealPathService) {
 			this.vault = vault;
-			this.hostServices = hostServices;
-			setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), getException()));
+			this.rs = revealPathService;
 		}
 
 		@Override
-		protected Vault call() {
+		protected Vault call() throws RevealFailedException {
 			switch (vault.getMountPoint()) {
 				case null -> LOG.warn("Not currently mounted");
-				case Mountpoint.WithPath m -> hostServices.showDocument(m.uri().toString());
+				case Mountpoint.WithPath m -> rs.reveal(m.path());
 				case Mountpoint.WithUri m -> LOG.info("Vault mounted at {}", m.uri()); // TODO show in UI?
 			}
 			return vault;

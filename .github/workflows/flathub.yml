@@ -33,7 +33,7 @@ jobs:
       - name: Download source tarball and compute checksum
         id: sha512
         run: |
-          curl --silent --fail-with-body -L -H "Accept: application/vnd.github+json" ${{ steps.url.outputs.url }} --output cryptomator.tar.gz
+          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" ${{ steps.url.outputs.url }} --output cryptomator.tar.gz
           TARBALL_SHA512=$(sha512sum cryptomator.tar.gz | cut -d ' ' -f1)
           echo "sha512=${TARBALL_SHA512}" >> "$GITHUB_OUTPUT"
   flathub:

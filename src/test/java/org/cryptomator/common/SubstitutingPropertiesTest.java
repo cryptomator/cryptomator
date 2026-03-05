@@ -1,6 +1,7 @@
 package org.cryptomator.common;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,12 +9,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 
 import java.util.Map;
 import java.util.Properties;
 
 public class SubstitutingPropertiesTest {
 
+	Logger logger = Mockito.mock(Logger.class);
 	SubstitutingProperties inTest;
 
 	@Nested
@@ -28,7 +31,7 @@ public class SubstitutingPropertiesTest {
 				@{@{appdir}},@{foobar}
 				Replacing several @{appdir} with @{appdir}., Replacing several foobar with foobar.""")
 		public void test(String propertyValue, String expected) {
-			SubstitutingProperties inTest = new SubstitutingProperties(Mockito.mock(Properties.class), Map.of("APPDIR", "foobar"));
+			SubstitutingProperties inTest = new SubstitutingProperties(Mockito.mock(Properties.class), Map.of("APPDIR", "foobar"), logger);
 			var result = inTest.process(propertyValue);
 			Assertions.assertEquals(expected, result);
 		}
@@ -39,7 +42,7 @@ public class SubstitutingPropertiesTest {
 			var props = new Properties();
 			props.setProperty("user.home", "OneUponABit");
 
-			inTest = new SubstitutingProperties(props, Map.of());
+			inTest = new SubstitutingProperties(props, Map.of(), logger);
 			var result = inTest.process("@{userhome}");
 			Assertions.assertEquals("OneUponABit", result);
 		}
@@ -48,7 +51,7 @@ public class SubstitutingPropertiesTest {
 		@ParameterizedTest(name = "Token \"{0}\" replaced with content of {1}")
 		@CsvSource(value = {"appdir, APPDIR, foobar", "appdata, APPDATA, bazbaz", "localappdata, LOCALAPPDATA, boboAlice"})
 		public void testEnvSubstitutions(String token, String envName, String expected) {
-			inTest = new SubstitutingProperties(new Properties(), Map.of(envName, expected));
+			inTest = new SubstitutingProperties(new Properties(), Map.of(envName, expected), logger);
 			var result = inTest.process("@{" + token + "}");
 			Assertions.assertEquals(expected, result);
 		}
@@ -62,7 +65,7 @@ public class SubstitutingPropertiesTest {
 		@Test
 		@DisplayName("Undefined properties are not processed")
 		public void testNoProcessingOnNull() {
-			inTest = Mockito.spy(new SubstitutingProperties(new Properties(), Map.of()));
+			inTest = Mockito.spy(new SubstitutingProperties(new Properties(), Map.of(), logger));
 
 			var result = inTest.getProperty("some.prop");
 			Assertions.assertNull(result);
@@ -75,7 +78,7 @@ public class SubstitutingPropertiesTest {
 		public void testNoProcessingOnNotCryptomator(String propKey) {
 			var props = new Properties();
 			props.setProperty(propKey, "someValue");
-			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of()));
+			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of(), logger));
 
 			var result = inTest.getProperty("some.prop");
 			Assertions.assertNull(result);
@@ -87,7 +90,7 @@ public class SubstitutingPropertiesTest {
 		public void testProcessing() {
 			var props = new Properties();
 			props.setProperty("cryptomator.prop", "someValue");
-			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of()));
+			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of(), logger));
 			Mockito.doReturn("someValue").when(inTest).process(Mockito.anyString());
 
 			inTest.getProperty("cryptomator.prop");
@@ -99,7 +102,7 @@ public class SubstitutingPropertiesTest {
 		public void testNoProcessingDefault() {
 			var props = Mockito.mock(Properties.class);
 			Mockito.when(props.getProperty("cryptomator.prop")).thenReturn(null);
-			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of()));
+			inTest = Mockito.spy(new SubstitutingProperties(props, Map.of(), logger));
 			Mockito.doReturn("someValue").when(inTest).process(Mockito.anyString());
 
 			var result = inTest.getProperty("cryptomator.prop", "a default");
@@ -120,7 +123,7 @@ public class SubstitutingPropertiesTest {
 		var delegate = Mockito.mock(Properties.class);
 		Mockito.doReturn("/home").when(delegate).getProperty("user.home");
 		Mockito.doReturn(raw).when(delegate).getProperty(key);
-		var inTest = new SubstitutingProperties(delegate, Map.of());
+		var inTest = new SubstitutingProperties(delegate, Map.of(), logger);
 
 		var result = inTest.getProperty(key);
 
@@ -142,7 +145,7 @@ public class SubstitutingPropertiesTest {
 		var env = Map.of("APPDATA", "C:\\Users\\JimFang\\AppData\\Roaming", //
 				"LOCALAPPDATA", "C:\\Users\\JimFang\\AppData\\Local", //
 				"APPDIR", "/squashfs1337/usr");
-		var inTest = new SubstitutingProperties(delegate, env);
+		var inTest = new SubstitutingProperties(delegate, env, logger);
 
 		var result = inTest.getProperty(key);
 
