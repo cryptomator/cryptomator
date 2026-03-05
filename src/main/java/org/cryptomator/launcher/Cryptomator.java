@@ -36,7 +36,7 @@ public class Cryptomator {
 
 	static {
 		var adminProps = AdminPropertiesFactory.create();
-		var lazyProcessedProps = new SubstitutingProperties(adminProps, System.getenv());
+		var lazyProcessedProps = new SubstitutingProperties(adminProps, System.getenv(), EventualLogger.INSTANCE);
 		System.setProperties(lazyProcessedProps);
 		CRYPTOMATOR_COMPONENT = DaggerCryptomatorComponent.factory().create(STARTUP_TIME);
 		LOG = LoggerFactory.getLogger(Cryptomator.class);
