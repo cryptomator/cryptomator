@@ -33,7 +33,7 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.10.0-beta3</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.10.0</cryptomator.cryptofs.version>
 		<cryptomator.cryptolib.version>2.2.2</cryptomator.cryptolib.version>
 		<cryptomator.integrations.version>1.8.0-beta1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.6.0</cryptomator.integrations.win.version>
