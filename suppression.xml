@@ -99,5 +99,14 @@
 		<packageUrl regex="true">^pkg:maven/org\.purejava/flatpak-update-portal@.*$</packageUrl>
 		<cpe>cpe:/a:flatpak:flatpak</cpe>
 	</suppress>
+
+	<suppress>
+		<notes><![CDATA[
+		Jetty is used as a local server only.
+   ]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
+		<vulnerabilityName>CVE-2025-11143</vulnerabilityName>
+		<cve>CVE-2025-11143</cve>
+	</suppress>
 	
 </suppressions>
