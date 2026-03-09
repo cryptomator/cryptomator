@@ -7,7 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.18.0...HEAD)
+
+## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.0...HEAD)
+
+No changes yet.
+
+
+## [1.19.0](https://github.com/cryptomator/cryptomator/releases/tag/1.19.0) - 2026-03-09
 
 ### Added
 * Self-Update Mechanism ([#3948](https://github.com/cryptomator/cryptomator/pull/3948))
@@ -31,7 +37,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Disable user defined app start config on Windows ([#4132](https://github.com/cryptomator/cryptomator/issues/4132))
 * Disable plugin loading by default ([#4136](https://github.com/cryptomator/cryptomator/4136))
 * Use JDK 25 ([#4031](https://github.com/cryptomator/cryptomator/pull/4031))
-* Update JavaFX to 25.0.2 ([#4145](https://github.com/cryptomator/cryptomator/pull/4145)))
+* Update JavaFX to 25.0.2 ([#4145](https://github.com/cryptomator/cryptomator/pull/4145))
 * Updated translations
 * Updated dependencies
   * `ch.qos.logback:*` from 1.5.19 to 1.5.32
