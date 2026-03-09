@@ -34,20 +34,20 @@ if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
 }
 if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
 {
-   Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.0)'
+   Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.2)'
    exit 1
 }
 $wixExtensions = & wix.exe extension list --global | Out-String
 if ($wixExtensions -notmatch 'WixToolset.UI.wixext') {
-    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.0 --global)'
+    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.2 --global)'
     exit 1
 }
 if ($wixExtensions -notmatch 'WixToolset.Util.wixext') {
-    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.0 --global)'
+    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.2 --global)'
     exit 1
 }
 if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
-    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.0 --global)'
+    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.2 --global)'
     exit 1
 }
 
@@ -93,9 +93,9 @@ switch ($archName) {
         $jmodPaths = "$Env:JAVA_HOME/jmods"
     }
     'x64' {
-		$javaFxVersion='25'
+		$javaFxVersion='25.0.2'
 		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-		$javaFxJmodsSHA256 = 'c8eb9fd039b00e0020cf6c3db8ed7876bf3ee4d27860aa697a247b83b8296ae7'
+		$javaFxJmodsSHA256 = '33d878dfac85590c4d77c518ed413e512d34a8479d90132b230a7ddd173576b3'
 		$javaFxJmods = '.\resources\jfxJmods.zip'
 
 		if( !(Test-Path -Path $javaFxJmods) ) {
@@ -155,7 +155,7 @@ $javaOptions = @(
 "--java-options", "-Djava.net.useSystemProxies=true"
 "--java-options", "-Dcryptomator.logDir=`"@{localappdata}/$AppName`""
 "--java-options", "-XX:ErrorFile=`"C:/cryptomator/cryptomator_crash.log`""
-"--java-options", "-Dcryptomator.pluginDir=`"@{appdata}/$AppName/Plugins`""
+"--java-options", "-Dcryptomator.adminConfigPath=`"C:/ProgramData/$AppName/config.properties`""
 "--java-options", "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`""
 "--java-options", "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`""
 "--java-options", "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`""

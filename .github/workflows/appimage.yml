@@ -8,6 +8,10 @@ on:
       version:
         description: 'Version'
         required: false
+      create-pr:
+        description: 'Create a PR for aur-bin repo'
+        type: boolean
+        default: false
   push:
     branches-ignore:
       - 'dependabot/**'
@@ -19,7 +23,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '24.0.1+9'
+  JAVA_VERSION: '25.0.2+10.0.LTS'
 
 jobs:
   get-version:
@@ -31,22 +35,26 @@ jobs:
     name: Build AppImage
     runs-on: ${{ matrix.os }}
     needs: [get-version]
+    env:
+      SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+      SEMVER_NUM: ${{ needs.get-version.outputs.semVerNum }}
+      REV_NUM: ${{ needs.get-version.outputs.revNum }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
-            appimage-suffix: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-x64_bin-jmods.zip'
-            openjfx-sha: '96e520f48610d8ffb94ca30face1f11ffe8a977ddc1c4ff80b1a9e9f048bd94e'
+            arch: x86_64
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-x64_bin-jmods.zip'
+            openjfx-sha: 'e0a9c29d8cf3af9b8b48848b43f87b5785bc107c53a951b19668ce05842bba1b'
           - os: ubuntu-24.04-arm
-            appimage-suffix: aarch64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-aarch64_bin-jmods.zip'
-            openjfx-sha: '9ad4ca7b769ca4ee6419f1e99143dd6ff812f8be4fddb46a7d7cacbeea148af4'
+            arch: aarch64
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-aarch64_bin-jmods.zip'
+            openjfx-sha: 'c3408f818693cce09e59829a8e862a82c7695fdfcd585c41cfd527f5fc3fe646'
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup Java
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -55,7 +63,7 @@ jobs:
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
-          curl -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
           echo "${{ matrix.openjfx-sha }}  openjfx-jmods.zip" | shasum -a256 --check
           mkdir -p openjfx-jmods
           unzip -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
@@ -73,7 +81,7 @@ jobs:
             exit 1
           fi
       - name: Set version
-        run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
+        run : mvn versions:set -DnewVersion="$SEMVER_STR"
       - name: Run maven
         run: mvn -B clean package -Plinux -DskipTests
       - name: Patch target dir
@@ -94,13 +102,15 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
+          --module-path "${JMOD_PATHS}"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
           --strip-debug
           --compress zip-0
+        env:
+          JMOD_PATHS: ${{ steps.jep-493-check.outputs.jmod_paths }}
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -114,23 +124,23 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2025 Skymatic GmbH"
-          --app-version "${{  needs.get-version.outputs.semVerNum }}.${{  needs.get-version.outputs.revNum }}"
+          --app-version "${SEMVER_NUM}.${REV_NUM}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
-          --java-options "-Dcryptomator.appVersion=\"${{  needs.get-version.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\""
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Djava.net.useSystemProxies=true"
+          --java-options "-Dcryptomator.adminConfigPath=\"/etc/cryptomator/config.properties\""
           --java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\""
-          --java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\""
           --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json\""
           --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/.local/share/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\""
-          --java-options "-Dcryptomator.buildNumber=\"appimage-${{  needs.get-version.outputs.revNum }}\""
+          --java-options "-Dcryptomator.buildNumber=\"appimage-${REV_NUM}\""
           --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\""
           --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
           --resource-dir dist/linux/resources
@@ -155,7 +165,7 @@ jobs:
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
       - name: Download AppImageKit
         run: |
-          curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.appimage-suffix }}.AppImage -o appimagetool.AppImage
+          curl --silent --fail-with-body --proto "=https" -L "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.arch }}.AppImage" -o appimagetool.AppImage
           chmod +x appimagetool.AppImage
           ./appimagetool.AppImage --appimage-extract
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
@@ -167,17 +177,17 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Build AppImage
         run: >
-          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{  needs.get-version.outputs.semVerStr }}-${{ matrix.appimage-suffix }}.AppImage
-          -u "gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${{ matrix.appimage-suffix }}.AppImage.zsync"
+          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${SEMVER_STR}-${{ matrix.arch }}.AppImage
+          -u "gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-${{ matrix.arch }}.AppImage.zsync"
           --sign --sign-key=615D449FE6E6A235
       - name: Create detached GPG signatures
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage.zsync
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: appimage-${{ matrix.appimage-suffix }}
+          name: appimage-${{ matrix.arch }}
           path: |
             cryptomator-*.AppImage
             cryptomator-*.AppImage.zsync
@@ -185,7 +195,7 @@ jobs:
           if-no-files-found: error
       - name: Publish AppImage on GitHub Releases
         if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
@@ -196,65 +206,77 @@ jobs:
 
   create-aur-bin-pr:
     name: Create PR for aur-bin repo
-    needs: [build, get-version]
+    if:  github.event_name == 'workflow_dispatch' && inputs.create-pr || github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable'
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable'
+    needs: [build, get-version]
+    container:
+      image: archlinux:base-devel
+    env:
+      SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+      PKGDEST: ${{ github.workspace }}/pkgdest
+      SRCDEST: ${{ github.workspace }}/srcdest
     steps:
-      - name: Download AppImages
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        with:
-          path: downloads/
-          merge-multiple: true
-      - name: Compute sha256 hash of AppImages
-        id: checksums
+      - name: Prepare pacman
         run: |
-          X64_SHA256=$(sha256sum downloads/cryptomator-*-x86_64.AppImage | cut -d ' ' -f1)
-          echo "x64-sha256sum=${X64_SHA256}" >> "$GITHUB_OUTPUT"
-          AARCH64_SHA256=$(sha256sum downloads/cryptomator-*-aarch64.AppImage | cut -d ' ' -f1)
-          echo "aarch64-sha256sum=${AARCH64_SHA256}" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+          pacman-key --init
+          pacman-key --populate archlinux
+          pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip github-cli curl pacman-contrib
+      - name: Checkout cryptomator/aur-bin
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: 'cryptomator/aur-bin'
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
-      - name: Install dependencies
+      - name: Create build user
         run: |
-          sudo apt-get update
-          sudo apt-get -y install makepkg pacman-package-manager
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          install -d -m 0755 -o builder -g builder "$PKGDEST" "$SRCDEST"
+      - name: Import Cryptomator release signing key
+        # try first ubuntu. on failure try openpgp keyservers
+        run: >
+          sudo -u builder gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
+          || sudo -u builder gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
       - name: Checkout release branch
         run: |
-          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+          git config --global safe.directory '*'
+          git checkout -b "release/${SEMVER_STR}"
       - name: Update build file
         run: |
-          sed -i -e 's|^pkgver=.*$|pkgver=${{ needs.get-version.outputs.semVerStr }}|' PKGBUILD
+          sed -i -e "s|^pkgver=.*$|pkgver=${SEMVER_STR}|" PKGBUILD
           sed -i -e 's|^pkgrel=.*$|pkgrel=1|' PKGBUILD
-          sed -i -e "s|^sha256sums_x86_64=.*$|sha256sums_x86_64=('${{ steps.checksums.outputs.x64-sha256sum }}'|" PKGBUILD
-          sed -i -e "s|^sha256sums_aarch64=.*$|sha256sums_aarch64=('${{ steps.checksums.outputs.aarch64-sha256sum}}'|" PKGBUILD
-          makepkg --printsrcinfo > .SRCINFO
+          sudo -u builder updpkgsums
+          sudo -u builder makepkg --printsrcinfo > .SRCINFO
+      - name: Build package with makepkg
+        run: >
+          sudo -u builder
+          env PKGDEST="$PKGDEST" SRCDEST="$SRCDEST"
+          makepkg --syncdeps --cleanbuild --noconfirm --log
       - name: Commit and push
         run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git config user.name "cryptobot"
+          git config user.email "cryptobot@users.noreply.github.com"
           git config push.autoSetupRemote true
-          git stage .
-          git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
+          git stage PKGBUILD .SRCINFO
+          git commit -m "Prepare release ${SEMVER_STR}"
           git push
       - name: Create pull request
         id: create-pr
         run: |
-          printf "> [!IMPORTANT]\n> Todos:\n> - [ ] Update build instructions\n> - [ ] Check for JDK update\n> - [ ] Check for JFX update" > pr_body.md
-          URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
-          echo "PR_URL=$URL" >> "$GITHUB_OUTPUT"
+          printf "Created by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > pr_body.md
+          PR_URL=$(gh pr create --title "Release ${SEMVER_STR}" --body-file pr_body.md)
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'
           SLACK_ICON: false
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
-          SLACK_TITLE: "AUR-bin release PR for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
-          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.PR_URL }}|PR> on how to proceed."
+          SLACK_TITLE: "AUR-bin release PR for ${{ github.event.repository.name }} ${{ needs.get-version.outputs.semVerStr }} created."
+          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.url }}|PR> on how to proceed."
           SLACK_FOOTER: false
           MSG_MINIMAL: true

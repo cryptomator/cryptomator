@@ -82,13 +82,31 @@
 
 	<!-- Vulnerable, but unused class in jetty -->
 	<suppress>
-   		<notes><![CDATA[
+		<notes><![CDATA[
 			The project does not use the HttpURI class at all, so no decoded user data is passed to it.
 			See also https://github.com/jetty/jetty.project/security/advisories/GHSA-qh8g-58pp-2wxh.
 		]]></notes>
 		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>   	
-   		<vulnerabilityName>CVE-2024-6763</vulnerabilityName>
+		<vulnerabilityName>CVE-2024-6763</vulnerabilityName>
 		<cve>CVE-2024-6763</cve>
+	</suppress>
+
+	<!-- False positives of the flatpak sandbox -->
+	<suppress>
+		<notes><![CDATA[
+		file name: flatpak-update-portal-1.1.0.jar
+		]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.purejava/flatpak-update-portal@.*$</packageUrl>
+		<cpe>cpe:/a:flatpak:flatpak</cpe>
+	</suppress>
+
+	<suppress>
+		<notes><![CDATA[
+		Jetty is used as a local server only.
+   ]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
+		<vulnerabilityName>CVE-2025-11143</vulnerabilityName>
+		<cve>CVE-2025-11143</cve>
 	</suppress>
 	
 </suppressions>

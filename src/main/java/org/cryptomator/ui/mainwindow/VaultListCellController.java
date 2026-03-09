@@ -16,6 +16,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
+import java.util.ResourceBundle;
 
 // unscoped because each cell needs its own controller
 public class VaultListCellController implements FxController {
@@ -23,9 +24,12 @@ public class VaultListCellController implements FxController {
 	private static final Insets COMPACT_INSETS = new Insets(6, 12, 6, 12);
 	private static final Insets DEFAULT_INSETS = new Insets(12);
 
+	private final ResourceBundle resourceBundle;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
+	private final ObservableValue<VaultState.Value> vaultState;
 	private final ObservableValue<FontAwesome5Icon> glyph;
 	private final ObservableValue<Boolean> compactMode;
+	private final ObservableValue<String> accessibleText;
 
 	private AutoAnimator spinAnimation;
 
@@ -35,17 +39,21 @@ public class VaultListCellController implements FxController {
 	public HBox vaultListCell;
 
 	@Inject
-	VaultListCellController(Settings settings) {
-		this.glyph = vault.flatMap(Vault::stateProperty).map(this::getGlyphForVaultState);
+	VaultListCellController(Settings settings, ResourceBundle resourceBundle) {
+		this.resourceBundle = resourceBundle;
+		this.vaultState = vault.flatMap(Vault::stateProperty);
+		this.glyph = vaultState.map(this::getGlyphForVaultState);
+		this.accessibleText = vaultState.map(this::getAccessibleTextForVaultState);
 		this.compactMode = settings.compactMode;
 	}
 
 	public void initialize() {
 		this.spinAnimation = AutoAnimator.animate(Animations.createDiscrete360Rotation(vaultStateView)) //
-				.onCondition(vault.flatMap(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals).orElse(false)) //
+				.onCondition(vaultState.map(VaultState.Value.PROCESSING::equals).orElse(false)) //
 				.afterStop(() -> vaultStateView.setRotate(0)) //
 				.build();
 		this.vaultListCell.paddingProperty().bind(compactMode.map(c -> c ? COMPACT_INSETS : DEFAULT_INSETS));
+		this.vaultListCell.accessibleTextProperty().bind(accessibleText);
 	}
 
 	// TODO deduplicate w/ VaultDetailController
@@ -59,6 +67,25 @@ public class VaultListCellController implements FxController {
 			};
 		} else {
 			return FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+		}
+	}
+
+	private String getAccessibleTextForVaultState(VaultState.Value state) {
+		var v = vault.get();
+		if (state != null && v != null) {
+			var translationKey = switch (state) {
+				case LOCKED -> "vault.state.locked";
+				case PROCESSING -> "vault.state.processing";
+				case UNLOCKED -> "vault.state.unlocked";
+				case NEEDS_MIGRATION -> "vault.state.migrationNeeded";
+				case MISSING -> "vault.state.missing";
+				case VAULT_CONFIG_MISSING, ALL_MISSING, ERROR -> "vault.state.error";
+			};
+
+			var localizedState = resourceBundle.getString(translationKey);
+			return resourceBundle.getString("main.vaultlist.listEntry").formatted(v.getDisplayName(), localizedState);
+		} else {
+			return "";
 		}
 	}
 

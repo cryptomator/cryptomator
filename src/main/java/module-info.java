@@ -1,5 +1,4 @@
 import ch.qos.logback.classic.spi.Configurator;
-import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
 import org.cryptomator.common.locationpresets.DropboxLinuxLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.DropboxWindowsLocationPresetsProvider;
@@ -14,11 +13,16 @@ import org.cryptomator.common.locationpresets.OneDriveLinuxLocationPresetsProvid
 import org.cryptomator.common.locationpresets.OneDriveMacLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.OneDriveWindowsLocationPresetsProvider;
 import org.cryptomator.common.locationpresets.PCloudLocationPresetsProvider;
-import org.cryptomator.networking.SSLContextWithMacKeychain;
-import org.cryptomator.networking.SSLContextProvider;
-import org.cryptomator.networking.SSLContextWithWindowsCertStore;
+import org.cryptomator.integrations.revealpath.RevealPathService;
 import org.cryptomator.integrations.tray.TrayMenuController;
+import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.logging.LogbackConfiguratorFactory;
+import org.cryptomator.networking.SSLContextProvider;
+import org.cryptomator.networking.SSLContextWithMacKeychain;
+import org.cryptomator.networking.SSLContextWithPKCS12TrustStore;
+import org.cryptomator.networking.SSLContextWithWindowsCertStore;
+import org.cryptomator.ui.fxapp.JfxRevealPathService;
+import org.cryptomator.ui.fxapp.JfxUiAppearanceProvider;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 open module org.cryptomator.desktop {
@@ -50,17 +54,19 @@ open module org.cryptomator.desktop {
 	requires io.github.coffeelibs.tinyoauth2client;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
+	requires com.github.benmanes.caffeine;
 
 	/* dagger bs */
 	requires jakarta.inject;
 	requires static javax.inject;
 	requires java.compiler;
-	requires com.github.benmanes.caffeine;
 
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
 	uses SSLContextProvider;
 	uses org.cryptomator.event.NotificationHandler;
 
+	provides UiAppearanceProvider with JfxUiAppearanceProvider;
+	provides RevealPathService with JfxRevealPathService;
 	provides TrayMenuController with AwtTrayMenuController;
 	provides Configurator with LogbackConfiguratorFactory;
 	provides SSLContextProvider with SSLContextWithWindowsCertStore, SSLContextWithMacKeychain, SSLContextWithPKCS12TrustStore;

@@ -11,7 +11,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: 24
+  JAVA_VERSION: 25
 
 defaults:
   run:
@@ -22,14 +22,14 @@ jobs:
     name: Compile and Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
       - name: Cache SonarCloud packages
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
@@ -49,28 +49,28 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Draft a release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           draft: true
           discussion_category_name: releases
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           generate_release_notes: true
           body: |-
-            :construction: Work in Progress
+            > [!NOTE]
+            > 🚧 Work in Progress 🚧
+            >
+            > Please be patient, the [builds are still running](https://github.com/cryptomator/cryptomator/actions). Binary packages can be found here in a few moments.   
+            
+            <!--REPLACE with auto-generated release notes (see below)
             ### What's New 🎉
-            
             ### Bugfixes 🐛
-            
             ### Other Changes 📎
+            END REPLACE-->
+            
+            For a comprehensive view of changes, read the [CHANGELOG](https://github.com/cryptomator/cryptomator/blob/develop/CHANGELOG.md).
             
             ---
             
-            TODO FULL CHANGELOG
-            
-            📜 List of closed issues is available [here](TODO)
-            
-            ---
-            ⏳ Please be patient, the builds are still [running](https://github.com/cryptomator/cryptomator/actions). New versions of Cryptomator can be found here in a few moments. ⏳
             
             <!-- Don't forget to include the
             💾 SHA-256 checksums of release artifacts:
@@ -78,4 +78,9 @@ jobs:
             ```
             -->
             
-            As usual, the GPG signatures can be checked using [our public key `5811 7AFA 1F85 B3EE C154  677D 615D 449F E6E6 A235`](https://gist.github.com/cryptobot/211111cf092037490275f39d408f461a).
+            > [!TIP]
+            > You can verify the GPG signature of all assets using our public key: [`5811 7AFA 1F85 B3EE C154  677D 615D 449F E6E6 A235`](https://gist.github.com/cryptobot/211111cf092037490275f39d408f461a).
+            
+            
+            
+            <!-- Auto-Generated Release Notes: -->

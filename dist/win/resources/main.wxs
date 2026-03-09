@@ -87,16 +87,36 @@
 
     <!-- Non-Opening ProgID -->
     <ns0:DirectoryRef Id="INSTALLDIR">
-        <ns0:Component Bitness="always64" Id="nonStartingProgID" >
+        <ns0:Component Bitness="always64" Id="nonStartingProgID">
           <ns0:File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileEncryptedData)" Name="$(var.IconFileEncryptedData)"/>
           <ns0:ProgId Id="$(var.JpAppName).Encrypted.1" Description="$(var.JpAppName) Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
             <ns0:Extension Id="c9r" Advertise="no" ContentType="$(var.ProgIdContentType)">
               <ns0:MIME ContentType="$(var.ProgIdContentType)" Default="yes"/>
             </ns0:Extension>
             <ns0:Extension Id="c9s" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
+            <ns0:Extension Id="c9u" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
           </ns0:ProgId>
         </ns0:Component>
     </ns0:DirectoryRef>
+
+    <ns0:StandardDirectory Id="CommonAppDataFolder">
+      <ns0:Directory Id="CryptomatorDesktopProgramData" Name="Cryptomator">
+        <ns0:Component Id="AdminConfigDir" Guid="c078b7da-ba6e-4069-a5ab-5c0f0f9856a0">
+          <ns0:CreateFolder>
+            <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
+            <util:PermissionEx User="Administrators" GenericAll="yes"/>
+            <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
+          </ns0:CreateFolder>
+        </ns0:Component>
+        <ns0:Component Id="AdminConfigFile" NeverOverwrite="yes" Permanent="yes">
+          <ns0:File Id="EmptyAdminConfig" Source="$(env.JP_WIXWIZARD_RESOURCES)\..\..\common\config.properties" Name="config.properties" KeyPath="yes">
+            <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
+            <util:PermissionEx User="Administrators" GenericAll="yes"/>
+            <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
+          </ns0:File>
+        </ns0:Component>
+      </ns0:Directory>
+    </ns0:StandardDirectory>
 
     <!-- Standard required root -->
 
@@ -105,7 +125,9 @@
       <ns0:ComponentGroupRef Id="Files"/>
       <ns0:ComponentGroupRef Id="FileAssociations"/>
       <!-- Ref to additional ProgIDs -->
-      <ns0:ComponentRef Id="nonStartingProgID" />
+      <ns0:ComponentRef Id="nonStartingProgID"/>
+      <ns0:ComponentRef Id="AdminConfigDir"/>
+      <ns0:ComponentRef Id="AdminConfigFile"/>
     </ns0:Feature>
 
     <ns0:CustomAction Id="JpSetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
@@ -130,6 +152,10 @@
 
     <!-- Property for controlling update check behavior (can be set via command line) -->
     <ns0:Property Id="DISABLEUPDATECHECK" Secure="yes" />
+
+    <!-- Disable user config -->
+    <ns0:SetProperty Id="DisableUserConfig" Value="&quot;[INSTALLDIR]disableUserConfig.bat&quot;" Sequence="execute" Before="DisableUserConfig" />
+    <ns0:CustomAction Id="DisableUserConfig" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
 
     <!-- WebDAV patches -->
     <ns0:SetProperty Id="PatchWebDAV" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot; &quot;$(var.LoopbackAlias)&quot;" Sequence="execute" Before="PatchWebDAV" />
@@ -187,9 +213,10 @@
       <ns0:Custom Action="FailOnRunningApp" After="Wix4CloseApplications_$(sys.BUILDARCHSHORT)" Condition="FOUNDRUNNINGAPP" />
 
       <ns0:RemoveExistingProducts After="InstallValidate"/> <!-- Moved from CostInitialize, due to Wix4CloseApplications_* -->
+      <ns0:Custom Action="DisableUserConfig" After="InstallFiles" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
       <!-- Skip action on uninstall -->
       <!-- TODO: don't skip action, but remove cryptomator alias from hosts file -->
-      <ns0:Custom Action="PatchWebDAV" After="InstallFiles" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
+      <ns0:Custom Action="PatchWebDAV" After="DisableUserConfig" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
       <!-- Configure update check setting if property is provided -->
       <ns0:Custom Action="PatchUpdateCheck" After="PatchWebDAV" Condition="DISABLEUPDATECHECK AND NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
     </ns0:InstallExecuteSequence>

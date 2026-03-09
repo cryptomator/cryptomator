@@ -12,6 +12,8 @@
   <string>Cryptomator</string>
   <key>CFBundleIconFile</key>
   <string>Cryptomator.icns</string>
+  <key>CFBundleIconName</key>
+  <string>Cryptomator</string>
   <key>CFBundleIdentifier</key>
   <string>org.cryptomator</string>
   <key>CFBundleInfoDictionaryVersion</key>
@@ -105,6 +107,7 @@
         <array>
           <string>c9r</string>
           <string>c9s</string>
+          <string>c9u</string>
         </array>
         <key>public.mime-type</key>
         <array>
@@ -116,8 +119,5 @@
   <!-- allow utilization of integrated GPU, see https://developer.apple.com/library/mac/qa/qa1734/_index.html -->
   <key>NSSupportsAutomaticGraphicsSwitching</key>
   <true/>
-  <!-- register dock tile plugin -->
-  <key>NSDockTilePlugIn</key>
-  <string>Cryptomator.docktileplugin</string>
 </dict>
 </plist>

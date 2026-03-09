@@ -21,7 +21,8 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.sharevault.ShareVaultController"
 	  prefWidth="540"
-	  spacing="12">
+	  spacing="12"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
@@ -68,7 +69,7 @@
 			<TextFlow styleClass="text-flow">
 				<Text text="%shareVault.remarkBestPractices"/>
 				<Text text=" "/>
-				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices">
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#visitBestPractices" accessibleText="%shareVault.docsTooltip">
 					<graphic>
 						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 					</graphic>

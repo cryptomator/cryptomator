@@ -1,7 +1,7 @@
 package org.cryptomator.common;
 
 import org.jetbrains.annotations.VisibleForTesting;
-import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.Map;
 import java.util.Properties;
@@ -13,10 +13,12 @@ public class SubstitutingProperties extends PropertiesDecorator {
 	private static final Pattern TEMPLATE = Pattern.compile("@\\{(\\w+)}");
 
 	private final Map<String, String> env;
+	private final Logger logger;
 
-	public SubstitutingProperties(Properties props, Map<String, String> systemEnvironment) {
+	public SubstitutingProperties(Properties props, Map<String, String> systemEnvironment, Logger logger) {
 		super(props);
 		this.env = systemEnvironment;
+		this.logger = logger;
 	}
 
 	@Override
@@ -44,7 +46,7 @@ public class SubstitutingProperties extends PropertiesDecorator {
 					case "localappdata" -> resolveFrom("LOCALAPPDATA", Source.ENV);
 					case "userhome" -> resolveFrom("user.home", Source.PROPS);
 					default -> {
-						LoggerFactory.getLogger(SubstitutingProperties.class).warn("Unknown variable {} in property value {}.", match.group(), value);
+						logger.warn("Unknown variable {} in property value {}.", match.group(), value);
 						yield match.group();
 					}
 				});
@@ -56,7 +58,7 @@ public class SubstitutingProperties extends PropertiesDecorator {
 			case PROPS -> delegate.getProperty(key);
 		};
 		if (val == null) {
-			LoggerFactory.getLogger(SubstitutingProperties.class).warn("Variable {} used for substitution not found in {}. Replaced with empty string.", key, src);
+			logger.warn("Variable {} used for substitution not found in {}. Replaced with empty string.", key, src);
 			return "";
 		} else {
 			return Matcher.quoteReplacement(val);

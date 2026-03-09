@@ -26,6 +26,6 @@
 			</VBox>
 		</HBox>
 
-		<TextArea text="${controller.thirdPartyLicenseText}" editable="false"/>
+		<TextArea text="${controller.thirdPartyLicenseText}" editable="false" accessibleText="%preferences.about.thirdPartyLicenses"/>
 	</children>
 </VBox>

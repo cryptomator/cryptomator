@@ -7,12 +7,14 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.decryptname.DecryptNameComponent;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
+import org.cryptomator.ui.notification.NotificationComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
@@ -25,8 +27,9 @@ import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, //
+@Module(subcomponents = {TrayMenuComponent.class, //
 		DecryptNameComponent.class, //
 		MainWindowComponent.class, //
 		PreferencesComponent.class, //
@@ -39,13 +42,20 @@ import java.io.InputStream;
 		UpdateReminderComponent.class, //
 		ShareVaultComponent.class, //
 		EventViewComponent.class, //
-		RecoveryKeyComponent.class})
+		RecoveryKeyComponent.class, //
+		NotificationComponent.class})
 abstract class FxApplicationModule {
 
 	private static Image createImageFromResource(String resourceName) throws IOException {
 		try (InputStream in = FxApplicationModule.class.getResourceAsStream(resourceName)) {
 			return new Image(in);
 		}
+	}
+
+	@Provides
+	@FxApplicationScoped
+	static Optional<UiAppearanceProvider> provideAppearanceProvider() {
+		return UiAppearanceProvider.get();
 	}
 
 	@Provides
@@ -75,6 +85,12 @@ abstract class FxApplicationModule {
 	@Provides
 	@FxApplicationScoped
 	static EventViewComponent provideEventViewComponent(EventViewComponent.Factory factory) {
+		return factory.create();
+	}
+
+	@Provides
+	@FxApplicationScoped
+	static NotificationComponent provideNotificationComponent(NotificationComponent.Factory factory) {
 		return factory.create();
 	}
 

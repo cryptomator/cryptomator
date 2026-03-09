@@ -56,7 +56,7 @@ public class InterfacePreferencesController implements FxController {
 
 	@FXML
 	public void initialize() {
-		themeChoiceBox.getItems().addAll(UiTheme.applicableValues());
+		themeChoiceBox.getItems().addAll(UiTheme.values());
 		if (!themeChoiceBox.getItems().contains(settings.theme.get())) {
 			settings.theme.set(UiTheme.LIGHT);
 		}

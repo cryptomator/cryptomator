@@ -4,11 +4,12 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-JAVA_HOME = /usr/lib/jvm/java-24-coffeelibs
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DEB_BUILD_ARCH),amd64)
+JAVA_HOME = /usr/lib/jvm/java-25-openjdk-amd64
 JMODS_PATH = jmods/amd64:${JAVA_HOME}/jmods
 else ifeq ($(DEB_BUILD_ARCH),arm64)
+JAVA_HOME = /usr/lib/jvm/java-25-openjdk-arm64
 JMODS_PATH = jmods/aarch64:${JAVA_HOME}/jmods
 endif
 
@@ -50,8 +51,8 @@ override_dh_auto_build:
 		--java-options "-Xmx256m" \
 		--java-options "-Dfile.encoding=\"utf-8\"" \
 		--java-options "-Djava.net.useSystemProxies=true" \
+		--java-options "-Dcryptomator.adminConfigPath=\"/etc/cryptomator/config.properties\"" \
 		--java-options "-Dcryptomator.logDir=\"@{userhome}/.local/share/Cryptomator/logs\"" \
-		--java-options "-Dcryptomator.pluginDir=\"@{userhome}/.local/share/Cryptomator/plugins\"" \
 		--java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:@{userhome}/.Cryptomator/settings.json\"" \
 		--java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
 		--java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \

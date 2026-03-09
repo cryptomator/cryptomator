@@ -23,13 +23,12 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '24.0.1+9'
-  COFFEELIBS_JDK: 24
-  COFFEELIBS_JDK_VERSION: '24.0.1+9-0ppa3'
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '96e520f48610d8ffb94ca30face1f11ffe8a977ddc1c4ff80b1a9e9f048bd94e'
-  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_linux-aarch64_bin-jmods.zip'
-  OPENJFX_JMODS_AARCH64_HASH: '9ad4ca7b769ca4ee6419f1e99143dd6ff812f8be4fddb46a7d7cacbeea148af4'
+  JAVA_VERSION: '25.0.2+10.0.LTS'
+  DEB_BUILD_DEPENDS: 'debhelper (>=10), openjdk-25-jdk (>= 25+36), libgtk-3-0 (>= 3.20.0), libxxf86vm1, libgl1'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: 'e0a9c29d8cf3af9b8b48848b43f87b5785bc107c53a951b19668ce05842bba1b'
+  OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-aarch64_bin-jmods.zip'
+  OPENJFX_JMODS_AARCH64_HASH: 'c3408f818693cce09e59829a8e862a82c7695fdfcd585c41cfd527f5fc3fe646'
 
 jobs:
   get-version:
@@ -44,7 +43,7 @@ jobs:
     env:
       INPUT_PPAVER: ${{ inputs.ppaver }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: deb-version
         name: Determine deb-version
         run: |
@@ -55,11 +54,13 @@ jobs:
           fi
       - name: Install build tools
         run: |
-          sudo add-apt-repository ppa:coffeelibs/openjdk
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dput coffeelibs-jdk-${{ env.COFFEELIBS_JDK }}=${{ env.COFFEELIBS_JDK_VERSION }}
+          sudo apt-get install devscripts dput
+          sudo apt-get satisfy "${DEB_BUILD_DEPENDS}"
+        env:
+          DEB_BUILD_DEPENDS: ${{ env.DEB_BUILD_DEPENDS }}
       - name: Setup Java
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -70,11 +71,11 @@ jobs:
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
-          curl -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.OPENJFX_JMODS_AMD64 }} -o openjfx-amd64.zip
           echo "${{ env.OPENJFX_JMODS_AMD64_HASH }}  openjfx-amd64.zip" | shasum -a256 --check
           mkdir -p jmods/amd64
           unzip -j openjfx-amd64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/amd64
-          curl -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.OPENJFX_JMODS_AARCH64 }} -o openjfx-aarch64.zip
           echo "${{ env.OPENJFX_JMODS_AARCH64_HASH }}  openjfx-aarch64.zip" | shasum -a256 --check
           mkdir -p jmods/aarch64
           unzip -j openjfx-aarch64.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods/aarch64
@@ -142,7 +143,7 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: linux-deb-package
           path: |

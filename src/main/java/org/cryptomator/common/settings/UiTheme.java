@@ -10,14 +10,6 @@ public enum UiTheme {
 	DARK("preferences.interface.theme.dark"), //
 	AUTOMATIC("preferences.interface.theme.automatic");
 
-	public static UiTheme[] applicableValues() {
-		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) {
-			return values();
-		} else {
-			return new UiTheme[]{LIGHT, DARK};
-		}
-	}
-
 	private final String displayName;
 
 	UiTheme(String displayName) {

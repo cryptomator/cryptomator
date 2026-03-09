@@ -22,7 +22,8 @@
 	  maxWidth="400"
 	  minHeight="145"
 	  spacing="12"
-	  alignment="TOP_CENTER">
+	  alignment="TOP_CENTER"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
@@ -48,7 +49,7 @@
 			<HBox spacing="2" HBox.hgrow="NEVER">
 				<Label text="%addvaultwizard.new.expertSettings.shorteningThreshold.title"/>
 				<Region prefWidth="2"/>
-				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs">
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" accessibleText="%addvaultwizard.new.expertSettings.shorteningThreshold.tooltip">
 					<graphic>
 						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
 					</graphic>
@@ -57,7 +58,7 @@
 					</tooltip>
 				</Hyperlink>
 			</HBox>
-			<Label text="%recover.expertSettings.shorteningThreshold.title" wrapText="true"/>
+			<Label text="%recover.expertSettings.shorteningThreshold.title" wrapText="true" labelFor="$shorteningThresholdTextField"/>
 			<NumericTextField fx:id="shorteningThresholdTextField"/>
 			<HBox alignment="TOP_RIGHT">
 				<Region minWidth="4" prefWidth="4" HBox.hgrow="NEVER"/>

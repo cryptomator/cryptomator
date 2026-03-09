@@ -22,7 +22,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '24.0.1+9'
+  JAVA_VERSION: '25.0.2+10.0.LTS'
 
 jobs:
   get-version:
@@ -42,12 +42,12 @@ jobs:
           architecture: aarch64
           output-suffix: arm64
           fuse-lib: FUSE-T
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/25/openjfx-25_osx-aarch64_bin-jmods.zip'
-          openjfx-sha: '13f8c0513c40c95881479fbcf0465a29a60217393fb0656f5e4eab78a9442fba'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_osx-aarch64_bin-jmods.zip'
+          openjfx-sha: '4cd258001c75af7047005c5c891e2400ed11d24fbb09412324c0cbaf8b503c5a'
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup Java
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -57,7 +57,7 @@ jobs:
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
-          curl -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
+          curl --silent --fail-with-body --proto "=https" -L ${{ matrix.openjfx-url }} -o openjfx-jmods.zip
           echo "${{ matrix.openjfx-sha }} *openjfx-jmods.zip" | shasum -a256 --check
           mkdir -p openjfx-jmods/
           unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d openjfx-jmods
@@ -126,14 +126,15 @@ jobs:
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\""
           --java-options "-Dcryptomator.logDir=\"@{userhome}/Library/Logs/Cryptomator\""
-          --java-options "-Dcryptomator.pluginDir=\"@{userhome}/Library/Application Support/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"@{userhome}/Library/Application Support/Cryptomator/settings.json\""
           --java-options "-Dcryptomator.p12Path=\"@{userhome}/Library/Application Support/Cryptomator/key.p12\""
           --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/Library/Application Support/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.integrationsMac.keychainServiceName=\"Cryptomator\""
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
+          --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
           --mac-package-identifier org.cryptomator
@@ -142,6 +143,7 @@ jobs:
         run: |
           mv appdir/Cryptomator.app Cryptomator.app
           mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
+          cp dist/mac/resources/Assets.car Cryptomator.app/Contents/Resources/
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output Cryptomator.app/Contents/embedded.provisionprofile
@@ -149,20 +151,6 @@ jobs:
           VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NO: ${{ needs.get-version.outputs.revNum }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
-      - name: Build and install DockTilePlugin
-        env:
-          DERIVED_DATA_PATH: dist/mac/DockTilePlugin/build
-        run: |
-          xcodebuild -project dist/mac/DockTilePlugin/DockTilePlugin.xcodeproj \
-                     -scheme DockTilePlugin \
-                     -configuration Release \
-                     -destination "platform=macOS,arch=arm64" \
-                     -derivedDataPath ${DERIVED_DATA_PATH} \
-                     -quiet \
-                     clean build
-          mkdir -p Cryptomator.app/Contents/PlugIns
-          cp -R ${DERIVED_DATA_PATH}/Build/Products/Release/Cryptomator.docktileplugin Cryptomator.app/Contents/PlugIns/
-          rm -rf ${DERIVED_DATA_PATH}
       - name: Generate license for dmg
         run: >
           mvn -B license:add-third-party
@@ -281,7 +269,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: dmg-${{ matrix.output-suffix }}
           path: |
@@ -290,7 +278,7 @@ jobs:
           if-no-files-found: error
       - name: Publish dmg on GitHub Releases
         if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}

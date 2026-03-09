@@ -3,6 +3,8 @@ package org.cryptomator.ui.fxapp;
 import org.cryptomator.event.FSEventBucket;
 import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.event.FileSystemEventAggregator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
@@ -11,6 +13,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +25,8 @@ import java.util.concurrent.TimeUnit;
  */
 @FxApplicationScoped
 public class FxFSEventList {
+
+	private static final Logger LOG = LoggerFactory.getLogger(FxFSEventList.class);
 
 	private final ObservableList<Map.Entry<FSEventBucket, FSEventBucketContent>> events;
 	private final FileSystemEventAggregator eventAggregator;
@@ -37,7 +42,13 @@ public class FxFSEventList {
 	}
 
 	public void schedulePollForUpdates() {
-		scheduler.schedule(this::checkForEventUpdates, 1000, TimeUnit.MILLISECONDS);
+		try {
+			scheduler.schedule(this::checkForEventUpdates, 1000, TimeUnit.MILLISECONDS);
+		} catch ( RejectedExecutionException e) {
+			if(!scheduler.isShutdown()) {
+				LOG.warn("Failed to poll for filesystem events", e);
+			}
+		}
 	}
 
 	/**

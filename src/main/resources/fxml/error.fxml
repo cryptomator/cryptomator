@@ -22,7 +22,8 @@
 	  minHeight="450"
 	  prefWidth="450"
 	  prefHeight="450"
-	  spacing="12">
+	  spacing="12"
+	  accessibleRole="DIALOG">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
@@ -79,7 +80,7 @@
 			<padding>
 				<Insets top="6" bottom="6"/>
 			</padding>
-			<Label text="%error.technicalDetails"/>
+			<Label text="%error.technicalDetails" labelFor="$detailsTextArea"/>
 			<Region HBox.hgrow="ALWAYS"/>
 			<Hyperlink styleClass="hyperlink-underline" text="%generic.button.copy" onAction="#copyDetails" contentDisplay="LEFT" visible="${!controller.copiedDetails}" managed="${!controller.copiedDetails}">
 				<graphic>
@@ -92,7 +93,7 @@
 				</graphic>
 			</Hyperlink>
 		</HBox>
-		<TextArea VBox.vgrow="ALWAYS" text="${controller.detailText}" prefRowCount="5" editable="false"/>
+		<TextArea fx:id="detailsTextArea" VBox.vgrow="ALWAYS" text="${controller.detailText}" prefRowCount="5" editable="false"/>
 
 		<Region minHeight="18"/>
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+C">

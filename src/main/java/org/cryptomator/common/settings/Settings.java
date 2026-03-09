@@ -25,10 +25,8 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
-
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.function.Consumer;
 
 public class Settings {
 
@@ -53,6 +51,7 @@ public class Settings {
 	static final String DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT.name();
 	public static final Instant DEFAULT_TIMESTAMP = Instant.parse("2000-01-01T00:00:00Z");
 
+	private final SettingsProvider provider;
 	public final ObservableList<VaultSettings> directories;
 	public final BooleanProperty startHidden;
 	public final BooleanProperty autoCloseVaults;
@@ -78,13 +77,12 @@ public class Settings {
 	public final ObjectProperty<Instant> lastUpdateCheckReminder;
 	public final ObjectProperty<Instant> lastSuccessfulUpdateCheck;
 	public final ObjectProperty<Path> previouslyUsedVaultDirectory;
+	public final StringProperty lastUpdateAttemptedByVersion;
 
-	private Consumer<Settings> saveCmd;
-
-	public static Settings create(Environment env) {
+	public static Settings create(SettingsProvider provider, Environment env) {
 		var defaults = new SettingsJson();
 		defaults.showTrayIcon = env.showTrayIcon();
-		return new Settings(defaults);
+		return new Settings(provider, defaults);
 	}
 
 	/**
@@ -92,7 +90,8 @@ public class Settings {
 	 *
 	 * @param json The parsed settings.json
 	 */
-	Settings(SettingsJson json) {
+	Settings(SettingsProvider provider, SettingsJson json) {
+		this.provider = provider;
 		this.directories = FXCollections.observableArrayList(VaultSettings::observables);
 		this.startHidden = new SimpleBooleanProperty(this, "startHidden", json.startHidden);
 		this.autoCloseVaults = new SimpleBooleanProperty(this, "autoCloseVaults", json.autoCloseVaults);
@@ -118,6 +117,7 @@ public class Settings {
 		this.lastUpdateCheckReminder = new SimpleObjectProperty<>(this, "lastUpdateCheckReminder", json.lastReminderForUpdateCheck);
 		this.lastSuccessfulUpdateCheck = new SimpleObjectProperty<>(this, "lastSuccessfulUpdateCheck", json.lastSuccessfulUpdateCheck);
 		this.previouslyUsedVaultDirectory = new SimpleObjectProperty<>(this, "previouslyUsedVaultDirectory", json.previouslyUsedVaultDirectory);
+		this.lastUpdateAttemptedByVersion = new SimpleStringProperty(this, "lastUpdateAttemptedByVersion", json.lastUpdateAttemptedByVersion);
 
 		this.directories.addAll(json.directories.stream().map(VaultSettings::new).toList());
 
@@ -148,15 +148,11 @@ public class Settings {
 		lastUpdateCheckReminder.addListener(this::somethingChanged);
 		lastSuccessfulUpdateCheck.addListener(this::somethingChanged);
 		previouslyUsedVaultDirectory.addListener(this::somethingChanged);
+		lastUpdateAttemptedByVersion.addListener(this::somethingChanged);
 	}
 
 	@SuppressWarnings("deprecation")
 	private void migrateLegacySettings(SettingsJson json) {
-		// migrate renamed keychainAccess
-		if(this.keychainProvider.getValueSafe().equals("org.cryptomator.linux.keychain.SecretServiceKeychainAccess")) {
-			this.keychainProvider.setValue("org.cryptomator.linux.keychain.GnomeKeyringKeychainAccess");
-		}
-
 		// implicit migration of 1.6.x legacy setting "preferredVolumeImpl":
 		if (this.mountService.get() == null && json.preferredVolumeImpl != null) {
 			this.mountService.set(switch (json.preferredVolumeImpl) {
@@ -210,6 +206,7 @@ public class Settings {
 		json.lastReminderForUpdateCheck = lastUpdateCheckReminder.get();
 		json.lastSuccessfulUpdateCheck = lastSuccessfulUpdateCheck.get();
 		json.previouslyUsedVaultDirectory = previouslyUsedVaultDirectory.get();
+		json.lastUpdateAttemptedByVersion = lastUpdateAttemptedByVersion.get();
 		return json;
 	}
 
@@ -222,20 +219,12 @@ public class Settings {
 		}
 	}
 
-
-	// TODO rename to setChangeListener
-	void setSaveCmd(Consumer<Settings> saveCmd) {
-		this.saveCmd = saveCmd;
-	}
-
 	private void somethingChanged(@SuppressWarnings("unused") Observable observable) {
-		this.save();
+		provider.scheduleSave(this);
 	}
 
-	void save() {
-		if (saveCmd != null) {
-			saveCmd.accept(this);
-		}
+	public void saveNow() {
+		provider.saveNow(this);
 	}
 
 }

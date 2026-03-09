@@ -117,14 +117,46 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	@FXML
 	public void next() {
 		switch (recoverType.get()) {
-			case RESTORE_ALL -> restorePassword();
+			case RESTORE_ALL -> restorePasswordAsync();
 			case RESTORE_MASTERKEY, RESET_PASSWORD -> resetPassword();
 			default -> resetPassword(); // Fallback
 		}
 	}
 
 	@FXML
-	public void restorePassword() {
+	public void restorePasswordAsync() {
+		Task<Void> task = RecoveryKeyTasks.createTask(this::restorePassword);
+
+		task.setOnScheduled(_ -> {
+			LOG.debug("Restoring vault configuration for {}.", vault.getDisplayablePath());
+		});
+
+		task.setOnSucceeded(_ -> {
+			LOG.debug("Restored vault configuration for {}.", vault.getDisplayablePath());
+			try {
+				if (!vaultListManager.isAlreadyAdded(vault.getPath())) {
+					vaultListManager.add(vault.getPath());
+				}
+				window.close();
+				dialogs.prepareRecoverPasswordSuccess((Stage) window.getOwner()) //
+						.setTitleKey("recover.recoverVaultConfig.title") //
+						.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message") //
+						.build().showAndWait();
+			} catch (IOException e) {
+				LOG.error("Failed to add vault to list.", e);
+				appWindows.showErrorWindow(e, window, null);
+			}
+		});
+
+		task.setOnFailed(_ -> {
+			LOG.error("Recovery process failed.", task.getException());
+			appWindows.showErrorWindow(task.getException(), window, null);
+		});
+
+		executor.submit(task);
+	}
+
+	void restorePassword() throws IOException, CryptoException {
 		try (RecoveryDirectory recoveryDirectory = RecoveryDirectory.create(vault.getPath())) {
 			Path recoveryPath = recoveryDirectory.getRecoveryPath();
 			MasterkeyService.recoverFromRecoveryKey(recoveryKey.get(), recoveryKeyFactory, recoveryPath, newPasswordController.passwordField.getCharacters());
@@ -135,19 +167,6 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 			recoveryDirectory.moveRecoveredFile(MASTERKEY_FILENAME);
 			recoveryDirectory.moveRecoveredFile(VAULTCONFIG_FILENAME);
-
-			if (!vaultListManager.isAlreadyAdded(vault.getPath())) {
-				vaultListManager.add(vault.getPath());
-			}
-			window.close();
-			dialogs.prepareRecoverPasswordSuccess((Stage)window.getOwner()) //
-					.setTitleKey("recover.recoverVaultConfig.title") //
-					.setMessageKey("recoveryKey.recover.resetVaultConfigSuccess.message") //
-					.build().showAndWait();
-
-		} catch (IOException | CryptoException e) {
-			LOG.error("Recovery process failed", e);
-			appWindows.showErrorWindow(e, window, null);
 		}
 	}
 

@@ -10,15 +10,19 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.application.Application;
 import javafx.application.Platform;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @FxApplicationScoped
 public class FxApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
+
+	static final AtomicReference<Application> INSTANCE = new AtomicReference<>();
 
 	private final long startupTime;
 	private final Environment environment;
@@ -30,9 +34,21 @@ public class FxApplication {
 	private final FxApplicationTerminator applicationTerminator;
 	private final AutoUnlocker autoUnlocker;
 	private final FxFSEventList fxFSEventList;
+	private final FxNotificationManager notificationManager;
 
 	@Inject
-	FxApplication(@Named("startupTime") long startupTime, Environment environment, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker, FxFSEventList fxFSEventList) {
+	FxApplication(Application fxApp,
+				   @Named("startupTime") long startupTime, //
+				  Environment environment, //
+				  Settings settings, //
+				  AppLaunchEventHandler launchEventHandler, //
+				  Lazy<TrayMenuComponent> trayMenu, //
+				  FxApplicationWindows appWindows, //
+				  FxApplicationStyle applicationStyle, //
+				  FxApplicationTerminator applicationTerminator, //
+				  AutoUnlocker autoUnlocker, //
+				  FxFSEventList fxFSEventList, //
+				  FxNotificationManager notificationManager) {
 		this.startupTime = startupTime;
 		this.environment = environment;
 		this.settings = settings;
@@ -43,6 +59,9 @@ public class FxApplication {
 		this.applicationTerminator = applicationTerminator;
 		this.autoUnlocker = autoUnlocker;
 		this.fxFSEventList = fxFSEventList;
+		this.notificationManager = notificationManager;
+
+		INSTANCE.set(fxApp);
 	}
 
 	public void start() {
@@ -88,6 +107,7 @@ public class FxApplication {
 
 		launchEventHandler.startHandlingLaunchEvents();
 		fxFSEventList.schedulePollForUpdates();
+		notificationManager.schedulePollForUpdates();
 		autoUnlocker.tryUnlockForTimespan(2, TimeUnit.MINUTES);
 	}
 

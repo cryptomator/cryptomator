@@ -36,82 +36,91 @@ public class FxApplicationStyle {
 	}
 
 	public void initialize() {
+		var uiTheme = settings.theme.get();
+		if (uiTheme == UiTheme.AUTOMATIC) {
+			registerOsThemeListener();
+		}
+		applyTheme(uiTheme);
 		settings.theme.addListener(this::appThemeChanged);
-		loadSelectedStyleSheet(settings.theme.get());
 	}
 
-	private void appThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, @SuppressWarnings("unused") UiTheme oldValue, UiTheme newValue) {
-		if (appearanceProvider.isPresent() && oldValue == UiTheme.AUTOMATIC && newValue != UiTheme.AUTOMATIC) {
+	private void appThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, UiTheme oldValue, UiTheme newValue) {
+		if (oldValue == newValue) {
+			// no-op
+		} else if (newValue == UiTheme.AUTOMATIC) {
+			registerOsThemeListener();
+		} else if (oldValue == UiTheme.AUTOMATIC) {
+			removeOsThemeListener();
+		}
+
+		applyTheme(newValue);
+	}
+
+	private void removeOsThemeListener() {
+		if (appearanceProvider.isPresent()) {
 			try {
 				appearanceProvider.get().removeListener(systemInterfaceThemeListener);
 			} catch (UiAppearanceException e) {
-				LOG.error("Failed to disable automatic theme switching.");
+				LOG.warn("Failed to disable automatic theme switching.", e);
 			}
-		}
-		loadSelectedStyleSheet(newValue);
-	}
-
-	private void loadSelectedStyleSheet(UiTheme desiredTheme) {
-		UiTheme theme = licenseHolder.isValidLicense() ? desiredTheme : UiTheme.LIGHT;
-		switch (theme) {
-			case LIGHT -> applyLightTheme();
-			case DARK -> applyDarkTheme();
-			case AUTOMATIC -> {
-				appearanceProvider.ifPresent(provider -> {
-					try {
-						provider.addListener(systemInterfaceThemeListener);
-					} catch (UiAppearanceException e) {
-						LOG.error("Failed to enable automatic theme switching.");
-					}
-				});
-				applySystemTheme();
-			}
+		} else {
+			LOG.debug("Unable to remove listener os theme changes: No supported UiAppearanceProvider present");
 		}
 	}
 
-	private void systemInterfaceThemeChanged(Theme theme) {
-		switch (theme) {
-			case LIGHT -> applyLightTheme();
-			case DARK -> applyDarkTheme();
-		}
-	}
-
-	private void applySystemTheme() {
+	private void registerOsThemeListener() {
 		if (appearanceProvider.isPresent()) {
-			systemInterfaceThemeChanged(appearanceProvider.get().getSystemTheme());
+			try {
+				appearanceProvider.get().addListener(systemInterfaceThemeListener);
+			} catch (UiAppearanceException e) {
+				LOG.warn("Failed to enable automatic theme switching.", e);
+			}
 		} else {
-			LOG.warn("No UiAppearanceProvider present, assuming LIGHT theme...");
-			applyLightTheme();
+			LOG.warn("Unable to register for os theme changes: No supported UiAppearanceProvider present");
 		}
 	}
 
-	private void applyLightTheme() {
-		var stylesheet = Optional //
-				.ofNullable(getClass().getResource("/css/light_theme.bss")) //
-				.orElse(getClass().getResource("/css/light_theme.css"));
+	private void applyTheme(UiTheme uiTheme) {
+		if (!licenseHolder.isValidLicense()) {
+			loadAndApplyLightTheme();
+		} else {
+			switch (uiTheme) {
+				case AUTOMATIC -> {
+					var osTheme = appearanceProvider.map(UiAppearanceProvider::getSystemTheme).orElse(Theme.LIGHT);
+					systemInterfaceThemeChanged(osTheme);
+				}
+				case LIGHT -> loadAndApplyLightTheme();
+				case DARK -> loadAndApplyDarkTheme();
+			}
+		}
+	}
+
+	private void systemInterfaceThemeChanged(Theme osTheme) {
+		switch (osTheme) {
+			case LIGHT -> loadAndApplyLightTheme();
+			case DARK -> loadAndApplyDarkTheme();
+		}
+	}
+
+	private void loadAndApplyLightTheme() {
+		loadAndApplyTheme(Theme.LIGHT, "/css/light_theme.css");
+	}
+
+	private void loadAndApplyDarkTheme() {
+		loadAndApplyTheme(Theme.DARK, "/css/dark_theme.css");
+	}
+
+	private void loadAndApplyTheme(Theme appTheme, String cssFile) {
+		var stylesheet = getClass().getResource(cssFile);
 		if (stylesheet == null) {
-			LOG.warn("Failed to load light_theme stylesheet");
-		} else {
-			Application.setUserAgentStylesheet(stylesheet.toString());
-			appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.LIGHT));
-			appliedTheme.set(Theme.LIGHT);
+			throw new IllegalStateException("Cannot find resource %s".formatted(cssFile));
 		}
+		Application.setUserAgentStylesheet(stylesheet.toString());
+		appearanceProvider.ifPresent(provider -> provider.adjustToTheme(appTheme));
+		appliedTheme.set(appTheme);
 	}
 
-	private void applyDarkTheme() {
-		var stylesheet = Optional //
-				.ofNullable(getClass().getResource("/css/dark_theme.bss")) //
-				.orElse(getClass().getResource("/css/dark_theme.css"));
-		if (stylesheet == null) {
-			LOG.warn("Failed to load dark_theme stylesheet");
-		} else {
-			Application.setUserAgentStylesheet(stylesheet.toString());
-			appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.DARK));
-			appliedTheme.set(Theme.DARK);
-		}
-	}
-
-	public ObjectProperty<Theme> appliedThemeProperty() {
+	public ObjectProperty<Theme> appliedAppThemeProperty() {
 		return appliedTheme;
 	}
 }

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  JDK_VERSION: '24.0.1+9'
+  JDK_VERSION: '25.0.1+8.0.LTS'
   JDK_VENDOR: temurin
   RUNTIME_VERSION_HELPER: >
     public class Test {
@@ -23,10 +23,10 @@ jobs:
         JDK_MAJOR_VERSION: 'toBeFilled'
     steps:
       - name: Determine current major version
-        run: echo 'JDK_MAJOR_VERSION=${{ env.JDK_VERSION }}'.substring(0,20) >> "$env:GITHUB_ENV"
+        run: echo 'JDK_MAJOR_VERSION=${{ env.JDK_VERSION }}'.substring(0,2) >> "$env:GITHUB_ENV"
         shell: pwsh
       - name: Checkout latest JDK ${{ env.JDK_MAJOR_VERSION }}
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: ${{ env.JDK_MAJOR_VERSION}}
           distribution: ${{ env.JDK_VENDOR }}

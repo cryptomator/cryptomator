@@ -50,6 +50,7 @@
 	GREEN_5: PRIMARY;
 	RED_5: #E74C3C;
 	ORANGE_5: #E67E22;
+	YELLOW_4: #C19F0E;
 	YELLOW_5: #F1C40F;
 
 	MAIN_BG: GRAY_9;
@@ -111,6 +112,11 @@
 .label-large {
 	-fx-font-family: 'Open Sans SemiBold';
 	-fx-font-size: 1.2em;
+}
+
+.label-window-title {
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 1.0em;
 }
 
 .label-small {
@@ -382,37 +388,62 @@
 
 /*******************************************************************************
  *                                                                             *
- * NotificationBar                                                             *
+ * InfoBar                                                                     *
  *                                                                             *
  ******************************************************************************/
+.info-bar {
+	-fx-alignment: center;
+	-fx-min-height:24px;
+	-fx-max-height:24px;
+	-fx-background-color: -bar-bg;
+}
 
-.notification-label {
-	-fx-text-fill: white;
+.info-bar--green {
+	-bar-bg: GREEN_5;
+	-button-bg: GREEN_5;
+	-button-bg-pressed: GREEN_3;
+}
+
+.info-bar--yellow {
+	-bar-bg: YELLOW_5;
+	-button-bg: YELLOW_5;
+	-button-bg-pressed: YELLOW_4;
+}
+
+.info-bar--red {
+	-bar-bg: RED_5;
+	-button-bg: RED_5;
+	-button-bg-pressed: RED_5;
+}
+
+.info-bar .label {
+	-fx-text-fill: GRAY_9;
 	-fx-font-weight: bold;
 }
 
-.notification-debug {
-	-fx-min-height:24px;
-	-fx-max-height:24px;
-	-fx-background-color: RED_5;
+.info-bar--yellow .label {
+	-fx-text-fill: GRAY_9;
+	-fx-font-weight: bold;
+	-fx-effect: dropshadow( gaussian , rgba(0,0,0,0.45) , 2 , 0 , 0 , 1 );
 }
 
-.notification-update {
-	-fx-min-height:24px;
-	-fx-max-height:24px;
-	-fx-background-color: YELLOW_5;
+.info-bar .glyph {
+	-fx-fill: GRAY_9;
 }
 
-.notification-support {
-	-fx-min-height:24px;
-	-fx-max-height:24px;
-	-fx-background-color: PRIMARY;
-}
-
-.notification-debug:hover .notification-label,
-.notification-update:hover .notification-label,
-.notification-support:hover .notification-label {
+.info-bar:hover .label {
 	-fx-underline:true;
+}
+
+.info-bar .button {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-padding: 2 2 2 2;
+}
+
+.info-bar .button:armed {
+	-fx-background-color: -button-bg-pressed;
+	-fx-background-radius: 8;
 }
 
 /*******************************************************************************
@@ -1185,4 +1216,34 @@
 .table-view .empty-table {
     -fx-background-color: MAIN_BG;
     -fx-font-size: 1.166667em; /* 14pt - 2 more than the default font */
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Notification Window
+ *                                                                             *
+ ******************************************************************************/
+.notification-window {
+	-fx-background-color: MAIN_BG;
+	-fx-background-radius: 8px;
+	-fx-border-radius: 8px;
+	-fx-background-insets: 0;
+	-fx-border-color: MUTED_BG;
+	-fx-border-width: 1px;
+	-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 28, 0.35, 0, 6);
+}
+
+.notification-window .dialog-header {
+	-fx-alignment: center-left;
+}
+
+.notification-window .window-bar-button {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-padding: 6 8 6 8;
+}
+
+.notification-window .window-bar-button:armed {
+	-fx-background-color: CONTROL_BG_ARMED;
+	-fx-background-radius: 8;
 }

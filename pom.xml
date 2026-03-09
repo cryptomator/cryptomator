@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.18.1</version>
+	<version>1.19.0</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -26,61 +26,83 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>24</project.jdk.version>
+		<project.jdk.version>25</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<!-- remove them, as soon they got modularized or support is dropped (i.e., WebDAV) -->
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.9.0</cryptomator.cryptofs.version>
-		<cryptomator.integrations.version>1.7.0</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.5.1</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.4.1</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.6.1</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>5.1.0</cryptomator.fuse.version>
-		<cryptomator.webdav.version>3.0.0</cryptomator.webdav.version>
+		<cryptomator.cryptofs.version>2.10.0</cryptomator.cryptofs.version>
+		<cryptomator.cryptolib.version>2.2.2</cryptomator.cryptolib.version>
+		<cryptomator.integrations.version>1.8.0-beta1</cryptomator.integrations.version>
+		<cryptomator.integrations.win.version>1.6.0</cryptomator.integrations.win.version>
+		<cryptomator.integrations.mac.version>1.5.0-beta3</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.linux.version>1.7.0-beta4</cryptomator.integrations.linux.version>
+		<cryptomator.fuse.version>6.0.1</cryptomator.fuse.version>
+		<cryptomator.webdav.version>3.0.1</cryptomator.webdav.version>
+		<cryptomator.webdav-servlet.version>1.2.12</cryptomator.webdav-servlet.version>
 
 		<!-- 3rd party dependencies -->
-		<commons-lang3.version>3.19.0</commons-lang3.version>
-		<dagger.version>2.57.2</dagger.version>
+		<caffeine.version>3.2.3</caffeine.version>
+		<commons-lang3.version>3.20.0</commons-lang3.version>
+		<dagger.version>2.59.2</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.20.0</jackson.version>
-		<javafx.version>25</javafx.version>
-		<jwt.version>4.5.0</jwt.version>
+		<jackson.version>2.21.1</jackson.version>
+		<javafx.version>25.0.2</javafx.version>
+		<jwt.version>4.5.1</jwt.version>
 		<nimbus-jose.version>10.5</nimbus-jose.version>
-		<logback.version>1.5.19</logback.version>
+		<logback.version>1.5.32</logback.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.13.4</junit.jupiter.version>
-		<mockito.version>5.20.0</mockito.version>
+		<junit.jupiter.version>6.0.3</junit.jupiter.version>
+		<mockito.version>5.22.0</mockito.version>
 		<hamcrest.version>3.0</hamcrest.version>
 
 		<!-- build-time dependencies -->
-		<jetbrains.annotations.version>26.0.2-1</jetbrains.annotations.version>
-		<dependency-check.version>12.1.5</dependency-check.version>
-		<jacoco.version>0.8.13</jacoco.version>
-		<license-generator.version>2.7.0</license-generator.version>
-		<junit-tree-reporter.version>1.4.0</junit-tree-reporter.version>
-		<mvn-compiler.version>3.14.1</mvn-compiler.version>
-		<mvn-resources.version>3.3.1</mvn-resources.version>
-		<mvn-dependency.version>3.8.1</mvn-dependency.version>
-		<mvn-surefire.version>3.5.4</mvn-surefire.version>
-		<mvn-jar.version>3.4.2</mvn-jar.version>
+		<jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
+		<dependency-check.version>12.2.0</dependency-check.version>
+		<jacoco.version>0.8.14</jacoco.version>
+		<license-generator.version>2.7.1</license-generator.version>
+		<junit-tree-reporter.version>1.5.1</junit-tree-reporter.version>
+		<mvn-compiler.version>3.15.0</mvn-compiler.version>
+		<mvn-resources.version>3.5.0</mvn-resources.version>
+		<mvn-dependency.version>3.10.0</mvn-dependency.version>
+		<mvn-surefire.version>3.5.3</mvn-surefire.version>
+		<mvn-jar.version>3.5.0</mvn-jar.version>
 
 		<!-- Property used by surefire to determine jacoco engine -->
 		<surefire.jacoco.args></surefire.jacoco.args>
 	</properties>
 
+	<repositories>
+		<repository>
+			<name>Central Portal Snapshots</name>
+			<id>central-portal-snapshots</id>
+			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<!-- Cryptomator Libs -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>
+			<artifactId>webdav-nio-adapter-servlet</artifactId>
+			<version>${cryptomator.webdav-servlet.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptolib</artifactId>
-			<version>2.2.1</version>
+			<version>${cryptomator.cryptolib.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
@@ -214,7 +236,7 @@
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
-			<version>3.2.2</version>
+			<version>${caffeine.version}</version>
 		</dependency>
 		<!-- JUnit / Mockito / Hamcrest -->
 		<dependency>
@@ -316,7 +338,6 @@
 					</annotationProcessorPaths>
 					<compilerArgs>
 						<arg>-Adagger.fastInit=enabled</arg>
-						<arg>-Adagger.formatGeneratedSource=enabled</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>
