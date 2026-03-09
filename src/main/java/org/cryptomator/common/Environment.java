@@ -34,6 +34,8 @@ public class Environment {
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 	private static final String DISABLE_UPDATE_CHECK_PROP_NAME = "cryptomator.disableUpdateCheck";
+	private static final String LICENSE_CHAIN_REQUIRED_CN_PROP_NAME = "cryptomator.licenseChainRequiredCn";
+	private static final String DEFAULT_LICENSE_CHAIN_REQUIRED_CN = "License Intermediate CA (Prod)";
 
 	private Environment() {}
 
@@ -57,6 +59,7 @@ public class Environment {
 		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
 		logCryptomatorSystemProperty(DISABLE_UPDATE_CHECK_PROP_NAME);
+		logCryptomatorSystemProperty(LICENSE_CHAIN_REQUIRED_CN_PROP_NAME);
 	}
 
 	public static Environment getInstance() {
@@ -143,6 +146,10 @@ public class Environment {
 
 	public boolean disableUpdateCheck() {
 		return Boolean.getBoolean(DISABLE_UPDATE_CHECK_PROP_NAME);
+	}
+
+	public String getLicenseChainRequiredCn() {
+		return System.getProperty(LICENSE_CHAIN_REQUIRED_CN_PROP_NAME, DEFAULT_LICENSE_CHAIN_REQUIRED_CN);
 	}
 
 	private Optional<Path> getPath(String propertyName) {
