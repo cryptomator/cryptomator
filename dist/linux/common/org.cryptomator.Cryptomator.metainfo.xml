@@ -73,6 +73,7 @@
 	<url type="faq">https://community.cryptomator.org/c/kb/faq</url>
 	<url type="help">https://docs.cryptomator.org/</url>
 	<url type="translate">https://translate.cryptomator.org</url>
+	<url type="vcs-browser">https://github.com/cryptomator/cryptomator</url>
 
 	<developer id="de.skymatic">
 		<name>Skymatic GmbH</name>
