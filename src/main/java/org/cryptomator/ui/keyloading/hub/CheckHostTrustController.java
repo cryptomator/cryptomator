@@ -118,7 +118,7 @@ public class CheckHostTrustController implements FxController {
 
 		// apiBaseURL.host == deviceUrl.host == authSuccessUrl.host == authErrorUrl.host
 		return (hubConfig.apiBaseUrl == null || getAuthority(hubConfig.apiBaseUrl).equals(canonicalHubAuthority)) //
-				&& getAuthority(hubConfig.devicesResourceUrl).equals(canonicalHubAuthority) //
+				&& (hubConfig.devicesResourceUrl == null || getAuthority(hubConfig.devicesResourceUrl).equals(canonicalHubAuthority)) //
 				&& getAuthority(hubConfig.authSuccessUrl).equals(canonicalHubAuthority) //
 				&& getAuthority(hubConfig.authErrorUrl).equals(canonicalHubAuthority) //
 				// authUrl.host == tokenUrl.host:
