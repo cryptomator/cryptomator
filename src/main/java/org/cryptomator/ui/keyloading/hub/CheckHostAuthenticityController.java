@@ -14,22 +14,24 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @KeyLoadingScoped
 public class CheckHostAuthenticityController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CheckHostAuthenticityController.class);
+	private static final String MESSAGE_SINGULAR_KEY = "hub.checkHostAuthenticity.message";
+	private static final String MESSAGE_PLURAL_KEY = "hub.checkHostAuthenticity.message.plural";
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -37,19 +39,24 @@ public class CheckHostAuthenticityController implements FxController {
 	private final Lazy<Scene> unauthorizedHostScene;
 	private final CompletableFuture<ReceivedKey> result;
 	private final Settings settings;
+	private final ResourceBundle resourceBundle;
 	private final Set<String> hostnames;
+
+	@FXML
+	private Label messageLabel;
 
 	@FXML
 	private TextFlow hostnamesFlow;
 
 	@Inject
-	public CheckHostAuthenticityController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_HOST) Lazy<Scene> unauthorizedHostScene, CompletableFuture<ReceivedKey> result, Settings settings) {
+	public CheckHostAuthenticityController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_HOST) Lazy<Scene> unauthorizedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.authFlowScene = authFlowScene;
 		this.unauthorizedHostScene = unauthorizedHostScene;
 		this.result = result;
 		this.settings = settings;
+		this.resourceBundle = resourceBundle;
 		this.hostnames = new HashSet<>();
 	}
 
@@ -86,9 +93,9 @@ public class CheckHostAuthenticityController implements FxController {
 
 	private void renderHostnames() {
 		hostnamesFlow.getChildren().clear();
-		hostnames.stream().sorted().forEach(hostname -> {
-			hostnamesFlow.getChildren().add(new Text(hostname + System.lineSeparator()));
-		});
+		hostnames.stream().sorted().forEach(hostname -> hostnamesFlow.getChildren().add(new Text(hostname + System.lineSeparator())));
+		var messageKey = hostnames.size() > 1 ? MESSAGE_PLURAL_KEY : MESSAGE_SINGULAR_KEY;
+		messageLabel.setText(resourceBundle.getString(messageKey));
 	}
 
 	private boolean isConsistentHubConfig() {
