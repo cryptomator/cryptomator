@@ -101,7 +101,7 @@ public abstract class HubKeyLoadingModule {
 	@Provides
 	@FxmlScene(FxmlFile.HUB_CHECK_HOST_TRUST)
 	@KeyLoadingScoped
-	static Scene provideHubCheckHostAuthenticityScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+	static Scene provideHubCheckHostTrustScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_CHECK_HOST_TRUST);
 	}
 
@@ -178,7 +178,7 @@ public abstract class HubKeyLoadingModule {
 	@Provides
 	@FxmlScene(FxmlFile.HUB_UNTRUSTED_HOST)
 	@KeyLoadingScoped
-	static Scene provideHubUnauthorizedHostScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+	static Scene provideHubUntrustedHostScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_UNTRUSTED_HOST);
 	}
 
