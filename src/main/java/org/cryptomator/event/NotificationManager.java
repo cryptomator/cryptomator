@@ -74,7 +74,7 @@ public class NotificationManager {
 	 * @return {@code true}, if elements were copied
 	 */
 	public boolean appendToAndClear(List<VaultEvent> target) {
-		//it is not clear, if addAll iterates thread-safe over the pendingEvents
+		//it is not clear if addAll iterates thread-safe over the pendingEvents
 		//hence we synchronize moving (copy then clear) and adding-single-element operations
 		synchronized (this) {
 			var result = target.addAll(pendingEvents);

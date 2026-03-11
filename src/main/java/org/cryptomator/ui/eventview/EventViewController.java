@@ -61,7 +61,7 @@ public class EventViewController implements FxController {
 		var t2 = right.getValue().mostRecentEvent().getTimestamp();
 		var timeComparison = t1.compareTo(t2);
 		if (timeComparison != 0) {
-			return -timeComparison; //we need the reverse timesorting
+			return -timeComparison; //we need the reverse time sorting
 		}
 		var vaultIdComparison = left.getKey().vault().getId().compareTo(right.getKey().vault().getId());
 		if (vaultIdComparison != 0) {
