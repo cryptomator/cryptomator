@@ -2,19 +2,18 @@
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.Group?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<?import javafx.scene.text.TextFlow?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.hub.CheckHostAuthenticityController"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.UnauthorizedHostController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
@@ -31,24 +30,23 @@
 					<Insets topRightBottomLeft="6"/>
 				</padding>
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%hub.checkHostAuthenticity.message" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%hub.unauthorizedHost.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="%hub.checkHostAuthenticity.description" wrapText="true"/>
-			<TextFlow fx:id="hostnamesFlow" styleClass="text-flow" minHeight="60"/>
+			<Label text="%hub.unauthorizedHost.description" wrapText="true"/>
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
-			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
 				<buttons>
-					<Button text="%hub.checkHostAuthenticity.denyBtn" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#deny"/>
-					<Button text="%hub.checkHostAuthenticity.trustBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#trust"/>
+					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" onAction="#close"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>
 	</children>
 </HBox>
+

@@ -14,7 +14,8 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import java.net.URI;
 import java.util.Arrays;
@@ -31,18 +32,20 @@ public class CheckHostAuthenticityController implements FxController {
 	private final Stage window;
 	private final HubConfig hubConfig;
 	private final Lazy<Scene> authFlowScene;
+	private final Lazy<Scene> unauthorizedHostScene;
 	private final CompletableFuture<ReceivedKey> result;
 	private final Settings settings;
 	private final Set<String> hostnames;
 
 	@FXML
-	private ListView<String> hostnamesList;
+	private TextFlow hostnamesFlow;
 
 	@Inject
-	public CheckHostAuthenticityController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, CompletableFuture<ReceivedKey> result, Settings settings) {
+	public CheckHostAuthenticityController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_HOST) Lazy<Scene> unauthorizedHostScene, CompletableFuture<ReceivedKey> result, Settings settings) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.authFlowScene = authFlowScene;
+		this.unauthorizedHostScene = unauthorizedHostScene;
 		this.result = result;
 		this.settings = settings;
 		this.hostnames = new HashSet<>();
@@ -62,7 +65,7 @@ public class CheckHostAuthenticityController implements FxController {
 			trust();
 		} else if (Boolean.getBoolean("cryptomator.allowUnknownHubHosts")) {
 			hostnames.addAll(List.of(authUri.getAuthority(), tokenUri.getAuthority(), apiBaseUri.getAuthority(), webappBaseUri.getAuthority()));
-			hostnamesList.getItems().addAll(hostnames);
+			renderHostnames();
 		} else {
 			LOG.warn("Cryptomator is not allowed to connect to {}. Check your cryptomator.allowedHubHosts config.", webappBaseUri);
 			Platform.runLater(this::deny);
@@ -78,7 +81,14 @@ public class CheckHostAuthenticityController implements FxController {
 	@FXML
 	public void deny() {
 		result.cancel(true);
-		window.close(); // TODO: show "denied" scene with explanation and "learn more" link to documentation
+		window.setScene(unauthorizedHostScene.get());
+	}
+
+	private void renderHostnames() {
+		hostnamesFlow.getChildren().clear();
+		hostnames.stream().sorted().forEach(hostname -> {
+			hostnamesFlow.getChildren().add(new Text(hostname + System.lineSeparator()));
+		});
 	}
 
 	private boolean isConsistentHubConfig() {
