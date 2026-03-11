@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.CheckHostAuthenticityController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12"
+	  alignment="TOP_LEFT"
+	  accessibleRole="DIALOG">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<VBox HBox.hgrow="ALWAYS">
+			<Label styleClass="label-large" text="%hub.checkHostAuthenticity.message" wrapText="true" textAlignment="LEFT">
+				<padding>
+					<Insets bottom="6" top="6"/>
+				</padding>
+			</Label>
+			<Label text="%hub.checkHostAuthenticity.description" wrapText="true"/>
+			<ListView fx:id="hostnamesList" VBox.vgrow="ALWAYS" minHeight="60"/>
+			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
+				<buttons>
+					<Button text="%hub.checkHostAuthenticity.denyBtn" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#deny"/>
+					<Button text="%hub.checkHostAuthenticity.trustBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#trust"/>
+				</buttons>
+			</ButtonBar>
+		</VBox>
+	</children>
+</HBox>

@@ -99,6 +99,13 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_CHECK_HOST_AUTHENTICITY)
+	@KeyLoadingScoped
+	static Scene provideHubCheckHostAuthenticityScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_CHECK_HOST_AUTHENTICITY);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_AUTH_FLOW)
 	@KeyLoadingScoped
 	static Scene provideHubAuthFlowScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
@@ -179,6 +186,11 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(NoKeychainController.class)
 	abstract FxController bindNoKeychainController(NoKeychainController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(CheckHostAuthenticityController.class)
+	abstract FxController bindCheckHostAuthenticityController(CheckHostAuthenticityController controller);
 
 	@Binds
 	@IntoMap

@@ -19,6 +19,7 @@ public enum FxmlFile {
 	HEALTH_START("/fxml/health_start.fxml"), //
 	HEALTH_CHECK_LIST("/fxml/health_check_list.fxml"), //
 	HUB_NO_KEYCHAIN("/fxml/hub_no_keychain.fxml"), //
+	HUB_CHECK_HOST_AUTHENTICITY("/fxml/hub_check_host_authenticity.fxml"), //
 	HUB_AUTH_FLOW("/fxml/hub_auth_flow.fxml"), //
 	HUB_INVALID_LICENSE("/fxml/hub_invalid_license.fxml"), //
 	HUB_RECEIVE_KEY("/fxml/hub_receive_key.fxml"), //

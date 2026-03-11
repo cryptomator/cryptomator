@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -99,4 +100,7 @@ class SettingsJson {
 
 	@JsonProperty("lastUpdateAttemptedByVersion")
 	String lastUpdateAttemptedByVersion;
+
+	@JsonProperty("trustedHosts")
+	Set<String> trustedHosts = Set.of();
 }
