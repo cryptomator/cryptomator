@@ -7,6 +7,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +118,8 @@ public class CheckHostAuthenticityController implements FxController {
 		return containsAllowedHosts(allowedHubHosts);
 	}
 
-	private boolean containsAllowedHosts(Set<String> allowedHubHosts) {
+	@VisibleForTesting
+	boolean containsAllowedHosts(Set<String> allowedHubHosts) {
 		var canonicalHubHost = getAuthority(hubConfig.getApiBaseUrl());
 		var canonicalAuthHost = getAuthority(hubConfig.authEndpoint);
 		return allowedHubHosts.contains(canonicalHubHost) && allowedHubHosts.contains(canonicalAuthHost);
@@ -128,11 +130,12 @@ public class CheckHostAuthenticityController implements FxController {
 	}
 
 	public static String getAuthority(URI uri) {
-		if (uri.getPort() != -1) {
-			return "%s://%s:%s".formatted(uri.getScheme(), uri.getHost(), uri.getPort());
-		} else {
-			return "%s://%s".formatted(uri.getScheme(), uri.getHost());
-		}
+		return switch (uri.getPort()) {
+			case -1 -> "%s://%s".formatted(uri.getScheme(), uri.getHost());
+			case 80 -> "http://%s".formatted(uri.getHost());
+			case 443 -> "https://%s".formatted(uri.getHost());
+			default -> "%s://%s:%s".formatted(uri.getScheme(), uri.getHost(), uri.getPort());
+		};
 	}
 
 }
