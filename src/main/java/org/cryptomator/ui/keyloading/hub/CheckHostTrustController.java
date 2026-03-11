@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -38,7 +37,7 @@ public class CheckHostTrustController implements FxController {
 	private final Stage window;
 	private final HubConfig hubConfig;
 	private final Lazy<Scene> authFlowScene;
-	private final Lazy<Scene> unauthorizedHostScene;
+	private final Lazy<Scene> untrustedHostScene;
 	private final CompletableFuture<ReceivedKey> result;
 	private final Settings settings;
 	private final Environment env;
@@ -52,11 +51,11 @@ public class CheckHostTrustController implements FxController {
 	private TextFlow hostnamesFlow;
 
 	@Inject
-	public CheckHostTrustController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNTRUSTED_HOST) Lazy<Scene> unauthorizedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, Environment env, ResourceBundle resourceBundle) {
+	public CheckHostTrustController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNTRUSTED_HOST) Lazy<Scene> untrustedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, Environment env, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.authFlowScene = authFlowScene;
-		this.unauthorizedHostScene = unauthorizedHostScene;
+		this.untrustedHostScene = untrustedHostScene;
 		this.result = result;
 		this.settings = settings;
 		this.env = env;
@@ -97,7 +96,7 @@ public class CheckHostTrustController implements FxController {
 	@FXML
 	public void deny() {
 		result.cancel(true);
-		window.setScene(unauthorizedHostScene.get());
+		window.setScene(untrustedHostScene.get());
 	}
 
 	private void renderHostnames() {
