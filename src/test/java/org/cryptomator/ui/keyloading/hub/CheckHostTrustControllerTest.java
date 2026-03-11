@@ -21,7 +21,7 @@ class CheckHostTrustControllerTest {
 		var hubConfig = new HubConfig();
 		hubConfig.apiBaseUrl = apiBase;
 		hubConfig.authEndpoint = authEndpoint;
-		var controller = new CheckHostTrustController(Mockito.mock(), hubConfig, Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock());
+		var controller = new CheckHostTrustController(Mockito.mock(), hubConfig, Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock());
 
 		var actualResult = controller.containsAllowedHosts(Set.of("https://auth.example.com", "https://hub.example.com"));
 
