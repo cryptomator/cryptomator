@@ -21,13 +21,11 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @KeyLoadingScoped
 public class CheckHostAuthenticityController implements FxController {
@@ -70,14 +68,16 @@ public class CheckHostAuthenticityController implements FxController {
 		if (!isConsistentHubConfig()) {
 			LOG.warn("Inconsistent hub config detected. Denying access to protect the user.");
 			Platform.runLater(this::deny);
+		} else if (isCryptomatorCloud()) {
+			trust(); // trust *.cryptomator.cloud by default, domain is owned by Cryptomator maintainers
 		} else if (containsAllowedHosts(env.hubAllowedHosts())) {
-			trust();
+			trust(); // trust hosts explicitly allowlisted via system property
 		} else if (env.hubTrustOnFirstUse() && containsAllowedHosts(settings.trustedHosts)) {
-			trust();
+			trust(); // trust hosts previously allowlisted by the user
 		} else if (env.hubTrustOnFirstUse()) {
 			hostnames.add(getAuthority(hubConfig.getApiBaseUrl()));
 			hostnames.add(getAuthority(hubConfig.authEndpoint));
-			renderHostnames();
+			renderHostnames(); // ask user whether to trust these hosts
 		} else {
 			LOG.warn("Cryptomator is not allowed to connect to {}. Check your {} config.", getAuthority(hubConfig.getApiBaseUrl()), Environment.HUB_ALLOWED_HOSTS_PROP_NAME);
 			Platform.runLater(this::deny);
@@ -116,6 +116,12 @@ public class CheckHostAuthenticityController implements FxController {
 				&& getAuthority(hubConfig.authErrorUrl).equals(canonicalHubHost) //
 				// authUrl.host == tokenUrl.host:
 				&& getAuthority(hubConfig.tokenEndpoint).equals(canonicalAuthHost);
+	}
+
+	private boolean isCryptomatorCloud() {
+		var canonicalHubHost = hubConfig.getApiBaseUrl().getHost();
+		var canonicalAuthHost = URI.create(hubConfig.authEndpoint).getHost();
+		return canonicalHubHost.endsWith("cryptomator.cloud") && canonicalAuthHost.endsWith("cryptomator.cloud");
 	}
 
 	@VisibleForTesting
