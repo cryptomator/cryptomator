@@ -32,7 +32,7 @@ public class CheckHostTrustController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(CheckHostTrustController.class);
 	private static final String MESSAGE_SINGULAR_KEY = "hub.checkHostTrust.message";
 	private static final String MESSAGE_PLURAL_KEY = "hub.checkHostTrust.message.plural";
-	private static final String TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN = "cryptomator.cloud";
+	private static final String TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN = ".cryptomator.cloud";
 
 	private final Stage window;
 	private final HubConfig hubConfig;
