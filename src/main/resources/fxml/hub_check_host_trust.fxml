@@ -14,7 +14,7 @@
 <?import javafx.scene.text.TextFlow?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.hub.CheckHostAuthenticityController"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.CheckHostTrustController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
@@ -35,7 +35,7 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label fx:id="messageLabel" styleClass="label-large" text="%hub.checkHostAuthenticity.message" wrapText="true" textAlignment="LEFT">
+			<Label fx:id="messageLabel" styleClass="label-large" text="%hub.checkHostTrust.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
@@ -44,8 +44,8 @@
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>
-					<Button text="%hub.checkHostAuthenticity.denyBtn" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#deny"/>
-					<Button text="%hub.checkHostAuthenticity.trustBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#trust"/>
+					<Button text="%hub.checkHostTrust.denyBtn" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#deny"/>
+					<Button text="%hub.checkHostTrust.trustBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#trust"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

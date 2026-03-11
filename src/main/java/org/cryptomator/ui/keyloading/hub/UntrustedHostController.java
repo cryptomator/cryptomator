@@ -11,13 +11,13 @@ import javafx.stage.WindowEvent;
 import java.util.concurrent.CompletableFuture;
 
 @KeyLoadingScoped
-public class UnauthorizedHostController implements FxController {
+public class UntrustedHostController implements FxController {
 
 	private final Stage window;
 	private final CompletableFuture<ReceivedKey> result;
 
 	@Inject
-	public UnauthorizedHostController(@KeyLoading Stage window, CompletableFuture<ReceivedKey> result) {
+	public UntrustedHostController(@KeyLoading Stage window, CompletableFuture<ReceivedKey> result) {
 		this.window = window;
 		this.result = result;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);

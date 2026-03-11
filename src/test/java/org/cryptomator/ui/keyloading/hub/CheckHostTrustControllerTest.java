@@ -7,7 +7,7 @@ import org.mockito.Mockito;
 
 import java.util.Set;
 
-class CheckHostAuthenticityControllerTest {
+class CheckHostTrustControllerTest {
 
 	@ParameterizedTest
 	@CsvSource({
@@ -21,7 +21,7 @@ class CheckHostAuthenticityControllerTest {
 		var hubConfig = new HubConfig();
 		hubConfig.apiBaseUrl = apiBase;
 		hubConfig.authEndpoint = authEndpoint;
-		var controller = new CheckHostAuthenticityController(Mockito.mock(), hubConfig, Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock());
+		var controller = new CheckHostTrustController(Mockito.mock(), hubConfig, Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock(), Mockito.mock());
 
 		var actualResult = controller.containsAllowedHosts(Set.of("https://auth.example.com", "https://hub.example.com"));
 
@@ -39,7 +39,7 @@ class CheckHostAuthenticityControllerTest {
 			"http://user@example.com:8080/foo/bar?foo=bar, http://example.com:8080"
 	})
 	void testGetAuthority(String input, String expected) {
-		var actual = CheckHostAuthenticityController.getAuthority(input);
+		var actual = CheckHostTrustController.getAuthority(input);
 
 		Assertions.assertEquals(expected, actual);
 	}

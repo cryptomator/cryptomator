@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Circle?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.hub.UnauthorizedHostController"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.UntrustedHostController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
@@ -34,12 +34,12 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label styleClass="label-large" text="%hub.unauthorizedHost.message" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="%hub.untrustedHost.message" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="%hub.unauthorizedHost.description" wrapText="true"/>
+			<Label text="%hub.untrustedHost.description" wrapText="true"/>
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
 				<buttons>

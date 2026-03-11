@@ -28,11 +28,12 @@ import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 
 @KeyLoadingScoped
-public class CheckHostAuthenticityController implements FxController {
+public class CheckHostTrustController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CheckHostAuthenticityController.class);
-	private static final String MESSAGE_SINGULAR_KEY = "hub.checkHostAuthenticity.message";
-	private static final String MESSAGE_PLURAL_KEY = "hub.checkHostAuthenticity.message.plural";
+	private static final Logger LOG = LoggerFactory.getLogger(CheckHostTrustController.class);
+	private static final String MESSAGE_SINGULAR_KEY = "hub.checkHostTrust.message";
+	private static final String MESSAGE_PLURAL_KEY = "hub.checkHostTrust.message.plural";
+	private static final String TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN = "cryptomator.cloud";
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -51,7 +52,7 @@ public class CheckHostAuthenticityController implements FxController {
 	private TextFlow hostnamesFlow;
 
 	@Inject
-	public CheckHostAuthenticityController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_HOST) Lazy<Scene> unauthorizedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, Environment env, ResourceBundle resourceBundle) {
+	public CheckHostTrustController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNTRUSTED_HOST) Lazy<Scene> unauthorizedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, Environment env, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.authFlowScene = authFlowScene;
@@ -121,7 +122,7 @@ public class CheckHostAuthenticityController implements FxController {
 	private boolean isCryptomatorCloud() {
 		var canonicalHubHost = hubConfig.getApiBaseUrl().getHost();
 		var canonicalAuthHost = URI.create(hubConfig.authEndpoint).getHost();
-		return canonicalHubHost.endsWith("cryptomator.cloud") && canonicalAuthHost.endsWith("cryptomator.cloud");
+		return canonicalHubHost.endsWith(TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN) && canonicalAuthHost.endsWith(TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN);
 	}
 
 	@VisibleForTesting

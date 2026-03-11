@@ -99,10 +99,10 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_CHECK_HOST_AUTHENTICITY)
+	@FxmlScene(FxmlFile.HUB_CHECK_HOST_TRUST)
 	@KeyLoadingScoped
 	static Scene provideHubCheckHostAuthenticityScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_CHECK_HOST_AUTHENTICITY);
+		return fxmlLoaders.createScene(FxmlFile.HUB_CHECK_HOST_TRUST);
 	}
 
 	@Provides
@@ -176,10 +176,10 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_UNAUTHORIZED_HOST)
+	@FxmlScene(FxmlFile.HUB_UNTRUSTED_HOST)
 	@KeyLoadingScoped
 	static Scene provideHubUnauthorizedHostScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_UNAUTHORIZED_HOST);
+		return fxmlLoaders.createScene(FxmlFile.HUB_UNTRUSTED_HOST);
 	}
 
 	@Provides
@@ -196,8 +196,8 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(CheckHostAuthenticityController.class)
-	abstract FxController bindCheckHostAuthenticityController(CheckHostAuthenticityController controller);
+	@FxControllerKey(CheckHostTrustController.class)
+	abstract FxController bindCheckHostAuthenticityController(CheckHostTrustController controller);
 
 	@Binds
 	@IntoMap
@@ -246,8 +246,8 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(UnauthorizedHostController.class)
-	abstract FxController bindUnauthorizedHostController(UnauthorizedHostController controller);
+	@FxControllerKey(UntrustedHostController.class)
+	abstract FxController bindUnauthorizedHostController(UntrustedHostController controller);
 
 	@Binds
 	@IntoMap
