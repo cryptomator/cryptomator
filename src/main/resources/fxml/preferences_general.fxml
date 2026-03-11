@@ -36,7 +36,7 @@
 			<ChoiceBox fx:id="quickAccessServiceChoiceBox" accessibleText="%preferences.general.quickAccessService"/>
 		</HBox>
 
-		<Button fx:id="resetTrustedHostsButton" text="%preferences.general.resetTrustedHosts" visible="${controller.unknownHubHostsAllowed}" managed="${controller.unknownHubHostsAllowed}" onAction="#resetTrustedHosts"/>
+		<Button fx:id="resetTrustedHostsButton" text="%preferences.general.resetTrustedHosts" visible="${controller.hubTrustOnFirstUseEnabled}" managed="${controller.hubTrustOnFirstUseEnabled}" onAction="#resetTrustedHosts"/>
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT">

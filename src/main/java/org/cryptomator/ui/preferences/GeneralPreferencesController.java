@@ -136,8 +136,8 @@ public class GeneralPreferencesController implements FxController {
 		return autoStartProvider.isPresent();
 	}
 
-	public boolean isUnknownHubHostsAllowed() {
-		return Boolean.getBoolean("cryptomator.allowUnknownHubHosts");
+	public boolean isHubTrustOnFirstUseEnabled() {
+		return environment.hubTrustOnFirstUse();
 	}
 
 	@FXML

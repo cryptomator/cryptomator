@@ -27,8 +27,8 @@ import java.util.Set;
  *     <li>cryptomator.p12Path</li>
  *     <li>cryptomator.mountPointsDir</li>
  *     <li>cryptomator.disableUpdateCheck</li>
- *     <li>cryptomator.allowUnknownHubHosts</li>
- *     <li>cryptomator.allowedHubHosts</li>
+ *     <li>cryptomator.hub.allowedHosts</li>
+ *     <li>cryptomator.hub.enableTrustOnFirstUse</li>
  * </ul>
  *
  * @see Properties
@@ -45,8 +45,8 @@ class AdminPropertiesFactory {
 			"cryptomator.p12Path", //
 			"cryptomator.mountPointsDir", //
 			"cryptomator.disableUpdateCheck", //
- 			"cryptomator.allowUnknownHubHosts", //
-			"cryptomator.allowedHubHosts");
+ 			"cryptomator.hub.allowedHosts", //
+			"cryptomator.hub.enableTrustOnFirstUse");
 
 
 	/**

@@ -1,6 +1,7 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import dagger.Lazy;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -41,6 +42,7 @@ public class CheckHostAuthenticityController implements FxController {
 	private final Lazy<Scene> unauthorizedHostScene;
 	private final CompletableFuture<ReceivedKey> result;
 	private final Settings settings;
+	private final Environment env;
 	private final ResourceBundle resourceBundle;
 	private final SortedSet<String> hostnames;
 
@@ -51,13 +53,14 @@ public class CheckHostAuthenticityController implements FxController {
 	private TextFlow hostnamesFlow;
 
 	@Inject
-	public CheckHostAuthenticityController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_HOST) Lazy<Scene> unauthorizedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, ResourceBundle resourceBundle) {
+	public CheckHostAuthenticityController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_HOST) Lazy<Scene> unauthorizedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, Environment env, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.authFlowScene = authFlowScene;
 		this.unauthorizedHostScene = unauthorizedHostScene;
 		this.result = result;
 		this.settings = settings;
+		this.env = env;
 		this.resourceBundle = resourceBundle;
 		this.hostnames = new TreeSet<>();
 	}
@@ -67,16 +70,16 @@ public class CheckHostAuthenticityController implements FxController {
 		if (!isConsistentHubConfig()) {
 			LOG.warn("Inconsistent hub config detected. Denying access to protect the user.");
 			Platform.runLater(this::deny);
-		} else if (configContainsAllowedHosts()) {
+		} else if (containsAllowedHosts(env.hubAllowedHosts())) {
 			trust();
-		} else if (Boolean.getBoolean("cryptomator.allowUnknownHubHosts") && containsAllowedHosts(settings.trustedHosts)) {
+		} else if (env.hubTrustOnFirstUse() && containsAllowedHosts(settings.trustedHosts)) {
 			trust();
-		} else if (Boolean.getBoolean("cryptomator.allowUnknownHubHosts")) {
+		} else if (env.hubTrustOnFirstUse()) {
 			hostnames.add(getAuthority(hubConfig.getApiBaseUrl()));
 			hostnames.add(getAuthority(hubConfig.authEndpoint));
 			renderHostnames();
 		} else {
-			LOG.warn("Cryptomator is not allowed to connect to {}. Check your cryptomator.allowedHubHosts config.", getAuthority(hubConfig.getApiBaseUrl()));
+			LOG.warn("Cryptomator is not allowed to connect to {}. Check your {} config.", getAuthority(hubConfig.getApiBaseUrl()), Environment.HUB_ALLOWED_HOSTS_PROP_NAME);
 			Platform.runLater(this::deny);
 		}
 	}
@@ -113,12 +116,6 @@ public class CheckHostAuthenticityController implements FxController {
 				&& getAuthority(hubConfig.authErrorUrl).equals(canonicalHubHost) //
 				// authUrl.host == tokenUrl.host:
 				&& getAuthority(hubConfig.tokenEndpoint).equals(canonicalAuthHost);
-	}
-
-	private boolean configContainsAllowedHosts() {
-		var allowedHubHostsString = System.getProperty("cryptomator.allowedHubHosts", ""); // https://example.com,http://foo.bar:3333
-		var allowedHubHosts = Arrays.stream(allowedHubHostsString.split(",")).map(String::trim).collect(Collectors.toUnmodifiableSet());
-		return containsAllowedHosts(allowedHubHosts);
 	}
 
 	@VisibleForTesting
