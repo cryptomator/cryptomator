@@ -21,6 +21,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -36,16 +37,18 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 	private final Stage window;
 	private final KeychainManager keychainManager;
 	private final AtomicReference<String> fsOwnerId;
+	private final HubConfig hubConfig;
 	private final Lazy<Scene> authFlowScene;
 	private final Lazy<Scene> noKeychainScene;
 	private final CompletableFuture<ReceivedKey> result;
 	private final DeviceKey deviceKey;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle, @Named("filesystemOwnerId") AtomicReference<String> fsOwnerId) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle, @Named("filesystemOwnerId") AtomicReference<String> fsOwnerId, HubConfig hubConfig) {
 		this.window = window;
 		this.keychainManager = keychainManager;
 		this.fsOwnerId = fsOwnerId;
+		this.hubConfig = hubConfig;
 		window.setTitle(windowTitle);
 		window.setOnCloseRequest(_ -> result.cancel(true));
 		this.authFlowScene = authFlowScene;
@@ -62,9 +65,20 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 				throw new NoKeychainAccessProviderException();
 			}
 			var keypair = deviceKey.get();
-			showWindow(authFlowScene);
-			var jwe = result.get();
-			return jwe.decryptMasterkey(keypair.getPrivate());
+
+			//check hub config
+			isConsistentHubConfig();
+			if (configContainsAllowedHosts()) {
+				showWindow(authFlowScene);
+				var jwe = result.get();
+				return jwe.decryptMasterkey(keypair.getPrivate());
+			} else {
+				//TODO: sanitze this shit
+				var showUnknownHubHostDialog = Boolean.getBoolean(System.getProperty("cryptomator.allowUnknownHubHosts", "false"));
+				//TODO show window
+				throw new MasterkeyLoadingFailedException("Unknown hub host in vault config");
+			}
+
 		} catch (NoKeychainAccessProviderException e) {
 			showWindow(noKeychainScene);
 			throw new UnlockCancelledException("Unlock canceled due to missing prerequisites", e);
@@ -77,6 +91,49 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 			throw new UnlockCancelledException("Loading interrupted", e);
 		} catch (ExecutionException e) {
 			throw new MasterkeyLoadingFailedException("Failed to retrieve key", e);
+		}
+	}
+
+	private void isConsistentHubConfig() {
+		//hub endpoints are consistent
+		//apiBaseURL.host == deviceUrl.host == authSuccessUrl.host == authErrorUrl.host
+		var expectedHubHubHost = URI.create(hubConfig.authSuccessUrl).getHost(); //apiBaseURL could be null! hence, the authSuccessUrl
+		if (hubConfig.apiBaseUrl != null && hasDifferentHost(hubConfig.apiBaseUrl, expectedHubHubHost)) {
+			//throw
+		}
+		if (hasDifferentHost(hubConfig.devicesResourceUrl, expectedHubHubHost)) {
+			//throw
+		}
+		if (hasDifferentHost(hubConfig.authErrorUrl, expectedHubHubHost)) {
+			//throw
+		}
+
+		//auth endpoints are consistent
+		//authUrl.host == tokenUrl.host
+		var expectedHubAuthHost = URI.create(hubConfig.authEndpoint).getHost();
+		if (hasDifferentHost(hubConfig.tokenEndpoint, expectedHubAuthHost)) {
+			//throw
+		}
+	}
+
+	private boolean configContainsAllowedHosts() {
+		var allowedHubHostsString = System.getProperty("cryptomator.allowedHubHosts", "");
+		//https://example.com,https://foo.bar
+		var allowedHubHosts = Arrays.stream(allowedHubHostsString.split(",")).map(String::trim).toList();
+
+		var expectedHubHubHost = URI.create(hubConfig.authSuccessUrl).getHost(); //apiBaseURL could be null! hence, the authSuccessUrl
+		var expectedHubAuthHost = URI.create(hubConfig.authEndpoint).getHost();
+		//are the hosts also allowed?
+		var isHubHubHostAllowed = allowedHubHosts.stream().anyMatch(host -> host.contains(expectedHubHubHost));
+		var isHubAuthHostAllowed = allowedHubHosts.stream().anyMatch(host -> host.contains(expectedHubAuthHost));
+		return isHubAuthHostAllowed && isHubHubHostAllowed;
+	}
+
+	private boolean hasDifferentHost(String uri, String host) {
+		try {
+			return !URI.create(uri).getHost().equals(host);
+		} catch (IllegalArgumentException e) {
+			return true;
 		}
 	}
 
