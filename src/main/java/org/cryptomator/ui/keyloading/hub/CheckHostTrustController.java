@@ -68,7 +68,7 @@ public class CheckHostTrustController implements FxController {
 	public void initialize() {
 		if (!isConsistentHubConfig()) {
 			LOG.warn("Inconsistent hub config detected. Denying access to protect the user.");
-			Platform.runLater(this::deny);
+			deny();
 		} else if (isCryptomatorCloud()) {
 			trust(); // trust *.cryptomator.cloud by default, domain is owned by Cryptomator maintainers
 		} else if (containsAllowedHosts(env.hubAllowedHosts())) {
@@ -81,7 +81,7 @@ public class CheckHostTrustController implements FxController {
 			renderHostnames(); // ask user whether to trust these hosts
 		} else {
 			LOG.warn("Cryptomator is not allowed to connect to {}. Check your {} config.", getAuthority(hubConfig.getApiBaseUrl()), Environment.HUB_ALLOWED_HOSTS_PROP_NAME);
-			Platform.runLater(this::deny);
+			deny();
 		}
 	}
 
