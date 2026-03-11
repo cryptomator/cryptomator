@@ -73,6 +73,9 @@ public class CheckHostTrustController implements FxController {
 			trust(); // trust *.cryptomator.cloud by default, domain is owned by Cryptomator maintainers
 		} else if (containsAllowedHosts(env.hubAllowedHosts())) {
 			trust(); // trust hosts explicitly allowlisted via system property
+		} else if (isHttpHost() && !isLocalhost()) {
+			LOG.warn("Denying attempt to connect to hub instance via unencrypted HTTP.");
+			deny(); // never trust http hosts except for local testing
 		} else if (env.hubTrustOnFirstUse() && containsAllowedHosts(settings.trustedHosts)) {
 			trust(); // trust hosts previously allowlisted by the user
 		} else if (env.hubTrustOnFirstUse()) {
@@ -123,6 +126,18 @@ public class CheckHostTrustController implements FxController {
 		var canonicalHubHost = hubConfig.getApiBaseUrl().getHost();
 		var canonicalAuthHost = URI.create(hubConfig.authEndpoint).getHost();
 		return canonicalHubHost.endsWith(TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN) && canonicalAuthHost.endsWith(TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN);
+	}
+
+	private boolean isHttpHost() {
+		var canonicalHubHost = hubConfig.getApiBaseUrl().getScheme();
+		var canonicalAuthHost = URI.create(hubConfig.authEndpoint).getScheme();
+		return "http".equalsIgnoreCase(canonicalHubHost) || "http".equalsIgnoreCase(canonicalAuthHost);
+	}
+
+	private boolean isLocalhost() {
+		var canonicalHubHost = hubConfig.getApiBaseUrl().getHost();
+		var canonicalAuthHost = URI.create(hubConfig.authEndpoint).getHost();
+		return "localhost".equalsIgnoreCase(canonicalHubHost) || "localhost".equalsIgnoreCase(canonicalAuthHost);
 	}
 
 	@VisibleForTesting
