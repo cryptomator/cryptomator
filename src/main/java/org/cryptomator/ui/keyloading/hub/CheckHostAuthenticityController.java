@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @KeyLoadingScoped
 public class CheckHostAuthenticityController implements FxController {
@@ -53,21 +55,19 @@ public class CheckHostAuthenticityController implements FxController {
 
 	@FXML
 	public void initialize() {
-		var authUri = URI.create(hubConfig.authEndpoint);
-		var tokenUri = URI.create(hubConfig.tokenEndpoint);
-		var apiBaseUri = hubConfig.getApiBaseUrl();
-		var webappBaseUri = hubConfig.getWebappBaseUrl();
-
 		if (!isConsistentHubConfig()) {
 			LOG.warn("Inconsistent hub config detected. Denying access to protect the user.");
 			Platform.runLater(this::deny);
 		} else if (configContainsAllowedHosts()) {
 			trust();
+		} else if (Boolean.getBoolean("cryptomator.allowUnknownHubHosts") && containsAllowedHosts(settings.trustedHosts)) {
+			trust();
 		} else if (Boolean.getBoolean("cryptomator.allowUnknownHubHosts")) {
-			hostnames.addAll(List.of(authUri.getAuthority(), tokenUri.getAuthority(), apiBaseUri.getAuthority(), webappBaseUri.getAuthority()));
+			hostnames.add(getAuthority(hubConfig.getApiBaseUrl()));
+			hostnames.add(getAuthority(hubConfig.authEndpoint));
 			renderHostnames();
 		} else {
-			LOG.warn("Cryptomator is not allowed to connect to {}. Check your cryptomator.allowedHubHosts config.", webappBaseUri);
+			LOG.warn("Cryptomator is not allowed to connect to {}. Check your cryptomator.allowedHubHosts config.", getAuthority(hubConfig.getApiBaseUrl()));
 			Platform.runLater(this::deny);
 		}
 	}
@@ -92,46 +92,39 @@ public class CheckHostAuthenticityController implements FxController {
 	}
 
 	private boolean isConsistentHubConfig() {
-		//hub endpoints are consistent
-		//apiBaseURL.host == deviceUrl.host == authSuccessUrl.host == authErrorUrl.host
-		var expectedHubHubHost = URI.create(hubConfig.authSuccessUrl).getHost(); //apiBaseURL could be null! hence, the authSuccessUrl
-		if (hubConfig.apiBaseUrl != null && hasDifferentHost(hubConfig.apiBaseUrl, expectedHubHubHost)) {
-			return false;
-		}
-		if (hasDifferentHost(hubConfig.devicesResourceUrl, expectedHubHubHost)) {
-			return false;
-		}
-		if (hasDifferentHost(hubConfig.authErrorUrl, expectedHubHubHost)) {
-			return false;
-		}
+		var canonicalHubHost = getAuthority(hubConfig.getApiBaseUrl());
+		var canonicalAuthHost = getAuthority(hubConfig.authEndpoint);
 
-		//auth endpoints are consistent
-		//authUrl.host == tokenUrl.host
-		var expectedHubAuthHost = URI.create(hubConfig.authEndpoint).getHost();
-		if (hasDifferentHost(hubConfig.tokenEndpoint, expectedHubAuthHost)) {
-			return false;
-		}
-		return true;
+		// apiBaseURL.host == deviceUrl.host == authSuccessUrl.host == authErrorUrl.host
+		return (hubConfig.apiBaseUrl == null || getAuthority(hubConfig.apiBaseUrl).equals(canonicalHubHost)) //
+				&& getAuthority(hubConfig.devicesResourceUrl).equals(canonicalHubHost) //
+				&& getAuthority(hubConfig.authSuccessUrl).equals(canonicalHubHost) //
+				&& getAuthority(hubConfig.authErrorUrl).equals(canonicalHubHost) //
+				// authUrl.host == tokenUrl.host:
+				&& getAuthority(hubConfig.tokenEndpoint).equals(canonicalAuthHost);
 	}
 
 	private boolean configContainsAllowedHosts() {
-		var allowedHubHostsString = System.getProperty("cryptomator.allowedHubHosts", "");
-		//https://example.com,http://foo.bar:3333
-		var allowedHubHosts = Arrays.stream(allowedHubHostsString.split(",")).map(String::trim).toList(); //foo.bar
-
-		var expectedHubHubAuthorities = URI.create(hubConfig.authSuccessUrl).getAuthority(); //apiBaseURL could be null! hence, the authSuccessUrl
-		var expectedHubAuthAuthorities = URI.create(hubConfig.authEndpoint).getAuthority();
-		//are the hosts also allowed?
-		var isHubHubHostAllowed = allowedHubHosts.stream().anyMatch(expectedHubHubAuthorities::equals);
-		var isHubAuthHostAllowed = allowedHubHosts.stream().anyMatch(expectedHubAuthAuthorities::equals);
-		return isHubAuthHostAllowed && isHubHubHostAllowed;
+		var allowedHubHostsString = System.getProperty("cryptomator.allowedHubHosts", ""); // https://example.com,http://foo.bar:3333
+		var allowedHubHosts = Arrays.stream(allowedHubHostsString.split(",")).map(String::trim).collect(Collectors.toUnmodifiableSet());
+		return containsAllowedHosts(allowedHubHosts);
 	}
 
-	private boolean hasDifferentHost(String uri, String host) {
-		try {
-			return !URI.create(uri).getHost().equals(host);
-		} catch (IllegalArgumentException e) {
-			return true;
+	private boolean containsAllowedHosts(Set<String> allowedHubHosts) {
+		var canonicalHubHost = getAuthority(hubConfig.getApiBaseUrl());
+		var canonicalAuthHost = getAuthority(hubConfig.authEndpoint);
+		return allowedHubHosts.contains(canonicalHubHost) && allowedHubHosts.contains(canonicalAuthHost);
+	}
+
+	public static String getAuthority(String string) {
+		return getAuthority(URI.create(string));
+	}
+
+	public static String getAuthority(URI uri) {
+		if (uri.getPort() != -1) {
+			return "%s://%s:%s".formatted(uri.getScheme(), uri.getHost(), uri.getPort());
+		} else {
+			return "%s://%s".formatted(uri.getScheme(), uri.getHost());
 		}
 	}
 
