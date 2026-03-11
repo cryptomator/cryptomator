@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Hyperlink?>
@@ -34,6 +35,8 @@
 			<CheckBox fx:id="useQuickAccessCheckbox" text="%preferences.general.quickAccessService"/>
 			<ChoiceBox fx:id="quickAccessServiceChoiceBox" accessibleText="%preferences.general.quickAccessService"/>
 		</HBox>
+
+		<Button fx:id="resetTrustedHostsButton" text="%preferences.general.resetTrustedHosts" visible="${controller.unknownHubHostsAllowed}" managed="${controller.unknownHubHostsAllowed}" onAction="#resetTrustedHosts"/>
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<HBox spacing="12" alignment="CENTER_LEFT">
