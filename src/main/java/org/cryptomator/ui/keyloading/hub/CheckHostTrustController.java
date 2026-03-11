@@ -36,6 +36,8 @@ public class CheckHostTrustController implements FxController {
 
 	private final Stage window;
 	private final HubConfig hubConfig;
+	private final URI canonicalHubUri;
+	private final URI canonicalAuthUri;
 	private final Lazy<Scene> authFlowScene;
 	private final Lazy<Scene> untrustedHostScene;
 	private final CompletableFuture<ReceivedKey> result;
@@ -54,6 +56,8 @@ public class CheckHostTrustController implements FxController {
 	public CheckHostTrustController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNTRUSTED_HOST) Lazy<Scene> untrustedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, Environment env, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.hubConfig = hubConfig;
+		this.canonicalHubUri = hubConfig.getApiBaseUrl();
+		this.canonicalAuthUri = URI.create(hubConfig.authEndpoint);
 		this.authFlowScene = authFlowScene;
 		this.untrustedHostScene = untrustedHostScene;
 		this.result = result;
@@ -78,11 +82,11 @@ public class CheckHostTrustController implements FxController {
 		} else if (env.hubTrustOnFirstUse() && containsAllowedHosts(settings.trustedHosts)) {
 			trust(); // trust hosts previously allowlisted by the user
 		} else if (env.hubTrustOnFirstUse()) {
-			hostnames.add(getAuthority(hubConfig.getApiBaseUrl()));
-			hostnames.add(getAuthority(hubConfig.authEndpoint));
+			hostnames.add(getAuthority(canonicalHubUri));
+			hostnames.add(getAuthority(canonicalAuthUri));
 			renderHostnames(); // ask user whether to trust these hosts
 		} else {
-			LOG.warn("Cryptomator is not allowed to connect to {}. Check your {} config.", getAuthority(hubConfig.getApiBaseUrl()), Environment.HUB_ALLOWED_HOSTS_PROP_NAME);
+			LOG.warn("Cryptomator is not allowed to connect to {}. Check your {} config.", getAuthority(canonicalHubUri), Environment.HUB_ALLOWED_HOSTS_PROP_NAME);
 			deny();
 		}
 	}
@@ -109,41 +113,34 @@ public class CheckHostTrustController implements FxController {
 	}
 
 	private boolean isConsistentHubConfig() {
-		var canonicalHubHost = getAuthority(hubConfig.getApiBaseUrl());
-		var canonicalAuthHost = getAuthority(hubConfig.authEndpoint);
+		var canonicalHubAuthority = getAuthority(canonicalHubUri);
+		var canonicalAuthAuthority = getAuthority(canonicalAuthUri);
 
 		// apiBaseURL.host == deviceUrl.host == authSuccessUrl.host == authErrorUrl.host
-		return (hubConfig.apiBaseUrl == null || getAuthority(hubConfig.apiBaseUrl).equals(canonicalHubHost)) //
-				&& getAuthority(hubConfig.devicesResourceUrl).equals(canonicalHubHost) //
-				&& getAuthority(hubConfig.authSuccessUrl).equals(canonicalHubHost) //
-				&& getAuthority(hubConfig.authErrorUrl).equals(canonicalHubHost) //
+		return (hubConfig.apiBaseUrl == null || getAuthority(hubConfig.apiBaseUrl).equals(canonicalHubAuthority)) //
+				&& getAuthority(hubConfig.devicesResourceUrl).equals(canonicalHubAuthority) //
+				&& getAuthority(hubConfig.authSuccessUrl).equals(canonicalHubAuthority) //
+				&& getAuthority(hubConfig.authErrorUrl).equals(canonicalHubAuthority) //
 				// authUrl.host == tokenUrl.host:
-				&& getAuthority(hubConfig.tokenEndpoint).equals(canonicalAuthHost);
+				&& getAuthority(hubConfig.tokenEndpoint).equals(canonicalAuthAuthority);
 	}
 
 	private boolean isCryptomatorCloud() {
-		var canonicalHubHost = hubConfig.getApiBaseUrl().getHost();
-		var canonicalAuthHost = URI.create(hubConfig.authEndpoint).getHost();
-		return canonicalHubHost.endsWith(TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN) && canonicalAuthHost.endsWith(TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN);
+		return canonicalHubUri.getHost().endsWith(TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN)
+				&& canonicalAuthUri.getHost().endsWith(TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN);
 	}
 
 	private boolean isHttpHost() {
-		var canonicalHubHost = hubConfig.getApiBaseUrl().getScheme();
-		var canonicalAuthHost = URI.create(hubConfig.authEndpoint).getScheme();
-		return "http".equalsIgnoreCase(canonicalHubHost) || "http".equalsIgnoreCase(canonicalAuthHost);
+		return "http".equalsIgnoreCase(canonicalHubUri.getScheme()) || "http".equalsIgnoreCase(canonicalAuthUri.getScheme());
 	}
 
 	private boolean isLocalhost() {
-		var canonicalHubHost = hubConfig.getApiBaseUrl().getHost();
-		var canonicalAuthHost = URI.create(hubConfig.authEndpoint).getHost();
-		return "localhost".equalsIgnoreCase(canonicalHubHost) || "localhost".equalsIgnoreCase(canonicalAuthHost);
+		return "localhost".equalsIgnoreCase(canonicalHubUri.getHost()) || "localhost".equalsIgnoreCase(canonicalAuthUri.getHost());
 	}
 
 	@VisibleForTesting
 	boolean containsAllowedHosts(Set<String> allowedHubHosts) {
-		var canonicalHubHost = getAuthority(hubConfig.getApiBaseUrl());
-		var canonicalAuthHost = getAuthority(hubConfig.authEndpoint);
-		return allowedHubHosts.contains(canonicalHubHost) && allowedHubHosts.contains(canonicalAuthHost);
+		return allowedHubHosts.contains(getAuthority(canonicalHubUri)) && allowedHubHosts.contains(getAuthority(canonicalAuthUri));
 	}
 
 	public static String getAuthority(String string) {
