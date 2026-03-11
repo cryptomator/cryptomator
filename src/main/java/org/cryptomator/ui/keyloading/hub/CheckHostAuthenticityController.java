@@ -21,9 +21,10 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public class CheckHostAuthenticityController implements FxController {
 	private final CompletableFuture<ReceivedKey> result;
 	private final Settings settings;
 	private final ResourceBundle resourceBundle;
-	private final Set<String> hostnames;
+	private final SortedSet<String> hostnames;
 
 	@FXML
 	private Label messageLabel;
@@ -58,7 +59,7 @@ public class CheckHostAuthenticityController implements FxController {
 		this.result = result;
 		this.settings = settings;
 		this.resourceBundle = resourceBundle;
-		this.hostnames = new HashSet<>();
+		this.hostnames = new TreeSet<>();
 	}
 
 	@FXML
@@ -94,7 +95,9 @@ public class CheckHostAuthenticityController implements FxController {
 
 	private void renderHostnames() {
 		hostnamesFlow.getChildren().clear();
-		hostnames.stream().sorted().forEach(hostname -> hostnamesFlow.getChildren().add(new Text(hostname + System.lineSeparator())));
+		for (var hostname : hostnames) {
+			hostnamesFlow.getChildren().add(new Text(hostname + System.lineSeparator()));
+		}
 		var messageKey = hostnames.size() > 1 ? MESSAGE_PLURAL_KEY : MESSAGE_SINGULAR_KEY;
 		messageLabel.setText(resourceBundle.getString(messageKey));
 	}
