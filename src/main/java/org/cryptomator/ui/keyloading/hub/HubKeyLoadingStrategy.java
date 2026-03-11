@@ -2,6 +2,7 @@ package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
 import dagger.Lazy;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.FilesystemOwnerSupplier;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.keychain.NoKeychainAccessProviderException;
@@ -73,8 +74,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 				var jwe = result.get();
 				return jwe.decryptMasterkey(keypair.getPrivate());
 			} else {
-				//TODO: sanitze this shit
-				var showUnknownHubHostDialog = Boolean.getBoolean(System.getProperty("cryptomator.allowUnknownHubHosts", "false"));
+				var showUnknownHubHostDialog = Environment.getInstance().allowUnknownHubHosts();
 				//TODO show window
 				throw new MasterkeyLoadingFailedException("Unknown hub host in vault config");
 			}
@@ -118,14 +118,14 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 
 	private boolean configContainsAllowedHosts() {
 		var allowedHubHostsString = System.getProperty("cryptomator.allowedHubHosts", "");
-		//https://example.com,https://foo.bar
-		var allowedHubHosts = Arrays.stream(allowedHubHostsString.split(",")).map(String::trim).toList();
+		//https://example.com,http://foo.bar:3333
+		var allowedHubHosts = Arrays.stream(allowedHubHostsString.split(",")).map(String::trim).toList(); //foo.bar
 
-		var expectedHubHubHost = URI.create(hubConfig.authSuccessUrl).getHost(); //apiBaseURL could be null! hence, the authSuccessUrl
-		var expectedHubAuthHost = URI.create(hubConfig.authEndpoint).getHost();
+		var expectedHubHubAuthorities = URI.create(hubConfig.authSuccessUrl).getAuthority(); //apiBaseURL could be null! hence, the authSuccessUrl
+		var expectedHubAuthAuthorities = URI.create(hubConfig.authEndpoint).getAuthority();
 		//are the hosts also allowed?
-		var isHubHubHostAllowed = allowedHubHosts.stream().anyMatch(host -> host.contains(expectedHubHubHost));
-		var isHubAuthHostAllowed = allowedHubHosts.stream().anyMatch(host -> host.contains(expectedHubAuthHost));
+		var isHubHubHostAllowed = allowedHubHosts.stream().anyMatch(expectedHubHubAuthorities::equals);
+		var isHubAuthHostAllowed = allowedHubHosts.stream().anyMatch(expectedHubAuthAuthorities::equals);
 		return isHubAuthHostAllowed && isHubHubHostAllowed;
 	}
 

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -34,6 +35,8 @@ public class Environment {
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 	private static final String DISABLE_UPDATE_CHECK_PROP_NAME = "cryptomator.disableUpdateCheck";
+	private static final String ALLOWED_HUB_HOSTS_PROP_NAME = "cryptomator.allowedHubHosts";
+	private static final String ALLOW_UNKNOWN_HUB_HOSTS_PROP_NAME = "cryptomator.allowUnknownHubHosts";
 
 	private Environment() {}
 
@@ -57,6 +60,8 @@ public class Environment {
 		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
 		logCryptomatorSystemProperty(DISABLE_UPDATE_CHECK_PROP_NAME);
+		logCryptomatorSystemProperty(ALLOWED_HUB_HOSTS_PROP_NAME);
+		logCryptomatorSystemProperty(ALLOW_UNKNOWN_HUB_HOSTS_PROP_NAME);
 	}
 
 	public static Environment getInstance() {
@@ -143,6 +148,15 @@ public class Environment {
 
 	public boolean disableUpdateCheck() {
 		return Boolean.getBoolean(DISABLE_UPDATE_CHECK_PROP_NAME);
+	}
+
+	public List<String> allowedHubHosts() {
+		//TODO: Sanitize?
+		return List.of(System.getProperty(ALLOWED_HUB_HOSTS_PROP_NAME, ""));
+	}
+
+	public boolean allowUnknownHubHosts() {
+		return Boolean.getBoolean(ALLOW_UNKNOWN_HUB_HOSTS_PROP_NAME);
 	}
 
 	private Optional<Path> getPath(String propertyName) {
