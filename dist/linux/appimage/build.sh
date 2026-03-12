@@ -123,7 +123,7 @@ ln -s org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/meta
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
 
 # load AppImageTool
-curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
+curl -L https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage
 
 # create AppImage
