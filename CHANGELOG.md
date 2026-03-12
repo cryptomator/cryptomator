@@ -10,7 +10,15 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.0...HEAD)
 
-No changes yet.
+### Added
+* Cryptomator Hub: Trust on first use, adding new config properties `cryptomator.hub.allowedHosts` and `cryptomator.hub.enableTrustOnFirstUse` ([#4179](https://github.com/cryptomator/cryptomator/pull/4179))
+
+### Fixed
+* Fixed loading of masterkey file from arbitrary paths ([#4180](https://github.com/cryptomator/cryptomator/pull/4180))
+* **[Security]** Cryptomamtor Hub: Fixed possible man-in-the-middle attack with tampered vault config ([GHSA-34rf-rwr3-7g43](https://github.com/cryptomator/cryptomator/security/advisories/GHSA-34rf-rwr3-7g43))
+
+### Other
+* Pin version of appimagetool([#4181](https://github.com/cryptomator/cryptomator/pull/4181))
 
 
 ## [1.19.0](https://github.com/cryptomator/cryptomator/releases/tag/1.19.0) - 2026-03-09
