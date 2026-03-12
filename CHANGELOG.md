@@ -17,12 +17,14 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Fixed loading of masterkey file from arbitrary paths ([#4180](https://github.com/cryptomator/cryptomator/pull/4180))
 * **[Security]** Cryptomamtor Hub: Fixed possible man-in-the-middle attack with tampered vault config ([GHSA-34rf-rwr3-7g43](https://github.com/cryptomator/cryptomator/security/advisories/GHSA-34rf-rwr3-7g43))
 * Fixed Finder window opens twice when revealing vault on macOS ([#4177](https://github.com/cryptomator/cryptomator/pull/4177))
+* Fixed app does not start due to secret service detection failure on Linux ([#4175](https://github.com/cryptomator/cryptomator/pull/4175))
 
 
 ### Changed
 * Pin version of appimagetool([#4181](https://github.com/cryptomator/cryptomator/pull/4181))
 * Updated dependencies:
   * `org.cryptomator:integrations-mac` from 1.5.0-beta3 to 1.5.0
+  * `org.cryptomator:integrations-linux` from 1.7.0-beta4 to 1.7.0
 
 
 
