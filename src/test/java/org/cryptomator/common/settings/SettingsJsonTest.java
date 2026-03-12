@@ -29,7 +29,8 @@ public class SettingsJsonTest {
 					"checkForUpdatesEnabled": true,
 					"port": 8080,
 					"language": "de-DE",
-					"numTrayNotifications": 42
+					"numTrayNotifications": 42,
+					"trustedHosts": null
 				}
 				""";
 
@@ -44,6 +45,7 @@ public class SettingsJsonTest {
 		Assertions.assertTrue(jsonObj.autoCloseVaults);
 		Assertions.assertEquals("de-DE", jsonObj.language);
 		Assertions.assertEquals(42, jsonObj.numTrayNotifications);
+		Assertions.assertEquals(0, jsonObj.trustedHosts.size());
 	}
 
 	@SuppressWarnings("SpellCheckingInspection")
