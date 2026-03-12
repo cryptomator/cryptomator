@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +17,7 @@ import java.util.Set;
 class SettingsJson {
 
 	@JsonProperty("directories")
-	List<VaultSettingsJson> directories = List.of();
+	List<VaultSettingsJson> directories = new ArrayList<>();
 
 	@JsonProperty("writtenByVersion")
 	String writtenByVersion;
@@ -102,5 +104,5 @@ class SettingsJson {
 	String lastUpdateAttemptedByVersion;
 
 	@JsonProperty("trustedHosts")
-	Set<String> trustedHosts = Set.of();
+	Set<String> trustedHosts = new HashSet<>();
 }
