@@ -137,6 +137,7 @@ jobs:
           --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
           --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
+          --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true"
           --mac-package-identifier org.cryptomator
           --resource-dir dist/mac/resources
       - name: Patch Cryptomator.app

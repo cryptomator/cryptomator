@@ -9,10 +9,13 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -20,20 +23,22 @@ public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
 	private static final int DEFAULT_MIN_PW_LENGTH = 8;
-	private static final String SETTINGS_PATH_PROP_NAME = "cryptomator.settingsPath";
-	private static final String IPC_SOCKET_PATH_PROP_NAME = "cryptomator.ipcSocketPath";
-	private static final String KEYCHAIN_PATHS_PROP_NAME = "cryptomator.integrationsWin.keychainPaths";
-	private static final String WINDOWS_HELLO_KEYCHAIN_PATHS_PROP_NAME = "cryptomator.integrationsWin.windowsHelloKeychainPaths";
-	private static final String P12_PATH_PROP_NAME = "cryptomator.p12Path";
-	private static final String LOG_DIR_PROP_NAME = "cryptomator.logDir";
-	private static final String LOOPBACK_ALIAS_PROP_NAME = "cryptomator.loopbackAlias";
-	private static final String MOUNTPOINT_DIR_PROP_NAME = "cryptomator.mountPointsDir";
-	private static final String MIN_PW_LENGTH_PROP_NAME = "cryptomator.minPwLength";
-	private static final String APP_VERSION_PROP_NAME = "cryptomator.appVersion";
-	private static final String BUILD_NUMBER_PROP_NAME = "cryptomator.buildNumber";
-	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
-	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
-	private static final String DISABLE_UPDATE_CHECK_PROP_NAME = "cryptomator.disableUpdateCheck";
+	public static final String SETTINGS_PATH_PROP_NAME = "cryptomator.settingsPath";
+	public static final String IPC_SOCKET_PATH_PROP_NAME = "cryptomator.ipcSocketPath";
+	public static final String KEYCHAIN_PATHS_PROP_NAME = "cryptomator.integrationsWin.keychainPaths";
+	public static final String WINDOWS_HELLO_KEYCHAIN_PATHS_PROP_NAME = "cryptomator.integrationsWin.windowsHelloKeychainPaths";
+	public static final String P12_PATH_PROP_NAME = "cryptomator.p12Path";
+	public static final String LOG_DIR_PROP_NAME = "cryptomator.logDir";
+	public static final String LOOPBACK_ALIAS_PROP_NAME = "cryptomator.loopbackAlias";
+	public static final String MOUNTPOINT_DIR_PROP_NAME = "cryptomator.mountPointsDir";
+	public static final String MIN_PW_LENGTH_PROP_NAME = "cryptomator.minPwLength";
+	public static final String APP_VERSION_PROP_NAME = "cryptomator.appVersion";
+	public static final String BUILD_NUMBER_PROP_NAME = "cryptomator.buildNumber";
+	public static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
+	public static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
+	public static final String DISABLE_UPDATE_CHECK_PROP_NAME = "cryptomator.disableUpdateCheck";
+	public static final String HUB_ALLOWED_HOSTS_PROP_NAME = "cryptomator.hub.allowedHosts";
+	public static final String HUB_TOFU_PROP_NAME = "cryptomator.hub.enableTrustOnFirstUse";
 
 	private Environment() {}
 
@@ -57,6 +62,8 @@ public class Environment {
 		logCryptomatorSystemProperty(PLUGIN_DIR_PROP_NAME);
 		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
 		logCryptomatorSystemProperty(DISABLE_UPDATE_CHECK_PROP_NAME);
+		logCryptomatorSystemProperty(HUB_ALLOWED_HOSTS_PROP_NAME);
+		logCryptomatorSystemProperty(HUB_TOFU_PROP_NAME);
 	}
 
 	public static Environment getInstance() {
@@ -143,6 +150,18 @@ public class Environment {
 
 	public boolean disableUpdateCheck() {
 		return Boolean.getBoolean(DISABLE_UPDATE_CHECK_PROP_NAME);
+	}
+
+	public Set<String> hubAllowedHosts() {
+		var allowedHubHostsString = System.getProperty(HUB_ALLOWED_HOSTS_PROP_NAME, "");
+		return Arrays.stream(allowedHubHostsString.split(","))
+				.map(String::trim)
+				.filter(Predicate.not(String::isEmpty))
+				.collect(Collectors.toUnmodifiableSet());
+	}
+
+	public boolean hubTrustOnFirstUse() {
+		return Boolean.getBoolean(HUB_TOFU_PROP_NAME);
 	}
 
 	private Optional<Path> getPath(String propertyName) {

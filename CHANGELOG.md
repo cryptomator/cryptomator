@@ -7,6 +7,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
+
+## [1.19.1](https://github.com/cryptomator/cryptomator/releases/1.19.1) - 2026-03-12
+
+### Added
+* Cryptomator Hub: Trust on first use, adding new config properties `cryptomator.hub.allowedHosts` and `cryptomator.hub.enableTrustOnFirstUse` ([#4179](https://github.com/cryptomator/cryptomator/pull/4179))
+
+### Fixed
+* Fixed loading of masterkey file from arbitrary paths ([#4180](https://github.com/cryptomator/cryptomator/pull/4180))
+* **[Security]** Cryptomamtor Hub: Fixed possible man-in-the-middle attack with tampered vault config ([GHSA-34rf-rwr3-7g43](https://github.com/cryptomator/cryptomator/security/advisories/GHSA-34rf-rwr3-7g43))
+* Fixed Finder window opens twice when revealing vault on macOS ([#4177](https://github.com/cryptomator/cryptomator/pull/4177))
+* Fixed app does not start due to secret service detection failure on Linux ([#4175](https://github.com/cryptomator/cryptomator/pull/4175))
+* Fixed not-configured plugin directory does not disable plugin search ([#4176](https://github.com/cryptomator/cryptomator/pull/4176))
+
+
+### Changed
+* Pin version of appimagetool([#4181](https://github.com/cryptomator/cryptomator/pull/4181))
+* Updated translations
+* Updated dependencies:
+  * `org.cryptomator:integrations-api` from 1.8.0-beta1 to 1.8.0
+  * `org.cryptomator:integrations-linux` from 1.7.0-beta4 to 1.7.0
+  * `org.cryptomator:integrations-mac` from 1.5.0-beta3 to 1.5.0
+
+
+
 ## [1.19.0](https://github.com/cryptomator/cryptomator/releases/tag/1.19.0) - 2026-03-09
 
 ### Added

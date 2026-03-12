@@ -125,6 +125,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
+    --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \
     --resource-dir ../resources
 

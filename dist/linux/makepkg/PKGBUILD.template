@@ -94,6 +94,7 @@ build() {
     --java-options "-Dcryptomator.p12Path=\"@{userhome}/.config/Cryptomator/key.p12\"" \
     --java-options "-Dcryptomator.settingsPath=\"@{userhome}/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
+    --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \
     --app-version "${pkgver//_*/}" \
     --verbose
 }

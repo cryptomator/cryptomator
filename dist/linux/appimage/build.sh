@@ -99,6 +99,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
     --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
     --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log" \
+    --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \
     --resource-dir ../resources
 
 # transform AppDir
@@ -123,7 +124,7 @@ ln -s org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/meta
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
 
 # load AppImageTool
-curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
+curl -L https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage
 
 # create AppImage

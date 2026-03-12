@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ToggleGroup;
@@ -56,6 +57,7 @@ public class GeneralPreferencesController implements FxController {
 	public CheckBox autoCloseVaultsCheckbox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
+	public Button resetTrustedHostsButton;
 	public ToggleGroup nodeOrientation;
 
 	private CompletionStage<Void> keychainMigrations = CompletableFuture.completedFuture(null);
@@ -105,6 +107,9 @@ public class GeneralPreferencesController implements FxController {
 		quickAccessServiceChoiceBox.setConverter(new NamedServiceConverter<>());
 		Bindings.bindBidirectional(settings.quickAccessService, quickAccessServiceChoiceBox.valueProperty(), quickAccessSettingsConverter);
 		quickAccessServiceChoiceBox.disableProperty().bind(useQuickAccessCheckbox.selectedProperty().not());
+		if (resetTrustedHostsButton != null) {
+			resetTrustedHostsButton.disableProperty().bind(Bindings.isEmpty(settings.trustedHosts));
+		}
 	}
 
 	private void migrateKeychainEntries(Observable observable, KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider) {
@@ -131,6 +136,10 @@ public class GeneralPreferencesController implements FxController {
 		return autoStartProvider.isPresent();
 	}
 
+	public boolean isHubTrustOnFirstUseEnabled() {
+		return environment.hubTrustOnFirstUse();
+	}
+
 	@FXML
 	public void toggleAutoStart() {
 		autoStartProvider.ifPresent(autoStart -> {
@@ -151,6 +160,11 @@ public class GeneralPreferencesController implements FxController {
 
 	public boolean isSomeQuickAccessServiceAvailable() {
 		return !quickAccessServices.isEmpty();
+	}
+
+	@FXML
+	public void resetTrustedHosts() {
+		settings.trustedHosts.clear();
 	}
 
 	@FXML
