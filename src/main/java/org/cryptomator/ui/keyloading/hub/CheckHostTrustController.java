@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -94,13 +95,17 @@ public class CheckHostTrustController implements FxController {
 	@FXML
 	public void trust() {
 		settings.trustedHosts.addAll(hostnames);
-		window.setScene(authFlowScene.get());
+		Platform.runLater(() -> {
+			window.setScene(authFlowScene.get());
+		});
 	}
 
 	@FXML
 	public void deny() {
 		result.cancel(true);
-		window.setScene(untrustedHostScene.get());
+		Platform.runLater(() -> {
+			window.setScene(untrustedHostScene.get());
+		});
 	}
 
 	private void renderHostnames() {
