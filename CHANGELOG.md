@@ -8,7 +8,7 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.0...HEAD)
+## [1.19.1](https://github.com/cryptomator/cryptomator/releases/1.19.1) - 2026-03-12
 
 ### Added
 * Cryptomator Hub: Trust on first use, adding new config properties `cryptomator.hub.allowedHosts` and `cryptomator.hub.enableTrustOnFirstUse` ([#4179](https://github.com/cryptomator/cryptomator/pull/4179))
