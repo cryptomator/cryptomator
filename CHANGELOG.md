@@ -23,6 +23,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ### Changed
 * Pin version of appimagetool([#4181](https://github.com/cryptomator/cryptomator/pull/4181))
+* Updated translations
 * Updated dependencies:
   * `org.cryptomator:integrations-api` from 1.8.0-beta1 to 1.8.0
   * `org.cryptomator:integrations-linux` from 1.7.0-beta4 to 1.7.0
