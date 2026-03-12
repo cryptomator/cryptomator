@@ -1,6 +1,7 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import com.google.common.base.Preconditions;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -33,7 +34,6 @@ import java.util.concurrent.ExecutionException;
 public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 
 	public static final String SCHEME = "masterkeyfile";
-	public static final String DEFAULT_MASTERKEY_PATH = "masterkey.cryptomator"; // relative to vault.cryptomator
 
 	private final Vault vault;
 	private final MasterkeyFileAccess masterkeyFileAccess;
@@ -64,12 +64,12 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
 		window.setTitle(resourceBundle.getString("unlock.title").formatted(vault.getDisplayName()));
 		Preconditions.checkArgument(SCHEME.equalsIgnoreCase(keyId.getScheme()), "Only supports keys with scheme " + SCHEME);
-		if (!DEFAULT_MASTERKEY_PATH.equals(keyId.getSchemeSpecificPart())) {
+		if (!Constants.MASTERKEY_FILENAME.equals(keyId.getSchemeSpecificPart())) {
 			LOG.warn("unsupported masterkey path found in vault.cryptomator: {}", keyId.getSchemeSpecificPart());
 		}
 		try {
 			// determine masterkey file path:
-			Path filePath = vault.getPath().resolve(DEFAULT_MASTERKEY_PATH);
+			Path filePath = vault.getPath().resolve(Constants.MASTERKEY_FILENAME);
 			if (!Files.exists(filePath)) {
 				filePath = askUserForMasterkeyFilePath();
 			}
