@@ -99,6 +99,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
     --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
     --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log" \
+    --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \
     --resource-dir ../resources
 
 # transform AppDir

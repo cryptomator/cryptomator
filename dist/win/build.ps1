@@ -167,6 +167,7 @@ $javaOptions = @(
 "--java-options", "-Dcryptomator.showTrayIcon=true"
 "--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
 "--java-options", "-Dcryptomator.disableUpdateCheck=false"
+"--java-options", "-Dcryptomator.hub.enableTrustOnFirstUse=true"
 )
 
 
