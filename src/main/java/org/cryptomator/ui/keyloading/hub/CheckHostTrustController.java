@@ -14,9 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -31,8 +32,9 @@ import java.util.concurrent.CompletableFuture;
 public class CheckHostTrustController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CheckHostTrustController.class);
-	private static final String MESSAGE_SINGULAR_KEY = "hub.checkHostTrust.message";
-	private static final String MESSAGE_PLURAL_KEY = "hub.checkHostTrust.message.plural";
+	private static final String CHECK_KEY = "hub.checkHostTrust.message.check";
+	private static final String ASK_SINGULAR_KEY = "hub.checkHostTrust.message.ask";
+	private static final String ASK_PLURAL_KEY = "hub.checkHostTrust.message.ask.plural";
 	private static final String TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN = ".cryptomator.cloud";
 
 	private final Stage window;
@@ -46,15 +48,20 @@ public class CheckHostTrustController implements FxController {
 	private final Environment env;
 	private final ResourceBundle resourceBundle;
 	private final SortedSet<String> hostnames;
-
-	@FXML
-	private Label messageLabel;
+	private final StringProperty messageLabel;
 
 	@FXML
 	private TextFlow hostnamesFlow;
 
 	@Inject
-	public CheckHostTrustController(@KeyLoading Stage window, HubConfig hubConfig, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_UNTRUSTED_HOST) Lazy<Scene> untrustedHostScene, CompletableFuture<ReceivedKey> result, Settings settings, Environment env, ResourceBundle resourceBundle) {
+	public CheckHostTrustController(@KeyLoading Stage window, //
+									HubConfig hubConfig, //
+									@FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, //
+									@FxmlScene(FxmlFile.HUB_UNTRUSTED_HOST) Lazy<Scene> untrustedHostScene, //
+									CompletableFuture<ReceivedKey> result, //
+									Settings settings, //
+									Environment env, //
+									ResourceBundle resourceBundle) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.canonicalHubUri = hubConfig.getApiBaseUrl();
@@ -66,6 +73,7 @@ public class CheckHostTrustController implements FxController {
 		this.env = env;
 		this.resourceBundle = resourceBundle;
 		this.hostnames = new TreeSet<>();
+		this.messageLabel = new SimpleStringProperty(resourceBundle.getString(CHECK_KEY));
 	}
 
 	@FXML
@@ -113,8 +121,8 @@ public class CheckHostTrustController implements FxController {
 		for (var hostname : hostnames) {
 			hostnamesFlow.getChildren().add(new Text(hostname + System.lineSeparator()));
 		}
-		var messageKey = hostnames.size() > 1 ? MESSAGE_PLURAL_KEY : MESSAGE_SINGULAR_KEY;
-		messageLabel.setText(resourceBundle.getString(messageKey));
+		var messageKey = hostnames.size() > 1 ? ASK_PLURAL_KEY : ASK_SINGULAR_KEY;
+		messageLabel.set(resourceBundle.getString(messageKey));
 	}
 
 	private boolean isConsistentHubConfig() {
@@ -158,6 +166,15 @@ public class CheckHostTrustController implements FxController {
 			case 443 -> "https://%s".formatted(uri.getHost());
 			default -> "%s://%s:%s".formatted(uri.getScheme(), uri.getHost(), uri.getPort());
 		};
+	}
+
+	//--- JavaFX property getter & setter
+	public StringProperty messageLabelProperty() {
+		return messageLabel;
+	}
+
+	public String getMessageLabel() {
+		return messageLabel.get();
 	}
 
 }

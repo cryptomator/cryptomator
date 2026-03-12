@@ -35,7 +35,7 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label fx:id="messageLabel" styleClass="label-large" text="%hub.checkHostTrust.message" wrapText="true" textAlignment="LEFT">
+			<Label styleClass="label-large" text="${controller.messageLabel}" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
