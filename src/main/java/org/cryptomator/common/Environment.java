@@ -154,7 +154,10 @@ public class Environment {
 
 	public Set<String> hubAllowedHosts() {
 		var allowedHubHostsString = System.getProperty(HUB_ALLOWED_HOSTS_PROP_NAME, "");
-		return Arrays.stream(allowedHubHostsString.split(",")).map(String::trim).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(allowedHubHostsString.split(","))
+				.map(String::trim)
+				.filter(Predicate.not(String::isEmpty))
+				.collect(Collectors.toUnmodifiableSet());
 	}
 
 	public boolean hubTrustOnFirstUse() {
