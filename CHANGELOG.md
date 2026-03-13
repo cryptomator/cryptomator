@@ -15,16 +15,18 @@ No changes yet.
 
 ## [1.19.1](https://github.com/cryptomator/cryptomator/releases/1.19.1) - 2026-03-12
 
-### Added
-* Cryptomator Hub: Trust on first use, adding new config properties `cryptomator.hub.allowedHosts` and `cryptomator.hub.enableTrustOnFirstUse` ([#4179](https://github.com/cryptomator/cryptomator/pull/4179))
-
-### Fixed
-* Fixed loading of masterkey file from arbitrary paths ([#4180](https://github.com/cryptomator/cryptomator/pull/4180))
-* **[Security]** Cryptomamtor Hub: Fixed possible man-in-the-middle attack with tampered vault config ([GHSA-34rf-rwr3-7g43](https://github.com/cryptomator/cryptomator/security/advisories/GHSA-34rf-rwr3-7g43))
-* Fixed Finder window opens twice when revealing vault on macOS ([#4177](https://github.com/cryptomator/cryptomator/pull/4177))
-* Fixed app does not start due to secret service detection failure on Linux ([#4175](https://github.com/cryptomator/cryptomator/pull/4175))
+### Security
+* Cryptomamtor Hub Vaults: Fixed possible man-in-the-middle attack with tampered vault config (#4179, [GHSA-34rf-rwr3-7g43](https://github.com/cryptomator/cryptomator/security/advisories/GHSA-34rf-rwr3-7g43))
+* Disallow unencrypted http connections to hub by default ([CVE-2026-32309](https://github.com/cryptomator/cryptomator/security/advisories/GHSA-vv33-h7qx-c264))
+* Disallow loading of masterkey file from arbitrary paths (#4180, [CVE-2026-32310](https://github.com/cryptomator/cryptomator/security/advisories/GHSA-5phc-5pfx-hr52))
 * Fixed not-configured plugin directory does not disable plugin search ([#4176](https://github.com/cryptomator/cryptomator/pull/4176))
 
+### Added
+* Trust on first use, adding new config properties `cryptomator.hub.allowedHosts` and `cryptomator.hub.enableTrustOnFirstUse` (#4179)
+
+### Fixed
+* Fixed Finder window opens twice when revealing vault on macOS ([#4177](https://github.com/cryptomator/cryptomator/pull/4177))
+* Fixed app does not start due to secret service detection failure on Linux ([#4175](https://github.com/cryptomator/cryptomator/pull/4175))
 
 ### Changed
 * Pin version of appimagetool([#4181](https://github.com/cryptomator/cryptomator/pull/4181))
