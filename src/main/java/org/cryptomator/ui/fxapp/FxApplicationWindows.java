@@ -223,14 +223,14 @@ public class FxApplicationWindows {
 	private static class CachedLazy<T> implements Lazy<T> {
 
 		private final Supplier<T> supplier;
-		private T instance = null;
+		private volatile T instance = null;
 
 		public CachedLazy(Supplier<T> supplier) {
 			this.supplier = supplier;
 		}
 
 		@Override
-		public T get() {
+		public synchronized T get() {
 			if (instance == null) {
 				instance = supplier.get();
 			}
