@@ -97,8 +97,7 @@ public class DecryptFileNamesViewController implements FxController {
 		});
 		cipherToCleartextTable.setOnDragDropped(event -> {
 			if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
-				checkAndDecrypt(event.getDragboard().getFiles().stream().map(File::toPath).toList());
-				cipherToCleartextTable.setItems(mapping);
+				decrypt(event.getDragboard().getFiles().stream().map(File::toPath).toList());
 			}
 		});
 		cipherToCleartextTable.setOnDragExited(_ -> cipherToCleartextTable.setItems(mapping));
@@ -124,9 +123,7 @@ public class DecryptFileNamesViewController implements FxController {
 				});
 			}
 		});
-		if (!initialList.isEmpty()) {
-			checkAndDecrypt(initialList);
-		}
+		decrypt(initialList);
 	}
 
 	private void copySingleCelltoClipboard() {
@@ -149,8 +146,16 @@ public class DecryptFileNamesViewController implements FxController {
 		fileChooser.setInitialDirectory(vault.getPath().toFile());
 		var ciphertextNodes = fileChooser.showOpenMultipleDialog(window);
 		if (ciphertextNodes != null) {
-			checkAndDecrypt(ciphertextNodes.stream().map(File::toPath).toList());
+			decrypt(ciphertextNodes.stream().map(File::toPath).toList());
 		}
+	}
+
+	public void decrypt(List<Path> pathsToDecrypt) {
+		if (pathsToDecrypt.isEmpty()) {
+			return;
+		}
+		checkAndDecrypt(pathsToDecrypt);
+		cipherToCleartextTable.setItems(mapping);
 	}
 
 	private void checkAndDecrypt(List<Path> pathsToDecrypt) {

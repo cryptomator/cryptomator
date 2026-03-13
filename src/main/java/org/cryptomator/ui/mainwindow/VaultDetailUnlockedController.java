@@ -58,6 +58,7 @@ public class VaultDetailUnlockedController implements FxController {
 	private final DecryptNameComponent.Factory decryptNameWindowFactory;
 	private final ResourceBundle resourceBundle;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
+	private final LoadingCache<Vault, DecryptNameComponent> decryptNameWindows;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
 	private final ObservableValue<Boolean> accessibleViaPath;
 	private final ObservableValue<Boolean> accessibleViaUri;
@@ -90,6 +91,7 @@ public class VaultDetailUnlockedController implements FxController {
 		this.decryptNameWindowFactory = decryptNameWindowFactory;
 		this.resourceBundle = resourceBundle;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
+		this.decryptNameWindows = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildDecryptNameWindow));
 		this.vaultStatsBuilder = vaultStatsBuilder;
 		var mp = vault.flatMap(Vault::mountPointProperty);
 		this.accessibleViaPath = mp.map(m -> m instanceof Mountpoint.WithPath).orElse(false);
@@ -161,7 +163,7 @@ public class VaultDetailUnlockedController implements FxController {
 	}
 
 	private void showDecryptNameWindow(List<Path> pathsToDecrypt) {
-		decryptNameWindowFactory.create(vault.get(), mainWindow, pathsToDecrypt).showDecryptFileNameWindow();
+		decryptNameWindows.getUnchecked(vault.get()).showDecryptFileNameWindow(pathsToDecrypt);
 	}
 
 	private boolean startsWithVaultAccessPoint(Path path) {
@@ -196,6 +198,10 @@ public class VaultDetailUnlockedController implements FxController {
 
 	private VaultStatisticsComponent buildVaultStats(Vault vault) {
 		return vaultStatsBuilder.vault(vault).build();
+	}
+
+	private DecryptNameComponent buildDecryptNameWindow(Vault vault) {
+		return decryptNameWindowFactory.create(vault, mainWindow, List.of());
 	}
 
 	@FXML
