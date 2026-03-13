@@ -11,6 +11,8 @@ name: Build macOS .dmg for x64
 on:
   release:
     types: [published]
+  schedule:
+    - cron: '0 20 20 * *'
   workflow_dispatch:
     inputs:
       version:
