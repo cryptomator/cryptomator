@@ -3,6 +3,8 @@ name: Build AppImage
 on:
   release:
     types: [published]
+  schedule:
+    - cron: '0 23 20 * *'
   workflow_dispatch:
     inputs:
       version:

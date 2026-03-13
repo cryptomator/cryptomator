@@ -3,6 +3,8 @@ name: Build macOS .dmg for arm64
 on:
   release:
     types: [published]
+  schedule:
+    - cron: '0 20 20 * *'
   workflow_dispatch:
     inputs:
       version:
@@ -248,7 +250,7 @@ jobs:
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
       - name: Notarize .dmg
-        if: startsWith(github.ref, 'refs/tags/') || inputs.notarize
+        if: startsWith(github.ref, 'refs/tags/') || inputs.notarize || github.event_name == 'schedule'
         uses: cocoalibs/xcode-notarization-action@5cf433d494b6fa26504b574c591f4dd120388846 # v1.0.3
         with:
           app-path: 'Cryptomator-*.dmg'

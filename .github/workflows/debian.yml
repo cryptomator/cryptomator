@@ -1,6 +1,8 @@
 name: Build Debian Package
 
 on:
+  schedule:
+    - cron: '0 22 20 * *'
   workflow_dispatch:
     inputs:
       semver:

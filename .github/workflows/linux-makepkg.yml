@@ -3,6 +3,8 @@ name: Build Arch package
 on:
   release:
     types: [published]
+  schedule:
+    - cron: '0 21 20 * *'
   workflow_dispatch:
     inputs:
       version:
