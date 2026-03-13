@@ -202,17 +202,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-      - name: Sign DLLs with Actalis CodeSigner
-        if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@957d3c2c08c56855fdac41e5afb9a7aca8c30dd9 # no specific version
-        with:
-          base-dir: 'appdir'
-          file-extensions: 'dll,exe,ps1'
-          recursive: true
-          sign-description: 'Cryptomator'
-          sign-url: 'https://cryptomator.org'
-          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
-          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Replace DLLs inside jars with signed ones
         shell: pwsh
         run: |
@@ -380,16 +369,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-      - name: Sign burn engine with Actalis CodeSigner
-        if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@957d3c2c08c56855fdac41e5afb9a7aca8c30dd9 # no specific version
-        with:
-          base-dir: 'tmp'
-          file-extensions: 'exe'
-          sign-description: 'Cryptomator Bundle Installer'
-          sign-url: 'https://cryptomator.org'
-          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
-          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Reattach signed burn engine to installer
         run: >
           wix burn reattach installer/unsigned/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
@@ -404,16 +383,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-      - name: Sign installer with Actalis CodeSigner
-        if: inputs.sign || github.event_name == 'release'
-        uses: skymatic/workflows/.github/actions/win-sign-action@957d3c2c08c56855fdac41e5afb9a7aca8c30dd9 # no specific version
-        with:
-          base-dir: 'installer'
-          file-extensions: 'exe'
-          sign-description: 'Cryptomator Bundle Installer'
-          sign-url: 'https://cryptomator.org'
-          username: ${{ secrets.WIN_CODESIGN_USERNAME }}
-          password: ${{ secrets.WIN_CODESIGN_PW }}
       - name: Add possible alpha/beta tags to installer name
         run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.executable-suffix }}.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
