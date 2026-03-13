@@ -230,9 +230,16 @@ public class FxApplicationWindows {
 		}
 
 		@Override
-		public synchronized T get() {
-			if (instance == null) {
-				instance = supplier.get();
+		public T get() {
+			T value = instance;
+			if (value == null) {
+				synchronized (this) {
+					value = instance;
+					if (value == null) {
+						value = supplier.get();
+						instance = value;
+					}
+				}
 			}
 			return instance;
 		}
