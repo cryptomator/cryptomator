@@ -3,10 +3,7 @@ updates:
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
-      timezone: "Etc/UTC"
+      interval: "monthly"
     ignore:
       - dependency-name: "org.cryptomator:integrations-api"
         versions: ["2.0.0-alpha1"]
@@ -18,36 +15,9 @@ updates:
       - dependency-name: "org.apache.maven.plugins:maven-surefire-plugin"
         versions: [ "3.5.4", "3.5.5" ]
     groups:
-      java-test-dependencies:
-        patterns:
-          - "org.junit.jupiter:*"
-          - "org.mockito:*"
-          - "org.hamcrest:*"
-          - "com.google.jimfs:jimfs"
-      maven-build-plugins:
-        patterns:
-          - "org.apache.maven.plugins:*"
-          - "org.jacoco:jacoco-maven-plugin"
-          - "org.owasp:dependency-check-maven"
-          - "me.fabriciorby:maven-surefire-junit5-tree-reporter"
-          - "org.codehaus.mojo:license-maven-plugin"
-      javafx:
-        patterns:
-          - "org.openjfx:*"
-      java-production-dependencies:
+      maven-dependencies:
         patterns:
           - "*"
-        exclude-patterns:
-          - "org.openjfx:*"
-          - "org.apache.maven.plugins:*"
-          - "org.jacoco:jacoco-maven-plugin"
-          - "org.owasp:dependency-check-maven"
-          - "me.fabriciorby:maven-surefire-junit5-tree-reporter"
-          - "org.codehaus.mojo:license-maven-plugin"
-          - "org.junit.jupiter:*"
-          - "org.mockito:*"
-          - "org.hamcrest:*"
-          - "com.google.jimfs:jimfs"
 
   - package-ecosystem: "github-actions"
     directory: "/" # even for `.github/workflows`
