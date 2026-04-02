@@ -63,6 +63,7 @@ public class TrayMenuBuilder {
 		vaults.addListener(this::vaultListChanged);
 		vaults.forEach(v -> {
 			v.displayNameProperty().addListener(this::vaultListChanged);
+			v.stateProperty().addListener(this::vaultListChanged);
 		});
 
 		try {
@@ -76,7 +77,9 @@ public class TrayMenuBuilder {
 				for (Vault vault : vaults) {
 					VaultListManager.redetermineVaultState(vault);
 				}
+				rebuildMenu();
 			});
+			vaults.forEach(VaultListManager::redetermineVaultState);
 			rebuildMenu();
 			initialized = true;
 		} catch (TrayMenuException e) {
@@ -122,18 +125,27 @@ public class TrayMenuBuilder {
 	}
 
 	private List<TrayMenuItem> buildSubmenu(Vault vault) {
-		if (vault.isLocked()) {
-			return List.of( //
+		return switch (vault.getState()) {
+			case LOCKED -> List.of( //
 					new ActionItem(resourceBundle.getString("traymenu.vault.unlock"), () -> this.unlockVault(vault)) //
 			);
-		} else if (vault.isUnlocked()) {
-			return List.of( //
+			case UNLOCKED -> List.of( //
 					new ActionItem(resourceBundle.getString("traymenu.vault.lock"), () -> this.lockVault(vault)), //
 					new ActionItem(resourceBundle.getString("traymenu.vault.reveal"), () -> this.revealVault(vault)) //
 			);
-		} else {
-			return List.of();
-		}
+			case PROCESSING -> List.of( //
+					new ActionItem(resourceBundle.getString("vault.state.processing"), () -> {}, false) //
+			);
+			case MISSING, VAULT_CONFIG_MISSING, ALL_MISSING -> List.of( //
+					new ActionItem(resourceBundle.getString("vault.state.missing"), () -> {}, false) //
+			);
+			case NEEDS_MIGRATION -> List.of( //
+					new ActionItem(resourceBundle.getString("vault.state.migrationNeeded"), () -> {}, false) //
+			);
+			case ERROR -> List.of( //
+					new ActionItem(resourceBundle.getString("vault.state.error"), () -> {}, false) //
+			);
+		};
 	}
 
 	/* action listeners: */

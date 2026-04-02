@@ -111,7 +111,6 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Djava.net.useSystemProxies=true" \
-    --java-options "-Dapple.awt.enableTemplateImages=true" \
     --java-options "-Dsun.java2d.metal=true" \
     --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
     --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\"" \
