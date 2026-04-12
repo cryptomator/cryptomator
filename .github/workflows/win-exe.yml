@@ -136,7 +136,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2025 Skymatic GmbH"
+          --copyright "(C) 2016 - 2026 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum }}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
@@ -239,7 +239,7 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2025 Skymatic GmbH"
+          --copyright "(C) 2016 - 2026 Skymatic GmbH"
           --app-version "${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           --win-menu
           --win-dir-chooser
@@ -349,7 +349,7 @@ jobs:
           -define BundleName="Cryptomator"
           -define BundleVersion="${{ needs.get-version.outputs.semVerNum }}.${{ needs.get-version.outputs.revNum}}"
           -define BundleVendor="Skymatic GmbH"
-          -define BundleCopyright="(C) 2016 - 2025 Skymatic GmbH"
+          -define BundleCopyright="(C) 2016 - 2026 Skymatic GmbH"
           -define AboutUrl="https://cryptomator.org"
           -define HelpUrl="https://cryptomator.org/contact"
           -define UpdateUrl="https://cryptomator.org/downloads/"

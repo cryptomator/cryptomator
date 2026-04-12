@@ -114,7 +114,7 @@ modules:
         --dest .
         --name Cryptomator
         --vendor 'Skymatic GmbH'
-        --copyright '(C) 2016 - 2025 Skymatic GmbH'
+        --copyright '(C) 2016 - 2026 Skymatic GmbH'
         --java-options '--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator'
         --java-options "--sun-misc-unsafe-memory-access=allow"
         --java-options '-Xss5m'
