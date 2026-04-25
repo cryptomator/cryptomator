@@ -8,23 +8,23 @@ jobs:
   get-version:
     runs-on: ubuntu-latest
     steps:
-      #- name: Download source tarball
-      #  run: |
-      #    curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name }}.tar.gz --output cryptomator-${{ github.event.release.tag_name }}.tar.gz
-      #- name: Sign source tarball with key 615D449FE6E6A235
-      #  run: |
-      #    echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-      #    echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.tar.gz
-      #  env:
-      #    GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
-      #    GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-      #- name: Publish asc on GitHub Releases
-      #  uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
-      #  with:
-      #    fail_on_unmatched_files: true
-      #    token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-      #    files: |
-      #      cryptomator-*.tar.gz.asc
+      - name: Download source tarball
+        run: |
+          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name }}.tar.gz --output cryptomator-${{ github.event.release.tag_name }}.tar.gz
+      - name: Sign source tarball with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.tar.gz
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Publish asc on GitHub Releases
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            cryptomator-*.tar.gz.asc
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
         env:
