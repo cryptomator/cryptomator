@@ -4,8 +4,8 @@ Param(
 	[string] $Action = "install"
 )
 
-New-Variable -Name "SYSDIR" -Value ([Environment]::SystemDirectory) -Option Constant -Scope Global
-New-Variable -Name "HOSTSFILE" -Value "$sysdir\drivers\etc\hosts" -Option Constant -Scope Global
+New-Variable -Name "sysdir" -Value ([Environment]::SystemDirectory) -Option Constant -Scope Global
+New-Variable -Name "hostsFile" -Value "$sysdir\drivers\etc\hosts" -Option Constant -Scope Global
 
 # Adds an alias for 127.0.0.1 to the hosts file
 function Add-AliasToHost {
@@ -14,17 +14,17 @@ function Add-AliasToHost {
     )
     $aliasLine = "127.0.0.1 $LoopbackAlias"
 
-    foreach ($line in Get-Content $HOSTSFILE) {
+    foreach ($line in Get-Content $hostsFile) {
         if ($line -eq $aliasLine){
             return
         }
     }
 
-    $content = Get-Content $HOSTSFILE
+    $content = Get-Content $hostsFile
     $content += "`r`n$aliasLine"
 
     $content | Set-Content "$hostsFile.tmp" -Encoding ascii
-    Move-Item "$hostsFile.tmp" $HOSTSFILE -Force
+    Move-Item "$hostsFile.tmp" $hostsFile -Force
 }
 
 # Removes an alias for 127.0.0.1 from the hosts file
@@ -34,11 +34,11 @@ function Remove-AliasFromHost {
     )
     $aliasLine = "127.0.0.1 $LoopbackAlias"
 
-    $content = Get-Content $HOSTSFILE
+    $content = Get-Content $hostsFile
     $newContent = $content | Where-Object { $_ -ne $aliasLine }
 
     $newContent | Set-Content "$hostsFile.tmp" -Encoding ascii
-	Move-Item "$hostsFile.tmp" $HOSTSFILE -Force
+	Move-Item "$hostsFile.tmp" $hostsFile -Force
 }
 
 # Sets in the registry the webclient file size limit to the maximum value
