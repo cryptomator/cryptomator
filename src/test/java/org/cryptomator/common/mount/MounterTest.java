@@ -66,6 +66,23 @@ class MounterTest {
 	}
 
 	/**
+	 * Verifies that scanning continues after a non-port-collision binding failure.
+	 */
+	@Test
+	void detectsSuppressedPortCollisionAfterNonMatchingBindException(@TempDir Path mountPointsDir) {
+		var bindException = new BindException("Cannot assign requested address");
+		bindException.addSuppressed(new BindException("Address already in use"));
+		var mountFailedException = new MountFailedException("Failed to start server", bindException);
+		var service = new FailingLoopbackMountService(mountFailedException);
+		var mounter = mounterWith(service, mountPointsDir);
+
+		var exception = assertThrows(PortAlreadyInUseException.class, () -> mounter.mount(VaultSettings.withRandomId(), mountPointsDir));
+
+		assertEquals(42427, exception.getPort());
+		assertSame(mountFailedException, exception.getCause());
+	}
+
+	/**
 	 * Verifies that unrelated mount failures keep their original exception type.
 	 */
 	@Test

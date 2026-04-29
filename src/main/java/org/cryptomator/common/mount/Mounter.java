@@ -206,8 +206,8 @@ public class Mounter {
 	private static boolean causedByAddressAlreadyInUse(Throwable e, Set<Throwable> visited) {
 		if (e == null || !visited.add(e)) {
 			return false;
-		} else if (e instanceof BindException be) {
-			return isAddressAlreadyInUse(be);
+		} else if (e instanceof BindException be && isAddressAlreadyInUse(be)) {
+			return true;
 		} else {
 			for (var suppressed : e.getSuppressed()) {
 				if (causedByAddressAlreadyInUse(suppressed, visited)) {
