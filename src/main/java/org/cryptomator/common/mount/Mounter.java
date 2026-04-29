@@ -16,12 +16,14 @@ import javax.inject.Singleton;
 import javafx.beans.value.ObservableValue;
 import java.io.IOException;
 import java.net.BindException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,6 +37,7 @@ import static org.cryptomator.integrations.mount.MountCapability.UNMOUNT_FORCED;
 public class Mounter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Mounter.class);
+	private static final int LOOPBACK_PORT_PROBE_TIMEOUT_MILLIS = 200;
 
 	// mount providers (key) can not be used if any of the conflicting mount providers (values) are already in use
 	private static final Map<String, Set<String>> CONFLICTING_MOUNT_SERVICES = Map.of(
@@ -164,7 +167,7 @@ public class Mounter {
 		}
 
 		private boolean loopbackPortAlreadyInUse(Throwable e) {
-			return loopbackPort != -1 && causedByAddressAlreadyInUse(e, Collections.newSetFromMap(new IdentityHashMap<>()));
+			return loopbackPort != -1 && causedByBindException(e, Collections.newSetFromMap(new IdentityHashMap<>())) && isLoopbackPortListening(loopbackPort);
 		}
 
 		private PortAlreadyInUseException portAlreadyInUseException(MountFailedException cause) {
@@ -203,24 +206,28 @@ public class Mounter {
 		return usedMountServices.stream().map(MountService::getClass).map(Class::getName).anyMatch(conflictingServices::contains);
 	}
 
-	private static boolean causedByAddressAlreadyInUse(Throwable e, Set<Throwable> visited) {
+	private static boolean causedByBindException(Throwable e, Set<Throwable> visited) {
 		if (e == null || !visited.add(e)) {
 			return false;
-		} else if (e instanceof BindException be && isAddressAlreadyInUse(be)) {
+		} else if (e instanceof BindException) {
 			return true;
 		} else {
 			for (var suppressed : e.getSuppressed()) {
-				if (causedByAddressAlreadyInUse(suppressed, visited)) {
+				if (causedByBindException(suppressed, visited)) {
 					return true;
 				}
 			}
-			return causedByAddressAlreadyInUse(e.getCause(), visited);
+			return causedByBindException(e.getCause(), visited);
 		}
 	}
 
-	private static boolean isAddressAlreadyInUse(BindException e) {
-		var msg = e.getMessage();
-		return msg != null && msg.toLowerCase(Locale.ROOT).contains("address already in use");
+	private static boolean isLoopbackPortListening(int port) {
+		try (var socket = new Socket()) {
+			socket.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), LOOPBACK_PORT_PROBE_TIMEOUT_MILLIS);
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
 	}
 
 	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, Runnable specialCleanup) {

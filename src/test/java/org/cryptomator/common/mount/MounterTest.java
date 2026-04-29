@@ -16,6 +16,9 @@ import org.mockito.Mockito;
 import javafx.beans.property.SimpleObjectProperty;
 import java.io.IOException;
 import java.net.BindException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -36,57 +39,61 @@ class MounterTest {
 	 * Verifies that a direct {@link BindException} becomes a typed port conflict.
 	 */
 	@Test
-	void wrapsBindExceptionAsPortAlreadyInUseException(@TempDir Path mountPointsDir) {
+	void wrapsBindExceptionAsPortAlreadyInUseException(@TempDir Path mountPointsDir) throws IOException {
 		var mountFailedException = new MountFailedException("Failed to start server", new BindException("Address already in use"));
 		var service = new FailingLoopbackMountService(mountFailedException);
-		var mounter = mounterWith(service, mountPointsDir);
+		try (var occupiedPort = occupyLoopbackPort()) {
+			var mounter = mounterWith(service, mountPointsDir, occupiedPort.getLocalPort());
 
-		var exception = assertThrows(PortAlreadyInUseException.class, () -> mounter.mount(VaultSettings.withRandomId(), mountPointsDir));
+			var exception = assertThrows(PortAlreadyInUseException.class, () -> mounter.mount(VaultSettings.withRandomId(), mountPointsDir));
 
-		assertEquals(42427, exception.getPort());
-		assertTrue(exception.isDefaultPort());
-		assertSame(mountFailedException, exception.getCause());
+			assertEquals(occupiedPort.getLocalPort(), exception.getPort());
+			assertTrue(exception.isDefaultPort());
+			assertSame(mountFailedException, exception.getCause());
+		}
 	}
 
 	/**
 	 * Verifies that suppressed binding failures are detected as port conflicts.
 	 */
 	@Test
-	void detectsSuppressedBindException(@TempDir Path mountPointsDir) {
+	void detectsSuppressedBindException(@TempDir Path mountPointsDir) throws IOException {
 		var serverFailure = new IOException("Server failed to start");
 		serverFailure.addSuppressed(new BindException("Address already in use"));
 		var mountFailedException = new MountFailedException("Failed to start server", serverFailure);
 		var service = new FailingLoopbackMountService(mountFailedException);
-		var mounter = mounterWith(service, mountPointsDir);
+		try (var occupiedPort = occupyLoopbackPort()) {
+			var mounter = mounterWith(service, mountPointsDir, occupiedPort.getLocalPort());
 
-		var exception = assertThrows(PortAlreadyInUseException.class, () -> mounter.mount(VaultSettings.withRandomId(), mountPointsDir));
+			var exception = assertThrows(PortAlreadyInUseException.class, () -> mounter.mount(VaultSettings.withRandomId(), mountPointsDir));
 
-		assertEquals(42427, exception.getPort());
-		assertSame(mountFailedException, exception.getCause());
+			assertEquals(occupiedPort.getLocalPort(), exception.getPort());
+			assertSame(mountFailedException, exception.getCause());
+		}
 	}
 
 	/**
-	 * Verifies that scanning continues after a non-port-collision binding failure.
+	 * Verifies that an occupied port is detected without relying on an English exception message.
 	 */
 	@Test
-	void detectsSuppressedPortCollisionAfterNonMatchingBindException(@TempDir Path mountPointsDir) {
-		var bindException = new BindException("Cannot assign requested address");
-		bindException.addSuppressed(new BindException("Address already in use"));
-		var mountFailedException = new MountFailedException("Failed to start server", bindException);
+	void detectsPortConflictWithNonEnglishBindExceptionMessage(@TempDir Path mountPointsDir) throws IOException {
+		var mountFailedException = new MountFailedException("Failed to start server", new BindException("Cannot assign requested address"));
 		var service = new FailingLoopbackMountService(mountFailedException);
-		var mounter = mounterWith(service, mountPointsDir);
+		try (var occupiedPort = occupyLoopbackPort()) {
+			var mounter = mounterWith(service, mountPointsDir, occupiedPort.getLocalPort());
 
-		var exception = assertThrows(PortAlreadyInUseException.class, () -> mounter.mount(VaultSettings.withRandomId(), mountPointsDir));
+			var exception = assertThrows(PortAlreadyInUseException.class, () -> mounter.mount(VaultSettings.withRandomId(), mountPointsDir));
 
-		assertEquals(42427, exception.getPort());
-		assertSame(mountFailedException, exception.getCause());
+			assertEquals(occupiedPort.getLocalPort(), exception.getPort());
+			assertSame(mountFailedException, exception.getCause());
+		}
 	}
 
 	/**
 	 * Verifies that unrelated mount failures keep their original exception type.
 	 */
 	@Test
-	void keepsOtherMountFailuresUnchanged(@TempDir Path mountPointsDir) {
+	void keepsOtherMountFailuresUnchanged(@TempDir Path mountPointsDir) throws IOException {
 		var mountFailedException = new MountFailedException("Mounting failed", new IOException("Some other failure"));
 		var service = new FailingLoopbackMountService(mountFailedException);
 		var mounter = mounterWith(service, mountPointsDir);
@@ -100,7 +107,7 @@ class MounterTest {
 	 * Verifies that bind failures unrelated to occupied ports keep their original exception type.
 	 */
 	@Test
-	void keepsNonPortCollisionBindFailuresUnchanged(@TempDir Path mountPointsDir) {
+	void keepsBindFailuresUnchangedIfConfiguredPortIsAvailable(@TempDir Path mountPointsDir) throws IOException {
 		var mountFailedException = new MountFailedException("Failed to start server", new BindException("Cannot assign requested address"));
 		var service = new FailingLoopbackMountService(mountFailedException);
 		var mounter = mounterWith(service, mountPointsDir);
@@ -113,12 +120,38 @@ class MounterTest {
 	/**
 	 * Creates a mounter with one fake mount service and a deterministic mount points directory.
 	 */
-	private static Mounter mounterWith(MountService service, Path mountPointsDir) {
+	private static Mounter mounterWith(MountService service, Path mountPointsDir) throws IOException {
+		return mounterWith(service, mountPointsDir, findAvailableLoopbackPort());
+	}
+
+	/**
+	 * Creates a mounter using the given TCP port as default loopback port.
+	 */
+	private static Mounter mounterWith(MountService service, Path mountPointsDir, int port) {
 		var env = Mockito.mock(Environment.class);
 		Mockito.when(env.getLoopbackAlias()).thenReturn(Optional.empty());
 		Mockito.when(env.getMountPointsDir()).thenReturn(Optional.of(mountPointsDir));
 		var settings = Settings.create(Mockito.mock(SettingsProvider.class), Mockito.mock(Environment.class));
+		settings.port.set(port);
 		return new Mounter(env, settings, Mockito.mock(WindowsDriveLetters.class), List.of(service), ConcurrentHashMap.newKeySet(), new SimpleObjectProperty<>(service));
+	}
+
+	/**
+	 * Opens a TCP server on a random loopback port.
+	 */
+	private static ServerSocket occupyLoopbackPort() throws IOException {
+		var server = new ServerSocket();
+		server.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
+		return server;
+	}
+
+	/**
+	 * @return A currently available loopback port.
+	 */
+	private static int findAvailableLoopbackPort() throws IOException {
+		try (var server = occupyLoopbackPort()) {
+			return server.getLocalPort();
+		}
 	}
 
 	/**
