@@ -15,8 +15,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javafx.beans.value.ObservableValue;
 import java.io.IOException;
+import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +68,8 @@ public class Mounter {
 		private final MountService service;
 		private final MountBuilder builder;
 		private final VaultSettings vaultSettings;
+		private int loopbackPort = -1;
+		private boolean defaultLoopbackPort;
 
 		public SettledMounter(MountService service, MountBuilder builder, VaultSettings vaultSettings) {
 			this.service = service;
@@ -78,10 +83,13 @@ public class Mounter {
 					case FILE_SYSTEM_NAME -> builder.setFileSystemName("cryptoFs");
 					case LOOPBACK_PORT -> {
 						if (vaultSettings.mountService.getValue() == null) {
-							builder.setLoopbackPort(settings.port.get());
+							loopbackPort = settings.port.get();
+							defaultLoopbackPort = true;
 						} else {
-							builder.setLoopbackPort(vaultSettings.port.get());
+							loopbackPort = vaultSettings.port.get();
+							defaultLoopbackPort = false;
 						}
+						builder.setLoopbackPort(loopbackPort);
 					}
 					case LOOPBACK_HOST_NAME -> env.getLoopbackAlias().ifPresent(builder::setLoopbackHostName);
 					case READ_ONLY -> builder.setReadOnly(vaultSettings.usesReadOnlyMode.get());
@@ -154,6 +162,14 @@ public class Mounter {
 			return cleanup;
 		}
 
+		private boolean loopbackPortAlreadyInUse(Throwable e) {
+			return loopbackPort != -1 && causedByBindException(e, Collections.newSetFromMap(new IdentityHashMap<>()));
+		}
+
+		private PortAlreadyInUseException portAlreadyInUseException(MountFailedException cause) {
+			return new PortAlreadyInUseException(loopbackPort, defaultLoopbackPort, cause);
+		}
+
 	}
 
 	public MountHandle mount(VaultSettings vaultSettings, Path cryptoFsRoot) throws IOException, MountFailedException {
@@ -170,12 +186,35 @@ public class Mounter {
 		LOG.debug("Using mount service {} for mounting vault {}", mountService.getClass().getName(), vaultSettings.displayName);
 		var internal = new SettledMounter(mountService, builder, vaultSettings); // FIXME: no need for an inner class
 		var cleanup = internal.prepare();
-		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), cleanup);
+		try {
+			return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), cleanup);
+		} catch (MountFailedException e) {
+			if (internal.loopbackPortAlreadyInUse(e)) {
+				throw internal.portAlreadyInUseException(e);
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	public boolean isConflictingMountService(MountService service) {
 		var conflictingServices = CONFLICTING_MOUNT_SERVICES.getOrDefault(service.getClass().getName(), Set.of());
 		return usedMountServices.stream().map(MountService::getClass).map(Class::getName).anyMatch(conflictingServices::contains);
+	}
+
+	private static boolean causedByBindException(Throwable e, Set<Throwable> visited) {
+		if (e == null || !visited.add(e)) {
+			return false;
+		} else if (e instanceof BindException) {
+			return true;
+		} else {
+			for (var suppressed : e.getSuppressed()) {
+				if (causedByBindException(suppressed, visited)) {
+					return true;
+				}
+			}
+			return causedByBindException(e.getCause(), visited);
+		}
 	}
 
 	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, Runnable specialCleanup) {
