@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -163,7 +164,7 @@ public class Mounter {
 		}
 
 		private boolean loopbackPortAlreadyInUse(Throwable e) {
-			return loopbackPort != -1 && causedByBindException(e, Collections.newSetFromMap(new IdentityHashMap<>()));
+			return loopbackPort != -1 && causedByAddressAlreadyInUse(e, Collections.newSetFromMap(new IdentityHashMap<>()));
 		}
 
 		private PortAlreadyInUseException portAlreadyInUseException(MountFailedException cause) {
@@ -202,19 +203,24 @@ public class Mounter {
 		return usedMountServices.stream().map(MountService::getClass).map(Class::getName).anyMatch(conflictingServices::contains);
 	}
 
-	private static boolean causedByBindException(Throwable e, Set<Throwable> visited) {
+	private static boolean causedByAddressAlreadyInUse(Throwable e, Set<Throwable> visited) {
 		if (e == null || !visited.add(e)) {
 			return false;
-		} else if (e instanceof BindException) {
-			return true;
+		} else if (e instanceof BindException be) {
+			return isAddressAlreadyInUse(be);
 		} else {
 			for (var suppressed : e.getSuppressed()) {
-				if (causedByBindException(suppressed, visited)) {
+				if (causedByAddressAlreadyInUse(suppressed, visited)) {
 					return true;
 				}
 			}
-			return causedByBindException(e.getCause(), visited);
+			return causedByAddressAlreadyInUse(e.getCause(), visited);
 		}
+	}
+
+	private static boolean isAddressAlreadyInUse(BindException e) {
+		var msg = e.getMessage();
+		return msg != null && msg.toLowerCase(Locale.ROOT).contains("address already in use");
 	}
 
 	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, Runnable specialCleanup) {
