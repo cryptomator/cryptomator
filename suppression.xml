@@ -105,6 +105,24 @@
 		Jetty is used as a local server only.
    ]]></notes>
 		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
+		<vulnerabilityName>CVE-2026-2332</vulnerabilityName>
+		<cve>CVE-2026-2332</cve>
+	</suppress>
+
+	<suppress>
+		<notes><![CDATA[
+		Jetty is used as a local server only.
+   ]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
+		<vulnerabilityName>CVE-2026-5795</vulnerabilityName>
+		<cve>CVE-2026-5795</cve>
+	</suppress>
+
+	<suppress>
+		<notes><![CDATA[
+		Jetty is used as a local server only.
+   ]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-.*$</packageUrl>
 		<vulnerabilityName>CVE-2025-11143</vulnerabilityName>
 		<cve>CVE-2025-11143</cve>
 	</suppress>
