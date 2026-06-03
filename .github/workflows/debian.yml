@@ -70,7 +70,7 @@ jobs:
           check-latest: true
           cache: 'maven'
       - name: Run maven
-        run: mvn -B clean package -Plinux -DskipTests
+        run: ./mvnw -B clean package -Plinux -DskipTests
       - name: Download OpenJFX jmods
         id: download-jmods
         run: |
@@ -90,7 +90,7 @@ jobs:
           JMOD_VERSION_AARCH64=$(jmod describe jmods/aarch64/javafx.base.jmod | head -1)
           JMOD_VERSION_AARCH64=${JMOD_VERSION_AARCH64#*@}
           JMOD_VERSION_AARCH64=${JMOD_VERSION_AARCH64%%.*}
-          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=$(./mvnw help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
           POM_JFX_VERSION=${POM_JFX_VERSION#*@}
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 

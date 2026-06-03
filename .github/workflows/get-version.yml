@@ -56,7 +56,7 @@ jobs:
           elif [[ "${VERSION_STRING}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
             SEM_VER_STR="${VERSION_STRING}"
           else
-            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
+            SEM_VER_STR=`./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout`
           fi
 
           SEM_VER_NUM=$(echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/')

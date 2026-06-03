@@ -123,7 +123,7 @@ flowchart TD
 | Job | Runs on | Description |
 |-----|---------|-------------|
 | **get-version** | ubuntu | Parses the tag into semver components (`semVerNum`, `semVerSuffix`, `revNum`, `versionType`). The release is aborted if not an alpha, beta, rc or 'stable' release. |
-| **create-release-draft** | ubuntu | Checks out the repo, verifies the tag is **signed** and lives on a `main` or `release/*` branch. Runs `mvn verify` (with `xvfb-run`). Creates a GitHub Release **draft** using the [release body template](../release-body.md.template). Downloads and GPG-signs the source tarball. |
+| **create-release-draft** | ubuntu | Checks out the repo, verifies the tag is **signed** and lives on a `main` or `release/*` branch. Runs `./mvnw verify` (with `xvfb-run`). Creates a GitHub Release **draft** using the [release body template](../release-body.md.template). Downloads and GPG-signs the source tarball. |
 | **build-exe-and-msi** | windows | Calls [`win-exe.yml`](win-exe.yml). Builds the MSI and EXE bundle installer for x64 Windows. Code-signed via Azure Trusted Signing, GPG-signed, and uploaded to the draft release. Outputs SHA-256 checksums. |
 | **build-dmg-arm64** | macos-15 | Calls [`mac-dmg.yml`](mac-dmg.yml). Builds the DMG for Apple Silicon. Code-signed, notarized with Apple, GPG-signed, and uploaded. Outputs SHA-256 checksum. |
 | **build-dmg-x64** | macos-15-large | Calls [`mac-dmg-x64.yml`](mac-dmg-x64.yml). Same as above but for Intel Macs. Uses macFUSE instead of FUSE-T. |

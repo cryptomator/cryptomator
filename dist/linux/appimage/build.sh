@@ -6,20 +6,20 @@ REVISION_NO=`git rev-list --count HEAD`
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
-command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found."; exit 1; }
+[ -x ../../../mvnw ] || { echo >&2 "mvnw not found at ../../../mvnw."; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found."; exit 1; }
 command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip not found."; exit 1; }
 
-VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
+VERSION=$(../../../mvnw -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
 CPU_ARCH=$(uname -m)
 
 if [[ ! "${CPU_ARCH}" =~ x86_64|aarch64 ]]; then echo "Platform ${CPU_ARCH} not supported"; exit 1; fi
 
-mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
+../../../mvnw -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 
 # compile
-mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
+../../../mvnw -B -f ../../../pom.xml clean package -Plinux -DskipTests
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
@@ -42,7 +42,7 @@ unzip -o -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/jav
 JMOD_VERSION=$(jmod describe ./openjfx-jmods/javafx.base.jmod | head -1)
 JMOD_VERSION=${JMOD_VERSION#*@}
 JMOD_VERSION=${JMOD_VERSION%%.*}
-POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout -B -f ../../../pom.xml)
+POM_JFX_VERSION=$(../../../mvnw help:evaluate "-Dexpression=javafx.version" -q -DforceStdout -B -f ../../../pom.xml)
 POM_JFX_VERSION=${POM_JFX_VERSION#*@}
 POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then

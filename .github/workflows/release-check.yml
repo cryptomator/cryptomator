@@ -36,7 +36,7 @@ jobs:
             exit 1
           fi
 
-          if [[ ${SEM_VER_STR} == `mvn help:evaluate -Dexpression=project.version -q -DforceStdout` ]]; then
+          if [[ ${SEM_VER_STR} == `./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout` ]]; then
             echo "semVerStr=${SEM_VER_STR}" >> $GITHUB_OUTPUT
           else
             echo "Version not set in POM"
@@ -61,6 +61,6 @@ jobs:
       - name: Run org.owasp:dependency-check plugin
         id: dependency-check
         continue-on-error: true
-        run: mvn -B verify -Pdependency-check -DskipTests
+        run: ./mvnw -B verify -Pdependency-check -DskipTests
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}

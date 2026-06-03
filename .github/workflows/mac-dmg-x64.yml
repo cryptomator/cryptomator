@@ -100,7 +100,7 @@ jobs:
           JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
           JMOD_VERSION=${JMOD_VERSION#*@}
           JMOD_VERSION=${JMOD_VERSION%%.*}
-          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=$(./mvnw help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
           POM_JFX_VERSION=${POM_JFX_VERSION#*@}
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
@@ -109,9 +109,9 @@ jobs:
             exit 1
           fi
       - name: Set version
-        run : mvn versions:set -DnewVersion="${VERSION_NUM}${VERSION_SUFFIX}"
+        run : ./mvnw versions:set -DnewVersion="${VERSION_NUM}${VERSION_SUFFIX}"
       - name: Run maven
-        run: mvn -B clean package -Pmac -DskipTests
+        run: ./mvnw -B clean package -Pmac -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
@@ -185,7 +185,7 @@ jobs:
           PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
       - name: Generate license for dmg
         run: >
-          mvn -B license:add-third-party
+          ./mvnw -B license:add-third-party
           -Dlicense.thirdPartyFilename=license.rtf
           -Dlicense.outputDirectory=dist/mac/dmg/resources
           -Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl

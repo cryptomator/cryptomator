@@ -29,7 +29,7 @@ PACKAGE_IDENTIFIER="org.cryptomator"
 MAIN_JAR_GLOB="cryptomator-*.jar"
 MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
 REVISION_NO=`git rev-list --count HEAD`
-VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
+VERSION_NO=`../../../mvnw -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
 JAVAFX_VERSION=25.0.2
@@ -46,7 +46,7 @@ JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjf
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
-command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found. Fix by 'brew install maven'."; exit 1; }
+[ -x ../../../mvnw ] || { echo >&2 "mvnw not found at ../../../mvnw."; exit 1; }
 command -v create-dmg >/dev/null 2>&1 || { echo >&2 "create-dmg not found. Fix by 'brew install create-dmg'."; exit 1; }
 if [ -n "${CODESIGN_IDENTITY}" ]; then
     command -v codesign >/dev/null 2>&1 || { echo >&2 "codesign not found. Fix by 'xcode-select --install'."; exit 1; }
@@ -61,7 +61,7 @@ unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javaf
 JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
 JMOD_VERSION=${JMOD_VERSION#*@}
 JMOD_VERSION=${JMOD_VERSION%%.*}
-POM_JFX_VERSION=$(mvn -f../../../pom.xml help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+POM_JFX_VERSION=$(../../../mvnw -f../../../pom.xml help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
 POM_JFX_VERSION=${POM_JFX_VERSION#*@}
 POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
@@ -71,7 +71,7 @@ if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
 fi
 
 # compile
-mvn -B -f../../../pom.xml clean package -DskipTests -Pmac
+../../../mvnw -B -f../../../pom.xml clean package -DskipTests -Pmac
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 
@@ -137,7 +137,7 @@ sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Inf
 cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
 # generate license
-mvn -B -f../../../pom.xml license:add-third-party \
+../../../mvnw -B -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
     -Dlicense.outputDirectory=dist/mac/dmg/resources \
     -Dlicense.fileTemplate=resources/licenseTemplate.ftl \
