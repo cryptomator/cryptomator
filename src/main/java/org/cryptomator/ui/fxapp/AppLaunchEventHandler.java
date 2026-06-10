@@ -14,6 +14,7 @@ import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -66,8 +67,15 @@ class AppLaunchEventHandler {
 		switch (event.type()) {
 			case REVEAL_APP -> appWindows.showMainWindow();
 			case OPEN_FILE -> event.pathsToOpen().forEach(this::openPotentialVault);
+			case OPEN_URI -> handleUri(event.uri());
 			default -> LOG.warn("Unsupported event type: {}", event.type());
 		}
+	}
+
+	private void handleUri(URI uri) {
+		// TODO: dispatch to a handler depending on the URI (e.g. host/path) once deeplink actions are defined
+		LOG.warn("Received deeplink {}, but handling of this scheme is not yet implemented.", uri);
+		appWindows.showMainWindow();
 	}
 
 	// TODO deduplicate MainWindowController...

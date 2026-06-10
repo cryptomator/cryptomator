@@ -41,7 +41,7 @@ class FileOpenRequestHandler {
 
 	private void openFiles(OpenFilesEvent evt) {
 		Collection<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath).toList();
-		AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
+		AppLaunchEvent launchEvent = AppLaunchEvent.openFiles(pathsToOpen);
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 
@@ -60,7 +60,7 @@ class FileOpenRequestHandler {
 			}
 		}).filter(Objects::nonNull).toList();
 		if (!pathsToOpen.isEmpty()) {
-			AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
+			AppLaunchEvent launchEvent = AppLaunchEvent.openFiles(pathsToOpen);
 			tryToEnqueueFileOpenRequest(launchEvent);
 		}
 	}
@@ -68,7 +68,7 @@ class FileOpenRequestHandler {
 
 	private void tryToEnqueueFileOpenRequest(AppLaunchEvent launchEvent) {
 		if (!launchEventQueue.offer(launchEvent)) {
-			LOG.warn("Could not enqueue application launch event.", launchEvent);
+			LOG.warn("Could not enqueue application launch event {}.", launchEvent);
 		}
 	}
 

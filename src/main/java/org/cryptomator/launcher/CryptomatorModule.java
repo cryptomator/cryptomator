@@ -25,7 +25,7 @@ class CryptomatorModule {
 	@Provides
 	@Singleton
 	@Named("launchEventQueue")
-	static BlockingQueue<AppLaunchEvent> provideFileOpenRequests() {
+	static BlockingQueue<AppLaunchEvent> provideLaunchEventQueue() {
 		return new ArrayBlockingQueue<>(10);
 	}
 

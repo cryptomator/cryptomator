@@ -60,7 +60,7 @@ public class FileOpenRequestHandlerTest {
 	@Test
 	@DisplayName("./cryptomator.exe foo (with full event queue)")
 	public void testOpenArgsWithFullQueue() {
-		queue.add(new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, Collections.emptyList()));
+		queue.add(AppLaunchEvent.openFiles(Collections.emptyList()));
 		Assumptions.assumeTrue(queue.remainingCapacity() == 0);
 
 		inTest.handleLaunchArgs(List.of("foo"));

@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -16,24 +15,28 @@ class IpcMessageHandler implements IpcMessageListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(IpcMessageHandler.class);
 
-	private final FileOpenRequestHandler fileOpenRequestHandler;
+	private final LaunchArgsParser launchArgsParser;
 	private final BlockingQueue<AppLaunchEvent> launchEventQueue;
 
 	@Inject
-	public IpcMessageHandler(FileOpenRequestHandler fileOpenRequestHandler, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue) {
-		this.fileOpenRequestHandler = fileOpenRequestHandler;
+	public IpcMessageHandler(LaunchArgsParser launchArgsParser, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue) {
+		this.launchArgsParser = launchArgsParser;
 		this.launchEventQueue = launchEventQueue;
 	}
 
 	@Override
 	public void revealRunningApp() {
-		launchEventQueue.add(new AppLaunchEvent(AppLaunchEvent.EventType.REVEAL_APP, Collections.emptyList()));
+		launchEventQueue.add(AppLaunchEvent.revealApp());
 	}
 
 	@Override
 	public void handleLaunchArgs(List<String> args) {
-		LOG.debug("Received launch args: {}", args.stream().reduce((a, b) -> a + ", " + b).orElse(""));
-		fileOpenRequestHandler.handleLaunchArgs(args);
+		LOG.debug("Received launch args: {}", args);
+		try {
+			launchArgsParser.process(args);
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Ignoring malformed launch args: {}", e.getMessage());
+		}
 	}
 
 }
