@@ -1,11 +1,11 @@
 [Desktop Entry]
 Name=Cryptomator
 Comment=Cloud Storage Encryption Utility
-Exec=cryptomator %F
+Exec=cryptomator %U
 Icon=org.cryptomator.Cryptomator
 Terminal=false
 Type=Application
 Categories=Utility;Security;FileTools;
 StartupNotify=true
 StartupWMClass=org.cryptomator.launcher.Cryptomator$MainApp
-MimeType=application/vnd.cryptomator.encrypted;application/vnd.cryptomator.vault;
+MimeType=application/vnd.cryptomator.encrypted;application/vnd.cryptomator.vault;x-scheme-handler/cryptomator;

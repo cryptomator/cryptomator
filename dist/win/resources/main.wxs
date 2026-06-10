@@ -27,6 +27,7 @@
   <?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
   <?define CloseApplicationTarget= "cryptomator.exe" ?>
   <?define LoopbackAlias= "cryptomator-vault" ?>
+  <?define UrlProtocolScheme= "cryptomator" ?>
 
   <?include $(var.JpConfigDir)/overrides.wxi ?>
 
@@ -97,6 +98,19 @@
             <ns0:Extension Id="c9u" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
           </ns0:ProgId>
         </ns0:Component>
+        <!-- Register "cryptomator://" URL protocol handler -->
+        <ns0:Component Bitness="always64" Id="UrlProtocolHandler" Guid="*">
+          <ns0:RegistryKey Root="HKMU" Key="Software\Classes\$(var.UrlProtocolScheme)">
+            <ns0:RegistryValue Type="string" Value="URL:$(var.JpAppName) Protocol" KeyPath="yes"/>
+            <ns0:RegistryValue Name="URL Protocol" Type="string" Value=""/>
+            <ns0:RegistryKey Key="DefaultIcon">
+              <ns0:RegistryValue Type="string" Value="[INSTALLDIR]$(var.JpAppName).exe,0"/>
+            </ns0:RegistryKey>
+            <ns0:RegistryKey Key="shell\open\command">
+              <ns0:RegistryValue Type="string" Value="&quot;[INSTALLDIR]$(var.JpAppName).exe&quot; &quot;%1&quot;"/>
+            </ns0:RegistryKey>
+          </ns0:RegistryKey>
+        </ns0:Component>
     </ns0:DirectoryRef>
 
     <ns0:StandardDirectory Id="CommonAppDataFolder">
@@ -126,6 +140,7 @@
       <ns0:ComponentGroupRef Id="FileAssociations"/>
       <!-- Ref to additional ProgIDs -->
       <ns0:ComponentRef Id="nonStartingProgID"/>
+      <ns0:ComponentRef Id="UrlProtocolHandler"/>
       <ns0:ComponentRef Id="AdminConfigDir"/>
       <ns0:ComponentRef Id="AdminConfigFile"/>
     </ns0:Feature>

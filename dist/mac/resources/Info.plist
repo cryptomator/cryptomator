@@ -46,6 +46,20 @@
       <string>Any</string>
     </dict>
   </dict>
+  <!-- register cryptomator:// URL scheme -->
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>org.cryptomator.deeplink</string>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>cryptomator</string>
+      </array>
+    </dict>
+  </array>
   <!-- register .cryptomator extension -->
   <key>CFBundleDocumentTypes</key>
   <array>
