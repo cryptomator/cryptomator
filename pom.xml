@@ -35,42 +35,42 @@
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.10.0</cryptomator.cryptofs.version>
 		<cryptomator.cryptolib.version>2.2.2</cryptomator.cryptolib.version>
-		<cryptomator.integrations.version>1.8.0</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.6.0</cryptomator.integrations.win.version>
+		<cryptomator.integrations.version>1.9.0</cryptomator.integrations.version>
+		<cryptomator.integrations.win.version>1.6.1</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.5.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.7.0</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>6.0.1</cryptomator.fuse.version>
-		<cryptomator.webdav.version>3.0.1</cryptomator.webdav.version>
+		<cryptomator.webdav.version>3.0.2</cryptomator.webdav.version>
 		<cryptomator.webdav-servlet.version>1.2.12</cryptomator.webdav-servlet.version>
 
 		<!-- 3rd party dependencies -->
-		<caffeine.version>3.2.3</caffeine.version>
+		<caffeine.version>3.2.4</caffeine.version>
 		<commons-lang3.version>3.20.0</commons-lang3.version>
 		<dagger.version>2.59.2</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.21.1</jackson.version>
+		<jackson.version>2.21.4</jackson.version>
 		<javafx.version>25.0.2</javafx.version>
-		<jwt.version>4.5.1</jwt.version>
+		<jwt.version>4.5.2</jwt.version>
 		<nimbus-jose.version>10.5</nimbus-jose.version>
-		<logback.version>1.5.32</logback.version>
-		<slf4j.version>2.0.17</slf4j.version>
+		<logback.version>1.5.35</logback.version>
+		<slf4j.version>2.0.18</slf4j.version>
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>6.0.3</junit.jupiter.version>
-		<mockito.version>5.22.0</mockito.version>
+		<junit.jupiter.version>6.1.0</junit.jupiter.version>
+		<mockito.version>5.23.0</mockito.version>
 		<hamcrest.version>3.0</hamcrest.version>
 
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
-		<dependency-check.version>12.2.0</dependency-check.version>
-		<jacoco.version>0.8.14</jacoco.version>
+		<dependency-check.version>12.2.2</dependency-check.version>
+		<jacoco.version>0.8.15</jacoco.version>
 		<license-generator.version>2.7.1</license-generator.version>
 		<mvn-compiler.version>3.15.0</mvn-compiler.version>
 		<mvn-resources.version>3.5.0</mvn-resources.version>
-		<mvn-dependency.version>3.10.0</mvn-dependency.version>
-		<mvn-surefire.version>3.5.3</mvn-surefire.version>
+		<mvn-dependency.version>3.11.0</mvn-dependency.version>
+		<mvn-surefire.version>3.5.6</mvn-surefire.version>
 		<mvn-jar.version>3.5.0</mvn-jar.version>
 
 		<!-- Property used by surefire to determine jacoco engine -->
