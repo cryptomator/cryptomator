@@ -82,7 +82,7 @@ jobs:
         include:
           - arch: x64
             os: windows-latest
-            java-dist: 'zulu' #cannot use temurin, see https://github.com/cryptomator/cryptomator/issues/3824#issuecomment-2829827427
+            java-dist: 'temurin'
             java-version: '26.0.1+8'
             java-package: 'jdk'
     steps:
@@ -348,7 +348,7 @@ jobs:
           - arch: x64
             os: windows-latest
             executable-suffix: x64
-            java-dist: 'zulu'
+            java-dist: 'temurin'
             java-version: '26.0.1+8'
             java-package: 'jdk'
     steps:
