@@ -79,7 +79,7 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ### Dependencies
 
-* JDK 25 (e.g. temurin, zulu)
+* JDK 26 (e.g. temurin, zulu)
 
 ### Run Maven
 
