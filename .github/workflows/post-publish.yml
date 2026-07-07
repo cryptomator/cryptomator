@@ -6,10 +6,10 @@ on:
 
 jobs:
   notify:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - name: Notify about DEB build
-        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'
@@ -21,7 +21,7 @@ jobs:
           SLACK_FOOTER: ''
           MSG_MINIMAL: true
       - name: Notify about latest-version update
-        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'
@@ -102,10 +102,10 @@ jobs:
     name: Notify for winget-release
     if: needs.get-asset-urls.outputs.is-windows-release == 'true' && needs.check-release.outputs.release-kind == 'stable'
     needs: [check-release, get-asset-urls]
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'

@@ -66,18 +66,18 @@ jobs:
         include:
           - os: ubuntu-latest
             arch: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-x64_bin-jmods.zip'
-            openjfx-sha: 'e0a9c29d8cf3af9b8b48848b43f87b5785bc107c53a951b19668ce05842bba1b'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_linux-x64_bin-jmods.zip'
+            openjfx-sha: '47035c653863a8e4be3dc6f142b8dbd84b4bb1efc9a8cbc68413e6a5ff5e9f50'
             appimagetool-sha: 'ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0'
           - os: ubuntu-24.04-arm
             arch: aarch64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_linux-aarch64_bin-jmods.zip'
-            openjfx-sha: 'c3408f818693cce09e59829a8e862a82c7695fdfcd585c41cfd527f5fc3fe646'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_linux-aarch64_bin-jmods.zip'
+            openjfx-sha: 'e3fd682354346845d2944a2da2b1ff2b6cb9259d92027f2f9c121b9b93c5e42f'
             appimagetool-sha: 'f0837e7448a0c1e4e650a93bb3e85802546e60654ef287576f46c71c126a9158'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Java
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -106,7 +106,7 @@ jobs:
       - name: Set version
         run : ./mvnw versions:set -DnewVersion="${VERSION_NUM}${VERSION_SUFFIX}"
       - name: Run maven
-        run: ./mvnw -B clean package -Plinux -DskipTests
+        run: ./mvnw -B clean package -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
@@ -210,7 +210,7 @@ jobs:
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage.zsync
       - name: Upload artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: appimage-${{ matrix.arch }}
           path: |
@@ -220,7 +220,7 @@ jobs:
           if-no-files-found: error
       - name: Publish AppImage on GitHub Releases
         if: inputs.upload-to-draft
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           draft: true
           fail_on_unmatched_files: true
@@ -240,7 +240,7 @@ jobs:
       aarch64-sha256sum: ${{ steps.sha256sum.outputs.aarch64-sha256sum }}
     steps:
       - name: Download AppImage artifacts
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: appimage-*
           path: appimage-artifacts

@@ -33,7 +33,7 @@ jobs:
           pacman-key --populate archlinux
           pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip github-cli curl pacman-contrib
       - name: Checkout cryptomator/aur-bin
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           repository: 'cryptomator/aur-bin'
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
@@ -102,7 +102,7 @@ jobs:
           DIST_VERSION: ${{ steps.pkgrel.outputs.dist-version }}
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'

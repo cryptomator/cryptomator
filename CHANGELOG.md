@@ -8,10 +8,39 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.2...HEAD)
+## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.3...HEAD)
+
+No changes yet.
+
+
+## [1.19.3](https://github.com/cryptomator/cryptomator/releases/1.19.3) - 2026-06-29
+### Added
+* New error dialog if importing a vault fails ([#4243](https://github.com/cryptomator/cryptomator/pull/4243))
+
+### Fixed
+* Fixed Cryptomator file extensions were not registered on Windows ([#4219](https://github.com/cryptomator/cryptomator/issues/4219))
+* Fixed warning was displayed when accessing update tab in settings even though an update check did not ran ([#4199](https://github.com/cryptomator/cryptomator/pull/4199))
+* Fixed several Decrypt Name dialogs could be opened on the same vault ([#4164](https://github.com/cryptomator/cryptomator/pull/4164))
+* Fixed not all mount options in vault specific settings could be displayed ([#4227](https://github.com/cryptomator/cryptomator/pull/4227))
+* Fixed localhost alias on Windows was not removed on uninstall ([#3993](https://github.com/cryptomator/cryptomator/issues/3993))
 
 ### Changed
 * Refactored release pipeline to allow immutable releases ([#4205](https://github.com/cryptomator/cryptomator/pull/4205))
+* Updated to JDK 26.0.1 ([#4244](https://github.com/cryptomator/cryptomator/pull/4244))
+* Updated to JavaFX 25.0.3 ([#4255](https://github.com/cryptomator/cryptomator/pull/4255))
+* Drop signing with Actalis issued certificate ([#4169](https://github.com/cryptomator/cryptomator/pull/4169), [#4262](https://github.com/cryptomator/cryptomator/pull/4262))
+* Fix dagger binding graph issues ([#4147](https://github.com/cryptomator/cryptomator/pull/4147))
+* Added flatpak build to CI ([#4199](https://github.com/cryptomator/cryptomator/pull/4199))
+* Updated dependencies:
+  - `org.cryptomator:webdav-nio-adapter` from 3.0.1 to 3.0.2
+  - `org.cryptomator:integrations-api` from 1.8.0 to 1.9.0
+  - `org.slf4j:slf4j-api` from 2.0.17 to 2.0.18
+  - `ch.qos.logback:logback-core` from 1.5.32 to 1.5.35
+  - `ch.qos.logback:logback-classic` from 1.5.32 to 1.5.35
+  - `com.auth0:java-jwt` from 4.5.1 4.5.2
+  - `com.fasterxml.jackson.core:jackson-databind` from 2.21.1 to 2.21.4
+  - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.1 to 2.21.4
+  - `com.github.ben-manes.caffeine:caffeine` from 3.2.3 to 3.2.4
 
 
 ## [1.19.2](https://github.com/cryptomator/cryptomator/releases/1.19.2) - 2026-03-20

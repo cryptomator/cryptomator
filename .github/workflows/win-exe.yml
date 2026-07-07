@@ -60,8 +60,8 @@ env:
   VERSION_NUM: ${{ inputs.semVerNum || '99.99.99'}}
   REVISION_NUM: ${{ inputs.revisionNum || '0' }}
   VERSION_SUFFIX: ${{ inputs.semVerSuffix || ''}}
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_windows-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '33d878dfac85590c4d77c518ed413e512d34a8479d90132b230a7ddd173576b3'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '0bf9b83260b85607a9ba200124debabd9cdb013cbc0d659e62a20192a7137907'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
   WINFSP_MSI_HASH: '073a70e00f77423e34bed98b86e600def93393ba5822204fac57a29324db9f7a'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
@@ -82,13 +82,13 @@ jobs:
         include:
           - arch: x64
             os: windows-latest
-            java-dist: 'zulu' #cannot use temurin, see https://github.com/cryptomator/cryptomator/issues/3824#issuecomment-2829827427
+            java-dist: 'temurin'
             java-version: '26.0.1+8'
             java-package: 'jdk'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Java
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
         with:
           distribution: ${{ matrix.java-dist }}
           java-version: ${{ matrix.java-version }}
@@ -229,8 +229,20 @@ jobs:
         uses: ./.github/actions/win-sign-action
         with:
           base-dir: ${{ github.workspace }}\appdir
+          file-extensions: 'exe,dll'
           recursive: true
           append-signature: true
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+      - name: Sign Scripts with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'schedule'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\appdir\Cryptomator
+          file-extensions: 'ps1'
+          recursive: false
+          append-signature: false  # Powershell scripts cannot be signed in append mode, see #4260
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -316,7 +328,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: msi-${{ matrix.arch }}
           path: |
@@ -336,11 +348,11 @@ jobs:
           - arch: x64
             os: windows-latest
             executable-suffix: x64
-            java-dist: 'zulu'
-            java-version: '24.0.1+9'
+            java-dist: 'temurin'
+            java-version: '26.0.1+8'
             java-package: 'jdk'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Install wix and extensions
         run: |
           dotnet tool install --global wix --version ${WIX_VERSION}
@@ -356,7 +368,7 @@ jobs:
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
       - name: Setup Java
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
         with:
           distribution: ${{ matrix.java-dist }}
           java-version: ${{ matrix.java-version }}
@@ -449,7 +461,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: exe-${{ matrix.executable-suffix }}
           path: |
@@ -469,7 +481,7 @@ jobs:
           merge-multiple: true
       - name: Publish installers on GitHub Releases
         id: publish
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           draft: true
           fail_on_unmatched_files: true

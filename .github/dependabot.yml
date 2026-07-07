@@ -10,10 +10,8 @@ updates:
       - dependency-name: "jakarta.inject:jakarta.inject-api"
         versions: ["2.0.1.MR"]
       - dependency-name: "org.openjfx:*"
-        update-types: ["version-update:semver-major"]
-      # due to https://github.com/fabriciorby/maven-surefire-junit5-tree-reporter/issues/68
-      - dependency-name: "org.apache.maven.plugins:maven-surefire-plugin"
-        versions: [ "3.5.4", "3.5.5" ]
+      - dependency-name: "com.fasterxml.jackson.*"
+        versions: [ "[2.22,)" ] # 2.21.x is LTS, see https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.21
     groups:
       maven-dependencies:
         patterns:

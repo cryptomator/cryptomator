@@ -19,16 +19,16 @@ if [[ ! "${CPU_ARCH}" =~ x86_64|aarch64 ]]; then echo "Platform ${CPU_ARCH} not 
 ../../../mvnw -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 
 # compile
-../../../mvnw -B -f ../../../pom.xml clean package -Plinux -DskipTests
+../../../mvnw -B -f ../../../pom.xml clean package -DskipTests
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
-JAVAFX_VERSION=25.0.2
+JAVAFX_VERSION=25.0.3
 JAVAFX_ARCH="x64"
-JAVAFX_JMODS_SHA256='e0a9c29d8cf3af9b8b48848b43f87b5785bc107c53a951b19668ce05842bba1b'
+JAVAFX_JMODS_SHA256='47035c653863a8e4be3dc6f142b8dbd84b4bb1efc9a8cbc68413e6a5ff5e9f50'
 if [ "${CPU_ARCH}" = "aarch64" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256='c3408f818693cce09e59829a8e862a82c7695fdfcd585c41cfd527f5fc3fe646'
+    JAVAFX_JMODS_SHA256='e3fd682354346845d2944a2da2b1ff2b6cb9259d92027f2f9c121b9b93c5e42f'
 fi
 
 # download javaFX jmods

@@ -49,16 +49,16 @@ jobs:
     env:
       SRC_GIT_SHA: ${{ inputs.src-tag || github.sha}}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           repository: flathub/org.cryptomator.Cryptomator
           submodules: true
       - name: Checkout build script
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           path: build-scripts
       - name: Checkout app source
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           path: cryptomator
           ref: ${{ env.SRC_GIT_SHA }}
@@ -77,7 +77,7 @@ jobs:
                     commit: ${{ env.SRC_GIT_SHA }}
       - name: Copy build script for upload
         run: cp org.cryptomator.Cryptomator.yaml org.cryptomator.Cryptomator.${{matrix.variant.arch}}.yaml
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           archive: false
           if-no-files-found: error
@@ -129,7 +129,7 @@ jobs:
           EOF
             done < maven-dependency-files-javafx.txt
           ) > javafx-maven-dependencies-${{ matrix.variant.arch }}.yaml
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: maven-sources-${{ matrix.variant.arch }}
           if-no-files-found: error
@@ -176,7 +176,7 @@ jobs:
           fi
         env:
           SRC_TAG: ${{ inputs.src-tag }}
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           repository: flathub/org.cryptomator.Cryptomator
           submodules: true #TODO: Update submodule!
@@ -184,7 +184,7 @@ jobs:
       - name: Checkout release branch
         run: |
           git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           path: cryptomator
       - name: Download source tarball and compute checksum
@@ -250,7 +250,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
         if: github.event_name == 'release'
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}

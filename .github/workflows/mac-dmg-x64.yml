@@ -76,12 +76,12 @@ jobs:
           architecture: x64
           output-suffix: x64
           fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_osx-x64_bin-jmods.zip'
-          openjfx-sha: '0b4d8463f03901b7425d94628e4116b7078abb8dd540fbec415266fac20bda5c'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_osx-x64_bin-jmods.zip'
+          openjfx-sha: '3512fabe43aee467538d329cfbbaab3c53dff2a810f0d54e381f461d5e0fac43'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Java
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -303,7 +303,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dmg-${{ matrix.output-suffix }}
           path: |
@@ -312,7 +312,7 @@ jobs:
           if-no-files-found: error
       - name: Publish dmg on GitHub Releases
         if: inputs.upload-to-draft
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           draft: true
           fail_on_unmatched_files: true
