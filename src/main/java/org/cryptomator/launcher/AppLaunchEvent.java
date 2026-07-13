@@ -1,28 +1,16 @@
 package org.cryptomator.launcher;
 
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-
-public record AppLaunchEvent(AppLaunchEvent.EventType type, Collection<Path> pathsToOpen, URI uri) {
-
-	public enum EventType {
-		REVEAL_APP,
-		OPEN_FILE,
-		OPEN_URI
-	}
-
-	static AppLaunchEvent revealApp() {
-		return new AppLaunchEvent(EventType.REVEAL_APP, List.of(), null);
-	}
-
-	static AppLaunchEvent openFiles(Collection<Path> pathsToOpen) {
-		return new AppLaunchEvent(EventType.OPEN_FILE, pathsToOpen, null);
-	}
-
-	static AppLaunchEvent openUri(URI uri) {
-		return new AppLaunchEvent(EventType.OPEN_URI, List.of(), uri);
-	}
+/**
+ * An event triggering an action in the running application instance.
+ * <p>
+ * Produced by the launch-argument handling (see {@link LaunchArgsParser} and the {@code *RequestHandler}s) and consumed
+ * by the UI's {@code AppLaunchEventHandler}. Each permitted subtype represents one supported action:
+ * <ul>
+ *     <li>{@link RevealRunningEvent} - reveal the already-running app,</li>
+ *     <li>{@link OpenFileEvent} - open one or more paths,</li>
+ *     <li>{@link VaultCreationEvent} - create a vault from a deeplink.</li>
+ * </ul>
+ */
+public sealed interface AppLaunchEvent permits RevealRunningEvent, OpenFileEvent, VaultCreationEvent {
 
 }

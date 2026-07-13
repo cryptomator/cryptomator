@@ -40,8 +40,7 @@ public class FileOpenRequestHandlerTest {
 	public void testOpenArgsWithCorrectPaths() {
 		inTest.handleLaunchArgs(List.of("foo", "bar"));
 
-		AppLaunchEvent evt = queue.poll();
-		Assertions.assertNotNull(evt);
+		OpenFileEvent evt = Assertions.assertInstanceOf(OpenFileEvent.class, queue.poll());
 		Collection<Path> paths = evt.pathsToOpen();
 		MatcherAssert.assertThat(paths, CoreMatchers.hasItems(Paths.get("foo"), Paths.get("bar")));
 	}
@@ -60,7 +59,7 @@ public class FileOpenRequestHandlerTest {
 	@Test
 	@DisplayName("./cryptomator.exe foo (with full event queue)")
 	public void testOpenArgsWithFullQueue() {
-		queue.add(AppLaunchEvent.openFiles(Collections.emptyList()));
+		queue.add(new OpenFileEvent(Collections.emptyList()));
 		Assumptions.assumeTrue(queue.remainingCapacity() == 0);
 
 		inTest.handleLaunchArgs(List.of("foo"));

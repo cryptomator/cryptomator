@@ -41,7 +41,7 @@ class FileOpenRequestHandler {
 
 	private void openFiles(OpenFilesEvent evt) {
 		Collection<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath).toList();
-		AppLaunchEvent launchEvent = AppLaunchEvent.openFiles(pathsToOpen);
+		AppLaunchEvent launchEvent = new OpenFileEvent(pathsToOpen);
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 
@@ -60,7 +60,7 @@ class FileOpenRequestHandler {
 			}
 		}).filter(Objects::nonNull).toList();
 		if (!pathsToOpen.isEmpty()) {
-			AppLaunchEvent launchEvent = AppLaunchEvent.openFiles(pathsToOpen);
+			AppLaunchEvent launchEvent = new OpenFileEvent(pathsToOpen);
 			tryToEnqueueFileOpenRequest(launchEvent);
 		}
 	}

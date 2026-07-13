@@ -1,17 +1,18 @@
 package org.cryptomator.launcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Optional;
 
 /**
- * Parsed representation of a {@code cryptomator://vault/create?name=…&template=…} deeplink.
+ * Requests creation of a new vault from a {@code cryptomator://vault/create?name=…&template=…} deeplink.
  * <p>
  * The {@code template} is a Base64URL-encoded ZIP archive holding a ready-made (signed) vault. The {@code name} fixes
  * the vault's directory name and is restricted to a single, safe path segment so that resolving it against a
@@ -20,19 +21,27 @@ import org.slf4j.LoggerFactory;
  * @param name     the fixed vault name (a single, safe path segment)
  * @param template the Base64URL-decoded vault template
  */
-public record VaultCreateDeeplink(String name, byte[] template) {
+public record VaultCreationEvent(String name, byte[] template) implements AppLaunchEvent {
 
-	private static final Logger LOG = LoggerFactory.getLogger(VaultCreateDeeplink.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VaultCreationEvent.class);
+	private static final String SCHEME = "cryptomator";
+	private static final String HOST = "vault";
+	private static final String PATH = "/create";
 
 	/**
-	 * Parses the query parameters of a {@code vault/create} deeplink.
+	 * Attempts to interpret the given URI as a {@code cryptomator://vault/create?name=…&template=…} deeplink.
 	 *
 	 * @param uri the deeplink URI
-	 * @return the parsed deeplink
-	 * @throws IllegalArgumentException if a required parameter is missing, the template is not valid Base64URL, or the
-	 *                                  name is not a single safe path segment
+	 * @return the parsed event, or an empty optional if the URI's scheme, host or path do not identify a
+	 * vault-creation deeplink
+	 * @throws IllegalArgumentException if the URI identifies a vault-creation deeplink, but a required parameter is
+	 *                                  missing, the template is not valid Base64URL, or the name is not a single safe
+	 *                                  path segment
 	 */
-	public static VaultCreateDeeplink parse(URI uri) {
+	public static Optional<VaultCreationEvent> tryParse(URI uri) {
+		if (!SCHEME.equalsIgnoreCase(uri.getScheme()) || !HOST.equalsIgnoreCase(uri.getHost()) || !PATH.equals(uri.getPath())) {
+			return Optional.empty();
+		}
 		var params = parseQuery(uri.getRawQuery());
 		var name = params.get("name");
 		var templateParam = params.get("template");
@@ -49,11 +58,11 @@ public record VaultCreateDeeplink(String name, byte[] template) {
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Query parameter 'template' is not valid Base64URL.", e);
 		}
-		var leftoverParams = params.keySet().stream().filter(k -> ! (k.equals("template") || k.equals("name"))).toList();
-		if(!leftoverParams.isEmpty()) {
-			LOG.debug("Ignoring unknow parameters {}", leftoverParams);
+		var leftoverParams = params.keySet().stream().filter(k -> !(k.equals("template") || k.equals("name"))).toList();
+		if (!leftoverParams.isEmpty()) {
+			LOG.debug("Ignoring unknown parameters {}", leftoverParams);
 		}
-		return new VaultCreateDeeplink(name, template);
+		return Optional.of(new VaultCreationEvent(name, template));
 	}
 
 	private static void validateName(String name) {

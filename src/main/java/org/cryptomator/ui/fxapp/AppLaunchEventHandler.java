@@ -4,6 +4,9 @@ import org.cryptomator.common.vaults.NotAVaultDirectoryException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.launcher.AppLaunchEvent;
+import org.cryptomator.launcher.OpenFileEvent;
+import org.cryptomator.launcher.RevealRunningEvent;
+import org.cryptomator.launcher.VaultCreationEvent;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.slf4j.Logger;
@@ -14,7 +17,6 @@ import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -64,17 +66,16 @@ class AppLaunchEventHandler {
 	}
 
 	private void handleLaunchEvent(AppLaunchEvent event) {
-		switch (event.type()) {
-			case REVEAL_APP -> appWindows.showMainWindow();
-			case OPEN_FILE -> event.pathsToOpen().forEach(this::openPotentialVault);
-			case OPEN_URI -> handleUri(event.uri());
-			default -> LOG.warn("Unsupported event type: {}", event.type());
+		switch (event) {
+			case RevealRunningEvent _ -> appWindows.showMainWindow();
+			case OpenFileEvent openFileEvent -> openFileEvent.pathsToOpen().forEach(this::openPotentialVault);
+			case VaultCreationEvent vaultCreationEvent -> handleVaultCreation(vaultCreationEvent);
 		}
 	}
 
-	private void handleUri(URI uri) {
-		// TODO: dispatch to a handler depending on the URI (e.g. host/path) once deeplink actions are defined
-		LOG.warn("Received deeplink {}, but handling of this scheme is not yet implemented.", uri);
+	private void handleVaultCreation(VaultCreationEvent event) {
+		// TODO (deeplink step 5): open the dedicated vault-creation dialog via appWindows
+		LOG.warn("Received vault-creation deeplink for '{}', but handling is not yet implemented.", event.name());
 		appWindows.showMainWindow();
 	}
 

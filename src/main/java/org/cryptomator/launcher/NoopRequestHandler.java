@@ -21,7 +21,7 @@ public class NoopRequestHandler {
 	}
 
 	public void revealApp() {
-		AppLaunchEvent launchEvent = AppLaunchEvent.revealApp();
+		AppLaunchEvent launchEvent = new RevealRunningEvent();
 		if (!launchEventQueue.offer(launchEvent)) {
 			LOG.warn("Could not enqueue application launch event {}.", launchEvent);
 		}

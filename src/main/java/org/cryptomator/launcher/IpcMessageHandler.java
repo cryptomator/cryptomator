@@ -26,7 +26,7 @@ class IpcMessageHandler implements IpcMessageListener {
 
 	@Override
 	public void revealRunningApp() {
-		launchEventQueue.add(AppLaunchEvent.revealApp());
+		launchEventQueue.add(new RevealRunningEvent());
 	}
 
 	@Override
