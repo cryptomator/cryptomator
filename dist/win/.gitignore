@@ -9,3 +9,4 @@ installer
 *.jmod
 resources/jfxJmods.zip
 license.rtf
+**/FAvaultFile.properties
