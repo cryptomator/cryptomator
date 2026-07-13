@@ -1,0 +1,116 @@
+package org.cryptomator.launcher;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+public class VaultTemplateExtractorTest {
+
+	private static final byte[] CONFIG = "hub-vault-config".getBytes(StandardCharsets.UTF_8);
+	private static final byte[] CIPHERTEXT = "some-ciphertext".getBytes(StandardCharsets.UTF_8);
+
+	@Test
+	@DisplayName("a vault at the archive root is moved to the destination")
+	public void testVaultAtArchiveRoot(@TempDir Path tmp) throws IOException {
+		var zip = zip(Map.of( //
+				"vault.cryptomator", CONFIG, //
+				"d/AB/CDEF/0.c9r", CIPHERTEXT //
+		));
+		var destination = tmp.resolve("MyVault");
+
+		var result = VaultTemplateExtractor.extractAndMove(zip, destination);
+
+		Assertions.assertEquals(destination, result);
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(destination.resolve("vault.cryptomator")));
+		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(destination.resolve("d/AB/CDEF/0.c9r")));
+	}
+
+	@Test
+	@DisplayName("a vault nested in a single top-level folder is moved to the destination")
+	public void testVaultInSubfolder(@TempDir Path tmp) throws IOException {
+		var zip = zip(Map.of( //
+				"TemplateVault/vault.cryptomator", CONFIG, //
+				"TemplateVault/d/AB/CDEF/0.c9r", CIPHERTEXT //
+		));
+		var destination = tmp.resolve("MyVault");
+
+		VaultTemplateExtractor.extractAndMove(zip, destination);
+
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(destination.resolve("vault.cryptomator")));
+		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(destination.resolve("d/AB/CDEF/0.c9r")));
+	}
+
+	@Test
+	@DisplayName("an existing destination is not overwritten")
+	public void testDestinationExists(@TempDir Path tmp) throws IOException {
+		var destination = tmp.resolve("MyVault");
+		Files.createDirectory(destination);
+		var zip = zip(Map.of("vault.cryptomator", CONFIG));
+
+		Assertions.assertThrows(FileAlreadyExistsException.class, () -> VaultTemplateExtractor.extractAndMove(zip, destination));
+	}
+
+	@Test
+	@DisplayName("an archive without a vault config fails")
+	public void testNoVaultConfig(@TempDir Path tmp) throws IOException {
+		var zip = zip(Map.of("readme.txt", CONFIG));
+
+		Assertions.assertThrows(IOException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+	}
+
+	@Test
+	@DisplayName("an archive with more than one vault config fails")
+	public void testMultipleVaultConfigs(@TempDir Path tmp) throws IOException {
+		var zip = zip(Map.of( //
+				"vault.cryptomator", CONFIG, //
+				"nested/vault.cryptomator", CONFIG //
+		));
+
+		Assertions.assertThrows(IOException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+	}
+
+	@Test
+	@DisplayName("a zip-slip entry does not escape the destination")
+	public void testZipSlip(@TempDir Path tmp) throws IOException {
+		var zip = zip(Map.of( //
+				"vault.cryptomator", CONFIG, //
+				"../escaped.txt", CIPHERTEXT //
+		));
+		var destination = tmp.resolve("nested").resolve("MyVault");
+
+		try {
+			VaultTemplateExtractor.extractAndMove(zip, destination);
+		} catch (IOException e) {
+			// acceptable: extraction refused the malicious entry
+		}
+
+		Assertions.assertTrue(Files.notExists(tmp.resolve("nested").resolve("escaped.txt")), "entry escaped the destination directory");
+		Assertions.assertTrue(Files.notExists(tmp.resolve("escaped.txt")), "entry escaped the temp tree");
+	}
+
+	private static byte[] zip(Map<String, byte[]> entries) throws IOException {
+		var ordered = new LinkedHashMap<>(entries);
+		var baos = new ByteArrayOutputStream();
+		try (var zos = new ZipOutputStream(baos)) {
+			for (var entry : ordered.entrySet()) {
+				zos.putNextEntry(new ZipEntry(entry.getKey()));
+				zos.write(entry.getValue());
+				zos.closeEntry();
+			}
+		}
+		return baos.toByteArray();
+	}
+
+}
