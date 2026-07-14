@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.importtemplate.ImportTemplateLocationController"
+	  prefWidth="450"
+	  prefHeight="450"
+	  spacing="12"
+	  alignment="CENTER_LEFT"
+	  accessibleRole="DIALOG">
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<children>
+		<!-- TODO (import-template step 4b): fixed-name label, location presets, path field, finish button with spinner -->
+		<Label text="%importTemplate.nameLabel"/>
+		<Label text="${controller.vaultName}"/>
+	</children>
+</VBox>

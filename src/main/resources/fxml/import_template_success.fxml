@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.importtemplate.ImportTemplateSuccessController"
+	  prefWidth="450"
+	  prefHeight="450"
+	  spacing="12"
+	  alignment="TOP_CENTER"
+	  accessibleRole="DIALOG">
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<children>
+		<!-- TODO (import-template step 4b): success glyph, instructions, unlock-now button -->
+		<Label text="%importTemplate.success.message"/>
+		<ButtonBar buttonMinWidth="120">
+			<buttons>
+				<Button text="%generic.button.done" ButtonBar.buttonData="FINISH" onAction="#close"/>
+			</buttons>
+		</ButtonBar>
+	</children>
+</VBox>
