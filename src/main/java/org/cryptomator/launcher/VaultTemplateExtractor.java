@@ -16,7 +16,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Comparator;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -30,6 +29,8 @@ import java.util.stream.Stream;
 public final class VaultTemplateExtractor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultTemplateExtractor.class);
+	private static final long MAX_TOTAL_BYTES = 2L * 1024 * 1024; // 2 MiB of uncompressed content
+	private static final int MAX_ENTRIES = 30; // files + directories
 
 	private VaultTemplateExtractor() {
 	}
@@ -66,18 +67,28 @@ public final class VaultTemplateExtractor {
 
 	private static Path unzip(Path zipFile, Path targetDir) throws IOException {
 		AtomicReference<Path> vaultConfig = new AtomicReference<>();
+		long[] totalBytes = {0};
+		int[] entryCount = {0};
 		Path normalizedTarget = targetDir.normalize();
 		try (FileSystem zipFs = FileSystems.newFileSystem(zipFile)) {
 			for (Path zipRoot : zipFs.getRootDirectories()) {
-				Files.walkFileTree(zipRoot, Set.of(), 6, new SimpleFileVisitor<>() {
+				Files.walkFileTree(zipRoot, new SimpleFileVisitor<>() {
 					@Override
 					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+						if (!dir.equals(zipRoot)) {
+							countEntry(entryCount);
+						}
 						Files.createDirectories(resolveSafely(normalizedTarget, zipRoot, dir));
 						return FileVisitResult.CONTINUE;
 					}
 
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						countEntry(entryCount);
+						totalBytes[0] += attrs.size();
+						if (totalBytes[0] > MAX_TOTAL_BYTES) {
+							throw new IOException("Vault template exceeds the maximum allowed size of " + MAX_TOTAL_BYTES + " bytes.");
+						}
 						var target = resolveSafely(normalizedTarget, zipRoot, file);
 						Files.copy(file, target, StandardCopyOption.REPLACE_EXISTING);
 						if (file.getFileName() != null && Constants.VAULTCONFIG_FILENAME.equals(file.getFileName().toString())) {
@@ -95,6 +106,12 @@ public final class VaultTemplateExtractor {
 			throw new IOException("Template does not contain a vault (no " + Constants.VAULTCONFIG_FILENAME + " found).");
 		}
 		return vaultConfig.get().getParent();
+	}
+
+	private static void countEntry(int[] entryCount) throws IOException {
+		if (++entryCount[0] > MAX_ENTRIES) {
+			throw new IOException("Vault template contains more than the maximum allowed " + MAX_ENTRIES + " entries.");
+		}
 	}
 
 	private static Path resolveSafely(Path targetDir, Path zipRoot, Path entry) throws IOException {

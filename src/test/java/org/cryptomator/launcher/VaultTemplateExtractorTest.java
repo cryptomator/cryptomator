@@ -82,6 +82,31 @@ public class VaultTemplateExtractorTest {
 	}
 
 	@Test
+	@DisplayName("an archive exceeding the size limit fails")
+	public void testExceedsSizeLimit(@TempDir Path tmp) throws IOException {
+		var big = new byte[2 * 1024 * 1024 + 1];
+		var zip = zip(Map.of( //
+				"vault.cryptomator", CONFIG, //
+				"d/AB/CDEF/0.c9r", big //
+		));
+
+		Assertions.assertThrows(IOException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+	}
+
+	@Test
+	@DisplayName("an archive exceeding the entry-count limit fails")
+	public void testExceedsEntryLimit(@TempDir Path tmp) throws IOException {
+		var entries = new LinkedHashMap<String, byte[]>();
+		entries.put("vault.cryptomator", CONFIG);
+		for (int i = 0; i < 11; i++) {
+			entries.put("file" + i + ".c9r", CIPHERTEXT);
+		}
+		var zip = zip(entries);
+
+		Assertions.assertThrows(IOException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+	}
+
+	@Test
 	@DisplayName("a zip-slip entry does not escape the destination")
 	public void testZipSlip(@TempDir Path tmp) throws IOException {
 		var zip = zip(Map.of( //
