@@ -9,6 +9,7 @@ import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
+import org.cryptomator.ui.importtemplate.ImportTemplateComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.notification.NotificationComponent;
@@ -60,6 +61,7 @@ public class FxApplicationWindows {
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
+	private final ImportTemplateComponent.Factory importTemplateWindow;
 	private final FilteredList<Window> visibleWindows;
 	private final Dialogs dialogs;
 
@@ -75,6 +77,7 @@ public class FxApplicationWindows {
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
+								ImportTemplateComponent.Factory importTemplateWindow, //
 								EventViewComponent.Factory eventViewWindowFactory, //
 								NotificationComponent.Factory notificationWindowFactory, //
 								ExecutorService executor, //
@@ -93,6 +96,7 @@ public class FxApplicationWindows {
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
+		this.importTemplateWindow = importTemplateWindow;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
 		this.dialogs = dialogs;
 	}
@@ -142,6 +146,14 @@ public class FxApplicationWindows {
 
 	public void showShareVaultWindow(Vault vault) {
 		CompletableFuture.runAsync(() -> shareVaultWindow.create(vault).showShareVaultWindow(), Platform::runLater);
+	}
+
+	public CompletionStage<Stage> showImportTemplateWindow(String name, byte[] template) {
+		return showMainWindow().thenApplyAsync(_ -> {
+			var component = importTemplateWindow.create(name, template);
+			component.showImportTemplateWindow();
+			return component.window();
+		}, Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {

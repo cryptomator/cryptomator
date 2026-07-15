@@ -69,14 +69,8 @@ class AppLaunchEventHandler {
 		switch (event) {
 			case RevealRunningEvent _ -> appWindows.showMainWindow();
 			case OpenFileEvent openFileEvent -> openFileEvent.pathsToOpen().forEach(this::openPotentialVault);
-			case VaultCreationEvent vaultCreationEvent -> handleVaultCreation(vaultCreationEvent);
+			case VaultCreationEvent vaultCreationEvent -> appWindows.showImportTemplateWindow(vaultCreationEvent.name(), vaultCreationEvent.template());
 		}
-	}
-
-	private void handleVaultCreation(VaultCreationEvent event) {
-		// TODO (deeplink step 5): open the dedicated vault-creation dialog via appWindows
-		LOG.warn("Received vault-creation deeplink for '{}', but handling is not yet implemented.", event.name());
-		appWindows.showMainWindow();
 	}
 
 	// TODO deduplicate MainWindowController...
