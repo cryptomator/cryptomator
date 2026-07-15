@@ -1,5 +1,6 @@
 package org.cryptomator.launcher;
 
+import org.cryptomator.launcher.VaultTemplateExtractor.MalformedTemplateException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,26 +64,34 @@ public class VaultTemplateExtractorTest {
 	}
 
 	@Test
-	@DisplayName("an archive without a vault config fails")
-	public void testNoVaultConfig(@TempDir Path tmp) throws IOException {
-		var zip = zip(Map.of("readme.txt", CONFIG));
+	@DisplayName("data that is not a zip archive fails as malformed")
+	public void testNotAZip(@TempDir Path tmp) {
+		var notAZip = "this is not a zip archive".getBytes(StandardCharsets.UTF_8);
 
-		Assertions.assertThrows(IOException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(notAZip, tmp.resolve("MyVault")));
 	}
 
 	@Test
-	@DisplayName("an archive with more than one vault config fails")
+	@DisplayName("an archive without a vault config fails as malformed")
+	public void testNoVaultConfig(@TempDir Path tmp) throws IOException {
+		var zip = zip(Map.of("readme.txt", CONFIG));
+
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+	}
+
+	@Test
+	@DisplayName("an archive with more than one vault config fails as malformed")
 	public void testMultipleVaultConfigs(@TempDir Path tmp) throws IOException {
 		var zip = zip(Map.of( //
 				"vault.cryptomator", CONFIG, //
 				"nested/vault.cryptomator", CONFIG //
 		));
 
-		Assertions.assertThrows(IOException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
 	}
 
 	@Test
-	@DisplayName("an archive exceeding the size limit fails")
+	@DisplayName("an archive exceeding the size limit fails as malformed")
 	public void testExceedsSizeLimit(@TempDir Path tmp) throws IOException {
 		var big = new byte[2 * 1024 * 1024 + 1];
 		var zip = zip(Map.of( //
@@ -90,20 +99,20 @@ public class VaultTemplateExtractorTest {
 				"d/AB/CDEF/0.c9r", big //
 		));
 
-		Assertions.assertThrows(IOException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
 	}
 
 	@Test
-	@DisplayName("an archive exceeding the entry-count limit fails")
+	@DisplayName("an archive exceeding the entry-count limit fails as malformed")
 	public void testExceedsEntryLimit(@TempDir Path tmp) throws IOException {
 		var entries = new LinkedHashMap<String, byte[]>();
 		entries.put("vault.cryptomator", CONFIG);
-		for (int i = 0; i < 11; i++) {
+		for (int i = 0; i < 31; i++) {
 			entries.put("file" + i + ".c9r", CIPHERTEXT);
 		}
 		var zip = zip(entries);
 
-		Assertions.assertThrows(IOException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
 	}
 
 	@Test

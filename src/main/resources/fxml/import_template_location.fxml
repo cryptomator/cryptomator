@@ -30,10 +30,10 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<VBox spacing="6">
-			<Label text="%importTemplate.nameLabel"/>
-			<TextField text="${controller.vaultName}" editable="false" disable="true"/>
-		</VBox>
+		<HBox spacing="12" alignment="CENTER_LEFT">
+			<Label text="%importTemplate.nameLabel" labelFor="$vaultNameTextField"/>
+			<TextField fx:id="vaultNameTextField" text="${controller.vaultName}" editable="false" HBox.hgrow="ALWAYS"/>
+		</HBox>
 
 		<Region prefHeight="6" VBox.vgrow="NEVER"/>
 

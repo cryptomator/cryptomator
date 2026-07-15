@@ -8,11 +8,13 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.launcher.VaultTemplateExtractor;
+import org.cryptomator.launcher.VaultTemplateExtractor.MalformedTemplateException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +71,7 @@ public class ImportTemplateLocationController implements FxController {
 	private final ExecutorService executor;
 	private final Settings settings;
 	private final ResourceBundle resourceBundle;
+	private final Dialogs dialogs;
 	private final ObservableValue<VaultPathStatus> vaultPathStatus;
 	private final ObservableValue<Boolean> validVaultPath;
 	private final BooleanProperty usePresetPath;
@@ -101,7 +104,8 @@ public class ImportTemplateLocationController implements FxController {
 									 VaultListManager vaultListManager, //
 									 ExecutorService executor, //
 									 Settings settings, //
-									 ResourceBundle resourceBundle) {
+									 ResourceBundle resourceBundle, //
+									 Dialogs dialogs) {
 		this.window = window;
 		this.vaultName = vaultName;
 		this.template = template;
@@ -113,6 +117,7 @@ public class ImportTemplateLocationController implements FxController {
 		this.executor = executor;
 		this.settings = settings;
 		this.resourceBundle = resourceBundle;
+		this.dialogs = dialogs;
 		this.vaultPathStatus = ObservableUtil.mapWithDefault(vaultPath, this::validatePath, new VaultPathStatus(false, "error.message"));
 		this.validVaultPath = ObservableUtil.mapWithDefault(vaultPathStatus, VaultPathStatus::valid, false);
 		this.vaultPathStatus.addListener(this::updateStatusLabel);
@@ -252,6 +257,12 @@ public class ImportTemplateLocationController implements FxController {
 			vault.set(newVault);
 			rememberParentDirectory(destination);
 			window.setScene(successScene.get());
+		}).onError(MalformedTemplateException.class, e -> { // must precede the IOException handler: Tasks picks the first matching one
+			LOG.error("Vault template is malformed.", e);
+			dialogs.prepareMalformedTemplateDialog(window).setOkAction(stage -> {
+				stage.close();
+				window.close(); //TODO: before showing this dialog, close the window and use the mainWindow as owner
+			}).build().showAndWait();
 		}).onError(IOException.class, e -> {
 			LOG.error("Failed to import vault template.", e);
 			appWindows.showErrorWindow(e, window, window.getScene());

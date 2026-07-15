@@ -16,8 +16,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+import java.util.zip.ZipException;
 
 /**
  * Unpacks a vault template (a ZIP archive holding a ready-made vault) and moves the contained vault to a destination.
@@ -41,7 +41,8 @@ public final class VaultTemplateExtractor {
 	 * @param template    the ZIP archive bytes
 	 * @param destination the target vault directory, which must not yet exist
 	 * @return {@code destination}
-	 * @throws IOException if the template is not a valid ZIP, contains no vault, the destination already exists, or the
+	 * @throws MalformedTemplateException if the template is not a valid zip or does not contain a vault
+	 * @throws IOException if the destination already exists, or the
 	 *                     files cannot be written or moved
 	 */
 	public static Path extractAndMove(byte[] template, Path destination) throws IOException {
@@ -66,58 +67,81 @@ public final class VaultTemplateExtractor {
 	}
 
 	private static Path unzip(Path zipFile, Path targetDir) throws IOException {
-		AtomicReference<Path> vaultConfig = new AtomicReference<>();
-		long[] totalBytes = {0};
-		int[] entryCount = {0};
 		Path normalizedTarget = targetDir.normalize();
 		try (FileSystem zipFs = FileSystems.newFileSystem(zipFile)) {
-			for (Path zipRoot : zipFs.getRootDirectories()) {
-				Files.walkFileTree(zipRoot, new SimpleFileVisitor<>() {
-					@Override
-					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-						if (!dir.equals(zipRoot)) {
-							countEntry(entryCount);
-						}
-						Files.createDirectories(resolveSafely(normalizedTarget, zipRoot, dir));
-						return FileVisitResult.CONTINUE;
-					}
+			Path zipRoot  = zipFs.getRootDirectories().iterator().next(); //we take the first available root and ignore others
+			var templateExtractor = new TemplateExtractionVisitor(zipRoot, normalizedTarget, MAX_ENTRIES, MAX_TOTAL_BYTES);
+			Files.walkFileTree(zipRoot, templateExtractor);
+			var vaultConfig = templateExtractor.getVaultConfig();
+			if (vaultConfig == null) {
+				throw new MalformedTemplateException("Template does not contain a vault (no " + Constants.VAULTCONFIG_FILENAME + " found).");
+			}
+			return vaultConfig.getParent();
+		} catch (ZipException e) {
+			throw new MalformedTemplateException("Template is not a readable ZIP archive.", e);
+		}
+	}
 
-					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						countEntry(entryCount);
-						totalBytes[0] += attrs.size();
-						if (totalBytes[0] > MAX_TOTAL_BYTES) {
-							throw new IOException("Vault template exceeds the maximum allowed size of " + MAX_TOTAL_BYTES + " bytes.");
-						}
-						var target = resolveSafely(normalizedTarget, zipRoot, file);
-						Files.copy(file, target, StandardCopyOption.REPLACE_EXISTING);
-						if (file.getFileName() != null && Constants.VAULTCONFIG_FILENAME.equals(file.getFileName().toString())) {
-							if (!vaultConfig.compareAndSet(null, target)) {
-								throw new IOException("Vault template contains more than one " + Constants.VAULTCONFIG_FILENAME);
-							}
-						}
-						return FileVisitResult.CONTINUE;
-					}
-				});
+	static class TemplateExtractionVisitor extends SimpleFileVisitor<Path> {
+
+		private final Path zipRoot;
+		private final Path target;
+		private final int maxEntries;
+		private final long maxSize;
+
+		private int totalEntries = 0;
+		private long totalBytes = 0;
+		private Path vaultConfig = null;
+
+		TemplateExtractionVisitor(Path zipRoot, Path target, int maxEntries, long maxSize) {
+			this.zipRoot = zipRoot;
+			this.target = target;
+			this.maxEntries = maxEntries + 1; //counting the root directory
+			this.maxSize = maxSize;
+		}
+
+		@Override
+		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+			countEntry();
+			Files.createDirectories(resolveSafely(target, zipRoot, dir));
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			countEntry();
+			totalBytes += attrs.size();
+			if (totalBytes > maxSize) {
+				throw new MalformedTemplateException("Vault template exceeds the maximum allowed size of " + maxSize + " bytes.");
+			}
+
+			var actualTarget = Files.copy(file, resolveSafely(target, zipRoot, file), StandardCopyOption.REPLACE_EXISTING);
+
+			if (Constants.VAULTCONFIG_FILENAME.equals(file.getFileName().toString())) {
+				if (vaultConfig != null) {
+					throw new MalformedTemplateException("Vault template contains more than one " + Constants.VAULTCONFIG_FILENAME);
+				}
+				vaultConfig = actualTarget;
+			}
+			return FileVisitResult.CONTINUE;
+		}
+
+		private void countEntry() throws IOException {
+			totalEntries++;
+			if ( totalEntries > maxEntries) {
+				throw new MalformedTemplateException("Vault template contains more than the maximum allowed " + maxEntries + " entries.");
 			}
 		}
 
-		if (vaultConfig.get() == null) {
-			throw new IOException("Template does not contain a vault (no " + Constants.VAULTCONFIG_FILENAME + " found).");
-		}
-		return vaultConfig.get().getParent();
-	}
-
-	private static void countEntry(int[] entryCount) throws IOException {
-		if (++entryCount[0] > MAX_ENTRIES) {
-			throw new IOException("Vault template contains more than the maximum allowed " + MAX_ENTRIES + " entries.");
+		Path getVaultConfig() {
+			return vaultConfig;
 		}
 	}
 
 	private static Path resolveSafely(Path targetDir, Path zipRoot, Path entry) throws IOException {
 		Path resolved = targetDir.resolve(zipRoot.relativize(entry).toString()).normalize();
 		if (!resolved.startsWith(targetDir)) {
-			throw new IOException("Refusing to extract entry outside of target directory: " + entry);
+			throw new MalformedTemplateException("Refusing to extract entry outside of target directory: " + entry);
 		}
 		return resolved;
 	}
@@ -171,6 +195,18 @@ public final class VaultTemplateExtractor {
 			for (Path p : paths) {
 				Files.deleteIfExists(p);
 			}
+		}
+	}
+
+	public static class MalformedTemplateException extends IOException {
+		private static final long serialVersionUID = 1L;
+
+		public MalformedTemplateException(String message) {
+			super(message);
+		}
+
+		public MalformedTemplateException(String message, Throwable cause) {
+			super(message, cause);
 		}
 	}
 
