@@ -23,10 +23,11 @@ public class JfxRevealPathService implements RevealPathService {
 
 	@Override
 	public void reveal(Path p) throws RevealFailedException {
+		var absPath = p.toAbsolutePath();
 		var fxApp = FxApplication.INSTANCE.get();
 		if (fxApp != null) {
 			// showDocument() launches the default app for a regular file, so reveal its parent directory instead
-			var target = Files.isRegularFile(p) ? p.getParent() : p;
+			var target = Files.isRegularFile(absPath) ? absPath.getParent() : absPath;
 			fxApp.getHostServices().showDocument(target.toUri().toString());
 		} else {
 			throw new RevealFailedException("JavaFX Application not initialized");
