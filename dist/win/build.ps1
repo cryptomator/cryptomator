@@ -40,11 +40,6 @@ if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
    Write-Error "Unable to find git.exe in your PATH (try: choco install git)"
    exit 1
 }
-if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
-{
-   Write-Error "Unable to find mvn.cmd in your PATH (try: choco install maven)"
-   exit 1
-}
 if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
 {
    Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.2)'
@@ -65,7 +60,7 @@ if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
 }
 
 $buildDir = Split-Path -Parent $PSCommandPath
-$version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
+$version = $(../../mvnw.cmd -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
 $semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
 
@@ -79,7 +74,7 @@ $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
 Invoke-CommandWithExitCheck -Command `
-    "mvn" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "clean", "package", "-DskipTests", "-Pwin")
+    "../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "clean", "package", "-DskipTests", "-Pwin")
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -212,7 +207,7 @@ if ($LASTEXITCODE -ne 0) {
 
 #Create RTF license for msi
 Invoke-CommandWithExitCheck -Command `
-    "mvn" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
+    "../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
     "-Dlicense.thirdPartyFilename=license.rtf", `
     "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl", `
     "-Dlicense.outputDirectory=$buildDir\resources\", `
@@ -259,7 +254,7 @@ Invoke-CommandWithExitCheck -Command `
 
 #Create RTF license for bundle
 Invoke-CommandWithExitCheck -Command `
-	"mvn" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
+	"../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
 	"-Dlicense.thirdPartyFilename=license.rtf", `
 	"-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl", `
 	"-Dlicense.outputDirectory=$buildDir\bundle\resources\", `
