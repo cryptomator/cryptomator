@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Requests creation of a new vault from a {@code cryptomator://vault/create?name=…&template=…} deeplink.
+ * Requests creation of a new vault from a {@code cryptomator://vault/create#name=…&template=…} deeplink.
  * <p>
  * The {@code template} is a Base64URL-encoded ZIP archive holding a ready-made (signed) vault. The {@code name} fixes
- * the vault's directory name and is restricted to a single, safe path segment so that resolving it against a
- * user-chosen location cannot escape that location.
+ * the vault's directory name and is restricted to a single, safe path segment. Both parameters are carried in the URI
+ * <em>fragment</em> part.
  *
  * @param name     the fixed vault name (a single, safe path segment)
  * @param template the Base64URL-decoded vault template
@@ -29,7 +29,7 @@ public record VaultCreationEvent(String name, byte[] template) implements AppLau
 	private static final String PATH = "/create";
 
 	/**
-	 * Attempts to interpret the given URI as a {@code cryptomator://vault/create?name=…&template=…} deeplink.
+	 * Attempts to interpret the given URI as a {@code cryptomator://vault/create#name=…&template=…} deeplink.
 	 *
 	 * @param uri the deeplink URI
 	 * @return the parsed event, or an empty optional if the URI's scheme, host or path do not identify a
@@ -42,21 +42,21 @@ public record VaultCreationEvent(String name, byte[] template) implements AppLau
 		if (!SCHEME.equalsIgnoreCase(uri.getScheme()) || !HOST.equalsIgnoreCase(uri.getHost()) || !PATH.equals(uri.getPath())) {
 			return Optional.empty();
 		}
-		var params = parseQuery(uri.getRawQuery());
+		var params = parseParams(uri.getRawFragment());
 		var name = params.get("name");
 		var templateParam = params.get("template");
 		if (name == null || name.isBlank()) {
-			throw new IllegalArgumentException("Missing required query parameter 'name'.");
+			throw new IllegalArgumentException("Missing required fragment parameter 'name'.");
 		}
 		if (templateParam == null || templateParam.isEmpty()) {
-			throw new IllegalArgumentException("Missing required query parameter 'template'.");
+			throw new IllegalArgumentException("Missing required fragment parameter 'template'.");
 		}
 		validateName(name);
 		byte[] template;
 		try {
 			template = Base64.getUrlDecoder().decode(templateParam);
 		} catch (IllegalArgumentException e) {
-			throw new IllegalArgumentException("Query parameter 'template' is not valid Base64URL.", e);
+			throw new IllegalArgumentException("Fragment parameter 'template' is not valid Base64URL.", e);
 		}
 		var leftoverParams = params.keySet().stream().filter(k -> !(k.equals("template") || k.equals("name"))).toList();
 		if (!leftoverParams.isEmpty()) {
@@ -67,16 +67,16 @@ public record VaultCreationEvent(String name, byte[] template) implements AppLau
 
 	private static void validateName(String name) {
 		if (name.contains("/") || name.contains("\\") || name.contains("..") || name.equals(".")) {
-			throw new IllegalArgumentException("Query parameter 'name' must be a single path segment, but was '" + name + "'.");
+			throw new IllegalArgumentException("Fragment parameter 'name' must be a single path segment, but was '" + name + "'.");
 		}
 	}
 
-	private static Map<String, String> parseQuery(String rawQuery) {
+	private static Map<String, String> parseParams(String rawParams) {
 		var params = new HashMap<String, String>();
-		if (rawQuery == null || rawQuery.isEmpty()) {
+		if (rawParams == null || rawParams.isEmpty()) {
 			return params;
 		}
-		for (var pair : rawQuery.split("&")) {
+		for (var pair : rawParams.split("&")) {
 			var idx = pair.indexOf('=');
 			if (idx < 0) {
 				continue;
