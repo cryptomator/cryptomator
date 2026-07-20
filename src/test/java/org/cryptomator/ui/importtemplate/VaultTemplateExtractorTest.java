@@ -1,6 +1,6 @@
-package org.cryptomator.launcher;
+package org.cryptomator.ui.importtemplate;
 
-import org.cryptomator.launcher.VaultTemplateExtractor.MalformedTemplateException;
+import org.cryptomator.ui.importtemplate.VaultTemplateExtractor.MalformedTemplateException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -93,7 +93,7 @@ public class VaultTemplateExtractorTest {
 	@Test
 	@DisplayName("an archive exceeding the size limit fails as malformed")
 	public void testExceedsSizeLimit(@TempDir Path tmp) throws IOException {
-		var big = new byte[2 * 1024 * 1024 + 1];
+		var big = new byte[(int) VaultTemplateExtractor.MAX_TOTAL_BYTES + 1];
 		var zip = zip(Map.of( //
 				"vault.cryptomator", CONFIG, //
 				"d/AB/CDEF/0.c9r", big //
@@ -103,16 +103,34 @@ public class VaultTemplateExtractorTest {
 	}
 
 	@Test
+	@DisplayName("an archive with exactly the maximum number of entries is accepted")
+	public void testAtEntryLimit(@TempDir Path tmp) throws IOException {
+		var zip = zip(flatEntries(VaultTemplateExtractor.MAX_ENTRIES));
+		var destination = tmp.resolve("MyVault");
+
+		VaultTemplateExtractor.extractAndMove(zip, destination);
+
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(destination.resolve("vault.cryptomator")));
+	}
+
+	@Test
 	@DisplayName("an archive exceeding the entry-count limit fails as malformed")
 	public void testExceedsEntryLimit(@TempDir Path tmp) throws IOException {
-		var entries = new LinkedHashMap<String, byte[]>();
-		entries.put("vault.cryptomator", CONFIG);
-		for (int i = 0; i < 31; i++) {
-			entries.put("file" + i + ".c9r", CIPHERTEXT);
-		}
-		var zip = zip(entries);
+		var zip = zip(flatEntries(VaultTemplateExtractor.MAX_ENTRIES + 1));
 
 		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+	}
+
+	/**
+	 * @param count total number of entries below the zip root, the vault config included
+	 */
+	private static Map<String, byte[]> flatEntries(int count) {
+		var entries = new LinkedHashMap<String, byte[]>();
+		entries.put("vault.cryptomator", CONFIG);
+		for (int i = 0; i < count - 1; i++) {
+			entries.put("file" + i + ".c9r", CIPHERTEXT);
+		}
+		return entries;
 	}
 
 	@Test

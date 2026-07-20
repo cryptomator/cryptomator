@@ -1,4 +1,4 @@
-package org.cryptomator.launcher;
+package org.cryptomator.ui.importtemplate;
 
 import org.cryptomator.common.Constants;
 import org.slf4j.Logger;
@@ -29,8 +29,11 @@ import java.util.zip.ZipException;
 public final class VaultTemplateExtractor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultTemplateExtractor.class);
-	private static final long MAX_TOTAL_BYTES = 2L * 1024 * 1024; // 2 MiB of uncompressed content
-	private static final int MAX_ENTRIES = 30; // files + directories
+	// On Windows, URI template (base64url encoded) is is given on command line argument. Windows API restrict the length
+	// to 32,767 chars (approx. ~24KB template size).
+	// Note that larger links are dropped by the OS anyway, but we also set the accepted size uniform across platforms
+	static final long MAX_TOTAL_BYTES = 24_000; // ~24 KB, see above
+	static final int MAX_ENTRIES = 30; // files + directories below the zip root
 
 	private VaultTemplateExtractor() {
 	}
@@ -96,13 +99,15 @@ public final class VaultTemplateExtractor {
 		TemplateExtractionVisitor(Path zipRoot, Path target, int maxEntries, long maxSize) {
 			this.zipRoot = zipRoot;
 			this.target = target;
-			this.maxEntries = maxEntries + 1; //counting the root directory
+			this.maxEntries = maxEntries;
 			this.maxSize = maxSize;
 		}
 
 		@Override
 		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-			countEntry();
+			if (!dir.equals(zipRoot)) { //the zip root is not part of the template's content
+				countEntry();
+			}
 			Files.createDirectories(resolveSafely(target, zipRoot, dir));
 			return FileVisitResult.CONTINUE;
 		}

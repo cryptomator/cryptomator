@@ -7,8 +7,6 @@ import org.cryptomator.common.locationpresets.LocationPresetsProvider;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.launcher.VaultTemplateExtractor;
-import org.cryptomator.launcher.VaultTemplateExtractor.MalformedTemplateException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -257,7 +255,7 @@ public class ImportTemplateLocationController implements FxController {
 			vault.set(newVault);
 			rememberParentDirectory(destination);
 			window.setScene(successScene.get());
-		}).onError(MalformedTemplateException.class, e -> { // must precede the IOException handler: Tasks picks the first matching one
+		}).onError(VaultTemplateExtractor.MalformedTemplateException.class, e -> { // must precede the IOException handler: Tasks picks the first matching one
 			LOG.error("Vault template is malformed.", e);
 			dialogs.prepareMalformedTemplateDialog(window).setOkAction(stage -> {
 				stage.close();
