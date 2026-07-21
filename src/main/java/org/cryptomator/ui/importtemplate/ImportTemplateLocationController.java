@@ -12,7 +12,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
-import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +46,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -60,7 +60,7 @@ public class ImportTemplateLocationController implements FxController {
 
 	private final Stage window;
 	private final String vaultName;
-	private final byte[] template;
+	private final VaultTemplate template;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObjectProperty<Vault> vault;
 	private final Lazy<Scene> successScene;
@@ -69,7 +69,6 @@ public class ImportTemplateLocationController implements FxController {
 	private final ExecutorService executor;
 	private final Settings settings;
 	private final ResourceBundle resourceBundle;
-	private final Dialogs dialogs;
 	private final ObservableValue<VaultPathStatus> vaultPathStatus;
 	private final ObservableValue<Boolean> validVaultPath;
 	private final BooleanProperty usePresetPath;
@@ -79,6 +78,8 @@ public class ImportTemplateLocationController implements FxController {
 	private final ObjectBinding<ContentDisplay> createButtonState;
 	private final ObservableList<Node> radioButtons;
 	private final ObservableList<Node> sortedRadioButtons;
+
+	private final String hubUrl;
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
 
@@ -94,7 +95,7 @@ public class ImportTemplateLocationController implements FxController {
 	@Inject
 	ImportTemplateLocationController(@ImportTemplateWindow Stage window, //
 									 @Named("vaultName") String vaultName, //
-									 @Named("vaultTemplate") byte[] template, //
+									 VaultTemplate template, //
 									 ObjectProperty<Path> vaultPath, //
 									 @ImportTemplateWindow ObjectProperty<Vault> vault, //
 									 @FxmlScene(FxmlFile.IMPORT_TEMPLATE_SUCCESS) Lazy<Scene> successScene, //
@@ -102,8 +103,7 @@ public class ImportTemplateLocationController implements FxController {
 									 VaultListManager vaultListManager, //
 									 ExecutorService executor, //
 									 Settings settings, //
-									 ResourceBundle resourceBundle, //
-									 Dialogs dialogs) {
+									 ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vaultName = vaultName;
 		this.template = template;
@@ -115,7 +115,7 @@ public class ImportTemplateLocationController implements FxController {
 		this.executor = executor;
 		this.settings = settings;
 		this.resourceBundle = resourceBundle;
-		this.dialogs = dialogs;
+		this.hubUrl = Objects.requireNonNullElseGet(template.hubUrl(), () -> resourceBundle.getString("importTemplate.hubUrl.none"));
 		this.vaultPathStatus = ObservableUtil.mapWithDefault(vaultPath, this::validatePath, new VaultPathStatus(false, "error.message"));
 		this.validVaultPath = ObservableUtil.mapWithDefault(vaultPathStatus, VaultPathStatus::valid, false);
 		this.vaultPathStatus.addListener(this::updateStatusLabel);
@@ -183,7 +183,10 @@ public class ImportTemplateLocationController implements FxController {
 	@FXML
 	public void initialize() {
 		var task = executor.submit(this::loadLocationPresets);
-		window.addEventHandler(WindowEvent.WINDOW_HIDING, _ -> task.cancel(true));
+		window.addEventHandler(WindowEvent.WINDOW_HIDING, _ -> {
+			task.cancel(true);
+			template.close(); //discards the temporary extraction directory, whether or not the import completed
+		});
 		locationPresetsToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(locationPresetsToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
 		radioButtons.add(customLocationRadioBtn);
@@ -248,19 +251,15 @@ public class ImportTemplateLocationController implements FxController {
 		}
 		Path destination = vaultPath.get();
 		processing.set(true);
+		// the template was already unpacked and validated when the deeplink arrived, so only the destination can still
+		// fail here - which the location picker has just checked, leaving races and hardware faults
 		Tasks.create(() -> {
-			VaultTemplateExtractor.extractAndMove(template, destination);
+			template.moveTo(destination);
 			return vaultListManager.add(destination);
 		}).onSuccess(newVault -> {
 			vault.set(newVault);
 			rememberParentDirectory(destination);
 			window.setScene(successScene.get());
-		}).onError(VaultTemplateExtractor.MalformedTemplateException.class, e -> { // must precede the IOException handler: Tasks picks the first matching one
-			LOG.error("Vault template is malformed.", e);
-			dialogs.prepareMalformedTemplateDialog(window).setOkAction(stage -> {
-				stage.close();
-				window.close(); //TODO: before showing this dialog, close the window and use the mainWindow as owner
-			}).build().showAndWait();
 		}).onError(IOException.class, e -> {
 			LOG.error("Failed to import vault template.", e);
 			appWindows.showErrorWindow(e, window, window.getScene());
@@ -284,6 +283,10 @@ public class ImportTemplateLocationController implements FxController {
 
 	public String getVaultName() {
 		return vaultName;
+	}
+
+	public String getHubUrl() {
+		return hubUrl;
 	}
 
 	public Path getVaultPath() {

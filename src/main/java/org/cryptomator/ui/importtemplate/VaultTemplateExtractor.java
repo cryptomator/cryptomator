@@ -20,13 +20,15 @@ import java.util.stream.Stream;
 import java.util.zip.ZipException;
 
 /**
- * Unpacks a vault template (a ZIP archive holding a ready-made vault) and moves the contained vault to a destination.
+ * Low-level mechanics of unpacking a vault template (a ZIP archive holding a ready-made vault).
  * <p>
- * The archive is expanded into a temporary directory using the Java ZIP {@link FileSystem}, and the vault directory
- * (identified by containing a {@value Constants#VAULTCONFIG_FILENAME} file) is then moved to the destination in a single
- * step, so the vault only ever appears complete at its final location.
+ * The archive is expanded into a directory using the Java ZIP {@link FileSystem}, and the vault directory is located by
+ * finding the {@value Constants#VAULTCONFIG_FILENAME} it contains. Moving that directory to its final location is a
+ * separate step, so the vault only ever appears complete at its destination.
+ * <p>
+ * Lifecycle of the temporary directory is owned by {@link VaultTemplate}, not by this class.
  */
-public final class VaultTemplateExtractor {
+final class VaultTemplateExtractor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultTemplateExtractor.class);
 	// On Windows, URI template (base64url encoded) is is given on command line argument. Windows API restrict the length
@@ -39,34 +41,41 @@ public final class VaultTemplateExtractor {
 	}
 
 	/**
-	 * Unpacks the given template and moves the contained vault to {@code destination}.
+	 * Unpacks the given template into {@code targetDir} and locates the vault it contains.
 	 *
-	 * @param template    the ZIP archive bytes
-	 * @param destination the target vault directory, which must not yet exist
-	 * @return {@code destination}
-	 * @throws MalformedTemplateException if the template is not a valid zip or does not contain a vault
-	 * @throws IOException if the destination already exists, or the
-	 *                     files cannot be written or moved
+	 * @param template  the ZIP archive bytes
+	 * @param targetDir an existing, empty directory to unpack into
+	 * @return the unpacked vault directory below {@code targetDir}
+	 * @throws MalformedTemplateException if the template is not a readable ZIP, exceeds the entry or size limits, or
+	 *                                    does not contain exactly one {@value Constants#VAULTCONFIG_FILENAME}
+	 * @throws IOException                if the files cannot be written
 	 */
-	public static Path extractAndMove(byte[] template, Path destination) throws IOException {
+	static Path extractTo(byte[] template, Path targetDir) throws IOException {
+		Path tmpZip = Files.createTempFile("vault-template-", ".zip");
+		try {
+			Files.write(tmpZip, template);
+			return unzip(tmpZip, targetDir);
+		} finally {
+			deleteQuietly(tmpZip);
+		}
+	}
+
+	/**
+	 * Moves an unpacked vault to its final location, creating missing parent directories.
+	 *
+	 * @param vaultRoot   the unpacked vault directory
+	 * @param destination the target vault directory, which must not yet exist
+	 * @throws FileAlreadyExistsException if {@code destination} already exists
+	 */
+	static void moveToDestination(Path vaultRoot, Path destination) throws IOException {
 		if (Files.exists(destination)) {
 			throw new FileAlreadyExistsException(destination.toString());
 		}
-		Path tmpZip = Files.createTempFile("vault-template-", ".zip");
-		Path tmpDir = Files.createTempDirectory("vault-template-");
-		try {
-			Files.write(tmpZip, template);
-			Path vaultRoot = unzip(tmpZip, tmpDir);
-			Path parent = destination.getParent();
-			if (parent != null) {
-				Files.createDirectories(parent);
-			}
-			move(vaultRoot, destination);
-			return destination;
-		} finally {
-			deleteQuietly(tmpDir);
-			deleteQuietly(tmpZip);
+		Path parent = destination.getParent();
+		if (parent != null) {
+			Files.createDirectories(parent);
 		}
+		move(vaultRoot, destination);
 	}
 
 	private static Path unzip(Path zipFile, Path targetDir) throws IOException {
@@ -183,7 +192,7 @@ public final class VaultTemplateExtractor {
 		});
 	}
 
-	private static void deleteQuietly(Path path) {
+	static void deleteQuietly(Path path) {
 		try {
 			deleteRecursively(path);
 		} catch (IOException e) {
@@ -200,18 +209,6 @@ public final class VaultTemplateExtractor {
 			for (Path p : paths) {
 				Files.deleteIfExists(p);
 			}
-		}
-	}
-
-	public static class MalformedTemplateException extends IOException {
-		private static final long serialVersionUID = 1L;
-
-		public MalformedTemplateException(String message) {
-			super(message);
-		}
-
-		public MalformedTemplateException(String message, Throwable cause) {
-			super(message, cause);
 		}
 	}
 

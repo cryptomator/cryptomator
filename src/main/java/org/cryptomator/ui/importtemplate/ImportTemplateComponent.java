@@ -28,7 +28,7 @@ public interface ImportTemplateComponent {
 
 	@Subcomponent.Factory
 	interface Factory {
-		ImportTemplateComponent create(@BindsInstance @Named("vaultName") String name, @BindsInstance @Named("vaultTemplate") byte[] template);
+		ImportTemplateComponent create(@BindsInstance @Named("vaultName") String name, @BindsInstance VaultTemplate template);
 	}
 
 }

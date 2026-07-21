@@ -10,6 +10,8 @@ import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
 import org.cryptomator.ui.importtemplate.ImportTemplateComponent;
+import org.cryptomator.ui.importtemplate.MalformedTemplateException;
+import org.cryptomator.ui.importtemplate.VaultTemplate;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.notification.NotificationComponent;
@@ -38,6 +40,7 @@ import java.awt.desktop.AppReopenedListener;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
@@ -148,12 +151,51 @@ public class FxApplicationWindows {
 		CompletableFuture.runAsync(() -> shareVaultWindow.create(vault).showShareVaultWindow(), Platform::runLater);
 	}
 
+	/**
+	 * Shows the import dialog for the given vault template.
+	 * <p>
+	 * The archive is unpacked and validated up front on a background thread, so a template that could never be imported
+	 * is rejected before the user is asked to choose a storage location - in which case the returned stage is the main
+	 * window, having shown an error dialog. On success the unpacked template is handed to the import window, which owns
+	 * it from then on and discards it when it closes.
+	 */
 	public CompletionStage<Stage> showImportTemplateWindow(String name, byte[] template) {
-		return showMainWindow().thenApplyAsync(_ -> {
-			var component = importTemplateWindow.create(name, template);
-			component.showImportTemplateWindow();
-			return component.window();
-		}, Platform::runLater).whenComplete(this::reportErrors);
+		return showMainWindow().thenComposeAsync(mainWindow -> //
+				VaultTemplate.extractAsync(template, executor) //
+						.handleAsync((extractedTemplate, throwable) -> {
+							if (throwable != null) {
+								return reportFailedImport(unwrap(throwable), mainWindow);
+							}
+							try {
+								var component = importTemplateWindow.create(name, extractedTemplate);
+								component.showImportTemplateWindow();
+								return component.window();
+							} catch (RuntimeException e) {
+								extractedTemplate.close(); //nothing took ownership, so the temp dir is ours to discard
+								throw e;
+							}
+						}, Platform::runLater) //
+		).whenComplete(this::reportErrors);
+	}
+
+	/**
+	 * @return the main window, which is what remains visible once the user dismisses the error
+	 */
+	private Stage reportFailedImport(Throwable cause, Stage mainWindow) {
+		if (cause instanceof MalformedTemplateException) {
+			// a dead end: no storage location the user could pick would make this template work
+			LOG.error("Vault template is malformed.", cause);
+			dialogs.prepareMalformedTemplateDialog(mainWindow).build().showAndWait();
+		} else {
+			LOG.error("Failed to unpack vault template.", cause);
+			showErrorWindow(cause, mainWindow, null);
+		}
+		return mainWindow;
+	}
+
+	private static Throwable unwrap(Throwable throwable) {
+		var cause = throwable.getCause();
+		return throwable instanceof CompletionException && cause != null ? cause : throwable;
 	}
 
 	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {

@@ -31,6 +31,11 @@
 	</padding>
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT">
+			<Label text="%importTemplate.hubUrlLabel" labelFor="$hubUrlTextField"/>
+			<TextField fx:id="hubUrlTextField" text="${controller.hubUrl}" editable="false" HBox.hgrow="ALWAYS"/>
+		</HBox>
+
+		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%importTemplate.nameLabel" labelFor="$vaultNameTextField"/>
 			<TextField fx:id="vaultNameTextField" text="${controller.vaultName}" editable="false" HBox.hgrow="ALWAYS"/>
 		</HBox>
