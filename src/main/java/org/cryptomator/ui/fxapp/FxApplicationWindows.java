@@ -9,9 +9,7 @@ import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
-import org.cryptomator.ui.importtemplate.ImportTemplateComponent;
-import org.cryptomator.ui.importtemplate.MalformedTemplateException;
-import org.cryptomator.ui.importtemplate.VaultTemplate;
+import org.cryptomator.ui.importtemplate.ImportTemplateWindows;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.notification.NotificationComponent;
@@ -40,7 +38,6 @@ import java.awt.desktop.AppReopenedListener;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
@@ -64,7 +61,7 @@ public class FxApplicationWindows {
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
-	private final ImportTemplateComponent.Factory importTemplateWindow;
+	private final ImportTemplateWindows importTemplateWindows;
 	private final FilteredList<Window> visibleWindows;
 	private final Dialogs dialogs;
 
@@ -80,7 +77,7 @@ public class FxApplicationWindows {
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
-								ImportTemplateComponent.Factory importTemplateWindow, //
+								ImportTemplateWindows importTemplateWindows, //
 								EventViewComponent.Factory eventViewWindowFactory, //
 								NotificationComponent.Factory notificationWindowFactory, //
 								ExecutorService executor, //
@@ -99,7 +96,7 @@ public class FxApplicationWindows {
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
-		this.importTemplateWindow = importTemplateWindow;
+		this.importTemplateWindows = importTemplateWindows;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
 		this.dialogs = dialogs;
 	}
@@ -152,50 +149,17 @@ public class FxApplicationWindows {
 	}
 
 	/**
-	 * Shows the import dialog for the given vault template.
-	 * <p>
-	 * The archive is unpacked and validated up front on a background thread, so a template that could never be imported
-	 * is rejected before the user is asked to choose a storage location - in which case the returned stage is the main
-	 * window, having shown an error dialog. On success the unpacked template is handed to the import window, which owns
-	 * it from then on and discards it when it closes.
+	 * Shows the vault template import flow, which decides for itself whether the template can be imported at all.
+	 * Unexpected failures (as opposed to an unusable template) surface in the generic error window.
 	 */
 	public CompletionStage<Stage> showImportTemplateWindow(String name, byte[] template) {
-		return showMainWindow().thenComposeAsync(mainWindow -> //
-				VaultTemplate.extractAsync(template, executor) //
-						.handleAsync((extractedTemplate, throwable) -> {
-							if (throwable != null) {
-								return reportFailedImport(unwrap(throwable), mainWindow);
-							}
-							try {
-								var component = importTemplateWindow.create(name, extractedTemplate);
-								component.showImportTemplateWindow();
-								return component.window();
-							} catch (RuntimeException e) {
-								extractedTemplate.close(); //nothing took ownership, so the temp dir is ours to discard
-								throw e;
-							}
-						}, Platform::runLater) //
-		).whenComplete(this::reportErrors);
-	}
-
-	/**
-	 * @return the main window, which is what remains visible once the user dismisses the error
-	 */
-	private Stage reportFailedImport(Throwable cause, Stage mainWindow) {
-		if (cause instanceof MalformedTemplateException) {
-			// a dead end: no storage location the user could pick would make this template work
-			LOG.error("Vault template is malformed.", cause);
-			dialogs.prepareMalformedTemplateDialog(mainWindow).build().showAndWait();
-		} else {
-			LOG.error("Failed to unpack vault template.", cause);
-			showErrorWindow(cause, mainWindow, null);
-		}
-		return mainWindow;
-	}
-
-	private static Throwable unwrap(Throwable throwable) {
-		var cause = throwable.getCause();
-		return throwable instanceof CompletionException && cause != null ? cause : throwable;
+		return showMainWindow() //
+				.thenComposeAsync(_ -> importTemplateWindows.extractAndShowImportTemplateWindow(name, template), Platform::runLater) //
+				.exceptionallyAsync(e -> {
+					showErrorWindow(e, primaryStage, null);
+					return primaryStage;
+				}, Platform::runLater) //
+				.whenComplete(this::reportErrors);
 	}
 
 	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {

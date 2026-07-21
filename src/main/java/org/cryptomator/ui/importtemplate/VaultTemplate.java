@@ -50,28 +50,6 @@ public final class VaultTemplate implements AutoCloseable {
 	}
 
 	/**
-	 * Unpacks and validates the given archive on {@code executor}, off the FX thread.
-	 * <p>
-	 * Failures arrive as a {@link CompletionException} wrapping the cause, so callers should unwrap before deciding
-	 * what to show: a {@link MalformedTemplateException} means the template itself is a dead end, any other
-	 * {@link IOException} means unpacking failed for an environmental reason.
-	 *
-	 * @param archive  the ZIP archive bytes
-	 * @param executor the executor to unpack on
-	 * @return the unpacked template, which the caller must close
-	 * @see #extract(byte[])
-	 */
-	public static CompletionStage<VaultTemplate> extractAsync(byte[] archive, Executor executor) {
-		return CompletableFuture.supplyAsync(()-> {
-			try {
-				return VaultTemplate.extract(archive);
-			} catch (IOException e) {
-				throw new CompletionException(e);
-			}
-		}, executor);
-	}
-
-	/**
 	 * Unpacks the given archive to a temporary directory and validates it.
 	 * <p>
 	 * This touches the file system and should not run on the FX thread.
@@ -92,7 +70,8 @@ public final class VaultTemplate implements AutoCloseable {
 				: Files.createTempDirectory(tempParent, "vault-template-");
 		try {
 			var vaultRoot = VaultTemplateExtractor.extractTo(archive, tempDir);
-			return new VaultTemplate(tempDir, vaultRoot, readHubUrl(vaultRoot));
+			var hubURL = readHubUrl(vaultRoot);
+			return new VaultTemplate(tempDir, vaultRoot, hubURL);
 		} catch (IOException | RuntimeException e) {
 			VaultTemplateExtractor.deleteQuietly(tempDir);
 			throw e;
@@ -120,7 +99,7 @@ public final class VaultTemplate implements AutoCloseable {
 	}
 
 	/**
-	 * The Hub this template's vault belongs to, or {@code null} if its config declares none.
+	 * The Hub instance which generated the template, or {@code null} if its config declares none.
 	 * <p>
 	 * Unverified - see the class documentation.
 	 */

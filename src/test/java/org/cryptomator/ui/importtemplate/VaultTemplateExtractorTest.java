@@ -1,6 +1,5 @@
 package org.cryptomator.ui.importtemplate;
 
-import org.cryptomator.ui.importtemplate.VaultTemplateExtractor.MalformedTemplateException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -23,44 +21,31 @@ public class VaultTemplateExtractorTest {
 	private static final byte[] CIPHERTEXT = "some-ciphertext".getBytes(StandardCharsets.UTF_8);
 
 	@Test
-	@DisplayName("a vault at the archive root is moved to the destination")
+	@DisplayName("a vault at the archive root is unpacked and located")
 	public void testVaultAtArchiveRoot(@TempDir Path tmp) throws IOException {
 		var zip = zip(Map.of( //
 				"vault.cryptomator", CONFIG, //
 				"d/AB/CDEF/0.c9r", CIPHERTEXT //
 		));
-		var destination = tmp.resolve("MyVault");
 
-		var result = VaultTemplateExtractor.extractAndMove(zip, destination);
+		var vaultRoot = VaultTemplateExtractor.extractTo(zip, tmp);
 
-		Assertions.assertEquals(destination, result);
-		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(destination.resolve("vault.cryptomator")));
-		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(destination.resolve("d/AB/CDEF/0.c9r")));
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(vaultRoot.resolve("vault.cryptomator")));
+		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(vaultRoot.resolve("d/AB/CDEF/0.c9r")));
 	}
 
 	@Test
-	@DisplayName("a vault nested in a single top-level folder is moved to the destination")
+	@DisplayName("a vault nested in a single top-level folder is located")
 	public void testVaultInSubfolder(@TempDir Path tmp) throws IOException {
 		var zip = zip(Map.of( //
 				"TemplateVault/vault.cryptomator", CONFIG, //
 				"TemplateVault/d/AB/CDEF/0.c9r", CIPHERTEXT //
 		));
-		var destination = tmp.resolve("MyVault");
 
-		VaultTemplateExtractor.extractAndMove(zip, destination);
+		var vaultRoot = VaultTemplateExtractor.extractTo(zip, tmp);
 
-		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(destination.resolve("vault.cryptomator")));
-		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(destination.resolve("d/AB/CDEF/0.c9r")));
-	}
-
-	@Test
-	@DisplayName("an existing destination is not overwritten")
-	public void testDestinationExists(@TempDir Path tmp) throws IOException {
-		var destination = tmp.resolve("MyVault");
-		Files.createDirectory(destination);
-		var zip = zip(Map.of("vault.cryptomator", CONFIG));
-
-		Assertions.assertThrows(FileAlreadyExistsException.class, () -> VaultTemplateExtractor.extractAndMove(zip, destination));
+		Assertions.assertEquals("TemplateVault", vaultRoot.getFileName().toString());
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(vaultRoot.resolve("vault.cryptomator")));
 	}
 
 	@Test
@@ -68,7 +53,7 @@ public class VaultTemplateExtractorTest {
 	public void testNotAZip(@TempDir Path tmp) {
 		var notAZip = "this is not a zip archive".getBytes(StandardCharsets.UTF_8);
 
-		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(notAZip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractTo(notAZip, tmp));
 	}
 
 	@Test
@@ -76,7 +61,7 @@ public class VaultTemplateExtractorTest {
 	public void testNoVaultConfig(@TempDir Path tmp) throws IOException {
 		var zip = zip(Map.of("readme.txt", CONFIG));
 
-		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractTo(zip, tmp));
 	}
 
 	@Test
@@ -87,7 +72,7 @@ public class VaultTemplateExtractorTest {
 				"nested/vault.cryptomator", CONFIG //
 		));
 
-		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractTo(zip, tmp));
 	}
 
 	@Test
@@ -99,18 +84,17 @@ public class VaultTemplateExtractorTest {
 				"d/AB/CDEF/0.c9r", big //
 		));
 
-		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractTo(zip, tmp));
 	}
 
 	@Test
 	@DisplayName("an archive with exactly the maximum number of entries is accepted")
 	public void testAtEntryLimit(@TempDir Path tmp) throws IOException {
 		var zip = zip(flatEntries(VaultTemplateExtractor.MAX_ENTRIES));
-		var destination = tmp.resolve("MyVault");
 
-		VaultTemplateExtractor.extractAndMove(zip, destination);
+		var vaultRoot = VaultTemplateExtractor.extractTo(zip, tmp);
 
-		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(destination.resolve("vault.cryptomator")));
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(vaultRoot.resolve("vault.cryptomator")));
 	}
 
 	@Test
@@ -118,7 +102,26 @@ public class VaultTemplateExtractorTest {
 	public void testExceedsEntryLimit(@TempDir Path tmp) throws IOException {
 		var zip = zip(flatEntries(VaultTemplateExtractor.MAX_ENTRIES + 1));
 
-		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractAndMove(zip, tmp.resolve("MyVault")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractTo(zip, tmp));
+	}
+
+	@Test
+	@DisplayName("a zip-slip entry does not escape the extraction directory")
+	public void testZipSlip(@TempDir Path tmp) throws IOException {
+		var zip = zip(Map.of( //
+				"vault.cryptomator", CONFIG, //
+				"../escaped.txt", CIPHERTEXT //
+		));
+		var targetDir = tmp.resolve("nested");
+		Files.createDirectory(targetDir);
+
+		try {
+			VaultTemplateExtractor.extractTo(zip, targetDir);
+		} catch (IOException e) {
+			// acceptable: extraction refused the malicious entry
+		}
+
+		Assertions.assertTrue(Files.notExists(tmp.resolve("escaped.txt")), "entry escaped the extraction directory");
 	}
 
 	/**
@@ -131,25 +134,6 @@ public class VaultTemplateExtractorTest {
 			entries.put("file" + i + ".c9r", CIPHERTEXT);
 		}
 		return entries;
-	}
-
-	@Test
-	@DisplayName("a zip-slip entry does not escape the destination")
-	public void testZipSlip(@TempDir Path tmp) throws IOException {
-		var zip = zip(Map.of( //
-				"vault.cryptomator", CONFIG, //
-				"../escaped.txt", CIPHERTEXT //
-		));
-		var destination = tmp.resolve("nested").resolve("MyVault");
-
-		try {
-			VaultTemplateExtractor.extractAndMove(zip, destination);
-		} catch (IOException e) {
-			// acceptable: extraction refused the malicious entry
-		}
-
-		Assertions.assertTrue(Files.notExists(tmp.resolve("nested").resolve("escaped.txt")), "entry escaped the destination directory");
-		Assertions.assertTrue(Files.notExists(tmp.resolve("escaped.txt")), "entry escaped the temp tree");
 	}
 
 	private static byte[] zip(Map<String, byte[]> entries) throws IOException {

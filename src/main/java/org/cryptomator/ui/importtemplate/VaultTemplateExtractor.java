@@ -60,24 +60,6 @@ final class VaultTemplateExtractor {
 		}
 	}
 
-	/**
-	 * Moves an unpacked vault to its final location, creating missing parent directories.
-	 *
-	 * @param vaultRoot   the unpacked vault directory
-	 * @param destination the target vault directory, which must not yet exist
-	 * @throws FileAlreadyExistsException if {@code destination} already exists
-	 */
-	static void moveToDestination(Path vaultRoot, Path destination) throws IOException {
-		if (Files.exists(destination)) {
-			throw new FileAlreadyExistsException(destination.toString());
-		}
-		Path parent = destination.getParent();
-		if (parent != null) {
-			Files.createDirectories(parent);
-		}
-		move(vaultRoot, destination);
-	}
-
 	private static Path unzip(Path zipFile, Path targetDir) throws IOException {
 		Path normalizedTarget = targetDir.normalize();
 		try (FileSystem zipFs = FileSystems.newFileSystem(zipFile)) {
@@ -158,6 +140,24 @@ final class VaultTemplateExtractor {
 			throw new MalformedTemplateException("Refusing to extract entry outside of target directory: " + entry);
 		}
 		return resolved;
+	}
+
+	/**
+	 * Moves an unpacked vault to its final location, creating missing parent directories.
+	 *
+	 * @param vaultRoot   the unpacked vault directory
+	 * @param destination the target vault directory, which must not yet exist
+	 * @throws FileAlreadyExistsException if {@code destination} already exists
+	 */
+	static void moveToDestination(Path vaultRoot, Path destination) throws IOException {
+		if (Files.exists(destination)) {
+			throw new FileAlreadyExistsException(destination.toString());
+		}
+		Path parent = destination.getParent();
+		if (parent != null) {
+			Files.createDirectories(parent);
+		}
+		move(vaultRoot, destination);
 	}
 
 	private static void move(Path source, Path destination) throws IOException {
