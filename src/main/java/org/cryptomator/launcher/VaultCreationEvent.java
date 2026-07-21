@@ -24,6 +24,8 @@ import java.util.Optional;
 public record VaultCreationEvent(String name, byte[] template) implements AppLaunchEvent {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultCreationEvent.class);
+	private static final int MAX_NAME_LENGTH = 256;
+	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	private static final String SCHEME = "cryptomator";
 	private static final String HOST = "vault";
 	private static final String PATH = "/create";
@@ -43,32 +45,57 @@ public record VaultCreationEvent(String name, byte[] template) implements AppLau
 			return Optional.empty();
 		}
 		var params = parseParams(uri.getRawFragment());
+
 		var name = params.get("name");
-		var templateParam = params.get("template");
 		if (name == null || name.isBlank()) {
 			throw new IllegalArgumentException("Missing required fragment parameter 'name'.");
 		}
+		validateName(name);
+
+		var templateParam = params.get("template");
 		if (templateParam == null || templateParam.isEmpty()) {
 			throw new IllegalArgumentException("Missing required fragment parameter 'template'.");
 		}
-		validateName(name);
 		byte[] template;
 		try {
 			template = Base64.getUrlDecoder().decode(templateParam);
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Fragment parameter 'template' is not valid Base64URL.", e);
 		}
+
 		var leftoverParams = params.keySet().stream().filter(k -> !(k.equals("template") || k.equals("name"))).toList();
 		if (!leftoverParams.isEmpty()) {
 			LOG.debug("Ignoring unknown parameters {}", leftoverParams);
 		}
+
 		return Optional.of(new VaultCreationEvent(name, template));
 	}
 
+	//TODO: what does Cryptomator Hub allow in vault names?
 	private static void validateName(String name) {
-		if (name.contains("/") || name.contains("\\") || name.contains("..") || name.equals(".")) {
+		if (name.codePointCount(0, name.length()) > MAX_NAME_LENGTH) {
+			throw new IllegalArgumentException("Fragment parameter 'name' must not exceed " + MAX_NAME_LENGTH + " characters.");
+		}
+		if (name.contains("/") || name.contains("\\") || name.contains(FILE_SEPARATOR) || name.contains("..") || name.equals(".")) {
 			throw new IllegalArgumentException("Fragment parameter 'name' must be a single path segment, but was '" + name + "'.");
 		}
+		if (!name.equals(name.stripTrailing())) {
+			// Windows silently strips these, so the directory would not match the requested name
+			throw new IllegalArgumentException("Fragment parameter 'name' must not end with whitespace, but was '" + name + "'.");
+		}
+		// invisible characters (control chars, bidi overrides such as U+202E, zero-width joiners, ...) let a name
+		// render deceptively, e.g. "Rechnung<U+202E>gnp.exe" showing up as "Rechnungexe.png"
+		var offendingCodePoint = name.codePoints().filter(VaultCreationEvent::isInvisible).findFirst();
+		if (offendingCodePoint.isPresent()) {
+			throw new IllegalArgumentException("Fragment parameter 'name' must not contain invisible characters, but contained U+%04X.".formatted(offendingCodePoint.getAsInt()));
+		}
+	}
+
+	private static boolean isInvisible(int codePoint) {
+		return switch (Character.getType(codePoint)) {
+			case Character.CONTROL, Character.FORMAT, Character.SURROGATE, Character.PRIVATE_USE, Character.UNASSIGNED -> true;
+			default -> false;
+		};
 	}
 
 	private static Map<String, String> parseParams(String rawParams) {

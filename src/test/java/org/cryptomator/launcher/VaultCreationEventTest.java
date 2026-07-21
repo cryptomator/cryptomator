@@ -3,6 +3,8 @@ package org.cryptomator.launcher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +41,51 @@ public class VaultCreationEventTest {
 		var uri = URI.create("cryptomator://vault/create#name=a%26template=" + TEMPLATE_B64);
 
 		Assertions.assertThrows(IllegalArgumentException.class, () -> VaultCreationEvent.tryParse(uri));
+	}
+
+	@ParameterizedTest
+	@DisplayName("a name with a disallowed character is rejected")
+	@ValueSource(strings = { //
+			"foo%2Fbar", // path separator
+			"foo%5Cbar", // backslash
+			"..", // parent directory
+			".", // this directory
+			"foo%20", // trailing whitespace
+			"foo%09", // trailing tab
+			"Rechnung%E2%80%AEgnp.exe", // U+202E right-to-left override
+			"foo%E2%80%8Bbar", // U+200B zero-width space
+			"foo%00bar" // NUL
+	})
+	public void testDisallowedName(String encodedName) {
+		var uri = URI.create("cryptomator://vault/create#name=" + encodedName + "&template=" + TEMPLATE_B64);
+
+		Assertions.assertThrows(IllegalArgumentException.class, () -> VaultCreationEvent.tryParse(uri));
+	}
+
+	@Test
+	@DisplayName("a name of exactly the maximum length is accepted")
+	public void testNameAtLengthLimit() {
+		var name = "a".repeat(256);
+
+		var inTest = VaultCreationEvent.tryParse(URI.create("cryptomator://vault/create#name=" + name + "&template=" + TEMPLATE_B64)).orElseThrow();
+
+		Assertions.assertEquals(name, inTest.name());
+	}
+
+	@Test
+	@DisplayName("a name exceeding the maximum length is rejected")
+	public void testNameExceedsLengthLimit() {
+		var uri = URI.create("cryptomator://vault/create#name=" + "a".repeat(257) + "&template=" + TEMPLATE_B64);
+
+		Assertions.assertThrows(IllegalArgumentException.class, () -> VaultCreationEvent.tryParse(uri));
+	}
+
+	@Test
+	@DisplayName("a name with non-ASCII letters is accepted")
+	public void testNameWithUmlauts() {
+		var inTest = VaultCreationEvent.tryParse(URI.create("cryptomator://vault/create#name=Gesch%C3%A4ftsberichte&template=" + TEMPLATE_B64)).orElseThrow();
+
+		Assertions.assertEquals("Geschäftsberichte", inTest.name());
 	}
 
 	@Test
