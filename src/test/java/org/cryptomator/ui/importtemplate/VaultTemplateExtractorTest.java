@@ -8,6 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -21,31 +22,29 @@ public class VaultTemplateExtractorTest {
 	private static final byte[] CIPHERTEXT = "some-ciphertext".getBytes(StandardCharsets.UTF_8);
 
 	@Test
-	@DisplayName("a vault at the archive root is unpacked and located")
+	@DisplayName("a vault at the archive root is unpacked into the target directory")
 	public void testVaultAtArchiveRoot(@TempDir Path tmp) throws IOException {
 		var zip = zip(Map.of( //
 				"vault.cryptomator", CONFIG, //
 				"d/AB/CDEF/0.c9r", CIPHERTEXT //
 		));
 
-		var vaultRoot = VaultTemplateExtractor.extractTo(zip, tmp);
+		VaultTemplateExtractor.extractTo(zip, tmp);
 
-		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(vaultRoot.resolve("vault.cryptomator")));
-		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(vaultRoot.resolve("d/AB/CDEF/0.c9r")));
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(tmp.resolve("vault.cryptomator")));
+		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(tmp.resolve("d/AB/CDEF/0.c9r")));
 	}
 
 	@Test
-	@DisplayName("a vault nested in a single top-level folder is located")
+	@DisplayName("a vault nested in a top-level folder fails as malformed")
 	public void testVaultInSubfolder(@TempDir Path tmp) throws IOException {
+		// requirement: the vault starts in the archive root, an enclosing folder is not a supported template
 		var zip = zip(Map.of( //
 				"TemplateVault/vault.cryptomator", CONFIG, //
 				"TemplateVault/d/AB/CDEF/0.c9r", CIPHERTEXT //
 		));
 
-		var vaultRoot = VaultTemplateExtractor.extractTo(zip, tmp);
-
-		Assertions.assertEquals("TemplateVault", vaultRoot.getFileName().toString());
-		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(vaultRoot.resolve("vault.cryptomator")));
+		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractTo(zip, tmp));
 	}
 
 	@Test
@@ -65,14 +64,19 @@ public class VaultTemplateExtractorTest {
 	}
 
 	@Test
-	@DisplayName("an archive with more than one vault config fails as malformed")
-	public void testMultipleVaultConfigs(@TempDir Path tmp) throws IOException {
+	@DisplayName("a further vault config below the root is ordinary content, the root one identifies the vault")
+	public void testFurtherVaultConfigBelowRoot(@TempDir Path tmp) throws IOException {
+		// with the vault fixed at the archive root a nested config is simply extracted along with everything
+		// else and counts against the entry limit
 		var zip = zip(Map.of( //
 				"vault.cryptomator", CONFIG, //
-				"nested/vault.cryptomator", CONFIG //
+				"nested/vault.cryptomator", CIPHERTEXT //
 		));
 
-		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplateExtractor.extractTo(zip, tmp));
+		VaultTemplateExtractor.extractTo(zip, tmp);
+
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(tmp.resolve("vault.cryptomator")));
+		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(tmp.resolve("nested/vault.cryptomator")));
 	}
 
 	@Test
@@ -92,9 +96,9 @@ public class VaultTemplateExtractorTest {
 	public void testAtEntryLimit(@TempDir Path tmp) throws IOException {
 		var zip = zip(flatEntries(VaultTemplateExtractor.MAX_ENTRIES));
 
-		var vaultRoot = VaultTemplateExtractor.extractTo(zip, tmp);
+		VaultTemplateExtractor.extractTo(zip, tmp);
 
-		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(vaultRoot.resolve("vault.cryptomator")));
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(tmp.resolve("vault.cryptomator")));
 	}
 
 	@Test
@@ -122,6 +126,35 @@ public class VaultTemplateExtractorTest {
 		}
 
 		Assertions.assertTrue(Files.notExists(tmp.resolve("escaped.txt")), "entry escaped the extraction directory");
+	}
+
+	@Test
+	@DisplayName("an unpacked vault is moved to the destination, creating missing parents")
+	public void testMoveToDestination(@TempDir Path tmp) throws IOException {
+		var source = unpackedVault(tmp.resolve("unpacked"));
+		var destination = tmp.resolve("parent").resolve("MyVault"); // parent does not exist yet
+
+		VaultTemplateExtractor.moveToDestination(source, destination);
+
+		Assertions.assertArrayEquals(CONFIG, Files.readAllBytes(destination.resolve("vault.cryptomator")));
+		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(destination.resolve("d/AB/0.c9r")));
+		Assertions.assertTrue(Files.notExists(source), "the vault should no longer be at its old location");
+	}
+
+	@Test
+	@DisplayName("an existing destination is not overwritten")
+	public void testMoveToExistingDestination(@TempDir Path tmp) throws IOException {
+		var source = unpackedVault(tmp.resolve("unpacked"));
+		var destination = Files.createDirectory(tmp.resolve("MyVault"));
+
+		Assertions.assertThrows(FileAlreadyExistsException.class, () -> VaultTemplateExtractor.moveToDestination(source, destination));
+	}
+
+	private static Path unpackedVault(Path dir) throws IOException {
+		Files.createDirectories(dir.resolve("d/AB"));
+		Files.write(dir.resolve("vault.cryptomator"), CONFIG);
+		Files.write(dir.resolve("d/AB/0.c9r"), CIPHERTEXT);
+		return dir;
 	}
 
 	/**

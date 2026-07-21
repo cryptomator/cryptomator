@@ -8,7 +8,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
@@ -51,43 +50,6 @@ public class VaultTemplateTest {
 	}
 
 	@Test
-	@DisplayName("data that is not a zip is rejected")
-	public void testNotAZip() {
-		var notAZip = "this is not a zip archive".getBytes(StandardCharsets.UTF_8);
-
-		Assertions.assertThrows(MalformedTemplateException.class, () -> VaultTemplate.extract(notAZip));
-	}
-
-	@Test
-	@DisplayName("the unpacked vault is moved to the destination")
-	public void testMoveTo(@TempDir Path tmp) throws IOException {
-		var zip = zip(Map.of( //
-				"vault.cryptomator", hubVaultConfig(API_BASE_URL), //
-				"d/AB/CDEF/0.c9r", CIPHERTEXT //
-		));
-		var destination = tmp.resolve("MyVault");
-
-		try (var inTest = VaultTemplate.extract(zip)) {
-			inTest.moveTo(destination);
-		}
-
-		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(destination.resolve("d/AB/CDEF/0.c9r")));
-		Assertions.assertTrue(Files.exists(destination.resolve("vault.cryptomator")));
-	}
-
-	@Test
-	@DisplayName("an existing destination is not overwritten")
-	public void testDestinationExists(@TempDir Path tmp) throws IOException {
-		var destination = tmp.resolve("MyVault");
-		Files.createDirectory(destination);
-		var zip = zip(Map.of("vault.cryptomator", hubVaultConfig(API_BASE_URL)));
-
-		try (var inTest = VaultTemplate.extract(zip)) {
-			Assertions.assertThrows(FileAlreadyExistsException.class, () -> inTest.moveTo(destination));
-		}
-	}
-
-	@Test
 	@DisplayName("closing discards the temporary directory, also after a completed import")
 	public void testCloseCleansUpAfterMove(@TempDir Path tmp) throws IOException {
 		var zip = zip(Map.of( //
@@ -105,24 +67,6 @@ public class VaultTemplateTest {
 		Assertions.assertTrue(isEmpty(workDir), "temporary extraction directory was not cleaned up");
 		Assertions.assertTrue(Files.exists(destination.resolve("vault.cryptomator")), "the moved vault must survive close()");
 		Assertions.assertArrayEquals(CIPHERTEXT, Files.readAllBytes(destination.resolve("d/AB/CDEF/0.c9r")));
-	}
-
-	@Test
-	@DisplayName("closing discards the temporary directory a nested vault leaves behind")
-	public void testCloseCleansUpNestedRemainder(@TempDir Path tmp) throws IOException {
-		// a vault at the archive root IS the temporary directory, so moveTo relocates it wholesale; a nested vault
-		// leaves its enclosing temporary directory behind, and only close() removes that
-		var zip = zip(Map.of("TemplateVault/vault.cryptomator", hubVaultConfig(API_BASE_URL)));
-		var workDir = Files.createDirectory(tmp.resolve("work"));
-		var destination = tmp.resolve("MyVault");
-
-		try (var inTest = VaultTemplate.extract(zip, workDir)) {
-			inTest.moveTo(destination);
-			Assertions.assertFalse(isEmpty(workDir), "the enclosing temporary directory should outlive the move");
-		}
-
-		Assertions.assertTrue(isEmpty(workDir), "temporary extraction directory was not cleaned up");
-		Assertions.assertTrue(Files.exists(destination.resolve("vault.cryptomator")));
 	}
 
 	@Test
@@ -157,11 +101,15 @@ public class VaultTemplateTest {
 
 	private static byte[] hubVaultConfig(String apiBaseUrl) {
 		return vaultConfig("""
-				,"hub":{"clientId":"cryptomator","authEndpoint":"https://login.example.com/auth",\
-				"tokenEndpoint":"https://login.example.com/token",\
-				"authSuccessUrl":"https://hub.example.com/app/unlock-success",\
-				"authErrorUrl":"https://hub.example.com/app/unlock-error",\
-				"apiBaseUrl":"%s"}""".formatted(apiBaseUrl));
+				,
+				"hub": {
+					"clientId":"cryptomator",\
+					"authEndpoint":"https://login.example.com/auth",\
+					"tokenEndpoint":"https://login.example.com/token",\
+					"authSuccessUrl":"https://hub.example.com/app/unlock-success",\
+					"authErrorUrl":"https://hub.example.com/app/unlock-error",\
+					"apiBaseUrl":"%s"
+				}""".formatted(apiBaseUrl));
 	}
 
 	/**
@@ -169,9 +117,17 @@ public class VaultTemplateTest {
 	 * the import dialog operates in - so a dummy signature is sufficient here.
 	 */
 	private static byte[] vaultConfig(String extraHeaderFields) {
-		var header = "{\"kid\":\"hub+https://hub.example.com/api/vaults/123\",\"typ\":\"JWT\",\"alg\":\"HS256\"%s}" //
-				.formatted(extraHeaderFields == null ? "" : extraHeaderFields);
-		var payload = "{\"format\":8,\"cipherCombo\":\"SIV_GCM\",\"shorteningThreshold\":220}";
+		var header = """
+			{ "kid":"hub+https://hub.example.com/api/vaults/123",\
+			  "typ":"JWT",\
+			  "alg":"HS256"\
+			  %s
+			  }""".formatted(extraHeaderFields == null ? "" : extraHeaderFields);
+		var payload = """
+			{ "format":8,\
+			  "cipherCombo":"SIV_GCM",\
+			  "shorteningThreshold":220\
+			  }""";
 		var encoder = Base64.getUrlEncoder().withoutPadding();
 		var token = encoder.encodeToString(header.getBytes(StandardCharsets.UTF_8)) //
 				+ "." + encoder.encodeToString(payload.getBytes(StandardCharsets.UTF_8)) //

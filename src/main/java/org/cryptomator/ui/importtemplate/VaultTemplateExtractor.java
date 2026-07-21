@@ -22,9 +22,10 @@ import java.util.zip.ZipException;
 /**
  * Low-level mechanics of unpacking a vault template (a ZIP archive holding a ready-made vault).
  * <p>
- * The archive is expanded into a directory using the Java ZIP {@link FileSystem}, and the vault directory is located by
- * finding the {@value Constants#VAULTCONFIG_FILENAME} it contains. Moving that directory to its final location is a
- * separate step, so the vault only ever appears complete at its destination.
+ * Per the template spec the vault lies directly in the archive root, i.e. the archive holds
+ * {@value Constants#VAULTCONFIG_FILENAME} at its top level rather than inside an enclosing folder. The extraction
+ * directory therefore <em>is</em> the vault directory. Moving it to its final location is a separate step, so the vault
+ * only ever appears complete at its destination.
  * <p>
  * Lifecycle of the temporary directory is owned by {@link VaultTemplate}, not by this class.
  */
@@ -41,38 +42,34 @@ final class VaultTemplateExtractor {
 	}
 
 	/**
-	 * Unpacks the given template into {@code targetDir} and locates the vault it contains.
+	 * Unpacks the given template into {@code targetDir}, which then holds the vault itself.
 	 *
 	 * @param template  the ZIP archive bytes
 	 * @param targetDir an existing, empty directory to unpack into
-	 * @return the unpacked vault directory below {@code targetDir}
 	 * @throws MalformedTemplateException if the template is not a readable ZIP, exceeds the entry or size limits, or
-	 *                                    does not contain exactly one {@value Constants#VAULTCONFIG_FILENAME}
+	 *                                    does not hold {@value Constants#VAULTCONFIG_FILENAME} in its root
 	 * @throws IOException                if the files cannot be written
 	 */
-	static Path extractTo(byte[] template, Path targetDir) throws IOException {
+	static void extractTo(byte[] template, Path targetDir) throws IOException {
 		Path tmpZip = Files.createTempFile("vault-template-", ".zip");
 		try {
 			Files.write(tmpZip, template);
-			return unzip(tmpZip, targetDir);
+			unzip(tmpZip, targetDir);
 		} finally {
 			deleteQuietly(tmpZip);
 		}
 	}
 
-	private static Path unzip(Path zipFile, Path targetDir) throws IOException {
+	private static void unzip(Path zipFile, Path targetDir) throws IOException {
 		Path normalizedTarget = targetDir.normalize();
 		try (FileSystem zipFs = FileSystems.newFileSystem(zipFile)) {
 			Path zipRoot  = zipFs.getRootDirectories().iterator().next(); //we take the first available root and ignore others
-			var templateExtractor = new TemplateExtractionVisitor(zipRoot, normalizedTarget, MAX_ENTRIES, MAX_TOTAL_BYTES);
-			Files.walkFileTree(zipRoot, templateExtractor);
-			var vaultConfig = templateExtractor.getVaultConfig();
-			if (vaultConfig == null) {
-				throw new MalformedTemplateException("Template does not contain a vault (no " + Constants.VAULTCONFIG_FILENAME + " found).");
-			}
-			return vaultConfig.getParent();
+			Files.walkFileTree(zipRoot, new TemplateExtractionVisitor(zipRoot, normalizedTarget, MAX_ENTRIES, MAX_TOTAL_BYTES));
 		} catch (ZipException e) {
 			throw new MalformedTemplateException("Template is not a readable ZIP archive.", e);
+		}
+		if (!Files.isRegularFile(normalizedTarget.resolve(Constants.VAULTCONFIG_FILENAME))) {
+			throw new MalformedTemplateException("Template does not hold " + Constants.VAULTCONFIG_FILENAME + " in its root directory.");
 		}
 	}
 
@@ -85,7 +82,6 @@ final class VaultTemplateExtractor {
 
 		private int totalEntries = 0;
 		private long totalBytes = 0;
-		private Path vaultConfig = null;
 
 		TemplateExtractionVisitor(Path zipRoot, Path target, int maxEntries, long maxSize) {
 			this.zipRoot = zipRoot;
@@ -111,14 +107,7 @@ final class VaultTemplateExtractor {
 				throw new MalformedTemplateException("Vault template exceeds the maximum allowed size of " + maxSize + " bytes.");
 			}
 
-			var actualTarget = Files.copy(file, resolveSafely(target, zipRoot, file), StandardCopyOption.REPLACE_EXISTING);
-
-			if (Constants.VAULTCONFIG_FILENAME.equals(file.getFileName().toString())) {
-				if (vaultConfig != null) {
-					throw new MalformedTemplateException("Vault template contains more than one " + Constants.VAULTCONFIG_FILENAME);
-				}
-				vaultConfig = actualTarget;
-			}
+			Files.copy(file, resolveSafely(target, zipRoot, file), StandardCopyOption.REPLACE_EXISTING);
 			return FileVisitResult.CONTINUE;
 		}
 
@@ -127,10 +116,6 @@ final class VaultTemplateExtractor {
 			if ( totalEntries > maxEntries) {
 				throw new MalformedTemplateException("Vault template contains more than the maximum allowed " + maxEntries + " entries.");
 			}
-		}
-
-		Path getVaultConfig() {
-			return vaultConfig;
 		}
 	}
 

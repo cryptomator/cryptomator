@@ -13,39 +13,31 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 
 /**
  * A vault template that has been unpacked to a temporary directory and found sound.
  * <p>
- * Holding an instance means the template <em>can</em> be imported: it was a readable ZIP within the entry and size
- * limits, held exactly one decodable {@value Constants#VAULTCONFIG_FILENAME}, and no entry escaped the extraction
- * directory. Unpacking therefore happens once, when the deeplink arrives, so a template that could never be imported is
- * rejected before the user is asked to choose a storage location - and {@link #moveTo(Path)} is left with nothing to
- * validate but the destination.
+ * Holding an instance means the template <em>is</em> valid: it was a readable ZIP within the entry and size
+ * limits, held a decodable {@value Constants#VAULTCONFIG_FILENAME} directly in its root and no entry escaped
+ * the extraction directory.
  * <p>
- * The instance owns a temporary directory and <strong>must be {@link #close() closed}</strong>, whether or not the
+ * Because the vault lies in the archive root, the temporary directory <em>is</em> the vault directory: importing moves
+ * it wholesale to its destination.
+ * <p>
+ * The instance owns that temporary directory and <strong>must be {@link #close() closed}</strong>, whether or not the
  * import completes.
  * <p>
- * {@link #hubUrl()} is read from the <em>unverified</em> vault config: its signature is keyed on the masterkey, which is
- * only obtained by completing the Hub flow. It is shown so the user can recognize an unexpected Hub; the authoritative
- * trust decision remains with {@code CheckHostTrustController} at unlock time.
+ * {@link #hubUrl()} is read from the <em>unverified</em> vault config.
  */
 public final class VaultTemplate implements AutoCloseable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultTemplate.class);
 
-	private final Path tempDir;
-	private final Path vaultRoot;
+	private final Path vaultDir;
 	private final @Nullable String hubUrl;
 
-	private VaultTemplate(Path tempDir, Path vaultRoot, @Nullable String hubUrl) {
-		this.tempDir = tempDir;
-		this.vaultRoot = vaultRoot;
+	private VaultTemplate(Path vaultDir, @Nullable String hubUrl) {
+		this.vaultDir = vaultDir;
 		this.hubUrl = hubUrl;
 	}
 
@@ -65,21 +57,21 @@ public final class VaultTemplate implements AutoCloseable {
 
 	@VisibleForTesting
 	static VaultTemplate extract(byte[] archive, @Nullable Path tempParent) throws IOException {
-		Path tempDir = tempParent == null //
+		Path vaultDir = tempParent == null //
 				? Files.createTempDirectory("vault-template-") //
 				: Files.createTempDirectory(tempParent, "vault-template-");
 		try {
-			var vaultRoot = VaultTemplateExtractor.extractTo(archive, tempDir);
-			var hubURL = readHubUrl(vaultRoot);
-			return new VaultTemplate(tempDir, vaultRoot, hubURL);
+			VaultTemplateExtractor.extractTo(archive, vaultDir);
+			var hubUrl = readHubUrl(vaultDir);
+			return new VaultTemplate(vaultDir, hubUrl);
 		} catch (IOException | RuntimeException e) {
-			VaultTemplateExtractor.deleteQuietly(tempDir);
+			VaultTemplateExtractor.deleteQuietly(vaultDir);
 			throw e;
 		}
 	}
 
-	private static @Nullable String readHubUrl(Path vaultRoot) throws IOException {
-		var token = Files.readString(vaultRoot.resolve(Constants.VAULTCONFIG_FILENAME), StandardCharsets.US_ASCII).trim();
+	private static @Nullable String readHubUrl(Path vaultDir) throws IOException {
+		var token = Files.readString(vaultDir.resolve(Constants.VAULTCONFIG_FILENAME), StandardCharsets.US_ASCII).trim();
 		HubConfig hubConfig;
 		try {
 			hubConfig = VaultConfig.decode(token).getHeader("hub", HubConfig.class);
@@ -115,15 +107,15 @@ public final class VaultTemplate implements AutoCloseable {
 	 * @throws IOException                              if the vault cannot be moved
 	 */
 	public void moveTo(Path destination) throws IOException {
-		VaultTemplateExtractor.moveToDestination(vaultRoot, destination);
+		VaultTemplateExtractor.moveToDestination(vaultDir, destination);
 	}
 
 	/**
-	 * Deletes the temporary directory. Safe to call after a successful {@link #moveTo(Path)}, which only moves the
-	 * vault directory out of it.
+	 * Discards the unpacked vault. A no-op after a successful {@link #moveTo(Path)}, which relocates the directory
+	 * this would otherwise delete.
 	 */
 	@Override
 	public void close() {
-		VaultTemplateExtractor.deleteQuietly(tempDir);
+		VaultTemplateExtractor.deleteQuietly(vaultDir);
 	}
 }
