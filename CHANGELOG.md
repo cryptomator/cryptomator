@@ -9,8 +9,8 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.3...HEAD)
-
-No changes yet.
+### Changed
+* Updated Jackson to 2.21.6
 
 
 ## [1.19.3](https://github.com/cryptomator/cryptomator/releases/1.19.3) - 2026-06-29
