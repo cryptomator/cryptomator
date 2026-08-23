@@ -24,7 +24,7 @@ public interface MasterkeyFileLoadingModule {
 	@Named("savedPassword")
 	@KeyLoadingScoped
 	static Optional<char[]> provideStoredPassword(KeychainManager keychain, @KeyLoading Vault vault) {
-		if (!keychain.isSupported() || keychain.isLocked()) {
+		if (!keychain.isSupported()) {
 			return Optional.empty();
 		} else {
 			try {
