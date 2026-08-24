@@ -140,9 +140,9 @@ public class VaultStatisticsController implements FxController {
 			long allTimeMaxAccessedFiles = Arrays.stream(maxAccessBuf).max().orElse(0L);
 
 			// remove oldest value:
-			decryptedBytesRead.getData().remove(0);
-			encryptedBytesWrite.getData().remove(0);
-			accessedFiles.getData().remove(0);
+			decryptedBytesRead.getData().removeFirst();
+			encryptedBytesWrite.getData().removeFirst();
+			accessedFiles.getData().removeFirst();
 
 			// add latest value:
 			decryptedBytesRead.getData().add(new Data<>(currentStep, decBytes));

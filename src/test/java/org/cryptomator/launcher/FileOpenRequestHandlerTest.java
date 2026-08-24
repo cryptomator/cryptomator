@@ -17,7 +17,6 @@ import org.mockito.Mockito;
 import java.nio.file.FileSystem;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +42,7 @@ public class FileOpenRequestHandlerTest {
 		AppLaunchEvent evt = queue.poll();
 		Assertions.assertNotNull(evt);
 		Collection<Path> paths = evt.pathsToOpen();
-		MatcherAssert.assertThat(paths, CoreMatchers.hasItems(Paths.get("foo"), Paths.get("bar")));
+		MatcherAssert.assertThat(paths, CoreMatchers.hasItems(Path.of("foo"), Path.of("bar")));
 	}
 
 	@Test

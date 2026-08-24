@@ -299,6 +299,10 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${mvn-surefire.version}</version>
+					<configuration>
+						<!--suppress MavenModelInspection -->
+						<argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -398,6 +402,12 @@
 							<outputDirectory>${project.build.directory}/libs</outputDirectory>
 							<includeGroupIds>${nonModularGroupIds}</includeGroupIds>
 						</configuration>
+					</execution>
+					<execution>
+						<id>get-mockito-agent-path</id>
+						<goals>
+							<goal>properties</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>

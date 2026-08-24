@@ -90,7 +90,7 @@ public final class MountWithinParentUtil {
 
 		EMPTY_DIR,
 
-		BROKEN_JUNCTION;
+		BROKEN_JUNCTION
 
 	}
 
