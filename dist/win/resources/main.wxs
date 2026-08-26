@@ -27,7 +27,7 @@
   <?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
   <?define CloseApplicationTarget= "cryptomator.exe" ?>
   <?define LoopbackAlias= "cryptomator-vault" ?>
-  <?define UrlProtocolScheme= "cryptomator" ?>
+  <?define UrlProtocolScheme= "org.cryptomator" ?>
 
   <?include $(var.JpConfigDir)/overrides.wxi ?>
 
@@ -98,7 +98,7 @@
             <ns0:Extension Id="c9u" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
           </ns0:ProgId>
         </ns0:Component>
-        <!-- Register "cryptomator://" URL protocol handler -->
+        <!-- Register "org.cryptomator://" URL protocol handler -->
         <ns0:Component Bitness="always64" Id="UrlProtocolHandler" Guid="*">
           <ns0:RegistryKey Root="HKMU" Key="Software\Classes\$(var.UrlProtocolScheme)">
             <ns0:RegistryValue Type="string" Value="URL:$(var.JpAppName) Protocol" KeyPath="yes"/>

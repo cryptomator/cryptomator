@@ -46,7 +46,7 @@
       <string>Any</string>
     </dict>
   </dict>
-  <!-- register cryptomator:// URL scheme -->
+  <!-- register org.cryptomator:// URL scheme -->
   <key>CFBundleURLTypes</key>
   <array>
     <dict>
@@ -56,7 +56,7 @@
       <string>Viewer</string>
       <key>CFBundleURLSchemes</key>
       <array>
-        <string>cryptomator</string>
+        <string>org.cryptomator</string>
       </array>
     </dict>
   </array>

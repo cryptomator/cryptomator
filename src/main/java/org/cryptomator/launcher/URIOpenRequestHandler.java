@@ -22,7 +22,7 @@ public class URIOpenRequestHandler {
 	 * not its concern, or throws {@link IllegalArgumentException} if the URI is its concern but malformed.
 	 */
 	private static final List<Function<URI, Optional<? extends AppLaunchEvent>>> DEEPLINK_PARSERS = List.of( //
-			VaultCreationEvent::tryParse //
+			OpenHubVaultEvent::tryParse //
 	);
 
 	private final BlockingQueue<AppLaunchEvent> launchEventQueue;

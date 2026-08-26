@@ -5,8 +5,8 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.launcher.AppLaunchEvent;
 import org.cryptomator.launcher.OpenFileEvent;
+import org.cryptomator.launcher.OpenHubVaultEvent;
 import org.cryptomator.launcher.RevealRunningEvent;
-import org.cryptomator.launcher.VaultCreationEvent;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.slf4j.Logger;
@@ -69,7 +69,11 @@ class AppLaunchEventHandler {
 		switch (event) {
 			case RevealRunningEvent _ -> appWindows.showMainWindow();
 			case OpenFileEvent openFileEvent -> openFileEvent.pathsToOpen().forEach(this::openPotentialVault);
-			case VaultCreationEvent vaultCreationEvent -> appWindows.showImportTemplateWindow(vaultCreationEvent.name(), vaultCreationEvent.template());
+			// TODO: show the hub vault open flow, see docs/hub-vault-open-deeplink-plan.md
+			case OpenHubVaultEvent openHubVaultEvent -> {
+				LOG.info("Received request to open hub vault {}.", openHubVaultEvent.vaultId());
+				appWindows.showMainWindow();
+			}
 		}
 	}
 

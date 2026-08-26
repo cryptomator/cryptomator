@@ -8,9 +8,9 @@ package org.cryptomator.launcher;
  * <ul>
  *     <li>{@link RevealRunningEvent} - reveal the already-running app,</li>
  *     <li>{@link OpenFileEvent} - open one or more paths,</li>
- *     <li>{@link VaultCreationEvent} - create a vault from a deeplink.</li>
+ *     <li>{@link OpenHubVaultEvent} - open a Hub vault from a deeplink.</li>
  * </ul>
  */
-public sealed interface AppLaunchEvent permits RevealRunningEvent, OpenFileEvent, VaultCreationEvent {
+public sealed interface AppLaunchEvent permits RevealRunningEvent, OpenFileEvent, OpenHubVaultEvent {
 
 }

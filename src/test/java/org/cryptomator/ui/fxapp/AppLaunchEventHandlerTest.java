@@ -3,7 +3,6 @@ package org.cryptomator.ui.fxapp;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.launcher.AppLaunchEvent;
 import org.cryptomator.launcher.RevealRunningEvent;
-import org.cryptomator.launcher.VaultCreationEvent;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.junit.jupiter.api.AfterEach;
@@ -41,16 +40,7 @@ public class AppLaunchEventHandlerTest {
 		executor.shutdownNow();
 	}
 
-	@Test
-	@DisplayName("a VaultCreationEvent opens the import-template window with name and template")
-	public void testVaultCreationEventOpensImportTemplateWindow() {
-		var template = new byte[]{1, 2, 3};
-		queue.add(new VaultCreationEvent("MyVault", template));
-
-		handler.startHandlingLaunchEvents();
-
-		verify(appWindows, timeout(2000)).showImportTemplateWindow("MyVault", template);
-	}
+	// TODO: Add test for OpenHubVaultEvent once the event opens the hub vault flow for real.
 
 	@Test
 	@DisplayName("a RevealRunningEvent reveals the main window")
