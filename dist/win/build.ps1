@@ -148,7 +148,7 @@ Invoke-CommandWithExitCheck -Command `
     "--verbose",
     "--output", "runtime",
     "--module-path", $jmodPaths,
-    "--add-modules", "java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.crypto.mscapi,jdk.zipfs,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml",
+    "--add-modules", "java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml",
     "--strip-native-commands",
     "--no-header-files",
     "--no-man-pages",

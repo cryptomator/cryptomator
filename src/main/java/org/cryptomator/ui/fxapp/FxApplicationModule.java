@@ -12,7 +12,6 @@ import org.cryptomator.ui.decryptname.DecryptNameComponent;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
 import org.cryptomator.ui.health.HealthCheckComponent;
-import org.cryptomator.ui.importtemplate.ImportTemplateComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.notification.NotificationComponent;
@@ -32,7 +31,6 @@ import java.util.Optional;
 
 @Module(subcomponents = {TrayMenuComponent.class, //
 		DecryptNameComponent.class, //
-		ImportTemplateComponent.class, //
 		MainWindowComponent.class, //
 		PreferencesComponent.class, //
 		VaultOptionsComponent.class, //

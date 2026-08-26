@@ -9,7 +9,6 @@ import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
-import org.cryptomator.ui.importtemplate.ImportTemplateWindows;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.notification.NotificationComponent;
@@ -61,7 +60,6 @@ public class FxApplicationWindows {
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
-	private final ImportTemplateWindows importTemplateWindows;
 	private final FilteredList<Window> visibleWindows;
 	private final Dialogs dialogs;
 
@@ -77,7 +75,6 @@ public class FxApplicationWindows {
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
-								ImportTemplateWindows importTemplateWindows, //
 								EventViewComponent.Factory eventViewWindowFactory, //
 								NotificationComponent.Factory notificationWindowFactory, //
 								ExecutorService executor, //
@@ -96,7 +93,6 @@ public class FxApplicationWindows {
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
-		this.importTemplateWindows = importTemplateWindows;
 		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
 		this.dialogs = dialogs;
 	}
@@ -146,20 +142,6 @@ public class FxApplicationWindows {
 
 	public void showShareVaultWindow(Vault vault) {
 		CompletableFuture.runAsync(() -> shareVaultWindow.create(vault).showShareVaultWindow(), Platform::runLater);
-	}
-
-	/**
-	 * Shows the vault template import flow, which decides for itself whether the template can be imported at all.
-	 * Unexpected failures (as opposed to an unusable template) surface in the generic error window.
-	 */
-	public CompletionStage<Stage> showImportTemplateWindow(String name, byte[] template) {
-		return showMainWindow() //
-				.thenComposeAsync(_ -> importTemplateWindows.extractAndShowImportTemplateWindow(name, template), Platform::runLater) //
-				.exceptionallyAsync(e -> {
-					showErrorWindow(e, primaryStage, null);
-					return primaryStage;
-				}, Platform::runLater) //
-				.whenComplete(this::reportErrors);
 	}
 
 	public CompletionStage<Stage> showVaultOptionsWindow(Vault vault, SelectedVaultOptionsTab tab) {

@@ -158,17 +158,6 @@ public class Dialogs {
 				.setOkAction(Stage::close);
 	}
 
-	public SimpleDialog.Builder prepareMalformedTemplateDialog(Stage window) {
-		return createDialogBuilder() //
-				.setOwner(window) //
-				.setTitleKey("importTemplate.title") //
-				.setMessageKey("importTemplate.malformedTemplate.message") //
-				.setDescriptionKey("importTemplate.malformedTemplate.description") //
-				.setIcon(FontAwesome5Icon.EXCLAMATION) //
-				.setOkButtonKey(BUTTON_KEY_CLOSE) //
-				.setOkAction(Stage::close);
-	}
-
 	public SimpleDialog.Builder prepareNoDDirectorySelectedDialog(Stage window) {
 		return createDialogBuilder() //
 				.setOwner(window) //
