@@ -84,7 +84,7 @@ public class CheckListController implements FxController {
 
 		checks.filtered(c -> !c.isChosenForExecution()).forEach(c -> c.setState(Check.CheckState.SKIPPED));
 		checkExecutor.executeBatch(chosenChecks);
-		checksListView.getSelectionModel().select(chosenChecks.get(0));
+		checksListView.getSelectionModel().select(chosenChecks.getFirst());
 		checksListView.refresh();
 		window.sizeToScene();
 	}

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
@@ -166,7 +165,7 @@ public class Environment {
 
 	private Optional<Path> getPath(String propertyName) {
 		String value = System.getProperty(propertyName);
-		return Optional.ofNullable(value).map(Paths::get);
+		return Optional.ofNullable(value).map(Path::of);
 	}
 
 	@VisibleForTesting

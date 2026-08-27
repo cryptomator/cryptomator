@@ -67,7 +67,7 @@ public class SubstitutingProperties extends PropertiesDecorator {
 
 	private enum Source {
 		ENV,
-		PROPS;
+		PROPS
 	}
 
 }

@@ -110,7 +110,7 @@ public class UnlockInvalidMountPointController implements FxController {
 
 		//TODO Add option to show filesystem, e.g. for ExceptionType.HIDEAWAY_EXISTS
 		SHOW_PREFERENCES,
-		SHOW_VAULT_OPTIONS;
+		SHOW_VAULT_OPTIONS
 
 	}
 

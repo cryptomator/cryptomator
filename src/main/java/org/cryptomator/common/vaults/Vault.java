@@ -47,7 +47,6 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.ReadOnlyFileSystemException;
 import java.util.EnumSet;
 import java.util.Objects;
@@ -58,7 +57,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
-	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
+	private static final Path HOME_DIR = Path.of(SystemUtils.USER_HOME);
 	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
 	private final VaultSettings vaultSettings;

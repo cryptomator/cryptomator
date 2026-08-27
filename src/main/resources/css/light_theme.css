@@ -20,6 +20,10 @@
 	src: url('firacode_regular.ttf');
 }
 
+@font-face {
+	src: url('AtkinsonHyperlegibleMono-Regular.ttf');
+}
+
 /*******************************************************************************
  *                                                                             *
  * Root Styling & Colors                                                       *
@@ -139,6 +143,17 @@
 	-fx-fill: TEXT_FILL;
 	-fx-font-family: 'Fira Code';
 	-fx-font-size: 1.1em;
+}
+
+.hostname-list {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 6px 8px 6px 8px;
+}
+
+.hostname-list .label {
+	-fx-font-family: 'Atkinson Hyperlegible Mono';
 }
 
 /*******************************************************************************

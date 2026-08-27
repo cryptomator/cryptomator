@@ -77,7 +77,7 @@ public class ErrorCode {
 	public static ErrorCode of(Throwable throwable) {
 		var causalChain = Throwables.getCausalChain(throwable);
 		if (causalChain.size() > 1) {
-			var rootCause = causalChain.get(causalChain.size() - 1);
+			var rootCause = causalChain.getLast();
 			var parentOfRootCause = causalChain.get(causalChain.size() - 2);
 			var rootSpecificFrames = countTopmostFrames(rootCause.getStackTrace(), parentOfRootCause.getStackTrace());
 			return new ErrorCode(throwable, rootCause, rootSpecificFrames);

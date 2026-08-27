@@ -58,7 +58,7 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		/**
 		 * Unknown state due to preceding unrecoverable exceptions.
 		 */
-		ERROR;
+		ERROR
 	}
 
 	private final AtomicReference<Value> value;
