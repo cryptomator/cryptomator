@@ -84,7 +84,7 @@ public class CheckDetailController implements FxController {
 		this.checkFinished = checkSucceeded.or(checkFailed).or(checkCancelled);
 		this.countOfWarnSeverity = results.reduce(countSeverity(Severity.WARN));
 		this.countOfCritSeverity = results.reduce(countSeverity(Severity.CRITICAL));
-		this.warnOrCritsExist = EasyBind.combine(checkSucceeded, countOfWarnSeverity, countOfCritSeverity, (suceeded, warns, crits) -> suceeded && (warns.longValue() > 0 || crits.longValue() > 0));
+		this.warnOrCritsExist = EasyBind.combine(checkSucceeded, countOfWarnSeverity, countOfCritSeverity, (succeeded, warns, crits) -> succeeded && (warns.longValue() > 0 || crits.longValue() > 0));
 		this.fixAllInfoResultsExecuted = new SimpleBooleanProperty(false);
 		this.fixAllInfoResultsPossible = Bindings.createBooleanBinding(() -> results.stream().anyMatch(this::isFixableInfoResult), results) //
 				.and(fixAllInfoResultsExecuted.not());

@@ -51,7 +51,7 @@ public class UnlockInvalidMountPointController implements FxController {
 		this.exceptionType = illegalMountPointException.map(this::getExceptionType);
 		this.exceptionPath = illegalMountPointException.map(IllegalMountPointException::getMountpoint);
 		this.exceptionMessage = illegalMountPointException.map(IllegalMountPointException::getMessage);
-		this.hideawayPath = illegalMountPointException.map(e -> e instanceof HideawayNotDirectoryException haeExc ? haeExc.getHideaway() : null);
+		this.hideawayPath = illegalMountPointException.map(e -> e instanceof HideawayNotDirectoryException hideawayException ? hideawayException.getHideaway() : null);
 
 		this.format = ObservableUtil.mapWithDefault(exceptionType, type -> resourceBundle.getString(type.translationKey), "");
 		this.showPreferences = ObservableUtil.mapWithDefault(exceptionType, type -> type.action == ButtonAction.SHOW_PREFERENCES, false);
