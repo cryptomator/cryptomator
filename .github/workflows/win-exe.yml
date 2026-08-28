@@ -551,6 +551,15 @@ jobs:
           mkdir -p tmp/msi-helper-output tmp/msi-helper-build
           ${JAVA_HOME}/bin/jpackage --type msi --win-upgrade-uuid "${{ env.X64_MSI_UPGRADE_UUID }}" --app-image appdir/Cryptomator --dest tmp/msi-helper-output --name Test --vendor Test --copyright "None" --app-version "1.0" --temp tmp/msi-helper-build
           find ./tmp/msi-helper-build/ -type f -name msica.dll -exec mv {} ./appdir \;
+      - name: Sign MSI helper DLL with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'schedule'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\appdir
+          file-extensions: dll
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -673,6 +682,15 @@ jobs:
           mkdir -p tmp/msi-helper-output tmp/msi-helper-build
           ${JAVA_HOME}/bin/jpackage --type msi --win-upgrade-uuid "${{ env.ARM64_MSI_UPGRADE_UUID }}" --app-image appdir/Cryptomator --dest tmp/msi-helper-output --name Test --vendor Test --copyright "None" --app-version "1.0" --temp tmp/msi-helper-build
           find ./tmp/msi-helper-build/ -type f -name msica.dll -exec mv {} ./appdir \;
+      - name: Sign MSI helper DLL with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'schedule'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\appdir
+          file-extensions: dll
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
