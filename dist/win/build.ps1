@@ -134,12 +134,18 @@ switch ($archName) {
     }
 }
 
-if (-not $PSBoundParameters.ContainsKey('BundleUpgradeCode')) {
+if ([string]::IsNullOrWhiteSpace($BundleUpgradeCode)) {
 	$BundleUpgradeCode = switch ($archName) {
 		'ARM64' { '070b3234-eaf9-4294-ba31-78a0e2f0a6be' }
 		default { '29eea626-2e5b-4449-b5f8-4602925ddf7b' }
 	}
 }
+$parsedBundleUpgradeCode = [guid]::Empty
+if (-not [guid]::TryParse($BundleUpgradeCode, [ref] $parsedBundleUpgradeCode) -or $parsedBundleUpgradeCode -eq [guid]::Empty) {
+	Write-Error "BundleUpgradeCode must be a non-empty GUID. Received: '$BundleUpgradeCode'"
+	exit 1
+}
+$BundleUpgradeCode = $parsedBundleUpgradeCode.ToString()
 if (-not $PSBoundParameters.ContainsKey('BundleLaunchTarget') -and $archName -eq 'x64') {
 	$BundleLaunchTarget = "[ProgramFiles64Folder]\$AppName\$AppName.exe"
 }
@@ -215,7 +221,7 @@ $javaOptions = @(
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "jpackage Appimage failed with exit code $LASTEXITCODE"
-	return 1;
+	exit $LASTEXITCODE
 }
 
 #Create RTF license for msi
@@ -265,7 +271,7 @@ Invoke-CommandWithExitCheck -Command `
 $msiHelperDll = Get-ChildItem -Path $msiHelperBuildDir -Recurse -Filter "msica.dll" | Select-Object -First 1
 if (-not $msiHelperDll) {
 	Write-Error "Unable to find msica.dll in $msiHelperBuildDir"
-	return 1
+	exit 1
 }
 Copy-Item -Path $msiHelperDll.FullName -Destination ".\msica.dll" -Force
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources\"
@@ -374,4 +380,5 @@ if ($clean) {
 	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 }
-return Main
+Main
+exit 0
