@@ -206,11 +206,15 @@ jobs:
 
           Get-ChildItem -Path $jarFolder -Filter "*.jar" | ForEach-Object {
               $jar = [Io.compression.zipfile]::OpenRead($_.FullName)
-              if (@($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0) {
+              try {
+                  $containsDll = @($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0
+              } finally {
+                  $jar.Dispose()
+              }
+              if ($containsDll) {
                   $jarDestination = Join-Path $jarExtractDir $_.BaseName
                   Expand-Archive -LiteralPath $_.FullName -DestinationPath $jarDestination
               }
-              $jar.Dispose()
           }
       - name: Sign DLLs with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'schedule'
@@ -371,11 +375,15 @@ jobs:
 
           Get-ChildItem -Path $jarFolder -Filter "*.jar" | ForEach-Object {
               $jar = [Io.compression.zipfile]::OpenRead($_.FullName)
-              if (@($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0) {
+              try {
+                  $containsDll = @($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0
+              } finally {
+                  $jar.Dispose()
+              }
+              if ($containsDll) {
                   $jarDestination = Join-Path $jarExtractDir $_.BaseName
                   Expand-Archive -LiteralPath $_.FullName -DestinationPath $jarDestination
               }
-              $jar.Dispose()
           }
       - name: Patch Application Directory without x64-only dispatcher
         shell: pwsh
