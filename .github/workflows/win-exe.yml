@@ -189,7 +189,7 @@ jobs:
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
           --add-launcher "Cryptomator (Debug)=dist/win/debug-launcher.properties"
-      - name: Patch Application Directory without x64-only dispatcher
+      - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
       - name: Fix permissions
@@ -207,8 +207,8 @@ jobs:
           Get-ChildItem -Path $jarFolder -Filter "*.jar" | ForEach-Object {
               $jar = [Io.compression.zipfile]::OpenRead($_.FullName)
               if (@($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0) {
-                  Set-Location $jarExtractDir
-                  Expand-Archive -Path $_.FullName
+                  $jarDestination = Join-Path $jarExtractDir $_.BaseName
+                  Expand-Archive -LiteralPath $_.FullName -DestinationPath $jarDestination
               }
               $jar.Dispose()
           }
@@ -372,12 +372,12 @@ jobs:
           Get-ChildItem -Path $jarFolder -Filter "*.jar" | ForEach-Object {
               $jar = [Io.compression.zipfile]::OpenRead($_.FullName)
               if (@($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0) {
-                  Set-Location $jarExtractDir
-                  Expand-Archive -Path $_.FullName
+                  $jarDestination = Join-Path $jarExtractDir $_.BaseName
+                  Expand-Archive -LiteralPath $_.FullName -DestinationPath $jarDestination
               }
               $jar.Dispose()
           }
-      - name: Patch Application Directory
+      - name: Patch Application Directory without x64-only dispatcher
         shell: pwsh
         run: |
           $destination = (Resolve-Path '.\appdir\Cryptomator').Path
