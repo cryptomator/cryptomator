@@ -230,7 +230,14 @@ Invoke-CommandWithExitCheck -Command `
     "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges")
 
 # patch app dir
-Copy-Item "contrib\*" -Destination "$AppName"
+if ($archName -eq 'ARM64') {
+	# The checked-in JNA dispatcher is x64-only and must not enter the Arm64 payload.
+	Get-ChildItem "contrib\*" -File |
+		Where-Object Name -ne 'jnidispatch.dll' |
+		Copy-Item -Destination "$AppName"
+} else {
+	Copy-Item "contrib\*" -Destination "$AppName"
+}
 attrib -r "$AppName\$AppName.exe"
 attrib -r "$AppName\${AppName} (Debug).exe"
 

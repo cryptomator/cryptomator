@@ -177,8 +177,8 @@ After the draft phase completes, a maintainer reviews the draft release on GitHu
 | **notify** | always | Sends Slack notifications to `#cryptomator-desktop`: ready to build `.deb` package, and reminder to update `latest-version.json` on S3. |
 | **get-asset-urls** | always | Extracts x64 and Arm64 MSI/EXE download URLs from the release assets and reports which Windows architectures are present. |
 | **check-release** | always | Classifies the published release tag as `stable`, `alpha`, `beta`, `rc`, or `unknown`. Stable-only follow-up jobs depend on this output. Unlike `get-version.yml` workflow, this job does not perform semver validation. |
-| **allowlist-msi-x64** | Windows release | Calls [`av-whitelist.yml`](av-whitelist.yml). Uploads the MSI to Kaspersky and Avast for whitelisting. |
-| **allowlist-exe-x64** | Windows release | Same as above for the EXE. Runs sequentially after MSI. |
+| **allowlist-msi-x64** | Windows x64 release | Calls [`av-whitelist.yml`](av-whitelist.yml). Uploads the MSI to Kaspersky and Avast for whitelisting. |
+| **allowlist-exe-x64** | Windows x64 release | Same as above for the EXE. Runs sequentially after MSI. |
 | **allowlist-msi-arm64** | Windows Arm64 release | Same as above for the Arm64 MSI. |
 | **allowlist-exe-arm64** | Windows Arm64 release | Same as above for the Arm64 EXE. Runs sequentially after the Arm64 MSI. |
 | **notify-winget** | stable + Windows x64 | Sends a Slack notification that the release is ready for [winget submission](winget.yml). `winget.yml` remains unchanged and x64-scoped in this PR. |

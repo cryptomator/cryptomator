@@ -189,7 +189,7 @@ jobs:
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
           --add-launcher "Cryptomator (Debug)=dist/win/debug-launcher.properties"
-      - name: Patch Application Directory
+      - name: Patch Application Directory without x64-only dispatcher
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
       - name: Fix permissions
@@ -377,6 +377,18 @@ jobs:
               }
               $jar.Dispose()
           }
+      - name: Patch Application Directory
+        shell: pwsh
+        run: |
+          $destination = (Resolve-Path '.\appdir\Cryptomator').Path
+          Get-ChildItem '.\dist\win\contrib' -File |
+            Where-Object Name -ne 'jnidispatch.dll' |
+            Copy-Item -Destination $destination
+      - name: Fix permissions
+        run: |
+          attrib -r appdir/Cryptomator/Cryptomator.exe
+          attrib -r "appdir/Cryptomator/Cryptomator (Debug).exe"
+        shell: pwsh
       - name: Assert generated arm64 payload machine types
         shell: pwsh
         run: |
@@ -397,9 +409,12 @@ jobs:
           $binaries = @(
             (Resolve-Path '.\appdir\Cryptomator\Cryptomator.exe').Path
           )
+          $binaries += Get-ChildItem '.\appdir\Cryptomator\*' -Include *.dll,*.exe -File | ForEach-Object FullName
           $binaries += Get-ChildItem '.\appdir\Cryptomator\runtime' -Recurse -Include *.dll,*.exe -File | ForEach-Object FullName
           if (Test-Path '.\appdir\jar-extract') {
-            $binaries += Get-ChildItem '.\appdir\jar-extract' -Recurse -Include *.dll,*.exe -File | ForEach-Object FullName
+            $binaries += Get-ChildItem '.\appdir\jar-extract' -Recurse -Include *.dll,*.exe -File |
+              Where-Object FullName -Match '(?i)([\\/]|-)(aarch64|arm64)([\\/]|[.-])' |
+              ForEach-Object FullName
           }
           $binaries = $binaries | Sort-Object -Unique
 
@@ -418,14 +433,6 @@ jobs:
             $mismatches | Format-Table -AutoSize | Out-String | Write-Host
             throw 'Detected non-arm64 generated payload binaries in the arm64 app-image lane.'
           }
-      - name: Patch Application Directory
-        run: |
-          cp dist/win/contrib/* appdir/Cryptomator
-      - name: Fix permissions
-        run: |
-          attrib -r appdir/Cryptomator/Cryptomator.exe
-          attrib -r "appdir/Cryptomator/Cryptomator (Debug).exe"
-        shell: pwsh
       - name: Sign DLLs with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'schedule'
         uses: ./.github/actions/win-sign-action
