@@ -198,6 +198,7 @@ These steps are triggered by team members after Slack notifications:
 - The Windows Arm64 MSI uses a different `--win-upgrade-uuid` than x64, and the Arm64 bundle uses a different Burn `UpgradeCode`. That prevents accidental cross-architecture replacement in this first PR, but it also means there is **no in-place x64 ↔ Arm64 migration** yet.
 - When switching between Windows x64 and Windows Arm64, **uninstall the current architecture first, then install the other one**.
 - The Arm64 bundle intentionally suppresses auto-launch-after-install for now instead of assuming the x64 `ProgramFiles64Folder` launch target is correct in a wrapper-first/emulated-wrapper context.
+- The Arm64 app-image patch step excludes the checked-in `dist/win/contrib/jnidispatch.dll` because that legacy binary is x64-only. The post-patch architecture assertion validates root/runtime binaries and Arm-specific native entries selected from multi-architecture dependency jars.
 - **Deferred hardware gate:** real Windows Arm hardware still must validate WinFsp and JNI behavior (install, launch, mount, read/write, uninstall). This PR wires the CI/release lane and adds smoke checks, but it does **not** claim WinFsp Arm64 readiness is solved.
 
 ## Signing & Security
