@@ -307,14 +307,10 @@ jobs:
         run: |
           cp LICENSE.txt target
           cp target/cryptomator-*.jar target/mods
-      - name: Run jlink with help option
+      - name: Set jlink module path
         id: jep-493-check
         run: |
-          JMOD_PATHS="${JAVA_HOME}/jmods"
-          if ! "${JAVA_HOME}/bin/jlink" --help | grep -q "Linking from run-time image enabled"; then
-            JMOD_PATHS="${JAVA_HOME}/jmods;${JMOD_PATHS}"
-          fi
-          echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
+          echo "jmod_paths=${JAVA_HOME}/jmods" >> "$GITHUB_OUTPUT"
       - name: Run jlink
         run: >
           ${JAVA_HOME}/bin/jlink
