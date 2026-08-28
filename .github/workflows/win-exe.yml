@@ -26,11 +26,23 @@ on:
         default: true
     outputs:
       sha256-msi:
-        description: "SHA256 sum of the x64 msi"
-        value: ${{ jobs.build-msi.outputs.sha256sum}}
+        description: 'SHA256 sum of the x64 msi'
+        value: ${{ jobs.build-msi-x64.outputs.sha256sum }}
       sha256-exe:
-        description: "SHA256 sum of the x64 exe"
-        value: ${{ jobs.build-exe.outputs.sha256sum}}
+        description: 'SHA256 sum of the x64 exe'
+        value: ${{ jobs.build-exe-x64.outputs.sha256sum }}
+      sha256-msi-x64:
+        description: 'SHA256 sum of the x64 msi'
+        value: ${{ jobs.build-msi-x64.outputs.sha256sum }}
+      sha256-msi-arm64:
+        description: 'SHA256 sum of the arm64 msi'
+        value: ${{ jobs.build-msi-arm64.outputs.sha256sum }}
+      sha256-exe-x64:
+        description: 'SHA256 sum of the x64 exe'
+        value: ${{ jobs.build-exe-x64.outputs.sha256sum }}
+      sha256-exe-arm64:
+        description: 'SHA256 sum of the arm64 exe'
+        value: ${{ jobs.build-exe-arm64.outputs.sha256sum }}
   workflow_dispatch:
     inputs:
       semVerNum:
@@ -55,66 +67,49 @@ on:
       - '.github/workflows/win-exe.yml'
       - 'dist/win/**'
 
-
 env:
-  VERSION_NUM: ${{ inputs.semVerNum || '99.99.99'}}
+  VERSION_NUM: ${{ inputs.semVerNum || '99.99.99' }}
   REVISION_NUM: ${{ inputs.revisionNum || '0' }}
-  VERSION_SUFFIX: ${{ inputs.semVerSuffix || ''}}
+  VERSION_SUFFIX: ${{ inputs.semVerSuffix || '' }}
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_windows-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: '0bf9b83260b85607a9ba200124debabd9cdb013cbc0d659e62a20192a7137907'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
   WINFSP_MSI_HASH: '073a70e00f77423e34bed98b86e600def93393ba5822204fac57a29324db9f7a'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
   WIX_VERSION: '6.0.2'
+  X64_MSI_UPGRADE_UUID: 'bda45523-42b1-4cae-9354-a45475ed4775'
+  ARM64_MSI_UPGRADE_UUID: 'e9698066-1f20-4723-b33f-80a42be3db29'
+  X64_BUNDLE_UPGRADE_CODE: '29eea626-2e5b-4449-b5f8-4602925ddf7b'
+  ARM64_BUNDLE_UPGRADE_CODE: '070b3234-eaf9-4294-ba31-78a0e2f0a6be'
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  build-msi:
-    name: Build .msi Installer
-    runs-on: ${{ matrix.os }}
-    outputs:
-      sha256sum: ${{ steps.sha256sum.outputs.value }}
-    strategy:
-      matrix:
-        include:
-          - arch: x64
-            os: windows-latest
-            java-dist: 'temurin'
-            java-version: '26.0.1+8'
-            java-package: 'jdk'
+  build-appimage-x64:
+    name: Build Windows app-image (x64)
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Setup Java
         uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
         with:
-          distribution: ${{ matrix.java-dist }}
-          java-version: ${{ matrix.java-version }}
-          java-package: ${{ matrix.java-package }}
+          distribution: temurin
+          java-version: '26.0.1+8'
+          java-package: jdk
           check-latest: true
-          cache: 'maven'
-      - name: Install wix and extensions
-        run: |
-          dotnet tool install --global wix --version ${WIX_VERSION}
-          wix.exe extension add --global WixToolset.UI.wixext/${WIX_VERSION}
-          wix.exe extension add --global WixToolset.Util.wixext/${WIX_VERSION}
-        env:
-          WIX_VERSION: ${{ env.WIX_VERSION }}
+          cache: maven
       - name: Download and extract JavaFX jmods from Gluon
-        if: matrix.arch == 'x64'
-        #In the last step we move all jmods files a dir level up because jmods are placed inside a directory in the zip
         run: |
           curl --silent --fail-with-body --proto "=https" -L "${{ env.OPENJFX_JMODS_AMD64 }}" --output openjfx-jmods.zip
           if(!(Get-FileHash -Path openjfx-jmods.zip -Algorithm SHA256).Hash.ToLower().equals("${{ env.OPENJFX_JMODS_AMD64_HASH }}")) {
-            throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}.";
+            throw "Wrong checksum of JMOD archive downloaded from ${{ env.OPENJFX_JMODS_AMD64 }}."
           }
           Expand-Archive -Path openjfx-jmods.zip -DestinationPath openjfx-jmods
-          Get-ChildItem -Path openjfx-jmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent}
+          Get-ChildItem -Path openjfx-jmods -Recurse -Filter "*.jmod" | ForEach-Object { Move-Item -Path $_ -Destination $_.Directory.Parent }
         shell: pwsh
       - name: Ensure major jfx version in pom and in jmods is the same
-        if: matrix.arch == 'x64'
         run: |
           JMOD_VERSION_AMD64=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
           JMOD_VERSION_AMD64=${JMOD_VERSION_AMD64#*@}
@@ -123,7 +118,7 @@ jobs:
           POM_JFX_VERSION=${POM_JFX_VERSION#*@}
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
-          if [ $POM_JFX_VERSION -ne $JMOD_VERSION_AMD64 ]; then
+          if [ "$POM_JFX_VERSION" -ne "$JMOD_VERSION_AMD64" ]; then
             >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != amd64 jmod version (${JMOD_VERSION_AMD64})"
             exit 1
           fi
@@ -144,7 +139,6 @@ jobs:
           fi
           echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
       - name: Run jlink
-        # Remark: no compression is applied for improved build compression later (here msi)
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
@@ -210,20 +204,14 @@ jobs:
           $jarFolder = Resolve-Path ".\appdir\Cryptomator\app\mods"
           $jarExtractDir = New-Item -Path ".\appdir\jar-extract" -ItemType Directory
 
-          #for all jars inspect
           Get-ChildItem -Path $jarFolder -Filter "*.jar" | ForEach-Object {
               $jar = [Io.compression.zipfile]::OpenRead($_.FullName)
               if (@($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0) {
-                  #jars containing dlls extract
                   Set-Location $jarExtractDir
                   Expand-Archive -Path $_.FullName
               }
               $jar.Dispose()
           }
-      - name: Get msi helper dll for code signing
-        run: |
-          ${JAVA_HOME}/bin/jpackage --type msi --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775 --app-image appdir/Cryptomator --dest /tmp/ --name Test --vendor Test --copyright "None" --app-version "1.0" --temp msi-helper
-          find ./msi-helper/ -type f -name msica.dll -exec mv {} ./appdir \;
       - name: Sign DLLs with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'schedule'
         uses: ./.github/actions/win-sign-action
@@ -242,7 +230,7 @@ jobs:
           base-dir: ${{ github.workspace }}\appdir\Cryptomator
           file-extensions: 'ps1'
           recursive: false
-          append-signature: false  # Powershell scripts cannot be signed in append mode, see #4260
+          append-signature: false
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -255,11 +243,273 @@ jobs:
               $jarName = $_.Name
               $jarFile = "${jarFolder}\${jarName}.jar"
               Set-Location $_
-              Get-ChildItem -Path $_ -Recurse -File "*.dll" | ForEach-Object {
-                  # update jar with signed dll
+              Get-ChildItem -Path $_ -Recurse -File -Filter "*.dll" | ForEach-Object {
                   jar --file="$jarFile" --update $(Resolve-Path -Relative -Path $_)
               }
           }
+      - name: Assert app-image output exists
+        shell: pwsh
+        run: |
+          $expected = Resolve-Path '.\appdir\Cryptomator' -ErrorAction Stop
+          if (-not (Test-Path '.\appdir\Cryptomator\Cryptomator.exe')) {
+            throw 'Expected x64 app-image executable appdir\Cryptomator\Cryptomator.exe was not created.'
+          }
+          Write-Host "App-image ready at $expected"
+      - name: Upload app-image artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: appimage-x64
+          path: appdir/Cryptomator
+          if-no-files-found: error
+
+  build-appimage-arm64:
+    name: Build Windows app-image (arm64)
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Setup Java
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: liberica
+          java-version: '26.0.1+8'
+          java-package: jdk+fx
+          check-latest: true
+          cache: maven
+      - name: Ensure JavaFX jmods are available in JAVA_HOME
+        shell: pwsh
+        run: |
+          $javaFxBaseJmod = Join-Path $env:JAVA_HOME 'jmods\javafx.base.jmod'
+          if (-not (Test-Path $javaFxBaseJmod)) {
+            throw "JavaFX module not found in JDK at $javaFxBaseJmod."
+          }
+      - name: Ensure major jfx version in pom and JAVA_HOME is the same
+        run: |
+          JMOD_VERSION_ARM64=$(jmod describe "${JAVA_HOME}/jmods/javafx.base.jmod" | head -1)
+          JMOD_VERSION_ARM64=${JMOD_VERSION_ARM64#*@}
+          JMOD_VERSION_ARM64=${JMOD_VERSION_ARM64%%.*}
+          POM_JFX_VERSION=$(./mvnw help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=${POM_JFX_VERSION#*@}
+          POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
+
+          if [ "$POM_JFX_VERSION" -ne "$JMOD_VERSION_ARM64" ]; then
+            >&2 echo "Major JavaFX version in pom.xml (${POM_JFX_VERSION}) != arm64 jmod version (${JMOD_VERSION_ARM64})"
+            exit 1
+          fi
+      - name: Set version
+        run: ./mvnw versions:set -DnewVersion="${VERSION_NUM}${VERSION_SUFFIX}"
+      - name: Run maven
+        run: ./mvnw -B clean package -Pwin -DskipTests
+      - name: Patch target dir
+        run: |
+          cp LICENSE.txt target
+          cp target/cryptomator-*.jar target/mods
+      - name: Run jlink with help option
+        id: jep-493-check
+        run: |
+          JMOD_PATHS="${JAVA_HOME}/jmods"
+          if ! $(${JAVA_HOME}/bin/jlink --help | grep -q "Linking from run-time image enabled"); then
+            JMOD_PATHS="${JAVA_HOME}/jmods;${JMOD_PATHS}"
+          fi
+          echo "jmod_paths=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
+      - name: Run jlink
+        run: >
+          ${JAVA_HOME}/bin/jlink
+          --verbose
+          --output runtime
+          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.crypto.mscapi,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
+          --strip-native-commands
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress zip-0
+      - name: Run jpackage
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type app-image
+          --runtime-image runtime
+          --input target/libs
+          --module-path target/mods
+          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+          --dest appdir
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --app-version "${VERSION_NUM}.${REVISION_NUM}"
+          --java-options "--enable-preview"
+          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+          --java-options "-Xss5m"
+          --java-options "-Xmx256m"
+          --java-options "-Dcryptomator.appVersion=\"${VERSION_NUM}${VERSION_SUFFIX}\""
+          --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Djava.net.useSystemProxies=true"
+          --java-options "-Dcryptomator.adminConfigPath=\"C:/ProgramData/Cryptomator/config.properties\""
+          --java-options "-Dcryptomator.logDir=\"@{localappdata}/Cryptomator\""
+          --java-options "-Dcryptomator.settingsPath=\"@{appdata}/Cryptomator/settings.json;@{userhome}/AppData/Roaming/Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.p12Path=\"@{appdata}/Cryptomator/key.p12;@{userhome}/AppData/Roaming/Cryptomator/key.p12\""
+          --java-options "-Dcryptomator.ipcSocketPath=\"@{localappdata}/Cryptomator/ipc.socket\""
+          --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Cryptomator\""
+          --java-options "-Dcryptomator.loopbackAlias=\"cryptomator-vault\""
+          --java-options "-Dcryptomator.showTrayIcon=true"
+          --java-options "-Dcryptomator.buildNumber=\"msi-${REVISION_NUM}\""
+          --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
+          --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"@{appdata}/Cryptomator/keychain.json;@{userhome}/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=\"@{appdata}/Cryptomator/windowsHelloKeychain.json\""
+          --java-options "-Dcryptomator.disableUpdateCheck=false"
+          --java-options "-XX:ErrorFile=C:/cryptomator/cryptomator_crash.log"
+          --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true"
+          --resource-dir dist/win/resources
+          --icon dist/win/resources/Cryptomator.ico
+          --add-launcher "Cryptomator (Debug)=dist/win/debug-launcher.properties"
+      - name: Extract jars with DLLs for inspection and signing
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName "System.io.compression.filesystem"
+          $jarFolder = Resolve-Path ".\appdir\Cryptomator\app\mods"
+          $jarExtractDir = New-Item -Path ".\appdir\jar-extract" -ItemType Directory
+
+          Get-ChildItem -Path $jarFolder -Filter "*.jar" | ForEach-Object {
+              $jar = [Io.compression.zipfile]::OpenRead($_.FullName)
+              if (@($jar.Entries | Where-Object {$_.Name.ToString().EndsWith(".dll")} | Select-Object -First 1).Count -gt 0) {
+                  Set-Location $jarExtractDir
+                  Expand-Archive -Path $_.FullName
+              }
+              $jar.Dispose()
+          }
+      - name: Assert generated arm64 payload machine types
+        shell: pwsh
+        run: |
+          function Get-PeMachineType([string]$Path) {
+            $stream = [System.IO.File]::OpenRead($Path)
+            try {
+              $reader = New-Object System.IO.BinaryReader($stream)
+              $stream.Seek(0x3C, [System.IO.SeekOrigin]::Begin) > $null
+              $peHeaderOffset = $reader.ReadInt32()
+              $stream.Seek($peHeaderOffset + 4, [System.IO.SeekOrigin]::Begin) > $null
+              return $reader.ReadUInt16()
+            } finally {
+              $stream.Dispose()
+            }
+          }
+
+          $expectedMachine = 0xAA64
+          $binaries = @(
+            (Resolve-Path '.\appdir\Cryptomator\Cryptomator.exe').Path
+          )
+          $binaries += Get-ChildItem '.\appdir\Cryptomator\runtime' -Recurse -Include *.dll,*.exe -File | ForEach-Object FullName
+          if (Test-Path '.\appdir\jar-extract') {
+            $binaries += Get-ChildItem '.\appdir\jar-extract' -Recurse -Include *.dll,*.exe -File | ForEach-Object FullName
+          }
+          $binaries = $binaries | Sort-Object -Unique
+
+          if ($binaries.Count -eq 0) {
+            throw 'No generated arm64 EXE/DLL payloads were found for validation.'
+          }
+
+          $mismatches = foreach ($binary in $binaries) {
+            $machine = Get-PeMachineType $binary
+            if ($machine -ne $expectedMachine) {
+              [pscustomobject]@{ Path = $binary; Machine = ('0x{0:X4}' -f $machine) }
+            }
+          }
+
+          if ($mismatches) {
+            $mismatches | Format-Table -AutoSize | Out-String | Write-Host
+            throw 'Detected non-arm64 generated payload binaries in the arm64 app-image lane.'
+          }
+      - name: Patch Application Directory
+        run: |
+          cp dist/win/contrib/* appdir/Cryptomator
+      - name: Fix permissions
+        run: |
+          attrib -r appdir/Cryptomator/Cryptomator.exe
+          attrib -r "appdir/Cryptomator/Cryptomator (Debug).exe"
+        shell: pwsh
+      - name: Sign DLLs with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'schedule'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\appdir
+          file-extensions: 'exe,dll'
+          recursive: true
+          append-signature: true
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+      - name: Sign Scripts with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'schedule'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\appdir\Cryptomator
+          file-extensions: 'ps1'
+          recursive: false
+          append-signature: false
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+      - name: Replace DLLs inside jars with signed ones
+        shell: pwsh
+        run: |
+          $jarExtractDir = Resolve-Path ".\appdir\jar-extract"
+          $jarFolder = Resolve-Path ".\appdir\Cryptomator\app\mods"
+          Get-ChildItem -Path $jarExtractDir | ForEach-Object {
+              $jarName = $_.Name
+              $jarFile = "${jarFolder}\${jarName}.jar"
+              Set-Location $_
+              Get-ChildItem -Path $_ -Recurse -File -Filter "*.dll" | ForEach-Object {
+                  jar --file="$jarFile" --update $(Resolve-Path -Relative -Path $_)
+              }
+          }
+      - name: Assert app-image output exists
+        shell: pwsh
+        run: |
+          $expected = Resolve-Path '.\appdir\Cryptomator' -ErrorAction Stop
+          if (-not (Test-Path '.\appdir\Cryptomator\Cryptomator.exe')) {
+            throw 'Expected arm64 app-image executable appdir\Cryptomator\Cryptomator.exe was not created.'
+          }
+          Write-Host "App-image ready at $expected"
+      - name: Upload app-image artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: appimage-arm64
+          path: appdir/Cryptomator
+          if-no-files-found: error
+
+  build-msi-x64:
+    name: Build .msi installer (x64)
+    runs-on: windows-latest
+    needs: [build-appimage-x64]
+    outputs:
+      sha256sum: ${{ steps.sha256sum.outputs.value }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Download app-image
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: appimage-x64
+          path: appdir
+      - name: Assert downloaded app-image exists
+        shell: pwsh
+        run: |
+          if (-not (Test-Path '.\appdir\Cryptomator\Cryptomator.exe')) {
+            throw 'Expected downloaded x64 app-image artifact at appdir\Cryptomator\Cryptomator.exe.'
+          }
+      - name: Setup Java
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: temurin
+          java-version: '26.0.1+8'
+          java-package: jdk
+          check-latest: true
+          cache: maven
+      - name: Install wix and extensions
+        run: |
+          dotnet tool install --global wix --version ${WIX_VERSION}
+          wix.exe extension add --global WixToolset.UI.wixext/${WIX_VERSION}
+          wix.exe extension add --global WixToolset.Util.wixext/${WIX_VERSION}
+        env:
+          WIX_VERSION: ${{ env.WIX_VERSION }}
       - name: Generate license for MSI
         run: >
           ./mvnw -B license:add-third-party
@@ -279,14 +529,19 @@ jobs:
             | ForEach-Object { $ExecutionContext.InvokeCommand.ExpandString($_) } `
             | Out-File -FilePath .\resources\FAvaultFile.properties
         env:
-          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources/ # requires abs path, used in resources/main.wxs
+          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources/
         shell: pwsh
+      - name: Get msi helper dll for code signing
+        run: |
+          mkdir -p tmp/msi-helper-output tmp/msi-helper-build
+          ${JAVA_HOME}/bin/jpackage --type msi --win-upgrade-uuid "${{ env.X64_MSI_UPGRADE_UUID }}" --app-image appdir/Cryptomator --dest tmp/msi-helper-output --name Test --vendor Test --copyright "None" --app-version "1.0" --temp tmp/msi-helper-build
+          find ./tmp/msi-helper-build/ -type f -name msica.dll -exec mv {} ./appdir \;
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
           --verbose
           --type msi
-          --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775
+          --win-upgrade-uuid "${{ env.X64_MSI_UPGRADE_UUID }}"
           --app-image appdir/Cryptomator
           --dest installer
           --name Cryptomator
@@ -302,7 +557,7 @@ jobs:
           --license-file dist/win/resources/license.rtf
           --file-associations dist/win/resources/FAvaultFile.properties
         env:
-          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources/ # requires abs path, used in resources/main.wxs
+          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources/
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir\
       - name: Sign MSI with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'schedule'
@@ -319,7 +574,14 @@ jobs:
           read -ra CMD_OUTPUT < <(sha256sum installer/Cryptomator-*.msi)
           echo "value=${CMD_OUTPUT[0]}" >> $GITHUB_OUTPUT
       - name: Add possible alpha/beta tags and architecture to installer name
-        run: mv installer/Cryptomator-*.msi "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-${{ matrix.arch }}.msi"
+        run: mv installer/Cryptomator-*.msi "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-x64.msi"
+      - name: Assert MSI output exists
+        shell: pwsh
+        run: |
+          $artifact = ".\Cryptomator-$($env:VERSION_NUM)$($env:VERSION_SUFFIX)-x64.msi"
+          if (-not (Test-Path $artifact)) {
+            throw "Expected renamed x64 MSI artifact at $artifact."
+          }
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -330,27 +592,140 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: msi-${{ matrix.arch }}
+          name: msi-x64
           path: |
             Cryptomator-*.msi
             Cryptomator-*.asc
           if-no-files-found: error
 
-  build-exe:
-    name: Build .exe installer
-    runs-on: ${{ matrix.os }}
-    needs: [ build-msi ]
+  build-msi-arm64:
+    name: Build .msi installer (arm64)
+    runs-on: windows-latest
+    needs: [build-appimage-arm64]
     outputs:
       sha256sum: ${{ steps.sha256sum.outputs.value }}
-    strategy:
-      matrix:
-        include:
-          - arch: x64
-            os: windows-latest
-            executable-suffix: x64
-            java-dist: 'temurin'
-            java-version: '26.0.1+8'
-            java-package: 'jdk'
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Download app-image
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: appimage-arm64
+          path: appdir
+      - name: Assert downloaded app-image exists
+        shell: pwsh
+        run: |
+          if (-not (Test-Path '.\appdir\Cryptomator\Cryptomator.exe')) {
+            throw 'Expected downloaded arm64 app-image artifact at appdir\Cryptomator\Cryptomator.exe.'
+          }
+      - name: Setup Java
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: temurin
+          java-version: '26.0.1+8'
+          java-package: jdk
+          check-latest: true
+          cache: maven
+      - name: Install wix and extensions
+        run: |
+          dotnet tool install --global wix --version ${WIX_VERSION}
+          wix.exe extension add --global WixToolset.UI.wixext/${WIX_VERSION}
+          wix.exe extension add --global WixToolset.Util.wixext/${WIX_VERSION}
+        env:
+          WIX_VERSION: ${{ env.WIX_VERSION }}
+      - name: Generate license for MSI
+        run: >
+          ./mvnw -B license:add-third-party
+          "-Dlicense.thirdPartyFilename=license.rtf"
+          "-Dlicense.outputDirectory=dist/win/resources"
+          "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
+          "-Dlicense.includedScopes=compile"
+          "-Dlicense.excludedGroups=^org\.cryptomator"
+          "-Dlicense.failOnMissing=true"
+          "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
+        shell: pwsh
+      - name: Create file association file from template
+        working-directory: dist/win
+        run: |
+          $Env:JP_WIXWIZARD_RESOURCES_PROPERTIES_FORMAT = "${Env:JP_WIXWIZARD_RESOURCES}".Replace('\', '\\');
+          Get-Content .\resources\FAvaultFile.template.properties `
+            | ForEach-Object { $ExecutionContext.InvokeCommand.ExpandString($_) } `
+            | Out-File -FilePath .\resources\FAvaultFile.properties
+        env:
+          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources/
+        shell: pwsh
+      - name: Get msi helper dll for code signing
+        run: |
+          mkdir -p tmp/msi-helper-output tmp/msi-helper-build
+          ${JAVA_HOME}/bin/jpackage --type msi --win-upgrade-uuid "${{ env.ARM64_MSI_UPGRADE_UUID }}" --app-image appdir/Cryptomator --dest tmp/msi-helper-output --name Test --vendor Test --copyright "None" --app-version "1.0" --temp tmp/msi-helper-build
+          find ./tmp/msi-helper-build/ -type f -name msica.dll -exec mv {} ./appdir \;
+      - name: Create MSI
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type msi
+          --win-upgrade-uuid "${{ env.ARM64_MSI_UPGRADE_UUID }}"
+          --app-image appdir/Cryptomator
+          --dest installer
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --app-version "${VERSION_NUM}.${REVISION_NUM}"
+          --win-menu
+          --win-dir-chooser
+          --win-shortcut-prompt
+          --win-update-url "https://cryptomator.org/downloads"
+          --win-menu-group Cryptomator
+          --resource-dir dist/win/resources
+          --license-file dist/win/resources/license.rtf
+          --file-associations dist/win/resources/FAvaultFile.properties
+        env:
+          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources/
+          JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir\
+      - name: Sign MSI with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'schedule'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\installer
+          file-extensions: msi
+          description: 'Cryptomator Installer'
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+      - id: sha256sum
+        run: |
+          read -ra CMD_OUTPUT < <(sha256sum installer/Cryptomator-*.msi)
+          echo "value=${CMD_OUTPUT[0]}" >> $GITHUB_OUTPUT
+      - name: Add possible alpha/beta tags and architecture to installer name
+        run: mv installer/Cryptomator-*.msi "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-arm64.msi"
+      - name: Assert MSI output exists
+        shell: pwsh
+        run: |
+          $artifact = ".\Cryptomator-$($env:VERSION_NUM)$($env:VERSION_SUFFIX)-arm64.msi"
+          if (-not (Test-Path $artifact)) {
+            throw "Expected renamed arm64 MSI artifact at $artifact."
+          }
+      - name: Create detached GPG signature with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.msi
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: msi-arm64
+          path: |
+            Cryptomator-*.msi
+            Cryptomator-*.asc
+          if-no-files-found: error
+
+  build-exe-x64:
+    name: Build .exe installer (x64)
+    runs-on: windows-latest
+    needs: [build-msi-x64]
+    outputs:
+      sha256sum: ${{ steps.sha256sum.outputs.value }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Install wix and extensions
@@ -363,18 +738,24 @@ jobs:
       - name: Download .msi
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: msi-${{ matrix.arch }}
+          name: msi-x64
           path: dist/win/bundle/resources
+      - name: Assert downloaded MSI exists
+        shell: pwsh
+        run: |
+          if (-not (Get-ChildItem '.\dist\win\bundle\resources' -Filter 'Cryptomator-*.msi' -File -ErrorAction SilentlyContinue)) {
+            throw 'Expected x64 MSI artifact in dist\win\bundle\resources.'
+          }
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
       - name: Setup Java
         uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
         with:
-          distribution: ${{ matrix.java-dist }}
-          java-version: ${{ matrix.java-version }}
-          java-package: ${{ matrix.java-package }}
+          distribution: temurin
+          java-version: '26.0.1+8'
+          java-package: jdk
           check-latest: true
-          cache: 'maven'
+          cache: maven
       - name: Generate license for exe
         run: >
           ./mvnw -B license:add-third-party
@@ -411,6 +792,8 @@ jobs:
           -define AboutUrl="https://cryptomator.org"
           -define HelpUrl="https://cryptomator.org/contact"
           -define UpdateUrl="https://cryptomator.org/downloads/"
+          -define BundleUpgradeCode="${{ env.X64_BUNDLE_UPGRADE_CODE }}"
+          -define BundleLaunchTarget="[ProgramFiles64Folder]\Cryptomator\Cryptomator.exe"
           -ext "WixToolset.Util.wixext"
           -ext "WixToolset.BootstrapperApplications.wixext"
           ./bundle/bundleWithWinfsp.wxs
@@ -452,7 +835,14 @@ jobs:
           read -ra CMD_OUTPUT < <(sha256sum installer/Cryptomator-*.exe)
           echo "value=${CMD_OUTPUT[0]}" >> $GITHUB_OUTPUT
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-Installer.exe "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-${{ matrix.executable-suffix }}.exe"
+        run: mv installer/Cryptomator-Installer.exe "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-x64.exe"
+      - name: Assert EXE output exists
+        shell: pwsh
+        run: |
+          $artifact = ".\Cryptomator-$($env:VERSION_NUM)$($env:VERSION_SUFFIX)-x64.exe"
+          if (-not (Test-Path $artifact)) {
+            throw "Expected renamed x64 EXE artifact at $artifact."
+          }
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -463,7 +853,145 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: exe-${{ matrix.executable-suffix }}
+          name: exe-x64
+          path: |
+            Cryptomator-*.exe
+            Cryptomator-*.asc
+          if-no-files-found: error
+
+  build-exe-arm64:
+    name: Build .exe installer (arm64)
+    runs-on: windows-latest
+    needs: [build-msi-arm64]
+    outputs:
+      sha256sum: ${{ steps.sha256sum.outputs.value }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Install wix and extensions
+        run: |
+          dotnet tool install --global wix --version ${WIX_VERSION}
+          wix.exe extension add --global WixToolset.BootstrapperApplications.wixext/${WIX_VERSION}
+          wix.exe extension add --global WixToolset.Util.wixext/${WIX_VERSION}
+        env:
+          WIX_VERSION: ${{ env.WIX_VERSION }}
+      - name: Download .msi
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: msi-arm64
+          path: dist/win/bundle/resources
+      - name: Assert downloaded MSI exists
+        shell: pwsh
+        run: |
+          if (-not (Get-ChildItem '.\dist\win\bundle\resources' -Filter 'Cryptomator-*.msi' -File -ErrorAction SilentlyContinue)) {
+            throw 'Expected arm64 MSI artifact in dist\win\bundle\resources.'
+          }
+      - name: Strip version info from msi file name
+        run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
+      - name: Setup Java
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: temurin
+          java-version: '26.0.1+8'
+          java-package: jdk
+          check-latest: true
+          cache: maven
+      - name: Generate license for exe
+        run: >
+          ./mvnw -B license:add-third-party
+          "-Dlicense.thirdPartyFilename=license.rtf"
+          "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
+          "-Dlicense.outputDirectory=dist/win/bundle/resources"
+          "-Dlicense.includedScopes=compile"
+          "-Dlicense.excludedGroups=^org\.cryptomator"
+          "-Dlicense.failOnMissing=true"
+          "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
+        shell: pwsh
+      - name: Download WinFsp
+        run: |
+          curl --silent --fail-with-body --proto "=https" -L "$env:WINFSP_MSI" --output $env:WINFSP_PATH
+          $computedHash = (Get-FileHash -Path "$env:WINFSP_PATH" -Algorithm SHA256).Hash.ToLower()
+          if ($computedHash -ne "$env:WINFSP_MSI_HASH") {
+            throw "Checksum mismatch for ${env:WINFSP_PATH} (expected ${env:WINFSP_MSI_HASH}, got $computedHash)."
+          }
+        env:
+          WINFSP_PATH: 'dist/win/bundle/resources/winfsp.msi'
+        shell: pwsh
+      - name: Download Legacy-WinFsp uninstaller
+        run: |
+          curl --silent --fail-with-body --proto "=https" -L ${{ env.WINFSP_UNINSTALLER }} --output dist/win/bundle/resources/winfsp-uninstaller.exe
+        shell: pwsh
+      - name: Create Wix Burn bundle
+        working-directory: dist/win
+        run: >
+          wix build
+          -define BundleName="Cryptomator"
+          -define BundleVersion="${VERSION_NUM}.${REVISION_NUM}"
+          -define BundleVendor="Skymatic GmbH"
+          -define BundleCopyright="(C) 2016 - 2026 Skymatic GmbH"
+          -define AboutUrl="https://cryptomator.org"
+          -define HelpUrl="https://cryptomator.org/contact"
+          -define UpdateUrl="https://cryptomator.org/downloads/"
+          -define BundleUpgradeCode="${{ env.ARM64_BUNDLE_UPGRADE_CODE }}"
+          -ext "WixToolset.Util.wixext"
+          -ext "WixToolset.BootstrapperApplications.wixext"
+          ./bundle/bundleWithWinfsp.wxs
+          -out "../../installer/Cryptomator-Installer.exe"
+      - name: Detach burn engine in preparation to sign
+        if: inputs.sign || github.event_name == 'schedule'
+        run: >
+          wix burn detach installer/Cryptomator-Installer.exe -engine tmp/engine.exe
+      - name: Sign WiX burn engine with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'schedule'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\tmp
+          file-extensions: exe
+          append-signature: true
+          description: 'Cryptomator Bundle Installer'
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+      - name: Reattach signed burn engine to installer
+        if: inputs.sign || github.event_name == 'schedule'
+        shell: pwsh
+        run: |
+          Move-Item -Path installer/Cryptomator-Installer.exe -Destination tmp/Cryptomator-Installer.exe
+          wix burn reattach tmp/Cryptomator-Installer.exe -engine tmp/engine.exe -o installer/Cryptomator-Installer.exe
+      - name: Sign EXE installer with Azure Trusted Signing
+        if: inputs.sign || github.event_name == 'schedule'
+        uses: ./.github/actions/win-sign-action
+        with:
+          base-dir: ${{ github.workspace }}\installer
+          file-extensions: exe
+          append-signature: true
+          description: 'Cryptomator Bundle Installer'
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+      - id: sha256sum
+        run: |
+          read -ra CMD_OUTPUT < <(sha256sum installer/Cryptomator-*.exe)
+          echo "value=${CMD_OUTPUT[0]}" >> $GITHUB_OUTPUT
+      - name: Add possible alpha/beta tags to installer name
+        run: mv installer/Cryptomator-Installer.exe "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-arm64.exe"
+      - name: Assert EXE output exists
+        shell: pwsh
+        run: |
+          $artifact = ".\Cryptomator-$($env:VERSION_NUM)$($env:VERSION_SUFFIX)-arm64.exe"
+          if (-not (Test-Path $artifact)) {
+            throw "Expected renamed arm64 EXE artifact at $artifact."
+          }
+      - name: Create detached GPG signature with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.exe
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: exe-arm64
           path: |
             Cryptomator-*.exe
             Cryptomator-*.asc
@@ -473,12 +1001,19 @@ jobs:
     name: Publish installers to the github release
     if: inputs.upload-to-draft
     runs-on: ubuntu-latest
-    needs: [ build-msi, build-exe ]
+    needs: [build-msi-x64, build-msi-arm64, build-exe-x64, build-exe-arm64]
     steps:
       - name: Download installers
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           merge-multiple: true
+      - name: Assert expected installer files exist
+        run: |
+          ls -1
+          test -f "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-x64.msi"
+          test -f "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-arm64.msi"
+          test -f "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-x64.exe"
+          test -f "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-arm64.exe"
       - name: Publish installers on GitHub Releases
         id: publish
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
@@ -488,5 +1023,7 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
             *x64.msi
+            *arm64.msi
             *x64.exe
+            *arm64.exe
             *.asc

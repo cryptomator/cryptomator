@@ -134,14 +134,21 @@ jobs:
           <!-- /HEADER -->')
 
           export TARBALL="${SRC_SHA}  cryptomator-${SEMVER}.tar.gz"
-          export MSI="${MSI_SHA}  Cryptomator-${SEMVER}-x64.msi"
-          export EXE="${EXE_SHA}  Cryptomator-${SEMVER}-x64.exe"
+          export MSI_x64="${MSI_X64_SHA}  Cryptomator-${SEMVER}-x64.msi"
+          export MSI_arm64="${MSI_ARM64_SHA}  Cryptomator-${SEMVER}-arm64.msi"
+          export EXE_x64="${EXE_X64_SHA}  Cryptomator-${SEMVER}-x64.exe"
+          export EXE_arm64="${EXE_ARM64_SHA}  Cryptomator-${SEMVER}-arm64.exe"
           export DMG_arm64="${DMG_ARM64_SHA}  Cryptomator-${SEMVER}-arm64.dmg"
           export DMG_x64="${DMG_X64_SHA}  Cryptomator-${SEMVER}-x64.dmg"
           export APPIMAGE_x86_64="${APPIMAGE_X64_SHA}  cryptomator-${SEMVER}-x86_64.AppImage"
           export APPIMAGE_aarch64="${APPIMAGE_AARCH64_SHA}  cryptomator-${SEMVER}-aarch64.AppImage"
 
-          envsubst '$VERSION $TARBALL $EXE $MSI $DMG_x64 $DMG_arm64 $APPIMAGE_x86_64 $APPIMAGE_aarch64' \
+          test -n "${MSI_X64_SHA}"
+          test -n "${MSI_ARM64_SHA}"
+          test -n "${EXE_X64_SHA}"
+          test -n "${EXE_ARM64_SHA}"
+
+          envsubst '$VERSION $TARBALL $MSI_x64 $MSI_arm64 $EXE_x64 $EXE_arm64 $DMG_x64 $DMG_arm64 $APPIMAGE_x86_64 $APPIMAGE_aarch64' \
             <<< "${RELEASE_BODY}" \
             > release-body.md
 
@@ -149,8 +156,10 @@ jobs:
         env:
           VERSION: ${{ needs.get-version.outputs.semVerStr }}
           SRC_SHA: ${{ steps.src-sha256.outputs.value }}
-          MSI_SHA: ${{ needs.build-exe-and-msi.outputs.sha256-msi }}
-          EXE_SHA: ${{ needs.build-exe-and-msi.outputs.sha256-exe }}
+          MSI_X64_SHA: ${{ needs.build-exe-and-msi.outputs.sha256-msi-x64 }}
+          MSI_ARM64_SHA: ${{ needs.build-exe-and-msi.outputs.sha256-msi-arm64 }}
+          EXE_X64_SHA: ${{ needs.build-exe-and-msi.outputs.sha256-exe-x64 }}
+          EXE_ARM64_SHA: ${{ needs.build-exe-and-msi.outputs.sha256-exe-arm64 }}
           DMG_ARM64_SHA: ${{ needs.build-dmg-arm64.outputs.sha256-dmg }}
           DMG_X64_SHA: ${{ needs.build-dmg-x64.outputs.sha256-dmg }}
           APPIMAGE_X64_SHA: ${{ needs.build-appimages.outputs.sha256-appimage-x64 }}

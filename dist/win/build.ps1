@@ -9,6 +9,9 @@ Param(
 	[Parameter(Mandatory, HelpMessage="Please provide an update url")][string] $UpdateUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an about url")][string] $AboutUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an alias for localhost")][string] $LoopbackAlias,
+	[ValidateSet('All', 'AppImage', 'Msi')][string] $BuildStage = 'All',
+	[string] $BundleUpgradeCode,
+	[string] $BundleLaunchTarget,
 	[bool] $clean = $false # if true, cleans up previous build artifacts
 )
 
@@ -126,9 +129,19 @@ switch ($archName) {
 		$jmodPaths="$buildDir/resources/javafx-jmods";
     }
     default {
-        Write-Error "Unsupported architecture: $arch"
+        Write-Error "Unsupported architecture: $archName"
         exit 1
     }
+}
+
+if (-not $PSBoundParameters.ContainsKey('BundleUpgradeCode')) {
+	$BundleUpgradeCode = switch ($archName) {
+		'ARM64' { '070b3234-eaf9-4294-ba31-78a0e2f0a6be' }
+		default { '29eea626-2e5b-4449-b5f8-4602925ddf7b' }
+	}
+}
+if (-not $PSBoundParameters.ContainsKey('BundleLaunchTarget') -and $archName -eq 'x64') {
+	$BundleLaunchTarget = "[ProgramFiles64Folder]\$AppName\$AppName.exe"
 }
 
 ## create custom runtime
@@ -221,10 +234,36 @@ Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
 attrib -r "$AppName\${AppName} (Debug).exe"
 
+if ($BuildStage -eq 'AppImage') {
+	Write-Host "BuildStage AppImage requested; skipping MSI and EXE bundle creation."
+	return 0
+}
+
 # create .msi
+$msiHelperBuildDir = ".\msi-helper-build"
+$msiHelperOutputDir = ".\msi-helper-output"
+Remove-Item -Path $msiHelperBuildDir, $msiHelperOutputDir, ".\msica.dll" -Force -Recurse -ErrorAction Ignore
+Invoke-CommandWithExitCheck -Command `
+    "$Env:JAVA_HOME\bin\jpackage" -Arguments @(
+    "--type", "msi",
+    "--win-upgrade-uuid", $UpgradeUUID,
+    "--app-image", $AppName,
+    "--dest", $msiHelperOutputDir,
+    "--name", "CryptomatorHelper",
+    "--vendor", $Vendor,
+    "--copyright", $copyright,
+    "--app-version", "1.0",
+    "--temp", $msiHelperBuildDir
+    )
+$msiHelperDll = Get-ChildItem -Path $msiHelperBuildDir -Recurse -Filter "msica.dll" | Select-Object -First 1
+if (-not $msiHelperDll) {
+	Write-Error "Unable to find msica.dll in $msiHelperBuildDir"
+	return 1
+}
+Copy-Item -Path $msiHelperDll.FullName -Destination ".\msica.dll" -Force
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources\"
 $Env:JP_WIXWIZARD_RESOURCES_PROPERTIES_FORMAT = "${Env:JP_WIXWIZARD_RESOURCES}".Replace('\', '\\');
-$Env:JP_WIXHELPER_DIR = ""
+$Env:JP_WIXHELPER_DIR = "$((Get-Location).Path)\"
 
 Get-Content .\resources\FAvaultFile.template.properties ` # Similar to envsubst
     | ForEach-Object { $ExecutionContext.InvokeCommand.ExpandString($_) } `
@@ -251,6 +290,12 @@ Invoke-CommandWithExitCheck -Command `
     "--about-url", $AboutUrl,
     "--file-associations", "resources/FAvaultFile.properties"
     )
+Remove-Item -Path $msiHelperBuildDir, $msiHelperOutputDir, ".\msica.dll" -Force -Recurse -ErrorAction Ignore
+
+if ($BuildStage -eq 'Msi') {
+	Write-Host "BuildStage Msi requested; skipping EXE bundle creation."
+	return 0
+}
 
 #Create RTF license for bundle
 Invoke-CommandWithExitCheck -Command `
@@ -287,21 +332,27 @@ Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninsta
 Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi" -Force
 
 # create bundle including winfsp
-Invoke-CommandWithExitCheck -Command `
-    "wix" -Arguments @(
-    "build",
-    "-define", "BundleName=$AppName",
-    "-define", "BundleVersion=$semVerNo.$revisionNo",
-    "-define", "BundleVendor=$Vendor",
-    "-define", "BundleCopyright=$copyright",
-    "-define", "AboutUrl=$AboutUrl",
-    "-define", "HelpUrl=$HelpUrl",
-    "-define", "UpdateUrl=$UpdateUrl",
-    "-ext", "WixToolset.Util.wixext",
-    "-ext", "WixToolset.BootstrapperApplications.wixext",
-    ".\bundle\bundleWithWinfsp.wxs",
-    "-out", ".\installer\$AppName-Installer.exe"
+$bundleWixArgs = @(
+	"build",
+	"-define", "BundleName=$AppName",
+	"-define", "BundleVersion=$semVerNo.$revisionNo",
+	"-define", "BundleVendor=$Vendor",
+	"-define", "BundleCopyright=$copyright",
+	"-define", "AboutUrl=$AboutUrl",
+	"-define", "HelpUrl=$HelpUrl",
+	"-define", "UpdateUrl=$UpdateUrl",
+	"-define", "BundleUpgradeCode=$BundleUpgradeCode"
 )
+if ($BundleLaunchTarget) {
+	$bundleWixArgs += @("-define", "BundleLaunchTarget=$BundleLaunchTarget")
+}
+$bundleWixArgs += @(
+	"-ext", "WixToolset.Util.wixext",
+	"-ext", "WixToolset.BootstrapperApplications.wixext",
+	".\bundle\bundleWithWinfsp.wxs",
+	"-out", ".\installer\$AppName-Installer.exe"
+)
+Invoke-CommandWithExitCheck -Command "wix" -Arguments $bundleWixArgs
 
 Write-Host "Created EXE installer .\installer\$AppName-Installer.exe"
 return 0;
@@ -317,4 +368,3 @@ if ($clean) {
 	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 }
 return Main
-

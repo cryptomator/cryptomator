@@ -38,38 +38,74 @@ jobs:
     runs-on: ubuntu-slim
     outputs:
       is-windows-release: ${{ steps.urls.outputs.urls-present }}
-      msi-url: ${{ steps.urls.outputs.msi }}
-      exe-url: ${{ steps.urls.outputs.exe }}
+      is-windows-x64-release: ${{ steps.urls.outputs.x64-present }}
+      is-windows-arm64-release: ${{ steps.urls.outputs.arm64-present }}
+      msi-x64-url: ${{ steps.urls.outputs.msi-x64 }}
+      exe-x64-url: ${{ steps.urls.outputs.exe-x64 }}
+      msi-arm64-url: ${{ steps.urls.outputs.msi-arm64 }}
+      exe-arm64-url: ${{ steps.urls.outputs.exe-arm64 }}
     steps:
       - name: Extract MSI and EXE download URLs
         id: urls
         run: |
-          MSI_URL=$(jq -r '[.[] | select(.name | endswith("-x64.msi"))][0].browser_download_url // "null"' <<< "$RELEASE_ASSETS")
-          EXE_URL=$(jq -r '[.[] | select(.name | endswith("-x64.exe"))][0].browser_download_url // "null"' <<< "$RELEASE_ASSETS")
-          if [[ "$MSI_URL" == "null" || -z "$MSI_URL" || "$EXE_URL" == "null" || -z "$EXE_URL" ]]; then
-            echo "urls-present=false" >> $GITHUB_OUTPUT
-          else
-            echo "urls-present=true" >> $GITHUB_OUTPUT
-            echo "msi=${MSI_URL}" >> $GITHUB_OUTPUT
-            echo "exe=${EXE_URL}" >> $GITHUB_OUTPUT
+          MSI_X64_URL=$(jq -r '[.[] | select(.name | endswith("-x64.msi"))][0].browser_download_url // "null"' <<< "$RELEASE_ASSETS")
+          EXE_X64_URL=$(jq -r '[.[] | select(.name | endswith("-x64.exe"))][0].browser_download_url // "null"' <<< "$RELEASE_ASSETS")
+          MSI_ARM64_URL=$(jq -r '[.[] | select(.name | endswith("-arm64.msi"))][0].browser_download_url // "null"' <<< "$RELEASE_ASSETS")
+          EXE_ARM64_URL=$(jq -r '[.[] | select(.name | endswith("-arm64.exe"))][0].browser_download_url // "null"' <<< "$RELEASE_ASSETS")
+
+          X64_PRESENT=false
+          ARM64_PRESENT=false
+          if [[ "$MSI_X64_URL" != "null" && -n "$MSI_X64_URL" && "$EXE_X64_URL" != "null" && -n "$EXE_X64_URL" ]]; then
+            X64_PRESENT=true
+            echo "msi-x64=${MSI_X64_URL}" >> $GITHUB_OUTPUT
+            echo "exe-x64=${EXE_X64_URL}" >> $GITHUB_OUTPUT
           fi
+          if [[ "$MSI_ARM64_URL" != "null" && -n "$MSI_ARM64_URL" && "$EXE_ARM64_URL" != "null" && -n "$EXE_ARM64_URL" ]]; then
+            ARM64_PRESENT=true
+            echo "msi-arm64=${MSI_ARM64_URL}" >> $GITHUB_OUTPUT
+            echo "exe-arm64=${EXE_ARM64_URL}" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$X64_PRESENT" == true || "$ARM64_PRESENT" == true ]]; then
+            echo "urls-present=true" >> $GITHUB_OUTPUT
+          else
+            echo "urls-present=false" >> $GITHUB_OUTPUT
+          fi
+          echo "x64-present=${X64_PRESENT}" >> $GITHUB_OUTPUT
+          echo "arm64-present=${ARM64_PRESENT}" >> $GITHUB_OUTPUT
         env:
           RELEASE_ASSETS: ${{ toJson(github.event.release.assets) }}
 
   allowlist-msi-x64:
     needs: [get-asset-urls]
-    if: needs.get-asset-urls.outputs.is-windows-release == 'true'
+    if: needs.get-asset-urls.outputs.is-windows-x64-release == 'true'
     uses: ./.github/workflows/av-whitelist.yml
     with:
-      url: ${{ needs.get-asset-urls.outputs.msi-url }}
+      url: ${{ needs.get-asset-urls.outputs.msi-x64-url }}
     secrets: inherit
 
   allowlist-exe-x64:
     needs: [get-asset-urls, allowlist-msi-x64]
-    if: needs.get-asset-urls.outputs.is-windows-release == 'true'
+    if: needs.get-asset-urls.outputs.is-windows-x64-release == 'true'
     uses: ./.github/workflows/av-whitelist.yml
     with:
-      url: ${{ needs.get-asset-urls.outputs.exe-url }}
+      url: ${{ needs.get-asset-urls.outputs.exe-x64-url }}
+    secrets: inherit
+
+  allowlist-msi-arm64:
+    needs: [get-asset-urls]
+    if: needs.get-asset-urls.outputs.is-windows-arm64-release == 'true'
+    uses: ./.github/workflows/av-whitelist.yml
+    with:
+      url: ${{ needs.get-asset-urls.outputs.msi-arm64-url }}
+    secrets: inherit
+
+  allowlist-exe-arm64:
+    needs: [get-asset-urls, allowlist-msi-arm64]
+    if: needs.get-asset-urls.outputs.is-windows-arm64-release == 'true'
+    uses: ./.github/workflows/av-whitelist.yml
+    with:
+      url: ${{ needs.get-asset-urls.outputs.exe-arm64-url }}
     secrets: inherit
 
   check-release:
@@ -100,7 +136,7 @@ jobs:
 
   notify-winget:
     name: Notify for winget-release
-    if: needs.get-asset-urls.outputs.is-windows-release == 'true' && needs.check-release.outputs.release-kind == 'stable'
+    if: needs.get-asset-urls.outputs.is-windows-x64-release == 'true' && needs.check-release.outputs.release-kind == 'stable'
     needs: [check-release, get-asset-urls]
     runs-on: ubuntu-latest
     steps:
@@ -142,4 +178,3 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_WORKFLOW_DISPATCH_TOKEN }}
           repository: cryptomator/docs
           client-payload: '{ "version": "${{ github.event.release.tag_name }}", "release": ${{ toJson(github.event.release.assets) }} }'
-

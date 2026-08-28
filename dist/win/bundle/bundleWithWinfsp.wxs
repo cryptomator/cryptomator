@@ -1,7 +1,10 @@
 ﻿<!-- For Built in variables, see https://wixtoolset.org/docs/tools/burn/builtin-variables/-->
+<?ifndef BundleUpgradeCode ?>
+  <?define BundleUpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b"?>
+<?endif?>
 <ns0:Wix xmlns:ns0="http://wixtoolset.org/schemas/v4/wxs" xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
     <ns0:Bundle Name="$(var.BundleName)"
-     UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b"
+     UpgradeCode="$(var.BundleUpgradeCode)"
      Version="$(var.BundleVersion)"
      Manufacturer="$(var.BundleVendor)"
      AboutUrl="$(var.AboutUrl)"
@@ -14,6 +17,7 @@
         <util:ProductSearch Variable="InstalledLegacyWinFspVersion" Result="version" UpgradeCode="82F812D9-4083-4EF1-8BC8-0F1EDA05B46B" />
 
         <ns0:BootstrapperApplication>
+            <?ifdef BundleLaunchTarget ?>
             <bal:WixStandardBootstrapperApplication LicenseFile="bundle\resources\license.rtf" ShowVersion="yes"
               SuppressOptionsUI="yes"
               Theme="rtfLargeLicense"
@@ -21,7 +25,16 @@
               LocalizationFile="bundle\resources\customBootstrapperTheme.wxl"
               LogoSideFile="bundle\resources\logoSide.png"
               LogoFile="bundle\resources\logo.png"
-              LaunchTarget="[ProgramFiles64Folder]\$(var.BundleName)\$(var.BundleName).exe" />
+              LaunchTarget="$(var.BundleLaunchTarget)" />
+            <?else?>
+            <bal:WixStandardBootstrapperApplication LicenseFile="bundle\resources\license.rtf" ShowVersion="yes"
+              SuppressOptionsUI="yes"
+              Theme="rtfLargeLicense"
+              ThemeFile="bundle\resources\customBootstrapperTheme.xml"
+              LocalizationFile="bundle\resources\customBootstrapperTheme.wxl"
+              LogoSideFile="bundle\resources\logoSide.png"
+              LogoFile="bundle\resources\logo.png" />
+            <?endif?>
             <ns0:Payload SourceFile="bundle\resources\logoSide.png"/>
             <!-- Required due to https://github.com/wixtoolset/issues/issues/8104 -->
             <ns0:Payload Name="Cryptobot.ico" SourceFile="bundle\resources\Cryptomator.ico"/>

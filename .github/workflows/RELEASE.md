@@ -38,7 +38,7 @@ flowchart TD
 
         build-exe-and-msi["build-exe-and-msi
         *calls win-exe.yml
-        MSI + EXE (x64)
+        x64 + arm64 app-image/MSI/EXE lanes
         code-signed & GPG-signed*"]
         build-dmg-arm64["build-dmg-arm64
         *calls mac-dmg.yml
@@ -90,13 +90,21 @@ flowchart TD
         check-release --> trigger-website
         check-release --> trigger-docs
 
-        get-asset-urls --> allowlist-msi
-        allowlist-msi --> allowlist-exe
+        get-asset-urls --> allowlist-msi-x64
+        allowlist-msi-x64 --> allowlist-exe-x64
+        get-asset-urls --> allowlist-msi-arm64
+        allowlist-msi-arm64 --> allowlist-exe-arm64
 
-        allowlist-msi["allowlist-msi-x64
+        allowlist-msi-x64["allowlist-msi-x64
         *av-whitelist.yml
         Kaspersky & Avast*"]
-        allowlist-exe["allowlist-exe-x64
+        allowlist-exe-x64["allowlist-exe-x64
+        *av-whitelist.yml
+        Kaspersky & Avast*"]
+        allowlist-msi-arm64["allowlist-msi-arm64
+        *av-whitelist.yml
+        Kaspersky & Avast*"]
+        allowlist-exe-arm64["allowlist-exe-arm64
         *av-whitelist.yml
         Kaspersky & Avast*"]
 
@@ -124,7 +132,7 @@ flowchart TD
 |-----|---------|-------------|
 | **get-version** | ubuntu | Parses the tag into semver components (`semVerNum`, `semVerSuffix`, `revNum`, `versionType`). The release is aborted if not an alpha, beta, rc or 'stable' release. |
 | **create-release-draft** | ubuntu | Checks out the repo, verifies the tag is **signed** and lives on a `main` or `release/*` branch. Runs `./mvnw verify` (with `xvfb-run`). Creates a GitHub Release **draft** using the [release body template](../release-body.md.template). Downloads and GPG-signs the source tarball. |
-| **build-exe-and-msi** | windows | Calls [`win-exe.yml`](win-exe.yml). Builds the MSI and EXE bundle installer for x64 Windows. Code-signed via Azure Trusted Signing, GPG-signed, and uploaded to the draft release. Outputs SHA-256 checksums. |
+| **build-exe-and-msi** | windows | Calls [`win-exe.yml`](win-exe.yml). Builds separate Windows x64 and Windows Arm64 lanes: app-image → MSI → EXE bundle. The Arm64 app-image runs on `windows-11-arm`; Arm64 MSI/EXE packaging is wrapper-first/emulated-wrapper-first and uses distinct installer upgrade families from x64. Outputs SHA-256 checksums for both Windows architectures. |
 | **build-dmg-arm64** | macos-15 | Calls [`mac-dmg.yml`](mac-dmg.yml). Builds the DMG for Apple Silicon. Code-signed, notarized with Apple, GPG-signed, and uploaded. Outputs SHA-256 checksum. |
 | **build-dmg-x64** | macos-15-large | Calls [`mac-dmg-x64.yml`](mac-dmg-x64.yml). Same as above but for Intel Macs. Uses macFUSE instead of FUSE-T. |
 | **build-appimages** | ubuntu | Calls [`appimage.yml`](appimage.yml). Builds AppImages for x86_64 and aarch64 (matrix). GPG-signed and uploaded with `.zsync` delta-update files. Outputs SHA-256 checksums. |
@@ -139,6 +147,8 @@ After the draft phase, the GitHub Release contains:
 | `cryptomator-<ver>.tar.gz.asc` | Source (GPG signature) |
 | `Cryptomator-<ver>-x64.msi` + `.asc` | Windows |
 | `Cryptomator-<ver>-x64.exe` + `.asc` | Windows |
+| `Cryptomator-<ver>-arm64.msi` + `.asc` | Windows Arm64 |
+| `Cryptomator-<ver>-arm64.exe` + `.asc` | Windows Arm64 |
 | `Cryptomator-<ver>-arm64.dmg` + `.asc` | macOS (Apple Silicon) |
 | `Cryptomator-<ver>-x64.dmg` + `.asc` | macOS (Intel) |
 | `cryptomator-<ver>-x86_64.AppImage` + `.zsync` + `.asc` | Linux (x86_64) |
@@ -151,7 +161,9 @@ All artifacts are signed with GPG key [`615D449FE6E6A235`](https://gist.github.c
 After the draft phase completes, a maintainer reviews the draft release on GitHub. This is the point to:
 
 - Verify all artifacts are present and checksums look correct.
+- Verify both Windows architectures are present and that the Arm64 lane passed its packaging smoke checks.
 - Edit the auto-generated release notes (What's New, Bugfixes, Other Changes).
+- Remember that switching between Windows x64 and Windows Arm64 currently requires a manual uninstall/reinstall because the two installers intentionally use separate upgrade families in this first Arm64 PR.
 - **Publish** the release when ready, which triggers phase 2.
 
 ## Phase 2: Post-Publish (`post-publish.yml`)
@@ -163,11 +175,13 @@ After the draft phase completes, a maintainer reviews the draft release on GitHu
 | Job | Condition | Description |
 |-----|-----------|-------------|
 | **notify** | always | Sends Slack notifications to `#cryptomator-desktop`: ready to build `.deb` package, and reminder to update `latest-version.json` on S3. |
-| **get-asset-urls** | always | Extracts MSI and EXE download URLs from the release assets. |
+| **get-asset-urls** | always | Extracts x64 and Arm64 MSI/EXE download URLs from the release assets and reports which Windows architectures are present. |
 | **check-release** | always | Classifies the published release tag as `stable`, `alpha`, `beta`, `rc`, or `unknown`. Stable-only follow-up jobs depend on this output. Unlike `get-version.yml` workflow, this job does not perform semver validation. |
 | **allowlist-msi-x64** | Windows release | Calls [`av-whitelist.yml`](av-whitelist.yml). Uploads the MSI to Kaspersky and Avast for whitelisting. |
 | **allowlist-exe-x64** | Windows release | Same as above for the EXE. Runs sequentially after MSI. |
-| **notify-winget** | stable + Windows | Sends a Slack notification that the release is ready for [winget submission](winget.yml). |
+| **allowlist-msi-arm64** | Windows Arm64 release | Same as above for the Arm64 MSI. |
+| **allowlist-exe-arm64** | Windows Arm64 release | Same as above for the Arm64 EXE. Runs sequentially after the Arm64 MSI. |
+| **notify-winget** | stable + Windows x64 | Sends a Slack notification that the release is ready for [winget submission](winget.yml). `winget.yml` remains unchanged and x64-scoped in this PR. |
 | **trigger-website-update** | stable | Dispatches `desktop-release` event to `cryptomator/cryptomator.github.io`. |
 | **trigger-docs-update** | stable + Windows | Dispatches `desktop-release` event to `cryptomator/docs`. |
 
@@ -176,8 +190,15 @@ After the draft phase completes, a maintainer reviews the draft release on GitHu
 These steps are triggered by team members after Slack notifications:
 
 - **Debian package** -- Run the [`debian.yml`](debian.yml) workflow to build `.deb` and optionally upload to the PPA.
-- **winget** -- Run the [`winget.yml`](winget.yml) workflow to submit to the Windows Package Manager.
+- **winget** -- Run the [`winget.yml`](winget.yml) workflow to submit to the Windows Package Manager. This workflow is intentionally unchanged in this PR and still follows the existing x64 release path.
 - **latest-version.json** -- Update the version-check file on S3 (`static.cryptomator.org/desktop/latest-version.json`).
+
+## Windows Arm64 caveats
+
+- The Windows Arm64 MSI uses a different `--win-upgrade-uuid` than x64, and the Arm64 bundle uses a different Burn `UpgradeCode`. That prevents accidental cross-architecture replacement in this first PR, but it also means there is **no in-place x64 ↔ Arm64 migration** yet.
+- When switching between Windows x64 and Windows Arm64, **uninstall the current architecture first, then install the other one**.
+- The Arm64 bundle intentionally suppresses auto-launch-after-install for now instead of assuming the x64 `ProgramFiles64Folder` launch target is correct in a wrapper-first/emulated-wrapper context.
+- **Deferred hardware gate:** real Windows Arm hardware still must validate WinFsp and JNI behavior (install, launch, mount, read/write, uninstall). This PR wires the CI/release lane and adds smoke checks, but it does **not** claim WinFsp Arm64 readiness is solved.
 
 ## Signing & Security
 
