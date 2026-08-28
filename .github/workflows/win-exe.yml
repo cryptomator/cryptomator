@@ -409,7 +409,11 @@ jobs:
             }
           }
 
-          $expectedMachine = 0xAA64
+          $allowedMachines = @{
+            0xAA64 = 'ARM64'
+            0xA641 = 'ARM64EC'
+            0xA64E = 'ARM64X'
+          }
           $binaries = @(
             (Resolve-Path '.\appdir\Cryptomator\Cryptomator.exe').Path
           )
@@ -428,14 +432,14 @@ jobs:
 
           $mismatches = foreach ($binary in $binaries) {
             $machine = Get-PeMachineType $binary
-            if ($machine -ne $expectedMachine) {
+            if (-not $allowedMachines.ContainsKey([int] $machine)) {
               [pscustomobject]@{ Path = $binary; Machine = ('0x{0:X4}' -f $machine) }
             }
           }
 
           if ($mismatches) {
             $mismatches | Format-Table -AutoSize | Out-String | Write-Host
-            throw 'Detected non-arm64 generated payload binaries in the arm64 app-image lane.'
+            throw 'Detected non-Arm-compatible generated payload binaries in the arm64 app-image lane.'
           }
       - name: Sign DLLs with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'schedule'
