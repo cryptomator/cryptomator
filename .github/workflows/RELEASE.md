@@ -199,6 +199,7 @@ These steps are triggered by team members after Slack notifications:
 - When switching between Windows x64 and Windows Arm64, **uninstall the current architecture first, then install the other one**.
 - The Arm64 bundle intentionally suppresses auto-launch-after-install for now instead of assuming the x64 `ProgramFiles64Folder` launch target is correct in a wrapper-first/emulated-wrapper context.
 - The Arm64 app-image patch step excludes the checked-in `dist/win/contrib/jnidispatch.dll` because that legacy binary is x64-only. The post-patch architecture assertion validates root/runtime binaries and Arm-specific native entries selected from multi-architecture dependency jars.
+- The wrapper-first Arm64 MSI/EXE is produced by the x64 packaging toolchain and does not yet reject installation on an x64 host. Release notes and download pages must label the artifact clearly; adding a reliable native-machine launch condition remains a follow-up before official publication.
 - **Deferred hardware gate:** real Windows Arm hardware still must validate WinFsp and JNI behavior (install, launch, mount, read/write, uninstall). This PR wires the CI/release lane and adds smoke checks, but it does **not** claim WinFsp Arm64 readiness is solved.
 
 ## Signing & Security

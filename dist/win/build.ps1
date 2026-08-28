@@ -15,6 +15,8 @@ Param(
 	[bool] $clean = $false # if true, cleans up previous build artifacts
 )
 
+$ErrorActionPreference = 'Stop'
+
 # ============================
 # Function Definitions Section
 # ============================
@@ -24,6 +26,10 @@ function Invoke-CommandWithExitCheck {
 		[string]$Command,
 		[string[]]$Arguments
 	)
+
+	if ((Get-Command $Command -ErrorAction SilentlyContinue) -eq $null) {
+		throw "Unable to find required command '$Command'."
+	}
 
 	& $Command @Arguments
 	if ($LASTEXITCODE -ne 0) {
