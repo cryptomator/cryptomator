@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import javafx.collections.FXCollections;
 import javafx.stage.Stage;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +33,7 @@ public class AppLaunchEventHandlerTest {
 		queue = new LinkedBlockingQueue<>();
 		executor = Executors.newSingleThreadExecutor();
 		appWindows = mock(FxApplicationWindows.class);
-		handler = new AppLaunchEventHandler(queue, executor, appWindows, mock(VaultListManager.class), mock(VaultService.class), mock(Stage.class), mock(Dialogs.class));
+		handler = new AppLaunchEventHandler(queue, executor, appWindows, mock(VaultListManager.class), FXCollections.observableArrayList(), mock(VaultService.class), mock(Stage.class), mock(Dialogs.class));
 	}
 
 	@AfterEach

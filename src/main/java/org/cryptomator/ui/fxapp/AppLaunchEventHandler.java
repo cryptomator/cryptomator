@@ -9,12 +9,14 @@ import org.cryptomator.launcher.OpenHubVaultEvent;
 import org.cryptomator.launcher.RevealRunningEvent;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
+import org.cryptomator.ui.keyloading.hub.HubVaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -34,16 +36,18 @@ class AppLaunchEventHandler {
 	private final ExecutorService executorService;
 	private final FxApplicationWindows appWindows;
 	private final VaultListManager vaultListManager;
+	private final ObservableList<Vault> vaults;
 	private final VaultService vaultService;
 	private final Stage primaryStage;
 	private final Dialogs dialogs;
 
 	@Inject
-	public AppLaunchEventHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExecutorService executorService, FxApplicationWindows appWindows, VaultListManager vaultListManager, VaultService vaultService, @PrimaryStage Stage primaryStage, Dialogs dialogs) {
+	public AppLaunchEventHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExecutorService executorService, FxApplicationWindows appWindows, VaultListManager vaultListManager, ObservableList<Vault> vaults, VaultService vaultService, @PrimaryStage Stage primaryStage, Dialogs dialogs) {
 		this.launchEventQueue = launchEventQueue;
 		this.executorService = executorService;
 		this.appWindows = appWindows;
 		this.vaultListManager = vaultListManager;
+		this.vaults = vaults;
 		this.vaultService = vaultService;
 		this.primaryStage = primaryStage;
 		this.dialogs = dialogs;
@@ -69,11 +73,29 @@ class AppLaunchEventHandler {
 		switch (event) {
 			case RevealRunningEvent _ -> appWindows.showMainWindow();
 			case OpenFileEvent openFileEvent -> openFileEvent.pathsToOpen().forEach(this::openPotentialVault);
-			// TODO: show the hub vault open flow, see docs/hub-vault-open-deeplink-plan.md
-			case OpenHubVaultEvent openHubVaultEvent -> {
-				LOG.info("Received request to open hub vault {}.", openHubVaultEvent.vaultId());
-				appWindows.showMainWindow();
-			}
+			case OpenHubVaultEvent openHubVaultEvent -> openHubVault(openHubVaultEvent);
+		}
+	}
+
+	/**
+	 * Whether a hub vault is set up on this machine is a purely local question - hub manages the vault's key, not where
+	 * it lives. Only if it is not set up here do we need to ask hub about it.
+	 */
+	private void openHubVault(OpenHubVaultEvent event) {
+		var existing = HubVaults.findByVaultId(vaults, event.vaultId());
+		if (existing.isPresent()) {
+			var vault = existing.get();
+			Platform.runLater(() -> {
+				if (vault.isUnlocked()) {
+					vaultService.reveal(vault);
+				} else if (vault.isLocked()) {
+					appWindows.startUnlockWorkflow(vault, null);
+				}
+			});
+		} else {
+			//TODO: authenticate, ask hub for the vault's details and offer to add it, see docs/hub-vault-open-deeplink-plan.md
+			LOG.info("Hub vault {} is not set up on this machine.", event.vaultId());
+			appWindows.showMainWindow();
 		}
 	}
 
