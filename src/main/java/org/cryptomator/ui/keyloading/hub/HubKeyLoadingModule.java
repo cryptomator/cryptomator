@@ -7,7 +7,6 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 import org.cryptomator.common.settings.DeviceKey;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.common.MessageDigestSupplier;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -15,13 +14,12 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.keyloading.KeyLoading;
+import org.cryptomator.ui.keyloading.KeyLoadingRef;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 
 import javax.inject.Named;
 import javafx.scene.Scene;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
@@ -32,19 +30,15 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
-	static HubConfig provideHubConfig(@KeyLoading Vault vault) {
-		try {
-			return vault.getVaultConfigCache().get().getHeader("hub", HubConfig.class);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+	static HubConfig provideHubConfig(@KeyLoading KeyLoadingRef vaultRef) {
+		return vaultRef.vaultConfig().getHeader("hub", HubConfig.class);
 	}
 
 	@Provides
 	@KeyLoadingScoped
 	@Named("windowTitle")
-	static String provideWindowTitle(@KeyLoading Vault vault, ResourceBundle resourceBundle) {
-		return String.format(resourceBundle.getString("unlock.title"), vault.getDisplayName());
+	static String provideWindowTitle(@KeyLoading KeyLoadingRef vaultRef, ResourceBundle resourceBundle) {
+		return String.format(resourceBundle.getString("unlock.title"), vaultRef.displayName());
 	}
 
 

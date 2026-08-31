@@ -16,6 +16,7 @@ import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.keyloading.KeyLoadingComponent;
+import org.cryptomator.ui.keyloading.KeyLoadingRef;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 
 import javax.inject.Named;
@@ -64,7 +65,11 @@ abstract class HealthCheckModule {
 	@HealthCheckWindow
 	@HealthCheckScoped
 	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Factory compFactory, @HealthCheckWindow Vault vault, @Named("unlockWindow") Stage window ) {
-		return compFactory.create(vault, window).keyloadingStrategy();
+		try {
+			return compFactory.create(KeyLoadingRef.forVault(vault), vault, window).keyloadingStrategy();
+		} catch (IOException e) {
+			return KeyLoadingStrategy.failed(e);
+		}
 	}
 
 	@Provides

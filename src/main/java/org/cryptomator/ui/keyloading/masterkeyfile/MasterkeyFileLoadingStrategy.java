@@ -2,6 +2,7 @@ package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import com.google.common.base.Preconditions;
 import org.cryptomator.common.Constants;
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.CancellationException;
@@ -48,8 +50,8 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private boolean wrongPassphrase;
 
 	@Inject
-	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, KeychainManager keychain, ResourceBundle resourceBundle) {
-		this.vault = vault;
+	public MasterkeyFileLoadingStrategy(@KeyLoading @Nullable Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, KeychainManager keychain, ResourceBundle resourceBundle) {
+		this.vault = Objects.requireNonNull(vault, MasterkeyFileLoadingModule.NO_LOCAL_VAULT);
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.window = window;
 		this.passphraseEntry = passphraseEntry;

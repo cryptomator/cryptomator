@@ -7,12 +7,12 @@ import com.google.common.base.Preconditions;
 import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.Constants;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.keyloading.KeyLoading;
+import org.cryptomator.ui.keyloading.KeyLoadingRef;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +60,10 @@ public class ReceiveKeyController implements FxController {
 	private final Lazy<Scene> invalidLicenseScene;
 	private final HttpClient httpClient;
 	private final Dialogs dialogs;
-	private final Vault vault;
+	private final KeyLoadingRef vaultRef;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, //
+	public ReceiveKeyController(@KeyLoading KeyLoadingRef vaultRef, //
 								ExecutorService executor, //
 								@KeyLoading Stage window, //
 								HubConfig hubConfig, //
@@ -79,7 +79,7 @@ public class ReceiveKeyController implements FxController {
 								Dialogs dialogs) {
 		this.window = window;
 		this.hubConfig = hubConfig;
-		this.vaultId = extractVaultId(vault.getVaultConfigCache().getUnchecked().getKeyId()); // TODO: access vault config's JTI directly (requires changes in cryptofs)
+		this.vaultId = vaultRef.vaultId();
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.fsOwnerId = fsOwnerId;
@@ -92,7 +92,7 @@ public class ReceiveKeyController implements FxController {
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(executor).build();
 		this.dialogs = dialogs;
-		this.vault = vault;
+		this.vaultRef = vaultRef;
 	}
 
 	@FXML
@@ -313,7 +313,7 @@ public class ReceiveKeyController implements FxController {
 
 	private void accessGoneVaultArchived() {
 		window.close();
-		dialogs.prepareHubVaultArchived((Stage)window.getOwner(), vault).build().showAndWait();
+		dialogs.prepareHubVaultArchived((Stage)window.getOwner(), vaultRef.displayName()).build().showAndWait();
 	}
 
 	private void accountInitializationRequired() {
@@ -341,12 +341,6 @@ public class ReceiveKeyController implements FxController {
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Can't append '" + path + "' to URI: " + base, e);
 		}
-	}
-
-	private static String extractVaultId(URI vaultKeyUri) {
-		assert vaultKeyUri.getScheme().startsWith(HubKeyLoadingStrategy.SCHEME_PREFIX);
-		var path = vaultKeyUri.getPath();
-		return path.substring(path.lastIndexOf('/') + 1);
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)

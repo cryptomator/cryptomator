@@ -1,5 +1,6 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
@@ -18,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
@@ -41,12 +43,12 @@ public class ChooseMasterkeyFileController implements FxController {
 
 	@Inject
 	public ChooseMasterkeyFileController(@KeyLoading Stage window, //
-										 @KeyLoading Vault vault, //
+										 @KeyLoading @Nullable Vault vault, //
 										 CompletableFuture<Path> result, //
 										 RecoveryKeyComponent.Factory recoveryKeyWindow, //
 										 ResourceBundle resourceBundle) {
 		this.window = window;
-		this.vault = vault;
+		this.vault = Objects.requireNonNull(vault, MasterkeyFileLoadingModule.NO_LOCAL_VAULT);
 		this.result = result;
 		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.resourceBundle = resourceBundle;

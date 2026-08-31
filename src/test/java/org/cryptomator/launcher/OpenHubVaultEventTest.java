@@ -73,21 +73,32 @@ public class OpenHubVaultEventTest {
 	@Test
 	@DisplayName("a config without a hub header is rejected")
 	public void testNoHubHeader() {
-		var token = vaultConfig(KEY_ID, null);
+		var token = vaultConfig(KEY_ID, VAULT_ID, null);
 
 		Assertions.assertThrows(IllegalArgumentException.class, //
 				() -> OpenHubVaultEvent.tryParse(URI.create("org.cryptomator://vault/open#vaultConfig=" + token)));
 	}
 
 	@ParameterizedTest
-	@DisplayName("a key id whose last segment is not a vault id is rejected")
+	@DisplayName("a vault id that is not a uuid is rejected")
 	@ValueSource(strings = { //
-			"hub+https://hub.example.com/api/vaults/not-a-uuid", //
-			"hub+https://hub.example.com/api/vaults/", // empty segment
-			"hub+https://hub.example.com" // no path at all
+			"not-a-uuid", //
+			"", // absent
+			"../../evil" // must never reach the api/vaults/{vaultId}/... request path
 	})
-	public void testInvalidVaultId(String keyId) {
-		var token = hubVaultConfig(keyId);
+	public void testInvalidVaultId(String vaultId) {
+		var token = vaultConfig(KEY_ID, vaultId, hubHeader("https://hub.example.com/api", "https://login.example.com/auth"));
+
+		Assertions.assertThrows(IllegalArgumentException.class, //
+				() -> OpenHubVaultEvent.tryParse(URI.create("org.cryptomator://vault/open#vaultConfig=" + token)));
+	}
+
+	@Test
+	@DisplayName("a vault id disagreeing with the key id is rejected")
+	public void testVaultIdMismatch() {
+		// Hub writes the same id into both, so a config where they differ is forged or broken
+		var token = vaultConfig(KEY_ID, "11111111-2222-3333-4444-555555555555", //
+				hubHeader("https://hub.example.com/api", "https://login.example.com/auth"));
 
 		Assertions.assertThrows(IllegalArgumentException.class, //
 				() -> OpenHubVaultEvent.tryParse(URI.create("org.cryptomator://vault/open#vaultConfig=" + token)));
@@ -101,7 +112,7 @@ public class OpenHubVaultEventTest {
 			"https:///api" // no host
 	})
 	public void testUnusableApiBaseUrl(String apiBaseUrl) {
-		var token = vaultConfig(KEY_ID, hubHeader(apiBaseUrl, "https://login.example.com/auth"));
+		var token = vaultConfig(KEY_ID, VAULT_ID, hubHeader(apiBaseUrl, "https://login.example.com/auth"));
 
 		Assertions.assertThrows(IllegalArgumentException.class, //
 				() -> OpenHubVaultEvent.tryParse(URI.create("org.cryptomator://vault/open#vaultConfig=" + token)));
@@ -110,7 +121,7 @@ public class OpenHubVaultEventTest {
 	@Test
 	@DisplayName("an unusable auth endpoint is rejected")
 	public void testUnusableAuthEndpoint() {
-		var token = vaultConfig(KEY_ID, hubHeader("https://hub.example.com/api", "not a url"));
+		var token = vaultConfig(KEY_ID, VAULT_ID, hubHeader("https://hub.example.com/api", "not a url"));
 
 		Assertions.assertThrows(IllegalArgumentException.class, //
 				() -> OpenHubVaultEvent.tryParse(URI.create("org.cryptomator://vault/open#vaultConfig=" + token)));
@@ -119,7 +130,7 @@ public class OpenHubVaultEventTest {
 	@Test
 	@DisplayName("an http endpoint is accepted here, host trust decides later")
 	public void testHttpEndpointAccepted() {
-		var token = vaultConfig(KEY_ID, hubHeader("http://localhost:8080/api", "http://localhost:8080/auth"));
+		var token = vaultConfig(KEY_ID, VAULT_ID, hubHeader("http://localhost:8080/api", "http://localhost:8080/auth"));
 
 		Assertions.assertTrue(OpenHubVaultEvent.tryParse(URI.create("org.cryptomator://vault/open#vaultConfig=" + token)).isPresent());
 	}
@@ -180,14 +191,14 @@ public class OpenHubVaultEventTest {
 	}
 
 	private static String hubVaultConfig(String keyId) {
-		return vaultConfig(keyId, hubHeader("https://hub.example.com/api", "https://login.example.com/auth"));
+		return vaultConfig(keyId, VAULT_ID, hubHeader("https://hub.example.com/api", "https://login.example.com/auth"));
 	}
 
 	/**
 	 * Builds a vault config token. Its signature is keyed on the masterkey, which the deeplink never carries, so a dummy
 	 * signature is exactly what the parser operates on.
 	 */
-	private static String vaultConfig(String keyId, String extraHeaderFields) {
+	private static String vaultConfig(String keyId, String vaultId, String extraHeaderFields) {
 		var header = """
 				{ "kid":"%s",\
 				  "typ":"JWT",\
@@ -195,10 +206,11 @@ public class OpenHubVaultEventTest {
 				  %s
 				  }""".formatted(keyId, extraHeaderFields == null ? "" : extraHeaderFields);
 		var payload = """
-				{ "format":8,\
+				{ "jti":"%s",\
+				  "format":8,\
 				  "cipherCombo":"SIV_GCM",\
 				  "shorteningThreshold":220\
-				  }""";
+				  }""".formatted(vaultId);
 		var encoder = Base64.getUrlEncoder().withoutPadding();
 		return encoder.encodeToString(header.getBytes(StandardCharsets.UTF_8)) //
 				+ "." + encoder.encodeToString(payload.getBytes(StandardCharsets.UTF_8)) //

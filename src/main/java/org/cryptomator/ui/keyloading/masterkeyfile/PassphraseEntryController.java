@@ -35,6 +35,7 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
@@ -66,9 +67,9 @@ public class PassphraseEntryController implements FxController {
 	public Animation unlockAnimation;
 
 	@Inject
-	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain, ExecutorService backgroundExecutorService) {
+	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading @Nullable Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain, ExecutorService backgroundExecutorService) {
 		this.window = window;
-		this.vault = vault;
+		this.vault = Objects.requireNonNull(vault, MasterkeyFileLoadingModule.NO_LOCAL_VAULT);
 		this.result = result;
 		this.savedPassword = savedPassword;
 		this.forgetPassword = forgetPassword;

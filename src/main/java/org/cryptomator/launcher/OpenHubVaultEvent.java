@@ -18,15 +18,16 @@ import java.util.UUID;
 /**
  * Requests opening a Hub vault from an {@code org.cryptomator://vault/open#vaultConfig=…} deeplink.
  * <p>
- * The single parameter is the vault's {@code vault.cryptomator}, a compact JWS embedded verbatim - a compact JWS
- * consists only of characters that are unreserved in a URI fragment, so it needs no further encoding. It is carried in
- * the fragment part so that it stays out of the logs of any web page that mints such a link.
+ * The single parameter is the vault's {@code vault.cryptomator}, a compact JWS embedded verbatim, carried in the fragment part.
  * <p>
- * The config is read <em>unverified</em>: its signature is keyed on the masterkey, which is only obtainable from Hub
- * later on. Everything consumed before that point is therefore validated here rather than trusted.
+ * Notes:
+ * <ul>
+ * 	<li> The config is read <em>unverified</em>, since its signature is keyed on the masterkey, which is only obtainable from Hu later on. </li>
+ *  <li> The deeplink parsing makes a strict validation due to untrusted input</li>
+ * </ul>
  *
  * @param vaultConfig the decoded, unverified vault config
- * @param vaultId     the vault's id within its Hub instance, taken from the config's key id
+ * @param vaultId     the vault's id within its Hub instance, taken from the config's {@code jti} claim
  */
 public record OpenHubVaultEvent(VaultConfig.UnverifiedVaultConfig vaultConfig, UUID vaultId) implements AppLaunchEvent {
 
@@ -59,7 +60,7 @@ public record OpenHubVaultEvent(VaultConfig.UnverifiedVaultConfig vaultConfig, U
 		}
 		var vaultConfig = decode(token);
 		requireHubVault(vaultConfig);
-		var vaultId = extractVaultId(vaultConfig.getKeyId());
+		var vaultId = extractVaultId(vaultConfig);
 
 		var leftoverParams = params.keySet().stream().filter(k -> !k.equals(PARAM_VAULT_CONFIG)).toList();
 		if (!leftoverParams.isEmpty()) {
@@ -123,8 +124,8 @@ public record OpenHubVaultEvent(VaultConfig.UnverifiedVaultConfig vaultConfig, U
 		if (!uri.isAbsolute() || uri.getHost() == null) {
 			throw new IllegalArgumentException("Vault config's hub " + field + " is not an absolute url with a host, but was '" + uri + "'.");
 		}
-		// Whether an http host is acceptable (it is, for local development) is decided by CheckHostTrustController, the
-		// authority on host trust. Here we only ensure the endpoint is shaped like something that decision can be made on.
+		// Whether an http host is acceptable (it is, for local development) is decided by CheckHostTrustController
+		// Here we only ensure the endpoint is shaped like something that decision can be made on.
 		var scheme = uri.getScheme();
 		if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {
 			throw new IllegalArgumentException("Vault config's hub " + field + " is neither http nor https, but was '" + uri + "'.");
@@ -132,24 +133,33 @@ public record OpenHubVaultEvent(VaultConfig.UnverifiedVaultConfig vaultConfig, U
 	}
 
 	/**
-	 * Reads the vault id from the trailing path segment of a key id such as
-	 * {@code hub+https://hub.example.com/api/vaults/<vaultId>}.
+	 * Reads the vault id from the config's {@code jti} claim.
 	 * <p>
 	 * Requiring a UUID matters beyond well-formedness: the id is interpolated into the {@code api/vaults/{vaultId}/…}
-	 * request path, so it must not be able to introduce a path segment. Re-serializing the parsed {@link UUID} rather
-	 * than passing the raw segment on keeps that guarantee.
+	 * request path, so it must not be able to introduce a path segment. A {@code jti} is an arbitrary string, so parsing
+	 * it as a {@link UUID} and passing that on - rather than the raw claim - is what keeps that guarantee.
+	 * <p>
+	 * Hub writes the same id into the key id's trailing path segment, and the two have always agreed, so a config where
+	 * they differ is forged or broken and is rejected.
 	 */
-	private static UUID extractVaultId(URI keyId) {
-		var path = keyId.getPath();
-		if (path == null || path.isEmpty()) {
-			throw new IllegalArgumentException("Vault config's key id contains no vault id, but was '" + keyId + "'.");
+	private static UUID extractVaultId(VaultConfig.UnverifiedVaultConfig vaultConfig) {
+		var allegedVaultId = vaultConfig.allegedVaultId();
+		if (allegedVaultId == null || allegedVaultId.isBlank()) {
+			throw new IllegalArgumentException("Vault config declares no vault id.");
 		}
-		var lastSegment = path.substring(path.lastIndexOf('/') + 1);
+		UUID vaultId;
 		try {
-			return UUID.fromString(lastSegment);
+			vaultId = UUID.fromString(allegedVaultId);
 		} catch (IllegalArgumentException e) {
-			throw new IllegalArgumentException("Vault config's key id does not end in a vault id, but was '" + keyId + "'.", e);
+			throw new IllegalArgumentException("Vault config's vault id is not a uuid, but was '" + allegedVaultId + "'.", e);
 		}
+		var keyId = vaultConfig.getKeyId();
+		var path = keyId.getPath();
+		var lastSegment = path == null ? "" : path.substring(path.lastIndexOf('/') + 1);
+		if (!vaultId.toString().equalsIgnoreCase(lastSegment)) {
+			throw new IllegalArgumentException("Vault config's vault id '" + vaultId + "' does not match its key id '" + keyId + "'.");
+		}
+		return vaultId;
 	}
 
 	private static Map<String, String> parseParams(String rawParams) {
