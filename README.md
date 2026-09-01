@@ -17,13 +17,7 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Gold Sponsors
 
-<table>
-  <tbody>
-    <tr>
-      <td><a href="https://uruky.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cryptomator.org/img/sponsors/uruky-white.svg"><img src="https://cryptomator.org/img/sponsors/uruky.svg" alt="Uruky" height="80"></picture></a></td>
-    </tr>
-  </tbody>
-</table>
+Become our Gold Sponsor and showcase your brand to a targeted audience! Please contact us if you are interested.
 
 ### Silver Sponsors
 
