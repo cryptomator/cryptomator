@@ -1,0 +1,222 @@
+name: Windows Arm64 Readiness
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/win-arm-readiness.yml'
+      - 'dist/win/**'
+      - 'pom.xml'
+      - 'src/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-appimage-arm64:
+    name: Build Windows app-image (arm64)
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Setup JavaFX jmods
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: liberica
+          java-version: '25.0.3+11'
+          java-package: jdk+fx
+      - name: Record JavaFX jmod path
+        shell: pwsh
+        run: |
+          $javaFxJmods = (Join-Path $env:JAVA_HOME 'jmods').Replace('\', '/')
+          "JAVAFX_JMODS_ARM64=$javaFxJmods" >> $env:GITHUB_ENV
+      - name: Setup Java
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: liberica
+          java-version: '26.0.1+10'
+          java-package: jdk
+          cache: maven
+      - name: Verify JavaFX jmod version
+        shell: bash
+        run: |
+          JMOD_VERSION=$(jmod describe "${JAVAFX_JMODS_ARM64}/javafx.base.jmod" | head -1)
+          JMOD_VERSION=${JMOD_VERSION#*@}
+          JMOD_VERSION=${JMOD_VERSION%%.*}
+          POM_VERSION=$(./mvnw help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_VERSION=${POM_VERSION#*@}
+          POM_VERSION=${POM_VERSION%%.*}
+          if [ "$POM_VERSION" -ne "$JMOD_VERSION" ]; then
+            echo "JavaFX major version in pom.xml (${POM_VERSION}) does not match Arm64 jmods (${JMOD_VERSION})." >&2
+            exit 1
+          fi
+      - name: Build application modules
+        shell: bash
+        run: ./mvnw -B clean package -Pwin -DskipTests -Djavafx.platform=win
+      - name: Prepare module path
+        shell: bash
+        run: |
+          test -d target/mods
+          test -d target/libs
+          cp LICENSE.txt target
+          cp target/cryptomator-*.jar target/mods
+      - name: Set jlink module path
+        id: jlink-module-path
+        shell: bash
+        run: |
+          JMOD_PATHS="${JAVAFX_JMODS_ARM64}"
+          if ! "${JAVA_HOME}/bin/jlink" --help | grep -q "Linking from run-time image enabled"; then
+            JMOD_PATHS="${JAVA_HOME}/jmods;${JMOD_PATHS}"
+          fi
+          echo "value=${JMOD_PATHS}" >> "$GITHUB_OUTPUT"
+      - name: Create Arm64 runtime
+        shell: bash
+        run: >
+          "${JAVA_HOME}/bin/jlink"
+          --verbose
+          --output runtime
+          --module-path "${{ steps.jlink-module-path.outputs.value }}"
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.crypto.mscapi,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
+          --strip-native-commands
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress zip-0
+      - name: Remove unused x64 JavaFX runtime
+        shell: pwsh
+        run: |
+          $runtime = '.\runtime\bin\vcruntime140_1.dll'
+          if (Test-Path $runtime) {
+            $stream = [System.IO.File]::OpenRead($runtime)
+            try {
+              $reader = [System.IO.BinaryReader]::new($stream)
+              $stream.Seek(0x3C, [System.IO.SeekOrigin]::Begin) > $null
+              $peHeaderOffset = $reader.ReadInt32()
+              $stream.Seek($peHeaderOffset + 4, [System.IO.SeekOrigin]::Begin) > $null
+              $machine = $reader.ReadUInt16()
+            } finally {
+              $stream.Dispose()
+            }
+            if ($machine -eq 0x8664) {
+              Remove-Item $runtime -Force
+            } elseif ($machine -notin 0xAA64, 0xA641, 0xA64E) {
+              throw ('Unexpected vcruntime140_1.dll machine type: 0x{0:X4}' -f $machine)
+            }
+          }
+      - name: Create Arm64 app-image
+        shell: bash
+        run: >
+          "${JAVA_HOME}/bin/jpackage"
+          --verbose
+          --type app-image
+          --runtime-image runtime
+          --input target/libs
+          --module-path target/mods
+          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+          --dest appdir
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --app-version "99.99.99.${GITHUB_RUN_NUMBER}"
+          --java-options "--enable-preview"
+          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+          --java-options "-Xss5m"
+          --java-options "-Xmx256m"
+          --java-options "-Dcryptomator.appVersion=99.99.99-SNAPSHOT"
+          --java-options "-Dfile.encoding=utf-8"
+          --java-options "-Djava.net.useSystemProxies=true"
+          --java-options "-Dcryptomator.adminConfigPath=C:/ProgramData/Cryptomator/config.properties"
+          --java-options "-Dcryptomator.logDir=@{localappdata}/Cryptomator"
+          --java-options "-Dcryptomator.settingsPath=@{appdata}/Cryptomator/settings.json;@{userhome}/AppData/Roaming/Cryptomator/settings.json"
+          --java-options "-Dcryptomator.p12Path=@{appdata}/Cryptomator/key.p12;@{userhome}/AppData/Roaming/Cryptomator/key.p12"
+          --java-options "-Dcryptomator.ipcSocketPath=@{localappdata}/Cryptomator/ipc.socket"
+          --java-options "-Dcryptomator.mountPointsDir=@{userhome}/Cryptomator"
+          --java-options "-Dcryptomator.loopbackAlias=cryptomator-vault"
+          --java-options "-Dcryptomator.showTrayIcon=true"
+          --java-options "-Dcryptomator.buildNumber=arm64-readiness-${GITHUB_RUN_NUMBER}"
+          --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=Cryptomator"
+          --java-options "-Dcryptomator.integrationsWin.keychainPaths=@{appdata}/Cryptomator/keychain.json;@{userhome}/AppData/Roaming/Cryptomator/keychain.json"
+          --java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=@{appdata}/Cryptomator/windowsHelloKeychain.json"
+          --java-options "-Dcryptomator.disableUpdateCheck=true"
+          --java-options "-XX:ErrorFile=C:/cryptomator/cryptomator_crash.log"
+          --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true"
+          --resource-dir dist/win/resources
+          --icon dist/win/resources/Cryptomator.ico
+          --add-launcher "Cryptomator (Debug)=dist/win/debug-launcher.properties"
+      - name: Add architecture-neutral support scripts
+        shell: pwsh
+        run: |
+          Get-ChildItem '.\dist\win\contrib' -File |
+            Where-Object Name -ne 'jnidispatch.dll' |
+            Copy-Item -Destination '.\appdir\Cryptomator'
+          attrib -r '.\appdir\Cryptomator\Cryptomator.exe'
+          attrib -r '.\appdir\Cryptomator\Cryptomator (Debug).exe'
+      - name: Assert Arm-compatible payload
+        shell: pwsh
+        run: |
+          function Get-PeMachineType([string]$Path) {
+            $stream = [System.IO.File]::OpenRead($Path)
+            try {
+              $reader = [System.IO.BinaryReader]::new($stream)
+              $stream.Seek(0x3C, [System.IO.SeekOrigin]::Begin) > $null
+              $peHeaderOffset = $reader.ReadInt32()
+              $stream.Seek($peHeaderOffset + 4, [System.IO.SeekOrigin]::Begin) > $null
+              return $reader.ReadUInt16()
+            } finally {
+              $stream.Dispose()
+            }
+          }
+
+          $allowedMachines = @{
+            0xAA64 = 'ARM64'
+            0xA641 = 'ARM64EC'
+            0xA64E = 'ARM64X'
+          }
+          $binaries = @(
+            Get-ChildItem '.\appdir\Cryptomator\*' -Include *.dll,*.exe -File
+            Get-ChildItem '.\appdir\Cryptomator\runtime' -Recurse -Include *.dll,*.exe -File
+          )
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $inspectionDir = New-Item '.\appdir\arm-native-inspection' -ItemType Directory
+          Get-ChildItem '.\appdir\Cryptomator\app\mods' -Filter '*.jar' | ForEach-Object {
+            $jarBaseName = $_.BaseName
+            $jar = [System.IO.Compression.ZipFile]::OpenRead($_.FullName)
+            try {
+              $entries = @($jar.Entries | Where-Object {
+                $_.FullName.EndsWith('.dll') -and
+                $_.FullName -match '(?i)(^|[/-])(aarch64|arm64)([/.+-]|$)'
+              })
+              foreach ($entry in $entries) {
+                $destination = Join-Path $inspectionDir "$jarBaseName-$($entry.Name)"
+                [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $destination, $true)
+                $binaries += Get-Item $destination
+              }
+            } finally {
+              $jar.Dispose()
+            }
+          }
+
+          $binaries = $binaries | Sort-Object FullName -Unique
+          if ($binaries.Count -eq 0) {
+            throw 'No generated Arm64 EXE/DLL payloads were found.'
+          }
+          $mismatches = foreach ($binary in $binaries) {
+            $machine = Get-PeMachineType $binary.FullName
+            if (-not $allowedMachines.ContainsKey([int] $machine)) {
+              [pscustomobject]@{
+                Path = $binary.FullName
+                Machine = ('0x{0:X4}' -f $machine)
+              }
+            }
+          }
+          if ($mismatches) {
+            $mismatches | Format-Table -AutoSize | Out-String | Write-Host
+            throw 'Detected a non-Arm-compatible app-image payload.'
+          }
+      - name: Upload Arm64 app-image
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cryptomator-windows-arm64-appimage
+          path: appdir/Cryptomator
+          include-hidden-files: true
+          if-no-files-found: error
