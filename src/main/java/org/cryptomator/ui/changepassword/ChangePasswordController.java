@@ -96,7 +96,7 @@ public class ChangePasswordController implements FxController {
 	}
 
 	private void updatePasswordInSystemkeychain() {
-		if (keychain.isSupported() && !keychain.isLocked()) {
+		if (keychain.isSupported()) {
 			try {
 				keychain.changePassphrase(vault.getId(), vault.getDisplayName(), newPasswordController.passwordField.getCharacters());
 				LOG.info("Successfully updated password in system keychain for {}", vault.getDisplayName());
