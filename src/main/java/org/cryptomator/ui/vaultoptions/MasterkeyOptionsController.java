@@ -40,7 +40,7 @@ public class MasterkeyOptionsController implements FxController {
 		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.forgetPasswordWindow = forgetPasswordWindow;
 		this.keychain = keychain;
-		if (keychain.isSupported() && !keychain.isLocked()) {
+		if (keychain.isSupported()) {
 			this.passwordSaved = keychain.getPassphraseStoredProperty(vault.getId()).orElse(false);
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
