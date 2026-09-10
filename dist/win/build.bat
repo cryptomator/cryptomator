@@ -33,13 +33,19 @@ SET PAUSE_AT_END=0
 echo %CMDCMDLINE% | findstr /I /C:"/c" >nul 2>&1 && SET PAUSE_AT_END=1
 IF DEFINED CI SET PAUSE_AT_END=0
 
-:: preconditions
+:: preconditions: prefer PowerShell 7 (pwsh), fall back to the Windows PowerShell 5.1 that ships with Windows
+SET PS=pwsh
 where pwsh >nul 2>&1
 IF ERRORLEVEL 1 (
-	echo ERROR: PowerShell 7 ^(pwsh.exe^) not found in PATH.
-	echo        Install it with: winget install Microsoft.PowerShell
-	SET EXITCODE=1
-	GOTO :end
+	where powershell >nul 2>&1
+	IF ERRORLEVEL 1 (
+		echo ERROR: Neither pwsh.exe nor powershell.exe found in PATH.
+		echo        Install PowerShell 7 with: winget install Microsoft.PowerShell
+		SET EXITCODE=1
+		GOTO :end
+	)
+	SET PS=powershell
+	echo NOTE: PowerShell 7 ^(pwsh^) not found, using Windows PowerShell. Install PowerShell 7 with: winget install Microsoft.PowerShell
 )
 IF "%JAVA_HOME%"=="" (
 	echo ERROR: JAVA_HOME is not set. Point it to a JDK 26 installation, e.g.
@@ -56,7 +62,7 @@ IF NOT EXIST "%JAVA_HOME%\bin\jpackage.exe" (
 :: build.ps1 expects to be run from dist\win
 pushd "%~dp0"
 echo Building target "%TARGET%" (clean=%CLEAN%) ...
-pwsh -NoLogo -NoProfile -ExecutionPolicy Unrestricted -Command .\build.ps1^
+%PS% -NoLogo -NoProfile -ExecutionPolicy Unrestricted -Command .\build.ps1^
  -AppName %APPNAME%^
  -MainJarGlob "%MAIN_JAR_GLOB%"^
  -ModuleAndMainClass "%MODULE_AND_MAIN_CLASS%"^

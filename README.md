@@ -91,7 +91,7 @@ This will build all the jars and bundle them together with their OS-specific dep
 
 ### Windows packages
 
-The scripts in `dist/win` build the native Windows packages. They require a JDK 26 (x64 builds additionally download the JavaFX jmods), PowerShell 7 (`pwsh`), Git and, for the installer, [WiX 6](https://wixtoolset.org/) with the UI, Util and BootstrapperApplications extensions.
+The scripts in `dist/win` build the native Windows packages. They require a JDK 26 (x64 builds additionally download the JavaFX jmods), PowerShell (PowerShell 7 is preferred, the Windows PowerShell 5.1 that ships with Windows works too), Git and, for the installer, [WiX 6](https://wixtoolset.org/) with the UI, Util and BootstrapperApplications extensions.
 
 ```
 cd dist\win

@@ -14,6 +14,10 @@ Param(
 	[bool] $clean = $false # if true, cleans up previous build artifacts
 )
 
+# Runs on PowerShell 7 (pwsh) as well as on the Windows PowerShell 5.1 that ships with Windows.
+# Progress bars are disabled globally: they slow down Invoke-WebRequest to a crawl on 5.1.
+$ProgressPreference = 'SilentlyContinue'
+
 $buildInstaller = ($Target -eq 'installer') -or ($Target -eq 'all')
 $buildPortable = ($Target -eq 'portable') -or ($Target -eq 'all')
 $buildCorp = ($Target -eq 'corp') -or ($Target -eq 'all')
@@ -255,7 +259,7 @@ $Env:JP_WIXHELPER_DIR = ""
 
 Get-Content .\resources\FAvaultFile.template.properties ` # Similar to envsubst
     | ForEach-Object { $ExecutionContext.InvokeCommand.ExpandString($_) } `
-    | Out-File -FilePath .\resources\FAvaultFile.properties
+    | Out-File -FilePath .\resources\FAvaultFile.properties -Encoding ascii
 
 Invoke-CommandWithExitCheck -Command `
     "$Env:JAVA_HOME\bin\jpackage" -Arguments @(
@@ -492,7 +496,7 @@ if ($buildCorp) {
 
 	Get-Content "$corpResources\FAvaultFile.template.properties" `
 	    | ForEach-Object { $ExecutionContext.InvokeCommand.ExpandString($_) } `
-	    | Out-File -FilePath "$corpResources\FAvaultFile.properties"
+	    | Out-File -FilePath "$corpResources\FAvaultFile.properties" -Encoding ascii
 
 	Remove-Item -Path "$corpDir\*.msi" -Force -ErrorAction Ignore
 	Invoke-CommandWithExitCheck -Command `
@@ -528,14 +532,14 @@ return 0;
 # ============================
 if ($clean) {
 	Write-Host "Cleaning up previous build artifacts..."
-	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
-	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
-	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
-	Remove-Item -Path ".\portable\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
-	Remove-Item -Path ".\portable\*.zip" -Force -ErrorAction Ignore -ProgressAction SilentlyContinue
-	Remove-Item -Path ".\corp\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
-	Remove-Item -Path ".\corp\resources" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
-	Remove-Item -Path ".\corp\*.msi" -Force -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\portable\$AppName" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\portable\*.zip" -Force -ErrorAction Ignore
+	Remove-Item -Path ".\corp\$AppName" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\corp\resources" -Force -Recurse -ErrorAction Ignore
+	Remove-Item -Path ".\corp\*.msi" -Force -ErrorAction Ignore
 }
 return Main
 
