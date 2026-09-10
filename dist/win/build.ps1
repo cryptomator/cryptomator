@@ -111,6 +111,28 @@ if ($buildInstaller -or $buildCorp) {
 }
 
 $buildDir = Split-Path -Parent $PSCommandPath
+
+# check that JAVA_HOME points to the JDK version required by the pom
+if (-not $Env:JAVA_HOME -or !(Test-Path "$Env:JAVA_HOME\bin\java.exe")) {
+	Write-Error "JAVA_HOME is not set or does not point to a JDK: '$Env:JAVA_HOME'"
+	exit 1
+}
+$pomText = Get-Content "$buildDir\..\..\pom.xml" -Raw
+if ($pomText -notmatch '<project\.jdk\.version>\s*(\d+)\s*</project\.jdk\.version>') {
+	Write-Error "Could not read project.jdk.version from pom.xml"
+	exit 1
+}
+$requiredJdk = [int]$Matches[1]
+$javaVersionOutput = (& "$Env:JAVA_HOME\bin\java.exe" -version 2>&1) | Out-String
+if ($javaVersionOutput -match 'version "(\d+)') {
+	$foundJdk = [int]$Matches[1]
+	if ($foundJdk -ne $requiredJdk) {
+		Write-Error "JDK $foundJdk found at JAVA_HOME ($Env:JAVA_HOME), but this project requires JDK $requiredJdk. Install it (e.g. winget install EclipseAdoptium.Temurin.$requiredJdk.JDK) and set JAVA_HOME accordingly."
+		exit 1
+	}
+} else {
+	Write-Warning "Could not determine the JDK version from '$Env:JAVA_HOME\bin\java.exe -version'. Continuing anyway."
+}
 $version = $(../../mvnw.cmd -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
 $semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)

@@ -47,17 +47,25 @@ IF ERRORLEVEL 1 (
 	SET PS=powershell
 	echo NOTE: PowerShell 7 ^(pwsh^) not found, using Windows PowerShell. Install PowerShell 7 with: winget install Microsoft.PowerShell
 )
+:: locate a JDK 26 if JAVA_HOME is not set: common vendor install dirs first (last match = newest), then java.exe from PATH
 IF "%JAVA_HOME%"=="" (
-	echo ERROR: JAVA_HOME is not set. Point it to a JDK 26 installation, e.g.
-	echo        set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-26
+	FOR /D %%D IN ("%ProgramFiles%\Eclipse Adoptium\jdk-26*" "%ProgramFiles%\Java\jdk-26*" "%ProgramFiles%\Zulu\zulu-26*" "%ProgramFiles%\Microsoft\jdk-26*" "%ProgramFiles%\Amazon Corretto\jdk26*" "%ProgramFiles%\BellSoft\LibericaJDK-26*" "%LOCALAPPDATA%\Programs\Eclipse Adoptium\jdk-26*") DO CALL :setjavahome "%%~D"
+)
+IF "%JAVA_HOME%"=="" (
+	FOR /F "delims=" %%J IN ('where java 2^>nul') DO CALL :setjavahome "%%~dpJ.."
+)
+IF "%JAVA_HOME%"=="" (
+	echo ERROR: No JDK 26 found. Install one, e.g. with: winget install EclipseAdoptium.Temurin.26.JDK
+	echo        or point JAVA_HOME to an existing JDK 26, e.g. set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-26.0.1.8-hotspot
 	SET EXITCODE=1
 	GOTO :end
 )
 IF NOT EXIST "%JAVA_HOME%\bin\jpackage.exe" (
-	echo ERROR: "%JAVA_HOME%\bin\jpackage.exe" not found. JAVA_HOME must point to a full JDK.
+	echo ERROR: "%JAVA_HOME%\bin\jpackage.exe" not found. JAVA_HOME must point to a full JDK, not a JRE.
 	SET EXITCODE=1
 	GOTO :end
 )
+echo Using JDK at "%JAVA_HOME%"
 
 :: build.ps1 expects to be run from dist\win
 pushd "%~dp0"
@@ -83,3 +91,8 @@ IF NOT "%EXITCODE%"=="0" echo Build failed with exit code %EXITCODE%.
 :end
 IF "%PAUSE_AT_END%"=="1" IF NOT "%EXITCODE%"=="0" pause
 EXIT /B %EXITCODE%
+
+:: sets JAVA_HOME to the given directory if it contains a full JDK (normalizes trailing "\..")
+:setjavahome
+IF EXIST "%~f1\bin\jpackage.exe" SET "JAVA_HOME=%~f1"
+EXIT /B 0
