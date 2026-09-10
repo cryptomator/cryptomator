@@ -9,8 +9,12 @@ Param(
 	[Parameter(Mandatory, HelpMessage="Please provide an update url")][string] $UpdateUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an about url")][string] $AboutUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an alias for localhost")][string] $LoopbackAlias,
+	[ValidateSet('installer', 'portable', 'all')][string] $Target = 'installer', # what to build: the msi/exe installer, the portable zip or both
 	[bool] $clean = $false # if true, cleans up previous build artifacts
 )
+
+$buildInstaller = ($Target -eq 'installer') -or ($Target -eq 'all')
+$buildPortable = ($Target -eq 'portable') -or ($Target -eq 'all')
 
 # ============================
 # Function Definitions Section
@@ -40,23 +44,26 @@ if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
    Write-Error "Unable to find git.exe in your PATH (try: choco install git)"
    exit 1
 }
-if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
-{
-   Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.2)'
-   exit 1
-}
-$wixExtensions = & wix.exe extension list --global | Out-String
-if ($wixExtensions -notmatch 'WixToolset.UI.wixext') {
-    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.2 --global)'
-    exit 1
-}
-if ($wixExtensions -notmatch 'WixToolset.Util.wixext') {
-    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.2 --global)'
-    exit 1
-}
-if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
-    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.2 --global)'
-    exit 1
+if ($buildInstaller) {
+	# wix is only required for the msi/exe installer, not for the portable build
+	if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
+	{
+	   Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.2)'
+	   exit 1
+	}
+	$wixExtensions = & wix.exe extension list --global | Out-String
+	if ($wixExtensions -notmatch 'WixToolset.UI.wixext') {
+	    Write-Error 'Wix UI extension missing. Please install it with: wix.exe extension add WixToolset.UI.wixext/6.0.2 --global)'
+	    exit 1
+	}
+	if ($wixExtensions -notmatch 'WixToolset.Util.wixext') {
+	    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.2 --global)'
+	    exit 1
+	}
+	if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
+	    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.2 --global)'
+	    exit 1
+	}
 }
 
 $buildDir = Split-Path -Parent $PSCommandPath
@@ -68,6 +75,7 @@ Write-Host "`$version=$version"
 Write-Host "`$semVerNo=$semVerNo"
 Write-Host "`$revisionNo=$revisionNo"
 Write-Host "`$buildDir=$buildDir"
+Write-Host "`$Target=$Target"
 Write-Host "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
@@ -151,6 +159,7 @@ Invoke-CommandWithExitCheck -Command `
     "--compress", "zip-0" #do not compress and use msi compression
     )
 
+if ($buildInstaller) {
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
@@ -304,6 +313,91 @@ Invoke-CommandWithExitCheck -Command `
 )
 
 Write-Host "Created EXE installer .\installer\$AppName-Installer.exe"
+}
+
+if ($buildPortable) {
+	# ===================================================================
+	# Portable build: a self-contained app image that keeps all of its
+	# data (settings, keychain, logs, ipc socket) in a "data" directory
+	# next to the executable. $ROOTDIR is a jpackage launcher macro that
+	# is expanded at runtime to the directory containing Cryptomator.exe,
+	# so the folder can be moved freely (e.g. onto a USB stick).
+	#
+	# Compared to the installer this build deliberately does NOT
+	#  - bundle or install WinFsp (requires an installer with admin rights);
+	#    if WinFsp is not installed on the host, WebDAV is used instead
+	#  - add the loopback alias to the hosts file (WebDAV uses localhost)
+	#  - register a Windows autostart entry or file associations
+	# ===================================================================
+	$portableDir = ".\portable"
+	$portableAppPath = "$portableDir\$AppName"
+	$portableDataDir = "`$ROOTDIR/data"
+	# the app dir is a pure build output and jpackage refuses to overwrite it, so always start from scratch
+	if (Test-Path -Path $portableAppPath) {
+		Remove-Item -Path $portableAppPath -Force -Recurse
+	}
+
+	$portableJavaOptions = @(
+	"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+	"--java-options", "-Xss5m"
+	"--java-options", "-Xmx256m"
+	"--java-options", "-Dcryptomator.appVersion=`"$semVerNo`""
+	"--java-options", "-Dfile.encoding=`"utf-8`""
+	"--java-options", "-Djava.net.useSystemProxies=true"
+	"--java-options", "-Dcryptomator.logDir=`"$portableDataDir/logs`""
+	"--java-options", "-XX:ErrorFile=`"$portableDataDir/logs/cryptomator_crash.log`""
+	"--java-options", "-Dcryptomator.adminConfigPath=`"$portableDataDir/config.properties`""
+	"--java-options", "-Dcryptomator.settingsPath=`"$portableDataDir/settings.json`""
+	"--java-options", "-Dcryptomator.ipcSocketPath=`"$portableDataDir/ipc.socket`""
+	"--java-options", "-Dcryptomator.p12Path=`"$portableDataDir/key.p12`""
+	"--java-options", "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`""
+	"--java-options", "-Dcryptomator.integrationsWin.keychainPaths=`"$portableDataDir/keychain.json`""
+	"--java-options", "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"$portableDataDir/windowsHelloKeychain.json`""
+	"--java-options", "-Dcryptomator.showTrayIcon=true"
+	"--java-options", "-Dcryptomator.buildNumber=`"portable-$revisionNo`""
+	"--java-options", "-Dcryptomator.disableUpdateCheck=false"
+	"--java-options", "-Dcryptomator.hub.enableTrustOnFirstUse=true"
+	)
+
+	# create portable app dir
+	& "$Env:JAVA_HOME\bin\jpackage" `
+		--verbose `
+		--type app-image `
+		--runtime-image runtime `
+		--input ../../target/libs `
+		--module-path ../../target/mods `
+		--module $ModuleAndMainClass `
+		--dest $portableDir `
+		--name $AppName `
+		--vendor $Vendor `
+		--copyright $copyright `
+		--app-version "$semVerNo.$revisionNo" `
+		--resource-dir resources `
+		--icon resources/$AppName.ico `
+		--add-launcher "${AppName} (Debug)=$buildDir\debug-launcher.properties" `
+		@portableJavaOptions
+
+	if ($LASTEXITCODE -ne 0) {
+		Write-Error "jpackage portable Appimage failed with exit code $LASTEXITCODE"
+		return 1;
+	}
+
+	# patch portable app dir
+	Copy-Item "contrib\jnidispatch.dll" -Destination "$portableAppPath"
+	Copy-Item "$buildDir\..\..\LICENSE.txt" -Destination "$portableAppPath"
+	Copy-Item "$buildDir\portable\README-PORTABLE.txt" -Destination "$portableAppPath"
+	New-Item -ItemType Directory -Path "$portableAppPath\data" -Force | Out-Null
+	attrib -r "$portableAppPath\$AppName.exe"
+	attrib -r "$portableAppPath\${AppName} (Debug).exe"
+
+	# create portable zip
+	$portableZip = "$portableDir\$AppName-$version-$($archName.ToLower())-portable.zip"
+	Remove-Item -Path $portableZip -Force -ErrorAction Ignore
+	Compress-Archive -Path $portableAppPath -DestinationPath $portableZip -CompressionLevel Optimal
+
+	Write-Host "Created portable app dir $portableAppPath"
+	Write-Host "Created portable ZIP $portableZip"
+}
 return 0;
 }
 
@@ -315,6 +409,8 @@ if ($clean) {
 	Remove-Item -Path ".\runtime" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 	Remove-Item -Path ".\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\portable\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\portable\*.zip" -Force -ErrorAction Ignore -ProgressAction SilentlyContinue
 }
 return Main
 

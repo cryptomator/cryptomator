@@ -89,6 +89,19 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 This will build all the jars and bundle them together with their OS-specific dependencies under `target`. This can now be used to build native packages.
 
+### Windows packages
+
+The scripts in `dist/win` build the native Windows packages. They require a JDK 26 (x64 builds additionally download the JavaFX jmods), PowerShell 7 (`pwsh`), Git and, for the installer, [WiX 6](https://wixtoolset.org/) with the UI, Util and BootstrapperApplications extensions.
+
+```
+cd dist\win
+build.bat            # msi and exe installer (dist\win\installer)
+build-portable.bat   # portable zip (dist\win\portable)
+build-all.bat        # both
+```
+
+Each script accepts `clean` as an additional argument to remove previous build artifacts first. The portable build keeps all its data (settings, keychain, logs) in a `data` folder next to `Cryptomator.exe`, does not bundle WinFsp and does not register autostart entries or file associations.
+
 ## License
 
 This project is dual-licensed under the GPLv3 for FOSS projects as well as a commercial license for independent software vendors and resellers. If you want to modify this application under different conditions, feel free to contact our support team.

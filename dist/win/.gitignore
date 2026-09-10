@@ -9,3 +9,5 @@ installer
 *.jmod
 resources/jfxJmods.zip
 license.rtf
+portable/Cryptomator
+portable/*.zip
