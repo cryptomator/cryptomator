@@ -9,12 +9,14 @@ Param(
 	[Parameter(Mandatory, HelpMessage="Please provide an update url")][string] $UpdateUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an about url")][string] $AboutUrl,
 	[Parameter(Mandatory, HelpMessage="Please provide an alias for localhost")][string] $LoopbackAlias,
-	[ValidateSet('installer', 'portable', 'all')][string] $Target = 'installer', # what to build: the msi/exe installer, the portable zip or both
+	[ValidateSet('installer', 'portable', 'corp', 'all')][string] $Target = 'installer', # what to build: the msi/exe installer, the portable zip, the per-user corp msi or everything
+	[string] $CorpUpgradeUUID = "d98d0145-341a-4684-bdb6-ee480294541a", # upgrade uuid of the per-user corp msi, must differ from the per-machine installer
 	[bool] $clean = $false # if true, cleans up previous build artifacts
 )
 
 $buildInstaller = ($Target -eq 'installer') -or ($Target -eq 'all')
 $buildPortable = ($Target -eq 'portable') -or ($Target -eq 'all')
+$buildCorp = ($Target -eq 'corp') -or ($Target -eq 'all')
 
 # ============================
 # Function Definitions Section
@@ -33,6 +35,44 @@ function Invoke-CommandWithExitCheck {
 	}
 }
 
+# Java options shared by the per-machine installer and the per-user corp msi.
+# The corp msi cannot patch the hosts file, hence it passes an empty LoopbackAliasName.
+function New-InstallerJavaOptions {
+	param (
+		[string]$BuildNumber,
+		[bool]$DisableUpdateCheck,
+		[string]$LoopbackAliasName
+	)
+	$options = @(
+	"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+	"--java-options", "-Xss5m"
+	"--java-options", "-Xmx256m"
+	"--java-options", "-Dcryptomator.appVersion=`"$semVerNo`""
+	"--java-options", "-Dfile.encoding=`"utf-8`""
+	"--java-options", "-Djava.net.useSystemProxies=true"
+	"--java-options", "-Dcryptomator.logDir=`"@{localappdata}/$AppName`""
+	"--java-options", "-XX:ErrorFile=`"C:/cryptomator/cryptomator_crash.log`""
+	"--java-options", "-Dcryptomator.adminConfigPath=`"C:/ProgramData/$AppName/config.properties`""
+	"--java-options", "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`""
+	"--java-options", "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`""
+	"--java-options", "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`""
+	"--java-options", "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`""
+	)
+	if ($LoopbackAliasName) {
+		$options += @("--java-options", "-Dcryptomator.loopbackAlias=`"$LoopbackAliasName`"")
+	}
+	$options += @(
+	"--java-options", "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`""
+	"--java-options", "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`""
+	"--java-options", "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`""
+	"--java-options", "-Dcryptomator.showTrayIcon=true"
+	"--java-options", "-Dcryptomator.buildNumber=`"$BuildNumber`""
+	"--java-options", "-Dcryptomator.disableUpdateCheck=$($DisableUpdateCheck.ToString().ToLower())"
+	"--java-options", "-Dcryptomator.hub.enableTrustOnFirstUse=true"
+	)
+	return $options
+}
+
 function Main {
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -44,7 +84,7 @@ if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
    Write-Error "Unable to find git.exe in your PATH (try: choco install git)"
    exit 1
 }
-if ($buildInstaller) {
+if ($buildInstaller -or $buildCorp) {
 	# wix is only required for the msi/exe installer, not for the portable build
 	if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
 	{
@@ -60,7 +100,7 @@ if ($buildInstaller) {
 	    Write-Error 'Wix Util extension missing. Please install it with: wix.exe extension add WixToolset.Util.wixext/6.0.2 --global)'
 	    exit 1
 	}
-	if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
+	if ($buildInstaller -and ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext')) {
 	    Write-Error 'Wix Bootstrapper extension missing. Please install it with: wix.exe extension add WixToolset.BootstrapperApplications.wixext/6.0.2 --global)'
 	    exit 1
 	}
@@ -166,29 +206,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 }
 
 
-$javaOptions = @(
-"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
-"--java-options", "-Xss5m"
-"--java-options", "-Xmx256m"
-"--java-options", "-Dcryptomator.appVersion=`"$semVerNo`""
-"--java-options", "-Dfile.encoding=`"utf-8`""
-"--java-options", "-Djava.net.useSystemProxies=true"
-"--java-options", "-Dcryptomator.logDir=`"@{localappdata}/$AppName`""
-"--java-options", "-XX:ErrorFile=`"C:/cryptomator/cryptomator_crash.log`""
-"--java-options", "-Dcryptomator.adminConfigPath=`"C:/ProgramData/$AppName/config.properties`""
-"--java-options", "-Dcryptomator.settingsPath=`"@{appdata}/$AppName/settings.json;@{userhome}/AppData/Roaming/$AppName/settings.json`""
-"--java-options", "-Dcryptomator.ipcSocketPath=`"@{localappdata}/$AppName/ipc.socket`""
-"--java-options", "-Dcryptomator.p12Path=`"@{appdata}/$AppName/key.p12;@{userhome}/AppData/Roaming/$AppName/key.p12`""
-"--java-options", "-Dcryptomator.mountPointsDir=`"@{userhome}/$AppName`""
-"--java-options", "-Dcryptomator.loopbackAlias=`"$LoopbackAlias`""
-"--java-options", "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"$AppName`""
-"--java-options", "-Dcryptomator.integrationsWin.keychainPaths=`"@{appdata}/$AppName/keychain.json;@{userhome}/AppData/Roaming/$AppName/keychain.json`""
-"--java-options", "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`""
-"--java-options", "-Dcryptomator.showTrayIcon=true"
-"--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
-"--java-options", "-Dcryptomator.disableUpdateCheck=false"
-"--java-options", "-Dcryptomator.hub.enableTrustOnFirstUse=true"
-)
+$javaOptions = New-InstallerJavaOptions -BuildNumber "msi-$revisionNo" -DisableUpdateCheck $false -LoopbackAliasName $LoopbackAlias
 
 
 # create app dir
@@ -398,6 +416,110 @@ if ($buildPortable) {
 	Write-Host "Created portable app dir $portableAppPath"
 	Write-Host "Created portable ZIP $portableZip"
 }
+
+if ($buildCorp) {
+	# ===================================================================
+	# Corp build: a per-user msi for managed/corporate machines where the
+	# user has no admin rights. It installs into %LOCALAPPDATA%, so it
+	# needs no elevation, and deliberately does NOT
+	#  - bundle WinFsp (IT deploys the WinFsp msi separately, otherwise
+	#    vaults are mounted via WebDAV)
+	#  - add the loopback alias to the hosts file
+	#  - create the admin config dir in ProgramData; IT can still deploy
+	#    C:\ProgramData\Cryptomator\config.properties via GPO/Intune to
+	#    enforce settings (see corp\README.md)
+	#  - check for updates (IT rolls out new versions)
+	# ===================================================================
+	$corpDir = ".\corp"
+	$corpAppPath = "$corpDir\$AppName"
+	$corpResources = "$corpDir\resources"
+	$corpResourcesAbs = Join-Path $buildDir "corp\resources"
+	if (Test-Path -Path $corpAppPath) {
+		Remove-Item -Path $corpAppPath -Force -Recurse
+	}
+
+	$corpJavaOptions = New-InstallerJavaOptions -BuildNumber "corp-$revisionNo" -DisableUpdateCheck $true -LoopbackAliasName ""
+
+	# create corp app dir
+	& "$Env:JAVA_HOME\bin\jpackage" `
+		--verbose `
+		--type app-image `
+		--runtime-image runtime `
+		--input ../../target/libs `
+		--module-path ../../target/mods `
+		--module $ModuleAndMainClass `
+		--dest $corpDir `
+		--name $AppName `
+		--vendor $Vendor `
+		--copyright $copyright `
+		--app-version "$semVerNo.$revisionNo" `
+		--resource-dir resources `
+		--icon resources/$AppName.ico `
+		--add-launcher "${AppName} (Debug)=$buildDir\debug-launcher.properties" `
+		@corpJavaOptions
+
+	if ($LASTEXITCODE -ne 0) {
+		Write-Error "jpackage corp Appimage failed with exit code $LASTEXITCODE"
+		return 1;
+	}
+
+	# patch corp app dir
+	Copy-Item "contrib\*" -Destination "$corpAppPath"
+	attrib -r "$corpAppPath\$AppName.exe"
+	attrib -r "$corpAppPath\${AppName} (Debug).exe"
+
+	# assemble wix resources: the regular ones plus the corp overrides.wxi (no jmods dir)
+	Remove-Item -Path $corpResources -Force -Recurse -ErrorAction Ignore
+	New-Item -ItemType Directory -Path $corpResources -Force | Out-Null
+	Get-ChildItem -Path ".\resources" -File | Copy-Item -Destination $corpResources
+	Copy-Item "$corpDir\overrides.wxi" -Destination "$corpResources\overrides.wxi" -Force
+
+	# create RTF license for corp msi
+	Invoke-CommandWithExitCheck -Command `
+	    "../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
+	    "-Dlicense.thirdPartyFilename=license.rtf", `
+	    "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl", `
+	    "-Dlicense.outputDirectory=$corpResourcesAbs\", `
+	    "-Dlicense.includedScopes=compile", `
+	    "-Dlicense.excludedGroups=^org\.cryptomator", `
+	    "-Dlicense.failOnMissing=true", `
+	    "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges")
+
+	# create per-user .msi
+	$Env:JP_WIXWIZARD_RESOURCES = "$corpResourcesAbs\"
+	$Env:JP_WIXWIZARD_RESOURCES_PROPERTIES_FORMAT = "${Env:JP_WIXWIZARD_RESOURCES}".Replace('\', '\\');
+	$Env:JP_WIXHELPER_DIR = ""
+
+	Get-Content "$corpResources\FAvaultFile.template.properties" `
+	    | ForEach-Object { $ExecutionContext.InvokeCommand.ExpandString($_) } `
+	    | Out-File -FilePath "$corpResources\FAvaultFile.properties"
+
+	Remove-Item -Path "$corpDir\*.msi" -Force -ErrorAction Ignore
+	Invoke-CommandWithExitCheck -Command `
+	    "$Env:JAVA_HOME\bin\jpackage" -Arguments @(
+	    "--verbose",
+	    "--type", "msi",
+	    "--win-per-user-install",
+	    "--win-upgrade-uuid", $CorpUpgradeUUID,
+	    "--app-image", $corpAppPath,
+	    "--dest", $corpDir,
+	    "--name", $AppName,
+	    "--vendor", $Vendor,
+	    "--copyright", $copyright,
+	    "--app-version", "$semVerNo.$revisionNo",
+	    "--win-menu",
+	    "--win-shortcut-prompt",
+	    "--win-menu-group", $AppName,
+	    "--resource-dir", $corpResources,
+	    "--license-file", "$corpResources\license.rtf",
+	    "--about-url", $AboutUrl,
+	    "--file-associations", "$corpResources\FAvaultFile.properties"
+	    )
+
+	$corpMsi = "$corpDir\$AppName-$version-$($archName.ToLower())-corp.msi"
+	Get-ChildItem -Path "$corpDir\$AppName-*.msi" | Move-Item -Destination $corpMsi -Force
+	Write-Host "Created per-user corp MSI $corpMsi"
+}
 return 0;
 }
 
@@ -411,6 +533,9 @@ if ($clean) {
 	Remove-Item -Path ".\installer" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 	Remove-Item -Path ".\portable\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
 	Remove-Item -Path ".\portable\*.zip" -Force -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\corp\$AppName" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\corp\resources" -Force -Recurse -ErrorAction Ignore -ProgressAction SilentlyContinue
+	Remove-Item -Path ".\corp\*.msi" -Force -ErrorAction Ignore -ProgressAction SilentlyContinue
 }
 return Main
 

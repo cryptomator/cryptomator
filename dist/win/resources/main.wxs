@@ -99,6 +99,7 @@
         </ns0:Component>
     </ns0:DirectoryRef>
 
+    <?ifndef SkipAdminConfig ?>
     <ns0:StandardDirectory Id="CommonAppDataFolder">
       <ns0:Directory Id="CryptomatorDesktopProgramData" Name="Cryptomator">
         <ns0:Component Id="AdminConfigDir" Guid="c078b7da-ba6e-4069-a5ab-5c0f0f9856a0">
@@ -117,6 +118,7 @@
         </ns0:Component>
       </ns0:Directory>
     </ns0:StandardDirectory>
+    <?endif?>
 
     <!-- Standard required root -->
 
@@ -126,8 +128,10 @@
       <ns0:ComponentGroupRef Id="FileAssociations"/>
       <!-- Ref to additional ProgIDs -->
       <ns0:ComponentRef Id="nonStartingProgID"/>
+      <?ifndef SkipAdminConfig ?>
       <ns0:ComponentRef Id="AdminConfigDir"/>
       <ns0:ComponentRef Id="AdminConfigFile"/>
+      <?endif?>
     </ns0:Feature>
 
     <ns0:CustomAction Id="JpSetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
@@ -157,6 +161,7 @@
     <ns0:SetProperty Id="DisableUserConfig" Value="&quot;[INSTALLDIR]disableUserConfig.bat&quot;" Sequence="execute" Before="DisableUserConfig" />
     <ns0:CustomAction Id="DisableUserConfig" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
 
+    <?ifndef SkipLoopbackAliasPatch ?>
     <!-- WebDAV patches -->
     <ns0:SetProperty Id="PatchWebDAV" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot; &quot;$(var.LoopbackAlias)&quot; install" Sequence="execute" Before="PatchWebDAV" />
     <ns0:CustomAction Id="PatchWebDAV" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
@@ -164,6 +169,7 @@
     <!-- WebDAV patches (Uninstall) -->
     <ns0:SetProperty Id="PatchWebDAVUninstall" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot; &quot;$(var.LoopbackAlias)&quot; uninstall" Sequence="execute" Before="PatchWebDAVUninstall" />
     <ns0:CustomAction Id="PatchWebDAVUninstall" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
+    <?endif?>
 
     <!-- Update check configuration -->
     <ns0:SetProperty Id="PatchUpdateCheck" Value="&quot;[INSTALLDIR]patchUpdateCheck.bat&quot; &quot;[DISABLEUPDATECHECK]&quot;" Sequence="execute" Before="PatchUpdateCheck" />
@@ -218,10 +224,16 @@
 
       <ns0:RemoveExistingProducts After="InstallValidate"/> <!-- Moved from CostInitialize, due to Wix4CloseApplications_* -->
       <ns0:Custom Action="DisableUserConfig" After="InstallFiles" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
+      <?ifndef SkipLoopbackAliasPatch ?>
       <ns0:Custom Action="PatchWebDAV" After="DisableUserConfig" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
       <ns0:Custom Action="PatchWebDAVUninstall" Before="RemoveFiles" Condition="Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE" />
+      <?endif?>
       <!-- Configure update check setting if property is provided -->
+      <?ifdef SkipLoopbackAliasPatch ?>
+      <ns0:Custom Action="PatchUpdateCheck" After="DisableUserConfig" Condition="DISABLEUPDATECHECK AND NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
+      <?else?>
       <ns0:Custom Action="PatchUpdateCheck" After="PatchWebDAV" Condition="DISABLEUPDATECHECK AND NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
+      <?endif?>
     </ns0:InstallExecuteSequence>
 
     <ns0:InstallUISequence>

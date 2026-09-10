@@ -10,7 +10,8 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.3...HEAD)
 ### Added
-* Portable Windows build (`dist/win/build-portable.bat`), which keeps all data next to the executable, and `dist/win/build-all.bat` to build installer and portable version at once
+* Portable Windows build (`dist/win/build-portable.bat`), which keeps all data next to the executable, and `dist/win/build-all.bat` to build all Windows variants at once
+* Per-user Windows msi for corporate machines without admin rights (`dist/win/build-corp.bat`)
 
 ### Changed
 * Updated Jackson to 2.21.6

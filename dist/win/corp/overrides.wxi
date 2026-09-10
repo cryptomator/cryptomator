@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Overrides for the per-user "corp" msi (see build.ps1, target "corp").
+A per-user installation runs without admin rights, so everything that needs
+elevation is left out. See resources/overrides.wxi for the full list of variables.
+-->
+<ns0:Include xmlns:ns0="http://wixtoolset.org/schemas/v4/wxs">
+  <!-- no hosts file modification: WebDAV uses localhost instead of the loopback alias -->
+  <?define SkipLoopbackAliasPatch="yes"?>
+  <!-- no C:\ProgramData\Cryptomator: IT deploys config.properties there via GPO/Intune if needed -->
+  <?define SkipAdminConfig="yes"?>
+</ns0:Include>

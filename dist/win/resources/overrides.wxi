@@ -46,5 +46,12 @@ Full name of executable to be checked in the close application util. Default is 
 Legacy Installation settings:
 - SkipCryptomatorLegacyCheck
 Should be defined to disable checking for the inno setup installation of Cryptomator and undefined, to enable it.
+
+Per-user (corp) installation settings:
+- SkipLoopbackAliasPatch
+Should be defined to skip adding/removing the loopback alias in the hosts file (requires admin rights).
+
+- SkipAdminConfig
+Should be defined to skip creating the admin config directory in ProgramData (requires admin rights).
  -->
 <ns0:Include xmlns:ns0="http://wixtoolset.org/schemas/v4/wxs"></ns0:Include>

@@ -11,3 +11,6 @@ resources/jfxJmods.zip
 license.rtf
 portable/Cryptomator
 portable/*.zip
+corp/Cryptomator
+corp/resources
+corp/*.msi
