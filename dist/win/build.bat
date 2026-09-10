@@ -20,20 +20,42 @@ SET LOOPBACK_ALIAS="cryptomator-vault"
 ::   all        build installer, portable zip and corp msi
 SET CLEAN=0
 SET TARGET=installer
+FOR %%A IN (%*) DO (
+	IF /I "%%~A"=="clean" SET CLEAN=1
+	IF /I "%%~A"=="installer" SET TARGET=installer
+	IF /I "%%~A"=="portable" SET TARGET=portable
+	IF /I "%%~A"=="corp" SET TARGET=corp
+	IF /I "%%~A"=="all" SET TARGET=all
+)
 
-:parseArgs
-IF "%~1"=="" GOTO endParseArgs
-IF /I "%~1"=="clean" SET CLEAN=1
-IF /I "%~1"=="installer" SET TARGET=installer
-IF /I "%~1"=="portable" SET TARGET=portable
-IF /I "%~1"=="corp" SET TARGET=corp
-IF /I "%~1"=="all" SET TARGET=all
-SHIFT
-GOTO parseArgs
-:endParseArgs
+:: keep the window open on failure if started by double-click, so errors stay visible (never in CI)
+SET PAUSE_AT_END=0
+echo %CMDCMDLINE% | findstr /I /C:"/c" >nul 2>&1 && SET PAUSE_AT_END=1
+IF DEFINED CI SET PAUSE_AT_END=0
+
+:: preconditions
+where pwsh >nul 2>&1
+IF ERRORLEVEL 1 (
+	echo ERROR: PowerShell 7 ^(pwsh.exe^) not found in PATH.
+	echo        Install it with: winget install Microsoft.PowerShell
+	SET EXITCODE=1
+	GOTO :end
+)
+IF "%JAVA_HOME%"=="" (
+	echo ERROR: JAVA_HOME is not set. Point it to a JDK 26 installation, e.g.
+	echo        set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-26
+	SET EXITCODE=1
+	GOTO :end
+)
+IF NOT EXIST "%JAVA_HOME%\bin\jpackage.exe" (
+	echo ERROR: "%JAVA_HOME%\bin\jpackage.exe" not found. JAVA_HOME must point to a full JDK.
+	SET EXITCODE=1
+	GOTO :end
+)
 
 :: build.ps1 expects to be run from dist\win
 pushd "%~dp0"
+echo Building target "%TARGET%" (clean=%CLEAN%) ...
 pwsh -NoLogo -NoProfile -ExecutionPolicy Unrestricted -Command .\build.ps1^
  -AppName %APPNAME%^
  -MainJarGlob "%MAIN_JAR_GLOB%"^
@@ -50,4 +72,8 @@ pwsh -NoLogo -NoProfile -ExecutionPolicy Unrestricted -Command .\build.ps1^
  -Clean %CLEAN%
 SET EXITCODE=%ERRORLEVEL%
 popd
+IF NOT "%EXITCODE%"=="0" echo Build failed with exit code %EXITCODE%.
+
+:end
+IF "%PAUSE_AT_END%"=="1" IF NOT "%EXITCODE%"=="0" pause
 EXIT /B %EXITCODE%
