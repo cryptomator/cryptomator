@@ -178,6 +178,8 @@ jobs:
 
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           $inspectionDir = New-Item '.\appdir\arm-native-inspection' -ItemType Directory
+          $expectedArmDlls = @('integrations-arm64.dll')
+          $foundArmDlls = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
           Get-ChildItem '.\appdir\Cryptomator\app\mods' -Filter '*.jar' | ForEach-Object {
             $jarBaseName = $_.BaseName
             $jar = [System.IO.Compression.ZipFile]::OpenRead($_.FullName)
@@ -190,6 +192,7 @@ jobs:
                 $destination = Join-Path $inspectionDir "$jarBaseName-$($entry.Name)"
                 [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $destination, $true)
                 $binaries += Get-Item $destination
+                $null = $foundArmDlls.Add($entry.Name)
               }
             } finally {
               $jar.Dispose()
@@ -212,6 +215,11 @@ jobs:
           if ($mismatches) {
             $mismatches | Format-Table -AutoSize | Out-String | Write-Host
             throw 'Detected a non-Arm-compatible app-image payload.'
+          }
+
+          $missingArmDlls = @($expectedArmDlls | Where-Object { -not $foundArmDlls.Contains($_) })
+          if ($missingArmDlls.Count -ne 0) {
+            throw "Missing required Arm64 JNI DLL(s): $($missingArmDlls -join ', ')"
           }
       - name: Upload Arm64 app-image
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
