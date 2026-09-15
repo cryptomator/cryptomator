@@ -6,6 +6,9 @@ on:
   discussion_comment:
     types: [created, edited, deleted]
 
+permissions:
+  discussions: read
+
 jobs:
   update-error-db:
     runs-on: ubuntu-latest

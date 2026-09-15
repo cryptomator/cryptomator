@@ -23,6 +23,9 @@ on:
       - 'dist/linux/common/**'
       - 'dist/linux/resources/**'
 
+permissions:
+  contents: read
+
 jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml

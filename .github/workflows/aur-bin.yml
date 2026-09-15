@@ -9,6 +9,9 @@ on:
         description: 'Source or Release tag'
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml

@@ -48,6 +48,9 @@ on:
       - 'dist/linux/common/**'
       - 'dist/linux/resources/**'
 
+permissions:
+  contents: read
+
 env:
   JAVA_DIST: 'temurin'
   JAVA_VERSION: '26.0.1+8'

@@ -7,6 +7,8 @@ on:
         description: 'Release tag'
         required: true
 
+permissions: {}
+
 jobs:
   winget:
     name: Publish winget package

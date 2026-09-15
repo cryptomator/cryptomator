@@ -11,6 +11,9 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+
 jobs: 
   test:
     name: Compile and Test

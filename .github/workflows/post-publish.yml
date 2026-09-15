@@ -4,6 +4,8 @@ on:
   release:
     types: [published]
 
+permissions: {}
+
 jobs:
   notify:
     runs-on: ubuntu-latest
@@ -142,4 +144,3 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_WORKFLOW_DISPATCH_TOKEN }}
           repository: cryptomator/docs
           client-payload: '{ "version": "${{ github.event.release.tag_name }}", "release": ${{ toJson(github.event.release.assets) }} }'
-

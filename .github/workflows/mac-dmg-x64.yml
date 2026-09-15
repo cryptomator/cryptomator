@@ -62,6 +62,9 @@ env:
   VERSION_SUFFIX: ${{ inputs.semVerSuffix || ''}}
 
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build Cryptomator.app for ${{ matrix.output-suffix }}

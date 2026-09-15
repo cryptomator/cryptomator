@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0/15 * * * *' # run every 15 min - don't forget to adjust the "interval" in the json sent to the metrics endpoint
 
+permissions:
+  contents: read
+
 jobs:
   report-download-stats:
     runs-on: ubuntu-latest

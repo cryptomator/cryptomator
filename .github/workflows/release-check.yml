@@ -14,6 +14,9 @@ env:
   JAVA_DIST: 'temurin'
   JAVA_VERSION: 26
 
+permissions:
+  contents: read
+
 jobs:
   check-preconditions:
     name: Validate commits pushed to release/hotfix branch to fulfill release requirements

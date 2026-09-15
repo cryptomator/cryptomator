@@ -28,6 +28,9 @@ env:
   JAVA_DIST: 'temurin'
   JAVA_VERSION: 26
 
+permissions:
+  contents: read
+
 jobs:
   determine-version:
     name: 'Determines the version following semver'
