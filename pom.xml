@@ -72,9 +72,16 @@
 		<mvn-dependency.version>3.11.0</mvn-dependency.version>
 		<mvn-surefire.version>3.5.6</mvn-surefire.version>
 		<mvn-jar.version>3.5.0</mvn-jar.version>
+		<mvn-exec.version>3.5.1</mvn-exec.version>
 
 		<!-- Property used by surefire to determine jacoco engine -->
 		<surefire.jacoco.args></surefire.jacoco.args>
+
+		<!-- App runtime config used by the 'run' profile, mirroring .idea/runConfigurations. The 'dev' profile switches these to the Cryptomator-Dev variants. -->
+		<run.appDir>Cryptomator</run.appDir>
+		<run.linuxFuseArgs></run.linuxFuseArgs>
+		<run.macMountPointsDir>@{userhome}/Cryptomator</run.macMountPointsDir>
+		<run.macUpdateArgs>-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism</run.macUpdateArgs>
 	</properties>
 
 	<repositories>
@@ -323,6 +330,11 @@
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
 					<version>${dependency-check.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>${mvn-exec.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -596,6 +608,102 @@
 					<version>${cryptomator.integrations.win.version}</version>
 				</dependency>
 			</dependencies>
+		</profile>
+
+		<!-- Launches the app from the command line: ./mvnw -Prun compile exec:exec (append ,dev for the Cryptomator-Dev variant) -->
+		<profile>
+			<id>run</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<!-- same split into module path and class path as the copy-mods/copy-libs executions used for packaging -->
+							<execution>
+								<id>build-run-modulepath</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>build-classpath</goal>
+								</goals>
+								<configuration>
+									<includeScope>runtime</includeScope>
+									<excludeGroupIds>${nonModularGroupIds}</excludeGroupIds>
+									<outputProperty>run.modulePath</outputProperty>
+								</configuration>
+							</execution>
+							<execution>
+								<id>build-run-classpath</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>build-classpath</goal>
+								</goals>
+								<configuration>
+									<includeScope>runtime</includeScope>
+									<includeGroupIds>${nonModularGroupIds}</includeGroupIds>
+									<outputProperty>run.classPath</outputProperty>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<configuration>
+							<executable>${java.home}/bin/java</executable>
+							<commandlineArgs>--module-path "${project.build.outputDirectory}${path.separator}${run.modulePath}" --class-path "${run.classPath}" ${run.jvmArgs} --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator</commandlineArgs>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- Switches the 'run' profile to the Cryptomator-Dev variants, so a dev run does not touch the settings of an installed Cryptomator -->
+		<profile>
+			<id>dev</id>
+			<properties>
+				<run.appDir>Cryptomator-Dev</run.appDir>
+				<run.linuxFuseArgs>-Dfuse.experimental="true"</run.linuxFuseArgs>
+				<run.macMountPointsDir>@{userhome}/Library/Application Support/Cryptomator-Dev/mnt</run.macMountPointsDir>
+				<run.macUpdateArgs></run.macUpdateArgs>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>run-win</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<properties>
+				<run.jvmArgs>-Dcryptomator.settingsPath="@{appdata}/${run.appDir}/settings.json;@{userhome}/AppData/Roaming/${run.appDir}/settings.json" -Dcryptomator.ipcSocketPath="@{localappdata}/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{localappdata}/${run.appDir}" -Dcryptomator.pluginDir="@{appdata}/${run.appDir}/Plugins" -Dcryptomator.integrationsWin.keychainPaths="@{appdata}/${run.appDir}/keychain.json;@{userhome}/AppData/Roaming/${run.appDir}/keychain.json" -Dcryptomator.integrationsWin.windowsHelloKeychainPaths="@{appdata}/${run.appDir}/windowsHelloKeychain.json;@{userhome}/AppData/Roaming/${run.appDir}/windowsHelloKeychain.json" -Dcryptomator.p12Path="@{appdata}/${run.appDir}/key.p12;@{userhome}/AppData/Roaming/${run.appDir}/key.p12" -Dcryptomator.mountPointsDir="@{userhome}/${run.appDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m --enable-preview --enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win,javafx.graphics</run.jvmArgs>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>run-mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<properties>
+				<run.jvmArgs>-Dapple.awt.enableTemplateImages=true -Dcryptomator.settingsPath="@{userhome}/Library/Application Support/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/Library/Application Support/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/Library/Application Support/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/Library/Logs/${run.appDir}" -Dcryptomator.pluginDir="@{userhome}/Library/Application Support/${run.appDir}/Plugins" -Dcryptomator.mountPointsDir="${run.macMountPointsDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.integrationsMac.keychainServiceName=Cryptomator ${run.macUpdateArgs} -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m -ea --enable-preview --enable-native-access=org.cryptomator.jfuse.mac,javafx.graphics</run.jvmArgs>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>run-linux</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>linux</name>
+				</os>
+			</activation>
+			<properties>
+				<run.jvmArgs>-Dcryptomator.settingsPath="@{userhome}/.config/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/.config/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/.config/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/.local/share/${run.appDir}/logs" -Dcryptomator.pluginDir="@{userhome}/.local/share/${run.appDir}/plugins" -Dcryptomator.mountPointsDir="@{userhome}/.local/share/${run.appDir}/mnt" -Dcryptomator.showTrayIcon=true -Dcryptomator.hub.enableTrustOnFirstUse=true ${run.linuxFuseArgs} -Xss20m -Xmx512m --enable-preview --enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator,javafx.graphics</run.jvmArgs>
+			</properties>
 		</profile>
 	</profiles>
 
