@@ -213,8 +213,7 @@ Invoke-CommandWithExitCheck -Command `
     "-Dlicense.outputDirectory=$buildDir\resources\", `
     "-Dlicense.includedScopes=compile", `
     "-Dlicense.excludedGroups=^org\.cryptomator", `
-    "-Dlicense.failOnMissing=true", `
-    "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges")
+    "-Dlicense.failOnMissing=true")
 
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
@@ -260,8 +259,7 @@ Invoke-CommandWithExitCheck -Command `
 	"-Dlicense.outputDirectory=$buildDir\bundle\resources\", `
 	"-Dlicense.includedScopes=compile", `
 	"-Dlicense.excludedGroups=^org\.cryptomator", `
-	"-Dlicense.failOnMissing=true", `
-	"-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges")
+	"-Dlicense.failOnMissing=true")
 
 # download Winfsp
 $winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'

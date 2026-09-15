@@ -426,6 +426,9 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<licenseMergesUrl>${project.baseUri}license/merges</licenseMergesUrl>
+				</configuration>
 				<executions>
 					<execution>
 						<id>add-third-party</id>
@@ -437,7 +440,6 @@
 							<thirdPartyFilename>THIRD-PARTY.txt</thirdPartyFilename>
 							<includedScopes>compile</includedScopes>
 							<excludedGroups>org\.cryptomator</excludedGroups>
-							<licenseMergesUrl>file:///${project.basedir}/license/merges</licenseMergesUrl>
 							<fileTemplate>${project.basedir}/src/main/resources/license/template.ftl</fileTemplate>
 						</configuration>
 					</execution>

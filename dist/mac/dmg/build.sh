@@ -143,8 +143,7 @@ cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
     -Dlicense.fileTemplate=resources/licenseTemplate.ftl \
     -Dlicense.includedScopes=compile \
     -Dlicense.excludedGroups=^org\.cryptomator \
-    -Dlicense.failOnMissing=true \
-    -Dlicense.licenseMergesUrl=file://$(pwd)/../../../license/merges
+    -Dlicense.failOnMissing=true
 
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then

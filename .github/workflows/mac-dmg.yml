@@ -191,7 +191,6 @@ jobs:
           -Dlicense.includedScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
-          -Dlicense.licenseMergesUrl=file://${{ github.workspace }}/license/merges
       - name: Install codesign certificate
         run: |
           # create variables
