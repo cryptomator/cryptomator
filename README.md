@@ -89,6 +89,20 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 This will build all the jars and bundle them together with their OS-specific dependencies under `target`. This can now be used to build native packages.
 
+### Running the app
+
+```
+./mvnw -Prun compile exec:exec
+```
+
+This starts the app with the defaults defined in `pom.xml`. The OS-specific parameters are picked automatically.
+
+Add the `dev` profile to use the `Cryptomator-Dev` settings, log and mount directories instead, so a development run does not interfere with an installed Cryptomator:
+
+```
+./mvnw -Prun,dev compile exec:exec
+```
+
 ## License
 
 This project is dual-licensed under the GPLv3 for FOSS projects as well as a commercial license for independent software vendors and resellers. If you want to modify this application under different conditions, feel free to contact our support team.
