@@ -9,8 +9,17 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.3...HEAD)
+### Fixed
+* Fixed "Locate encrypted file" opening the file instead of revealing it in the file manager on Linux ([#4272](https://github.com/cryptomator/cryptomator/issues/4272))
+
 ### Changed
-* Updated Jackson to 2.21.6
+* Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
+* Migrated code to common JDK 25 APIs and constructs
+* Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
+* Updated dependencies:
+  - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0-beta1
+  - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.6
+  - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.6
 
 
 ## [1.19.3](https://github.com/cryptomator/cryptomator/releases/1.19.3) - 2026-06-29
@@ -19,7 +28,8 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ### Fixed
 * Fixed Cryptomator file extensions were not registered on Windows ([#4219](https://github.com/cryptomator/cryptomator/issues/4219))
-* Fixed warning was displayed when accessing update tab in settings even though an update check did not ran ([#4199](https://github.com/cryptomator/cryptomator/pull/4199))
+* Fixed warning was displayed when accessing update tab in settings even though an update check did not ran ([#4194](https://github.com/cryptomator/cryptomator/pull/4194))
+* Fixed the same vault could be added several times to the vault list ([#4243](https://github.com/cryptomator/cryptomator/pull/4243))
 * Fixed several Decrypt Name dialogs could be opened on the same vault ([#4164](https://github.com/cryptomator/cryptomator/pull/4164))
 * Fixed not all mount options in vault specific settings could be displayed ([#4227](https://github.com/cryptomator/cryptomator/pull/4227))
 * Fixed localhost alias on Windows was not removed on uninstall ([#3993](https://github.com/cryptomator/cryptomator/issues/3993))
@@ -31,6 +41,9 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Drop signing with Actalis issued certificate ([#4169](https://github.com/cryptomator/cryptomator/pull/4169), [#4262](https://github.com/cryptomator/cryptomator/pull/4262))
 * Fix dagger binding graph issues ([#4147](https://github.com/cryptomator/cryptomator/pull/4147))
 * Added flatpak build to CI ([#4199](https://github.com/cryptomator/cryptomator/pull/4199))
+* Added monthly distribution builds to CI ([#4187](https://github.com/cryptomator/cryptomator/pull/4187))
+* Replaced Guava cache with Caffeine
+* Updated translations ([#4223](https://github.com/cryptomator/cryptomator/pull/4223))
 * Updated dependencies:
   - `org.cryptomator:webdav-nio-adapter` from 3.0.1 to 3.0.2
   - `org.cryptomator:integrations-api` from 1.8.0 to 1.9.0
