@@ -6,7 +6,10 @@ import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -40,10 +43,37 @@ public class SimpleDialog {
 				builder.sceneFactory, builder.resourceBundle);
 
 		dialogStage.setScene(loaderFactory.createScene(FxmlFile.SIMPLE_DIALOG));
+		dialogStage.setMinWidth(400);
+		fitDialogToButtonLabels(dialogStage);
 	}
 
 	public void showAndWait() {
 		dialogStage.showAndWait();
+	}
+
+	/**
+	 * JavaFX {@link ButtonBar} shrinks buttons toward {@code buttonMinWidth} when the parent is too narrow,
+	 * which crops translated labels (see issue #3338). Grow the dialog with the widest label instead.
+	 */
+	static void fitDialogToButtonLabels(Stage stage) {
+		Scene scene = stage.getScene();
+		if (scene == null || !(scene.getRoot() instanceof Region root)) {
+			return;
+		}
+		root.setMaxWidth(Double.MAX_VALUE);
+		root.setMinWidth(Region.USE_COMPUTED_SIZE);
+		root.applyCss();
+
+		if (root.lookup(".button-bar") instanceof ButtonBar buttonBar) {
+			buttonBar.setMinWidth(Region.USE_PREF_SIZE);
+			double minButtonWidth = buttonBar.getButtonMinWidth();
+			for (Node node : buttonBar.getButtons()) {
+				if (node instanceof Region button && node.isManaged() && node.isVisible()) {
+					button.setMinWidth(Math.max(minButtonWidth, button.prefWidth(-1)));
+				}
+			}
+		}
+		stage.sizeToScene();
 	}
 
 	private String resolveText(String key, String[] args) {

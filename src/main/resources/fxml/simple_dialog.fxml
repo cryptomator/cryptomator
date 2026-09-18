@@ -15,7 +15,6 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.dialogs.SimpleDialogController"
 	  minWidth="400"
-	  maxWidth="400"
 	  minHeight="145"
 	  spacing="12"
 	  accessibleRole="DIALOG">
@@ -33,14 +32,15 @@
 			</StackPane>
 		</Group>
 		<VBox HBox.hgrow="ALWAYS">
-			<Label text="${controller.message}" styleClass="label-large" wrapText="true">
+			<!-- prefWidth matches the 400px dialog minus icon, spacing, and padding so wrapped text stays compact while the ButtonBar can still grow. -->
+			<Label text="${controller.message}" styleClass="label-large" wrapText="true" prefWidth="304" maxWidth="Infinity">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<Label text="${controller.description}" wrapText="true"/>
+			<Label text="${controller.description}" wrapText="true" prefWidth="304" maxWidth="Infinity"/>
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
-			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
+			<ButtonBar minWidth="-Infinity" buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
 					<Button text="${controller.cancelButtonText}" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#handleCancel" visible="${controller.cancelButtonVisible}" managed="${controller.cancelButtonVisible}"/>
 					<Button text="${controller.okButtonText}" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#handleOk"/>
