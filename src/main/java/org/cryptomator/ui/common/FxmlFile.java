@@ -54,6 +54,7 @@ public enum FxmlFile {
 	SIMPLE_DIALOG("/fxml/simple_dialog.fxml"), //
 	UPDATE_REMINDER("/fxml/update_reminder.fxml"), //
 	UNLOCK_ENTER_PASSWORD("/fxml/unlock_enter_password.fxml"),
+	UNLOCK_PORT_IN_USE("/fxml/unlock_port_in_use.fxml"), //
 	UNLOCK_REQUIRES_RESTART("/fxml/unlock_requires_restart.fxml"), //
 	UNLOCK_INVALID_MOUNT_POINT("/fxml/unlock_invalid_mount_point.fxml"), //
 	UNLOCK_SELECT_MASTERKEYFILE("/fxml/unlock_select_masterkeyfile.fxml"), //
