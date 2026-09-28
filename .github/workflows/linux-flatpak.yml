@@ -166,7 +166,7 @@ jobs:
     needs: [get-version, verify-maven-sources]
     if: (github.event_name == 'workflow_dispatch' && inputs.create-pr ) || (github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable')
     permissions:
-      contents: write
+      contents: read # Required for checkout; the flathub push/PR uses CRYPTOBOT_PR_TOKEN
     env:
       TARBALL_URL: 'https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name || inputs.src-tag }}.tar.gz'
     steps:
