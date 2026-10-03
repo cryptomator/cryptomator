@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.mount.IllegalMountPointException;
+import org.cryptomator.common.mount.PortAlreadyInUseException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
@@ -69,6 +70,13 @@ abstract class UnlockModule {
 	}
 
 	@Provides
+	@UnlockWindow
+	@UnlockScoped
+	static ObjectProperty<PortAlreadyInUseException> portAlreadyInUseException() {
+		return new SimpleObjectProperty<>();
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_SUCCESS)
 	@UnlockScoped
 	static Scene provideUnlockSuccessScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
@@ -80,6 +88,13 @@ abstract class UnlockModule {
 	@UnlockScoped
 	static Scene provideInvalidMountPointScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.UNLOCK_PORT_IN_USE)
+	@UnlockScoped
+	static Scene providePortInUseScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.UNLOCK_PORT_IN_USE);
 	}
 
 	@Provides
@@ -100,6 +115,11 @@ abstract class UnlockModule {
 	@IntoMap
 	@FxControllerKey(UnlockInvalidMountPointController.class)
 	abstract FxController bindUnlockInvalidMountPointController(UnlockInvalidMountPointController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(UnlockPortInUseController.class)
+	abstract FxController bindUnlockPortInUseController(UnlockPortInUseController controller);
 
 	@Binds
 	@IntoMap
