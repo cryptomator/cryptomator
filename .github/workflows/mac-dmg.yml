@@ -153,7 +153,7 @@ jobs:
           --copyright "(C) 2016 - 2026 Skymatic GmbH"
           --app-version "${VERSION_NUM}"
           --java-options "--enable-preview"
-          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac"
+          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac,org.cryptomator.frontend.fskit"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""
@@ -244,6 +244,37 @@ jobs:
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
           TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
+      - name: Embed and codesign FSKit extension
+        if: matrix.architecture == 'aarch64'
+        # runs after the --deep signature, which would replace the extension's entitlements with the app's
+        run: |
+          set -euo pipefail
+          APPEX_PATH=Cryptomator.app/Contents/Extensions/FSKitNioExtension.appex
+          echo "Embedding FSKit extension..."
+          mkdir -p Cryptomator.app/Contents/Extensions
+          ditto -x -k target/fskit-extension.zip Cryptomator.app/Contents/Extensions
+          /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier org.cryptomator.fskit" ${APPEX_PATH}/Contents/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION_NUM}" ${APPEX_PATH}/Contents/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${REVISION_NUM}" ${APPEX_PATH}/Contents/Info.plist
+          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output ${APPEX_PATH}/Contents/embedded.provisionprofile
+          PROFILE_PLIST=$(security cms -D -i ${APPEX_PATH}/Contents/embedded.provisionprofile)
+          PROFILE_APP_IDENTIFIER=$(plutil -extract 'Entitlements.com\.apple\.application-identifier' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null || true)
+          PROFILE_FSMODULE=$(plutil -extract 'Entitlements.com\.apple\.developer\.fskit\.fsmodule' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null || true)
+          if [[ "${PROFILE_APP_IDENTIFIER}" != *.org.cryptomator.fskit ]] || [[ "${PROFILE_FSMODULE}" != "true" ]]; then
+            >&2 echo "Provisioning profile is not for org.cryptomator.fskit with com.apple.developer.fskit.fsmodule"
+            exit 1
+          fi
+          echo "Codesigning FSKit extension..."
+          sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" dist/mac/FSKitExtension.entitlements
+          sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" dist/mac/FSKitExtension.entitlements
+          codesign --force --entitlements dist/mac/FSKitExtension.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APPEX_PATH}
+          echo "Codesigning Cryptomator.app..."
+          codesign --force --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
+          codesign --verify --deep --strict Cryptomator.app
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+          TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
       - name: Prepare .dmg contents
         run: |
           mkdir dmg

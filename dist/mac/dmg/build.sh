@@ -106,7 +106,7 @@ ${JAVA_HOME}/bin/jpackage \
     --copyright "(C) ${COPYRIGHT_YEARS} ${VENDOR}" \
     --app-version "${VERSION_NO}" \
     --java-options "--enable-preview" \
-    --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac" \
+    --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac,org.cryptomator.frontend.fskit" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
@@ -172,6 +172,37 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" ${APP_NAME}.entitlements
     sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" ${APP_NAME}.entitlements
     codesign --force --deep --entitlements ${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
+    # embedded after the --deep signature, which would replace the extension's entitlements with the app's
+    if [ "${JAVAFX_ARCH}" = "aarch64" ]; then
+        echo "Embedding FSKit extension..."
+        APPEX_PATH=${APP_NAME}.app/Contents/Extensions/FSKitNioExtension.appex
+        [ -f ../fskit-extension.provisionprofile ] || { echo >&2 "FSKit extension provisioning profile not found at dist/mac/fskit-extension.provisionprofile."; exit 1; }
+        mkdir -p ${APP_NAME}.app/Contents/Extensions || exit 1
+        ditto -x -k ../../../target/fskit-extension.zip ${APP_NAME}.app/Contents/Extensions || exit 1
+        /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier ${PACKAGE_IDENTIFIER}.fskit" ${APPEX_PATH}/Contents/Info.plist || exit 1
+        /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION_NO}" ${APPEX_PATH}/Contents/Info.plist || exit 1
+        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${REVISION_NO}" ${APPEX_PATH}/Contents/Info.plist || exit 1
+        cp ../fskit-extension.provisionprofile ${APPEX_PATH}/Contents/embedded.provisionprofile || exit 1
+        PROFILE_PLIST=$(security cms -D -i ${APPEX_PATH}/Contents/embedded.provisionprofile) || exit 1
+        PROFILE_APP_IDENTIFIER=$(plutil -extract 'Entitlements.com\.apple\.application-identifier' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null)
+        PROFILE_FSMODULE=$(plutil -extract 'Entitlements.com\.apple\.developer\.fskit\.fsmodule' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null)
+        if [[ "${PROFILE_APP_IDENTIFIER}" != *.${PACKAGE_IDENTIFIER}.fskit ]] || [[ "${PROFILE_FSMODULE}" != "true" ]]; then
+            >&2 echo "Provisioning profile is not for ${PACKAGE_IDENTIFIER}.fskit with com.apple.developer.fskit.fsmodule"
+            exit 1
+        fi
+        echo "Codesigning FSKit extension..."
+        cp ../FSKitExtension.entitlements . || exit 1
+        sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" FSKitExtension.entitlements || exit 1
+        sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" FSKitExtension.entitlements || exit 1
+        codesign --force --entitlements FSKitExtension.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APPEX_PATH} || exit 1
+        echo "Codesigning ${APP_NAME}.app..."
+        codesign --force --entitlements ${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app || exit 1
+        codesign --verify --deep --strict ${APP_NAME}.app || exit 1
+    else
+        echo "Leaving out the FSKit extension, which runs on Apple silicon only."
+    fi
+else
+    echo "Leaving out the FSKit extension, which cannot launch unsigned."
 fi
 
 # prepare dmg contents
