@@ -218,18 +218,18 @@ jobs:
       - name: Codesign
         run: |
           echo "Codesigning jdk files..."
-          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ \( -name 'jspawnhelper' -o -name 'pauseengine' -o -name 'simengine' \) -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} +
+          find Cryptomator.app/Contents/runtime/Contents/Home/lib/ \( -name 'jspawnhelper' -o -name 'pauseengine' -o -name 'simengine' \) -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} +
           echo "Codesigning jar contents..."
-          find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+          find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} +
           for JAR_PATH in `find Cryptomator.app -name "*.jar"`; do
             if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
               JAR_FILENAME=$(basename ${JAR_PATH})
               OUTPUT_PATH=${JAR_PATH%.*}
               echo "Codesigning libs in ${JAR_FILENAME}..."
               unzip -q ${JAR_PATH} -d ${OUTPUT_PATH}
-              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} +
+              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} +
               rm ${JAR_PATH}
               pushd ${OUTPUT_PATH} > /dev/null
               zip -qr ../${JAR_FILENAME} *
@@ -246,12 +246,10 @@ jobs:
           TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
       - name: Embed and codesign FSKit extension
         if: matrix.architecture == 'aarch64'
-        # runs after the --deep signature, which would replace the extension's entitlements with the app's
         run: |
           set -euo pipefail
           APPEX_PATH=Cryptomator.app/Contents/Extensions/FSKitNioExtension.appex
           echo "Embedding FSKit extension..."
-          mkdir -p Cryptomator.app/Contents/Extensions
           ditto -x -k target/fskit-extension.zip Cryptomator.app/Contents/Extensions
           /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier org.cryptomator.fskit" ${APPEX_PATH}/Contents/Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION_NUM}" ${APPEX_PATH}/Contents/Info.plist
@@ -260,8 +258,8 @@ jobs:
           PROFILE_PLIST=$(security cms -D -i ${APPEX_PATH}/Contents/embedded.provisionprofile)
           PROFILE_APP_IDENTIFIER=$(plutil -extract 'Entitlements.com\.apple\.application-identifier' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null || true)
           PROFILE_FSMODULE=$(plutil -extract 'Entitlements.com\.apple\.developer\.fskit\.fsmodule' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null || true)
-          if [[ "${PROFILE_APP_IDENTIFIER}" != *.org.cryptomator.fskit ]] || [[ "${PROFILE_FSMODULE}" != "true" ]]; then
-            >&2 echo "Provisioning profile is not for org.cryptomator.fskit with com.apple.developer.fskit.fsmodule"
+          if [[ "${PROFILE_APP_IDENTIFIER}" != "${TEAM_IDENTIFIER}.org.cryptomator.fskit" ]] || [[ "${PROFILE_FSMODULE}" != "true" ]]; then
+            >&2 echo "Provisioning profile is not for ${TEAM_IDENTIFIER}.org.cryptomator.fskit with com.apple.developer.fskit.fsmodule"
             exit 1
           fi
           echo "Codesigning FSKit extension..."
@@ -271,6 +269,7 @@ jobs:
           echo "Codesigning Cryptomator.app..."
           codesign --force --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
           codesign --verify --deep --strict Cryptomator.app
+          codesign --verify --strict ${APPEX_PATH}
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
           TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}

@@ -52,6 +52,9 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
     command -v codesign >/dev/null 2>&1 || { echo >&2 "codesign not found. Fix by 'xcode-select --install'."; exit 1; }
     if [[ ! `security find-identity -v -p codesigning | grep -w "${CODESIGN_IDENTITY}"` ]]; then echo "Given codesign identity is invalid."; exit 1; fi
 fi
+if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ] && [ "${JAVAFX_ARCH}" = "aarch64" ]; then
+    [ -f ../fskit-extension.provisionprofile ] || { echo >&2 "FSKit extension provisioning profile not found at dist/mac/fskit-extension.provisionprofile."; exit 1; }
+fi
 
 # download and check jmods
 curl -L ${JAVAFX_JMODS_URL} -o openjfx-jmods.zip
@@ -148,21 +151,21 @@ cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     echo "Codesigning jdk files..."
-    find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-    find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s ${CODESIGN_IDENTITY} {} \;
+    find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name '*.dylib' -exec codesign --force -s "${CODESIGN_IDENTITY}" {} + || exit 1
+    find ${APP_NAME}.app/Contents/runtime/Contents/Home/lib/ -name 'jspawnhelper' -exec codesign --force -o runtime -s "${CODESIGN_IDENTITY}" {} + || exit 1
     echo "Codesigning jar contents..."
-    find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+    find ${APP_NAME}.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s "${CODESIGN_IDENTITY}" {} + || exit 1
     for JAR_PATH in `find ${APP_NAME}.app -name "*.jar"`; do
     if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
         JAR_FILENAME=$(basename ${JAR_PATH})
         OUTPUT_PATH=${JAR_PATH%.*}
         echo "Codesigning libs in ${JAR_FILENAME}..."
-        unzip -q ${JAR_PATH} -d ${OUTPUT_PATH}
-        find ${OUTPUT_PATH} -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-        find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+        unzip -q ${JAR_PATH} -d ${OUTPUT_PATH} || exit 1
+        find ${OUTPUT_PATH} -name '*.dylib' -exec codesign --force -s "${CODESIGN_IDENTITY}" {} + || exit 1
+        find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign --force -s "${CODESIGN_IDENTITY}" {} + || exit 1
         rm ${JAR_PATH}
         pushd ${OUTPUT_PATH} > /dev/null
-        zip -qr ../${JAR_FILENAME} *
+        zip -qr ../${JAR_FILENAME} * || exit 1
         popd > /dev/null
         rm -r ${OUTPUT_PATH}
     fi
@@ -171,13 +174,10 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
     cp ../${APP_NAME}.entitlements .
     sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" ${APP_NAME}.entitlements
     sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" ${APP_NAME}.entitlements
-    codesign --force --deep --entitlements ${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app
-    # embedded after the --deep signature, which would replace the extension's entitlements with the app's
+    codesign --force --deep --entitlements ${APP_NAME}.entitlements -o runtime -s "${CODESIGN_IDENTITY}" ${APP_NAME}.app || exit 1
     if [ "${JAVAFX_ARCH}" = "aarch64" ]; then
         echo "Embedding FSKit extension..."
         APPEX_PATH=${APP_NAME}.app/Contents/Extensions/FSKitNioExtension.appex
-        [ -f ../fskit-extension.provisionprofile ] || { echo >&2 "FSKit extension provisioning profile not found at dist/mac/fskit-extension.provisionprofile."; exit 1; }
-        mkdir -p ${APP_NAME}.app/Contents/Extensions || exit 1
         ditto -x -k ../../../target/fskit-extension.zip ${APP_NAME}.app/Contents/Extensions || exit 1
         /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier ${PACKAGE_IDENTIFIER}.fskit" ${APPEX_PATH}/Contents/Info.plist || exit 1
         /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION_NO}" ${APPEX_PATH}/Contents/Info.plist || exit 1
@@ -186,18 +186,19 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
         PROFILE_PLIST=$(security cms -D -i ${APPEX_PATH}/Contents/embedded.provisionprofile) || exit 1
         PROFILE_APP_IDENTIFIER=$(plutil -extract 'Entitlements.com\.apple\.application-identifier' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null)
         PROFILE_FSMODULE=$(plutil -extract 'Entitlements.com\.apple\.developer\.fskit\.fsmodule' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null)
-        if [[ "${PROFILE_APP_IDENTIFIER}" != *.${PACKAGE_IDENTIFIER}.fskit ]] || [[ "${PROFILE_FSMODULE}" != "true" ]]; then
-            >&2 echo "Provisioning profile is not for ${PACKAGE_IDENTIFIER}.fskit with com.apple.developer.fskit.fsmodule"
+        if [[ "${PROFILE_APP_IDENTIFIER}" != "${TEAM_IDENTIFIER}.${PACKAGE_IDENTIFIER}.fskit" ]] || [[ "${PROFILE_FSMODULE}" != "true" ]]; then
+            >&2 echo "Provisioning profile is not for ${TEAM_IDENTIFIER}.${PACKAGE_IDENTIFIER}.fskit with com.apple.developer.fskit.fsmodule"
             exit 1
         fi
         echo "Codesigning FSKit extension..."
         cp ../FSKitExtension.entitlements . || exit 1
         sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" FSKitExtension.entitlements || exit 1
         sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" FSKitExtension.entitlements || exit 1
-        codesign --force --entitlements FSKitExtension.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APPEX_PATH} || exit 1
+        codesign --force --entitlements FSKitExtension.entitlements -o runtime -s "${CODESIGN_IDENTITY}" ${APPEX_PATH} || exit 1
         echo "Codesigning ${APP_NAME}.app..."
-        codesign --force --entitlements ${APP_NAME}.entitlements -o runtime -s ${CODESIGN_IDENTITY} ${APP_NAME}.app || exit 1
+        codesign --force --entitlements ${APP_NAME}.entitlements -o runtime -s "${CODESIGN_IDENTITY}" ${APP_NAME}.app || exit 1
         codesign --verify --deep --strict ${APP_NAME}.app || exit 1
+        codesign --verify --strict ${APPEX_PATH} || exit 1
     else
         echo "Leaving out the FSKit extension, which runs on Apple silicon only."
     fi

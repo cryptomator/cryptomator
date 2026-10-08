@@ -40,7 +40,7 @@
 		<cryptomator.integrations.mac.version>1.5.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.8.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>6.0.1</cryptomator.fuse.version>
-		<!-- on every bump, compare dist/mac/FSKitExtension.entitlements with fskit/Bundle/FSKitNioExtension.entitlements of that release -->
+		<!-- on every bump, compare dist/mac/FSKitExtension.entitlements with fskit/Bundle/FSKitNioExtension.entitlements in fskit-nio-adapter at that tag -->
 		<cryptomator.fskit.version>0.1.0</cryptomator.fskit.version>
 		<cryptomator.webdav.version>3.0.2</cryptomator.webdav.version>
 		<cryptomator.webdav-servlet.version>1.2.12</cryptomator.webdav-servlet.version>
@@ -547,7 +547,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-dependency-plugin</artifactId>
 						<executions>
-							<!-- the FSKit extension, embedded into Cryptomator.app by dist/mac. Expand it only with 'ditto -x -k', other unzips break its signature -->
+							<!-- expand with 'ditto -x -k' or 'unzip'. A Java unzip such as 'jar xf' drops the executable bit of the extension binary -->
 							<execution>
 								<id>copy-fskit-extension</id>
 								<phase>package</phase>
