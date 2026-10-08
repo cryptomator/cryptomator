@@ -12,6 +12,8 @@ updates:
       - dependency-name: "org.openjfx:*"
       - dependency-name: "com.fasterxml.jackson.*"
         versions: [ "[2.22,)" ] # 2.21.x is LTS, see https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.21
+      - dependency-name: "org.apache.maven:apache-maven"
+        versions: ["[3.10.0,)"]
     groups:
       maven-dependencies:
         patterns:
