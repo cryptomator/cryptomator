@@ -40,6 +40,8 @@
 		<cryptomator.integrations.mac.version>1.5.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.8.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>6.0.1</cryptomator.fuse.version>
+		<!-- on every bump, compare dist/mac/FSKitExtension.entitlements with fskit/Bundle/FSKitNioExtension.entitlements in fskit-nio-adapter at that tag -->
+		<cryptomator.fskit.version>0.1.0</cryptomator.fskit.version>
 		<cryptomator.webdav.version>3.0.2</cryptomator.webdav.version>
 		<cryptomator.webdav-servlet.version>1.2.12</cryptomator.webdav-servlet.version>
 
@@ -533,7 +535,43 @@
 					<artifactId>integrations-mac</artifactId>
 					<version>${cryptomator.integrations.mac.version}</version>
 				</dependency>
+				<dependency>
+					<groupId>org.cryptomator</groupId>
+					<artifactId>fskit-nio-adapter</artifactId>
+					<version>${cryptomator.fskit.version}</version>
+				</dependency>
 			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<!-- expand with 'ditto -x -k' or 'unzip'. A Java unzip such as 'jar xf' drops the executable bit of the extension binary -->
+							<execution>
+								<id>copy-fskit-extension</id>
+								<phase>package</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.cryptomator</groupId>
+											<artifactId>fskit-nio-adapter</artifactId>
+											<version>${cryptomator.fskit.version}</version>
+											<type>zip</type>
+											<classifier>appex</classifier>
+											<outputDirectory>${project.build.directory}</outputDirectory>
+											<destFileName>fskit-extension.zip</destFileName>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 
 		<profile>
@@ -691,7 +729,7 @@
 				</os>
 			</activation>
 			<properties>
-				<run.jvmArgs>-Dapple.awt.enableTemplateImages=true -Dcryptomator.settingsPath="@{userhome}/Library/Application Support/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/Library/Application Support/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/Library/Application Support/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/Library/Logs/${run.appDir}" -Dcryptomator.pluginDir="@{userhome}/Library/Application Support/${run.appDir}/Plugins" -Dcryptomator.mountPointsDir="${run.macMountPointsDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.integrationsMac.keychainServiceName=Cryptomator ${run.macUpdateArgs} -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m -ea --enable-preview --enable-native-access=org.cryptomator.jfuse.mac,javafx.graphics</run.jvmArgs>
+				<run.jvmArgs>-Dapple.awt.enableTemplateImages=true -Dcryptomator.settingsPath="@{userhome}/Library/Application Support/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/Library/Application Support/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/Library/Application Support/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/Library/Logs/${run.appDir}" -Dcryptomator.pluginDir="@{userhome}/Library/Application Support/${run.appDir}/Plugins" -Dcryptomator.mountPointsDir="${run.macMountPointsDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.integrationsMac.keychainServiceName=Cryptomator ${run.macUpdateArgs} -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m -ea --enable-preview --enable-native-access=org.cryptomator.jfuse.mac,org.cryptomator.frontend.fskit,javafx.graphics</run.jvmArgs>
 			</properties>
 		</profile>
 
