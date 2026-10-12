@@ -3,6 +3,7 @@ package org.cryptomator.ui.unlock;
 import dagger.Lazy;
 import org.cryptomator.common.mount.ConflictingMountServiceException;
 import org.cryptomator.common.mount.IllegalMountPointException;
+import org.cryptomator.common.mount.PortAlreadyInUseException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.CryptoException;
@@ -45,10 +46,12 @@ public class UnlockWorkflow extends Task<Void> {
 	private final VaultService vaultService;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
+	private final Lazy<Scene> portInUseScene;
 	private final Lazy<Scene> restartRequiredScene;
 	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 	private final ObjectProperty<IllegalMountPointException> illegalMountPointException;
+	private final ObjectProperty<PortAlreadyInUseException> portAlreadyInUseException;
 	private final Dialogs dialogs;
 
 	@Inject
@@ -58,10 +61,12 @@ public class UnlockWorkflow extends Task<Void> {
 				   VaultService vaultService, //
 				   @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, //
 				   @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, //
+				   @FxmlScene(FxmlFile.UNLOCK_PORT_IN_USE) Lazy<Scene> portInUseScene, //
 				   @FxmlScene(FxmlFile.UNLOCK_REQUIRES_RESTART) Lazy<Scene> restartRequiredScene, //
 				   FxApplicationWindows appWindows, //
 				   @UnlockWindow KeyLoadingStrategy keyLoadingStrategy, //
 				   @UnlockWindow ObjectProperty<IllegalMountPointException> illegalMountPointException, //
+				   @UnlockWindow ObjectProperty<PortAlreadyInUseException> portAlreadyInUseException, //
 				   Dialogs dialogs) {
 		this.mainWindow = mainWindow;
 		this.window = window;
@@ -69,10 +74,12 @@ public class UnlockWorkflow extends Task<Void> {
 		this.vaultService = vaultService;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
+		this.portInUseScene = portInUseScene;
 		this.restartRequiredScene = restartRequiredScene;
 		this.appWindows = appWindows;
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.illegalMountPointException = illegalMountPointException;
+		this.portAlreadyInUseException = portAlreadyInUseException;
 		this.dialogs = dialogs;
 	}
 
@@ -95,6 +102,15 @@ public class UnlockWorkflow extends Task<Void> {
 		Platform.runLater(() -> {
 			illegalMountPointException.set(impe);
 			window.setScene(invalidMountPointScene.get());
+			window.show();
+		});
+	}
+
+	private void handlePortAlreadyInUseError(PortAlreadyInUseException e) {
+		LOG.warn("Unlock failed because TCP port {} is already in use.", e.getPort(), e);
+		Platform.runLater(() -> {
+			portAlreadyInUseException.set(e);
+			window.setScene(portInUseScene.get());
 			window.show();
 		});
 	}
@@ -149,6 +165,7 @@ public class UnlockWorkflow extends Task<Void> {
 		Throwable throwable = super.getException();
 		switch (throwable) {
 			case IllegalMountPointException e -> handleIllegalMountPointError(e);
+			case PortAlreadyInUseException e -> handlePortAlreadyInUseError(e);
 			case ConflictingMountServiceException _ -> handleConflictingMountServiceException();
 			case ReadOnlyFileSystemException _ -> handleReadOnlyFileSystem();
 			default -> handleGenericError(throwable);
