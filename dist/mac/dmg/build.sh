@@ -52,8 +52,12 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
     command -v codesign >/dev/null 2>&1 || { echo >&2 "codesign not found. Fix by 'xcode-select --install'."; exit 1; }
     if [[ ! `security find-identity -v -p codesigning | grep -w "${CODESIGN_IDENTITY}"` ]]; then echo "Given codesign identity is invalid."; exit 1; fi
 fi
+if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
+    ../verify-provisioning-profile.sh ../embedded.provisionprofile "${TEAM_IDENTIFIER}.${PACKAGE_IDENTIFIER}" com.apple.developer.fskit.mount || exit 1
+fi
 if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ] && [ "${JAVAFX_ARCH}" = "aarch64" ]; then
     [ -f ../fskit-extension.provisionprofile ] || { echo >&2 "FSKit extension provisioning profile not found at dist/mac/fskit-extension.provisionprofile."; exit 1; }
+    ../verify-provisioning-profile.sh ../fskit-extension.provisionprofile "${TEAM_IDENTIFIER}.${PACKAGE_IDENTIFIER}.fskit" com.apple.developer.fskit.fsmodule || exit 1
 fi
 
 # download and check jmods
@@ -183,13 +187,6 @@ if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then
         /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION_NO}" ${APPEX_PATH}/Contents/Info.plist || exit 1
         /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${REVISION_NO}" ${APPEX_PATH}/Contents/Info.plist || exit 1
         cp ../fskit-extension.provisionprofile ${APPEX_PATH}/Contents/embedded.provisionprofile || exit 1
-        PROFILE_PLIST=$(security cms -D -i ${APPEX_PATH}/Contents/embedded.provisionprofile) || exit 1
-        PROFILE_APP_IDENTIFIER=$(plutil -extract 'Entitlements.com\.apple\.application-identifier' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null)
-        PROFILE_FSMODULE=$(plutil -extract 'Entitlements.com\.apple\.developer\.fskit\.fsmodule' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null)
-        if [[ "${PROFILE_APP_IDENTIFIER}" != "${TEAM_IDENTIFIER}.${PACKAGE_IDENTIFIER}.fskit" ]] || [[ "${PROFILE_FSMODULE}" != "true" ]]; then
-            >&2 echo "Provisioning profile is not for ${TEAM_IDENTIFIER}.${PACKAGE_IDENTIFIER}.fskit with com.apple.developer.fskit.fsmodule"
-            exit 1
-        fi
         echo "Codesigning FSKit extension..."
         cp ../FSKitExtension.entitlements . || exit 1
         sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" FSKitExtension.entitlements || exit 1

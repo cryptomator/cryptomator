@@ -237,6 +237,7 @@ jobs:
               rm -r ${OUTPUT_PATH}
             fi
           done
+          dist/mac/verify-provisioning-profile.sh Cryptomator.app/Contents/embedded.provisionprofile "${TEAM_IDENTIFIER}.org.cryptomator" com.apple.developer.fskit.mount
           echo "Codesigning Cryptomator.app..."
           sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" dist/mac/Cryptomator.entitlements
           sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" dist/mac/Cryptomator.entitlements
@@ -255,13 +256,7 @@ jobs:
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION_NUM}" ${APPEX_PATH}/Contents/Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${REVISION_NUM}" ${APPEX_PATH}/Contents/Info.plist
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output ${APPEX_PATH}/Contents/embedded.provisionprofile
-          PROFILE_PLIST=$(security cms -D -i ${APPEX_PATH}/Contents/embedded.provisionprofile)
-          PROFILE_APP_IDENTIFIER=$(plutil -extract 'Entitlements.com\.apple\.application-identifier' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null || true)
-          PROFILE_FSMODULE=$(plutil -extract 'Entitlements.com\.apple\.developer\.fskit\.fsmodule' raw -o - - <<< "${PROFILE_PLIST}" 2>/dev/null || true)
-          if [[ "${PROFILE_APP_IDENTIFIER}" != "${TEAM_IDENTIFIER}.org.cryptomator.fskit" ]] || [[ "${PROFILE_FSMODULE}" != "true" ]]; then
-            >&2 echo "Provisioning profile is not for ${TEAM_IDENTIFIER}.org.cryptomator.fskit with com.apple.developer.fskit.fsmodule"
-            exit 1
-          fi
+          dist/mac/verify-provisioning-profile.sh ${APPEX_PATH}/Contents/embedded.provisionprofile "${TEAM_IDENTIFIER}.org.cryptomator.fskit" com.apple.developer.fskit.fsmodule
           echo "Codesigning FSKit extension..."
           sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" dist/mac/FSKitExtension.entitlements
           sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" dist/mac/FSKitExtension.entitlements
