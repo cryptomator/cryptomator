@@ -38,6 +38,7 @@ public class VaultSettings {
 	static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 	static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
 	static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
+	static final boolean DEFAULT_AUTOLOCK_ON_SYSTEM_LOCK = false;
 	static final int DEFAULT_PORT = 42427;
 
 	private static final Random RNG = new Random();
@@ -53,6 +54,7 @@ public class VaultSettings {
 	public final ObjectProperty<WhenUnlocked> actionAfterUnlock;
 	public final BooleanProperty autoLockWhenIdle;
 	public final IntegerProperty autoLockIdleSeconds;
+	public final BooleanProperty autoLockOnSystemLock;
 	public final ObjectProperty<Path> mountPoint;
 	public final StringExpression mountName;
 	public final StringProperty mountService;
@@ -71,6 +73,7 @@ public class VaultSettings {
 		this.actionAfterUnlock = new SimpleObjectProperty<>(this, "actionAfterUnlock", json.actionAfterUnlock);
 		this.autoLockWhenIdle = new SimpleBooleanProperty(this, "autoLockWhenIdle", json.autoLockWhenIdle);
 		this.autoLockIdleSeconds = new SimpleIntegerProperty(this, "autoLockIdleSeconds", json.autoLockIdleSeconds);
+		this.autoLockOnSystemLock = new SimpleBooleanProperty(this, "autoLockOnSystemLock", json.autoLockOnSystemLock);
 		this.mountPoint = new SimpleObjectProperty<>(this, "mountPoint", json.mountPoint == null ? null : Path.of(json.mountPoint));
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
 		this.port = new SimpleIntegerProperty(this, "port", json.port);
@@ -100,7 +103,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode, port, mountService, lastKnownKeyLoader};
+		return new Observable[]{actionAfterUnlock, autoLockIdleSeconds, autoLockWhenIdle, autoLockOnSystemLock, displayName, maxCleartextFilenameLength, mountFlags, mountPoint, path, revealAfterMount, unlockAfterStartup, usesReadOnlyMode, port, mountService, lastKnownKeyLoader};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -128,6 +131,7 @@ public class VaultSettings {
 		json.actionAfterUnlock = actionAfterUnlock.get();
 		json.autoLockWhenIdle = autoLockWhenIdle.get();
 		json.autoLockIdleSeconds = autoLockIdleSeconds.get();
+		json.autoLockOnSystemLock = autoLockOnSystemLock.get();
 		json.mountPoint = mountPoint.map(Path::toString).getValue();
 		json.mountService = mountService.get();
 		json.port = port.get();
