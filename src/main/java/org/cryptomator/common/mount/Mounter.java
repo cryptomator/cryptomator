@@ -26,6 +26,7 @@ import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_EXISTI
 import static org.cryptomator.integrations.mount.MountCapability.MOUNT_TO_SYSTEM_CHOSEN_PATH;
 import static org.cryptomator.integrations.mount.MountCapability.MOUNT_WITHIN_EXISTING_PARENT;
 import static org.cryptomator.integrations.mount.MountCapability.UNMOUNT_FORCED;
+import static org.cryptomator.integrations.mount.MountCapability.WHEN_TERMINATED;
 
 @Singleton
 public class Mounter {
@@ -170,7 +171,7 @@ public class Mounter {
 		LOG.debug("Using mount service {} for mounting vault {}", mountService.getClass().getName(), vaultSettings.displayName);
 		var internal = new SettledMounter(mountService, builder, vaultSettings); // FIXME: no need for an inner class
 		var cleanup = internal.prepare();
-		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), cleanup);
+		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), mountService.hasCapability(WHEN_TERMINATED), cleanup);
 	}
 
 	public boolean isConflictingMountService(MountService service) {
@@ -178,7 +179,7 @@ public class Mounter {
 		return usedMountServices.stream().map(MountService::getClass).map(Class::getName).anyMatch(conflictingServices::contains);
 	}
 
-	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, Runnable specialCleanup) {
+	public record MountHandle(Mount mountObj, boolean supportsUnmountForced, boolean supportsWhenTerminated, Runnable specialCleanup) {
 
 	}
 
