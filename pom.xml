@@ -35,13 +35,13 @@
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.10.0</cryptomator.cryptofs.version>
 		<cryptomator.cryptolib.version>2.2.2</cryptomator.cryptolib.version>
-		<cryptomator.integrations.version>1.10.0-SNAPSHOT</cryptomator.integrations.version>
+		<cryptomator.integrations.version>1.10.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.6.1</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.5.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.8.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>6.0.1</cryptomator.fuse.version>
 		<!-- on every bump, check the entitlements and provisioning profiles in dist/mac against "Embed the extension in an app" in the README of fskit-nio-adapter at that tag -->
-		<cryptomator.fskit.version>0.2.0</cryptomator.fskit.version>
+		<cryptomator.fskit.version>0.3.0</cryptomator.fskit.version>
 		<cryptomator.webdav.version>3.0.2</cryptomator.webdav.version>
 		<cryptomator.webdav-servlet.version>1.2.12</cryptomator.webdav-servlet.version>
 
