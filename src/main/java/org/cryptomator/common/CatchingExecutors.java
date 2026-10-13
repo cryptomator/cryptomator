@@ -90,9 +90,10 @@ public final class CatchingExecutors {
 	}
 
 	private static void afterExecuteFuture(Future<?> future) {
-		if (future instanceof ScheduledFuture<?> && !future.isDone()) {
-			//we assume that this must be a repeated ScheduledFutureTask, where the done-status is only set when not executed anymore
-			//see also https://github.com/cryptomator/cryptomator/pull/2422
+		if (!future.isDone()) {
+			//get() would block forever on a future that is not done:
+			//repeated ScheduledFutureTasks are only done once no longer executed (see https://github.com/cryptomator/cryptomator/pull/2422),
+			//and CompletableFuture's async tasks only complete the CompletableFuture they feed, never themselves
 			return;
 		}
 
