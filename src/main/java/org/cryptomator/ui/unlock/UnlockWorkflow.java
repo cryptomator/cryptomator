@@ -172,7 +172,7 @@ public class UnlockWorkflow extends Task<Void> {
 		var readOnlyDialog = dialogs.prepareRetryIfReadonlyDialog(mainWindow, stage -> {
 			stage.close();
 			vault.getVaultSettings().usesReadOnlyMode.set(true);
-			restartUnlock(mainWindow);
+			restartUnlock();
 		}).build();
 
 		Platform.runLater(readOnlyDialog::showAndWait);
@@ -181,7 +181,7 @@ public class UnlockWorkflow extends Task<Void> {
 	private void handleExtensionSwitchedOff() {
 		var extensionSwitchedOffDialog = dialogs.prepareFSKitExtensionSwitchedOffDialog(mainWindow, vault, stage -> {
 			stage.close();
-			restartUnlock(owner);
+			restartUnlock();
 		}).build();
 
 		Platform.runLater(() -> {
@@ -190,13 +190,13 @@ public class UnlockWorkflow extends Task<Void> {
 		});
 	}
 
-	private void restartUnlock(@Nullable Stage unlockOwner) {
+	private void restartUnlock() {
 		try {
 			var isLocked = vault.stateProperty().awaitState(VaultState.Value.LOCKED, 5, TimeUnit.SECONDS);
 			if (!isLocked) {
 				LOG.error("Vault did not changed to LOCKED state within 5 seconds. Aborting unlock retry.");
 			} else {
-				appWindows.startUnlockWorkflow(vault, unlockOwner);
+				appWindows.startUnlockWorkflow(vault, owner);
 			}
 		} catch (InterruptedException e) {
 			LOG.error("Waiting for LOCKED vault state was interrupted. Aborting unlock retry.", e);

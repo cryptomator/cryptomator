@@ -146,16 +146,18 @@ class UnlockWorkflowTest {
 	}
 
 	@Test
-	public void testReadOnlyRetryRestartsUnlockWithMainWindow() throws Exception {
+	public void testReadOnlyRetryRestartsUnlockWithOwner() throws Exception {
 		Mockito.when(dialogs.prepareRetryIfReadonlyDialog(Mockito.any(), Mockito.any())).thenReturn(dialogBuilder);
 		runFailingWith(new ReadOnlyFileSystemException());
 		ArgumentCaptor<Consumer<Stage>> okAction = ArgumentCaptor.captor();
 		Mockito.verify(dialogs).prepareRetryIfReadonlyDialog(Mockito.any(), okAction.capture());
+		var dialogStage = Mockito.mock(Stage.class);
 
-		okAction.getValue().accept(Mockito.mock(Stage.class));
+		okAction.getValue().accept(dialogStage);
 
+		Mockito.verify(dialogStage).close();
 		Assertions.assertTrue(vaultSettings.usesReadOnlyMode.get());
-		Mockito.verify(appWindows).startUnlockWorkflow(vault, mainWindow);
+		Mockito.verify(appWindows).startUnlockWorkflow(vault, owner);
 	}
 
 	private void runFailingWith(Exception exception) throws Exception {
