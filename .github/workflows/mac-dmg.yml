@@ -81,6 +81,21 @@ jobs:
           openjfx-sha: 'a52014d625b8b04e57fd71650f881c1397542b4018e1b04f1b4e66c8800a1f34'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Verify provisioning profile
+        run: |
+          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output $RUNNER_TEMP/app.provisionprofile
+          dist/mac/verify-provisioning-profile.sh $RUNNER_TEMP/app.provisionprofile "${TEAM_IDENTIFIER}.org.cryptomator" com.apple.developer.fskit.mount
+        env:
+          TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+      - name: Verify FSKit provisioning profile
+        if: matrix.architecture == 'aarch64'
+        run: |
+          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output $RUNNER_TEMP/fskit.provisionprofile
+          dist/mac/verify-provisioning-profile.sh $RUNNER_TEMP/fskit.provisionprofile "${TEAM_IDENTIFIER}.org.cryptomator.fskit" com.apple.developer.fskit.fsmodule
+        env:
+          TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
       - name: Setup Java
         uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
         with:
@@ -182,9 +197,7 @@ jobs:
           cp dist/mac/resources/Assets.car Cryptomator.app/Contents/Resources/
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NUM}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NUM}|g" Cryptomator.app/Contents/Info.plist
-          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output Cryptomator.app/Contents/embedded.provisionprofile
-        env:
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+          cp $RUNNER_TEMP/app.provisionprofile Cryptomator.app/Contents/embedded.provisionprofile
       - name: Generate license for dmg
         run: >
           ./mvnw -B license:add-third-party
@@ -237,7 +250,6 @@ jobs:
               rm -r ${OUTPUT_PATH}
             fi
           done
-          dist/mac/verify-provisioning-profile.sh Cryptomator.app/Contents/embedded.provisionprofile "${TEAM_IDENTIFIER}.org.cryptomator" com.apple.developer.fskit.mount
           echo "Codesigning Cryptomator.app..."
           sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" dist/mac/Cryptomator.entitlements
           sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" dist/mac/Cryptomator.entitlements
@@ -255,8 +267,7 @@ jobs:
           /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier org.cryptomator.fskit" ${APPEX_PATH}/Contents/Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION_NUM}" ${APPEX_PATH}/Contents/Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${REVISION_NUM}" ${APPEX_PATH}/Contents/Info.plist
-          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output ${APPEX_PATH}/Contents/embedded.provisionprofile
-          dist/mac/verify-provisioning-profile.sh ${APPEX_PATH}/Contents/embedded.provisionprofile "${TEAM_IDENTIFIER}.org.cryptomator.fskit" com.apple.developer.fskit.fsmodule
+          cp $RUNNER_TEMP/fskit.provisionprofile ${APPEX_PATH}/Contents/embedded.provisionprofile
           echo "Codesigning FSKit extension..."
           sed -i '' "s|###APP_IDENTIFIER_PREFIX###|${TEAM_IDENTIFIER}.|g" dist/mac/FSKitExtension.entitlements
           sed -i '' "s|###TEAM_IDENTIFIER###|${TEAM_IDENTIFIER}|g" dist/mac/FSKitExtension.entitlements
@@ -268,7 +279,6 @@ jobs:
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
           TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
       - name: Prepare .dmg contents
         run: |
           mkdir dmg
