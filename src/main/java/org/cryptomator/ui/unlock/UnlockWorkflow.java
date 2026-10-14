@@ -5,7 +5,6 @@ import org.cryptomator.common.mount.ConflictingMountServiceException;
 import org.cryptomator.common.mount.FSKitExtensionSwitchedOffException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
@@ -30,7 +29,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.ReadOnlyFileSystemException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A multi-step task that consists of background activities as well as user interaction.
@@ -191,17 +189,11 @@ public class UnlockWorkflow extends Task<Void> {
 	}
 
 	private void restartUnlock() {
-		try {
-			var isLocked = vault.stateProperty().awaitState(VaultState.Value.LOCKED, 5, TimeUnit.SECONDS);
-			if (!isLocked) {
-				LOG.error("Vault did not changed to LOCKED state within 5 seconds. Aborting unlock retry.");
-			} else {
-				appWindows.startUnlockWorkflow(vault, owner);
-			}
-		} catch (InterruptedException e) {
-			LOG.error("Waiting for LOCKED vault state was interrupted. Aborting unlock retry.", e);
-			Thread.currentThread().interrupt();
+		if (!vault.isLocked()) {
+			LOG.warn("Vault '{}' is {} instead of LOCKED. Aborting unlock retry.", vault.getDisplayName(), vault.getState());
+			return;
 		}
+		appWindows.startUnlockWorkflow(vault, owner);
 	}
 
 	@Override

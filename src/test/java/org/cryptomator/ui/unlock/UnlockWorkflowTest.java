@@ -5,7 +5,6 @@ import org.cryptomator.common.mount.FSKitExtensionSwitchedOffException;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.dialogs.Dialogs;
@@ -25,7 +24,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.ReadOnlyFileSystemException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 class UnlockWorkflowTest {
@@ -132,17 +130,32 @@ class UnlockWorkflowTest {
 
 	private void assertExtensionSwitchedOffRetryRestartsUnlockWith(Stage unlockOwner) throws Exception {
 		workflow = createWorkflow(unlockOwner);
-		Mockito.when(dialogs.prepareFSKitExtensionSwitchedOffDialog(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(dialogBuilder);
-		runFailingWith(new FSKitExtensionSwitchedOffException(new MountFailedException("switched off")));
-		ArgumentCaptor<Consumer<Stage>> okAction = ArgumentCaptor.captor();
-		Mockito.verify(dialogs).prepareFSKitExtensionSwitchedOffDialog(Mockito.any(), Mockito.any(), okAction.capture());
+		var okAction = failWithExtensionSwitchedOffAndCaptureRetry();
 		var dialogStage = Mockito.mock(Stage.class);
 
-		okAction.getValue().accept(dialogStage);
+		okAction.accept(dialogStage);
 
 		Mockito.verify(dialogStage).close();
 		Mockito.verify(appWindows).startUnlockWorkflow(vault, unlockOwner);
 		Assertions.assertFalse(vaultSettings.usesReadOnlyMode.get());
+	}
+
+	@Test
+	public void testExtensionSwitchedOffRetryAbortsWhenVaultIsNotLocked() throws Exception {
+		var okAction = failWithExtensionSwitchedOffAndCaptureRetry();
+		Mockito.when(vault.isLocked()).thenReturn(false); // e.g. an unlock from the tray menu started while the dialog was open
+
+		okAction.accept(Mockito.mock(Stage.class));
+
+		Mockito.verify(appWindows, Mockito.never()).startUnlockWorkflow(Mockito.any(), Mockito.any());
+	}
+
+	private Consumer<Stage> failWithExtensionSwitchedOffAndCaptureRetry() throws Exception {
+		Mockito.when(dialogs.prepareFSKitExtensionSwitchedOffDialog(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(dialogBuilder);
+		runFailingWith(new FSKitExtensionSwitchedOffException(new MountFailedException("switched off")));
+		ArgumentCaptor<Consumer<Stage>> okAction = ArgumentCaptor.captor();
+		Mockito.verify(dialogs).prepareFSKitExtensionSwitchedOffDialog(Mockito.any(), Mockito.any(), okAction.capture());
+		return okAction.getValue();
 	}
 
 	@Test
@@ -166,9 +179,7 @@ class UnlockWorkflowTest {
 			invocation.getArgument(0, Runnable.class).run();
 			return null;
 		});
-		var vaultState = Mockito.mock(VaultState.class);
-		Mockito.when(vaultState.awaitState(VaultState.Value.LOCKED, 5, TimeUnit.SECONDS)).thenReturn(true);
-		Mockito.when(vault.stateProperty()).thenReturn(vaultState);
+		Mockito.when(vault.isLocked()).thenReturn(true);
 		Mockito.doThrow(exception).when(keyLoadingStrategy).use(Mockito.any());
 
 		workflow.run();
