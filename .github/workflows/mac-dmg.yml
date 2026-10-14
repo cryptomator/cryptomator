@@ -213,7 +213,7 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/codesign.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/codesign.keychain-db
 
-          # import certificate and provisioning profile from secrets
+          # decode certificate from secrets
           echo -n "$CODESIGN_P12_BASE64" | base64 --decode --output $CERTIFICATE_PATH
 
           # create temporary keychain
