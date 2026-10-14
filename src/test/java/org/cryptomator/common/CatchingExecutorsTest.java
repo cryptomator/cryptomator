@@ -44,8 +44,11 @@ class CatchingExecutorsTest {
 
 		scheduler.scheduleAtFixedRate(runs::countDown, 0, 10, TimeUnit.MILLISECONDS);
 
-		Assertions.assertTrue(runs.await(1, TimeUnit.SECONDS));
-		scheduler.shutdownNow();
+		try {
+			Assertions.assertTrue(runs.await(1, TimeUnit.SECONDS));
+		} finally {
+			scheduler.shutdownNow();
+		}
 	}
 
 }
