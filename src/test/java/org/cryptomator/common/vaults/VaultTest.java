@@ -160,6 +160,7 @@ class VaultTest {
 		vault.lock(false);
 
 		Mockito.verify(mount).unmount();
+		Mockito.verify(specialCleanup).run();
 		Mockito.verify(cryptoFileSystem).close();
 	}
 

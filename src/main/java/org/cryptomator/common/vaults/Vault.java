@@ -237,11 +237,11 @@ public class Vault {
 	private void release(Mounter.MountHandle mountHandle) throws UnmountFailedException, IOException {
 		try {
 			mountHandle.mountObj().close();
-			mountHandle.specialCleanup().run();
 		} finally {
 			removeFromQuickAccess();
 			destroyCryptoFileSystem();
 			this.mountHandle.set(null);
+			mountHandle.specialCleanup().run();
 		}
 	}
 
