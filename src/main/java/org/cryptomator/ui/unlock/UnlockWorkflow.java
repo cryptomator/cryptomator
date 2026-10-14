@@ -88,6 +88,8 @@ public class UnlockWorkflow extends Task<Void> {
 			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException("Unexpected exception type", e);
+		} finally {
+			vault.finishProcessing();
 		}
 	}
 
@@ -115,6 +117,12 @@ public class UnlockWorkflow extends Task<Void> {
 	protected void succeeded() {
 		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayName());
 
+		if (!vault.isUnlocked()) {
+			LOG.info("Volume of '{}' ended before its unlock completed.", vault.getDisplayName());
+			Platform.runLater(window::close);
+			return;
+		}
+
 		switch (vault.getVaultSettings().actionAfterUnlock.get()) {
 			case ASK -> Platform.runLater(() -> {
 				window.setScene(successScene.get());
@@ -139,8 +147,6 @@ public class UnlockWorkflow extends Task<Void> {
 			}
 			case IGNORE -> Platform.runLater(window::close);
 		}
-
-		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
 	}
 
 	@Override
@@ -153,7 +159,6 @@ public class UnlockWorkflow extends Task<Void> {
 			case ReadOnlyFileSystemException _ -> handleReadOnlyFileSystem();
 			default -> handleGenericError(throwable);
 		}
-		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 	private void handleReadOnlyFileSystem() {
@@ -183,7 +188,6 @@ public class UnlockWorkflow extends Task<Void> {
 	@Override
 	protected void cancelled() {
 		LOG.debug("Unlock of '{}' canceled.", vault.getDisplayName());
-		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 }

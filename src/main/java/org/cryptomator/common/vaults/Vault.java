@@ -205,7 +205,7 @@ public class Vault {
 	public synchronized void lock(boolean forced) throws UnmountFailedException, IOException {
 		var mountHandle = this.mountHandle.get();
 		if (mountHandle == null) {
-			//lockAfterTermination may already have released an externally unmounted volume
+			//another lock, or lockAfterTermination after an external unmount, may already have released the mount
 			return;
 		}
 
@@ -215,7 +215,12 @@ public class Vault {
 			mountHandle.mountObj().unmount();
 		}
 
-		release(mountHandle);
+		try {
+			release(mountHandle);
+		} catch (UnmountFailedException e) {
+			//release() dropped the mount anyway, so report an IOException rather than an UnmountFailedException, which would offer a forced retry
+			throw new IOException("Closing the unmounted volume failed.", e);
+		}
 		LOG.info("Locked vault '{}'", getDisplayName());
 	}
 
@@ -230,8 +235,33 @@ public class Vault {
 			LOG.error("Releasing the mount of vault '{}' failed.", getDisplayName(), e);
 		}
 
-		state.set(VaultState.Value.LOCKED);
-		LOG.info("Locked vault '{}' after its volume was unmounted externally", getDisplayName());
+		if (markLockedIfUnmounted()) {
+			LOG.info("Locked vault '{}' after its volume was unmounted externally", getDisplayName());
+		} else {
+			LOG.debug("Released the externally unmounted volume of vault '{}', leaving its state to the current workflow", getDisplayName());
+		}
+	}
+
+	/**
+	 * Ends the {@link VaultState.Value#PROCESSING PROCESSING} state that a lock or unlock workflow admitted, as {@link VaultState.Value#UNLOCKED UNLOCKED} if a mount remains and as {@link VaultState.Value#LOCKED LOCKED} otherwise.
+	 * <p>
+	 * Only the workflow that admitted {@code PROCESSING} may call this, after its last vault mutation.
+	 * Call it on the worker thread, never on the FX application thread, since it waits for running mount operations.
+	 */
+	public synchronized void finishProcessing() {
+		var target = mountHandle.get() != null ? VaultState.Value.UNLOCKED : VaultState.Value.LOCKED;
+		if (!state.transition(VaultState.Value.PROCESSING, target)) {
+			LOG.warn("Vault '{}' is not processing, leaving its state {}", getDisplayName(), state.getValue());
+		}
+	}
+
+	/**
+	 * Marks an {@link VaultState.Value#UNLOCKED UNLOCKED} vault as {@link VaultState.Value#LOCKED LOCKED} if no mount remains, for callers that do not own a {@link VaultState.Value#PROCESSING PROCESSING} state.
+	 *
+	 * @return {@code true} if the vault has been marked as locked
+	 */
+	public synchronized boolean markLockedIfUnmounted() {
+		return mountHandle.get() == null && state.transition(VaultState.Value.UNLOCKED, VaultState.Value.LOCKED);
 	}
 
 	private void release(Mounter.MountHandle mountHandle) throws UnmountFailedException, IOException {

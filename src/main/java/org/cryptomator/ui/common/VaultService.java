@@ -16,7 +16,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -94,7 +93,7 @@ public class VaultService {
 	 *
 	 * @param vaults The list of vaults to be locked
 	 * @param forced Whether to attempt a forced lock
-	 * @return Meta-Task that waits until all vaults are locked or fails after the first failure of a subtask
+	 * @return Meta-Task that waits for all subtasks, which skip vaults that are not unlocked, and fails afterwards if any subtask failed
 	 */
 	public Task<Collection<Vault>> createLockAllTask(Collection<Vault> vaults, boolean forced) {
 		List<Task<Vault>> lockTasks = vaults.stream().<Task<Vault>>map(v -> new LockVaultTask(v, forced)).toList();
@@ -128,7 +127,7 @@ public class VaultService {
 	}
 
 	/**
-	 * A task that waits for completion of multiple other tasks
+	 * A task that waits for completion of multiple other tasks and fails once all are done, if any failed
 	 */
 	private static class WaitForTasksTask extends Task<Collection<Vault>> {
 
@@ -142,20 +141,19 @@ public class VaultService {
 
 		@Override
 		protected Collection<Vault> call() throws ExecutionException, InterruptedException {
-			Iterator<Task<Vault>> remainingTasks = startedTasks.iterator();
 			Collection<Vault> completed = new ArrayList<>();
-			try {
-				// wait for all tasks:
-				while (remainingTasks.hasNext()) {
-					Vault done = remainingTasks.next().get();
-					completed.add(done);
+			ExecutionException firstFailure = null;
+			for (Task<Vault> task : startedTasks) {
+				try {
+					completed.add(task.get());
+				} catch (ExecutionException e) {
+					if (firstFailure == null) {
+						firstFailure = e;
+					}
 				}
-			} catch (ExecutionException e) {
-				// cancel all remaining:
-				while (remainingTasks.hasNext()) {
-					remainingTasks.next().cancel(true);
-				}
-				throw e;
+			}
+			if (firstFailure != null) {
+				throw firstFailure;
 			}
 			return completed;
 		}
@@ -181,29 +179,24 @@ public class VaultService {
 		}
 
 		@Override
-		protected Vault call() throws UnmountFailedException, IOException {
-			vault.lock(forced);
-			return vault;
-		}
-
-		@Override
-		protected void scheduled() {
-			vault.stateProperty().transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING);
-		}
-
-		@Override
-		protected void succeeded() {
-			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
-		}
-
-		@Override
-		protected void failed() {
-			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
-		}
-
-		@Override
-		protected void cancelled() {
-			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
+		protected Vault call() throws UnmountFailedException, IOException, InterruptedException {
+			var state = vault.stateProperty();
+			while (!state.transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING)) {
+				switch (state.get()) {
+					case UNLOCKED -> {} // settled by another workflow in the meantime, retry
+					case PROCESSING -> state.awaitStateOtherThan(VaultState.Value.PROCESSING);
+					default -> {
+						LOG.debug("Skipping lock of {}, which is not unlocked.", vault.getDisplayName());
+						return vault;
+					}
+				}
+			}
+			try {
+				vault.lock(forced);
+				return vault;
+			} finally {
+				vault.finishProcessing();
+			}
 		}
 
 	}

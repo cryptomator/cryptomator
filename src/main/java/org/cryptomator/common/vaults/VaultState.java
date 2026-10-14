@@ -130,6 +130,23 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		}
 	}
 
+	/**
+	 * Waits, without a timeout, until the state differs from the specified one.
+	 *
+	 * @param state what state to wait out
+	 * @throws InterruptedException if the current thread is interrupted
+	 */
+	public void awaitStateOtherThan(Value state) throws InterruptedException {
+		lock.lock();
+		try {
+			while (value.get() == state) {
+				valueChanged.await();
+			}
+		} finally {
+			lock.unlock();
+		}
+	}
+
 	private void signal() {
 		lock.lock();
 		try {

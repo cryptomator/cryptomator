@@ -14,6 +14,7 @@ import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.event.FileSystemEventAggregator;
 import org.cryptomator.event.NotificationManager;
 import org.cryptomator.integrations.mount.Mount;
+import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,7 +77,11 @@ class VaultTest {
 	}
 
 	private void unlock(Mount mount, boolean supportsWhenTerminated) throws Exception {
-		Mockito.when(mounter.mount(Mockito.any(), Mockito.any())).thenReturn(new Mounter.MountHandle(mount, false, supportsWhenTerminated, specialCleanup));
+		unlock(mount, false, supportsWhenTerminated);
+	}
+
+	private void unlock(Mount mount, boolean supportsUnmountForced, boolean supportsWhenTerminated) throws Exception {
+		Mockito.when(mounter.mount(Mockito.any(), Mockito.any())).thenReturn(new Mounter.MountHandle(mount, supportsUnmountForced, supportsWhenTerminated, specialCleanup));
 		vault.unlock(Mockito.mock(MasterkeyLoader.class));
 	}
 
@@ -103,6 +108,36 @@ class VaultTest {
 
 		Assertions.assertEquals(VaultState.Value.LOCKED, state.getValue());
 		Mockito.verify(cryptoFileSystem).close();
+	}
+
+	@Test
+	public void testTerminationDuringProcessingLeavesStateToOwner() throws Exception {
+		unlock(mount, true);
+		state.set(VaultState.Value.PROCESSING);
+
+		terminated.complete(null);
+
+		Assertions.assertEquals(VaultState.Value.PROCESSING, state.getValue());
+		Mockito.verify(mount).close();
+		Mockito.verify(cryptoFileSystem).close();
+		vault.finishProcessing();
+		Assertions.assertEquals(VaultState.Value.LOCKED, state.getValue());
+	}
+
+	@Test
+	public void testTerminationWhileForceDecisionPendingLocks() throws Exception {
+		unlock(mount, true, true);
+		state.set(VaultState.Value.PROCESSING);
+		Mockito.doThrow(UnmountFailedException.class).when(mount).unmount();
+		Assertions.assertThrows(UnmountFailedException.class, () -> vault.lock(false));
+
+		terminated.complete(null);
+		Assertions.assertEquals(VaultState.Value.PROCESSING, state.getValue());
+		vault.lock(true);
+		vault.finishProcessing();
+
+		Mockito.verify(mount, Mockito.never()).unmountForced();
+		Assertions.assertEquals(VaultState.Value.LOCKED, state.getValue());
 	}
 
 	@Test
@@ -162,6 +197,65 @@ class VaultTest {
 		Mockito.verify(mount).unmount();
 		Mockito.verify(specialCleanup).run();
 		Mockito.verify(cryptoFileSystem).close();
+	}
+
+	@Test
+	public void testLockWrapsFailedCloseAsIOException() throws Exception {
+		unlock(mount, false);
+		var closeFailure = new UnmountFailedException("close failed");
+		Mockito.doThrow(closeFailure).when(mount).close();
+
+		var thrown = Assertions.assertThrows(IOException.class, () -> vault.lock(false));
+
+		Assertions.assertSame(closeFailure, thrown.getCause());
+		Assertions.assertNull(vault.getMountPoint());
+	}
+
+	@Test
+	public void testFinishProcessingWithMountSettlesUnlocked() throws Exception {
+		unlock(mount, false);
+		state.set(VaultState.Value.PROCESSING);
+
+		vault.finishProcessing();
+
+		Assertions.assertEquals(VaultState.Value.UNLOCKED, state.getValue());
+	}
+
+	@Test
+	public void testFinishProcessingAfterFailedCloseSettlesLocked() throws Exception {
+		unlock(mount, false);
+		state.set(VaultState.Value.PROCESSING);
+		Mockito.doThrow(IOException.class).when(mount).close();
+		Assertions.assertThrows(IOException.class, () -> vault.lock(false));
+
+		vault.finishProcessing();
+
+		Assertions.assertEquals(VaultState.Value.LOCKED, state.getValue());
+	}
+
+	@Test
+	public void testFinishProcessingWithoutOwnershipKeepsState() {
+		vault.finishProcessing();
+
+		Assertions.assertEquals(VaultState.Value.UNLOCKED, state.getValue());
+	}
+
+	@Test
+	public void testMarkLockedIfUnmountedLeavesProcessing() throws Exception {
+		unlock(mount, false);
+		vault.lock(false);
+		state.set(VaultState.Value.PROCESSING);
+
+		Assertions.assertFalse(vault.markLockedIfUnmounted());
+		Assertions.assertEquals(VaultState.Value.PROCESSING, state.getValue());
+	}
+
+	@Test
+	public void testMarkLockedIfUnmountedLeavesMountedVault() throws Exception {
+		unlock(mount, false);
+
+		Assertions.assertFalse(vault.markLockedIfUnmounted());
+		Assertions.assertEquals(VaultState.Value.UNLOCKED, state.getValue());
 	}
 
 	@Test
