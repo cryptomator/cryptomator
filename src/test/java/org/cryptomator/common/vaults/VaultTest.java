@@ -113,7 +113,7 @@ class VaultTest {
 	@Test
 	public void testTerminationDuringProcessingLeavesStateToOwner() throws Exception {
 		unlock(mount, true);
-		state.set(VaultState.Value.PROCESSING);
+		state.transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING);
 
 		terminated.complete(null);
 
@@ -127,7 +127,7 @@ class VaultTest {
 	@Test
 	public void testTerminationWhileForceDecisionPendingLocks() throws Exception {
 		unlock(mount, true, true);
-		state.set(VaultState.Value.PROCESSING);
+		state.transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING);
 		Mockito.doThrow(UnmountFailedException.class).when(mount).unmount();
 		Assertions.assertThrows(UnmountFailedException.class, () -> vault.lock(false));
 
@@ -214,7 +214,7 @@ class VaultTest {
 	@Test
 	public void testFinishProcessingWithMountSettlesUnlocked() throws Exception {
 		unlock(mount, false);
-		state.set(VaultState.Value.PROCESSING);
+		state.transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING);
 
 		vault.finishProcessing();
 
@@ -224,7 +224,7 @@ class VaultTest {
 	@Test
 	public void testFinishProcessingAfterFailedCloseSettlesLocked() throws Exception {
 		unlock(mount, false);
-		state.set(VaultState.Value.PROCESSING);
+		state.transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING);
 		Mockito.doThrow(IOException.class).when(mount).close();
 		Assertions.assertThrows(IOException.class, () -> vault.lock(false));
 
@@ -244,7 +244,7 @@ class VaultTest {
 	public void testMarkLockedIfUnmountedLeavesProcessing() throws Exception {
 		unlock(mount, false);
 		vault.lock(false);
-		state.set(VaultState.Value.PROCESSING);
+		state.transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING);
 
 		Assertions.assertFalse(vault.markLockedIfUnmounted());
 		Assertions.assertEquals(VaultState.Value.PROCESSING, state.getValue());

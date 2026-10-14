@@ -17,6 +17,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Fixed password retrieval from keychain not working while the system keychain is locked on Linux ([#4294](https://github.com/cryptomator/cryptomator/pull/4294), [#4301](https://github.com/cryptomator/cryptomator/pull/4301), [#4302](https://github.com/cryptomator/cryptomator/pull/4302))
 * Fixed background threads piling up with every unlock and lock of a vault
 * Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
+* Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
 
 ### Changed
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))

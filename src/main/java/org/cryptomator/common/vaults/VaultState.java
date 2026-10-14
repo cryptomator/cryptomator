@@ -98,13 +98,6 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		return success;
 	}
 
-	public void set(Value newState) {
-		var oldState = value.getAndSet(newState);
-		if (oldState != newState) {
-			fireValueChangedEvent();
-		}
-	}
-
 	/**
 	 * Waits for the specified time, until the desired state is reached.
 	 *
