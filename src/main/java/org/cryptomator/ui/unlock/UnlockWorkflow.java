@@ -2,6 +2,7 @@ package org.cryptomator.ui.unlock;
 
 import dagger.Lazy;
 import org.cryptomator.common.mount.ConflictingMountServiceException;
+import org.cryptomator.common.mount.FSKitExtensionSwitchedOffException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -14,10 +15,12 @@ import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.concurrent.Task;
@@ -41,6 +44,7 @@ public class UnlockWorkflow extends Task<Void> {
 
 	private final Stage mainWindow;
 	private final Stage window;
+	private final Stage owner;
 	private final Vault vault;
 	private final VaultService vaultService;
 	private final Lazy<Scene> successScene;
@@ -54,6 +58,7 @@ public class UnlockWorkflow extends Task<Void> {
 	@Inject
 	UnlockWorkflow(@PrimaryStage Stage mainWindow, //
 				   @UnlockWindow Stage window, //
+				   @Nullable @Named("unlockWindowOwner") Stage owner, //
 				   @UnlockWindow Vault vault, //
 				   VaultService vaultService, //
 				   @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, //
@@ -65,6 +70,7 @@ public class UnlockWorkflow extends Task<Void> {
 				   Dialogs dialogs) {
 		this.mainWindow = mainWindow;
 		this.window = window;
+		this.owner = owner;
 		this.vault = vault;
 		this.vaultService = vaultService;
 		this.successScene = successScene;
@@ -157,6 +163,7 @@ public class UnlockWorkflow extends Task<Void> {
 			case IllegalMountPointException e -> handleIllegalMountPointError(e);
 			case ConflictingMountServiceException _ -> handleConflictingMountServiceException();
 			case ReadOnlyFileSystemException _ -> handleReadOnlyFileSystem();
+			case FSKitExtensionSwitchedOffException _ -> handleExtensionSwitchedOff();
 			default -> handleGenericError(throwable);
 		}
 	}
@@ -164,20 +171,32 @@ public class UnlockWorkflow extends Task<Void> {
 	private void handleReadOnlyFileSystem() {
 		var readOnlyDialog = dialogs.prepareRetryIfReadonlyDialog(mainWindow, stage -> {
 			stage.close();
-			this.retry();
+			vault.getVaultSettings().usesReadOnlyMode.set(true);
+			restartUnlock(mainWindow);
 		}).build();
 
 		Platform.runLater(readOnlyDialog::showAndWait);
 	}
 
-	private void retry() {
+	private void handleExtensionSwitchedOff() {
+		var extensionSwitchedOffDialog = dialogs.prepareFSKitExtensionSwitchedOffDialog(mainWindow, vault, stage -> {
+			stage.close();
+			restartUnlock(owner);
+		}).build();
+
+		Platform.runLater(() -> {
+			window.close();
+			extensionSwitchedOffDialog.showAndWait();
+		});
+	}
+
+	private void restartUnlock(@Nullable Stage unlockOwner) {
 		try {
-			vault.getVaultSettings().usesReadOnlyMode.set(true);
 			var isLocked = vault.stateProperty().awaitState(VaultState.Value.LOCKED, 5, TimeUnit.SECONDS);
 			if (!isLocked) {
 				LOG.error("Vault did not changed to LOCKED state within 5 seconds. Aborting unlock retry.");
 			} else {
-				appWindows.startUnlockWorkflow(vault, mainWindow);
+				appWindows.startUnlockWorkflow(vault, unlockOwner);
 			}
 		} catch (InterruptedException e) {
 			LOG.error("Waiting for LOCKED vault state was interrupted. Aborting unlock retry.", e);

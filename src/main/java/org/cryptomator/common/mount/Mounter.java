@@ -39,6 +39,9 @@ public class Mounter {
 			"org.cryptomator.frontend.fuse.mount.FuseTMountProvider", Set.of("org.cryptomator.frontend.fuse.mount.MacFuseMountProvider")
 	);
 
+	// matched by name, as fskit-nio-adapter is a dependency only in the mac build
+	static final String FSKIT_EXTENSION_SWITCHED_OFF_EXCEPTION = "org.cryptomator.frontend.fskit.mount.ExtensionSwitchedOffException";
+
 	private final Environment env;
 	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
@@ -171,7 +174,14 @@ public class Mounter {
 		LOG.debug("Using mount service {} for mounting vault {}", mountService.getClass().getName(), vaultSettings.displayName);
 		var internal = new SettledMounter(mountService, builder, vaultSettings); // FIXME: no need for an inner class
 		var cleanup = internal.prepare();
-		return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), mountService.hasCapability(WHEN_TERMINATED), cleanup);
+		try {
+			return new MountHandle(builder.mount(), mountService.hasCapability(UNMOUNT_FORCED), mountService.hasCapability(WHEN_TERMINATED), cleanup);
+		} catch (MountFailedException e) {
+			if (e.getClass().getName().equals(FSKIT_EXTENSION_SWITCHED_OFF_EXCEPTION)) {
+				throw new FSKitExtensionSwitchedOffException(e);
+			}
+			throw e;
+		}
 	}
 
 	public boolean isConflictingMountService(MountService service) {
