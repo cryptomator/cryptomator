@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValueBase;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -98,33 +97,18 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		return success;
 	}
 
-	public void set(Value newState) {
-		var oldState = value.getAndSet(newState);
-		if (oldState != newState) {
-			fireValueChangedEvent();
-		}
-	}
-
 	/**
-	 * Waits for the specified time, until the desired state is reached.
+	 * Waits, without a timeout, until the state differs from the specified one.
 	 *
-	 * @param desiredState what state to wait for
-	 * @param time the maximum time to wait
-	 * @param unit the time unit of the {@code time} argument
-	 * @return {@code false} if the waiting time detectably elapsed before reaching {@code desiredState}
+	 * @param state what state to wait out
 	 * @throws InterruptedException if the current thread is interrupted
 	 */
-	public boolean awaitState(Value desiredState, long time, TimeUnit unit) throws InterruptedException {
+	public void awaitStateOtherThan(Value state) throws InterruptedException {
 		lock.lock();
 		try {
-			long remaining = TimeUnit.NANOSECONDS.convert(time, unit);
-			while (value.get() != desiredState) {
-				if (remaining <= 0L) {
-					return false;
-				}
-				remaining = valueChanged.awaitNanos(remaining);
+			while (value.get() == state) {
+				valueChanged.await();
 			}
-			return true;
 		} finally {
 			lock.unlock();
 		}

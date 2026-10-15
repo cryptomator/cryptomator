@@ -10,6 +10,7 @@ import org.cryptomator.ui.dialogs.SimpleDialog;
 import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.eventview.EventViewComponent;
 import org.cryptomator.ui.lock.LockComponent;
+import org.cryptomator.ui.lock.LockWorkflow;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.notification.NotificationComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -170,11 +171,14 @@ public class FxApplicationWindows {
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {
-					Preconditions.checkState(vault.stateProperty().transition(VaultState.Value.LOCKED, VaultState.Value.PROCESSING), "Vault not locked.");
+					if (!vault.stateProperty().transition(VaultState.Value.LOCKED, VaultState.Value.PROCESSING)) {
+						LOG.warn("Vault '{}' is {} instead of LOCKED. Skipping unlock.", vault.getDisplayName(), vault.stateProperty().get());
+						return Optional.<UnlockWorkflow>empty();
+					}
 					LOG.debug("Start unlock workflow for {}", vault.getDisplayName());
-					return unlockWorkflowFactory.create(vault, owner).unlockWorkflow();
+					return Optional.of(unlockWorkflowFactory.create(vault, owner).unlockWorkflow());
 				}, Platform::runLater) //
-				.thenAcceptAsync(UnlockWorkflow::run, executor).exceptionally(e -> {
+				.thenAcceptAsync(unlockWorkflow -> unlockWorkflow.ifPresent(UnlockWorkflow::run), executor).exceptionally(e -> {
 					showErrorWindow(e, owner == null ? primaryStage : owner, null);
 					return null;
 				});
@@ -182,12 +186,14 @@ public class FxApplicationWindows {
 
 	public CompletionStage<Void> startLockWorkflow(Vault vault, @Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {
-					Preconditions.checkState(vault.stateProperty().transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING), "Vault not unlocked.");
+					if (!vault.stateProperty().transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING)) {
+						LOG.warn("Vault '{}' is {} instead of UNLOCKED. Skipping lock.", vault.getDisplayName(), vault.stateProperty().get());
+						return Optional.<LockWorkflow>empty();
+					}
 					LOG.debug("Start lock workflow for {}", vault.getDisplayName());
-					return lockWorkflowFactory.create(vault, owner).lockWorkflow();
+					return Optional.of(lockWorkflowFactory.create(vault, owner).lockWorkflow());
 				}, Platform::runLater) //
-				.thenCompose(lockWorkflow -> CompletableFuture.runAsync(lockWorkflow, executor)) //
-				.exceptionally(e -> {
+				.thenAcceptAsync(lockWorkflow -> lockWorkflow.ifPresent(LockWorkflow::run), executor).exceptionally(e -> {
 					showErrorWindow(e, owner == null ? primaryStage : owner, null);
 					return null;
 				});

@@ -4,6 +4,8 @@
 <dict>
 	<key>com.apple.application-identifier</key>
 	<string>###APP_IDENTIFIER_PREFIX###org.cryptomator</string>
+	<key>com.apple.developer.fskit.mount</key>
+	<true/>
 	<key>com.apple.developer.team-identifier</key>
 	<string>###TEAM_IDENTIFIER###</string>
 	<key>com.apple.security.cs.allow-jit</key>

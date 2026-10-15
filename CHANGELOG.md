@@ -9,15 +9,23 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.3...HEAD)
+### Added
+* Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later
+
 ### Fixed
 * Fixed "Locate encrypted file" opening the file instead of revealing it in the file manager on Linux ([#4272](https://github.com/cryptomator/cryptomator/issues/4272))
 * Fixed password retrieval from keychain not working while the system keychain is locked on Linux ([#4294](https://github.com/cryptomator/cryptomator/pull/4294), [#4301](https://github.com/cryptomator/cryptomator/pull/4301), [#4302](https://github.com/cryptomator/cryptomator/pull/4302))
+* Fixed background threads piling up with every unlock and lock of a vault
+* Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
+* Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
+* Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu
 
 ### Changed
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
 * Migrated code to common JDK 25 APIs and constructs
 * Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
 * Updated dependencies:
+  - `org.cryptomator:integrations-api` from 1.9.0 to 1.10.0
   - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0-beta1
   - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.6
   - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.6
