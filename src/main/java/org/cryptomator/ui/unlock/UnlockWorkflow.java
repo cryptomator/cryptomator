@@ -170,7 +170,7 @@ public class UnlockWorkflow extends Task<Void> {
 		var readOnlyDialog = dialogs.prepareRetryIfReadonlyDialog(mainWindow, stage -> {
 			stage.close();
 			vault.getVaultSettings().usesReadOnlyMode.set(true);
-			restartUnlock();
+			appWindows.startUnlockWorkflow(vault, owner);
 		}).build();
 
 		Platform.runLater(readOnlyDialog::showAndWait);
@@ -179,21 +179,13 @@ public class UnlockWorkflow extends Task<Void> {
 	private void handleExtensionSwitchedOff() {
 		var extensionSwitchedOffDialog = dialogs.prepareFSKitExtensionSwitchedOffDialog(mainWindow, vault, stage -> {
 			stage.close();
-			restartUnlock();
+			appWindows.startUnlockWorkflow(vault, owner);
 		}).build();
 
 		Platform.runLater(() -> {
 			window.close();
 			extensionSwitchedOffDialog.showAndWait();
 		});
-	}
-
-	private void restartUnlock() {
-		if (!vault.isLocked()) {
-			LOG.warn("Vault '{}' is {} instead of LOCKED. Aborting unlock retry.", vault.getDisplayName(), vault.getState());
-			return;
-		}
-		appWindows.startUnlockWorkflow(vault, owner);
 	}
 
 	@Override

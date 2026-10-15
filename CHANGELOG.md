@@ -18,6 +18,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Fixed background threads piling up with every unlock and lock of a vault
 * Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
 * Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
+* Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu
 
 ### Changed
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))

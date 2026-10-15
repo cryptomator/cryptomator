@@ -140,16 +140,6 @@ class UnlockWorkflowTest {
 		Assertions.assertFalse(vaultSettings.usesReadOnlyMode.get());
 	}
 
-	@Test
-	public void testExtensionSwitchedOffRetryAbortsWhenVaultIsNotLocked() throws Exception {
-		var okAction = failWithExtensionSwitchedOffAndCaptureRetry();
-		Mockito.when(vault.isLocked()).thenReturn(false); // e.g. an unlock from the tray menu started while the dialog was open
-
-		okAction.accept(Mockito.mock(Stage.class));
-
-		Mockito.verify(appWindows, Mockito.never()).startUnlockWorkflow(Mockito.any(), Mockito.any());
-	}
-
 	private Consumer<Stage> failWithExtensionSwitchedOffAndCaptureRetry() throws Exception {
 		Mockito.when(dialogs.prepareFSKitExtensionSwitchedOffDialog(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(dialogBuilder);
 		runFailingWith(new FSKitExtensionSwitchedOffException(new MountFailedException("switched off")));
@@ -179,7 +169,6 @@ class UnlockWorkflowTest {
 			invocation.getArgument(0, Runnable.class).run();
 			return null;
 		});
-		Mockito.when(vault.isLocked()).thenReturn(true);
 		Mockito.doThrow(exception).when(keyLoadingStrategy).use(Mockito.any());
 
 		workflow.run();
