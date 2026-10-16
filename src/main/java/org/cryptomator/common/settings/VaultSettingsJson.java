@@ -45,6 +45,9 @@ class VaultSettingsJson {
 	@JsonProperty("autoLockIdleSeconds")
 	int autoLockIdleSeconds = VaultSettings.DEFAULT_AUTOLOCK_IDLE_SECONDS;
 
+	@JsonProperty("autoLockOnSystemLock")
+	boolean autoLockOnSystemLock = VaultSettings.DEFAULT_AUTOLOCK_ON_SYSTEM_LOCK;
+
 	@JsonProperty("mountService")
 	String mountService;
 

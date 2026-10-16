@@ -31,20 +31,35 @@ public class AutoLocker {
 		scheduler.scheduleAtFixedRate(this::tick, 0, 1, TimeUnit.MINUTES);
 	}
 
+	/**
+	 * Locks all unlocked vaults that have {@link org.cryptomator.common.settings.VaultSettings#autoLockOnSystemLock} enabled.
+	 * <p>
+	 * Intended to be called when the user session gets locked or the system is about to go to sleep.
+	 * The vaults are locked asynchronously, so this method can safely be called from any thread.
+	 *
+	 * @param reason A human-readable reason used for logging, e.g. "screen lock"
+	 */
+	public void lockOnSystemLock(String reason) {
+		scheduler.execute(() -> vaultList.stream() // all vaults
+				.filter(Vault::isUnlocked) // unlocked vaults
+				.filter(vault -> vault.getVaultSettings().autoLockOnSystemLock.get()) // vaults that want to be locked
+				.forEach(vault -> autolock(vault, reason)));
+	}
+
 	private void tick() {
 		vaultList.stream() // all vaults
 				.filter(Vault::isUnlocked) // unlocked vaults
 				.filter(this::exceedsIdleTime) // idle vaults
-				.forEach(this::autolock);
+				.forEach(vault -> autolock(vault, "idle timeout"));
 	}
 
-	private void autolock(Vault vault) {
+	private void autolock(Vault vault, String reason) {
 		try {
 			vault.lock(false);
 			Platform.runLater(() -> vault.stateProperty().set(VaultState.Value.LOCKED));
-			LOG.info("Autolocked {} after idle timeout", vault.getDisplayName());
+			LOG.info("Autolocked {} after {}", vault.getDisplayName(), reason);
 		} catch (UnmountFailedException | IOException e) {
-			LOG.error("Autolocking failed.", e);
+			LOG.error("Autolocking {} after {} failed.", vault.getDisplayName(), reason, e);
 		}
 	}
 
