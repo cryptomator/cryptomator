@@ -1,0 +1,28 @@
+name: Check docs and website URLs #using Lychee
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # every Monday
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check-urls:
+    name: Check URLs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      # explicitly listed files are checked regardless of their extension
+      - name: List tracked text files containing URLs
+        run: git grep -lI -e 'https\?://' > url-files.txt
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --no-progress
+            --include '^https?://(docs\.)?cryptomator\.org([/?#]|$)'
+            --files-from url-files.txt
