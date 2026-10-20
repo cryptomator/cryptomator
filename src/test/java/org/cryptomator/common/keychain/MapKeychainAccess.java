@@ -13,10 +13,18 @@ import java.util.Map;
 
 class MapKeychainAccess implements KeychainAccessProvider {
 
-	private final Map<String, char[]> map = new HashMap<>();
+	private final Map<String, char[]> map;
+
+	MapKeychainAccess() {
+		this(new HashMap<>());
+	}
+
+	MapKeychainAccess(Map<String, char[]> map) {
+		this.map = map;
+	}
 
 	@Override
-	public void storePassphrase(String key, String displayName,CharSequence passphrase) {
+	public void storePassphrase(String key, String displayName,CharSequence passphrase) throws KeychainAccessException {
 		char[] pw = new char[passphrase.length()];
 		for (int i = 0; i < passphrase.length(); i++) {
 			pw[i] = passphrase.charAt(i);

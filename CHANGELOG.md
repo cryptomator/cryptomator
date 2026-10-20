@@ -12,6 +12,9 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Fixed
 * Fixed "Locate encrypted file" opening the file instead of revealing it in the file manager on Linux ([#4272](https://github.com/cryptomator/cryptomator/issues/4272))
 * Fixed password retrieval from keychain not working while the system keychain is locked on Linux ([#4294](https://github.com/cryptomator/cryptomator/pull/4294), [#4301](https://github.com/cryptomator/cryptomator/pull/4301), [#4302](https://github.com/cryptomator/cryptomator/pull/4302))
+* Fixed keychain backend and quick access settings being reset when the selected service was unavailable at startup
+* Fixed changing the keychain backend leaving the Hub device key behind; the previous backend is now kept if moving the saved passwords fails
+* Fixed Hub unlock failing until manual cleanup when the device key file and its stored passphrase did not match
 
 ### Changed
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))

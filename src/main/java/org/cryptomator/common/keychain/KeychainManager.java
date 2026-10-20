@@ -14,6 +14,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -161,14 +162,46 @@ public class KeychainManager implements KeychainAccessProvider {
 		if (oldProvider instanceof KeychainManager || newProvider instanceof KeychainManager) {
 			throw new IllegalArgumentException("KeychainManger must not be the source or target of migration");
 		}
-		for (var entry : idsAndNames.entrySet()) {
-			var passphrase = oldProvider.loadPassphrase(entry.getKey());
-			if (passphrase != null) {
-				var wrapper = new Passphrase(passphrase);
-				oldProvider.deletePassphrase(entry.getKey()); //we cannot apply "first-write-then-delete" pattern here, since we can potentially write to the same passphrase store (e.g., touchID and regular keychain)
-				newProvider.storePassphrase(entry.getKey(), entry.getValue(), wrapper);
-				wrapper.destroy();
+		var migrated = new LinkedHashMap<String, String>();
+		try {
+			for (var entry : idsAndNames.entrySet()) {
+				if (move(oldProvider, newProvider, entry.getKey(), entry.getValue())) {
+					migrated.put(entry.getKey(), entry.getValue());
+				}
 			}
+		} catch (KeychainAccessException e) {
+			for (var entry : migrated.entrySet()) {
+				try {
+					move(newProvider, oldProvider, entry.getKey(), entry.getValue());
+				} catch (KeychainAccessException rollbackException) {
+					e.addSuppressed(rollbackException);
+				}
+			}
+			throw e;
 		}
+	}
+
+	private static boolean move(KeychainAccessProvider source, KeychainAccessProvider target, String key, String displayName) throws KeychainAccessException {
+		var passphrase = source.loadPassphrase(key);
+		if (passphrase == null) {
+			return false;
+		}
+		var wrapper = new Passphrase(passphrase);
+		try {
+			source.deletePassphrase(key); // delete before storing: both providers may address the same keychain item (e.g., Touch ID and regular keychain on macOS), so deleting afterwards would remove the moved entry
+			try {
+				target.storePassphrase(key, displayName, wrapper);
+			} catch (KeychainAccessException e) {
+				try {
+					source.storePassphrase(key, displayName, wrapper);
+				} catch (KeychainAccessException restoreException) {
+					e.addSuppressed(restoreException);
+				}
+				throw e;
+			}
+		} finally {
+			wrapper.destroy();
+		}
+		return true;
 	}
 }
