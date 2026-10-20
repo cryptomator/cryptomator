@@ -162,46 +162,66 @@ public class KeychainManager implements KeychainAccessProvider {
 		if (oldProvider instanceof KeychainManager || newProvider instanceof KeychainManager) {
 			throw new IllegalArgumentException("KeychainManger must not be the source or target of migration");
 		}
-		var migrated = new LinkedHashMap<String, String>();
+		var migrated = new LinkedHashMap<String, Passphrase>();
 		try {
 			for (var entry : idsAndNames.entrySet()) {
-				if (move(oldProvider, newProvider, entry.getKey(), entry.getValue())) {
-					migrated.put(entry.getKey(), entry.getValue());
+				var passphrase = move(oldProvider, newProvider, entry.getKey(), entry.getValue());
+				if (passphrase != null) {
+					migrated.put(entry.getKey(), passphrase);
 				}
 			}
 		} catch (KeychainAccessException e) {
 			for (var entry : migrated.entrySet()) {
-				try {
-					move(newProvider, oldProvider, entry.getKey(), entry.getValue());
-				} catch (KeychainAccessException rollbackException) {
-					e.addSuppressed(rollbackException);
-				}
+				moveBack(newProvider, oldProvider, entry.getKey(), idsAndNames.get(entry.getKey()), entry.getValue(), e);
 			}
 			throw e;
+		} finally {
+			migrated.values().forEach(Passphrase::destroy);
 		}
 	}
 
-	private static boolean move(KeychainAccessProvider source, KeychainAccessProvider target, String key, String displayName) throws KeychainAccessException {
-		var passphrase = source.loadPassphrase(key);
-		if (passphrase == null) {
-			return false;
+	// returns the moved passphrase, which the caller must destroy, or null if the source has none
+	private static Passphrase move(KeychainAccessProvider source, KeychainAccessProvider target, String key, String displayName) throws KeychainAccessException {
+		var loaded = source.loadPassphrase(key);
+		if (loaded == null) {
+			return null;
 		}
-		var wrapper = new Passphrase(passphrase);
+		var passphrase = new Passphrase(loaded);
 		try {
 			source.deletePassphrase(key); // delete before storing: both providers may address the same keychain item (e.g., Touch ID and regular keychain on macOS), so deleting afterwards would remove the moved entry
-			try {
-				target.storePassphrase(key, displayName, wrapper);
-			} catch (KeychainAccessException e) {
-				try {
-					source.storePassphrase(key, displayName, wrapper);
-				} catch (KeychainAccessException restoreException) {
-					e.addSuppressed(restoreException);
-				}
-				throw e;
-			}
-		} finally {
-			wrapper.destroy();
+			storeOrRestore(source, target, key, displayName, passphrase);
+		} catch (KeychainAccessException | RuntimeException e) {
+			passphrase.destroy();
+			throw e;
 		}
-		return true;
+		return passphrase;
+	}
+
+	// restores from the retained copy, since the new provider may no longer be readable after the failure
+	private static void moveBack(KeychainAccessProvider newProvider, KeychainAccessProvider oldProvider, String key, String displayName, Passphrase passphrase, KeychainAccessException failure) {
+		try {
+			newProvider.deletePassphrase(key);
+		} catch (KeychainAccessException deleteException) {
+			failure.addSuppressed(deleteException);
+		}
+		try {
+			storeOrRestore(newProvider, oldProvider, key, displayName, passphrase);
+		} catch (KeychainAccessException restoreException) {
+			failure.addSuppressed(restoreException);
+		}
+	}
+
+	// if the target refuses the passphrase, it goes back into the source, so the entry isn't lost from both
+	private static void storeOrRestore(KeychainAccessProvider source, KeychainAccessProvider target, String key, String displayName, Passphrase passphrase) throws KeychainAccessException {
+		try {
+			target.storePassphrase(key, displayName, passphrase);
+		} catch (KeychainAccessException e) {
+			try {
+				source.storePassphrase(key, displayName, passphrase);
+			} catch (KeychainAccessException restoreException) {
+				e.addSuppressed(restoreException);
+			}
+			throw e;
+		}
 	}
 }

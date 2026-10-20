@@ -112,7 +112,7 @@ class KeychainManagerTest {
 		}
 
 		@Test
-		public void testMigrateRollsBackRemainingEntriesIfOneRollbackFails() throws KeychainAccessException {
+		public void testMigrateRollsBackRemainingEntriesAndKeepsUnrestorableEntryIfOneRollbackFails() throws KeychainAccessException {
 			var refuseStores = new AtomicBoolean(false);
 			var oldProvider = new MapKeychainAccess() {
 				@Override
@@ -145,8 +145,49 @@ class KeychainManagerTest {
 
 			Assertions.assertEquals("store failed", e.getMessage());
 			Assertions.assertEquals(1, e.getSuppressed().length);
+			Assertions.assertArrayEquals("asd".toCharArray(), newProvider.loadPassphrase("first"));
 			Assertions.assertArrayEquals("qwe".toCharArray(), oldProvider.loadPassphrase("second"));
 			Assertions.assertNull(newProvider.loadPassphrase("second"));
+		}
+
+		@Test
+		public void testMigrateRestoresEntriesIfNewProviderBecomesUnavailable() throws KeychainAccessException {
+			var oldProvider = new MapKeychainAccess();
+			var newProvider = new MapKeychainAccess() {
+				private boolean unavailable;
+
+				@Override
+				public void storePassphrase(String key, String displayName, CharSequence passphrase) throws KeychainAccessException {
+					if (key.equals("second")) {
+						unavailable = true;
+						throw new KeychainAccessException("store failed");
+					}
+					super.storePassphrase(key, displayName, passphrase);
+				}
+
+				@Override
+				public char[] loadPassphrase(String key) {
+					return unavailable ? null : super.loadPassphrase(key);
+				}
+
+				@Override
+				public void deletePassphrase(String key) throws KeychainAccessException {
+					if (unavailable) {
+						throw new KeychainAccessException("delete failed");
+					}
+					super.deletePassphrase(key);
+				}
+			};
+			oldProvider.storePassphrase("first", "First", "asd");
+			oldProvider.storePassphrase("second", "Second", "qwe");
+			var idsAndNames = new LinkedHashMap<String, String>();
+			idsAndNames.put("first", "First");
+			idsAndNames.put("second", "Second");
+
+			Assertions.assertThrows(KeychainAccessException.class, () -> KeychainManager.migrate(oldProvider, newProvider, idsAndNames));
+
+			Assertions.assertArrayEquals("asd".toCharArray(), oldProvider.loadPassphrase("first"));
+			Assertions.assertArrayEquals("qwe".toCharArray(), oldProvider.loadPassphrase("second"));
 		}
 
 	}

@@ -38,7 +38,7 @@ class MapKeychainAccess implements KeychainAccessProvider {
 	}
 
 	@Override
-	public void deletePassphrase(String key) {
+	public void deletePassphrase(String key) throws KeychainAccessException {
 		map.remove(key);
 	}
 
