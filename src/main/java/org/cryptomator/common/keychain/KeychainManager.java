@@ -170,7 +170,7 @@ public class KeychainManager implements KeychainAccessProvider {
 					migrated.put(entry.getKey(), passphrase);
 				}
 			}
-		} catch (KeychainAccessException e) {
+		} catch (KeychainAccessException | RuntimeException e) {
 			for (var entry : migrated.entrySet()) {
 				moveBack(newProvider, oldProvider, entry.getKey(), idsAndNames.get(entry.getKey()), entry.getValue(), e);
 			}
@@ -198,27 +198,27 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	// restores from the retained copy, since the new provider may no longer be readable after the failure
-	private static void moveBack(KeychainAccessProvider newProvider, KeychainAccessProvider oldProvider, String key, String displayName, Passphrase passphrase, KeychainAccessException failure) {
+	private static void moveBack(KeychainAccessProvider newProvider, KeychainAccessProvider oldProvider, String key, String displayName, Passphrase passphrase, Exception failure) {
 		try {
 			newProvider.deletePassphrase(key);
-		} catch (KeychainAccessException deleteException) {
+		} catch (KeychainAccessException | RuntimeException deleteException) {
 			failure.addSuppressed(deleteException);
 		}
 		try {
 			storeOrRestore(newProvider, oldProvider, key, displayName, passphrase);
-		} catch (KeychainAccessException restoreException) {
+		} catch (KeychainAccessException | RuntimeException restoreException) {
 			failure.addSuppressed(restoreException);
 		}
 	}
 
-	// if the target refuses the passphrase, it goes back into the source, so the entry isn't lost from both
+	// if the target refuses the passphrase, try to put it back into the source, so the entry isn't lost from both
 	private static void storeOrRestore(KeychainAccessProvider source, KeychainAccessProvider target, String key, String displayName, Passphrase passphrase) throws KeychainAccessException {
 		try {
 			target.storePassphrase(key, displayName, passphrase);
-		} catch (KeychainAccessException e) {
+		} catch (KeychainAccessException | RuntimeException e) {
 			try {
 				source.storePassphrase(key, displayName, passphrase);
-			} catch (KeychainAccessException restoreException) {
+			} catch (KeychainAccessException | RuntimeException restoreException) {
 				e.addSuppressed(restoreException);
 			}
 			throw e;

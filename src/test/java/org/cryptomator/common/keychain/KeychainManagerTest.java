@@ -100,6 +100,42 @@ class KeychainManagerTest {
 		}
 
 		@Test
+		public void testMigrateRestoresEntriesIfNewProviderThrowsUnchecked() throws KeychainAccessException {
+			var oldProvider = new MapKeychainAccess();
+			var newProvider = new MapKeychainAccess() {
+				private boolean broken;
+
+				@Override
+				public void storePassphrase(String key, String displayName, CharSequence passphrase) throws KeychainAccessException {
+					if (key.equals("second")) {
+						broken = true;
+						throw new IllegalStateException("store failed");
+					}
+					super.storePassphrase(key, displayName, passphrase);
+				}
+
+				@Override
+				public void deletePassphrase(String key) throws KeychainAccessException {
+					if (broken) {
+						throw new IllegalStateException("delete failed");
+					}
+					super.deletePassphrase(key);
+				}
+			};
+			oldProvider.storePassphrase("first", "First", "asd");
+			oldProvider.storePassphrase("second", "Second", "qwe");
+			var idsAndNames = new LinkedHashMap<String, String>();
+			idsAndNames.put("first", "First");
+			idsAndNames.put("second", "Second");
+
+			var e = Assertions.assertThrows(IllegalStateException.class, () -> KeychainManager.migrate(oldProvider, newProvider, idsAndNames));
+
+			Assertions.assertEquals("store failed", e.getMessage());
+			Assertions.assertArrayEquals("asd".toCharArray(), oldProvider.loadPassphrase("first"));
+			Assertions.assertArrayEquals("qwe".toCharArray(), oldProvider.loadPassphrase("second"));
+		}
+
+		@Test
 		public void testMigrateKeepsEntriesIfBothProvidersShareOneStore() throws KeychainAccessException {
 			var store = new HashMap<String, char[]>();
 			var oldProvider = new MapKeychainAccess(store);
