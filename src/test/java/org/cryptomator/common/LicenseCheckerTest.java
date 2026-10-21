@@ -86,4 +86,24 @@ public class LicenseCheckerTest {
 		Assertions.assertFalse(decoded.isPresent());
 	}
 
+	@Test
+	public void testCheckEmptyX5c() {
+		// header: {"x5c":[],"alg":"ES512"}
+		String license = "eyJ4NWMiOltdLCJhbGciOiJFUzUxMiJ9.eyJhdWQiOiJDcnlwdG9tYXRvciIsInN1YiI6ImNyeXB0b2JvdEBleGFtcGxlLmNvbSIsImtpZCI6IllFVjFFSXY5dllMR1lfR1RoQ0VPTGtleW1xUDBlZVhVVTdNbWxKaHFnR0EiLCJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODA4MVwvIiwiZXhwIjozMjUwMzY4MDAwMCwiaWF0Ijo5NDY2ODQ4MDAsInNlYXRzIjozfQ.AMBwG0CnIu8FHLsmynfT-JHwE-pwjXGh8SoExaYWY6n88cL18gzI_tYl3cjZSvLVZImg-VRZi7SkhDVt5zrOXX12AdNst1jJc0HJIA0dJUiM22b3XmkIjionTXmK-Njgp9XIQV4qtYoFPXjsL4KKTa95yx5oTvDD7ZAHFxur5_nN3y4t";
+
+		Optional<DecodedJWT> decoded = licenseChecker.check(license);
+
+		Assertions.assertFalse(decoded.isPresent());
+	}
+
+	@Test
+	public void testCheckMalformedX5cEntry() {
+		// header: {"x5c":["bm90IGEgY2VydGlmaWNhdGU="],"alg":"ES512"}, i.e. valid Base64 but not a DER certificate
+		String license = "eyJ4NWMiOlsiYm05MElHRWdZMlZ5ZEdsbWFXTmhkR1U9Il0sImFsZyI6IkVTNTEyIn0.eyJhdWQiOiJDcnlwdG9tYXRvciIsInN1YiI6ImNyeXB0b2JvdEBleGFtcGxlLmNvbSIsImtpZCI6IllFVjFFSXY5dllMR1lfR1RoQ0VPTGtleW1xUDBlZVhVVTdNbWxKaHFnR0EiLCJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODA4MVwvIiwiZXhwIjozMjUwMzY4MDAwMCwiaWF0Ijo5NDY2ODQ4MDAsInNlYXRzIjozfQ.AMBwG0CnIu8FHLsmynfT-JHwE-pwjXGh8SoExaYWY6n88cL18gzI_tYl3cjZSvLVZImg-VRZi7SkhDVt5zrOXX12AdNst1jJc0HJIA0dJUiM22b3XmkIjionTXmK-Njgp9XIQV4qtYoFPXjsL4KKTa95yx5oTvDD7ZAHFxur5_nN3y4t";
+
+		Optional<DecodedJWT> decoded = licenseChecker.check(license);
+
+		Assertions.assertFalse(decoded.isPresent());
+	}
+
 }
