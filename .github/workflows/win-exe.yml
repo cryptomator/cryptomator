@@ -54,6 +54,7 @@ on:
     paths:
       - '.github/workflows/win-exe.yml'
       - 'dist/win/**'
+      - 'dist/common/**'
 
 
 env:
@@ -159,6 +160,8 @@ jobs:
           --no-man-pages
           --strip-debug
           --compress zip-0
+      - name: Remove distrusted CA certificates from runtime
+        run: ${JAVA_HOME}/bin/java dist/common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage

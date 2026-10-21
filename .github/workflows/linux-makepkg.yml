@@ -21,6 +21,7 @@ on:
       - '.github/workflows/linux-makepkg.yml'
       - 'dist/linux/makepkg/**'
       - 'dist/linux/common/**'
+      - 'dist/common/**'
       - 'dist/linux/resources/**'
 
 permissions:

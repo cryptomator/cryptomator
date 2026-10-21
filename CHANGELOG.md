@@ -23,6 +23,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
   - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.6
 
 
+## [1.19.4](https://github.com/cryptomator/cryptomator/releases/1.19.4) - 2026-10-21
+### Security
+* Removed compromised eMudhra certs from app internal CA store ([62a0f41](https://github.com/cryptomator/cryptomator/commit/62a0f41523d5e1818d76ef3e9b6f4560053f2445))
+
+
 ## [1.19.3](https://github.com/cryptomator/cryptomator/releases/1.19.3) - 2026-06-29
 ### Added
 * New error dialog if importing a vault fails ([#4243](https://github.com/cryptomator/cryptomator/pull/4243))

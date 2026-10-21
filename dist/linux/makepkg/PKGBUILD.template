@@ -64,6 +64,8 @@ build() {
     --strip-debug \
     --compress=zip-0
 
+  "$JAVA_HOME/bin/java" ../dist/common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
+
   ##Note: jpackage does not allow -beta suffixes, have to strip those
   "$JAVA_HOME/bin/jpackage" \
     --type app-image \

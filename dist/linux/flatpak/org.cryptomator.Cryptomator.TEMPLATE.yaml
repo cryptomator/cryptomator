@@ -105,6 +105,7 @@ modules:
         --no-man-pages
         --strip-debug
         --compress=zip-0
+      - $JAVA_HOME/bin/java dist/common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
       - $JAVA_HOME/bin/jpackage
         --type app-image
         --runtime-image runtime
