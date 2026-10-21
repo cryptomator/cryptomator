@@ -26,6 +26,9 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 
 	public static final int MAX_SHORTENING_THRESHOLD = 220;
 	public static final int MIN_SHORTENING_THRESHOLD = 36;
+	public static final int DEFAULT_SCRYPT_COST_PARAM = 1 << 17;
+	private static final int MIN_SCRYPT_COST_EXPONENT = 15;
+	private static final int MAX_SCRYPT_COST_EXPONENT = 18;
 	private static final String DOCS_NAME_SHORTENING_URL = "https://docs.cryptomator.org/security/vault/#name-shortening";
 
 	private final Stage window;
@@ -35,14 +38,18 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 	private final StringProperty vaultNameProperty;
 	private final ObjectProperty<Path> vaultPathProperty;
 	private final IntegerProperty shorteningThreshold;
+	private final IntegerProperty scryptCostParam;
 
 	private final BooleanBinding validShorteningThreshold;
+	private final BooleanBinding validScryptCostParam;
+	private final BooleanBinding validExpertSettings;
 
 	//FXML
 	public Label vaultNameLabel;
 	public Label vaultPathLabel;
 	public CheckBox expertSettingsCheckBox;
 	public NumericTextField shorteningThresholdTextField;
+	public NumericTextField scryptCostExponentTextField;
 
 	@Inject
 	CreateNewVaultExpertSettingsController(@AddVaultWizardWindow Stage window, //
@@ -51,7 +58,8 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 										   @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, //
 										   @Named("vaultName") StringProperty vaultName, //
 										   ObjectProperty<Path> vaultPath, //
-										   @Named("shorteningThreshold") IntegerProperty shorteningThreshold) {
+										   @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
+										   @Named("scryptCostParam") IntegerProperty scryptCostParam) {
 		this.window = window;
 		this.application = application;
 		this.chooseLocationScene = chooseLocationScene;
@@ -59,7 +67,10 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 		this.vaultNameProperty = vaultName;
 		this.vaultPathProperty = vaultPath;
 		this.shorteningThreshold = shorteningThreshold;
+		this.scryptCostParam = scryptCostParam;
 		this.validShorteningThreshold = Bindings.createBooleanBinding(this::isValidShorteningThreshold, shorteningThreshold);
+		this.validScryptCostParam = Bindings.createBooleanBinding(this::isValidScryptCostParam, scryptCostParam);
+		this.validExpertSettings = validShorteningThreshold.and(validScryptCostParam);
 	}
 
 	@FXML
@@ -76,12 +87,23 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 				shorteningThreshold.set(0); //the value is set to 0 to ensure that an invalid value assignment is detected during a NumberFormatException
 			}
 		});
+		scryptCostExponentTextField.setPromptText(MIN_SCRYPT_COST_EXPONENT + "-" + MAX_SCRYPT_COST_EXPONENT);
+		scryptCostExponentTextField.setText(Integer.toString(Integer.numberOfTrailingZeros(DEFAULT_SCRYPT_COST_PARAM)));
+		scryptCostExponentTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+			try {
+				int exponent = Integer.parseInt(newValue);
+				scryptCostParam.set(exponent >= MIN_SCRYPT_COST_EXPONENT && exponent <= MAX_SCRYPT_COST_EXPONENT ? 1 << exponent : 0);
+			} catch (NumberFormatException e) {
+				scryptCostParam.set(0);
+			}
+		});
 	}
 
 	@FXML
 	public void toggleUseExpertSettings() {
 		if (!expertSettingsCheckBox.isSelected()) {
 			shorteningThresholdTextField.setText(Integer.toString(MAX_SHORTENING_THRESHOLD));
+			scryptCostExponentTextField.setText(Integer.toString(Integer.numberOfTrailingZeros(DEFAULT_SCRYPT_COST_PARAM)));
 		}
 	}
 
@@ -102,6 +124,24 @@ public class CreateNewVaultExpertSettingsController implements FxController {
 	public boolean isValidShorteningThreshold() {
 		var value = shorteningThreshold.get();
 		return value >= MIN_SHORTENING_THRESHOLD && value <= MAX_SHORTENING_THRESHOLD;
+	}
+
+	public BooleanBinding validScryptCostParamProperty() {
+		return validScryptCostParam;
+	}
+
+	public boolean isValidScryptCostParam() {
+		int cost = scryptCostParam.get();
+		return cost >= 1 << MIN_SCRYPT_COST_EXPONENT && cost <= 1 << MAX_SCRYPT_COST_EXPONENT
+				&& (cost & (cost - 1)) == 0;
+	}
+
+	public BooleanBinding validExpertSettingsProperty() {
+		return validExpertSettings;
+	}
+
+	public boolean isValidExpertSettings() {
+		return validExpertSettings.get();
 	}
 
 	public void openDocs() {

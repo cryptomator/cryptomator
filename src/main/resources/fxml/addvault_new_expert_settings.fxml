@@ -67,13 +67,17 @@
 					</Label>
 				</StackPane>
 			</HBox>
+			<Label text="%addvaultwizard.new.expertSettings.scryptCost.title" labelFor="$scryptCostExponentTextField"/>
+			<NumericTextField fx:id="scryptCostExponentTextField"/>
+			<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.scryptCost.description" wrapText="true"/>
+			<Label styleClass="label-muted" text="%addvaultwizard.new.expertSettings.scryptCost.invalid" wrapText="true" visible="${!controller.validScryptCostParam}" managed="${!controller.validScryptCostParam}"/>
 		</VBox>
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+X">
 			<buttons>
 				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
-				<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" onAction="#next" defaultButton="true" disable="${!controller.validShorteningThreshold}"/>
+				<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" onAction="#next" defaultButton="true" disable="${!controller.validExpertSettings}"/>
 			</buttons>
 		</ButtonBar>
 	</children>
