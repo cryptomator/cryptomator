@@ -156,6 +156,10 @@ Invoke-CommandWithExitCheck -Command `
     "--compress", "zip-0" #do not compress and use msi compression
     )
 
+### remove distrusted CA certificates from runtime
+Invoke-CommandWithExitCheck -Command `
+    "$Env:JAVA_HOME\bin\java" -Arguments @("$buildDir\..\common\RemoveDistrustedCaCerts.java", "runtime\lib\security\cacerts")
+
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
