@@ -21,6 +21,7 @@ on:
       - '.github/workflows/debian.yml'
       - 'dist/linux/debian/**'
       - 'dist/linux/common/**'
+      - 'dist/common/**'
       - 'dist/linux/resources/**'
 
 env:
@@ -110,6 +111,7 @@ jobs:
           cp -r target/mods pkgdir
           cp -r jmods pkgdir
           cp -r dist/linux/common/ pkgdir
+          cp dist/common/RemoveDistrustedCaCerts.java pkgdir/common
           cp target/cryptomator-*.jar pkgdir/mods
           tar -cJf cryptomator_${{ steps.deb-version.outputs.debVersion }}.orig.tar.xz -C pkgdir .
       - name: Patch and rename pkgdir

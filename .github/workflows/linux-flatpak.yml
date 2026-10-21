@@ -21,6 +21,7 @@ on:
       - '.github/workflows/linux-flatpak.yml'
       - 'dist/linux/flatpak/**'
       - 'dist/linux/common/**'
+      - 'dist/common/**'
       - 'dist/linux/resources/**'
 
 jobs:
