@@ -2,7 +2,6 @@ package org.cryptomator.common;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -87,7 +86,7 @@ class LicenseChecker {
 			}
 			JWTVerifier verifier = JWT.require(Algorithm.ECDSA512(signingKey, null)).build();
 			return Optional.of(verifier.verify(licenseKey));
-		} catch (JWTVerificationException | GeneralSecurityException e) {
+		} catch (JWTVerificationException | GeneralSecurityException | IllegalArgumentException e) { // IAE: malformed x5c entries or non-EC leaf key
 			return Optional.empty();
 		}
 	}
