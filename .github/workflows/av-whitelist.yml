@@ -74,13 +74,13 @@ jobs:
           FILE_NAME: ${{ needs.download-file.outputs.fileName }}
           FTP_USERNAME: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
           FTP_PASSWORD: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
-        # ftps:// on port 990 is implicit FTPS
+        # server speaks explicit FTPS (plain greeting, then AUTH TLS) despite port 990, hence ftp:// with --ssl-reqd
         run: >
           curl --silent --show-error --fail --ssl-reqd
           --retry 3 --retry-all-errors
           --user "${FTP_USERNAME}:${FTP_PASSWORD}"
           --upload-file "upload/${FILE_NAME}"
-          "ftps://allowlist.kaspersky-labs.com:990/"
+          "ftp://allowlist.kaspersky-labs.com:990/"
   allowlist-avast:
     name: Anti Virus Allowlisting Avast
     runs-on: ubuntu-slim
