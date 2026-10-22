@@ -4,36 +4,143 @@ on:
   release:
     types: [published]
 
+permissions: {}
+
 jobs:
-  get-version:
+  notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Download source tarball
-        run: |
-          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name }}.tar.gz --output cryptomator-${{ github.event.release.tag_name }}.tar.gz
-      - name: Sign source tarball with key 615D449FE6E6A235
-        run: |
-          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.tar.gz
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-      - name: Publish asc on GitHub Releases
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
-        with:
-          fail_on_unmatched_files: true
-          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
-          files: |
-            cryptomator-*.tar.gz.asc
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
+      - name: Notify about DEB build
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'
-          SLACK_ICON: false
+          SLACK_ICON: ''
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
           SLACK_TITLE: "Release ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} published."
           SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/debian.yml|build deb Package>."
-          SLACK_FOOTER: false
+          SLACK_FOOTER: ''
           MSG_MINIMAL: true
+      - name: Notify about latest-version update
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: ''
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "Requiring version check source update for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }}."
+          SLACK_MESSAGE: 'Check S3 bucket for <https://static.cryptomator.org/desktop/latest-version.json|latest-version.json>.'
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: true
+
+  get-asset-urls:
+    name: Get release asset URLs
+    runs-on: ubuntu-slim
+    outputs:
+      is-windows-release: ${{ steps.urls.outputs.urls-present }}
+      msi-url: ${{ steps.urls.outputs.msi }}
+      exe-url: ${{ steps.urls.outputs.exe }}
+    steps:
+      - name: Extract MSI and EXE download URLs
+        id: urls
+        run: |
+          MSI_URL=$(jq -r '[.[] | select(.name | endswith("-x64.msi"))][0].browser_download_url // "null"' <<< "$RELEASE_ASSETS")
+          EXE_URL=$(jq -r '[.[] | select(.name | endswith("-x64.exe"))][0].browser_download_url // "null"' <<< "$RELEASE_ASSETS")
+          if [[ "$MSI_URL" == "null" || -z "$MSI_URL" || "$EXE_URL" == "null" || -z "$EXE_URL" ]]; then
+            echo "urls-present=false" >> $GITHUB_OUTPUT
+          else
+            echo "urls-present=true" >> $GITHUB_OUTPUT
+            echo "msi=${MSI_URL}" >> $GITHUB_OUTPUT
+            echo "exe=${EXE_URL}" >> $GITHUB_OUTPUT
+          fi
+        env:
+          RELEASE_ASSETS: ${{ toJson(github.event.release.assets) }}
+
+  allowlist-msi-x64:
+    needs: [get-asset-urls]
+    if: needs.get-asset-urls.outputs.is-windows-release == 'true'
+    uses: ./.github/workflows/av-whitelist.yml
+    with:
+      url: ${{ needs.get-asset-urls.outputs.msi-url }}
+    secrets: inherit
+
+  allowlist-exe-x64:
+    needs: [get-asset-urls, allowlist-msi-x64]
+    if: needs.get-asset-urls.outputs.is-windows-release == 'true'
+    uses: ./.github/workflows/av-whitelist.yml
+    with:
+      url: ${{ needs.get-asset-urls.outputs.exe-url }}
+    secrets: inherit
+
+  check-release:
+    name: Analyzes the release for certain properties
+    runs-on: ubuntu-slim
+    outputs:
+      release-kind: ${{steps.determine-kind.outputs.value}} # Possible values are [alpha, beta, rc, stable, unknown]
+    steps:
+      - id: determine-kind
+        run: |
+          SEM_VER_NUM=$(echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          SEM_VER_SUFFIX="${SEM_VER_STR#"$SEM_VER_NUM"}"
+
+          TYPE="unknown"
+          if [[ -z $SEM_VER_SUFFIX  ]]; then
+            TYPE="stable"
+          elif [[ $SEM_VER_SUFFIX =~ -alpha[1-9]+$ ]]; then
+            TYPE="alpha"
+          elif [[ $SEM_VER_SUFFIX =~ -beta[1-9]+$ ]]; then
+            TYPE="beta"
+          elif [[ $SEM_VER_SUFFIX =~ -rc[1-9]+$ ]]; then
+            TYPE="rc"
+          fi
+          echo "value=${TYPE}" >> $GITHUB_OUTPUT
+        env:
+          SEM_VER_STR: ${{ github.event.release.tag_name }}
+
+
+  notify-winget:
+    name: Notify for winget-release
+    if: needs.get-asset-urls.outputs.is-windows-release == 'true' && needs.check-release.outputs.release-kind == 'stable'
+    needs: [check-release, get-asset-urls]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: ''
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "Release ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} published."
+          SLACK_MESSAGE: "Ready to <https://github.com/${{ github.repository }}/actions/workflows/winget.yml|release to winget>."
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: true
+
+  trigger-website-update:
+    needs: [check-release]
+    runs-on: ubuntu-slim
+    if: needs.check-release.outputs.release-kind == 'stable'
+    steps:
+      - name: Start website update workflow
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
+        with:
+          event-type: desktop-release
+          token: ${{ secrets.CRYPTOBOT_WORKFLOW_DISPATCH_TOKEN }}
+          repository: cryptomator/cryptomator.github.io
+          client-payload: '{ "version": "${{ github.event.release.tag_name }}", "release": ${{ toJson(github.event.release.assets) }} }'
+
+  trigger-docs-update:
+    needs: [check-release, get-asset-urls]
+    runs-on: ubuntu-slim
+    if: needs.get-asset-urls.outputs.is-windows-release == 'true' && needs.check-release.outputs.release-kind == 'stable'
+    steps:
+      - name: Start docs update workflow
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
+        with:
+          event-type: desktop-release
+          token: ${{ secrets.CRYPTOBOT_WORKFLOW_DISPATCH_TOKEN }}
+          repository: cryptomator/docs
+          client-payload: '{ "version": "${{ github.event.release.tag_name }}", "release": ${{ toJson(github.event.release.assets) }} }'

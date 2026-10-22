@@ -4,17 +4,23 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class SettingsJson {
 
 	@JsonProperty("directories")
-	List<VaultSettingsJson> directories = List.of();
+	@JsonSetter(nulls = Nulls.AS_EMPTY)
+	List<VaultSettingsJson> directories = new ArrayList<>();
 
 	@JsonProperty("writtenByVersion")
 	String writtenByVersion;
@@ -99,4 +105,8 @@ class SettingsJson {
 
 	@JsonProperty("lastUpdateAttemptedByVersion")
 	String lastUpdateAttemptedByVersion;
+
+	@JsonProperty("trustedHosts")
+	@JsonSetter(nulls = Nulls.AS_EMPTY)
+	Set<String> trustedHosts = new HashSet<>();
 }

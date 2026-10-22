@@ -8,11 +8,13 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -36,6 +38,8 @@ public class Environment {
 	private static final String DISABLE_UPDATE_CHECK_PROP_NAME = "cryptomator.disableUpdateCheck";
 	private static final String LICENSE_CHAIN_REQUIRED_CN_PROP_NAME = "cryptomator.licenseChainRequiredCn";
 	private static final String DEFAULT_LICENSE_CHAIN_REQUIRED_CN = "License Intermediate CA (Prod)";
+	public static final String HUB_ALLOWED_HOSTS_PROP_NAME = "cryptomator.hub.allowedHosts";
+	public static final String HUB_TOFU_PROP_NAME = "cryptomator.hub.enableTrustOnFirstUse";
 
 	private Environment() {}
 
@@ -60,6 +64,8 @@ public class Environment {
 		logCryptomatorSystemProperty(TRAY_ICON_PROP_NAME);
 		logCryptomatorSystemProperty(DISABLE_UPDATE_CHECK_PROP_NAME);
 		logCryptomatorSystemProperty(LICENSE_CHAIN_REQUIRED_CN_PROP_NAME);
+		logCryptomatorSystemProperty(HUB_ALLOWED_HOSTS_PROP_NAME);
+		logCryptomatorSystemProperty(HUB_TOFU_PROP_NAME);
 	}
 
 	public static Environment getInstance() {
@@ -152,9 +158,21 @@ public class Environment {
 		return System.getProperty(LICENSE_CHAIN_REQUIRED_CN_PROP_NAME, DEFAULT_LICENSE_CHAIN_REQUIRED_CN);
 	}
 
+	public Set<String> hubAllowedHosts() {
+		var allowedHubHostsString = System.getProperty(HUB_ALLOWED_HOSTS_PROP_NAME, "");
+		return Arrays.stream(allowedHubHostsString.split(","))
+				.map(String::trim)
+				.filter(Predicate.not(String::isEmpty))
+				.collect(Collectors.toUnmodifiableSet());
+	}
+
+	public boolean hubTrustOnFirstUse() {
+		return Boolean.getBoolean(HUB_TOFU_PROP_NAME);
+	}
+
 	private Optional<Path> getPath(String propertyName) {
 		String value = System.getProperty(propertyName);
-		return Optional.ofNullable(value).map(Paths::get);
+		return Optional.ofNullable(value).map(Path::of);
 	}
 
 	@VisibleForTesting

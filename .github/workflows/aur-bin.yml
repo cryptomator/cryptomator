@@ -1,0 +1,118 @@
+name: PR for aur-bin repo
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      src-tag:
+        description: 'Source or Release tag'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ inputs.src-tag }}
+
+  create-aur-bin-pr:
+    name: Create PR for aur-bin repo
+    if: (github.event_name == 'workflow_dispatch') || (github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable')
+    runs-on: ubuntu-latest
+    needs: [get-version]
+    container:
+      image: archlinux:base-devel
+    env:
+      SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
+      PKGDEST: ${{ github.workspace }}/pkgdest
+      SRCDEST: ${{ github.workspace }}/srcdest
+    steps:
+      - name: Prepare pacman
+        run: |
+          pacman-key --init
+          pacman-key --populate archlinux
+          pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip github-cli curl pacman-contrib
+      - name: Checkout cryptomator/aur-bin
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: 'cryptomator/aur-bin'
+          token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+      - name: Create build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          install -d -m 0755 -o builder -g builder "$PKGDEST" "$SRCDEST"
+      - name: Import Cryptomator release signing key
+        # try first ubuntu. on failure try openpgp keyservers
+        run: >
+          sudo -u builder gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
+          || sudo -u builder gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys 58117AFA1F85B3EEC154677D615D449FE6E6A235
+      - name: Checkout release branch
+        run: |
+          git config --global safe.directory '*'
+          git checkout -b "release/${SEMVER_STR}"
+      - name: Determine pkgrel
+        id: pkgrel
+        run: |
+          CURRENT_VERSION="$(sed -nE 's/^pkgver=(.*)$/\1/p' PKGBUILD | head -n1)"
+          CURRENT_REL="$(sed -nE 's/^pkgrel=([0-9]+).*$/\1/p' PKGBUILD | head -n1)"
+
+          if [[ "$CURRENT_VERSION" == "$TARGET_VERSION" && "$CURRENT_REL" =~ ^[0-9]+$ ]]; then
+            NEXT_REL=$((CURRENT_REL + 1))
+          else
+            NEXT_REL=1
+          fi
+
+          echo "value=${NEXT_REL}" >> "$GITHUB_OUTPUT"
+          echo "dist-version=${TARGET_VERSION}-${NEXT_REL}" >> "$GITHUB_OUTPUT"
+        env:
+          TARGET_VERSION: ${{ needs.get-version.outputs.semVerStr }}
+      - name: Update build file
+        run: |
+          sed -i -e "s|^pkgver=.*$|pkgver=${PKG_VERSION}|" PKGBUILD
+          sed -i -e "s|^pkgrel=.*$|pkgrel=${PKG_RELEASE}|" PKGBUILD
+          sudo -u builder updpkgsums
+          sudo -u builder makepkg --printsrcinfo > .SRCINFO
+        env:
+          PKG_VERSION: ${{ needs.get-version.outputs.semVerNum }}
+          PKG_RELEASE: ${{ steps.pkgrel.outputs.value }}
+      - name: Build package with makepkg
+        run: >
+          sudo -u builder
+          env PKGDEST="$PKGDEST" SRCDEST="$SRCDEST"
+          makepkg --syncdeps --cleanbuild --noconfirm --log
+      - name: Commit and push
+        run: |
+          git config user.name "cryptobot"
+          git config user.email "cryptobot@users.noreply.github.com"
+          git config push.autoSetupRemote true
+          git stage PKGBUILD .SRCINFO
+          git commit -m "Prepare release ${DIST_VERSION}"
+          git push
+        env:
+          DIST_VERSION: ${{ steps.pkgrel.outputs.dist-version }}
+      - name: Create pull request
+        id: create-pr
+        run: |
+          printf "Created by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > pr_body.md
+          PR_URL=$(gh pr create --title "Release ${DIST_VERSION}" --body-file pr_body.md)
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
+        env:
+          DIST_VERSION: ${{ steps.pkgrel.outputs.dist-version }}
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: ''
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "AUR-bin release PR for ${{ github.event.repository.name }} ${{ needs.get-version.outputs.semVerStr }} created."
+          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.url }}|PR> on how to proceed."
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: true

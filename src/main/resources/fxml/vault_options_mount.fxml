@@ -9,90 +9,94 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns:fx="http://javafx.com/fxml"
-	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
-	  spacing="6">
-	<fx:define>
-		<ToggleGroup fx:id="mountPointToggleGroup"/>
-	</fx:define>
-	<padding>
-		<Insets topRightBottomLeft="12"/>
-	</padding>
-	<children>
-		<HBox spacing="12" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.mount.volume.type" labelFor="$vaultVolumeTypeChoiceBox"/>
-			<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}" accessibleText="%vaultOptions.mount.info">
-				<graphic>
-					<FontAwesome5IconView glyph="COGS" styleClass="glyph-icon-muted"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%vaultOptions.mount.info" showDelay="100ms"/>
-				</tooltip>
-			</Hyperlink>
-			<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}" accessibleText="%preferences.volume.docsTooltip">
-				<graphic>
-					<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%preferences.volume.docsTooltip" showDelay="100ms"/>
-				</tooltip>
-			</Hyperlink>
-		</HBox>
-
-		<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.restartRequired" visible="${controller.selectedMountServiceRequiresRestart}" managed="${controller.selectedMountServiceRequiresRestart}"/>
-
-		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortChangeable}" managed="${controller.loopbackPortChangeable}">
-			<Label text="%vaultOptions.mount.volume.tcp.port" labelFor="$vaultLoopbackPortField"/>
-			<NumericTextField fx:id="vaultLoopbackPortField"/>
-			<Button text="%generic.button.apply" fx:id="vaultLoopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
-		</HBox>
-
-		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly" visible="${controller.readOnlyOptionAllowed}" managed="${controller.readOnlyOptionAllowed}"/>
-
-		<VBox visible="${controller.mountFlagsSupported}" managed="${controller.mountFlagsSupported}">
-			<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags"/>
-			<TextField fx:id="mountFlagsField" HBox.hgrow="ALWAYS" maxWidth="Infinity" accessibleText="%vaultOptions.mount.customMountFlags">
-				<VBox.margin>
-					<Insets left="24"/>
-				</VBox.margin>
-			</TextField>
-		</VBox>
-
-		<Label text="%vaultOptions.mount.mountPoint">
-			<VBox.margin>
-				<Insets top="9"/>
-			</VBox.margin>
-		</Label>
-
-		<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointAutoBtn" text="%vaultOptions.mount.mountPoint.auto"/>
-
-		<HBox spacing="6" visible="${controller.mountpointDriveLetterSupported}" managed="${controller.mountpointDriveLetterSupported}">
-			<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDriveLetterBtn" text="%vaultOptions.mount.mountPoint.driveLetter"/>
-			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointDriveLetterBtn.selected}" accessibleText="%vaultOptions.mount.mountPoint.driveLetter"/>
-		</HBox>
-
-		<VBox spacing="6" visible="${controller.mountpointDirSupported}" managed="${controller.mountpointDirSupported}">
-			<HBox spacing="6" alignment="CENTER_LEFT">
-				<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDirBtn" text="%vaultOptions.mount.mountPoint.custom"/>
-				<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointDirBtn.selected}">
+<ScrollPane xmlns:fx="http://javafx.com/fxml"
+			xmlns="http://javafx.com/javafx"
+			fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
+			fitToWidth="true"
+			hbarPolicy="NEVER">
+	<VBox spacing="6">
+		<fx:define>
+			<ToggleGroup fx:id="mountPointToggleGroup"/>
+		</fx:define>
+		<padding>
+			<Insets topRightBottomLeft="12"/>
+		</padding>
+		<children>
+			<HBox spacing="12" alignment="CENTER_LEFT">
+				<Label text="%vaultOptions.mount.volume.type" labelFor="$vaultVolumeTypeChoiceBox"/>
+				<ChoiceBox fx:id="vaultVolumeTypeChoiceBox"/>
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openVolumePreferences" visible="${controller.defaultMountServiceSelected}" managed="${controller.defaultMountServiceSelected}" accessibleText="%vaultOptions.mount.info">
 					<graphic>
-						<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
+						<FontAwesome5IconView glyph="COGS" styleClass="glyph-icon-muted"/>
 					</graphic>
-				</Button>
+					<tooltip>
+						<Tooltip text="%vaultOptions.mount.info" showDelay="100ms"/>
+					</tooltip>
+				</Hyperlink>
+				<Hyperlink contentDisplay="GRAPHIC_ONLY" onAction="#openDocs" visible="${!controller.defaultMountServiceSelected}" managed="${!controller.defaultMountServiceSelected}" accessibleText="%preferences.volume.docsTooltip">
+					<graphic>
+						<FontAwesome5IconView glyph="QUESTION_CIRCLE" styleClass="glyph-icon-muted"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%preferences.volume.docsTooltip" showDelay="100ms"/>
+					</tooltip>
+				</Hyperlink>
 			</HBox>
-			<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false" accessibleText="%vaultOptions.mount.mountPoint.custom">
-				<VBox.margin>
-					<Insets left="24"/>
-				</VBox.margin>
-			</TextField>
-		</VBox>
-	</children>
 
-</VBox>
+			<Label styleClass="label-red" text="%vaultOptions.mount.volumeType.restartRequired" visible="${controller.selectedMountServiceRequiresRestart}" managed="${controller.selectedMountServiceRequiresRestart}"/>
+
+			<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.loopbackPortChangeable}" managed="${controller.loopbackPortChangeable}">
+				<Label text="%vaultOptions.mount.volume.tcp.port" labelFor="$vaultLoopbackPortField"/>
+				<NumericTextField fx:id="vaultLoopbackPortField"/>
+				<Button text="%generic.button.apply" fx:id="vaultLoopbackPortApplyButton" onAction="#doChangeLoopbackPort"/>
+			</HBox>
+
+			<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly" visible="${controller.readOnlyOptionAllowed}" managed="${controller.readOnlyOptionAllowed}"/>
+
+			<VBox visible="${controller.mountFlagsSupported}" managed="${controller.mountFlagsSupported}">
+				<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags"/>
+				<TextField fx:id="mountFlagsField" HBox.hgrow="ALWAYS" maxWidth="Infinity" accessibleText="%vaultOptions.mount.customMountFlags">
+					<VBox.margin>
+						<Insets left="24"/>
+					</VBox.margin>
+				</TextField>
+			</VBox>
+
+			<Label text="%vaultOptions.mount.mountPoint">
+				<VBox.margin>
+					<Insets top="9"/>
+				</VBox.margin>
+			</Label>
+
+			<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointAutoBtn" text="%vaultOptions.mount.mountPoint.auto"/>
+
+			<HBox spacing="6" visible="${controller.mountpointDriveLetterSupported}" managed="${controller.mountpointDriveLetterSupported}">
+				<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDriveLetterBtn" text="%vaultOptions.mount.mountPoint.driveLetter"/>
+				<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointDriveLetterBtn.selected}" accessibleText="%vaultOptions.mount.mountPoint.driveLetter"/>
+			</HBox>
+
+			<VBox spacing="6" visible="${controller.mountpointDirSupported}" managed="${controller.mountpointDirSupported}">
+				<HBox spacing="6" alignment="CENTER_LEFT">
+					<RadioButton toggleGroup="${mountPointToggleGroup}" fx:id="mountPointDirBtn" text="%vaultOptions.mount.mountPoint.custom"/>
+					<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointDirBtn.selected}">
+						<graphic>
+							<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
+						</graphic>
+					</Button>
+				</HBox>
+				<TextField fx:id="directoryPathField" text="${controller.directoryPath}" visible="${mountPointDirBtn.selected}" managed="${mountPointDirBtn.managed}" maxWidth="Infinity" editable="false" accessibleText="%vaultOptions.mount.mountPoint.custom">
+					<VBox.margin>
+						<Insets left="24"/>
+					</VBox.margin>
+				</TextField>
+			</VBox>
+		</children>
+
+	</VBox>
+</ScrollPane>

@@ -58,8 +58,6 @@ public class DecryptFileNamesViewController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final ResourceBundle resourceBundle;
-	private final List<Path> initialList;
-
 	@FXML
 	public TableColumn<CipherAndCleartext, String> ciphertextColumn;
 	@FXML
@@ -68,12 +66,11 @@ public class DecryptFileNamesViewController implements FxController {
 	public TableView<CipherAndCleartext> cipherToCleartextTable;
 
 	@Inject
-	public DecryptFileNamesViewController(@DecryptNameWindow Stage window, @DecryptNameWindow Vault vault, @DecryptNameWindow List<Path> pathsToDecrypt, ResourceBundle resourceBundle) {
+	public DecryptFileNamesViewController(@DecryptNameWindow Stage window, @DecryptNameWindow Vault vault, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
 		this.resourceBundle = resourceBundle;
 		this.mapping = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.initialList = pathsToDecrypt;
 	}
 
 	@FXML
@@ -97,8 +94,7 @@ public class DecryptFileNamesViewController implements FxController {
 		});
 		cipherToCleartextTable.setOnDragDropped(event -> {
 			if (event.getGestureSource() == null && event.getDragboard().hasFiles()) {
-				checkAndDecrypt(event.getDragboard().getFiles().stream().map(File::toPath).toList());
-				cipherToCleartextTable.setItems(mapping);
+				decrypt(event.getDragboard().getFiles().stream().map(File::toPath).toList());
 			}
 		});
 		cipherToCleartextTable.setOnDragExited(_ -> cipherToCleartextTable.setItems(mapping));
@@ -124,9 +120,7 @@ public class DecryptFileNamesViewController implements FxController {
 				});
 			}
 		});
-		if (!initialList.isEmpty()) {
-			checkAndDecrypt(initialList);
-		}
+		window.setOnHidden(_ -> mapping.clear());
 	}
 
 	private void copySingleCelltoClipboard() {
@@ -149,8 +143,16 @@ public class DecryptFileNamesViewController implements FxController {
 		fileChooser.setInitialDirectory(vault.getPath().toFile());
 		var ciphertextNodes = fileChooser.showOpenMultipleDialog(window);
 		if (ciphertextNodes != null) {
-			checkAndDecrypt(ciphertextNodes.stream().map(File::toPath).toList());
+			decrypt(ciphertextNodes.stream().map(File::toPath).toList());
 		}
+	}
+
+	public void decrypt(List<Path> pathsToDecrypt) {
+		if (pathsToDecrypt.isEmpty()) {
+			return;
+		}
+		checkAndDecrypt(pathsToDecrypt);
+		cipherToCleartextTable.setItems(mapping);
 	}
 
 	private void checkAndDecrypt(List<Path> pathsToDecrypt) {

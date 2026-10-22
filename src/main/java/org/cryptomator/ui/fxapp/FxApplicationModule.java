@@ -64,17 +64,6 @@ abstract class FxApplicationModule {
 		return builder.build();
 	}
 
-	@Provides
-	@FxApplicationScoped
-	static MainWindowComponent provideMainWindowComponent(MainWindowComponent.Builder builder) {
-		return builder.build();
-	}
-
-	@Provides
-	@FxApplicationScoped
-	static PreferencesComponent providePreferencesComponent(PreferencesComponent.Builder builder) {
-		return builder.build();
-	}
 
 	@Provides
 	@FxApplicationScoped
@@ -85,12 +74,6 @@ abstract class FxApplicationModule {
 	@Provides
 	@FxApplicationScoped
 	static EventViewComponent provideEventViewComponent(EventViewComponent.Factory factory) {
-		return factory.create();
-	}
-
-	@Provides
-	@FxApplicationScoped
-	static NotificationComponent provideNotificationComponent(NotificationComponent.Factory factory) {
 		return factory.create();
 	}
 

@@ -2,12 +2,14 @@ package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.vaults.NotAVaultDirectoryException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationStyle;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
@@ -41,6 +43,7 @@ public class ChooseExistingVaultController implements FxController {
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
+	private final Dialogs dialogs;
 	private final ObservableValue<Image> screenshot;
 
 	@Inject
@@ -51,6 +54,7 @@ public class ChooseExistingVaultController implements FxController {
 								  @AddVaultWizardWindow ObjectProperty<Vault> vault, //
 								  VaultListManager vaultListManager, //
 								  ResourceBundle resourceBundle, //
+								  Dialogs dialogs, //
 								  FxApplicationStyle applicationStyle) {
 		this.window = window;
 		this.successScene = successScene;
@@ -59,6 +63,7 @@ public class ChooseExistingVaultController implements FxController {
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
+		this.dialogs = dialogs;
 		this.screenshot = applicationStyle.appliedAppThemeProperty().map(this::selectScreenshot);
 	}
 
@@ -87,6 +92,9 @@ public class ChooseExistingVaultController implements FxController {
 				Vault newVault = vaultListManager.add(vaultPath.get());
 				vault.set(newVault);
 				window.setScene(successScene.get());
+			} catch (NotAVaultDirectoryException e) {
+				LOG.warn("Selected folder is not a vault directory: {}", e.getMessage());
+				dialogs.prepareNotAVaultDirectoryDialog(window, e).build().showAndWait();
 			} catch (IOException e) {
 				LOG.error("Failed to open existing vault.", e);
 				appWindows.showErrorWindow(e, window, window.getScene());

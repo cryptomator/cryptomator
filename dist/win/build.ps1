@@ -16,6 +16,19 @@ Param(
 # Function Definitions Section
 # ============================
 
+function Invoke-CommandWithExitCheck {
+	param (
+		[string]$Command,
+		[string[]]$Arguments
+	)
+
+	& $Command @Arguments
+	if ($LASTEXITCODE -ne 0) {
+		Write-Error "Command '$Command' failed with exit code $LASTEXITCODE"
+		exit $LASTEXITCODE
+	}
+}
+
 function Main {
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -25,11 +38,6 @@ $ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress
 if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
 {
    Write-Error "Unable to find git.exe in your PATH (try: choco install git)"
-   exit 1
-}
-if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
-{
-   Write-Error "Unable to find mvn.cmd in your PATH (try: choco install maven)"
    exit 1
 }
 if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
@@ -52,7 +60,7 @@ if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
 }
 
 $buildDir = Split-Path -Parent $PSCommandPath
-$version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
+$version = $(../../mvnw.cmd -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
 $semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
 
@@ -65,7 +73,8 @@ Write-Host "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
-&mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
+Invoke-CommandWithExitCheck -Command `
+    "../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "clean", "package", "-DskipTests", "-Pwin")
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -93,9 +102,9 @@ switch ($archName) {
         $jmodPaths = "$Env:JAVA_HOME/jmods"
     }
     'x64' {
-		$javaFxVersion='25.0.2'
+		$javaFxVersion='25.0.3'
 		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-		$javaFxJmodsSHA256 = '33d878dfac85590c4d77c518ed413e512d34a8479d90132b230a7ddd173576b3'
+		$javaFxJmodsSHA256 = '0bf9b83260b85607a9ba200124debabd9cdb013cbc0d659e62a20192a7137907'
 		$javaFxJmods = '.\resources\jfxJmods.zip'
 
 		if( !(Test-Path -Path $javaFxJmods) ) {
@@ -129,16 +138,22 @@ if ((& "$Env:JAVA_HOME\bin\jlink" --help | Select-String -Pattern "Linking from 
 }
 
 ### create runtime
-& "$Env:JAVA_HOME\bin\jlink" `
-	--verbose `
-	--output runtime `
-	--module-path $jmodPaths `
-	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml `
-	--strip-native-commands `
-	--no-header-files `
-	--no-man-pages `
-	--strip-debug `
-	--compress "zip-0" #do not compress and use msi compression
+Invoke-CommandWithExitCheck -Command `
+    "$Env:JAVA_HOME\bin\jlink" -Arguments @(
+    "--verbose",
+    "--output", "runtime",
+    "--module-path", $jmodPaths,
+    "--add-modules", "java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.accessibility,jdk.management.jfr,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.crypto.mscapi,java.compiler,javafx.base,javafx.graphics,javafx.controls,javafx.fxml",
+    "--strip-native-commands",
+    "--no-header-files",
+    "--no-man-pages",
+    "--strip-debug",
+    "--compress", "zip-0" #do not compress and use msi compression
+    )
+
+### remove distrusted CA certificates from runtime
+Invoke-CommandWithExitCheck -Command `
+    "$Env:JAVA_HOME\bin\java" -Arguments @("$buildDir\..\common\RemoveDistrustedCaCerts.java", "runtime\lib\security\cacerts")
 
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
@@ -167,6 +182,7 @@ $javaOptions = @(
 "--java-options", "-Dcryptomator.showTrayIcon=true"
 "--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
 "--java-options", "-Dcryptomator.disableUpdateCheck=false"
+"--java-options", "-Dcryptomator.hub.enableTrustOnFirstUse=true"
 )
 
 
@@ -194,14 +210,14 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 #Create RTF license for msi
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
- "-Dlicense.thirdPartyFilename=license.rtf" `
- "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
- "-Dlicense.outputDirectory=$buildDir\resources\" `
- "-Dlicense.includedScopes=compile" `
- "-Dlicense.excludedGroups=^org\.cryptomator" `
- "-Dlicense.failOnMissing=true" `
- "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
+Invoke-CommandWithExitCheck -Command `
+    "../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
+    "-Dlicense.thirdPartyFilename=license.rtf", `
+    "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl", `
+    "-Dlicense.outputDirectory=$buildDir\resources\", `
+    "-Dlicense.includedScopes=compile", `
+    "-Dlicense.excludedGroups=^org\.cryptomator", `
+    "-Dlicense.failOnMissing=true")
 
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
@@ -209,42 +225,45 @@ attrib -r "$AppName\$AppName.exe"
 attrib -r "$AppName\${AppName} (Debug).exe"
 
 # create .msi
-$Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
-$Env:JP_WIXHELPER_DIR = "."
-& "$Env:JAVA_HOME\bin\jpackage" `
-	--verbose `
-	--type msi `
-	--win-upgrade-uuid $UpgradeUUID `
-	--app-image $AppName `
-	--dest installer `
-	--name $AppName `
-	--vendor $Vendor `
-	--copyright $copyright `
-	--app-version "$semVerNo.$revisionNo" `
-	--win-menu `
-	--win-dir-chooser `
-	--win-shortcut-prompt `
-	--win-menu-group $AppName `
-	--resource-dir resources `
-	--license-file resources/license.rtf `
-	--win-update-url $UpdateUrl `
-	--about-url $AboutUrl `
-	--file-associations resources/FAvaultFile.properties
+$Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources\"
+$Env:JP_WIXWIZARD_RESOURCES_PROPERTIES_FORMAT = "${Env:JP_WIXWIZARD_RESOURCES}".Replace('\', '\\');
+$Env:JP_WIXHELPER_DIR = ""
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "jpackage MSI failed with exit code $LASTEXITCODE"
-	return 1;
-}
+Get-Content .\resources\FAvaultFile.template.properties ` # Similar to envsubst
+    | ForEach-Object { $ExecutionContext.InvokeCommand.ExpandString($_) } `
+    | Out-File -FilePath .\resources\FAvaultFile.properties
+
+Invoke-CommandWithExitCheck -Command `
+    "$Env:JAVA_HOME\bin\jpackage" -Arguments @(
+    "--verbose",
+    "--type", "msi",
+    "--win-upgrade-uuid", $UpgradeUUID,
+    "--app-image", $AppName,
+    "--dest", "installer",
+    "--name", $AppName,
+    "--vendor", $Vendor,
+    "--copyright", $copyright,
+    "--app-version", "$semVerNo.$revisionNo",
+    "--win-menu",
+    "--win-dir-chooser",
+    "--win-shortcut-prompt",
+    "--win-menu-group", $AppName,
+    "--resource-dir", "resources",
+    "--license-file", "resources/license.rtf",
+    "--win-update-url", $UpdateUrl,
+    "--about-url", $AboutUrl,
+    "--file-associations", "resources/FAvaultFile.properties"
+    )
 
 #Create RTF license for bundle
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
- "-Dlicense.thirdPartyFilename=license.rtf" `
- "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
- "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `
- "-Dlicense.includedScopes=compile" `
- "-Dlicense.excludedGroups=^org\.cryptomator" `
- "-Dlicense.failOnMissing=true" `
- "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
+Invoke-CommandWithExitCheck -Command `
+	"../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
+	"-Dlicense.thirdPartyFilename=license.rtf", `
+	"-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl", `
+	"-Dlicense.outputDirectory=$buildDir\bundle\resources\", `
+	"-Dlicense.includedScopes=compile", `
+	"-Dlicense.excludedGroups=^org\.cryptomator", `
+	"-Dlicense.failOnMissing=true")
 
 # download Winfsp
 $winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
@@ -270,18 +289,21 @@ Invoke-WebRequest $winfspUninstaller -OutFile ".\bundle\resources\winfsp-uninsta
 Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName.msi" -Force
 
 # create bundle including winfsp
-& wix build `
-	-define BundleName="$AppName" `
-	-define BundleVersion="$semVerNo.$revisionNo" `
-	-define BundleVendor="$Vendor" `
-	-define BundleCopyright="$copyright" `
-	-define AboutUrl="$AboutUrl" `
-	-define HelpUrl="$HelpUrl" `
-	-define UpdateUrl="$UpdateUrl" `
-	-ext "WixToolset.Util.wixext" `
-	-ext "WixToolset.BootstrapperApplications.wixext" `
-    .\bundle\bundleWithWinfsp.wxs `
-    -out "installer\$AppName-Installer.exe"
+Invoke-CommandWithExitCheck -Command `
+    "wix" -Arguments @(
+    "build",
+    "-define", "BundleName=$AppName",
+    "-define", "BundleVersion=$semVerNo.$revisionNo",
+    "-define", "BundleVendor=$Vendor",
+    "-define", "BundleCopyright=$copyright",
+    "-define", "AboutUrl=$AboutUrl",
+    "-define", "HelpUrl=$HelpUrl",
+    "-define", "UpdateUrl=$UpdateUrl",
+    "-ext", "WixToolset.Util.wixext",
+    "-ext", "WixToolset.BootstrapperApplications.wixext",
+    ".\bundle\bundleWithWinfsp.wxs",
+    "-out", ".\installer\$AppName-Installer.exe"
+)
 
 Write-Host "Created EXE installer .\installer\$AppName-Installer.exe"
 return 0;

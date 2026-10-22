@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -78,7 +78,7 @@ public final class OneDriveWindowsLocationPresetsProvider implements LocationPre
 	 */
 	@Blocking
 	private static void waitForSuccess(Process process, int timeoutSeconds, String cmdDescription) throws TimeoutException, InterruptedException, CommandFailedException {
-		boolean exited = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+		boolean exited = process.waitFor(Duration.ofSeconds(timeoutSeconds));
 		if (!exited) {
 			throw new TimeoutException(cmdDescription + " timed out after " + timeoutSeconds + "s");
 		}

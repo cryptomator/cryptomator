@@ -1,0 +1,183 @@
+app-id: org.cryptomator.Cryptomator
+command: cryptomator
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+separate-locales: false
+finish-args:
+  # Required for FUSE, see https://github.com/flathub/org.cryptomator.Cryptomator/pull/68#issuecomment-1935136502
+  - --device=all
+  # Set the PATH environment variable in the application, as flatpak is resetting the shell's PATH
+  - --env=PATH=/app/bin/:/usr/bin/
+  # Allow filesystem access to the user's home dir
+  # Needed to manage vaults there
+  - --filesystem=home
+  # Reading system certificates
+  - --filesystem=host-etc:ro
+  # Allow access to the XDG data directory
+  # Needed to connect to KeePassXC's UNIX domain socket
+  - --filesystem=xdg-run/org.keepassxc.KeePassXC.BrowserServer
+  - --filesystem=xdg-run/app/org.keepassxc.KeePassXC/
+  # Share IPC namespace with the host, without it the X11 shared memory extension will not work
+  - --share=ipc
+  # Allow access to the network
+  - --share=network
+  # Show windows using X11
+  - --socket=x11
+  # Needed to reveal encrypted files
+  - --talk-name=org.freedesktop.FileManager1
+  # Run any command on the host
+  # Needed to spawn fusermount on the host
+  - --talk-name=org.freedesktop.Flatpak
+  # Allow desktop notifications
+  - --talk-name=org.freedesktop.Notifications
+  # Allow access to the GNOME secret service API and to talk to the GNOME keyring daemon
+  - --talk-name=org.freedesktop.secrets
+  - --talk-name=org.gnome.keyring
+  # Allow to talk to the KDE kwallet daemon
+  - --talk-name=org.kde.kwalletd5
+  - --talk-name=org.kde.kwalletd6
+  # Needed to talk to the gvfs daemons over D-Bus and list mounts using the GIO APIs
+  - --talk-name=org.gtk.vfs.*
+  # Allow access to appindicator icons
+  - --talk-name=org.ayatana
+  # Allow access to appindicator icons on KDE
+  - --talk-name=org.kde.StatusNotifierWatcher
+cleanup:
+  - /include
+  - /lib/pkgconfig
+modules:
+  - shared-modules/libayatana-appindicator/libayatana-appindicator-gtk3.json
+  - name: libfuse
+    buildsystem: meson
+    config-opts:
+      - -Dexamples=false
+      - -Dinitscriptdir=
+      - -Duseroot=false
+      - -Dtests=false
+      # don't install rules on the host
+      - -Dudevrulesdir=/tmp/
+    sources:
+      - type: archive
+        url: https://github.com/libfuse/libfuse/releases/download/fuse-3.16.2/fuse-3.16.2.tar.gz
+        sha256: f797055d9296b275e981f5f62d4e32e089614fc253d1ef2985851025b8a0ce87
+        x-checker-data:
+          type: anitya
+          project-id: 861
+          url-template: https://github.com/libfuse/libfuse/releases/download/fuse-$version/fuse-$version.tar.gz
+          versions: {<: '3.17.0'}
+  - name: host-command-wrapper
+    buildsystem: simple
+    build-commands:
+      - install fusermount-wrapper.sh /app/bin/fusermount3
+    sources:
+      - type: file
+        path: build-aux/fusermount-wrapper.sh
+  - name: cryptomator
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+      env:
+        PATH: /app/bin:/usr/bin
+        MAVEN_OPTS: -Dmaven.repo.local=.m2/repository
+        JAVA_HOME: jdk
+        JMODS_PATH: jmods
+        VERSION: $FLATPAK_VERSION
+        REVISION_NO: '$FLATPAK_REVISION'
+    build-commands:
+      # Setup Java
+      - tar xvfz jdk.tar.gz --transform 's!^[^/]*!jdk!'
+      - mkdir jmods
+      - unzip -j openjfx.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javafx.fxml.jmod \*/javafx.graphics.jmod -d jmods
+      # Setup Maven
+      - mkdir maven
+      - tar xf maven.tar.gz --strip-components=1 --exclude=jansi-native --directory=maven
+      # Build project
+      - maven/bin/mvn clean package -DskipTests
+      - cp target/cryptomator-*.jar target/mods
+      - cd target
+      - $JAVA_HOME/bin/jlink
+        --output runtime
+        --module-path $JMODS_PATH
+        --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.ec,jdk.crypto.cryptoki,jdk.unsupported,jdk.security.auth,jdk.accessibility,jdk.management.jfr,jdk.net,java.compiler
+        --no-header-files
+        --no-man-pages
+        --strip-debug
+        --compress=zip-0
+      - $JAVA_HOME/bin/java dist/common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
+      - $JAVA_HOME/bin/jpackage
+        --type app-image
+        --runtime-image runtime
+        --input target/libs
+        --module-path target/mods
+        --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+        --dest .
+        --name Cryptomator
+        --vendor 'Skymatic GmbH'
+        --copyright '(C) 2016 - 2026 Skymatic GmbH'
+        --java-options '--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator'
+        --java-options "--sun-misc-unsafe-memory-access=allow"
+        --java-options '-Xss5m'
+        --java-options '-Xmx256m'
+        --java-options '-Dfile.encoding='utf-8''
+        --java-options '-Djava.net.useSystemProxies=true'
+        --java-options "-Dcryptomator.appVersion='${VERSION}'"
+        --java-options "-Dcryptomator.buildNumber='flatpak-${REVISION_NO}'"
+        --java-options '-Dcryptomator.ipcSocketPath='@{userhome}/.config/Cryptomator/ipc.socket''
+        --java-options '-Dcryptomator.adminConfigPath='/run/host/etc/cryptomator/config.properties''
+        --java-options '-Dcryptomator.logDir='@{userhome}/.local/share/Cryptomator/logs''
+        --java-options '-Dcryptomator.mountPointsDir='@{userhome}/.local/share/Cryptomator/mnt''
+        --java-options '-Dcryptomator.pluginDir='@{userhome}/.local/share/Cryptomator/plugins''
+        --java-options '-Dcryptomator.p12Path='@{userhome}/.config/Cryptomator/key.p12''
+        --java-options '-Dcryptomator.settingsPath='@{userhome}/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json''
+        --java-options '-Dcryptomator.showTrayIcon=true'
+        --java-options '-Dcryptomator.updateMechanism=org.cryptomator.linux.update.FlatpakUpdater'
+        --java-options '-Dcryptomator.networking.truststore.p12Path='/run/host/etc/cryptomator/certs.p12''
+        --java-options '-Dcryptomator.hub.enableTrustOnFirstUse=true'
+        --app-version "${VERSION}.${REVISION_NO}"
+        --verbose
+      - cp -R Cryptomator /app/
+      - ln -s /app/Cryptomator/bin/Cryptomator /app/bin/cryptomator
+      - cp -R /app/lib/* /app/Cryptomator/lib/app/
+      - install -D -m0644 -t /app/share/applications/ dist/linux/common/org.cryptomator.Cryptomator.desktop
+      - install -D -m0644 -t /app/share/icons/hicolor/scalable/apps/ dist/linux/common/org.cryptomator.Cryptomator.svg
+      - install -D -m0644 -T dist/linux/common/org.cryptomator.Cryptomator.tray.svg /app/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-symbolic.svg
+      - install -D -m0644 -T dist/linux/common/org.cryptomator.Cryptomator.tray-unlocked.svg /app/share/icons/hicolor/symbolic/apps/org.cryptomator.Cryptomator.tray-unlocked-symbolic.svg
+      - install -D -m0644 -t /app/share/metainfo/ dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml
+    sources:
+      - $CRYPTOMATOR_SOURCE
+      - type: file
+        dest-filename: jdk.tar.gz
+        only-arches:
+          - x86_64
+        url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.1%2B8/OpenJDK26U-jdk_x64_linux_hotspot_26.0.1_8.tar.gz
+        sha512: eb46cda97ffd46e2e0c1f6f977dc204d9cc969b958946287b7e7d0bfe859fd92faccb2f6ef79995421a963c6de140c436af559403e0a2cd27c90b06c20260d5c
+      - type: file
+        dest-filename: jdk.tar.gz
+        only-arches:
+          - aarch64
+        url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.1%2B8/OpenJDK26U-jdk_aarch64_linux_hotspot_26.0.1_8.tar.gz
+        sha512: 3c31671552712a8f0df96df2eeae7e9ad5156c0e98ebd5bf4fa04c14bba58bd5e19ff567ddcdc7aa478f6f4b0a852762a09bd88d3132acb121e667cfe0397034
+      - type: file
+        dest-filename: openjfx.zip
+        only-arches:
+          - x86_64
+        url: https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_linux-x64_bin-jmods.zip
+        sha512: 75605440f13d0337e70ada1220f77d0d9780fb4602e676f1f07674d8b2e296b25080549d07edcca8f66733e15388860e3472d4ff6d51fd72b0452ed8bbe78022
+      - type: file
+        dest-filename: openjfx.zip
+        only-arches:
+          - aarch64
+        url: https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_linux-aarch64_bin-jmods.zip
+        sha512: 30c509b880ced1b29e0fafa41073d2350a16296d9439124b9a0e3bb391bf7f27e34d5abcfb338df11e5e898175699bceac40574bc9ad123ff071a5964f8fb14d
+      - type: file
+        dest-filename: maven.tar.gz
+        url: https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.13/apache-maven-3.9.13-bin.tar.gz
+        sha512: d9ccd44ba2991586e359c29eb86780ae8ff4ec1b88b0b8af3af074803472690cf2017782a9c4401343c62cbcd056231db9612e1e551cbd9747c21746d732c015
+        x-checker-data:
+          type: anitya
+          project-id: 1894
+          stable-only: true
+          url-template: https://repo1.maven.org/maven2/org/apache/maven/apache-maven/$version/apache-maven-$version-bin.tar.gz
+          versions: {<: '4.0'}

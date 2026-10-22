@@ -1,6 +1,7 @@
 package org.cryptomator.ui.dialogs;
 
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.vaults.NotAVaultDirectoryException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.StageFactory;
@@ -137,6 +138,24 @@ public class Dialogs {
 				.setCancelButtonKey(BUTTON_KEY_CLOSE) //
 				.setOkAction(okAction) //
 				.setCancelAction(Stage::close);
+	}
+
+	public SimpleDialog.Builder prepareNotAVaultDirectoryDialog(Stage window, NotAVaultDirectoryException e) {
+		String descriptionKey = switch (e.notAVaultReason()) {
+			case MISSING_DATA_DIR -> "addvaultwizard.existing.notAVault.description.missingDataDir";
+			case DATA_NOT_A_DIRECTORY -> "addvaultwizard.existing.notAVault.description.dataNotADirectory";
+			case MISSING_VAULT_CONFIG -> "addvaultwizard.existing.notAVault.description.missingVaultConfig";
+			case VAULT_CONFIG_ACCESS_DENIED -> "addvaultwizard.existing.notAVault.description.vaultConfigAccessDenied";
+			case UNSUPPORTED_STRUCTURE -> "addvaultwizard.existing.notAVault.description.unsupportedStructure";
+		};
+		return createDialogBuilder() //
+				.setOwner(window) //
+				.setTitleKey("addvaultwizard.existing.notAVault.title") //
+				.setMessageKey("addvaultwizard.existing.notAVault.message") //
+				.setDescriptionKey(descriptionKey, e.path().getFileName() != null ? e.path().getFileName().toString() : e.path().toString()) //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
+				.setOkButtonKey(BUTTON_KEY_CLOSE) //
+				.setOkAction(Stage::close);
 	}
 
 	public SimpleDialog.Builder prepareNoDDirectorySelectedDialog(Stage window) {

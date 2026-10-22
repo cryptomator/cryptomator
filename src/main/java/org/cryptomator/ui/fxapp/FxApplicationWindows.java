@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 
 @FxApplicationScoped
 public class FxApplicationWindows {
@@ -47,15 +48,15 @@ public class FxApplicationWindows {
 
 	private final Stage primaryStage;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
-	private final Lazy<MainWindowComponent> mainWindow;
-	private final Lazy<PreferencesComponent> preferencesWindow;
+	private final CachedLazy<MainWindowComponent> mainWindow;
+	private final CachedLazy<PreferencesComponent> preferencesWindow;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final UnlockComponent.Factory unlockWorkflowFactory;
 	private final UpdateReminderComponent.Factory updateReminderWindowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
-	private final Lazy<EventViewComponent> eventViewWindow;
-	private final Lazy<NotificationComponent> notificationWindow;
+	private final CachedLazy<EventViewComponent> eventViewWindow;
+	private final CachedLazy<NotificationComponent> notificationWindow;
 	private final ExecutorService executor;
 	private final VaultOptionsComponent.Factory vaultOptionsWindow;
 	private final ShareVaultComponent.Factory shareVaultWindow;
@@ -65,8 +66,8 @@ public class FxApplicationWindows {
 	@Inject
 	public FxApplicationWindows(@PrimaryStage Stage primaryStage, //
 								Optional<TrayIntegrationProvider> trayIntegration, //
-								Lazy<MainWindowComponent> mainWindow, //
-								Lazy<PreferencesComponent> preferencesWindow, //
+								MainWindowComponent.Builder mainWindowBuilder, //
+								PreferencesComponent.Builder preferencesWindowBuilder, //
 								QuitComponent.Builder quitWindowBuilder, //
 								UnlockComponent.Factory unlockWorkflowFactory, //
 								UpdateReminderComponent.Factory updateReminderWindowFactory, //
@@ -74,21 +75,21 @@ public class FxApplicationWindows {
 								ErrorComponent.Factory errorWindowFactory, //
 								VaultOptionsComponent.Factory vaultOptionsWindow, //
 								ShareVaultComponent.Factory shareVaultWindow, //
-								Lazy<EventViewComponent> eventViewWindow, //
-								Lazy<NotificationComponent> notificationWindow,
+								EventViewComponent.Factory eventViewWindowFactory, //
+								NotificationComponent.Factory notificationWindowFactory, //
 								ExecutorService executor, //
 								Dialogs dialogs) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
-		this.mainWindow = mainWindow;
-		this.preferencesWindow = preferencesWindow;
+		this.mainWindow = new CachedLazy<>(mainWindowBuilder::build);
+		this.preferencesWindow = new CachedLazy<>(preferencesWindowBuilder::build);
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
 		this.updateReminderWindowFactory = updateReminderWindowFactory;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
-		this.eventViewWindow = eventViewWindow;
-		this.notificationWindow = notificationWindow;
+		this.eventViewWindow = new CachedLazy<>(eventViewWindowFactory::create);
+		this.notificationWindow = new CachedLazy<>(notificationWindowFactory::create);
 		this.executor = executor;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.shareVaultWindow = shareVaultWindow;
@@ -216,6 +217,31 @@ public class FxApplicationWindows {
 	private void reportErrors(@Nullable Stage stage, @Nullable Throwable error) {
 		if (error != null) {
 			LOG.error("Failed to display stage", error);
+		}
+	}
+
+	private static class CachedLazy<T> implements Lazy<T> {
+
+		private final Supplier<T> supplier;
+		private volatile T instance = null;
+
+		public CachedLazy(Supplier<T> supplier) {
+			this.supplier = supplier;
+		}
+
+		@Override
+		public T get() {
+			T value = instance;
+			if (value == null) {
+				synchronized (this) {
+					value = instance;
+					if (value == null) {
+						value = supplier.get();
+						instance = value;
+					}
+				}
+			}
+			return instance;
 		}
 	}
 }

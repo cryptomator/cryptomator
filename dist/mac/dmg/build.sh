@@ -24,29 +24,29 @@ rm -rf runtime dmg *.app *.dmg
 # set variables
 APP_NAME="Cryptomator"
 VENDOR="Skymatic GmbH"
-COPYRIGHT_YEARS="2016 - 2025"
+COPYRIGHT_YEARS="2016 - 2026"
 PACKAGE_IDENTIFIER="org.cryptomator"
 MAIN_JAR_GLOB="cryptomator-*.jar"
 MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
 REVISION_NO=`git rev-list --count HEAD`
-VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
+VERSION_NO=`../../../mvnw -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 FUSE_LIB="FUSE-T"
 
-JAVAFX_VERSION=25.0.2
+JAVAFX_VERSION=25.0.3
 JAVAFX_ARCH="undefined"
 JAVAFX_JMODS_SHA256="undefined"
 if [ "$(machine)" = "arm64e" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256="4cd258001c75af7047005c5c891e2400ed11d24fbb09412324c0cbaf8b503c5a"
+    JAVAFX_JMODS_SHA256="a52014d625b8b04e57fd71650f881c1397542b4018e1b04f1b4e66c8800a1f34"
 else
     JAVAFX_ARCH="x64"
-    JAVAFX_JMODS_SHA256="0b4d8463f03901b7425d94628e4116b7078abb8dd540fbec415266fac20bda5c"
+    JAVAFX_JMODS_SHA256="3512fabe43aee467538d329cfbbaab3c53dff2a810f0d54e381f461d5e0fac43"
 fi
 JAVAFX_JMODS_URL="https://download2.gluonhq.com/openjfx/${JAVAFX_VERSION}/openjfx-${JAVAFX_VERSION}_osx-${JAVAFX_ARCH}_bin-jmods.zip"
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
-command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found. Fix by 'brew install maven'."; exit 1; }
+[ -x ../../../mvnw ] || { echo >&2 "mvnw not found at ../../../mvnw."; exit 1; }
 command -v create-dmg >/dev/null 2>&1 || { echo >&2 "create-dmg not found. Fix by 'brew install create-dmg'."; exit 1; }
 if [ -n "${CODESIGN_IDENTITY}" ]; then
     command -v codesign >/dev/null 2>&1 || { echo >&2 "codesign not found. Fix by 'xcode-select --install'."; exit 1; }
@@ -61,7 +61,7 @@ unzip -jo openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/javaf
 JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
 JMOD_VERSION=${JMOD_VERSION#*@}
 JMOD_VERSION=${JMOD_VERSION%%.*}
-POM_JFX_VERSION=$(mvn -f../../../pom.xml help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+POM_JFX_VERSION=$(../../../mvnw -f../../../pom.xml help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
 POM_JFX_VERSION=${POM_JFX_VERSION#*@}
 POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
@@ -71,7 +71,7 @@ if [ "${POM_JFX_VERSION}" -ne "${JMOD_VERSION}" ]; then
 fi
 
 # compile
-mvn -B -f../../../pom.xml clean package -DskipTests -Pmac
+../../../mvnw -B -f../../../pom.xml clean package -DskipTests -Pmac
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/${MAIN_JAR_GLOB} ../../../target/mods
 
@@ -91,6 +91,8 @@ ${JAVA_HOME}/bin/jlink \
     --no-man-pages \
     --strip-debug \
     --compress zip-0
+## remove distrusted CA certificates from runtime
+${JAVA_HOME}/bin/java ../../common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
 
 # create app dir
 ${JAVA_HOME}/bin/jpackage \
@@ -125,6 +127,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
+    --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \
     --resource-dir ../resources
 
@@ -136,14 +139,13 @@ sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Inf
 cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
 # generate license
-mvn -B -f../../../pom.xml license:add-third-party \
+../../../mvnw -B -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
     -Dlicense.outputDirectory=dist/mac/dmg/resources \
     -Dlicense.fileTemplate=resources/licenseTemplate.ftl \
     -Dlicense.includedScopes=compile \
     -Dlicense.excludedGroups=^org\.cryptomator \
-    -Dlicense.failOnMissing=true \
-    -Dlicense.licenseMergesUrl=file://$(pwd)/../../../license/merges
+    -Dlicense.failOnMissing=true
 
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ] && [ -n "${TEAM_IDENTIFIER}" ]; then

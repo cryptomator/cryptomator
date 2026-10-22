@@ -29,7 +29,8 @@ public class SettingsJsonTest {
 					"checkForUpdatesEnabled": true,
 					"port": 8080,
 					"language": "de-DE",
-					"numTrayNotifications": 42
+					"numTrayNotifications": 42,
+					"trustedHosts": null
 				}
 				""";
 
@@ -37,13 +38,14 @@ public class SettingsJsonTest {
 
 		Assertions.assertTrue(jsonObj.checkForUpdatesEnabled);
 		Assertions.assertEquals(2, jsonObj.directories.size());
-		Assertions.assertEquals("/vault1", jsonObj.directories.get(0).path);
+		Assertions.assertEquals("/vault1", jsonObj.directories.getFirst().path);
 		Assertions.assertEquals("/vault2", jsonObj.directories.get(1).path);
 		Assertions.assertEquals("--foo --bar", jsonObj.directories.get(1).mountFlags);
 		Assertions.assertEquals(8080, jsonObj.port);
 		Assertions.assertTrue(jsonObj.autoCloseVaults);
 		Assertions.assertEquals("de-DE", jsonObj.language);
 		Assertions.assertEquals(42, jsonObj.numTrayNotifications);
+		Assertions.assertEquals(0, jsonObj.trustedHosts.size());
 	}
 
 	@SuppressWarnings("SpellCheckingInspection")
@@ -65,7 +67,7 @@ public class SettingsJsonTest {
 	public void testSerialize() throws JsonProcessingException {
 		var jsonObj = new SettingsJson();
 		jsonObj.directories = List.of(new VaultSettingsJson(), new VaultSettingsJson());
-		jsonObj.directories.get(0).id = "test";
+		jsonObj.directories.getFirst().id = "test";
 		jsonObj.theme = UiTheme.DARK;
 		jsonObj.showTrayIcon = false;
 

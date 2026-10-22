@@ -6,29 +6,29 @@ REVISION_NO=`git rev-list --count HEAD`
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
-command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found."; exit 1; }
+[ -x ../../../mvnw ] || { echo >&2 "mvnw not found at ../../../mvnw."; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found."; exit 1; }
 command -v unzip >/dev/null 2>&1 || { echo >&2 "unzip not found."; exit 1; }
 
-VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
+VERSION=$(../../../mvnw -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 SEMVER_STR=${VERSION}
 CPU_ARCH=$(uname -m)
 
 if [[ ! "${CPU_ARCH}" =~ x86_64|aarch64 ]]; then echo "Platform ${CPU_ARCH} not supported"; exit 1; fi
 
-mvn -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
+../../../mvnw -f ../../../pom.xml versions:set -DnewVersion=${SEMVER_STR}
 
 # compile
-mvn -B -f ../../../pom.xml clean package -Plinux -DskipTests
+../../../mvnw -B -f ../../../pom.xml clean package -DskipTests
 cp ../../../LICENSE.txt ../../../target
 cp ../../../target/cryptomator-*.jar ../../../target/mods
 
-JAVAFX_VERSION=25.0.2
+JAVAFX_VERSION=25.0.3
 JAVAFX_ARCH="x64"
-JAVAFX_JMODS_SHA256='e0a9c29d8cf3af9b8b48848b43f87b5785bc107c53a951b19668ce05842bba1b'
+JAVAFX_JMODS_SHA256='47035c653863a8e4be3dc6f142b8dbd84b4bb1efc9a8cbc68413e6a5ff5e9f50'
 if [ "${CPU_ARCH}" = "aarch64" ]; then
     JAVAFX_ARCH="aarch64"
-    JAVAFX_JMODS_SHA256='c3408f818693cce09e59829a8e862a82c7695fdfcd585c41cfd527f5fc3fe646'
+    JAVAFX_JMODS_SHA256='e3fd682354346845d2944a2da2b1ff2b6cb9259d92027f2f9c121b9b93c5e42f'
 fi
 
 # download javaFX jmods
@@ -42,7 +42,7 @@ unzip -o -j openjfx-jmods.zip \*/javafx.base.jmod \*/javafx.controls.jmod \*/jav
 JMOD_VERSION=$(jmod describe ./openjfx-jmods/javafx.base.jmod | head -1)
 JMOD_VERSION=${JMOD_VERSION#*@}
 JMOD_VERSION=${JMOD_VERSION%%.*}
-POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout -B -f ../../../pom.xml)
+POM_JFX_VERSION=$(../../../mvnw help:evaluate "-Dexpression=javafx.version" -q -DforceStdout -B -f ../../../pom.xml)
 POM_JFX_VERSION=${POM_JFX_VERSION#*@}
 POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 if [ $POM_JFX_VERSION -ne $JMOD_VERSION ]; then
@@ -68,6 +68,8 @@ ${JAVA_HOME}/bin/jlink \
     --no-man-pages \
     --strip-debug \
     --compress zip-0
+## remove distrusted CA certificates from runtime
+${JAVA_HOME}/bin/java ../../common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
 
 # create app dir
 ${JAVA_HOME}/bin/jpackage \
@@ -82,7 +84,7 @@ ${JAVA_HOME}/bin/jpackage \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
     --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
-    --copyright "(C) 2016 - 2025 Skymatic GmbH" \
+    --copyright "(C) 2016 - 2026 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \
@@ -99,6 +101,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
     --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
     --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log" \
+    --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \
     --resource-dir ../resources
 
 # transform AppDir
@@ -123,7 +126,7 @@ ln -s org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/meta
 ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
 
 # load AppImageTool
-curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
+curl -L https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-${CPU_ARCH}.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage
 
 # create AppImage

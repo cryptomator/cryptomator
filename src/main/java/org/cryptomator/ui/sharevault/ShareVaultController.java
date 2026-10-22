@@ -18,7 +18,10 @@ import java.net.URISyntaxException;
 public class ShareVaultController implements FxController {
 
 	private static final String SCHEME_PREFIX = "hub+";
-	private static final String VISIT_HUB_URL = "https://cryptomator.org/hub/";
+	private static final String VISIT_HUB_URL = "https://cryptomator.org/hub/" //
+			+ "?utm_source=cryptomator-desktop" //
+			+ "&utm_medium=app" //
+			+ "&utm_campaign=share-vault";
 	private static final String BEST_PRACTICES_URL = "https://docs.cryptomator.org/security/best-practices/#sharing-of-vaults";
 
 	private final Stage window;

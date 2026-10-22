@@ -3,6 +3,8 @@ name: Build Arch package
 on:
   release:
     types: [published]
+  schedule:
+    - cron: '0 21 20 * *'
   workflow_dispatch:
     inputs:
       version:
@@ -19,7 +21,11 @@ on:
       - '.github/workflows/linux-makepkg.yml'
       - 'dist/linux/makepkg/**'
       - 'dist/linux/common/**'
+      - 'dist/common/**'
       - 'dist/linux/resources/**'
+
+permissions:
+  contents: read
 
 jobs:
   get-version:
@@ -42,7 +48,7 @@ jobs:
           pacman-key --init
           pacman-key --populate archlinux
           pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: cryptomator
       - name: Create build user
@@ -67,13 +73,13 @@ jobs:
           sudo -u builder
           env PKGDEST="$PKGDEST" SRCDEST="$SRCDEST"
           makepkg --syncdeps --cleanbuild --noconfirm --log
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: arch-package
           if-no-files-found: error
           path: |
             ${{ env.PKGDEST }}/*.pkg.tar.zst
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: pkgbuild-file
           if-no-files-found: error
@@ -106,7 +112,7 @@ jobs:
         env:
           TAG: ${{ needs.get-version.outputs.semVerStr || github.event.release.tag_name }}
       - name: Checkout cryptomator/aur repo
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: 'cryptomator/aur'
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
@@ -130,7 +136,6 @@ jobs:
       - name: Determine pkgrel
         id: pkgrel
         run: |
-          TARGET_VERSION='${{ needs.get-version.outputs.semVerStr }}'
           CURRENT_VERSION="$(sed -nE 's/^pkgver=(.*)$/\1/p' PKGBUILD | head -n1)"
           CURRENT_REL="$(sed -nE 's/^pkgrel=([0-9]+).*$/\1/p' PKGBUILD | head -n1)"
 
@@ -141,11 +146,11 @@ jobs:
           fi
 
           echo "value=${NEXT_REL}" >> "$GITHUB_OUTPUT"
-          echo "dist-version=${VERSION}-${NEXT_REL}" >> "$GITHUB_OUTPUT"
+          echo "dist-version=${TARGET_VERSION}-${NEXT_REL}" >> "$GITHUB_OUTPUT"
         env:
-          VERSION: ${{ needs.get-version.outputs.semVerStr }}
+          TARGET_VERSION: ${{ needs.get-version.outputs.semVerStr }}
       - name: Download PKGBUILD template
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: pkgbuild-file
       - name: Prepare PKGBUILD
@@ -187,14 +192,14 @@ jobs:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
         if: github.event_name == 'release'
-        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2.3.3
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'
-          SLACK_ICON: false
+          SLACK_ICON: ''
           SLACK_ICON_EMOJI: ':bot:'
           SLACK_CHANNEL: 'cryptomator-desktop'
           SLACK_TITLE: "AUR release PR created for ${{ github.event.repository.name }} ${{ steps.pkgrel.outputs.dist-version }} ."
           SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.url }}|PR> on how to proceed."
-          SLACK_FOOTER: false
+          SLACK_FOOTER: ''
           MSG_MINIMAL: true

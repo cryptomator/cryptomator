@@ -260,7 +260,7 @@ public class UpdatesPreferencesController implements FxController {
 
 	public boolean isProhibitUpdateWhileUnlocked() {
 		// If the result of the last update check was from the fallback mechanism, we don't need to show the warning
-		return !unlockedVaults.isEmpty() && !FallbackUpdateInfo.class.isInstance(updateChecker.getUpdate());
+		return !unlockedVaults.isEmpty() && updateChecker.isUpdateAvailable() && !FallbackUpdateInfo.class.isInstance(updateChecker.getUpdate());
 	}
 
 	public BooleanBinding prohibitUpdateWhileUnlockedProperty() {

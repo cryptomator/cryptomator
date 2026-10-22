@@ -1,6 +1,5 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -12,8 +11,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.WorkerStateEvent;

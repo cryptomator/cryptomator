@@ -22,20 +22,31 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
-import static org.cryptomator.common.vaults.VaultState.Value.*;
+import static org.cryptomator.common.vaults.VaultState.Value.ALL_MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
+import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.MISSING;
+import static org.cryptomator.common.vaults.VaultState.Value.NEEDS_MIGRATION;
+import static org.cryptomator.common.vaults.VaultState.Value.PROCESSING;
+import static org.cryptomator.common.vaults.VaultState.Value.UNLOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.VAULT_CONFIG_MISSING;
+import static org.cryptomator.cryptofs.common.Constants.DATA_DIR_NAME;
 
 @Singleton
 public class VaultListManager {
@@ -72,18 +83,57 @@ public class VaultListManager {
 		return vaultList.stream().anyMatch(v -> vaultPath.equals(v.getPath()));
 	}
 
+	/**
+	 * Safe to call from any thread: the IO work runs on the calling thread, but the
+	 * {@code ObservableList} mutation is marshaled to the JavaFX application thread.
+	 */
 	public Vault add(Path pathToVault) throws IOException {
 		Path normalizedPathToVault = pathToVault.normalize().toAbsolutePath();
-		if (CryptoFileSystemProvider.checkDirStructureForVault(normalizedPathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) == DirStructure.UNRELATED) {
-			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
-		}
+		assertIsVaultDirectory(normalizedPathToVault);
 
-		return get(normalizedPathToVault) //
-				.orElseGet(() -> {
-					Vault newVault = create(newVaultSettings(normalizedPathToVault));
-					vaultList.add(newVault);
-					return newVault;
-				});
+		return get(normalizedPathToVault).orElseGet(() -> {
+			Vault newVault = create(newVaultSettings(normalizedPathToVault));
+			if (Platform.isFxApplicationThread()) {
+				addVault(newVault);
+			} else {
+				Platform.runLater(() -> addVault(newVault));
+			}
+			return newVault;
+		});
+	}
+
+	public static void assertIsVaultDirectory(Path pathToVault) throws IOException {
+		if (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) == DirStructure.UNRELATED) {
+			checkDataDir(pathToVault);
+			checkConfigFile(pathToVault);
+			//if vault is legacy _and_ not readable, just say unsupported
+			throw new NotAVaultDirectoryException(pathToVault, NotAVaultDirectoryException.Reason.UNSUPPORTED_STRUCTURE);
+		}
+	}
+
+	static void checkDataDir(Path pathToVault) throws NotAVaultDirectoryException {
+		Path dataDir = pathToVault.resolve(DATA_DIR_NAME);
+		if (!Files.exists(dataDir)) {
+			throw new NotAVaultDirectoryException(pathToVault, NotAVaultDirectoryException.Reason.MISSING_DATA_DIR);
+		}
+		if (!Files.isDirectory(dataDir)) {
+			throw new NotAVaultDirectoryException(pathToVault, NotAVaultDirectoryException.Reason.DATA_NOT_A_DIRECTORY);
+		}
+	}
+
+	static void checkConfigFile(Path pathToVault) throws NotAVaultDirectoryException {
+		Path vaultConfig = pathToVault.resolve(VAULTCONFIG_FILENAME);
+
+		try (var ch = Files.newByteChannel(vaultConfig, StandardOpenOption.READ)) {
+			ch.read(ByteBuffer.allocate(1));
+		} catch (AccessDeniedException e) {
+			throw new NotAVaultDirectoryException(pathToVault, NotAVaultDirectoryException.Reason.VAULT_CONFIG_ACCESS_DENIED);
+		} catch (NoSuchFileException e) {
+			throw new NotAVaultDirectoryException(pathToVault, NotAVaultDirectoryException.Reason.MISSING_VAULT_CONFIG);
+		} catch (IOException e) {
+			LOG.warn("Failed to read vault config: {}", e.getMessage());
+			throw new NotAVaultDirectoryException(pathToVault, NotAVaultDirectoryException.Reason.UNSUPPORTED_STRUCTURE);
+		}
 	}
 
 	private VaultSettings newVaultSettings(Path path) {
@@ -153,7 +203,7 @@ public class VaultListManager {
 				//for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				vaultSettings.lastKnownKeyLoader.set(MasterkeyFileLoadingStrategy.SCHEME);
 			}
-			case VAULT_CONFIG_MISSING ->  {
+			case VAULT_CONFIG_MISSING -> {
 				//Nothing to do here, since there is no config to read
 			}
 			case MISSING, ALL_MISSING, ERROR, PROCESSING -> {

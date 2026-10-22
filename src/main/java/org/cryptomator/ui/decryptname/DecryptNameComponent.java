@@ -28,23 +28,28 @@ public interface DecryptNameComponent {
 	@FxmlScene(FxmlFile.DECRYPTNAMES)
 	Lazy<Scene> decryptNamesView();
 
+	DecryptFileNamesViewController controller();
+
 	@DecryptNameWindow
 	Vault vault();
 
-	default void showDecryptFileNameWindow() {
+	default void showDecryptFileNameWindow(List<Path> pathsToDecrypt) {
 		Stage s = window();
 		s.setScene(decryptNamesView().get());
 		s.sizeToScene();
 		if (vault().isUnlocked()) {
+			controller().decrypt(pathsToDecrypt);
 			s.show();
+			s.requestFocus();
 		} else {
 			LOG.error("Aborted showing DecryptFileName window: vault state is not {}, but {}.", VaultState.Value.UNLOCKED, vault().getState());
+			s.close();
 		}
 	}
 
 	@Subcomponent.Factory
 	interface Factory {
 
-		DecryptNameComponent create(@BindsInstance @DecryptNameWindow Vault vault, @BindsInstance @Named("windowOwner") Stage owner, @BindsInstance @DecryptNameWindow List<Path> pathsToDecrypt);
+		DecryptNameComponent create(@BindsInstance @DecryptNameWindow Vault vault, @BindsInstance @Named("windowOwner") Stage owner);
 	}
 }

@@ -9,5 +9,15 @@
 target/
 pom.xml.versionsBackup
 
-# Java Crash Logs
+# Eclipse #
+.classpath
+.factorypath
+.project
+.settings/
+bin/
+
+# Java Crash Logs #
 hs_err_pid*.log
+
+# VS Code #
+.vscode/

@@ -217,7 +217,7 @@ public class RecoveryKeyValidateController implements FxController {
 		/**
 		 * Recovery key is not a valid key.
 		 */
-		INVALID;
+		INVALID
 	}
 
 }

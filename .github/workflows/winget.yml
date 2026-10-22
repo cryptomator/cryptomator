@@ -7,6 +7,8 @@ on:
         description: 'Release tag'
         required: true
 
+permissions: {}
+
 jobs:
   winget:
     name: Publish winget package
@@ -18,7 +20,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Submit package
-        uses: vedantmgoyal2009/winget-releaser@19e706d4c9121098010096f9c495a70a7518b30f # no_specific_version
+        uses: vedantmgoyal2009/winget-releaser@b7370d4d152efdce803a26cc6ca9eee58cb2ad54 # no_specific_version
         with:
           identifier: Cryptomator.Cryptomator
           version: ${{ inputs.tag }}

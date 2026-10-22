@@ -34,10 +34,12 @@ on:
         type: boolean
         default: false
 
+permissions: {}
+
 jobs:
   download-file:
     name: Downloads the file into the VM
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       fileName: ${{ steps.extractName.outputs.fileName}}
     env:
@@ -51,24 +53,24 @@ jobs:
       - name: Download file
         run: curl --silent --fail-with-body --proto "=https" -L "${INPUT_URL}" -o "${{steps.extractName.outputs.fileName}}"
       - name: Upload artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.extractName.outputs.fileName }}
           path: ${{ steps.extractName.outputs.fileName }}
           if-no-files-found: error
   allowlist-kaspersky:
     name: Anti Virus Allowlisting Kaspersky
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: download-file
     if: inputs.kaspersky
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@a51268f67f6605236975928ae28b0f7e9971d50a # v4.6.3
+        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.6.3
         with:
           protocol: ftps
           server: allowlist.kaspersky-labs.com
@@ -83,7 +85,7 @@ jobs:
     if: inputs.avast
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload

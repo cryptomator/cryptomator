@@ -4,6 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.recovery.RecoveryActionType;
 import org.cryptomator.common.recovery.VaultPreparator;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.vaults.NotAVaultDirectoryException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListManager;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -55,6 +57,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_EXT;
@@ -90,6 +93,7 @@ public class VaultListController implements FxController {
 	private final VaultComponent.Factory vaultComponentFactory;
 	private final RecoveryKeyComponent.Factory recoveryKeyWindow;
 	private final List<MountService> mountServices;
+	private final ExecutorService executor;
 
 	public ListView<Vault> vaultList;
 	public StackPane root;
@@ -113,7 +117,8 @@ public class VaultListController implements FxController {
 						RecoveryKeyComponent.Factory recoveryKeyWindow, //
 						VaultComponent.Factory vaultComponentFactory, //
 						List<MountService> mountServices, //
-						FxFSEventList fxFSEventList) {
+						FxFSEventList fxFSEventList, //
+						ExecutorService executor) {
 		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
@@ -127,6 +132,7 @@ public class VaultListController implements FxController {
 		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.vaultComponentFactory = vaultComponentFactory;
 		this.mountServices = mountServices;
+		this.executor = executor;
 
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.unreadEvents = fxFSEventList.unreadEventsProperty();
@@ -147,7 +153,7 @@ public class VaultListController implements FxController {
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
 			while (c.next()) {
 				if (c.wasAdded()) {
-					Vault anyAddedVault = c.getAddedSubList().get(0);
+					Vault anyAddedVault = c.getAddedSubList().getFirst();
 					vaultList.getSelectionModel().select(anyAddedVault);
 				}
 			}
@@ -324,15 +330,18 @@ public class VaultListController implements FxController {
 	}
 
 	private void addVault(Path pathToVault) {
-		try {
-			if (pathToVault.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT)) {
-				vaultListManager.add(pathToVault.getParent());
-			} else {
-				vaultListManager.add(pathToVault);
+		Path target = pathToVault.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT) ? pathToVault.getParent() : pathToVault;
+		executor.execute(() -> {
+			try {
+				vaultListManager.add(target);
+			} catch (NotAVaultDirectoryException e) {
+				LOG.warn("Cannot add {}: {}", target, e.getMessage());
+				Platform.runLater(() -> dialogs.prepareNotAVaultDirectoryDialog(mainWindow, e).build().showAndWait());
+			} catch (IOException e) {
+				LOG.warn("Failed to add vault {}", target, e);
+				Platform.runLater(() -> appWindows.showErrorWindow(e, mainWindow, null));
 			}
-		} catch (IOException e) {
-			LOG.debug("Not a vault: {}", pathToVault);
-		}
+		});
 	}
 
 	@FXML

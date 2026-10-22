@@ -9,13 +9,45 @@ name: Build macOS .dmg for x64
 #######################################
 
 on:
-  release:
-    types: [published]
+  schedule:
+    - cron: '0 20 20 * *'
+  workflow_call:
+    inputs:
+      semVerNum:
+        type: string
+        description: 'The Major.Minor.Patch part of the version'
+        required: true
+      revisionNum:
+        type: string
+        description: 'The revision number'
+        required: true
+      semVerSuffix:
+        type: string
+        description: 'The suffix of the version, including dash'
+        required: true
+      notarize:
+        description: 'Notarize'
+        default: true
+        type: boolean
+      upload-to-draft:
+        type: boolean
+        default: true
+    outputs:
+      sha256-dmg:
+        description: "SHA256 sum of the x64 dmg"
+        value: ${{ jobs.build.outputs.sha256sum}}
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version'
+      semVerNum:
+        description: 'The Major.Minor.Patch part of the version'
         required: false
+      revisionNum:
+        description: 'The revision number'
+        required: false
+      semVerSuffix:
+        description: 'The suffix of the version, including dash'
+        required: false
+        default: '-SNAPSHOT'
       notarize:
         description: 'Notarize'
         required: true
@@ -24,18 +56,21 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '25.0.2+10.0.LTS'
+  JAVA_VERSION: '26.0.1+8'
+  VERSION_NUM: ${{ inputs.semVerNum || '99.99.99'}}
+  REVISION_NUM: ${{ inputs.revisionNum || '0' }}
+  VERSION_SUFFIX: ${{ inputs.semVerSuffix || ''}}
+
+
+permissions:
+  contents: read
 
 jobs:
-  get-version:
-    uses: ./.github/workflows/get-version.yml
-    with:
-      version: ${{ inputs.version }}
-
-  build-arm:
+  build:
     name: Build Cryptomator.app for ${{ matrix.output-suffix }}
     runs-on: ${{ matrix.os }}
-    needs: [get-version]
+    outputs:
+      sha256sum: ${{ steps.sha256sum.outputs.value }}
     strategy:
       fail-fast: false
       matrix:
@@ -44,12 +79,12 @@ jobs:
           architecture: x64
           output-suffix: x64
           fuse-lib: macFUSE
-          openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_osx-x64_bin-jmods.zip'
-          openjfx-sha: '0b4d8463f03901b7425d94628e4116b7078abb8dd540fbec415266fac20bda5c'
+          openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_osx-x64_bin-jmods.zip'
+          openjfx-sha: '3512fabe43aee467538d329cfbbaab3c53dff2a810f0d54e381f461d5e0fac43'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Java
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -68,7 +103,7 @@ jobs:
           JMOD_VERSION=$(jmod describe openjfx-jmods/javafx.base.jmod | head -1)
           JMOD_VERSION=${JMOD_VERSION#*@}
           JMOD_VERSION=${JMOD_VERSION%%.*}
-          POM_JFX_VERSION=$(mvn help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
+          POM_JFX_VERSION=$(./mvnw help:evaluate "-Dexpression=javafx.version" -q -DforceStdout)
           POM_JFX_VERSION=${POM_JFX_VERSION#*@}
           POM_JFX_VERSION=${POM_JFX_VERSION%%.*}
 
@@ -77,9 +112,9 @@ jobs:
             exit 1
           fi
       - name: Set version
-        run : mvn versions:set -DnewVersion=${{ needs.get-version.outputs.semVerStr }}
+        run : ./mvnw versions:set -DnewVersion="${VERSION_NUM}${VERSION_SUFFIX}"
       - name: Run maven
-        run: mvn -B clean package -Pmac -DskipTests
+        run: ./mvnw -B clean package -Pmac -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
@@ -105,6 +140,8 @@ jobs:
           --no-man-pages
           --strip-debug
           --compress zip-0
+      - name: Remove distrusted CA certificates from runtime
+        run: ${JAVA_HOME}/bin/java dist/common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -117,8 +154,8 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2025 Skymatic GmbH"
-          --app-version "${{ needs.get-version.outputs.semVerNum }}"
+          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --app-version "${VERSION_NUM}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.mac"
           --java-options "-Xss5m"
@@ -127,7 +164,7 @@ jobs:
           --java-options "-Djava.net.useSystemProxies=true"
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
-          --java-options "-Dcryptomator.appVersion=\"${{ needs.get-version.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.appVersion=\"${VERSION_NUM}${VERSION_SUFFIX}\""
           --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\""
           --java-options "-Dcryptomator.logDir=\"@{userhome}/Library/Logs/Cryptomator\""
           --java-options "-Dcryptomator.settingsPath=\"@{userhome}/Library/Application Support/Cryptomator/settings.json\""
@@ -137,7 +174,8 @@ jobs:
           --java-options "-Dcryptomator.mountPointsDir=\"@{userhome}/Library/Application Support/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism"
-          --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.get-version.outputs.revNum }}\""
+          --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NUM}\""
+          --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true"
           --mac-package-identifier org.cryptomator
           --resource-dir dist/mac/resources
       - name: Patch Cryptomator.app
@@ -145,23 +183,20 @@ jobs:
           mv appdir/Cryptomator.app Cryptomator.app
           mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
           cp dist/mac/resources/Assets.car Cryptomator.app/Contents/Resources/
-          sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
-          sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
+          sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NUM}|g" Cryptomator.app/Contents/Info.plist
+          sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NUM}|g" Cryptomator.app/Contents/Info.plist
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output Cryptomator.app/Contents/embedded.provisionprofile
         env:
-          VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
-          REVISION_NO: ${{ needs.get-version.outputs.revNum }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
       - name: Generate license for dmg
         run: >
-          mvn -B license:add-third-party
+          ./mvnw -B license:add-third-party
           -Dlicense.thirdPartyFilename=license.rtf
           -Dlicense.outputDirectory=dist/mac/dmg/resources
           -Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl
           -Dlicense.includedScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
-          -Dlicense.licenseMergesUrl=file://${{ github.workspace }}/license/merges
       - name: Install codesign certificate
         run: |
           # create variables
@@ -239,16 +274,14 @@ jobs:
           --eula "dist/mac/dmg/resources/license.rtf"
           --icon ".background" 128 758
           --icon ".VolumeIcon.icns" 512 758
-          Cryptomator-${VERSION_NO}-${{ matrix.output-suffix }}.dmg dmg
-        env:
-          VERSION_NO: ${{ needs.get-version.outputs.semVerNum }}
+          Cryptomator-${VERSION_NUM}-${{ matrix.output-suffix }}.dmg dmg
       - name: Codesign .dmg
         run: |
           codesign -s ${CODESIGN_IDENTITY} --timestamp Cryptomator-*.dmg
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
       - name: Notarize .dmg
-        if: startsWith(github.ref, 'refs/tags/') || inputs.notarize
+        if:  inputs.notarize || github.event_name == 'schedule'
         uses: cocoalibs/xcode-notarization-action@5cf433d494b6fa26504b574c591f4dd120388846 # v1.0.3
         with:
           app-path: 'Cryptomator-*.dmg'
@@ -256,8 +289,12 @@ jobs:
           password: ${{ secrets.MACOS_NOTARIZATION_PW }}
           team-id: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
           xcode-path: '/Applications/Xcode_16.app'
+      - id: sha256sum
+        run: |
+          read -ra CMD_OUTPUT < <(shasum -a256 Cryptomator-*.dmg)
+          echo "value=${CMD_OUTPUT[0]}" >> $GITHUB_OUTPUT
       - name: Add possible alpha/beta tags to installer name
-        run: mv Cryptomator-*.dmg Cryptomator-${{ needs.get-version.outputs.semVerStr }}-${{ matrix.output-suffix }}.dmg
+        run: mv Cryptomator-*.dmg "Cryptomator-${VERSION_NUM}${VERSION_SUFFIX}-${{ matrix.output-suffix }}.dmg"
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -270,7 +307,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dmg-${{ matrix.output-suffix }}
           path: |
@@ -278,9 +315,10 @@ jobs:
             Cryptomator-*.asc
           if-no-files-found: error
       - name: Publish dmg on GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/') && github.event.action == 'published'
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        if: inputs.upload-to-draft
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
+          draft: true
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |

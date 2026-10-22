@@ -1,0 +1,268 @@
+name: Build flatpak
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      src-tag:
+        description: 'Source or Release tag'
+        required: false
+      create-pr:
+        description: 'Create Flathub PR'
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+    paths:
+      - '.github/workflows/get-version.yml'
+      - '.github/workflows/linux-flatpak.yml'
+      - 'dist/linux/flatpak/**'
+      - 'dist/linux/common/**'
+      - 'dist/common/**'
+      - 'dist/linux/resources/**'
+
+permissions:
+  contents: read
+
+jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    with:
+      version: ${{ inputs.src-tag }}
+
+  build-flatpak:
+    name: "Build flatpak"
+    needs: [get-version]
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.variant.runner }}
+    permissions:
+      contents: read
+    env:
+      SRC_GIT_SHA: ${{ inputs.src-tag || github.sha}}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: flathub/org.cryptomator.Cryptomator
+          submodules: true
+      - name: Checkout build script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: build-scripts
+      - name: Checkout app source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: cryptomator
+          ref: ${{ env.SRC_GIT_SHA }}
+          fetch-depth: 0
+      - name: Prepare build files
+        # using envsubst instead of yq to keep linebreaks
+        run: |
+          cp -r -f build-scripts/dist/linux/flatpak/* .
+          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
+        env:
+          FLATPAK_VERSION: ${{ needs.get-version.outputs.semVerNum }}
+          FLATPAK_REVISION: 1
+          CRYPTOMATOR_SOURCE: |-
+            type: git
+                    path: cryptomator
+                    commit: ${{ env.SRC_GIT_SHA }}
+      - name: Copy build script for upload
+        run: cp org.cryptomator.Cryptomator.yaml org.cryptomator.Cryptomator.${{matrix.variant.arch}}.yaml
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          archive: false
+          if-no-files-found: error
+          path: |
+            org.cryptomator.Cryptomator.${{matrix.variant.arch}}.yaml
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # SNAPSHOT due to using keep-build-dirs
+        with:
+          bundle: cryptomator.flatpak
+          manifest-path: org.cryptomator.Cryptomator.yaml
+          cache-key: flatpak-builder-${{ env.SRC_GIT_SHA }}
+          arch: ${{ matrix.variant.arch }}
+          keep-build-dirs: true
+      - name: Collect maven dependencies
+        working-directory: .flatpak-builder/build/cryptomator-1/.m2/repository/
+        run: |
+          find * -type f \( -iname '*.jar' -o -iname '*.pom' \) | sort -V > /tmp/maven-dependency-files.txt
+          grep -v '^org/openjfx/javafx-' /tmp/maven-dependency-files.txt > maven-dependency-files-common.txt
+          grep '^org/openjfx/javafx-' /tmp/maven-dependency-files.txt > maven-dependency-files-javafx.txt
+      - name: Update arch independent maven dependencies
+        run: |
+          (
+            cd .flatpak-builder/build/cryptomator-1/.m2/repository/
+
+            while IFS= read -r dependencyPath; do
+              dependencyName=$(dirname "$dependencyPath")
+              dependencySha=$(sha256sum "$dependencyPath" | cut -c 1-64)
+              cat <<EOF
+          - type: file
+            dest: .m2/repository/${dependencyName}
+            url: https://repo.maven.apache.org/maven2/${dependencyPath}
+            sha256: ${dependencySha}
+          EOF
+            done < maven-dependency-files-common.txt
+          ) > maven-dependencies.yaml
+      - name: Update arch specific maven dependencies
+        run: |
+          (
+            cd .flatpak-builder/build/cryptomator-1/.m2/repository/
+
+            while IFS= read -r dependencyPath; do
+              dependencyName=$(dirname "$dependencyPath")
+              dependencySha=$(sha256sum "$dependencyPath" | cut -c 1-64)
+              cat <<EOF
+          - type: file
+            dest: .m2/repository/${dependencyName}
+            url: https://repo.maven.apache.org/maven2/${dependencyPath}
+            sha256: ${dependencySha}
+            only-arches: [${{ matrix.variant.arch }}]
+          EOF
+            done < maven-dependency-files-javafx.txt
+          ) > javafx-maven-dependencies-${{ matrix.variant.arch }}.yaml
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: maven-sources-${{ matrix.variant.arch }}
+          if-no-files-found: error
+          path: |
+            maven-dependencies.yaml
+            javafx-maven-dependencies-${{ matrix.variant.arch }}.yaml
+
+  verify-maven-sources:
+    name: Verify maven sources
+    runs-on: ubuntu-latest
+    needs: [build-flatpak]
+    permissions:
+      contents: none
+    steps:
+      - name: Download updated maven aarch64 dependencies
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: maven-sources-aarch64
+          path: mvn-src-aarch64
+      - name: Download updated maven x86_64 dependencies
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: maven-sources-x86_64
+          path: mvn-src-x64
+      - name: Verify arch independent maven dependencies
+        run: cmp --silent mvn-src-aarch64/maven-dependencies.yaml mvn-src-x64/maven-dependencies.yaml
+
+  create-pr:
+    name: Create PR for flathub
+    runs-on: ubuntu-latest
+    needs: [get-version, verify-maven-sources]
+    if: (github.event_name == 'workflow_dispatch' && inputs.create-pr ) || (github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable')
+    permissions:
+      contents: read # Required for checkout; the flathub push/PR uses CRYPTOBOT_PR_TOKEN
+    env:
+      TARBALL_URL: 'https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name || inputs.src-tag }}.tar.gz'
+    steps:
+      - name: Check that input "src-tag" is actually a tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ -z "$SRC_TAG" ]; then
+            echo '::error::Input "src-tag" must be set to create a Flathub PR'
+            exit 1
+          fi
+        env:
+          SRC_TAG: ${{ inputs.src-tag }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: flathub/org.cryptomator.Cryptomator
+          submodules: true #TODO: Update submodule!
+          token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+      - name: Checkout release branch
+        run: |
+          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: cryptomator
+      - name: Download source tarball and compute checksum
+        id: sha512
+        run: |
+          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" ${TARBALL_URL} --output cryptomator.tar.gz
+          TARBALL_SHA512=$(sha512sum cryptomator.tar.gz | cut -d ' ' -f1)
+          echo "value=${TARBALL_SHA512}" >> "$GITHUB_OUTPUT"
+      - name: Download updated maven aarch64 dependencies
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: maven-sources-aarch64
+          path: mvn-src-aarch64
+      - name: Download updated maven x86_64 dependencies
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: maven-sources-x86_64
+          path: mvn-src-x64
+      - name: Determine revision
+        id: revision
+        run: |
+          CURRENT_VERSION="$(yq '(.modules[] | select(.name == "cryptomator") | .build-options.env.VERSION)' org.cryptomator.Cryptomator.yaml)"
+          CURRENT_REVISION="$(yq '(.modules[] | select(.name == "cryptomator") | .build-options.env.REVISION_NO)' org.cryptomator.Cryptomator.yaml)"
+
+          if [[ "$CURRENT_VERSION" == "$TARGET_VERSION" && "$CURRENT_REVISION" =~ ^[0-9]+$ ]]; then
+            NEXT_REVISION=$((CURRENT_REVISION + 1))
+          else
+            NEXT_REVISION=1
+          fi
+
+          echo "value=${NEXT_REVISION}" >> "$GITHUB_OUTPUT"
+        env:
+          TARGET_VERSION: ${{ needs.get-version.outputs.semVerStr }}
+      - name: Update build files
+        run: |
+          cp -r -f cryptomator/dist/linux/flatpak/* .
+          cp -r -f mvn-src-x64/* .
+          cp -r -f mvn-src-aarch64/* .
+          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
+          yq -i 'del(.modules[] | select(.name == "cryptomator") | .build-options.build-args)' org.cryptomator.Cryptomator.yaml
+          yq -i '(.modules[] | select(.name == "cryptomator") | .sources) += ["maven-dependencies.yaml", "javafx-maven-dependencies-x86_64.yaml", "javafx-maven-dependencies-aarch64.yaml"]' org.cryptomator.Cryptomator.yaml
+        env:
+          FLATPAK_VERSION: ${{ needs.get-version.outputs.semVerNum }}
+          FLATPAK_REVISION: ${{ steps.revision.outputs.value}}
+          CRYPTOMATOR_SOURCE: |-
+            type: archive
+                    sha512: ${{steps.sha512.outputs.value}}
+                    url: ${{ env.TARBALL_URL }}
+      - name: Commit and push
+        run: |
+          git config user.name "cryptobot"
+          git config user.email "cryptobot@users.noreply.github.com"
+          git config push.autoSetupRemote true
+          git stage org.cryptomator.Cryptomator.yaml maven-dependencies.yaml javafx-maven-dependencies-aarch64.yaml javafx-maven-dependencies-x86_64.yaml
+          git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
+          git push
+      - name: Create pull request
+        id: create-pr
+        run: |
+          printf "Created by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > pr_body.md
+          PR_URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
+          echo "FLATHUB_PR_URL=$PR_URL" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        if: github.event_name == 'release'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
+          SLACK_USERNAME: 'Cryptobot'
+          SLACK_ICON: ''
+          SLACK_ICON_EMOJI: ':bot:'
+          SLACK_CHANNEL: 'cryptomator-desktop'
+          SLACK_TITLE: "Flathub release PR created for ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} created."
+          SLACK_MESSAGE: "See <${{ steps.create-pr.outputs.FLATHUB_PR_URL }}|PR> on how to proceed."
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: true

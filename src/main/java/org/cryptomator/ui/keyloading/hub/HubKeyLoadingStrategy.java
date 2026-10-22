@@ -36,19 +36,19 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 	private final Stage window;
 	private final KeychainManager keychainManager;
 	private final AtomicReference<String> fsOwnerId;
-	private final Lazy<Scene> authFlowScene;
+	private final Lazy<Scene> checkHostTrustScene;
 	private final Lazy<Scene> noKeychainScene;
 	private final CompletableFuture<ReceivedKey> result;
 	private final DeviceKey deviceKey;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle, @Named("filesystemOwnerId") AtomicReference<String> fsOwnerId) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_CHECK_HOST_TRUST) Lazy<Scene> checkHostTrustScene, @FxmlScene(FxmlFile.HUB_NO_KEYCHAIN) Lazy<Scene> noKeychainScene, CompletableFuture<ReceivedKey> result, DeviceKey deviceKey, KeychainManager keychainManager, @Named("windowTitle") String windowTitle, @Named("filesystemOwnerId") AtomicReference<String> fsOwnerId) {
 		this.window = window;
 		this.keychainManager = keychainManager;
 		this.fsOwnerId = fsOwnerId;
 		window.setTitle(windowTitle);
 		window.setOnCloseRequest(_ -> result.cancel(true));
-		this.authFlowScene = authFlowScene;
+		this.checkHostTrustScene = checkHostTrustScene;
 		this.noKeychainScene = noKeychainScene;
 		this.result = result;
 		this.deviceKey = deviceKey;
@@ -62,7 +62,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy, FilesystemOwne
 				throw new NoKeychainAccessProviderException();
 			}
 			var keypair = deviceKey.get();
-			showWindow(authFlowScene);
+			showWindow(checkHostTrustScene);
 			var jwe = result.get();
 			return jwe.decryptMasterkey(keypair.getPrivate());
 		} catch (NoKeychainAccessProviderException e) {

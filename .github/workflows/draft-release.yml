@@ -1,0 +1,172 @@
+name: Draft a Cryptomator Release
+
+on:
+  push:
+    tags:
+        - '*'
+
+env:
+  JAVA_DIST: 'temurin'
+  JAVA_VERSION: '26.0.1+8'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+    permissions:
+      contents: read
+    with:
+      version:  ''
+
+  create-release-draft:
+    name: Compile and Test
+    runs-on: ubuntu-latest
+    needs: get-version
+    permissions:
+      contents: read
+      pull-requests: read
+    if: needs.get-version.outputs.versionType != 'unknown'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Check the git tag is signed
+        run: git cat-file -p "${GITHUB_REF_NAME}" | grep "BEGIN SSH SIGNATURE"
+      - name: Check the git tag is on release or main branch
+        run: git branch -r --contains "${GITHUB_REF_NAME}" | grep -E '^\s*origin/(main|release/.*)\s*$'
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: ${{ env.JAVA_DIST }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+      - name: Build and Test
+        run: xvfb-run ./mvnw -B verify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+      - name: Draft a release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          draft: true
+          discussion_category_name: releases
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          generate_release_notes: true
+          body_path: .github/release-body.md.template
+      - name: Download source tarball
+        run: |
+          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/${{ github.ref }}.tar.gz --output cryptomator-${{ github.ref_name }}.tar.gz
+      - name: Sign source tarball with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.tar.gz
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Publish asc on GitHub Releases
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          draft: true
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            cryptomator-*.tar.gz.asc
+
+  build-exe-and-msi:
+    needs: [get-version, create-release-draft]
+    uses: ./.github/workflows/win-exe.yml
+    permissions:
+      contents: read
+    with:
+      semVerNum: ${{needs.get-version.outputs.semVerNum}}
+      revisionNum: ${{needs.get-version.outputs.revNum}}
+      semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
+    secrets: inherit
+
+  build-dmg-arm64:
+    needs: [get-version, create-release-draft]
+    uses: ./.github/workflows/mac-dmg.yml
+    permissions:
+      contents: read
+    with:
+      semVerNum: ${{needs.get-version.outputs.semVerNum}}
+      revisionNum: ${{needs.get-version.outputs.revNum}}
+      semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
+    secrets: inherit
+
+  build-dmg-x64:
+    needs: [get-version, create-release-draft]
+    uses: ./.github/workflows/mac-dmg-x64.yml
+    permissions:
+      contents: read
+    with:
+      semVerNum: ${{needs.get-version.outputs.semVerNum}}
+      revisionNum: ${{needs.get-version.outputs.revNum}}
+      semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
+    secrets: inherit
+
+  build-appimages:
+    needs: [get-version, create-release-draft]
+    uses: ./.github/workflows/appimage.yml
+    permissions:
+      contents: read
+    with:
+      semVerNum: ${{needs.get-version.outputs.semVerNum}}
+      revisionNum: ${{needs.get-version.outputs.revNum}}
+      semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
+    secrets: inherit
+
+  update-sha256sums:
+    runs-on: ubuntu-latest
+    needs: [get-version, build-exe-and-msi, build-dmg-arm64, build-dmg-x64, build-appimages]
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ github.ref_name }}
+      SEMVER: ${{ needs.get-version.outputs.semVerStr }}
+      GH_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Compute source tarball SHA256
+        id: src-sha256
+        run: |
+          curl --silent --fail-with-body --proto "=https" -L \
+            -H "Accept: application/vnd.github+json" \
+            "https://github.com/cryptomator/cryptomator/archive/refs/tags/${TAG}.tar.gz" \
+            --output "cryptomator-${SEMVER}.tar.gz"
+          read -ra CMD_OUTPUT < <(sha256sum "cryptomator-${SEMVER}.tar.gz")
+          echo "value=${CMD_OUTPUT[0]}" >> $GITHUB_OUTPUT
+      - name: Update release body with checksums
+        run: |
+          CURRENT_BODY=$(gh release view "${TAG}" --json body --jq .body)
+          RELEASE_BODY=$(printf '%s\n' "${CURRENT_BODY}" | sed '/<!-- HEADER -->/,/<!-- \/HEADER -->/c\
+          <!-- HEADER -->\
+          > [!NOTE]\
+          > Release artifacts finished building successfully.\
+          >\
+          > SHA-256 checksums have been updated below.\
+          <!-- /HEADER -->')
+
+          export TARBALL="${SRC_SHA}  cryptomator-${SEMVER}.tar.gz"
+          export MSI="${MSI_SHA}  Cryptomator-${SEMVER}-x64.msi"
+          export EXE="${EXE_SHA}  Cryptomator-${SEMVER}-x64.exe"
+          export DMG_arm64="${DMG_ARM64_SHA}  Cryptomator-${SEMVER}-arm64.dmg"
+          export DMG_x64="${DMG_X64_SHA}  Cryptomator-${SEMVER}-x64.dmg"
+          export APPIMAGE_x86_64="${APPIMAGE_X64_SHA}  cryptomator-${SEMVER}-x86_64.AppImage"
+          export APPIMAGE_aarch64="${APPIMAGE_AARCH64_SHA}  cryptomator-${SEMVER}-aarch64.AppImage"
+
+          envsubst '$VERSION $TARBALL $EXE $MSI $DMG_x64 $DMG_arm64 $APPIMAGE_x86_64 $APPIMAGE_aarch64' \
+            <<< "${RELEASE_BODY}" \
+            > release-body.md
+
+          gh release edit "${TAG}" --draft --notes-file release-body.md
+        env:
+          VERSION: ${{ needs.get-version.outputs.semVerStr }}
+          SRC_SHA: ${{ steps.src-sha256.outputs.value }}
+          MSI_SHA: ${{ needs.build-exe-and-msi.outputs.sha256-msi }}
+          EXE_SHA: ${{ needs.build-exe-and-msi.outputs.sha256-exe }}
+          DMG_ARM64_SHA: ${{ needs.build-dmg-arm64.outputs.sha256-dmg }}
+          DMG_X64_SHA: ${{ needs.build-dmg-x64.outputs.sha256-dmg }}
+          APPIMAGE_X64_SHA: ${{ needs.build-appimages.outputs.sha256-appimage-x64 }}
+          APPIMAGE_AARCH64_SHA: ${{ needs.build-appimages.outputs.sha256-appimage-aarch64 }}

@@ -68,7 +68,7 @@
     <?endif?>
 
     <!-- TODO: how does this work again? -->
-    <ns0:Binary Id="JpCaDll" SourceFile="$(env.JP_WIXHELPER_DIR)\wixhelper.dll" />
+    <ns0:Binary Id="JpCaDll" SourceFile="$(env.JP_WIXHELPER_DIR)msica.dll"></ns0:Binary>
     <ns0:CustomAction Id="JpFindRelatedProducts" BinaryRef="JpCaDll" DllEntry="FindRelatedProductsEx" />
 
     <?ifndef SkipCryptomatorLegacyCheck ?>
@@ -109,7 +109,7 @@
           </ns0:CreateFolder>
         </ns0:Component>
         <ns0:Component Id="AdminConfigFile" NeverOverwrite="yes" Permanent="yes">
-          <ns0:File Id="EmptyAdminConfig" Source="$(env.JP_WIXWIZARD_RESOURCES)\..\..\common\cryptomator.config" Name="cryptomator.config" KeyPath="yes">
+          <ns0:File Id="EmptyAdminConfig" Source="$(env.JP_WIXWIZARD_RESOURCES)\..\..\common\config.properties" Name="config.properties" KeyPath="yes">
             <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
             <util:PermissionEx User="Administrators" GenericAll="yes"/>
             <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
@@ -158,8 +158,12 @@
     <ns0:CustomAction Id="DisableUserConfig" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
 
     <!-- WebDAV patches -->
-    <ns0:SetProperty Id="PatchWebDAV" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot; &quot;$(var.LoopbackAlias)&quot;" Sequence="execute" Before="PatchWebDAV" />
+    <ns0:SetProperty Id="PatchWebDAV" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot; &quot;$(var.LoopbackAlias)&quot; install" Sequence="execute" Before="PatchWebDAV" />
     <ns0:CustomAction Id="PatchWebDAV" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
+
+    <!-- WebDAV patches (Uninstall) -->
+    <ns0:SetProperty Id="PatchWebDAVUninstall" Value="&quot;[INSTALLDIR]patchWebDAV.bat&quot; &quot;$(var.LoopbackAlias)&quot; uninstall" Sequence="execute" Before="PatchWebDAVUninstall" />
+    <ns0:CustomAction Id="PatchWebDAVUninstall" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
 
     <!-- Update check configuration -->
     <ns0:SetProperty Id="PatchUpdateCheck" Value="&quot;[INSTALLDIR]patchUpdateCheck.bat&quot; &quot;[DISABLEUPDATECHECK]&quot;" Sequence="execute" Before="PatchUpdateCheck" />
@@ -214,9 +218,8 @@
 
       <ns0:RemoveExistingProducts After="InstallValidate"/> <!-- Moved from CostInitialize, due to Wix4CloseApplications_* -->
       <ns0:Custom Action="DisableUserConfig" After="InstallFiles" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
-      <!-- Skip action on uninstall -->
-      <!-- TODO: don't skip action, but remove cryptomator alias from hosts file -->
       <ns0:Custom Action="PatchWebDAV" After="DisableUserConfig" Condition="NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
+      <ns0:Custom Action="PatchWebDAVUninstall" Before="RemoveFiles" Condition="Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE" />
       <!-- Configure update check setting if property is provided -->
       <ns0:Custom Action="PatchUpdateCheck" After="PatchWebDAV" Condition="DISABLEUPDATECHECK AND NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
     </ns0:InstallExecuteSequence>
@@ -225,7 +228,7 @@
       <ns0:Custom Action="JpFindRelatedProducts" After="FindRelatedProducts"/>
     </ns0:InstallUISequence>
 
-    <ns0:WixVariable Id="WixUIBannerBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\banner.bmp" />
-    <ns0:WixVariable Id="WixUIDialogBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\background.bmp" />
+    <ns0:WixVariable Id="WixUIBannerBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)banner.bmp" />
+    <ns0:WixVariable Id="WixUIDialogBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)background.bmp" />
   </ns0:Package>
 </ns0:Wix>

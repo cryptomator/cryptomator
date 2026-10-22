@@ -1,15 +1,18 @@
 package org.cryptomator.ui.fxapp;
 
+import org.cryptomator.common.vaults.NotAVaultDirectoryException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.launcher.AppLaunchEvent;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
+import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -29,14 +32,18 @@ class AppLaunchEventHandler {
 	private final FxApplicationWindows appWindows;
 	private final VaultListManager vaultListManager;
 	private final VaultService vaultService;
+	private final Stage primaryStage;
+	private final Dialogs dialogs;
 
 	@Inject
-	public AppLaunchEventHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExecutorService executorService, FxApplicationWindows appWindows, VaultListManager vaultListManager, VaultService vaultService) {
+	public AppLaunchEventHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExecutorService executorService, FxApplicationWindows appWindows, VaultListManager vaultListManager, VaultService vaultService, @PrimaryStage Stage primaryStage, Dialogs dialogs) {
 		this.launchEventQueue = launchEventQueue;
 		this.executorService = executorService;
 		this.appWindows = appWindows;
 		this.vaultListManager = vaultListManager;
 		this.vaultService = vaultService;
+		this.primaryStage = primaryStage;
+		this.dialogs = dialogs;
 	}
 
 	public void startHandlingLaunchEvents() {
@@ -58,31 +65,33 @@ class AppLaunchEventHandler {
 	private void handleLaunchEvent(AppLaunchEvent event) {
 		switch (event.type()) {
 			case REVEAL_APP -> appWindows.showMainWindow();
-			case OPEN_FILE -> Platform.runLater(() -> {
-				event.pathsToOpen().forEach(this::openPotentialVault);
-			});
+			case OPEN_FILE -> event.pathsToOpen().forEach(this::openPotentialVault);
 			default -> LOG.warn("Unsupported event type: {}", event.type());
 		}
 	}
 
 	// TODO deduplicate MainWindowController...
 	private void openPotentialVault(Path path) {
-		assert Platform.isFxApplicationThread();
-		try {
-			Path potentialVaultPath = path.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT) ? path.getParent() : path;
-			final Optional<Vault> v = vaultListManager.get(potentialVaultPath);
-			if (v.isPresent()) {
-				if (v.get().isUnlocked()) {
-					vaultService.reveal(v.get());
-				} else if (v.get().isLocked()) {
-					appWindows.startUnlockWorkflow(v.get(), null);
+		Path potentialVaultPath = path.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT) ? path.getParent() : path;
+		Optional<Vault> existing = vaultListManager.get(potentialVaultPath.normalize().toAbsolutePath());
+		if (existing.isPresent()) {
+			Platform.runLater(() -> {
+				if (existing.get().isUnlocked()) {
+					vaultService.reveal(existing.get());
+				} else if (existing.get().isLocked()) {
+					appWindows.startUnlockWorkflow(existing.get(), null);
 				}
-			} else {
-				vaultListManager.add(potentialVaultPath);
-				LOG.debug("Added vault {}", potentialVaultPath);
-			}
+			});
+			return;
+		}
+		try {
+			vaultListManager.add(potentialVaultPath);
+			LOG.debug("Added vault {}", potentialVaultPath);
+		} catch (NotAVaultDirectoryException e) {
+			LOG.warn("Cannot add {}: {}", potentialVaultPath, e.getMessage());
+			Platform.runLater(() -> dialogs.prepareNotAVaultDirectoryDialog(primaryStage, e).build().showAndWait());
 		} catch (IOException e) {
-			LOG.error("Failed to add vault " + path, e);
+			LOG.error("Failed to add vault {}", potentialVaultPath, e);
 		}
 	}
 

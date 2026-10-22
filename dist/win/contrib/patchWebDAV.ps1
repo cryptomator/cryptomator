@@ -1,15 +1,17 @@
 #Requires -RunAsAdministrator
 Param(
-	[Parameter(Mandatory, HelpMessage="Please provide an alias for 127.0.0.1")][string] $LoopbackAlias
+	[Parameter(Mandatory, HelpMessage="Please provide an alias for 127.0.0.1")][string] $LoopbackAlias,
+	[string] $Action = "install"
 )
+
+New-Variable -Name "sysdir" -Value ([Environment]::SystemDirectory) -Option Constant -Scope Global
+New-Variable -Name "hostsFile" -Value "$sysdir\drivers\etc\hosts" -Option Constant -Scope Global
 
 # Adds an alias for 127.0.0.1 to the hosts file
 function Add-AliasToHost {
     param (
         [string]$LoopbackAlias
     )
-    $sysdir = [Environment]::SystemDirectory
-    $hostsFile = "$sysdir\drivers\etc\hosts"
     $aliasLine = "127.0.0.1 $LoopbackAlias"
 
     foreach ($line in Get-Content $hostsFile) {
@@ -18,9 +20,26 @@ function Add-AliasToHost {
         }
     }
 
-    Add-Content -Path $hostsFile -Encoding ascii -Value "`r`n$aliasLine"
+    $content = Get-Content $hostsFile
+    $content += "`r`n$aliasLine"
+
+    $content | Set-Content "$hostsFile.tmp" -Encoding ascii
+    Move-Item "$hostsFile.tmp" $hostsFile -Force
 }
 
+# Removes an alias for 127.0.0.1 from the hosts file
+function Remove-AliasFromHost {
+    param (
+    	[string]$LoopbackAlias
+    )
+    $aliasLine = "127.0.0.1 $LoopbackAlias"
+
+    $content = Get-Content $hostsFile
+    $newContent = $content | Where-Object { $_ -ne $aliasLine }
+
+    $newContent | Set-Content "$hostsFile.tmp" -Encoding ascii
+	Move-Item "$hostsFile.tmp" $hostsFile -Force
+}
 
 # Sets in the registry the webclient file size limit to the maximum value
 function Set-WebDAVFileSizeLimit {
@@ -54,14 +73,20 @@ function Edit-ProviderOrder {
     New-ItemProperty -Path $RegistryPath -Name $Name -Value $UpdatedOrder -PropertyType String -Force | Out-Null
 }
 
+if ($Action -eq "install") {
+	Add-AliasToHost $LoopbackAlias
+    Write-Output 'Ensured alias exists in hosts file'
 
-Add-AliasToHost $LoopbackAlias
-Write-Output 'Ensured alias exists in hosts file'
+	Set-WebDAVFileSizeLimit
+    Write-Output 'Set WebDAV file size limit'
 
-Set-WebDAVFileSizeLimit
-Write-Output 'Set WebDAV file size limit'
-
-Edit-ProviderOrder
-Write-Output 'Ensured correct provider order'
+    Edit-ProviderOrder
+    Write-Output 'Ensured correct provider order'
+} elseif ($Action -eq "uninstall") {
+    Remove-AliasFromHost $LoopbackAlias
+    Write-Output 'Ensured alias removed from hosts file'
+} else {
+	Write-Error "Invalid action: $Action. Only 'install' or 'uninstall' are valid."
+}
 
 exit 0

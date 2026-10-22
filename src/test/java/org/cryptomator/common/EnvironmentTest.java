@@ -11,7 +11,6 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.mockito.Mockito;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -56,7 +55,7 @@ public class EnvironmentTest {
 			List<Path> result = env.getPaths("test.path.property").toList();
 
 			MatcherAssert.assertThat(result, Matchers.hasSize(1));
-			MatcherAssert.assertThat(result, Matchers.hasItem(Paths.get("/foo/bar/test")));
+			MatcherAssert.assertThat(result, Matchers.hasItem(Path.of("/foo/bar/test")));
 		}
 
 		@Test
