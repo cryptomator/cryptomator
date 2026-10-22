@@ -2,6 +2,10 @@ package org.cryptomator.common;
 
 import com.google.common.io.BaseEncoding;
 
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
@@ -60,54 +64,18 @@ final class X509Helper {
 	}
 
 	static Optional<String> extractCommonName(X509Certificate cert) {
-		String rfc2253Name = cert.getSubjectX500Principal().getName(X500Principal.RFC2253);
-		for (String rdn : splitRdns(rfc2253Name)) {
-			int equalsPos = rdn.indexOf('=');
-			if (equalsPos > 0 && "CN".equalsIgnoreCase(rdn.substring(0, equalsPos).trim())) {
-				return Optional.of(unescapeRdnValue(rdn.substring(equalsPos + 1).trim()));
+		try {
+			var name = new LdapName(cert.getSubjectX500Principal().getName(X500Principal.RFC2253));
+			for (Rdn rdn : name.getRdns().reversed()) { // LdapName lists RDNs right to left
+				Attribute cn = rdn.toAttributes().get("CN");
+				if (cn != null && cn.get() instanceof String value) {
+					return Optional.of(value);
+				}
 			}
+			return Optional.empty();
+		} catch (NamingException e) {
+			return Optional.empty();
 		}
-		return Optional.empty();
-	}
-
-	private static List<String> splitRdns(String distinguishedName) {
-		List<String> rdns = new ArrayList<>();
-		StringBuilder current = new StringBuilder();
-		boolean escaped = false;
-		for (int i = 0; i < distinguishedName.length(); i++) {
-			char c = distinguishedName.charAt(i);
-			if (escaped) {
-				current.append(c);
-				escaped = false;
-			} else if (c == '\\') {
-				current.append(c);
-				escaped = true;
-			} else if (c == ',') {
-				rdns.add(current.toString());
-				current.setLength(0);
-			} else {
-				current.append(c);
-			}
-		}
-		rdns.add(current.toString());
-		return rdns;
-	}
-
-	private static String unescapeRdnValue(String value) {
-		StringBuilder unescaped = new StringBuilder(value.length());
-		boolean escaped = false;
-		for (int i = 0; i < value.length(); i++) {
-			char c = value.charAt(i);
-			if (escaped) {
-				unescaped.append(c);
-				escaped = false;
-			} else if (c == '\\') {
-				escaped = true;
-			} else {
-				unescaped.append(c);
-			}
-		}
-		return unescaped.toString();
 	}
 
 	private static X509Certificate parseDerCertificate(byte[] derEncodedCertificate) {
