@@ -18,10 +18,14 @@ public final class CryptomatorMKFValidator implements MasterkeyFileValidator {
 	private CryptomatorMKFValidator() {}
 
 	@Override
-	public void validate(MasterkeyFile file) throws IOException {
-		MasterkeyFileValidator.DEFAULT.validate(file); // also bounds N and r, so the multiplication below cannot overflow
+	public void validate(MasterkeyFile file) throws UnsupportedScryptParametersException {
+		try {
+			MasterkeyFileValidator.DEFAULT.validate(file); // also bounds N and r, so the multiplication below cannot overflow
+		} catch (IOException e) {
+			throw new UnsupportedScryptParametersException(e.getMessage(), e);
+		}
 		if (128L * file.scryptBlockSize * file.scryptCostParam > MAX_SCRYPT_MEMORY) {
-			throw new IOException("scrypt parameters exceed memory limit of " + MAX_SCRYPT_MEMORY + " bytes");
+			throw new UnsupportedScryptParametersException("scrypt parameters exceed memory limit of " + MAX_SCRYPT_MEMORY + " bytes");
 		}
 	}
 

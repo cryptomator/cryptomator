@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.io.IOException;
-
 public class CryptomatorMKFValidatorTest {
 
 	@ParameterizedTest(name = "N={0}, r={1}")
@@ -18,11 +16,11 @@ public class CryptomatorMKFValidatorTest {
 	}
 
 	@ParameterizedTest(name = "N={0}, r={1}")
-	@CsvSource({"131072, 8", "65536, 16", "1048576, 8"})
+	@CsvSource({"131072, 8", "65536, 16", "1048576, 8", "1024, 128"}) // last one is within the memory limit, but rejected by MasterkeyFileValidator.DEFAULT
 	public void testRejectsParametersExceedingLimit(int costParam, int blockSize) {
 		var file = masterkeyFile(costParam, blockSize);
 
-		Assertions.assertThrows(IOException.class, () -> CryptomatorMKFValidator.INSTANCE.validate(file));
+		Assertions.assertThrows(UnsupportedScryptParametersException.class, () -> CryptomatorMKFValidator.INSTANCE.validate(file));
 	}
 
 	private static MasterkeyFile masterkeyFile(int costParam, int blockSize) {

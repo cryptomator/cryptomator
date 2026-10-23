@@ -71,6 +71,16 @@ public class Dialogs {
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
+	public SimpleDialog.Builder prepareUnsupportedScryptParameters(Stage window, Vault vault) {
+		return createDialogBuilder().setOwner(window) //
+				.setTitleKey("unlock.error.title", vault.getDisplayName()) //
+				.setMessageKey("unlock.error.unsupportedScryptParameters.message") //
+				.setDescriptionKey("unlock.error.unsupportedScryptParameters.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
+				.setOkButtonKey(BUTTON_KEY_CLOSE) //
+				.setOkAction(Stage::close);
+	}
+
 	public SimpleDialog.Builder prepareRecoveryVaultAdded(Stage window, String displayName) {
 		return createDialogBuilder().setOwner(window) //
 				.setTitleKey("recover.existing.title") //
