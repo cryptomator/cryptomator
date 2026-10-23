@@ -20,6 +20,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
 * Migrated code to common JDK 25 APIs and constructs
 * Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
+* Masterkey files whose scrypt parameters require more than 64 MiB of memory are now rejected before key derivation
 * Updated dependencies:
   - `org.cryptomator:cryptolib` from 2.2.2 to 2.3.0
   - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0-beta1
