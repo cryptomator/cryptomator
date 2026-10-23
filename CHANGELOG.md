@@ -20,6 +20,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
 * Migrated code to common JDK 25 APIs and constructs
 * Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
+* Updated to JavaFX 25.0.5
 * Updated dependencies:
   - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0-beta1
   - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.6
