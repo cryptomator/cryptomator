@@ -2,6 +2,7 @@ package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.Preconditions;
 import com.google.common.hash.Hashing;
+import org.cryptomator.common.CryptomatorMKFValidator;
 import org.cryptomator.cryptofs.common.BackupHelper;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -51,7 +52,7 @@ public class RecoveryKeyFactory {
 	public String createRecoveryKey(Path vaultPath, CharSequence password) throws IOException, InvalidPassphraseException, CryptoException {
 		Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
 		byte[] rawKey = new byte[0];
-		try (var masterkey = masterkeyFileAccess.load(masterkeyPath, password)) {
+		try (var masterkey = masterkeyFileAccess.load(masterkeyPath, password, CryptomatorMKFValidator.INSTANCE)) {
 			rawKey = masterkey.getEncoded();
 			return createRecoveryKey(rawKey);
 		} finally {

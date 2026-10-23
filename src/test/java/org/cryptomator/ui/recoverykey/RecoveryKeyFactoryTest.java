@@ -1,6 +1,7 @@
 package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.Splitter;
+import org.cryptomator.common.CryptomatorMKFValidator;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
@@ -26,7 +27,7 @@ public class RecoveryKeyFactoryTest {
 	public void testCreateRecoveryKey() throws IOException, CryptoException {
 		Path pathToVault = Path.of("path/to/vault");
 		Masterkey masterkey = Mockito.mock(Masterkey.class);
-		Mockito.when(masterkeyFileAccess.load(pathToVault.resolve("masterkey.cryptomator"), "asd")).thenReturn(masterkey);
+		Mockito.doReturn(masterkey).when(masterkeyFileAccess).load(pathToVault.resolve("masterkey.cryptomator"), "asd", CryptomatorMKFValidator.INSTANCE);
 
 		Mockito.when(masterkey.getEncoded()).thenReturn(new byte[64]);
 

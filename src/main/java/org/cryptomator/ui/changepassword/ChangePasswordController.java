@@ -1,31 +1,38 @@
 package org.cryptomator.ui.changepassword;
 
+import org.cryptomator.common.CryptomatorMKFValidator;
+import org.cryptomator.common.UnsupportedScryptParametersException;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.common.BackupHelper;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.common.MasterkeyFile;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
@@ -35,10 +42,12 @@ public class ChangePasswordController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
 	private final Stage window;
+	private final Stage owner;
 	private final Vault vault;
 	private final FxApplicationWindows appWindows;
 	private final KeychainManager keychain;
 	private final MasterkeyFileAccess masterkeyFileAccess;
+	private final Dialogs dialogs;
 
 	public NiceSecurePasswordField oldPasswordField;
 	public CheckBox finalConfirmationCheckbox;
@@ -46,12 +55,14 @@ public class ChangePasswordController implements FxController {
 	public NewPasswordController newPasswordController;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, FxApplicationWindows appWindows, KeychainManager keychain, MasterkeyFileAccess masterkeyFileAccess) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @Named("changePasswordOwner") Stage owner, @ChangePasswordWindow Vault vault, FxApplicationWindows appWindows, KeychainManager keychain, MasterkeyFileAccess masterkeyFileAccess, Dialogs dialogs) {
 		this.window = window;
+		this.owner = owner;
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.keychain = keychain;
 		this.masterkeyFileAccess = masterkeyFileAccess;
+		this.dialogs = dialogs;
 	}
 
 	@FXML
@@ -78,6 +89,8 @@ public class ChangePasswordController implements FxController {
 			CharSequence newPassphrase = newPasswordController.passwordField.getCharacters();
 			Path masterkeyPath = vault.getPath().resolve(MASTERKEY_FILENAME);
 			byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
+			// changePassphrase() only applies cryptolib's default validator, so check the file against our stricter limits beforehand
+			CryptomatorMKFValidator.INSTANCE.validate(MasterkeyFile.read(new StringReader(new String(oldMasterkeyBytes, UTF_8))));
 			byte[] newMasterkeyBytes = masterkeyFileAccess.changePassphrase(oldMasterkeyBytes, oldPassphrase, newPassphrase);
 			Path backupKeyPath = vault.getPath().resolve(MASTERKEY_FILENAME + BackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
 			Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
@@ -89,6 +102,10 @@ public class ChangePasswordController implements FxController {
 			Animations.createShakeWindowAnimation(window).play();
 			oldPasswordField.selectAll();
 			oldPasswordField.requestFocus();
+		} catch (UnsupportedScryptParametersException e) {
+			LOG.warn("Rejected masterkey file of '{}': {}", vault.getDisplayName(), e.getMessage());
+			window.close();
+			dialogs.prepareUnsupportedScryptParameters(owner, "changepassword.title").build().showAndWait();
 		} catch (IOException | CryptoException e) {
 			LOG.error("Password change failed. Unable to perform operation.", e);
 			appWindows.showErrorWindow(e, window, window.getScene());
