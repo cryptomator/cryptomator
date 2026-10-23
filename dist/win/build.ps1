@@ -162,7 +162,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 
 
 $javaOptions = @(
-"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
 "--java-options", "-Xss5m"
 "--java-options", "-Xmx256m"
 "--java-options", "-Dcryptomator.appVersion=`"$semVerNo`""

@@ -39,7 +39,7 @@
 		<cryptomator.integrations.win.version>1.6.2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.5.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.8.0-beta1</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>6.0.1</cryptomator.fuse.version>
+		<cryptomator.fuse.version>7.0.0</cryptomator.fuse.version>
 		<cryptomator.webdav.version>3.0.3</cryptomator.webdav.version>
 		<cryptomator.webdav-servlet.version>1.2.13</cryptomator.webdav-servlet.version>
 
@@ -679,7 +679,7 @@
 				</os>
 			</activation>
 			<properties>
-				<run.jvmArgs>-Dcryptomator.settingsPath="@{appdata}/${run.appDir}/settings.json;@{userhome}/AppData/Roaming/${run.appDir}/settings.json" -Dcryptomator.ipcSocketPath="@{localappdata}/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{localappdata}/${run.appDir}" -Dcryptomator.pluginDir="@{appdata}/${run.appDir}/Plugins" -Dcryptomator.integrationsWin.keychainPaths="@{appdata}/${run.appDir}/keychain.json;@{userhome}/AppData/Roaming/${run.appDir}/keychain.json" -Dcryptomator.integrationsWin.windowsHelloKeychainPaths="@{appdata}/${run.appDir}/windowsHelloKeychain.json;@{userhome}/AppData/Roaming/${run.appDir}/windowsHelloKeychain.json" -Dcryptomator.p12Path="@{appdata}/${run.appDir}/key.p12;@{userhome}/AppData/Roaming/${run.appDir}/key.p12" -Dcryptomator.mountPointsDir="@{userhome}/${run.appDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m --enable-preview --enable-native-access=org.cryptomator.jfuse.win,org.cryptomator.integrations.win,javafx.graphics</run.jvmArgs>
+				<run.jvmArgs>-Dcryptomator.settingsPath="@{appdata}/${run.appDir}/settings.json;@{userhome}/AppData/Roaming/${run.appDir}/settings.json" -Dcryptomator.ipcSocketPath="@{localappdata}/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{localappdata}/${run.appDir}" -Dcryptomator.pluginDir="@{appdata}/${run.appDir}/Plugins" -Dcryptomator.integrationsWin.keychainPaths="@{appdata}/${run.appDir}/keychain.json;@{userhome}/AppData/Roaming/${run.appDir}/keychain.json" -Dcryptomator.integrationsWin.windowsHelloKeychainPaths="@{appdata}/${run.appDir}/windowsHelloKeychain.json;@{userhome}/AppData/Roaming/${run.appDir}/windowsHelloKeychain.json" -Dcryptomator.p12Path="@{appdata}/${run.appDir}/key.p12;@{userhome}/AppData/Roaming/${run.appDir}/key.p12" -Dcryptomator.mountPointsDir="@{userhome}/${run.appDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m --enable-preview --enable-native-access=org.cryptomator.frontend.fuse,org.cryptomator.jfuse.win,org.cryptomator.integrations.win,javafx.graphics</run.jvmArgs>
 			</properties>
 		</profile>
 
@@ -691,7 +691,7 @@
 				</os>
 			</activation>
 			<properties>
-				<run.jvmArgs>-Dapple.awt.enableTemplateImages=true -Dcryptomator.settingsPath="@{userhome}/Library/Application Support/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/Library/Application Support/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/Library/Application Support/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/Library/Logs/${run.appDir}" -Dcryptomator.pluginDir="@{userhome}/Library/Application Support/${run.appDir}/Plugins" -Dcryptomator.mountPointsDir="${run.macMountPointsDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.integrationsMac.keychainServiceName=Cryptomator ${run.macUpdateArgs} -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m -ea --enable-preview --enable-native-access=org.cryptomator.jfuse.mac,javafx.graphics</run.jvmArgs>
+				<run.jvmArgs>-Dapple.awt.enableTemplateImages=true -Dcryptomator.settingsPath="@{userhome}/Library/Application Support/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/Library/Application Support/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/Library/Application Support/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/Library/Logs/${run.appDir}" -Dcryptomator.pluginDir="@{userhome}/Library/Application Support/${run.appDir}/Plugins" -Dcryptomator.mountPointsDir="${run.macMountPointsDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.integrationsMac.keychainServiceName=Cryptomator ${run.macUpdateArgs} -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m -ea --enable-preview --enable-native-access=org.cryptomator.frontend.fuse,org.cryptomator.jfuse.mac,javafx.graphics</run.jvmArgs>
 			</properties>
 		</profile>
 
@@ -704,7 +704,7 @@
 				</os>
 			</activation>
 			<properties>
-				<run.jvmArgs>-Dcryptomator.settingsPath="@{userhome}/.config/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/.config/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/.config/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/.local/share/${run.appDir}/logs" -Dcryptomator.pluginDir="@{userhome}/.local/share/${run.appDir}/plugins" -Dcryptomator.mountPointsDir="@{userhome}/.local/share/${run.appDir}/mnt" -Dcryptomator.showTrayIcon=true -Dcryptomator.hub.enableTrustOnFirstUse=true ${run.linuxFuseArgs} -Xss20m -Xmx512m --enable-preview --enable-native-access=org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator,javafx.graphics</run.jvmArgs>
+				<run.jvmArgs>-Dcryptomator.settingsPath="@{userhome}/.config/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/.config/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/.config/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/.local/share/${run.appDir}/logs" -Dcryptomator.pluginDir="@{userhome}/.local/share/${run.appDir}/plugins" -Dcryptomator.mountPointsDir="@{userhome}/.local/share/${run.appDir}/mnt" -Dcryptomator.showTrayIcon=true -Dcryptomator.hub.enableTrustOnFirstUse=true ${run.linuxFuseArgs} -Xss20m -Xmx512m --enable-preview --enable-native-access=org.cryptomator.frontend.fuse,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator,javafx.graphics</run.jvmArgs>
 			</properties>
 		</profile>
 	</profiles>
