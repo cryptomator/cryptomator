@@ -70,17 +70,20 @@ jobs:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
       - name: Upload to Kaspersky
-        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.6.3
-        with:
-          protocol: ftps
-          server: allowlist.kaspersky-labs.com
-          port: 990
-          username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
-          password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
-          local-dir: ./upload/
+        env:
+          FILE_NAME: ${{ needs.download-file.outputs.fileName }}
+          FTP_USERNAME: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+        # server speaks explicit FTPS (plain greeting, then AUTH TLS) despite port 990, hence ftp:// with --ssl-reqd
+        run: >
+          curl --silent --show-error --fail --ssl-reqd
+          --retry 3 --retry-all-errors
+          --user "${FTP_USERNAME}:${FTP_PASSWORD}"
+          --upload-file "upload/${FILE_NAME}"
+          "ftp://allowlist.kaspersky-labs.com:990/"
   allowlist-avast:
     name: Anti Virus Allowlisting Avast
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: download-file
     if: inputs.avast
     steps:
@@ -89,14 +92,24 @@ jobs:
         with:
           name: ${{ needs.download-file.outputs.fileName }}
           path: upload
+      - name: Pin Avast host keys
+        # obtained via `ssh-keyscan whitelisting.avast.com`
+        run: |
+          mkdir -p ~/.ssh
+          cat >> ~/.ssh/known_hosts <<'EOF'
+          whitelisting.avast.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDCZV8IQoy56zwJAowPG7v79vwmWPGI269MYLV1ipyxn
+          whitelisting.avast.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJ40OBHpnuq02CSbiJZxIyfSSc7pHVdOrLsdLI2x/PJ9TcKcg8CAPjJO3dibx3f5BXdFI0gmYbRGj8L2/fymH18=
+          whitelisting.avast.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDq4rdT00tp589y/crwxmN3lQj51B4lIaScwmUTbH6Qh2OCDds4/1em9aFBXS6pzmUCw1igLJP6bH8n4v2IM9C7jzKMgrQkJnOgy93T3/LMON4/IQFwX9OqatFNH1G2pM5q1rmQGfmfThbNMqV3/XsRFoWQdufx/SCUV6CDgp+7twFeKFF8A6JhSQKW0nHvB0hn3xnp01D/LPh0xKzrdYY6pD1aDkB26WvWj7f6TsV/YqsJewBfHq8WgQaXJN76OfZdjMIOu+MltSV5jsScCLOl1WrJkcjTtSQHFrRftQOVefLud9i2LRcU0qblNxdOo9TlmJGQ1MCkHyjtLmvUks7EsAC9yr0FSC1nFef9Uiv9CkJN90ehjX5JSSK2A2E/W+nKx4VjV1gw3BPX7GNh6Nitct/X/quO8DEgQSs56W6u/bDj4JfmTmc8NE5viKB3BhU3dcrCwKjvpCu90g72q3B3JYmUTAv7aoQapKyGd1ly0tH86HOIh3T1d1/S8rRNPJU=
+          EOF
       - name: Upload to Avast
-        uses: wlixcc/SFTP-Deploy-Action@a5ccb9c6211a94cc59404f0fdb2a9936a6dfee64 # v1.2.6
-        with:
-          server: whitelisting.avast.com
-          port: 22
-          username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
-          password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
-          ssh_private_key: ''
-          sftp_only: true
-          local_path: './upload/*'
-          remote_path: '/data'
+        env:
+          FILE_NAME: ${{ needs.download-file.outputs.fileName }}
+          SFTP_USERNAME: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
+        # curl verifies the server against ~/.ssh/known_hosts
+        run: >
+          curl --silent --show-error --fail
+          --retry 3 --retry-all-errors
+          --user "${SFTP_USERNAME}:${SFTP_PASSWORD}"
+          --upload-file "upload/${FILE_NAME}"
+          "sftp://whitelisting.avast.com/data/"

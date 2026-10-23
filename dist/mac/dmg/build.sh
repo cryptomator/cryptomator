@@ -98,6 +98,8 @@ ${JAVA_HOME}/bin/jlink \
     --no-man-pages \
     --strip-debug \
     --compress zip-0
+## remove distrusted CA certificates from runtime
+${JAVA_HOME}/bin/java ../../common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
 
 # create app dir
 ${JAVA_HOME}/bin/jpackage \

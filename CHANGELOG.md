@@ -15,6 +15,9 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Fixed
 * Fixed "Locate encrypted file" opening the file instead of revealing it in the file manager on Linux ([#4272](https://github.com/cryptomator/cryptomator/issues/4272))
 * Fixed password retrieval from keychain not working while the system keychain is locked on Linux ([#4294](https://github.com/cryptomator/cryptomator/pull/4294), [#4301](https://github.com/cryptomator/cryptomator/pull/4301), [#4302](https://github.com/cryptomator/cryptomator/pull/4302))
+* Fixed keychain backend and quick access settings being reset when the selected service was unavailable at startup ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
+* Fixed changing the keychain backend leaving the Hub device key behind; the previous backend is now kept if moving the saved passwords fails ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
+* Fixed Hub unlock failing until manual cleanup when the device key file and its stored passphrase did not match ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
 * Fixed background threads piling up with every unlock and lock of a vault
 * Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
 * Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
@@ -29,6 +32,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
   - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0-beta1
   - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.6
   - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.6
+
+
+## [1.19.4](https://github.com/cryptomator/cryptomator/releases/1.19.4) - 2026-10-21
+### Security
+* Removed compromised eMudhra certs from app internal CA store ([62a0f41](https://github.com/cryptomator/cryptomator/commit/62a0f41523d5e1818d76ef3e9b6f4560053f2445))
 
 
 ## [1.19.3](https://github.com/cryptomator/cryptomator/releases/1.19.3) - 2026-06-29

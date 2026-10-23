@@ -28,7 +28,7 @@ jobs:
         run: echo 'JDK_MAJOR_VERSION=${{ env.JDK_VERSION }}'.substring(0,2) >> "$env:GITHUB_ENV"
         shell: pwsh
       - name: Checkout latest JDK ${{ env.JDK_MAJOR_VERSION }}
-        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: ${{ env.JDK_MAJOR_VERSION}}
           distribution: ${{ env.JDK_VENDOR }}

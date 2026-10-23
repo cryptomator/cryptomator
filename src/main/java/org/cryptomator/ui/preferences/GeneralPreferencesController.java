@@ -3,6 +3,8 @@ package org.cryptomator.ui.preferences;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.keychain.KeychainManager;
+import org.cryptomator.common.keychain.KeychainModule;
+import org.cryptomator.common.settings.DeviceKey;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
@@ -18,8 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -27,12 +32,12 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -60,7 +65,7 @@ public class GeneralPreferencesController implements FxController {
 	public Button resetTrustedHostsButton;
 	public ToggleGroup nodeOrientation;
 
-	private CompletionStage<Void> keychainMigrations = CompletableFuture.completedFuture(null);
+	private final BooleanProperty keychainMigrationRunning = new SimpleBooleanProperty();
 
 	@Inject
 	GeneralPreferencesController(@PreferencesWindow Stage window, //
@@ -91,44 +96,57 @@ public class GeneralPreferencesController implements FxController {
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode);
 		autoStartProvider.ifPresent(autoStart -> autoStartCheckbox.setSelected(autoStart.isEnabled()));
 
-		var keychainSettingsConverter = new ServiceToSettingsConverter<>(keychainAccessProviders);
 		keychainBackendChoiceBox.getItems().addAll(keychainAccessProviders);
-		keychainBackendChoiceBox.setValue(keychainSettingsConverter.fromString(settings.keychainProvider.get()));
+		keychainBackendChoiceBox.setValue(KeychainModule.selectProvider(settings.keychainProvider.get(), keychainAccessProviders));
 		keychainBackendChoiceBox.setConverter(new NamedServiceConverter<>());
-		Bindings.bindBidirectional(settings.keychainProvider, keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 		useKeychainCheckbox.selectedProperty().bindBidirectional(settings.useKeychain);
-		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not());
-		keychainBackendChoiceBox.valueProperty().addListener(this::migrateKeychainEntries);
+		keychainBackendChoiceBox.disableProperty().bind(useKeychainCheckbox.selectedProperty().not().or(keychainMigrationRunning));
+		keychainBackendChoiceBox.valueProperty().addListener(this::changeKeychainProvider);
 
 		useQuickAccessCheckbox.selectedProperty().bindBidirectional(settings.useQuickAccess);
 		var quickAccessSettingsConverter = new ServiceToSettingsConverter<>(quickAccessServices);
 		quickAccessServiceChoiceBox.getItems().addAll(quickAccessServices);
 		quickAccessServiceChoiceBox.setValue(quickAccessSettingsConverter.fromString(settings.quickAccessService.get()));
 		quickAccessServiceChoiceBox.setConverter(new NamedServiceConverter<>());
-		Bindings.bindBidirectional(settings.quickAccessService, quickAccessServiceChoiceBox.valueProperty(), quickAccessSettingsConverter);
+		quickAccessServiceChoiceBox.valueProperty().addListener((_, _, newService) -> settings.quickAccessService.set(quickAccessSettingsConverter.toString(newService)));
 		quickAccessServiceChoiceBox.disableProperty().bind(useQuickAccessCheckbox.selectedProperty().not());
 		if (resetTrustedHostsButton != null) {
 			resetTrustedHostsButton.disableProperty().bind(Bindings.isEmpty(settings.trustedHosts));
 		}
 	}
 
-	private void migrateKeychainEntries(Observable observable, KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider) {
+	private void changeKeychainProvider(Observable observable, KeychainAccessProvider oldProvider, KeychainAccessProvider newProvider) {
+		if (keychainMigrationRunning.get()) {
+			return; // ignore the revert after a failed migration
+		}
 		//currently, we migrate on macOS (touchID vs regular keychain)
 		//and on Linux (GNOME Keyring / KDE Wallet / Secret Service)
 		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
-			var idsAndNames = settings.directories.stream().collect(Collectors.toMap(vs -> vs.id, vs -> vs.displayName.getValue()));
-			if (!idsAndNames.isEmpty()) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.getName(), newProvider.getName());
-				}
-				keychainMigrations = keychainMigrations.thenRunAsync(() -> {
-					try {
-						KeychainManager.migrate(oldProvider, newProvider, idsAndNames);
-					} catch (KeychainAccessException e) {
-						LOG.warn("Failed to migrate all entries from {} to {}", oldProvider.getName(), newProvider.getName(), e);
-					}
-				}, backgroundExecutor);
+			var idsAndNames = new HashMap<String, String>();
+			settings.directories.forEach(vs -> idsAndNames.put(vs.id, vs.displayName.getValue()));
+			idsAndNames.put(DeviceKey.KEYCHAIN_KEY, DeviceKey.KEYCHAIN_DISPLAY_NAME);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Migrating keychain entries {} from {} to {}", idsAndNames.keySet(), oldProvider.getName(), newProvider.getName());
 			}
+			keychainMigrationRunning.set(true);
+			CompletableFuture.runAsync(() -> {
+				try {
+					KeychainManager.migrate(oldProvider, newProvider, idsAndNames);
+				} catch (KeychainAccessException e) {
+					throw new CompletionException(e);
+				}
+			}, backgroundExecutor).whenCompleteAsync((_, exception) -> {
+				if (exception == null) {
+					settings.keychainProvider.set(newProvider.getClass().getName());
+				} else {
+					LOG.error("Failed to migrate keychain entries from {} to {}", oldProvider.getName(), newProvider.getName(), exception);
+					keychainBackendChoiceBox.setValue(oldProvider);
+					appWindows.showErrorWindow(exception, window, window.getScene());
+				}
+				keychainMigrationRunning.set(false);
+			}, Platform::runLater);
+		} else {
+			settings.keychainProvider.set(newProvider.getClass().getName());
 		}
 	}
 
