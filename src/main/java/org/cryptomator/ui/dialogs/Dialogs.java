@@ -71,9 +71,9 @@ public class Dialogs {
 				.setOkButtonKey(BUTTON_KEY_CLOSE);
 	}
 
-	public SimpleDialog.Builder prepareUnsupportedScryptParameters(Stage window, Vault vault) {
+	public SimpleDialog.Builder prepareUnsupportedScryptParameters(Stage window, String titleKey, String... titleArgs) {
 		return createDialogBuilder().setOwner(window) //
-				.setTitleKey("unlock.error.title", vault.getDisplayName()) //
+				.setTitleKey(titleKey, titleArgs) //
 				.setMessageKey("unlock.error.unsupportedScryptParameters.message") //
 				.setDescriptionKey("unlock.error.unsupportedScryptParameters.description") //
 				.setIcon(FontAwesome5Icon.EXCLAMATION) //

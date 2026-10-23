@@ -170,7 +170,7 @@ public class UnlockWorkflow extends Task<Void> {
 
 	private void handleUnsupportedScryptParameters(UnsupportedScryptParametersException e) {
 		LOG.warn("Rejected masterkey file of '{}': {}", vault.getDisplayName(), e.getMessage());
-		var dialog = dialogs.prepareUnsupportedScryptParameters(mainWindow, vault).build();
+		var dialog = dialogs.prepareUnsupportedScryptParameters(mainWindow, "unlock.error.title", vault.getDisplayName()).build();
 		Platform.runLater(() -> {
 			window.close();
 			dialog.showAndWait();
