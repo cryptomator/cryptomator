@@ -21,6 +21,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Migrated code to common JDK 25 APIs and constructs
 * Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
 * Updated dependencies:
+  - `org.cryptomator:cryptolib` from 2.2.2 to 2.3.0
   - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0-beta1
   - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.6
   - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.6
