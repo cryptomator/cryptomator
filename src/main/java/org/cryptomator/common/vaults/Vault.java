@@ -51,6 +51,7 @@ import java.nio.file.ReadOnlyFileSystemException;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 @PerVault
@@ -80,6 +81,7 @@ public class Vault {
 	private final Settings settings;
 	private final FileSystemEventAggregator fileSystemEventAggregator;
 	private final NotificationManager notificationManager;
+	private final ExecutorService executor;
 	private final BooleanProperty showingStats;
 
 	private final AtomicReference<Mounter.MountHandle> mountHandle = new AtomicReference<>(null);
@@ -93,7 +95,8 @@ public class Vault {
 		  VaultStats stats, //
 		  Mounter mounter, Settings settings, //
 		  FileSystemEventAggregator fileSystemEventAggregator, //
-		  NotificationManager notificationManager) {
+		  NotificationManager notificationManager, //
+		  ExecutorService executor) {
 		this.vaultSettings = vaultSettings;
 		this.configCache = configCache;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -113,6 +116,7 @@ public class Vault {
 		this.settings = settings;
 		this.fileSystemEventAggregator = fileSystemEventAggregator;
 		this.notificationManager = notificationManager;
+		this.executor = executor;
 		this.showingStats = new SimpleBooleanProperty(false);
 		this.quickAccessEntry = new AtomicReference<>(null);
 	}
@@ -185,6 +189,9 @@ public class Vault {
 			var rootPath = fs.getRootDirectories().iterator().next();
 			var mountHandle = mounter.mount(vaultSettings, rootPath);
 			success = this.mountHandle.compareAndSet(null, mountHandle);
+			if (success && mountHandle.supportsWhenTerminated()) {
+				mountHandle.mountObj().whenTerminated().whenComplete((_, _) -> executor.execute(() -> lockAfterTermination(mountHandle)));
+			}
 			if (settings.useQuickAccess.getValue()) {
 				addToQuickAccess();
 			}
@@ -198,7 +205,7 @@ public class Vault {
 	public synchronized void lock(boolean forced) throws UnmountFailedException, IOException {
 		var mountHandle = this.mountHandle.get();
 		if (mountHandle == null) {
-			//TODO: noop or InvalidStateException?
+			//another lock, or lockAfterTermination after an external unmount, may already have released the mount
 			return;
 		}
 
@@ -209,15 +216,63 @@ public class Vault {
 		}
 
 		try {
+			release(mountHandle);
+		} catch (UnmountFailedException e) {
+			//release() dropped the mount anyway, so report an IOException rather than an UnmountFailedException, which would offer a forced retry
+			throw new IOException("Closing the unmounted volume failed.", e);
+		}
+		LOG.info("Locked vault '{}'", getDisplayName());
+	}
+
+	private synchronized void lockAfterTermination(Mounter.MountHandle mountHandle) {
+		if (this.mountHandle.get() != mountHandle) {
+			return;
+		}
+
+		try {
+			release(mountHandle);
+		} catch (UnmountFailedException | IOException e) {
+			LOG.error("Releasing the mount of vault '{}' failed.", getDisplayName(), e);
+		}
+
+		if (markLockedIfUnmounted()) {
+			LOG.info("Locked vault '{}' after its volume was unmounted externally", getDisplayName());
+		} else {
+			LOG.debug("Released the externally unmounted volume of vault '{}', leaving its state to the current workflow", getDisplayName());
+		}
+	}
+
+	/**
+	 * Ends the {@link VaultState.Value#PROCESSING PROCESSING} state that a lock or unlock workflow admitted, as {@link VaultState.Value#UNLOCKED UNLOCKED} if a mount remains and as {@link VaultState.Value#LOCKED LOCKED} otherwise.
+	 * <p>
+	 * Only the workflow that admitted {@code PROCESSING} may call this, after its last vault mutation.
+	 * Call it on the worker thread, never on the FX application thread, since it waits for running mount operations.
+	 */
+	public synchronized void finishProcessing() {
+		var target = mountHandle.get() != null ? VaultState.Value.UNLOCKED : VaultState.Value.LOCKED;
+		if (!state.transition(VaultState.Value.PROCESSING, target)) {
+			LOG.warn("Vault '{}' is not processing, leaving its state {}", getDisplayName(), state.getValue());
+		}
+	}
+
+	/**
+	 * Marks an {@link VaultState.Value#UNLOCKED UNLOCKED} vault as {@link VaultState.Value#LOCKED LOCKED} if no mount remains, for callers that do not own a {@link VaultState.Value#PROCESSING PROCESSING} state.
+	 *
+	 * @return {@code true} if the vault has been marked as locked
+	 */
+	public synchronized boolean markLockedIfUnmounted() {
+		return mountHandle.get() == null && state.transition(VaultState.Value.UNLOCKED, VaultState.Value.LOCKED);
+	}
+
+	private void release(Mounter.MountHandle mountHandle) throws UnmountFailedException, IOException {
+		try {
 			mountHandle.mountObj().close();
-			mountHandle.specialCleanup().run();
 		} finally {
 			removeFromQuickAccess();
 			destroyCryptoFileSystem();
+			this.mountHandle.set(null);
+			mountHandle.specialCleanup().run();
 		}
-
-		this.mountHandle.set(null);
-		LOG.info("Locked vault '{}'", getDisplayName());
 	}
 
 	private synchronized void addToQuickAccess() {
@@ -480,10 +535,7 @@ public class Vault {
 
 	public boolean supportsForcedUnmount() {
 		var mh = mountHandle.get();
-		if (mh == null) {
-			throw new IllegalStateException("Vault is not mounted");
-		}
-		return mountHandle.get().supportsUnmountForced();
+		return mh != null && mh.supportsUnmountForced();
 	}
 
 }

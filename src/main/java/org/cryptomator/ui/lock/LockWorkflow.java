@@ -2,7 +2,6 @@ package org.cryptomator.ui.lock;
 
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.mount.UnmountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -54,8 +53,12 @@ public class LockWorkflow extends Task<Void> {
 
 	@Override
 	protected Void call() throws InterruptedException, ExecutionException, IOException {
-		lock(false);
-		return null;
+		try {
+			lock(false);
+			return null;
+		} finally {
+			vault.finishProcessing();
+		}
 	}
 
 	private void lock(boolean forced) throws InterruptedException, ExecutionException, IOException { //TODO: catch or rethrow IOException?
@@ -97,14 +100,12 @@ public class LockWorkflow extends Task<Void> {
 	@Override
 	protected void succeeded() {
 		LOG.info("Lock of {} succeeded.", vault.getDisplayName());
-		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 	@Override
 	protected void failed() {
 		final var throwable = super.getException();
 		LOG.warn("Lock of {} failed.", vault.getDisplayName(), throwable);
-		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
 		if (throwable instanceof UnmountFailedException) { //TODO: check if correct exception caught
 			lockWindow.setScene(lockFailedScene.get());
 			lockWindow.show();
@@ -116,7 +117,6 @@ public class LockWorkflow extends Task<Void> {
 	@Override
 	protected void cancelled() {
 		LOG.debug("Lock of {} canceled.", vault.getDisplayName());
-		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
 	}
 
 }

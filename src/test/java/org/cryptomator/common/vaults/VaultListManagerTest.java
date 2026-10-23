@@ -2,7 +2,9 @@ package org.cryptomator.common.vaults;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mockito;
 
+import javafx.application.Platform;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,6 +67,84 @@ class VaultListManagerTest {
 		assertDoesNotThrow(() -> {
 			VaultListManager.assertIsVaultDirectory(tmpDir);
 		});
+	}
+
+	@Test
+	void testRedetermineVaultStateUpdatesState(@TempDir Path tmpDir) {
+		var state = new VaultState(VaultState.Value.LOCKED);
+		var vault = Mockito.mock(Vault.class);
+		Mockito.when(vault.stateProperty()).thenReturn(state);
+		Mockito.when(vault.getPath()).thenReturn(tmpDir.resolve("missing"));
+
+		try (var _ = Mockito.mockStatic(Platform.class)) {
+			VaultListManager.redetermineVaultState(vault);
+		}
+
+		assertEquals(VaultState.Value.MISSING, state.getValue());
+	}
+
+	@Test
+	void testRedetermineVaultStateKeepsUnchangedState(@TempDir Path tmpDir) {
+		var state = new VaultState(VaultState.Value.MISSING);
+		var vault = Mockito.mock(Vault.class);
+		Mockito.when(vault.stateProperty()).thenReturn(state);
+		Mockito.when(vault.getPath()).thenReturn(tmpDir.resolve("missing"));
+
+		try (var _ = Mockito.mockStatic(Platform.class)) {
+			assertEquals(VaultState.Value.MISSING, VaultListManager.redetermineVaultState(vault));
+		}
+
+		assertEquals(VaultState.Value.MISSING, state.getValue());
+	}
+
+	@Test
+	void testRedetermineVaultStateKeepsStateAdmittedMeanwhile(@TempDir Path tmpDir) {
+		var state = new VaultState(VaultState.Value.LOCKED);
+		var vault = Mockito.mock(Vault.class);
+		Mockito.when(vault.stateProperty()).thenReturn(state);
+		Mockito.when(vault.getPath()).thenAnswer(_ -> {
+			state.transition(VaultState.Value.LOCKED, VaultState.Value.PROCESSING); // an unlock is admitted during the check
+			return tmpDir.resolve("missing");
+		});
+
+		try (var _ = Mockito.mockStatic(Platform.class)) {
+			VaultListManager.redetermineVaultState(vault);
+		}
+
+		assertEquals(VaultState.Value.PROCESSING, state.getValue());
+	}
+
+	@Test
+	void testRedetermineVaultStateMarksError(@TempDir Path tmpDir) throws IOException {
+		var notADirectory = Files.createFile(tmpDir.resolve("file"));
+		var state = new VaultState(VaultState.Value.LOCKED);
+		var vault = Mockito.mock(Vault.class);
+		Mockito.when(vault.stateProperty()).thenReturn(state);
+		Mockito.when(vault.getPath()).thenReturn(notADirectory);
+
+		try (var _ = Mockito.mockStatic(Platform.class)) {
+			VaultListManager.redetermineVaultState(vault);
+		}
+
+		assertEquals(VaultState.Value.ERROR, state.getValue());
+	}
+
+	@Test
+	void testRedetermineVaultStateKeepsStateAdmittedMeanwhileOnError(@TempDir Path tmpDir) throws IOException {
+		var notADirectory = Files.createFile(tmpDir.resolve("file"));
+		var state = new VaultState(VaultState.Value.LOCKED);
+		var vault = Mockito.mock(Vault.class);
+		Mockito.when(vault.stateProperty()).thenReturn(state);
+		Mockito.when(vault.getPath()).thenAnswer(_ -> {
+			state.transition(VaultState.Value.LOCKED, VaultState.Value.PROCESSING); // an unlock is admitted during the check
+			return notADirectory;
+		});
+
+		try (var _ = Mockito.mockStatic(Platform.class)) {
+			VaultListManager.redetermineVaultState(vault);
+		}
+
+		assertEquals(VaultState.Value.PROCESSING, state.getValue());
 	}
 
 }
