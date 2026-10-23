@@ -33,24 +33,24 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.10.0</cryptomator.cryptofs.version>
-		<cryptomator.cryptolib.version>2.2.2</cryptomator.cryptolib.version>
-		<cryptomator.integrations.version>1.9.1</cryptomator.integrations.version>
+		<cryptomator.cryptofs.version>2.11.0</cryptomator.cryptofs.version>
+		<cryptomator.cryptolib.version>2.3.0</cryptomator.cryptolib.version>
+		<cryptomator.integrations.version>1.10.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.6.2</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.5.0</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.8.0-beta1</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.mac.version>1.5.1</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.linux.version>1.8.0</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>7.0.0</cryptomator.fuse.version>
 		<cryptomator.webdav.version>3.0.3</cryptomator.webdav.version>
-		<cryptomator.webdav-servlet.version>1.2.13</cryptomator.webdav-servlet.version>
+		<cryptomator.webdav-servlet.version>1.2.15</cryptomator.webdav-servlet.version>
 
 		<!-- 3rd party dependencies -->
-		<caffeine.version>3.3.0</caffeine.version>
+		<caffeine.version>3.3.1</caffeine.version>
 		<commons-lang3.version>3.21.0</commons-lang3.version>
 		<dagger.version>2.60.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.21.7</jackson.version>
+		<jackson.version>2.21.8</jackson.version>
 		<javafx.version>25.0.3</javafx.version>
-		<jwt.version>4.6.1</jwt.version>
+		<jwt.version>4.6.2</jwt.version>
 		<nimbus-jose.version>10.5</nimbus-jose.version>
 		<logback.version>1.6.5</logback.version>
 		<slf4j.version>2.0.20</slf4j.version>
