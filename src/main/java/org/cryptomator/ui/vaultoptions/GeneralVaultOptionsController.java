@@ -4,6 +4,7 @@ import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.NumericTextField;
+import org.cryptomator.ui.fxapp.SystemLockListener;
 import org.cryptomator.ui.health.HealthCheckComponent;
 
 import javax.inject.Inject;
@@ -34,6 +35,7 @@ public class GeneralVaultOptionsController implements FxController {
 	public ChoiceBox<WhenUnlocked> actionAfterUnlockChoiceBox;
 	public CheckBox lockAfterTimeCheckbox;
 	public NumericTextField lockTimeInMinutesTextField;
+	public CheckBox lockOnSystemLockCheckbox;
 
 	@Inject
 	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, HealthCheckComponent.Builder healthCheckWindow, ResourceBundle resourceBundle) {
@@ -54,6 +56,9 @@ public class GeneralVaultOptionsController implements FxController {
 		actionAfterUnlockChoiceBox.setConverter(new WhenUnlockedConverter(resourceBundle));
 		lockAfterTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().autoLockWhenIdle);
 		Bindings.bindBidirectional(lockTimeInMinutesTextField.textProperty(), vault.getVaultSettings().autoLockIdleSeconds, new IdleTimeSecondsConverter());
+		lockOnSystemLockCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().autoLockOnSystemLock);
+		lockOnSystemLockCheckbox.setVisible(SystemLockListener.isSupported());
+		lockOnSystemLockCheckbox.setManaged(lockOnSystemLockCheckbox.isVisible());
 	}
 
 	private void trimVaultNameOnFocusLoss(Observable observable, Boolean wasFocussed, Boolean isFocussed) {

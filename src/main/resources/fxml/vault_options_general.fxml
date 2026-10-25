@@ -34,6 +34,8 @@
 			<FormattedLabel format="%vaultOptions.general.autoLock.lockAfterTimePart2"/>
 		</TextFlow>
 
+		<CheckBox text="%vaultOptions.general.autoLock.lockOnSystemLock" fx:id="lockOnSystemLockCheckbox"/>
+
 		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>
 
 		<HBox spacing="6" alignment="CENTER_LEFT">

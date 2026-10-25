@@ -33,6 +33,7 @@ public class FxApplication {
 	private final FxApplicationStyle applicationStyle;
 	private final FxApplicationTerminator applicationTerminator;
 	private final AutoUnlocker autoUnlocker;
+	private final SystemLockListener systemLockListener;
 	private final FxFSEventList fxFSEventList;
 	private final FxNotificationManager notificationManager;
 
@@ -47,6 +48,7 @@ public class FxApplication {
 				  FxApplicationStyle applicationStyle, //
 				  FxApplicationTerminator applicationTerminator, //
 				  AutoUnlocker autoUnlocker, //
+				  SystemLockListener systemLockListener, //
 				  FxFSEventList fxFSEventList, //
 				  FxNotificationManager notificationManager) {
 		this.startupTime = startupTime;
@@ -58,6 +60,7 @@ public class FxApplication {
 		this.applicationStyle = applicationStyle;
 		this.applicationTerminator = applicationTerminator;
 		this.autoUnlocker = autoUnlocker;
+		this.systemLockListener = systemLockListener;
 		this.fxFSEventList = fxFSEventList;
 		this.notificationManager = notificationManager;
 
@@ -69,6 +72,7 @@ public class FxApplication {
 		applicationStyle.initialize();
 		appWindows.initialize();
 		applicationTerminator.initialize();
+		systemLockListener.initialize();
 
 		// init system tray
 		final boolean hasTrayIcon;
