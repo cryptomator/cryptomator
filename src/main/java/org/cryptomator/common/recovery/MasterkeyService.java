@@ -1,5 +1,6 @@
 package org.cryptomator.common.recovery;
 
+import org.cryptomator.common.CryptomatorMKFValidator;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.Cryptor;
@@ -38,7 +39,7 @@ public final class MasterkeyService {
 	}
 
 	public static Masterkey load(MasterkeyFileAccess masterkeyFileAccess, Path masterkeyFilePath, CharSequence password) throws IOException {
-		return masterkeyFileAccess.load(masterkeyFilePath, password);
+		return masterkeyFileAccess.load(masterkeyFilePath, password, CryptomatorMKFValidator.INSTANCE);
 	}
 
 	public static CryptorProvider.Scheme validateRecoveryKeyAndDetectCombo(RecoveryKeyFactory recoveryKeyFactory, //

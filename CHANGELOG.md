@@ -20,8 +20,10 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
 * Migrated code to common JDK 25 APIs and constructs
 * Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
+* Masterkey files whose scrypt parameters require more than 64 MiB of memory are now rejected before key derivation, with a dedicated error dialog on unlock and password change
 * Updated to JavaFX 25.0.5
 * Updated dependencies:
+  - `org.cryptomator:cryptolib` from 2.2.2 to 2.4.0
   - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0-beta1
   - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.6
   - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.6
