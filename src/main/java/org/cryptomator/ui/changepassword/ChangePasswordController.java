@@ -7,7 +7,6 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.common.BackupHelper;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.cryptolib.common.MasterkeyFile;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
@@ -26,13 +25,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
@@ -89,9 +86,7 @@ public class ChangePasswordController implements FxController {
 			CharSequence newPassphrase = newPasswordController.passwordField.getCharacters();
 			Path masterkeyPath = vault.getPath().resolve(MASTERKEY_FILENAME);
 			byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
-			// changePassphrase() only applies cryptolib's default validator, so check the file against our stricter limits beforehand
-			CryptomatorMKFValidator.INSTANCE.validate(MasterkeyFile.read(new StringReader(new String(oldMasterkeyBytes, UTF_8))));
-			byte[] newMasterkeyBytes = masterkeyFileAccess.changePassphrase(oldMasterkeyBytes, oldPassphrase, newPassphrase);
+			byte[] newMasterkeyBytes = masterkeyFileAccess.changePassphrase(oldMasterkeyBytes, oldPassphrase, newPassphrase, CryptomatorMKFValidator.INSTANCE);
 			Path backupKeyPath = vault.getPath().resolve(MASTERKEY_FILENAME + BackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
 			Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			Files.write(masterkeyPath, newMasterkeyBytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
