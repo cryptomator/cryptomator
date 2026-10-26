@@ -33,24 +33,24 @@
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.10.0</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.11.0</cryptomator.cryptofs.version>
 		<cryptomator.cryptolib.version>2.4.0</cryptomator.cryptolib.version>
-		<cryptomator.integrations.version>1.9.1</cryptomator.integrations.version>
+		<cryptomator.integrations.version>1.10.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.6.2</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.5.0</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>1.8.0-beta1</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.mac.version>1.5.1</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.linux.version>1.8.0</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>7.0.0</cryptomator.fuse.version>
 		<cryptomator.webdav.version>3.0.3</cryptomator.webdav.version>
-		<cryptomator.webdav-servlet.version>1.2.13</cryptomator.webdav-servlet.version>
+		<cryptomator.webdav-servlet.version>1.2.15</cryptomator.webdav-servlet.version>
 
 		<!-- 3rd party dependencies -->
-		<caffeine.version>3.3.0</caffeine.version>
+		<caffeine.version>3.3.1</caffeine.version>
 		<commons-lang3.version>3.21.0</commons-lang3.version>
 		<dagger.version>2.60.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
-		<jackson.version>2.21.7</jackson.version>
+		<jackson.version>2.21.8</jackson.version>
 		<javafx.version>25.0.5</javafx.version>
-		<jwt.version>4.6.1</jwt.version>
+		<jwt.version>4.6.2</jwt.version>
 		<nimbus-jose.version>10.5</nimbus-jose.version>
 		<logback.version>1.6.5</logback.version>
 		<slf4j.version>2.0.20</slf4j.version>
@@ -70,7 +70,7 @@
 		<mvn-compiler.version>3.16.0</mvn-compiler.version>
 		<mvn-resources.version>3.5.0</mvn-resources.version>
 		<mvn-dependency.version>3.11.0</mvn-dependency.version>
-		<mvn-surefire.version>3.6.0</mvn-surefire.version>
+		<mvn-surefire.version>3.6.1</mvn-surefire.version>
 		<mvn-jar.version>3.5.1</mvn-jar.version>
 		<mvn-exec.version>3.6.4</mvn-exec.version>
 
