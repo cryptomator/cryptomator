@@ -10,6 +10,7 @@ import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SymbolLookup;
 import java.lang.invoke.MethodHandle;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,17 +60,33 @@ class WindowsAdminConfigVerifier {
 
 	/**
 	 * Checks that neither the given file nor its parent directory is owned or modifiable by any principal other than SYSTEM, Administrators or TrustedInstaller.
+	 * <p>
+	 * Paths containing links (junctions or symlinks) are rejected, because a link owned by an untrusted principal could be retargeted between this check and the actual read of the file.
 	 *
-	 * @param file path of an existing file, may contain links
+	 * @param file path of an existing file
 	 * @return {@code true} if only trusted principals are able to modify or replace the file
 	 * @throws java.nio.file.NoSuchFileException if the file does not exist
 	 * @throws IOException if the owner or DACL cannot be read
 	 */
 	static boolean isProtected(Path file) throws IOException {
-		var realFile = file.toRealPath(); // check the file that is actually read, not a junction or symlink pointing to it
-		var realDir = realFile.getParent();
-		return isProtected(realFile, Advapi32.securityInfo(realFile), FILE_MODIFYING_RIGHTS) //
-				&& isProtected(realDir, Advapi32.securityInfo(realDir), DIR_MODIFYING_RIGHTS);
+		if (!isLinkFree(file)) {
+			return false;
+		}
+		var dir = file.toAbsolutePath().getParent();
+		return isProtected(file, Advapi32.securityInfo(file), FILE_MODIFYING_RIGHTS) //
+				&& isProtected(dir, Advapi32.securityInfo(dir), DIR_MODIFYING_RIGHTS);
+	}
+
+	//visible for testing
+	static boolean isLinkFree(Path file) throws IOException {
+		// both canonicalize case and 8.3 short names, but only the former resolves junctions and symlinks
+		var realFile = file.toRealPath();
+		var unresolvedFile = file.toRealPath(LinkOption.NOFOLLOW_LINKS);
+		if (realFile.equals(unresolvedFile)) {
+			return true;
+		}
+		LOG.warn("{} resolves to {}. Links are not allowed in the admin config path.", unresolvedFile, realFile);
+		return false;
 	}
 
 	//visible for testing

@@ -161,6 +161,31 @@ public class WindowsAdminConfigVerifierTest {
 			Assertions.assertThrows(NoSuchFileException.class, () -> WindowsAdminConfigVerifier.isProtected(dir.resolve("config.properties")));
 		}
 
+		@Test
+		@DisplayName("Path without links")
+		void linkFree(@TempDir Path dir) throws IOException {
+			var file = Files.createFile(dir.resolve("config.properties"));
+
+			Assertions.assertTrue(WindowsAdminConfigVerifier.isLinkFree(file));
+		}
+
+		@Test
+		@DisplayName("Path containing a junction")
+		void junction(@TempDir Path dir) throws IOException, InterruptedException {
+			var target = Files.createDirectory(dir.resolve("target"));
+			var file = Files.createFile(target.resolve("config.properties"));
+			var link = dir.resolve("link");
+			var mklink = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.toString(), target.toString()).inheritIO().start();
+			Assertions.assertEquals(0, mklink.waitFor(), "mklink failed");
+			try {
+				Assertions.assertAll( //
+						() -> Assertions.assertFalse(WindowsAdminConfigVerifier.isLinkFree(link.resolve("config.properties"))), //
+						() -> Assertions.assertTrue(WindowsAdminConfigVerifier.isLinkFree(file)));
+			} finally {
+				Files.delete(link); // deletes the junction, not its target
+			}
+		}
+
 	}
 
 }
