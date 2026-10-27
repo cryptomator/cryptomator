@@ -1,5 +1,6 @@
 package org.cryptomator.launcher;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.Set;
  * <p>
  * Admin properties are {@link Properties} using system properties as defaults, but allow overwriting a specific set of properties with an external config file.
  * Those properties are created by calling {@link #create()}. The method first reads system property {@value #ADMIN_PROP_FILE_KEY}. If it contains a path to a valid properties file, all overridable properties from the file are loaded into the returned admin properties.
+ * On Windows, the file is ignored unless only SYSTEM, Administrators or TrustedInstaller can modify it.
  * <p>
  * The overridable properties are:
  * <ul>
@@ -66,7 +68,11 @@ class AdminPropertiesFactory {
 			LOG.debug("Admin config property is not defined. Skipping.");
 			return adminProps;
 		}
-		var propsFromFile = loadPropertiesFromFile(Path.of(adminCfgPath));
+		var adminCfg = Path.of(adminCfgPath);
+		if (SystemUtils.IS_OS_WINDOWS && !isProtectedOnWindows(adminCfg)) {
+			return adminProps;
+		}
+		var propsFromFile = loadPropertiesFromFile(adminCfg);
 
 		for (var key : propsFromFile.stringPropertyNames()) {
 			if (ALLOWED_OVERRIDES.contains(key)) {
@@ -78,6 +84,22 @@ class AdminPropertiesFactory {
 			}
 		}
 		return adminProps;
+	}
+
+	// a standard user able to modify the admin config could e.g. make other users load plugins from an arbitrary directory
+	private static boolean isProtectedOnWindows(Path adminCfg) {
+		try {
+			if (WindowsAdminConfigVerifier.isProtected(adminCfg)) {
+				return true;
+			}
+			LOG.warn("Ignoring admin config {}, because it or its directory can be modified by non-administrative principals. Restrict owner and write access to SYSTEM and Administrators, e.g. by reinstalling Cryptomator.", adminCfg);
+		} catch (NoSuchFileException _) {
+			// do not proceed to load the file, it might have been created meanwhile by someone else
+			LOG.debug("No admin properties found at {}.", adminCfg);
+		} catch (IOException e) {
+			LOG.warn("Ignoring admin config {}, because its permissions could not be verified.", adminCfg, e);
+		}
+		return false;
 	}
 
 	//visible for testing
