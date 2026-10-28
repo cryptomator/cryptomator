@@ -99,21 +99,15 @@
         </ns0:Component>
     </ns0:DirectoryRef>
 
+    <!-- Owner and ACLs of the admin config dir are set by the SecureAdminConfig custom action before InstallFiles, because the dir may already exist (e.g. planted by a standard user).
+         A pre-existing config.properties is kept as is (NeverOverwrite): a planted one keeps its untrusted owner and is therefore ignored by Cryptomator (see WindowsAdminConfigVerifier). -->
     <ns0:StandardDirectory Id="CommonAppDataFolder">
       <ns0:Directory Id="CryptomatorDesktopProgramData" Name="Cryptomator">
         <ns0:Component Id="AdminConfigDir" Guid="c078b7da-ba6e-4069-a5ab-5c0f0f9856a0">
-          <ns0:CreateFolder>
-            <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
-            <util:PermissionEx User="Administrators" GenericAll="yes"/>
-            <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
-          </ns0:CreateFolder>
+          <ns0:CreateFolder/>
         </ns0:Component>
         <ns0:Component Id="AdminConfigFile" NeverOverwrite="yes" Permanent="yes">
-          <ns0:File Id="EmptyAdminConfig" Source="$(env.JP_WIXWIZARD_RESOURCES)\..\..\common\config.properties" Name="config.properties" KeyPath="yes">
-            <util:PermissionEx User="SYSTEM" GenericAll="yes"/>
-            <util:PermissionEx User="Administrators" GenericAll="yes"/>
-            <util:PermissionEx User="Users" GenericRead="yes" GenericExecute="yes"/>
-          </ns0:File>
+          <ns0:File Id="EmptyAdminConfig" Source="$(env.JP_WIXWIZARD_RESOURCES)\..\..\common\config.properties" Name="config.properties" KeyPath="yes"/>
         </ns0:Component>
       </ns0:Directory>
     </ns0:StandardDirectory>
@@ -169,6 +163,14 @@
     <ns0:SetProperty Id="PatchUpdateCheck" Value="&quot;[INSTALLDIR]patchUpdateCheck.bat&quot; &quot;[DISABLEUPDATECHECK]&quot;" Sequence="execute" Before="PatchUpdateCheck" />
     <ns0:CustomAction Id="PatchUpdateCheck" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec64" Execute="deferred" Return="ignore" Impersonate="no"/>
 
+    <!-- Admin config directory: Administrators as owner, drop all explicit and inherited ACEs, then grant SYSTEM and Administrators full control and Users read/execute.
+         A custom actions is used, because Windows Installer neither resets owner nor DACL of a pre-existing directory (might be controlled by a standard user).
+         Must run before InstallFiles, so that config.properties is never created in a directory writable by a standard user.
+         /L modifies a planted junction itself instead of its target. Fails the installation if the directory cannot be secured. -->
+    <ns0:SetProperty Id="AdminConfigDir" Value="[CommonAppDataFolder]Cryptomator" Sequence="execute" After="CostFinalize" />
+    <ns0:SetProperty Id="SecureAdminConfig" Value="&quot;[System64Folder]cmd.exe&quot; /c icacls &quot;[AdminConfigDir]&quot; /setowner *S-1-5-32-544 /L /Q &amp;&amp; icacls &quot;[AdminConfigDir]&quot; /reset /L /Q &amp;&amp; icacls &quot;[AdminConfigDir]&quot; /inheritance:r /grant:r *S-1-5-18:(OI)(CI)F *S-1-5-32-544:(OI)(CI)F *S-1-5-32-545:(OI)(CI)RX /L /Q" Sequence="execute" Before="SecureAdminConfig" />
+    <ns0:CustomAction Id="SecureAdminConfig" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Return="check" Impersonate="no"/>
+
     <!-- Running App detection and exit -->
     <ns0:Property Id="FOUNDRUNNINGAPP" Admin="yes"/>
     <util:CloseApplication
@@ -222,6 +224,8 @@
       <ns0:Custom Action="PatchWebDAVUninstall" Before="RemoveFiles" Condition="Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE" />
       <!-- Configure update check setting if property is provided -->
       <ns0:Custom Action="PatchUpdateCheck" After="PatchWebDAV" Condition="DISABLEUPDATECHECK AND NOT (Installed AND (NOT REINSTALL) AND (NOT UPGRADINGPRODUCTCODE) AND REMOVE)"/>
+      <!-- Secures the admin config directory before anything is installed into it. Runs on install, repair and upgrade, but not when the product is removed (incl. removal of the old product during an upgrade) -->
+      <ns0:Custom Action="SecureAdminConfig" After="CreateFolders" Condition="NOT (REMOVE~=&quot;ALL&quot;)"/>
     </ns0:InstallExecuteSequence>
 
     <ns0:InstallUISequence>

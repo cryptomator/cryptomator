@@ -376,7 +376,7 @@
 					<consoleOutputReporter>
 						<disable>true</disable>
 					</consoleOutputReporter>
-					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar} --enable-native-access=javafx.graphics</argLine>
+					<argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar} --enable-native-access=javafx.graphics,org.cryptomator.desktop</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
