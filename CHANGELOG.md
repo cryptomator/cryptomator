@@ -29,6 +29,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Masterkey files whose scrypt parameters require more than 64 MiB of memory are now rejected before key derivation, with a dedicated error dialog on unlock and password change ([#4355](https://github.com/cryptomator/cryptomator/pull/4355))
 * Updated to JavaFX 25.0.5 including several (security) fixes (see [release notes](https://gluonhq.com/products/javafx/openjfx-25-release-notes/#release-notes-for-javafx-2505)) ([#4356](https://github.com/cryptomator/cryptomator/pull/4356))
 * Updated Flatpak runtime to Freedesktop 26.08 ([#4352](https://github.com/cryptomator/cryptomator/pull/4352))
+* Updated translations ([#4261](https://github.com/cryptomator/cryptomator/pull/4261))
 * Updated dependencies:
   - `org.cryptomator:cryptofs` from 2.10.0 to 2.11.1
   - `org.cryptomator:cryptolib` from 2.2.2 to 2.4.0
