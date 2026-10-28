@@ -8,9 +8,12 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.3...HEAD)
+## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.5...HEAD)
 ### Security
 * Windows: Fixed a standard user being able to plant the admin config `C:\ProgramData\Cryptomator\config.properties` before installation and thereby make other users load arbitrary plugins. The installer now secures the directory before writing into it and Cryptomator ignores the admin config unless it, its directory and all ancestors are owned by SYSTEM, Administrators or TrustedInstaller and cannot be modified by other principals ([#4362](https://github.com/cryptomator/cryptomator/pull/4362))
+
+### Added
+* Supporter certificates signed via a certificate chain (`x5c` header) are now accepted ([#4171](https://github.com/cryptomator/cryptomator/pull/4171))
 
 ### Fixed
 * Fixed "Locate encrypted file" opening the file instead of revealing it in the file manager on Linux ([#4272](https://github.com/cryptomator/cryptomator/issues/4272))
@@ -18,18 +21,33 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Fixed keychain backend and quick access settings being reset when the selected service was unavailable at startup ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
 * Fixed changing the keychain backend leaving the Hub device key behind; the previous backend is now kept if moving the saved passwords fails ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
 * Fixed Hub unlock failing until manual cleanup when the device key file and its stored passphrase did not match ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
+* Fixed a broken directory link file (e.g. an empty `dir.c9r`) in the vault blocking all further directory listings and preventing the vault from being locked ([cryptomator/cryptofs#365](https://github.com/cryptomator/cryptofs/issues/365))
 
 ### Changed
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
-* Migrated code to common JDK 25 APIs and constructs
 * Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
 * Masterkey files whose scrypt parameters require more than 64 MiB of memory are now rejected before key derivation, with a dedicated error dialog on unlock and password change
-* Updated to JavaFX 25.0.5
+* Updated to JavaFX 25.0.5 including several (security) fixes (see [release notes](https://gluonhq.com/products/javafx/openjfx-25-release-notes/#release-notes-for-javafx-2505)) ([#4356](https://github.com/cryptomator/cryptomator/pull/4356))
+* Updated Flatpak runtime to Freedesktop 26.08 ([#4352](https://github.com/cryptomator/cryptomator/pull/4352))
 * Updated dependencies:
+  - `org.cryptomator:cryptofs` from 2.10.0 to 2.11.1
   - `org.cryptomator:cryptolib` from 2.2.2 to 2.4.0
-  - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0-beta1
-  - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.6
-  - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.6
+  - `org.cryptomator:fuse-nio-adapter` from 6.0.1 to 7.0.0 ([#4353](https://github.com/cryptomator/cryptomator/pull/4353))
+  - `org.cryptomator:integrations-api` from 1.9.0 to 1.10.0
+  - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0
+  - `org.cryptomator:integrations-mac` from 1.5.0 to 1.5.1
+  - `org.cryptomator:integrations-win` from 1.6.1 to 1.6.2
+  - `org.cryptomator:webdav-nio-adapter` from 3.0.2 to 3.0.3
+  - `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.12 to 1.2.15
+  - `ch.qos.logback:logback-core` from 1.5.35 to 1.6.5
+  - `ch.qos.logback:logback-classic` from 1.5.35 to 1.6.5
+  - `com.auth0:java-jwt` from 4.5.2 to 4.6.2
+  - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.8
+  - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.8
+  - `com.github.ben-manes.caffeine:caffeine` from 3.2.4 to 3.3.1
+  - `com.google.dagger:dagger` from 2.59.2 to 2.60.1
+  - `org.apache.commons:commons-lang3` from 3.20.0 to 3.21.0
+  - `org.slf4j:slf4j-api` from 2.0.18 to 2.0.20
 
 
 ## [1.19.4](https://github.com/cryptomator/cryptomator/releases/1.19.4) - 2026-10-21
