@@ -21,7 +21,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Fixed keychain backend and quick access settings being reset when the selected service was unavailable at startup ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
 * Fixed changing the keychain backend leaving the Hub device key behind; the previous backend is now kept if moving the saved passwords fails ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
 * Fixed Hub unlock failing until manual cleanup when the device key file and its stored passphrase did not match ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
-* Fixed a broken directory link file (e.g. an empty `dir.c9r`) in the vault blocking all further directory listings and preventing the vault from being locked ([cryptomator/cryptofs#365](https://github.com/cryptomator/cryptofs/issues/365))
+* Fixed stucked/hanging vault (no directory listing or vault lock possible) by single broken directory link file (e.g. an empty `dir.c9r`) ([cryptomator/cryptofs#365](https://github.com/cryptomator/cryptofs/issues/365))
 
 ### Changed
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
