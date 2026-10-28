@@ -8,7 +8,12 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.4...HEAD)
+## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.5...HEAD)
+
+No changes yet.
+
+
+## [1.19.5](https://github.com/cryptomator/cryptomator/releases/1.19.5) - 2026-10-28
 ### Security
 * Windows: Fixed a standard user being able to plant the admin config `C:\ProgramData\Cryptomator\config.properties` before installation and thereby make other users load arbitrary plugins. The installer now secures the directory before writing into it and Cryptomator ignores the admin config unless it, its directory and all ancestors are owned by SYSTEM, Administrators or TrustedInstaller and cannot be modified by other principals ([#4362](https://github.com/cryptomator/cryptomator/pull/4362))
 
