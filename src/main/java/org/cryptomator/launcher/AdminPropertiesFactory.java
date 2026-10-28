@@ -92,7 +92,7 @@ class AdminPropertiesFactory {
 			if (WindowsAdminConfigVerifier.isProtected(adminCfg)) {
 				return true;
 			}
-			LOG.warn("Ignoring admin config {}, because it or its directory can be modified by non-administrative principals. Restrict owner and write access to SYSTEM and Administrators, or delete the file and reinstall Cryptomator.", adminCfg);
+			LOG.warn("Ignoring admin config {}, because it or one of its directories can be modified by non-administrative principals. Restrict owner and write access to SYSTEM and Administrators, or delete the directory containing it and reinstall Cryptomator.", adminCfg);
 		} catch (NoSuchFileException _) {
 			// do not proceed to load the file, it might have been created meanwhile by someone else
 			LOG.debug("No admin properties found at {}.", adminCfg);
