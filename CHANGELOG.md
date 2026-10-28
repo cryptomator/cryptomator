@@ -9,6 +9,9 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.3...HEAD)
+### Security
+* Windows: Fixed a standard user being able to plant the admin config `C:\ProgramData\Cryptomator\config.properties` before installation and thereby make other users load arbitrary plugins. The installer now secures the directory before writing into it and Cryptomator ignores the admin config unless it, its directory and all ancestors are owned by SYSTEM, Administrators or TrustedInstaller and cannot be modified by other principals ([#4362](https://github.com/cryptomator/cryptomator/pull/4362))
+
 ### Fixed
 * Fixed "Locate encrypted file" opening the file instead of revealing it in the file manager on Linux ([#4272](https://github.com/cryptomator/cryptomator/issues/4272))
 * Fixed password retrieval from keychain not working while the system keychain is locked on Linux ([#4294](https://github.com/cryptomator/cryptomator/pull/4294), [#4301](https://github.com/cryptomator/cryptomator/pull/4301), [#4302](https://github.com/cryptomator/cryptomator/pull/4302))
