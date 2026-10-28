@@ -59,7 +59,7 @@ class WindowsAdminConfigVerifier {
 	}
 
 	/**
-	 * Checks that neither the given file nor its parent directory is owned or modifiable by any principal other than SYSTEM, Administrators or TrustedInstaller.
+	 * Checks that neither the given file nor any of its ancestor directories up to the root is owned or modifiable by any principal other than SYSTEM, Administrators or TrustedInstaller.
 	 * <p>
 	 * Paths containing links (junctions or symlinks) are rejected, because a link owned by an untrusted principal could be retargeted between this check and the actual read of the file.
 	 *
@@ -69,12 +69,28 @@ class WindowsAdminConfigVerifier {
 	 * @throws IOException if the owner or DACL cannot be read
 	 */
 	static boolean isProtected(Path file) throws IOException {
-		if (!isLinkFree(file)) {
+		return isLinkFree(file) && isProtected(file.toAbsolutePath(), Advapi32::securityInfo);
+	}
+
+	// all ancestors are checked, because an untrusted principal with FILE_DELETE_CHILD on any of them could rename the subtree containing the file and replace it
+	//visible for testing
+	static boolean isProtected(Path file, SecurityInfoReader reader) throws IOException {
+		if (!isProtected(file, reader.read(file), FILE_MODIFYING_RIGHTS)) {
 			return false;
 		}
-		var dir = file.toAbsolutePath().getParent();
-		return isProtected(file, Advapi32.securityInfo(file), FILE_MODIFYING_RIGHTS) //
-				&& isProtected(dir, Advapi32.securityInfo(dir), DIR_MODIFYING_RIGHTS);
+		for (var dir = file.getParent(); dir != null; dir = dir.getParent()) {
+			if (!isProtected(dir, reader.read(dir), DIR_MODIFYING_RIGHTS)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	//visible for testing
+	@FunctionalInterface
+	interface SecurityInfoReader {
+
+		SecurityInfo read(Path path) throws IOException;
 	}
 
 	//visible for testing

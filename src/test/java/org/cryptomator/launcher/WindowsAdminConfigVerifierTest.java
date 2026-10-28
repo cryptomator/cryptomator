@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.cryptomator.launcher.WindowsAdminConfigVerifier.ACCESS_ALLOWED_ACE_TYPE;
 import static org.cryptomator.launcher.WindowsAdminConfigVerifier.ACCESS_ALLOWED_CALLBACK_ACE_TYPE;
@@ -40,6 +42,67 @@ public class WindowsAdminConfigVerifierTest {
 
 	private static Ace allowAce(String sid, int mask) {
 		return new Ace(ACCESS_ALLOWED_ACE_TYPE, 0, mask, sid);
+	}
+
+	private static SecurityInfo trusted(Ace... untrustedAces) {
+		var aces = new ArrayList<>(List.of(allowAce(SYSTEM, FULL_CONTROL), allowAce(ADMINS, FULL_CONTROL)));
+		aces.addAll(List.of(untrustedAces));
+		return new SecurityInfo(ADMINS, aces);
+	}
+
+	@Nested
+	@DisplayName("Ancestors of /Shared/Locked/config.properties")
+	class Ancestors {
+
+		private final Path file = Path.of("/Shared/Locked/config.properties").toAbsolutePath();
+		private final Path locked = file.getParent();
+		private final Path shared = locked.getParent();
+		private final Path root = shared.getParent();
+
+		private boolean isProtected(SecurityInfo sharedInfo) throws IOException {
+			var infos = Map.of( //
+					file, trusted(allowAce(USERS, READ_EXECUTE)), //
+					locked, trusted(allowAce(USERS, READ_EXECUTE)), //
+					shared, sharedInfo, //
+					root, trusted(allowAce(USERS, 0x4))); // default ACE of C:\ for Authenticated Users: (AD)
+			return WindowsAdminConfigVerifier.isProtected(file, path -> {
+				var info = infos.get(path);
+				if (info == null) {
+					throw new NoSuchFileException(path.toString());
+				}
+				return info;
+			});
+		}
+
+		@Test
+		@DisplayName("Grandparent allows untrusted SID to add children")
+		void grandparentAllowsAddingChildren() throws IOException {
+			Assertions.assertTrue(isProtected(trusted(allowAce(USERS, 0x116))));
+		}
+
+		@Test
+		@DisplayName("Grandparent allows untrusted SID to delete children")
+		void grandparentAllowsDeletingChildren() throws IOException {
+			Assertions.assertFalse(isProtected(trusted(allowAce(USERS, 0x116 | 0x40))));
+		}
+
+		@Test
+		@DisplayName("Grandparent owned by untrusted SID")
+		void grandparentOwnedByUntrustedSid() throws IOException {
+			Assertions.assertFalse(isProtected(new SecurityInfo(USERS, List.of(allowAce(ADMINS, FULL_CONTROL)))));
+		}
+
+		@Test
+		@DisplayName("Root is checked")
+		void rootIsChecked() {
+			Assertions.assertNull(root.getParent());
+			Assertions.assertThrows(NoSuchFileException.class, () -> WindowsAdminConfigVerifier.isProtected(file, path -> {
+				if (path.equals(root)) {
+					throw new NoSuchFileException(path.toString());
+				}
+				return trusted();
+			}));
+		}
 	}
 
 	@Test
