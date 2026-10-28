@@ -8,7 +8,7 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.5...HEAD)
+## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.4...HEAD)
 ### Security
 * Windows: Fixed a standard user being able to plant the admin config `C:\ProgramData\Cryptomator\config.properties` before installation and thereby make other users load arbitrary plugins. The installer now secures the directory before writing into it and Cryptomator ignores the admin config unless it, its directory and all ancestors are owned by SYSTEM, Administrators or TrustedInstaller and cannot be modified by other principals ([#4362](https://github.com/cryptomator/cryptomator/pull/4362))
 
@@ -26,7 +26,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Changed
 * Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
 * Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
-* Masterkey files whose scrypt parameters require more than 64 MiB of memory are now rejected before key derivation, with a dedicated error dialog on unlock and password change
+* Masterkey files whose scrypt parameters require more than 64 MiB of memory are now rejected before key derivation, with a dedicated error dialog on unlock and password change ([#4355](https://github.com/cryptomator/cryptomator/pull/4355))
 * Updated to JavaFX 25.0.5 including several (security) fixes (see [release notes](https://gluonhq.com/products/javafx/openjfx-25-release-notes/#release-notes-for-javafx-2505)) ([#4356](https://github.com/cryptomator/cryptomator/pull/4356))
 * Updated Flatpak runtime to Freedesktop 26.08 ([#4352](https://github.com/cryptomator/cryptomator/pull/4352))
 * Updated dependencies:
