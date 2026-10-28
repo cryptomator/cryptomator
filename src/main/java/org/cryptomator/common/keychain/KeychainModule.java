@@ -26,11 +26,14 @@ public class KeychainModule {
 			if (!settings.useKeychain.get()) {
 				return null;
 			}
-			var selectedProviderClass = settings.keychainProvider.get();
-			var selectedProvider = providers.stream().filter(provider -> provider.getClass().getName().equals(selectedProviderClass)).findAny();
-			var fallbackProvider = providers.stream().findFirst().orElse(null);
-			return selectedProvider.orElse(fallbackProvider);
+			return selectProvider(settings.keychainProvider.get(), providers);
 		}, settings.keychainProvider, settings.useKeychain);
+	}
+
+	public static KeychainAccessProvider selectProvider(String selectedProviderClass, List<KeychainAccessProvider> providers) {
+		var selectedProvider = providers.stream().filter(provider -> provider.getClass().getName().equals(selectedProviderClass)).findAny();
+		var fallbackProvider = providers.stream().findFirst().orElse(null);
+		return selectedProvider.orElse(fallbackProvider);
 	}
 
 }

@@ -6,6 +6,7 @@ import org.cryptomator.common.Environment;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.cryptolib.common.Pkcs12Exception;
+import org.cryptomator.cryptolib.common.Pkcs12PasswordException;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,8 @@ import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.UUID;
@@ -25,8 +28,8 @@ import java.util.function.Supplier;
 public class DeviceKey {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DeviceKey.class);
-	private static final String KEYCHAIN_KEY = "cryptomator-device-p12";
-	private static final String KEYCHAIN_DISPLAY_NAME = "Cryptomator Device Keypair .p12 Passphrase";
+	public static final String KEYCHAIN_KEY = "cryptomator-device-p12";
+	public static final String KEYCHAIN_DISPLAY_NAME = "Cryptomator Device Keypair .p12 Passphrase";
 
 	private final KeychainManager keychainManager;
 	private final Environment env;
@@ -52,12 +55,17 @@ public class DeviceKey {
 		try {
 			passphrase = keychainManager.loadPassphrase(KEYCHAIN_KEY);
 			if (passphrase != null && Files.isRegularFile(p12File)) {
-				return loadExistingKeyPair(passphrase, p12File);
-			} else { // (re)generate new key pair if either file or password got lost
-				passphrase = randomPassword();
-				keychainManager.storePassphrase(KEYCHAIN_KEY, KEYCHAIN_DISPLAY_NAME, CharBuffer.wrap(passphrase));
-				return createAndStoreNewKeyPair(passphrase, p12File);
+				try {
+					return loadExistingKeyPair(passphrase, p12File);
+				} catch (Pkcs12PasswordException e) {
+					LOG.warn("Stored passphrase does not match device key {}. Generating a new device key.", p12File);
+				} finally {
+					Arrays.fill(passphrase, '\0');
+				}
 			}
+			// (re)generate the key pair if the file or passphrase is missing, or if the passphrase does not match the file
+			passphrase = randomPassword();
+			return createAndStoreNewKeyPair(passphrase, p12File);
 		} catch (KeychainAccessException e) {
 			throw new DeviceKeyRetrievalException("Failed to access system keychain", e);
 		} catch (Pkcs12Exception | IOException e) {
@@ -74,15 +82,28 @@ public class DeviceKey {
 		return P384KeyPair.load(p12File, passphrase);
 	}
 
-	private P384KeyPair createAndStoreNewKeyPair(char[] passphrase, Path p12File) throws IOException {
+	private P384KeyPair createAndStoreNewKeyPair(char[] passphrase, Path p12File) throws IOException, KeychainAccessException {
 		var keyPair = P384KeyPair.generate();
 		var tmpFile = p12File.resolveSibling(p12File.getFileName().toString() + ".tmp");
 		if(Files.exists(tmpFile)) {
 			LOG.debug("Leftover from devicekey creation detected. Deleting {}", tmpFile);
 			Files.delete(tmpFile);
 		}
+		try (var out = Files.newOutputStream(tmpFile, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+			keyPair.store(out, passphrase);
+		}
+		try {
+			keychainManager.storePassphrase(KEYCHAIN_KEY, KEYCHAIN_DISPLAY_NAME, CharBuffer.wrap(passphrase));
+		} catch (KeychainAccessException e) {
+			try {
+				Files.delete(tmpFile);
+			} catch (IOException deleteException) {
+				e.addSuppressed(deleteException);
+			}
+			throw e;
+		}
 		LOG.debug("Store new device key to {}", p12File);
-		keyPair.store(p12File, passphrase);
+		Files.move(tmpFile, p12File, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 		return keyPair;
 	}
 

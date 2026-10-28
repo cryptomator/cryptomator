@@ -40,11 +40,6 @@ if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
    Write-Error "Unable to find git.exe in your PATH (try: choco install git)"
    exit 1
 }
-if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
-{
-   Write-Error "Unable to find mvn.cmd in your PATH (try: choco install maven)"
-   exit 1
-}
 if ((Get-Command 'wix' -ErrorAction SilentlyContinue) -eq $null)
 {
    Write-Error 'Unable to find wix in your PATH (try: dotnet tool install --global wix --version 6.0.2)'
@@ -65,7 +60,7 @@ if ($wixExtensions -notmatch 'WixToolset.BootstrapperApplications.wixext') {
 }
 
 $buildDir = Split-Path -Parent $PSCommandPath
-$version = $(mvn -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
+$version = $(../../mvnw.cmd -f $buildDir/../../pom.xml help:evaluate -Dexpression="project.version" -q -DforceStdout)
 $semVerNo = $version -replace '(\d+\.\d+\.\d+).*','$1'
 $revisionNo = $(git rev-list --count HEAD)
 
@@ -79,7 +74,7 @@ $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
 
 # compile
 Invoke-CommandWithExitCheck -Command `
-    "mvn" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "clean", "package", "-DskipTests", "-Pwin")
+    "../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "clean", "package", "-DskipTests", "-Pwin")
 Copy-Item "$buildDir\..\..\target\$MainJarGlob.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
@@ -107,9 +102,9 @@ switch ($archName) {
         $jmodPaths = "$Env:JAVA_HOME/jmods"
     }
     'x64' {
-		$javaFxVersion='25.0.3'
+		$javaFxVersion='25.0.5'
 		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-		$javaFxJmodsSHA256 = '0bf9b83260b85607a9ba200124debabd9cdb013cbc0d659e62a20192a7137907'
+		$javaFxJmodsSHA256 = '41c0361e1183852a3693c5d505ed4aa914bb4190e0adc51ae4db28812a48d2ae'
 		$javaFxJmods = '.\resources\jfxJmods.zip'
 
 		if( !(Test-Path -Path $javaFxJmods) ) {
@@ -167,7 +162,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 
 
 $javaOptions = @(
-"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+"--java-options", "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.win,org.cryptomator.integrations.win,org.cryptomator.desktop"
 "--java-options", "-Xss5m"
 "--java-options", "-Xmx256m"
 "--java-options", "-Dcryptomator.appVersion=`"$semVerNo`""
@@ -216,14 +211,13 @@ if ($LASTEXITCODE -ne 0) {
 
 #Create RTF license for msi
 Invoke-CommandWithExitCheck -Command `
-    "mvn" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
+    "../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
     "-Dlicense.thirdPartyFilename=license.rtf", `
     "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl", `
     "-Dlicense.outputDirectory=$buildDir\resources\", `
     "-Dlicense.includedScopes=compile", `
     "-Dlicense.excludedGroups=^org\.cryptomator", `
-    "-Dlicense.failOnMissing=true", `
-    "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges")
+    "-Dlicense.failOnMissing=true")
 
 # patch app dir
 Copy-Item "contrib\*" -Destination "$AppName"
@@ -263,14 +257,13 @@ Invoke-CommandWithExitCheck -Command `
 
 #Create RTF license for bundle
 Invoke-CommandWithExitCheck -Command `
-	"mvn" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
+	"../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
 	"-Dlicense.thirdPartyFilename=license.rtf", `
 	"-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl", `
 	"-Dlicense.outputDirectory=$buildDir\bundle\resources\", `
 	"-Dlicense.includedScopes=compile", `
 	"-Dlicense.excludedGroups=^org\.cryptomator", `
-	"-Dlicense.failOnMissing=true", `
-	"-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges")
+	"-Dlicense.failOnMissing=true")
 
 # download Winfsp
 $winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'

@@ -90,7 +90,7 @@ public class Check {
 		SUCCEEDED,
 		SKIPPED,
 		ERROR,
-		CANCELLED;
+		CANCELLED
 	}
 
 	ObservableList<Result> getResults() {

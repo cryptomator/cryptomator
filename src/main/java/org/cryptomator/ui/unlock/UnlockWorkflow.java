@@ -1,11 +1,13 @@
 package org.cryptomator.ui.unlock;
 
 import dagger.Lazy;
+import org.cryptomator.common.UnsupportedScryptParametersException;
 import org.cryptomator.common.mount.ConflictingMountServiceException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -151,6 +153,7 @@ public class UnlockWorkflow extends Task<Void> {
 			case IllegalMountPointException e -> handleIllegalMountPointError(e);
 			case ConflictingMountServiceException _ -> handleConflictingMountServiceException();
 			case ReadOnlyFileSystemException _ -> handleReadOnlyFileSystem();
+			case MasterkeyLoadingFailedException e when e.getCause() instanceof UnsupportedScryptParametersException uspe -> handleUnsupportedScryptParameters(uspe);
 			default -> handleGenericError(throwable);
 		}
 		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
@@ -163,6 +166,15 @@ public class UnlockWorkflow extends Task<Void> {
 		}).build();
 
 		Platform.runLater(readOnlyDialog::showAndWait);
+	}
+
+	private void handleUnsupportedScryptParameters(UnsupportedScryptParametersException e) {
+		LOG.warn("Rejected masterkey file of '{}': {}", vault.getDisplayName(), e.getMessage());
+		var dialog = dialogs.prepareUnsupportedScryptParameters(mainWindow, "unlock.error.title", vault.getDisplayName()).build();
+		Platform.runLater(() -> {
+			window.close();
+			dialog.showAndWait();
+		});
 	}
 
 	private void retry() {

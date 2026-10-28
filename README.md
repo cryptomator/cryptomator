@@ -26,6 +26,7 @@ Become our Gold Sponsor and showcase your brand to a targeted audience! Please c
     <tr>
       <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="56"></a></td>
       <td><a href="https://www.route4me.com/"><img src="https://cryptomator.org/img/sponsors/route4me.svg" alt="Route4Me" height="56"></a></td>
+      <td><a href="https://www.apivoid.com/"><img src="https://cryptomator.org/img/sponsors/apivoid.svg" alt="ApiVoid" height="56"></a></td>
     </tr>
   </tbody>
 </table>
@@ -78,7 +79,7 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ### Dependencies
 
-* JDK 25 (e.g. temurin, zulu)
+* JDK 26 (e.g. temurin, zulu)
 
 ### Run Maven
 
@@ -87,6 +88,20 @@ For more information on the security details visit [cryptomator.org](https://doc
 ```
 
 This will build all the jars and bundle them together with their OS-specific dependencies under `target`. This can now be used to build native packages.
+
+### Running the app
+
+```
+./mvnw -Prun compile exec:exec
+```
+
+This starts the app with the defaults defined in `pom.xml`. The OS-specific parameters are picked automatically.
+
+Add the `dev` profile to use the `Cryptomator-Dev` settings, log and mount directories instead, so a development run does not interfere with an installed Cryptomator:
+
+```
+./mvnw -Prun,dev compile exec:exec
+```
 
 ## License
 

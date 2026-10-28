@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -50,7 +49,7 @@ import java.util.concurrent.ExecutorService;
 public class CreateNewVaultLocationController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultLocationController.class);
-	private static final Path DEFAULT_CUSTOM_VAULT_PATH = Paths.get(System.getProperty("user.home"));
+	private static final Path DEFAULT_CUSTOM_VAULT_PATH = Path.of(System.getProperty("user.home"));
 	private static final String TEMP_FILE_PREFIX = ".locationTest.cryptomator";
 
 	private final Stage window;

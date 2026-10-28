@@ -23,7 +23,7 @@ public class SystemBarUtil {
 		/**
 		 * OS Bar placed at the bottom screen edge
 		 */
-		BOTTOM;
+		BOTTOM
 	}
 
 	/**

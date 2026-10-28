@@ -8,6 +8,49 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
+## [1.19.5](https://github.com/cryptomator/cryptomator/releases/1.19.5) - 2026-10-28
+### Security
+* Windows: Fixed a standard user being able to plant the admin config `C:\ProgramData\Cryptomator\config.properties` before installation and thereby make other users load arbitrary plugins. The installer now secures the directory before writing into it and Cryptomator ignores the admin config unless it, its directory and all ancestors are owned by SYSTEM, Administrators or TrustedInstaller and cannot be modified by other principals ([#4362](https://github.com/cryptomator/cryptomator/pull/4362))
+
+### Added
+* Supporter certificates signed via a certificate chain (`x5c` header) are now accepted ([#4171](https://github.com/cryptomator/cryptomator/pull/4171))
+
+### Fixed
+* Fixed "Locate encrypted file" opening the file instead of revealing it in the file manager on Linux ([#4272](https://github.com/cryptomator/cryptomator/issues/4272))
+* Fixed password retrieval from keychain not working while the system keychain is locked on Linux ([#4294](https://github.com/cryptomator/cryptomator/pull/4294), [#4301](https://github.com/cryptomator/cryptomator/pull/4301), [#4302](https://github.com/cryptomator/cryptomator/pull/4302))
+* Fixed keychain backend and quick access settings being reset when the selected service was unavailable at startup ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
+* Fixed changing the keychain backend leaving the Hub device key behind; the previous backend is now kept if moving the saved passwords fails ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
+* Fixed Hub unlock failing until manual cleanup when the device key file and its stored passphrase did not match ([#4346](https://github.com/cryptomator/cryptomator/pull/4346))
+* Fixed stucked/hanging vault (no directory listing or vault lock possible) by single broken directory link file (e.g. an empty `dir.c9r`) ([cryptomator/cryptofs#365](https://github.com/cryptomator/cryptofs/issues/365))
+
+### Changed
+* Improved usability of the trust on first use dialog ([#4295](https://github.com/cryptomator/cryptomator/pull/4295))
+* Added Maven profile to run the app from the command line ([#4317](https://github.com/cryptomator/cryptomator/pull/4317))
+* Masterkey files whose scrypt parameters require more than 64 MiB of memory are now rejected before key derivation, with a dedicated error dialog on unlock and password change ([#4355](https://github.com/cryptomator/cryptomator/pull/4355))
+* Updated to JavaFX 25.0.5 including several (security) fixes (see [release notes](https://gluonhq.com/products/javafx/openjfx-25-release-notes/#release-notes-for-javafx-2505)) ([#4356](https://github.com/cryptomator/cryptomator/pull/4356))
+* Updated Flatpak runtime to Freedesktop 26.08 ([#4352](https://github.com/cryptomator/cryptomator/pull/4352))
+* Updated translations ([#4261](https://github.com/cryptomator/cryptomator/pull/4261))
+* Updated dependencies:
+  - `org.cryptomator:cryptofs` from 2.10.0 to 2.11.1
+  - `org.cryptomator:cryptolib` from 2.2.2 to 2.4.0
+  - `org.cryptomator:fuse-nio-adapter` from 6.0.1 to 7.0.0 ([#4353](https://github.com/cryptomator/cryptomator/pull/4353))
+  - `org.cryptomator:integrations-api` from 1.9.0 to 1.10.0
+  - `org.cryptomator:integrations-linux` from 1.7.0 to 1.8.0
+  - `org.cryptomator:integrations-mac` from 1.5.0 to 1.5.1
+  - `org.cryptomator:integrations-win` from 1.6.1 to 1.6.2
+  - `org.cryptomator:webdav-nio-adapter` from 3.0.2 to 3.0.3
+  - `org.cryptomator:webdav-nio-adapter-servlet` from 1.2.12 to 1.2.15
+  - `ch.qos.logback:logback-core` from 1.5.35 to 1.6.5
+  - `ch.qos.logback:logback-classic` from 1.5.35 to 1.6.5
+  - `com.auth0:java-jwt` from 4.5.2 to 4.6.2
+  - `com.fasterxml.jackson.core:jackson-databind` from 2.21.4 to 2.21.8
+  - `com.fasterxml.jackson.datatype:jackson-datatype-jsr310` from 2.21.4 to 2.21.8
+  - `com.github.ben-manes.caffeine:caffeine` from 3.2.4 to 3.3.1
+  - `com.google.dagger:dagger` from 2.59.2 to 2.60.1
+  - `org.apache.commons:commons-lang3` from 3.20.0 to 3.21.0
+  - `org.slf4j:slf4j-api` from 2.0.18 to 2.0.20
+
+
 ## [1.19.4](https://github.com/cryptomator/cryptomator/releases/1.19.4) - 2026-10-21
 ### Security
 * Removed compromised eMudhra certs from app internal CA store ([62a0f41](https://github.com/cryptomator/cryptomator/commit/62a0f41523d5e1818d76ef3e9b6f4560053f2445))
@@ -19,7 +62,8 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ### Fixed
 * Fixed Cryptomator file extensions were not registered on Windows ([#4219](https://github.com/cryptomator/cryptomator/issues/4219))
-* Fixed warning was displayed when accessing update tab in settings even though an update check did not ran ([#4199](https://github.com/cryptomator/cryptomator/pull/4199))
+* Fixed warning was displayed when accessing update tab in settings even though an update check did not ran ([#4194](https://github.com/cryptomator/cryptomator/pull/4194))
+* Fixed the same vault could be added several times to the vault list ([#4243](https://github.com/cryptomator/cryptomator/pull/4243))
 * Fixed several Decrypt Name dialogs could be opened on the same vault ([#4164](https://github.com/cryptomator/cryptomator/pull/4164))
 * Fixed not all mount options in vault specific settings could be displayed ([#4227](https://github.com/cryptomator/cryptomator/pull/4227))
 * Fixed localhost alias on Windows was not removed on uninstall ([#3993](https://github.com/cryptomator/cryptomator/issues/3993))
@@ -31,6 +75,9 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Drop signing with Actalis issued certificate ([#4169](https://github.com/cryptomator/cryptomator/pull/4169), [#4262](https://github.com/cryptomator/cryptomator/pull/4262))
 * Fix dagger binding graph issues ([#4147](https://github.com/cryptomator/cryptomator/pull/4147))
 * Added flatpak build to CI ([#4199](https://github.com/cryptomator/cryptomator/pull/4199))
+* Added monthly distribution builds to CI ([#4187](https://github.com/cryptomator/cryptomator/pull/4187))
+* Replaced Guava cache with Caffeine
+* Updated translations ([#4223](https://github.com/cryptomator/cryptomator/pull/4223))
 * Updated dependencies:
   - `org.cryptomator:webdav-nio-adapter` from 3.0.1 to 3.0.2
   - `org.cryptomator:integrations-api` from 1.8.0 to 1.9.0

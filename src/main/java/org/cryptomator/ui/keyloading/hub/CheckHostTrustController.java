@@ -6,6 +6,8 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -13,14 +15,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import java.net.URI;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -35,7 +47,11 @@ public class CheckHostTrustController implements FxController {
 	private static final String CHECK_KEY = "hub.checkHostTrust.message.check";
 	private static final String ASK_SINGULAR_KEY = "hub.checkHostTrust.message.ask";
 	private static final String ASK_PLURAL_KEY = "hub.checkHostTrust.message.ask.plural";
+	private static final String DESCRIPTION_SINGULAR_KEY = "hub.checkHostTrust.description.ask";
+	private static final String DESCRIPTION_PLURAL_KEY = "hub.checkHostTrust.description.ask.plural";
+	private static final String COPY_TOOLTIP_KEY = "hub.checkHostTrust.copyBtn.tooltip";
 	private static final String TRUSTED_CRYPTOMATOR_CLOUD_DOMAIN = ".cryptomator.cloud";
+	private static final Duration COPIED_INDICATION_DURATION = Duration.seconds(2);
 
 	private final Stage window;
 	private final HubConfig hubConfig;
@@ -49,9 +65,10 @@ public class CheckHostTrustController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final SortedSet<String> hostnames;
 	private final StringProperty messageLabel;
+	private final StringProperty descriptionLabel;
 
 	@FXML
-	private TextFlow hostnamesFlow;
+	private VBox hostnamesBox;
 
 	@Inject
 	public CheckHostTrustController(@KeyLoading Stage window, //
@@ -74,6 +91,7 @@ public class CheckHostTrustController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.hostnames = new TreeSet<>();
 		this.messageLabel = new SimpleStringProperty(resourceBundle.getString(CHECK_KEY));
+		this.descriptionLabel = new SimpleStringProperty("");
 	}
 
 	@FXML
@@ -117,12 +135,41 @@ public class CheckHostTrustController implements FxController {
 	}
 
 	private void renderHostnames() {
-		hostnamesFlow.getChildren().clear();
+		hostnamesBox.getChildren().clear();
 		for (var hostname : hostnames) {
-			hostnamesFlow.getChildren().add(new Text(hostname + System.lineSeparator()));
+			hostnamesBox.getChildren().add(createHostnameRow(hostname));
 		}
-		var messageKey = hostnames.size() > 1 ? ASK_PLURAL_KEY : ASK_SINGULAR_KEY;
-		messageLabel.set(resourceBundle.getString(messageKey));
+		var plural = hostnames.size() > 1;
+		messageLabel.set(resourceBundle.getString(plural ? ASK_PLURAL_KEY : ASK_SINGULAR_KEY));
+		descriptionLabel.set(resourceBundle.getString(plural ? DESCRIPTION_PLURAL_KEY : DESCRIPTION_SINGULAR_KEY));
+	}
+
+	private Node createHostnameRow(String hostname) {
+		var label = new Label(hostname);
+		label.setWrapText(true);
+		HBox.setHgrow(label, Priority.ALWAYS);
+
+		var icon = new FontAwesome5IconView();
+		icon.setGlyph(FontAwesome5Icon.COPY);
+		var copyLink = new Hyperlink(null, icon);
+		copyLink.setTooltip(new Tooltip(resourceBundle.getString(COPY_TOOLTIP_KEY)));
+		copyLink.setAccessibleText(resourceBundle.getString(COPY_TOOLTIP_KEY));
+		copyLink.setOnAction(_ -> copyToClipboard(hostname, icon));
+
+		var row = new HBox(6, label, copyLink);
+		row.setAlignment(Pos.CENTER_LEFT);
+		return row;
+	}
+
+	private void copyToClipboard(String hostname, FontAwesome5IconView icon) {
+		var clipboardContent = new ClipboardContent();
+		clipboardContent.putString(hostname);
+		Clipboard.getSystemClipboard().setContent(clipboardContent);
+
+		icon.setGlyph(FontAwesome5Icon.CHECK);
+		var resetIcon = new PauseTransition(COPIED_INDICATION_DURATION);
+		resetIcon.setOnFinished(_ -> icon.setGlyph(FontAwesome5Icon.COPY));
+		resetIcon.play();
 	}
 
 	private boolean isConsistentHubConfig() {
@@ -174,6 +221,14 @@ public class CheckHostTrustController implements FxController {
 
 	public String getMessageLabel() {
 		return messageLabel.get();
+	}
+
+	public StringProperty descriptionLabelProperty() {
+		return descriptionLabel;
+	}
+
+	public String getDescriptionLabel() {
+		return descriptionLabel.get();
 	}
 
 }

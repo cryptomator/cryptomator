@@ -22,7 +22,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Random;
 
@@ -62,7 +61,7 @@ public class VaultSettings {
 
 	VaultSettings(VaultSettingsJson json) {
 		this.id = json.id;
-		this.path = new SimpleObjectProperty<>(this, "path", json.path == null ? null : Paths.get(json.path));
+		this.path = new SimpleObjectProperty<>(this, "path", json.path == null ? null : Path.of(json.path));
 		this.displayName = new SimpleStringProperty(this, "displayName", json.displayName);
 		this.unlockAfterStartup = new SimpleBooleanProperty(this, "unlockAfterStartup", json.unlockAfterStartup);
 		this.revealAfterMount = new SimpleBooleanProperty(this, "revealAfterMount", json.revealAfterMount);

@@ -11,12 +11,11 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<?import javafx.scene.text.TextFlow?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.hub.CheckHostTrustController"
-	  minWidth="400"
-	  maxWidth="400"
+	  minWidth="450"
+	  maxWidth="450"
 	  minHeight="145"
 	  spacing="12"
 	  alignment="TOP_LEFT"
@@ -34,13 +33,15 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
 			</StackPane>
 		</Group>
-		<VBox HBox.hgrow="ALWAYS">
+		<VBox HBox.hgrow="ALWAYS" spacing="6">
 			<Label styleClass="label-large" text="${controller.messageLabel}" wrapText="true" textAlignment="LEFT">
 				<padding>
 					<Insets bottom="6" top="6"/>
 				</padding>
 			</Label>
-			<TextFlow fx:id="hostnamesFlow" styleClass="text-flow" minHeight="60"/>
+			<Label text="${controller.descriptionLabel}" wrapText="true" textAlignment="LEFT" visible="${!controller.descriptionLabel.empty}" managed="${!controller.descriptionLabel.empty}"/>
+			<!-- The box is filled in the controller, see createHostNamesRow() -->
+			<VBox fx:id="hostnamesBox" styleClass="hostname-list" spacing="4" visible="${!controller.descriptionLabel.empty}" managed="${!controller.descriptionLabel.empty}"/>
 			<Region VBox.vgrow="ALWAYS" minHeight="18"/>
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>

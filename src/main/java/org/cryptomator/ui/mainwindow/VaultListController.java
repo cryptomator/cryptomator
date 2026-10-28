@@ -153,7 +153,7 @@ public class VaultListController implements FxController {
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
 			while (c.next()) {
 				if (c.wasAdded()) {
-					Vault anyAddedVault = c.getAddedSubList().get(0);
+					Vault anyAddedVault = c.getAddedSubList().getFirst();
 					vaultList.getSelectionModel().select(anyAddedVault);
 				}
 			}

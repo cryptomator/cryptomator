@@ -49,6 +49,9 @@ on:
       - 'dist/common/**'
       - 'dist/linux/resources/**'
 
+permissions:
+  contents: read
+
 env:
   JAVA_DIST: 'temurin'
   JAVA_VERSION: '26.0.1+8'
@@ -67,18 +70,18 @@ jobs:
         include:
           - os: ubuntu-latest
             arch: x86_64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_linux-x64_bin-jmods.zip'
-            openjfx-sha: '47035c653863a8e4be3dc6f142b8dbd84b4bb1efc9a8cbc68413e6a5ff5e9f50'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.5/openjfx-25.0.5_linux-x64_bin-jmods.zip'
+            openjfx-sha: 'fbb768a16c23a453c420ba55bbc2a689c708bc6456ef77c1e4f69823b95f9e9f'
             appimagetool-sha: 'ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0'
           - os: ubuntu-24.04-arm
             arch: aarch64
-            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_linux-aarch64_bin-jmods.zip'
-            openjfx-sha: 'e3fd682354346845d2944a2da2b1ff2b6cb9259d92027f2f9c121b9b93c5e42f'
+            openjfx-url: 'https://download2.gluonhq.com/openjfx/25.0.5/openjfx-25.0.5_linux-aarch64_bin-jmods.zip'
+            openjfx-sha: 'c85722f3f26059e1bbe689bb8ada4434dfaf68fa9fc8e64bac6a95da1828de01'
             appimagetool-sha: 'f0837e7448a0c1e4e650a93bb3e85802546e60654ef287576f46c71c126a9158'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Java
-        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -152,7 +155,7 @@ jobs:
           --copyright "(C) 2016 - 2026 Skymatic GmbH"
           --app-version "${VERSION_NUM}.${REVISION_NUM}"
           --java-options "--enable-preview"
-          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator"
+          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${VERSION_NUM}${VERSION_SUFFIX}\""
@@ -223,7 +226,7 @@ jobs:
           if-no-files-found: error
       - name: Publish AppImage on GitHub Releases
         if: inputs.upload-to-draft
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           draft: true
           fail_on_unmatched_files: true

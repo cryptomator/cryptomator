@@ -24,6 +24,9 @@ on:
       - 'dist/common/**'
       - 'dist/linux/resources/**'
 
+permissions:
+  contents: read
+
 jobs:
   get-version:
     uses: ./.github/workflows/get-version.yml
@@ -34,7 +37,7 @@ jobs:
     name: "Build flatpak"
     needs: [get-version]
     container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
       options: --privileged
     strategy:
       fail-fast: false
@@ -50,16 +53,16 @@ jobs:
     env:
       SRC_GIT_SHA: ${{ inputs.src-tag || github.sha}}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: flathub/org.cryptomator.Cryptomator
           submodules: true
       - name: Checkout build script
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: build-scripts
       - name: Checkout app source
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: cryptomator
           ref: ${{ env.SRC_GIT_SHA }}
@@ -84,7 +87,7 @@ jobs:
           if-no-files-found: error
           path: |
             org.cryptomator.Cryptomator.${{matrix.variant.arch}}.yaml
-      - uses: flatpak/flatpak-github-actions/flatpak-builder@401fe28a8384095fc1531b9d320b292f0ee45adb # SNAPSHOT due to using keep-build-dirs
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # SNAPSHOT due to using keep-build-dirs
         with:
           bundle: cryptomator.flatpak
           manifest-path: org.cryptomator.Cryptomator.yaml
@@ -164,7 +167,7 @@ jobs:
     needs: [get-version, verify-maven-sources]
     if: (github.event_name == 'workflow_dispatch' && inputs.create-pr ) || (github.event_name == 'release' && needs.get-version.outputs.versionType == 'stable')
     permissions:
-      contents: write
+      contents: read # Required for checkout; the flathub push/PR uses CRYPTOBOT_PR_TOKEN
     env:
       TARBALL_URL: 'https://github.com/cryptomator/cryptomator/archive/refs/tags/${{ github.event.release.tag_name || inputs.src-tag }}.tar.gz'
     steps:
@@ -177,7 +180,7 @@ jobs:
           fi
         env:
           SRC_TAG: ${{ inputs.src-tag }}
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: flathub/org.cryptomator.Cryptomator
           submodules: true #TODO: Update submodule!
@@ -185,7 +188,7 @@ jobs:
       - name: Checkout release branch
         run: |
           git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: cryptomator
       - name: Download source tarball and compute checksum
