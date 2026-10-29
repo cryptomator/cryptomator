@@ -9,8 +9,14 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.5...HEAD)
+### Added
+* Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later
 
-No changes yet.
+### Fixed
+* Fixed background threads piling up with every unlock and lock of a vault
+* Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
+* Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
+* Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu
 
 
 ## [1.19.5](https://github.com/cryptomator/cryptomator/releases/1.19.5) - 2026-10-28

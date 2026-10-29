@@ -237,13 +237,20 @@ public class VaultListManager {
 				vault.getVaultConfigCache().reloadConfig();
 			}
 
-			state.set(determined);
+			replaceUnlessChanged(state, previous, determined);
 			return determined;
 		} catch (IOException e) {
 			LOG.warn("Failed to (re)determine vault state for {}", vault.getPath(), e);
 			vault.setLastKnownException(e);
-			state.set(ERROR);
+			replaceUnlessChanged(state, previous, ERROR);
 			return ERROR;
+		}
+	}
+
+	// a workflow may have taken the vault into PROCESSING while its state was being determined
+	private static void replaceUnlessChanged(VaultState state, VaultState.Value previous, VaultState.Value next) {
+		if (next != previous) {
+			state.transition(previous, next);
 		}
 	}
 

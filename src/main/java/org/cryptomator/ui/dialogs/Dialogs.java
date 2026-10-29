@@ -150,6 +150,19 @@ public class Dialogs {
 				.setCancelAction(Stage::close);
 	}
 
+	public SimpleDialog.Builder prepareFSKitExtensionSwitchedOffDialog(Stage window, Vault vault, Consumer<Stage> okAction) {
+		return createDialogBuilder() //
+				.setOwner(window) //
+				.setTitleKey("unlock.error.title", vault.getDisplayName()) //
+				.setMessageKey("unlock.error.extensionSwitchedOff.message") //
+				.setDescriptionKey("unlock.error.extensionSwitchedOff.description") //
+				.setIcon(FontAwesome5Icon.EXCLAMATION) //
+				.setOkButtonKey("unlock.error.extensionSwitchedOff.retryBtn") //
+				.setCancelButtonKey("generic.button.cancel") //
+				.setOkAction(okAction) //
+				.setCancelAction(Stage::close);
+	}
+
 	public SimpleDialog.Builder prepareNotAVaultDirectoryDialog(Stage window, NotAVaultDirectoryException e) {
 		String descriptionKey = switch (e.notAVaultReason()) {
 			case MISSING_DATA_DIR -> "addvaultwizard.existing.notAVault.description.missingDataDir";
