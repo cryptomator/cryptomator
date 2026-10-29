@@ -1,15 +1,15 @@
 Param(
-	[Parameter(Mandatory, HelpMessage="Please provide a name for the app")][string] $AppName,
-	[Parameter(Mandatory, HelpMessage="Please provide the glob pattern to identify the main jar")][string] $MainJarGlob,
-	[Parameter(Mandatory, HelpMessage="Please provide the module- and main class path to start the app")][string] $ModuleAndMainClass,
-	[Parameter(Mandatory, HelpMessage="Please provide the windows upgrade uuid for the installer")][string] $UpgradeUUID,
-	[Parameter(Mandatory, HelpMessage="Please provide the name of the vendor")][string] $Vendor,
-	[Parameter(Mandatory, HelpMessage="Please provide the starting year for the copyright notice")][int] $CopyrightStartYear,
-	[Parameter(Mandatory, HelpMessage="Please provide a help url")][string] $HelpUrl,
-	[Parameter(Mandatory, HelpMessage="Please provide an update url")][string] $UpdateUrl,
-	[Parameter(Mandatory, HelpMessage="Please provide an about url")][string] $AboutUrl,
-	[Parameter(Mandatory, HelpMessage="Please provide an alias for localhost")][string] $LoopbackAlias,
-	[bool] $clean = $false # if true, cleans up previous build artifacts
+	[Parameter(HelpMessage="Name of the app")][string] $AppName = 'Cryptomator',
+	[Parameter(HelpMessage="Glob pattern to identify the main jar")][string] $MainJarGlob = 'cryptomator-*',
+	[Parameter(HelpMessage="Module- and main class path to start the app")][string] $ModuleAndMainClass = 'org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator',
+	[Parameter(HelpMessage="Windows upgrade uuid for the installer")][string] $UpgradeUUID = 'bda45523-42b1-4cae-9354-a45475ed4775',
+	[Parameter(HelpMessage="Name of the vendor")][string] $Vendor = 'Skymatic GmbH',
+	[Parameter(HelpMessage="Starting year for the copyright notice")][int] $CopyrightStartYear = 2016,
+	[Parameter(HelpMessage="Help url")][string] $HelpUrl = 'https://cryptomator.org/contact/',
+	[Parameter(HelpMessage="Update url")][string] $UpdateUrl = 'https://cryptomator.org/downloads/',
+	[Parameter(HelpMessage="About url")][string] $AboutUrl = 'https://cryptomator.org',
+	[Parameter(HelpMessage="Alias for localhost")][string] $LoopbackAlias = 'cryptomator-vault',
+	[Parameter(HelpMessage="Clean up previous build artifacts")][switch] $Clean
 )
 
 # ============================
