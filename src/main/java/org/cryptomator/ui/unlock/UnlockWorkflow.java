@@ -1,11 +1,13 @@
 package org.cryptomator.ui.unlock;
 
 import dagger.Lazy;
+import org.cryptomator.common.UnsupportedScryptParametersException;
 import org.cryptomator.common.mount.ConflictingMountServiceException;
 import org.cryptomator.common.mount.FSKitExtensionSwitchedOffException;
 import org.cryptomator.common.mount.IllegalMountPointException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.integrations.mount.MountFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -162,6 +164,7 @@ public class UnlockWorkflow extends Task<Void> {
 			case ConflictingMountServiceException _ -> handleConflictingMountServiceException();
 			case ReadOnlyFileSystemException _ -> handleReadOnlyFileSystem();
 			case FSKitExtensionSwitchedOffException _ -> handleExtensionSwitchedOff();
+			case MasterkeyLoadingFailedException e when e.getCause() instanceof UnsupportedScryptParametersException uspe -> handleUnsupportedScryptParameters(uspe);
 			default -> handleGenericError(throwable);
 		}
 	}
@@ -185,6 +188,15 @@ public class UnlockWorkflow extends Task<Void> {
 		Platform.runLater(() -> {
 			window.close();
 			extensionSwitchedOffDialog.showAndWait();
+		});
+	}
+
+	private void handleUnsupportedScryptParameters(UnsupportedScryptParametersException e) {
+		LOG.warn("Rejected masterkey file of '{}': {}", vault.getDisplayName(), e.getMessage());
+		var dialog = dialogs.prepareUnsupportedScryptParameters(mainWindow, "unlock.error.title", vault.getDisplayName()).build();
+		Platform.runLater(() -> {
+			window.close();
+			dialog.showAndWait();
 		});
 	}
 

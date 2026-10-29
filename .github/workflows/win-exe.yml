@@ -61,8 +61,8 @@ env:
   VERSION_NUM: ${{ inputs.semVerNum || '99.99.99'}}
   REVISION_NUM: ${{ inputs.revisionNum || '0' }}
   VERSION_SUFFIX: ${{ inputs.semVerSuffix || ''}}
-  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_windows-x64_bin-jmods.zip'
-  OPENJFX_JMODS_AMD64_HASH: '0bf9b83260b85607a9ba200124debabd9cdb013cbc0d659e62a20192a7137907'
+  OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25.0.5/openjfx-25.0.5_windows-x64_bin-jmods.zip'
+  OPENJFX_JMODS_AMD64_HASH: '41c0361e1183852a3693c5d505ed4aa914bb4190e0adc51ae4db28812a48d2ae'
   WINFSP_MSI: 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
   WINFSP_MSI_HASH: '073a70e00f77423e34bed98b86e600def93393ba5822204fac57a29324db9f7a'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
@@ -177,7 +177,7 @@ jobs:
           --copyright "(C) 2016 - 2026 Skymatic GmbH"
           --app-version "${VERSION_NUM}.${REVISION_NUM}"
           --java-options "--enable-preview"
-          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.jfuse.win,org.cryptomator.integrations.win"
+          --java-options "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.win,org.cryptomator.integrations.win,org.cryptomator.desktop"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${VERSION_NUM}${VERSION_SUFFIX}\""

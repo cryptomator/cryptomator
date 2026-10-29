@@ -2,6 +2,7 @@ package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import com.google.common.base.Preconditions;
 import org.cryptomator.common.Constants;
+import org.cryptomator.common.CryptomatorMKFValidator;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -77,7 +78,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 			if (passphrase == null) {
 				askForPassphrase();
 			}
-			var masterkey = masterkeyFileAccess.load(filePath, passphrase);
+			var masterkey = masterkeyFileAccess.load(filePath, passphrase, CryptomatorMKFValidator.INSTANCE);
 			// backup on successful unlock:
 			if (filePath.startsWith(vault.getPath())) {
 				try {

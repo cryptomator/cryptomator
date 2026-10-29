@@ -1,5 +1,7 @@
 package org.cryptomator.ui.changepassword;
 
+import org.cryptomator.common.CryptomatorMKFValidator;
+import org.cryptomator.common.UnsupportedScryptParametersException;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.common.BackupHelper;
@@ -10,11 +12,13 @@ import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
+import org.cryptomator.ui.dialogs.Dialogs;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -35,10 +39,12 @@ public class ChangePasswordController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
 	private final Stage window;
+	private final Stage owner;
 	private final Vault vault;
 	private final FxApplicationWindows appWindows;
 	private final KeychainManager keychain;
 	private final MasterkeyFileAccess masterkeyFileAccess;
+	private final Dialogs dialogs;
 
 	public NiceSecurePasswordField oldPasswordField;
 	public CheckBox finalConfirmationCheckbox;
@@ -46,12 +52,14 @@ public class ChangePasswordController implements FxController {
 	public NewPasswordController newPasswordController;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, FxApplicationWindows appWindows, KeychainManager keychain, MasterkeyFileAccess masterkeyFileAccess) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @Named("changePasswordOwner") Stage owner, @ChangePasswordWindow Vault vault, FxApplicationWindows appWindows, KeychainManager keychain, MasterkeyFileAccess masterkeyFileAccess, Dialogs dialogs) {
 		this.window = window;
+		this.owner = owner;
 		this.vault = vault;
 		this.appWindows = appWindows;
 		this.keychain = keychain;
 		this.masterkeyFileAccess = masterkeyFileAccess;
+		this.dialogs = dialogs;
 	}
 
 	@FXML
@@ -78,7 +86,7 @@ public class ChangePasswordController implements FxController {
 			CharSequence newPassphrase = newPasswordController.passwordField.getCharacters();
 			Path masterkeyPath = vault.getPath().resolve(MASTERKEY_FILENAME);
 			byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
-			byte[] newMasterkeyBytes = masterkeyFileAccess.changePassphrase(oldMasterkeyBytes, oldPassphrase, newPassphrase);
+			byte[] newMasterkeyBytes = masterkeyFileAccess.changePassphrase(oldMasterkeyBytes, oldPassphrase, newPassphrase, CryptomatorMKFValidator.INSTANCE);
 			Path backupKeyPath = vault.getPath().resolve(MASTERKEY_FILENAME + BackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
 			Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			Files.write(masterkeyPath, newMasterkeyBytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
@@ -89,6 +97,10 @@ public class ChangePasswordController implements FxController {
 			Animations.createShakeWindowAnimation(window).play();
 			oldPasswordField.selectAll();
 			oldPasswordField.requestFocus();
+		} catch (UnsupportedScryptParametersException e) {
+			LOG.warn("Rejected masterkey file of '{}': {}", vault.getDisplayName(), e.getMessage());
+			window.close();
+			dialogs.prepareUnsupportedScryptParameters(owner, "changepassword.title").build().showAndWait();
 		} catch (IOException | CryptoException e) {
 			LOG.error("Password change failed. Unable to perform operation.", e);
 			appWindows.showErrorWindow(e, window, window.getScene());

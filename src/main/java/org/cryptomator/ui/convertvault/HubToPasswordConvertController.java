@@ -3,6 +3,7 @@ package org.cryptomator.ui.convertvault;
 import com.google.common.base.Preconditions;
 import dagger.Lazy;
 import org.cryptomator.common.Constants;
+import org.cryptomator.common.CryptomatorMKFValidator;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
@@ -155,7 +156,7 @@ public class HubToPasswordConvertController implements FxController {
 	@VisibleForTesting
 	Path createPasswordConfig(Path passwordConfigPath, Path masterkeyFile, Passphrase passphrase) throws IOException, MasterkeyLoadingFailedException {
 		var unverifiedVaultConfig = vault.getVaultConfigCache().get();
-		try (var masterkey = masterkeyFileAccess.load(masterkeyFile, passphrase)) {
+		try (var masterkey = masterkeyFileAccess.load(masterkeyFile, passphrase, CryptomatorMKFValidator.INSTANCE)) {
 			var hubConfig = unverifiedVaultConfig.verify(masterkey.getEncoded(), unverifiedVaultConfig.allegedVaultVersion());
 			var passwordConfig = VaultConfig.createNew() //
 					.cipherCombo(hubConfig.getCipherCombo()) //
