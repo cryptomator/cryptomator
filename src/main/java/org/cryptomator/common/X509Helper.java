@@ -15,7 +15,9 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.security.cert.PKIXParameters;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -43,9 +45,21 @@ final class X509Helper {
 		return certificates;
 	}
 
-	static void validateChain(List<X509Certificate> certificateChain, X509Certificate rootCertificate) throws GeneralSecurityException {
+	/**
+	 * Validates the given leaf-first certificate chain against the trusted root.
+	 *
+	 * @param certificateChain The certificates, leaf first, as found in a JWS {@code x5c} header
+	 * @param rootCertificate  The trust anchor the chain must lead to
+	 * @param validAt          The point in time at which every certificate in the chain must be valid, i.e. the time the signature was made
+	 * @throws GeneralSecurityException If the chain is not valid at the given time or does not lead to the trusted root
+	 */
+	static void validateChain(List<X509Certificate> certificateChain, X509Certificate rootCertificate, Instant validAt) throws GeneralSecurityException {
 		if (certificateChain.isEmpty()) {
 			throw new IllegalArgumentException("Certificate chain must not be empty.");
+		}
+		Date validationDate = Date.from(validAt);
+		for (X509Certificate cert : certificateChain) {
+			cert.checkValidity(validationDate);
 		}
 
 		List<X509Certificate> certPathCertificates = new ArrayList<>(certificateChain);
@@ -60,6 +74,7 @@ final class X509Helper {
 		CertPath certPath = certificateFactory.generateCertPath(certPathCertificates);
 		PKIXParameters params = new PKIXParameters(Set.of(new TrustAnchor(rootCertificate, null)));
 		params.setRevocationEnabled(false);
+		params.setDate(validationDate);
 		CertPathValidator.getInstance("PKIX").validate(certPath, params);
 	}
 
