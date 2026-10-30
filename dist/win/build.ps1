@@ -9,7 +9,8 @@ Param(
 	[Parameter(HelpMessage="Update url")][string] $UpdateUrl = 'https://cryptomator.org/downloads/',
 	[Parameter(HelpMessage="About url")][string] $AboutUrl = 'https://cryptomator.org',
 	[Parameter(HelpMessage="Alias for localhost")][string] $LoopbackAlias = 'cryptomator-vault',
-	[Parameter(HelpMessage="Clean up previous build artifacts")][switch] $Clean
+	[Parameter(HelpMessage="Clean up previous build artifacts")][switch] $Clean,
+	[Parameter(HelpMessage="Build for ARM64 using the JavaFX jmods bundled in the JDK instead of downloading the x64 jmods")][switch] $Arm64
 )
 
 # ============================
@@ -83,52 +84,38 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	Remove-Item -Path $runtimeImagePath -Force -Recurse
 }
 
-## download jfx jmods for X64, while they are part of the Arm64 JDK
-$archCode = (Get-CimInstance Win32_Processor).Architecture
-$archName = switch ($archCode) {
-    9  { "x64" }
-    12 { "ARM64" }
-    default { "WMI Win32_Processor.Architecture code ($archCode)" }
-}
+## jfx jmods: part of the ARM64 JDK, downloaded from Gluon for x64
+if ($Arm64) {
+	$javafxBaseJmod = Join-Path $Env:JAVA_HOME "jmods\javafx.base.jmod"
+	if (!(Test-Path $javafxBaseJmod)) {
+		Write-Error "JavaFX module not found in JDK. Please ensure a JDK with JavaFX (including jmods) is installed."
+		exit 1
+	}
 
-switch ($archName) {
-    'ARM64' {
-		$javafxBaseJmod = Join-Path $Env:JAVA_HOME "jmods\javafx.base.jmod"
-		if (!(Test-Path $javafxBaseJmod)) {
-			Write-Error "JavaFX module not found in JDK. Please ensure a JDK with JavaFX (including jmods) is installed."
-			exit 1
-		}
+	$jmodPaths = "$Env:JAVA_HOME/jmods"
+} else {
+	$javaFxVersion='25.0.5'
+	$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
+	$javaFxJmodsSHA256 = '41c0361e1183852a3693c5d505ed4aa914bb4190e0adc51ae4db28812a48d2ae'
+	$javaFxJmods = '.\resources\jfxJmods.zip'
 
-        $jmodPaths = "$Env:JAVA_HOME/jmods"
-    }
-    'x64' {
-		$javaFxVersion='25.0.5'
-		$javaFxJmodsUrl = "https://download2.gluonhq.com/openjfx/${javaFxVersion}/openjfx-${javaFxVersion}_windows-x64_bin-jmods.zip"
-		$javaFxJmodsSHA256 = '41c0361e1183852a3693c5d505ed4aa914bb4190e0adc51ae4db28812a48d2ae'
-		$javaFxJmods = '.\resources\jfxJmods.zip'
+	if( !(Test-Path -Path $javaFxJmods) ) {
+		Write-Host "Downloading ${javaFxJmodsUrl}..."
+		Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
+	}
 
-		if( !(Test-Path -Path $javaFxJmods) ) {
-			Write-Host "Downloading ${javaFxJmodsUrl}..."
-			Invoke-WebRequest $javaFxJmodsUrl -OutFile $javaFxJmods # redirects are followed by default
-		}
+	$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
+	if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
+		Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
+	, actual: $jmodsChecksumActual"
+		exit 1;
+	}
 
-		$jmodsChecksumActual = $(Get-FileHash -Path $javaFxJmods -Algorithm SHA256).Hash.ToLower()
-		if( $jmodsChecksumActual -ne $javaFxJmodsSHA256 ) {
-			Write-Error "Checksum mismatch for jfxJmods.zip. Expected: $javaFxJmodsSHA256
-		, actual: $jmodsChecksumActual"
-			exit 1;
-		}
+	Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
+	Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
+	Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
 
-		Expand-Archive -Path $javaFxJmods -Force -DestinationPath ".\resources\"
-		Remove-Item -Recurse -Force -Path ".\resources\javafx-jmods" -ErrorAction Ignore
-		Move-Item -Force -Path ".\resources\javafx-jmods-*" -Destination ".\resources\javafx-jmods" -ErrorAction Stop
-
-		$jmodPaths="$buildDir/resources/javafx-jmods";
-    }
-    default {
-        Write-Error "Unsupported architecture: $arch"
-        exit 1
-    }
+	$jmodPaths="$buildDir/resources/javafx-jmods";
 }
 
 ## create custom runtime
