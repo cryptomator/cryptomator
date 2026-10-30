@@ -8,7 +8,7 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.6...HEAD)
+## [1.20.0](https://github.com/cryptomator/cryptomator/releases/1.20.0) - tbd
 ### Added
 * Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later
 
