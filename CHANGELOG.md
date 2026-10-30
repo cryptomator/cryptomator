@@ -8,7 +8,7 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.5...HEAD)
+## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.6...HEAD)
 ### Added
 * Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later
 
@@ -18,6 +18,10 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
 * Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu
 
+
+## [1.19.6](https://github.com/cryptomator/cryptomator/releases/1.19.6) - 2026-10-31
+### Fixed
+* Fixed supporter certificates being rejected once the certificate that signed them was rotated out: the certificate chain is now required to be valid at the certificate's issue date instead of at verification time
 
 ## [1.19.5](https://github.com/cryptomator/cryptomator/releases/1.19.5) - 2026-10-28
 ### Security
