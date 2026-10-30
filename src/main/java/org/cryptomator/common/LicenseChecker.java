@@ -2,6 +2,7 @@ package org.cryptomator.common;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -21,6 +22,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,7 +83,13 @@ class LicenseChecker {
 			if (x5cClaim == null || x5cClaim.isMissing()) {
 				signingKey = this.legacyPublicKey;
 			} else {
-				var certChain = verifyChain(x5cClaim);
+				// The chain must have been valid when the license was signed, not necessarily now (same principle as timestamped code signing):
+				// intermediate certificates are rotated regularly, which must not invalidate licenses signed before the rotation.
+				Instant issuedAt = decodedJwt.getIssuedAtAsInstant();
+				if (issuedAt == null) {
+					throw new InvalidClaimException("The claim iat is required for licenses with an x5c header.");
+				}
+				var certChain = verifyChain(x5cClaim, issuedAt);
 				signingKey = asEcPublicKey(certChain.getFirst().getPublicKey());
 			}
 			JWTVerifier verifier = JWT.require(Algorithm.ECDSA512(signingKey, null)).build();
@@ -91,7 +99,7 @@ class LicenseChecker {
 		}
 	}
 
-	private List<X509Certificate> verifyChain(Claim x5cClaim) throws GeneralSecurityException {
+	private List<X509Certificate> verifyChain(Claim x5cClaim, Instant validAt) throws GeneralSecurityException {
 		List<String> x5cEntries = x5cClaim.asList(String.class);
 		if (x5cEntries == null || x5cEntries.isEmpty()) {
 			throw new CertPathValidatorException("x5c claim is empty.");
@@ -103,7 +111,7 @@ class LicenseChecker {
 		if (!containsRequiredCn) {
 			throw new CertPathValidatorException("x5c certificate chain does not contain required CN " + requiredChainCn);
 		}
-		X509Helper.validateChain(certChain, rootCertificate);
+		X509Helper.validateChain(certChain, rootCertificate, validAt);
 		return certChain;
 	}
 
