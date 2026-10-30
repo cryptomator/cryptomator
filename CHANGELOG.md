@@ -8,7 +8,9 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [1.19.6](https://github.com/cryptomator/cryptomator/releases/1.19.6) - tbd
+## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.6...HEAD)
+
+## [1.19.6](https://github.com/cryptomator/cryptomator/releases/1.19.6) - 2026-10-31
 ### Fixed
 * Fixed supporter certificates being rejected once the certificate that signed them was rotated out: the certificate chain is now required to be valid at the certificate's issue date instead of at verification time
 

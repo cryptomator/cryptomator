@@ -84,6 +84,9 @@
 	</content_rating>
 
 	<releases>
+		<release date="2026-10-31" version="1.19.6">
+			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.19.6</url>
+		</release>
 		<release date="2026-10-28" version="1.19.5">
 			<url type="details">https://github.com/cryptomator/cryptomator/releases/1.19.5</url>
 		</release>
