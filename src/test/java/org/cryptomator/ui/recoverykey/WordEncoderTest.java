@@ -3,6 +3,7 @@ package org.cryptomator.ui.recoverykey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,6 +30,27 @@ public class WordEncoderTest {
 		String encoded = encoder.encodePadded(input);
 		byte[] decoded = encoder.decode(encoded);
 		Assertions.assertArrayEquals(input, decoded);
+	}
+
+	@Test
+	@DisplayName("decode(<odd number of words>) doesn't leak the input")
+	public void decodeOddNumberOfWordsDoesNotLeakInput() {
+		String word = encoder.getWords().get(0);
+		String encoded = encoder.encodePadded(new byte[6]) + " " + word;
+
+		var thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> encoder.decode(encoded));
+
+		Assertions.assertFalse(thrown.getMessage().contains(word));
+	}
+
+	@Test
+	@DisplayName("decode(<unknown word>) doesn't leak the input")
+	public void decodeUnknownWordDoesNotLeakInput() {
+		String encoded = "notaword " + encoder.getWords().get(0);
+
+		var thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> encoder.decode(encoded));
+
+		Assertions.assertFalse(thrown.getMessage().contains("notaword"));
 	}
 
 	public static Stream<byte[]> createRandomByteSequences() {
