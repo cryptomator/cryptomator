@@ -137,9 +137,10 @@ class JWEHelper {
 
 	private static <T> T readKey(JWEObject jwe, String keyField, Function<byte[], T> rawKeyFactory) throws MasterkeyLoadingFailedException {
 		Preconditions.checkArgument(jwe.getState() == JWEObject.State.DECRYPTED);
+		// the JWE is already decrypted at this point, i.e. its payload contains the vault key or the user's private key and must never be logged
 		var fields = jwe.getPayload().toJSONObject();
 		if (fields == null) {
-			LOG.error("Expected JWE payload to be JSON: {}", jwe.getPayload());
+			LOG.error("Expected JWE payload to be JSON, but was not. JWE header: {}", jwe.getHeader());
 			throw new MasterkeyLoadingFailedException("Expected JWE payload to be JSON");
 		}
 		var keyBytes = new byte[0];
@@ -151,7 +152,7 @@ class JWEHelper {
 				throw new IllegalArgumentException("JWE payload doesn't contain field " + keyField);
 			}
 		} catch (IllegalArgumentException | KeyDecodeFailedException e) {
-			LOG.error("Unexpected JWE payload: {}", jwe.getPayload());
+			LOG.error("Unexpected JWE payload. JWE header: {}, payload fields: {}", jwe.getHeader(), fields.keySet());
 			throw new MasterkeyLoadingFailedException("Unexpected JWE payload", e);
 		} finally {
 			Arrays.fill(keyBytes, (byte) 0x00);
