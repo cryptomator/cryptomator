@@ -37,7 +37,7 @@ jobs:
     name: "Build flatpak"
     needs: [get-version]
     container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08@sha256:6ed6921bb5a9e1a916989971844f159b854b7b225880c381fa34f7a158863039
       options: --privileged
     strategy:
       fail-fast: false

@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-version]
     container:
-      image: archlinux:base-devel
+      image: archlinux:base-devel@sha256:624bdc7fc6615155d67bc34cf7146c0c9fd0e3c92943977da63a630e4ca49c30
     env:
       SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
       PKGDEST: ${{ github.workspace }}/pkgdest
