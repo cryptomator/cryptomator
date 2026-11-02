@@ -55,15 +55,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           repository: flathub/org.cryptomator.Cryptomator
           submodules: true
       - name: Checkout build script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           path: build-scripts
       - name: Checkout app source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           path: cryptomator
           ref: ${{ env.SRC_GIT_SHA }}
           fetch-depth: 0
@@ -190,6 +193,7 @@ jobs:
           git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           path: cryptomator
       - name: Download source tarball and compute checksum
         id: sha512

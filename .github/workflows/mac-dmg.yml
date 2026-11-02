@@ -111,6 +111,8 @@ jobs:
           openjfx-sha: '2a05b5d236c10eb74a366638cf908ddebfa36795695c8b1f2734f2169d54b128'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Verify provisioning profile
         run: |
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output $RUNNER_TEMP/app.provisionprofile

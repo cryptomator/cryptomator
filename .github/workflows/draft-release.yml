@@ -32,6 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Check the git tag is signed
         run: git cat-file -p "${GITHUB_REF_NAME}" | grep "BEGIN SSH SIGNATURE"
@@ -163,6 +164,8 @@ jobs:
       GH_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Compute source tarball SHA256
         id: src-sha256
         run: |
