@@ -64,7 +64,11 @@ jobs:
     uses: ./.github/workflows/av-whitelist.yml
     with:
       url: ${{ needs.get-asset-urls.outputs.msi-url }}
-    secrets: inherit
+    secrets:
+      ALLOWLIST_KASPERSKY_USERNAME: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
+      ALLOWLIST_KASPERSKY_PASSWORD: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+      ALLOWLIST_AVAST_USERNAME: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
+      ALLOWLIST_AVAST_PASSWORD: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
 
   allowlist-exe-x64:
     needs: [get-asset-urls, allowlist-msi-x64]
@@ -72,7 +76,11 @@ jobs:
     uses: ./.github/workflows/av-whitelist.yml
     with:
       url: ${{ needs.get-asset-urls.outputs.exe-url }}
-    secrets: inherit
+    secrets:
+      ALLOWLIST_KASPERSKY_USERNAME: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
+      ALLOWLIST_KASPERSKY_PASSWORD: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+      ALLOWLIST_AVAST_USERNAME: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
+      ALLOWLIST_AVAST_PASSWORD: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
 
   check-release:
     name: Analyzes the release for certain properties

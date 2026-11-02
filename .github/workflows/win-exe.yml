@@ -31,6 +31,21 @@ on:
       sha256-exe:
         description: "SHA256 sum of the x64 exe"
         value: ${{ jobs.build-exe.outputs.sha256sum}}
+    secrets:
+      # What this workflow reads when called. Direct runs read the repository secrets of the same names.
+      AZURE_TENANT_ID:
+        required: false
+      AZURE_CLIENT_ID:
+        required: false
+      AZURE_CLIENT_SECRET:
+        required: false
+      RELEASES_GPG_PRIVATE_KEY:
+        required: false
+      RELEASES_GPG_PASSPHRASE:
+        required: false
+      CRYPTOBOT_RELEASE_TOKEN:
+        required: false
+
   workflow_dispatch:
     inputs:
       semVerNum:

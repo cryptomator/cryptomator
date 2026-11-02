@@ -82,7 +82,13 @@ jobs:
       semVerNum: ${{needs.get-version.outputs.semVerNum}}
       revisionNum: ${{needs.get-version.outputs.revNum}}
       semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
-    secrets: inherit
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   build-dmg-arm64:
     needs: [get-version, create-release-draft]
@@ -93,7 +99,20 @@ jobs:
       semVerNum: ${{needs.get-version.outputs.semVerNum}}
       revisionNum: ${{needs.get-version.outputs.revNum}}
       semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
-    secrets: inherit
+    secrets:
+      MACOS_TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
+      MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+      MACOS_FSKIT_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
+      MACOS_CODESIGN_P12_BASE64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
+      MACOS_CODESIGN_P12_PW: ${{ secrets.MACOS_CODESIGN_P12_PW }}
+      MACOS_CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
+      MACOS_CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+      MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+      MACOS_NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
+      MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   build-dmg-x64:
     needs: [get-version, create-release-draft]
@@ -104,7 +123,20 @@ jobs:
       semVerNum: ${{needs.get-version.outputs.semVerNum}}
       revisionNum: ${{needs.get-version.outputs.revNum}}
       semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
-    secrets: inherit
+    secrets:
+      MACOS_TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
+      MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+      MACOS_FSKIT_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
+      MACOS_CODESIGN_P12_BASE64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
+      MACOS_CODESIGN_P12_PW: ${{ secrets.MACOS_CODESIGN_P12_PW }}
+      MACOS_CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
+      MACOS_CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+      MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+      MACOS_NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
+      MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   build-appimages:
     needs: [get-version, create-release-draft]
@@ -115,7 +147,10 @@ jobs:
       semVerNum: ${{needs.get-version.outputs.semVerNum}}
       revisionNum: ${{needs.get-version.outputs.revNum}}
       semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
-    secrets: inherit
+    secrets:
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   update-sha256sums:
     runs-on: ubuntu-latest

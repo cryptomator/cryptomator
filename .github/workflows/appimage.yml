@@ -27,6 +27,15 @@ on:
       sha256-appimage-aarch64:
         description: "SHA256 sum of the aarch64 appimage"
         value: ${{ jobs.collect-sha256sums.outputs.aarch64-sha256sum}}
+    secrets:
+      # What this workflow reads when called. Direct runs read the repository secrets of the same names.
+      RELEASES_GPG_PRIVATE_KEY:
+        required: false
+      RELEASES_GPG_PASSPHRASE:
+        required: false
+      CRYPTOBOT_RELEASE_TOKEN:
+        required: false
+
   workflow_dispatch:
     inputs:
       semVerNum:
