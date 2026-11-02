@@ -152,7 +152,7 @@ class JWEHelper {
 				throw new IllegalArgumentException("JWE payload doesn't contain field " + keyField);
 			}
 		} catch (IllegalArgumentException | KeyDecodeFailedException e) {
-			LOG.error("Unexpected JWE payload. JWE header: {}, payload fields: {}", jwe.getHeader(), fields.keySet());
+			LOG.error("Unexpected JWE payload. JWE header: {}, payload field count: {}", jwe.getHeader(), fields.size());
 			throw new MasterkeyLoadingFailedException("Unexpected JWE payload", e);
 		} finally {
 			Arrays.fill(keyBytes, (byte) 0x00);
