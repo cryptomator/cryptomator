@@ -86,15 +86,16 @@ class WordEncoder {
 	 */
 	public byte[] decode(String encoded) {
 		List<String> split = Splitter.on(DELIMITER).omitEmptyStrings().splitToList(Strings.nullToEmpty(encoded));
-		Preconditions.checkArgument(split.size() % 2 == 0, "%s needs to be a multiple of two words", encoded);
+		// never include the decoded words themselves in an exception message: they may be a recovery key, and the message ends up in the log file as well as in the copyable details of the error window
+		Preconditions.checkArgument(split.size() % 2 == 0, "word sequence needs to consist of a multiple of two words, but consists of %s", split.size());
 		byte[] result = new byte[split.size() / 2 * 3];
 		for (int i = 0; i < split.size(); i += 2) {
 			String w1 = split.get(i);
 			String w2 = split.get(i + 1);
 			int firstWordIndex = indices.getOrDefault(w1, -1);
 			int secondWordIndex = indices.getOrDefault(w2, -1);
-			Preconditions.checkArgument(firstWordIndex != -1, "%s not in dictionary", w1);
-			Preconditions.checkArgument(secondWordIndex != -1, "%s not in dictionary", w2);
+			Preconditions.checkArgument(firstWordIndex != -1, "word at index %s not in dictionary", i);
+			Preconditions.checkArgument(secondWordIndex != -1, "word at index %s not in dictionary", i + 1);
 			byte b1 = (byte) (0xFF & (firstWordIndex >> 4));
 			byte b2 = (byte) ((0xF0 & (firstWordIndex << 4)) + (0x0F & (secondWordIndex >> 8)));
 			byte b3 = (byte) (0xFF & secondWordIndex);
