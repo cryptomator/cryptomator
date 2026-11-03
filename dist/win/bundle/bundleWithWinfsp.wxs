@@ -28,6 +28,8 @@
         </ns0:BootstrapperApplication>
 
         <ns0:Variable Name="DISABLEUPDATECHECK" bal:Overridable="yes" Type="string" Value="false"/>
+        <!-- Install type for the in-app updater, see INSTALLTYPE in main.wxs. Left unset by default, so that the MSI can keep the value of a previous installation. -->
+        <ns0:Variable Name="INSTALLTYPE" bal:Overridable="yes"/>
 
         <ns0:Chain>
             <ns0:ExePackage Cache="keep" PerMachine="yes" Permanent="no" SourceFile="bundle\resources\winfsp-uninstaller.exe" DisplayName="Removing outdated WinFsp Driver" Description="Executable to remove old winfsp" DetectCondition="false" InstallCondition="(InstalledLegacyWinFspVersion &lt;&gt; v0.0.0.0) AND ((WixBundleAction = 7) OR (WixBundleAction = 5))" UninstallArguments="">
@@ -45,6 +47,8 @@ Do you want to continue?&quot;" RepairArgument="-q" UninstallArgument="-s" />
             </ns0:ExePackage>
             <ns0:MsiPackage SourceFile="bundle\resources\Cryptomator.msi" CacheId="cryptomator-bundle-cryptomator" Visible="no">
                 <ns0:MsiProperty Name="DISABLEUPDATECHECK" Value="[DISABLEUPDATECHECK]"/>
+                <ns0:MsiProperty Name="INSTALLTYPE" Value="[INSTALLTYPE]"/>
+                <ns0:MsiProperty Name="DEFAULTINSTALLTYPE" Value="EXE"/>
             </ns0:MsiPackage>
             <ns0:MsiPackage SourceFile="bundle\resources\winfsp.msi" CacheId="cryptomator-bundle-winfsp" Visible="yes" Permanent="yes" />
         </ns0:Chain>

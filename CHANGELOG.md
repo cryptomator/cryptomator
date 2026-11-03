@@ -11,6 +11,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.6...HEAD)
 ### Added
 * Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later
+* Built-in updater on Windows. Installations managed by package managers can opt out by passing the installer property `INSTALLTYPE` (e.g. `INSTALLTYPE=winget`)
 
 ### Fixed
 * Fixed background threads piling up with every unlock and lock of a vault
