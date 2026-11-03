@@ -17,6 +17,17 @@ on:
         required: false
         type: boolean
         default: true
+    secrets:
+      # What this workflow reads when called. Direct runs read the repository secrets of the same names.
+      ALLOWLIST_KASPERSKY_USERNAME:
+        required: false
+      ALLOWLIST_KASPERSKY_PASSWORD:
+        required: false
+      ALLOWLIST_AVAST_USERNAME:
+        required: false
+      ALLOWLIST_AVAST_PASSWORD:
+        required: false
+
   workflow_dispatch:
     inputs:
       url:

@@ -36,6 +36,35 @@ on:
       sha256-dmg:
         description: "SHA256 sum of the x64 dmg"
         value: ${{ jobs.build.outputs.sha256sum}}
+    secrets:
+      # What this workflow reads when called. Direct runs read the repository secrets of the same names.
+      MACOS_TEAM_IDENTIFIER:
+        required: false
+      MACOS_PROVISIONING_PROFILE_BASE64:
+        required: false
+      MACOS_FSKIT_PROVISIONING_PROFILE_BASE64:
+        required: false
+      MACOS_CODESIGN_P12_BASE64:
+        required: false
+      MACOS_CODESIGN_P12_PW:
+        required: false
+      MACOS_CODESIGN_TMP_KEYCHAIN_PW:
+        required: false
+      MACOS_CODESIGN_IDENTITY:
+        required: false
+      MACOS_NOTARIZATION_APPLE_ID:
+        required: false
+      MACOS_NOTARIZATION_PW:
+        required: false
+      MACOS_NOTARIZATION_TEAM_ID:
+        required: false
+      RELEASES_GPG_PRIVATE_KEY:
+        required: false
+      RELEASES_GPG_PASSPHRASE:
+        required: false
+      CRYPTOBOT_RELEASE_TOKEN:
+        required: false
+
   workflow_dispatch:
     inputs:
       semVerNum:
@@ -83,6 +112,8 @@ jobs:
           openjfx-sha: 'c50de3b8ed05385c452557bf0ac66682d73c597f224f056c091d825cb4224456'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Verify provisioning profile
         run: |
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output $RUNNER_TEMP/app.provisionprofile
