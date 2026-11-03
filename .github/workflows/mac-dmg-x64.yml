@@ -84,8 +84,8 @@ on:
         type: boolean
 
 env:
-  JAVA_DIST: 'temurin'
-  JAVA_VERSION: '26.0.1+8'
+  JAVA_DIST: 'zulu' # Temurin provides no macOS x64 builds for JDK 27
+  JAVA_VERSION: '27.0.1'
   VERSION_NUM: ${{ inputs.semVerNum || '99.99.99'}}
   REVISION_NUM: ${{ inputs.revisionNum || '0' }}
   VERSION_SUFFIX: ${{ inputs.semVerSuffix || ''}}
