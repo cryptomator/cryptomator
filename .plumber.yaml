@@ -1,0 +1,46 @@
+# Plumber overlay: inherits every control from the CLI's built-in
+# baseline, only the differences for this repository are written here.
+# Run 'plumber config resolve' to see the full effective config.
+extends: plumber:default
+version: '2.0'
+
+github:
+  controls:
+    githubActionMustComeFromAuthorizedSources:
+      # Keep the curated default list and trust the actions this
+      # repository uses on top of it, all pinned by commit: the Slack
+      # notifier and the markdown converter it runs, the release upload,
+      # the Skymatic shared workflows, notarization, the Gist and HTTP
+      # helpers, the winget releaser and the binstall step it runs.
+      includePlumberDefaults: true
+      trustedGithubActions:
+        - LoveToKnow/slackify-markdown-action
+        - andymckay/get-gist-action
+        - cargo-bins/cargo-binstall
+        - cocoalibs/xcode-notarization-action
+        - exuanbo/actions-deploy-gist
+        - fjogeleit/http-request-action
+        - rtCamp/action-slack-notify
+        - skymatic/semver-validation-action
+        - skymatic/workflows
+        - softprops/action-gh-release
+        - vedantmgoyal2009/winget-releaser
+
+    # The winget releaser installs cargo-binstall from its main branch
+    # inside its own action.yml. That reference is not in this tree, so
+    # its owner is exempt from the pin requirement the way GitHub's own
+    # actions are. Every reference in this repository is a commit.
+    actionsMustBePinnedByCommitSha:
+      trustedOwners:
+        - actions
+        - github
+        - cargo-bins
+
+    # develop and main are protected, the release branches are cut and
+    # deleted around each release and carry no rules, so the requirement
+    # stays on the branches code lands on.
+    branchMustBeProtected:
+      defaultMustBeProtected: true
+      namePatterns:
+        - develop
+        - main

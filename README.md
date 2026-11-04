@@ -7,6 +7,7 @@
 [![Crowdin](https://badges.crowdin.net/cryptomator/localized.svg)](https://translate.cryptomator.org/)
 [![Latest Release](https://img.shields.io/github/release/cryptomator/cryptomator.svg)](https://github.com/cryptomator/cryptomator/releases/latest)
 [![Community](https://img.shields.io/badge/help-Community-orange.svg)](https://community.cryptomator.org)
+[![Plumber Score](https://score.getplumber.io/github.com/cryptomator/cryptomator.svg)](https://score.getplumber.io/github.com/cryptomator/cryptomator)
 
 ## Supporting Cryptomator
 
