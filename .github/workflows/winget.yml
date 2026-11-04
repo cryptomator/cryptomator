@@ -9,21 +9,39 @@ on:
 
 permissions: {}
 
+env:
+  KOMAC_VERSION: '2.17.1'
+  KOMAC_HASH: 'e694e79cd451afabf47bead66ed34586fef4814f7b94e4b61a098f419978d5d7'
+
 jobs:
   winget:
     name: Publish winget package
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
+      - name: Install komac
+        run: |
+          curl --silent --fail-with-body --proto "=https" -L "https://github.com/russellbanks/Komac/releases/download/v${KOMAC_VERSION}/komac-${KOMAC_VERSION}-x86_64-unknown-linux-gnu.tar.gz" -o komac.tar.gz
+          echo "${KOMAC_HASH}  komac.tar.gz" | shasum -a256 --check
+          mkdir -p "${RUNNER_TEMP}/komac"
+          tar -xzf komac.tar.gz -C "${RUNNER_TEMP}/komac" komac
+          echo "${RUNNER_TEMP}/komac" >> "$GITHUB_PATH"
       - name: Sync winget-pkgs fork
         run: |
           gh repo sync cryptomator/winget-pkgs -b master --force
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Submit package
-        uses: vedantmgoyal2009/winget-releaser@b7370d4d152efdce803a26cc6ca9eee58cb2ad54 # no_specific_version
-        with:
-          identifier: Cryptomator.Cryptomator
-          version: ${{ inputs.tag }}
-          release-tag: ${{ inputs.tag }}
-          installers-regex: '-x64\.msi$'
-          token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+        run: >
+          komac update Cryptomator.Cryptomator
+          --version "${TAG}"
+          --urls "https://github.com/cryptomator/cryptomator/releases/download/${TAG}/Cryptomator-${TAG}-x64.msi"
+          --submit
+        env:
+          TAG: ${{ inputs.tag }}
+          KOMAC_FORK_OWNER: cryptomator
+          GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+      - name: Delete branches of merged PRs from fork
+        run: komac cleanup --only-merged
+        env:
+          KOMAC_FORK_OWNER: cryptomator
+          GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
