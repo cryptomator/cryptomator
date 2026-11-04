@@ -54,3 +54,6 @@ jobs:
             echo "Release not set in dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml"
             exit 1
           fi
+
+  check-urls:
+    uses: ./.github/workflows/check-urls.yml
