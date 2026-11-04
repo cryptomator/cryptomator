@@ -142,6 +142,23 @@ Invoke-CommandWithExitCheck -Command `
 Invoke-CommandWithExitCheck -Command `
     "$Env:JAVA_HOME\bin\java" -Arguments @("$buildDir\..\common\RemoveDistrustedCaCerts.java", "runtime\lib\security\cacerts")
 
+### add missing UTF-8.zh fontconfig sequences so the AWT tray menu can render Chinese (#1474)
+$fontConfigSrc = Join-Path $runtimeImagePath 'lib\fontconfig.properties.src'
+$fontConfigDst = Join-Path (Resolve-Path $runtimeImagePath) 'lib\fontconfig.properties'
+$fontConfig = Get-Content $fontConfigSrc -Raw -Encoding UTF8
+$anchor = 'sequence.allfonts.UTF-8.ko=alphabetic,korean,dingbats,symbol'
+if (-not $fontConfig.Contains($anchor)) {
+	Write-Error "Unexpected fontconfig.properties.src layout, cannot add UTF-8.zh sequences"
+	exit 1
+}
+$fontConfig = $fontConfig.Replace($anchor, @"
+$anchor
+sequence.allfonts.UTF-8.zh=alphabetic,chinese-ms936,dingbats,symbol,chinese-ms936-extb
+sequence.allfonts.UTF-8.zh.TW=alphabetic,chinese-ms950,dingbats,symbol,chinese-ms950-extb
+sequence.allfonts.UTF-8.zh.HK=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+"@)
+[System.IO.File]::WriteAllText($fontConfigDst, $fontConfig, (New-Object System.Text.UTF8Encoding($false)))
+
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
