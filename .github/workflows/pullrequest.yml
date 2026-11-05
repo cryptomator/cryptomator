@@ -5,7 +5,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: 26
+  JAVA_VERSION: 27
 
 defaults:
   run:
