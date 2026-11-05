@@ -74,6 +74,13 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
+	@Named("scryptCostParam")
+	@AddVaultWizardScoped
+	static IntegerProperty provideScryptCostParam() {
+		return new SimpleIntegerProperty(CreateNewVaultExpertSettingsController.DEFAULT_SCRYPT_COST_PARAM);
+	}
+
+	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
 	static ObjectProperty<Vault> provideVault() {
