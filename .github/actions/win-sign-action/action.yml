@@ -40,13 +40,17 @@ runs:
     - name: Generate, mask, and output the input secrets
       id: set-secrets
       run: |
-        echo "::add-mask::${{ inputs.tenant-id }}"
-        echo "::add-mask::${{ inputs.client-id }}"
-        echo "::add-mask::${{ inputs.client-secret }}"
-        echo "tenant-id=${{ inputs.tenant-id }}" >> "$GITHUB_OUTPUT"
-        echo "client-id=${{ inputs.client-id }}" >> "$GITHUB_OUTPUT"
-        echo "client-secret=${{ inputs.client-secret }}" >> "$GITHUB_OUTPUT"
+        echo "::add-mask::${TENANT_ID}"
+        echo "::add-mask::${CLIENT_ID}"
+        echo "::add-mask::${CLIENT_SECRET}"
+        echo "tenant-id=${TENANT_ID}" >> "$GITHUB_OUTPUT"
+        echo "client-id=${CLIENT_ID}" >> "$GITHUB_OUTPUT"
+        echo "client-secret=${CLIENT_SECRET}" >> "$GITHUB_OUTPUT"
       shell: bash
+      env:
+        TENANT_ID: ${{ inputs.tenant-id }}
+        CLIENT_ID: ${{ inputs.client-id }}
+        CLIENT_SECRET: ${{ inputs.client-secret }}
     - name: Sign DLLs with Azure Trusted Signing
       uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
       with:
