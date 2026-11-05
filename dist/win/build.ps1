@@ -142,6 +142,10 @@ Invoke-CommandWithExitCheck -Command `
 Invoke-CommandWithExitCheck -Command `
     "$Env:JAVA_HOME\bin\java" -Arguments @("$buildDir\..\common\RemoveDistrustedCaCerts.java", "runtime\lib\security\cacerts")
 
+### add missing UTF-8.zh fontconfig sequences so the AWT tray menu can render Chinese (#1474)
+Invoke-CommandWithExitCheck -Command `
+    "$Env:JAVA_HOME\bin\java" -Arguments @("$buildDir\AddChineseFontConfigSequences.java", "runtime")
+
 $appPath = ".\$AppName"
 if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
