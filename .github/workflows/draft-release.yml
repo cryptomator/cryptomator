@@ -57,7 +57,7 @@ jobs:
           body_path: .github/release-body.md.template
       - name: Download source tarball
         run: |
-          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/${{ github.ref }}.tar.gz --output cryptomator-${{ github.ref_name }}.tar.gz
+          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/${GITHUB_REF}.tar.gz --output "cryptomator-${GITHUB_REF_NAME}.tar.gz"
       - name: Sign source tarball with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import

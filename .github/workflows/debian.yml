@@ -58,8 +58,10 @@ jobs:
           if [ -n "${INPUT_PPAVER}" ]; then
             echo "debVersion=${INPUT_PPAVER}" >> "$GITHUB_OUTPUT"
           else
-            echo "debVersion=${{needs.get-version.outputs.semVerStr}}" >> "$GITHUB_OUTPUT"
+            echo "debVersion=${SEMVER_STR}" >> "$GITHUB_OUTPUT"
           fi
+        env:
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
       - name: Install build tools
         run: |
           sudo add-apt-repository -y ppa:coffeelibs/openjdk
@@ -118,7 +120,9 @@ jobs:
           cp -r dist/linux/common/ pkgdir
           cp dist/common/RemoveDistrustedCaCerts.java pkgdir/common
           cp target/cryptomator-*.jar pkgdir/mods
-          tar -cJf cryptomator_${{ steps.deb-version.outputs.debVersion }}.orig.tar.xz -C pkgdir .
+          tar -cJf "cryptomator_${DEB_VERSION}.orig.tar.xz" -C pkgdir .
+        env:
+          DEB_VERSION: ${{ steps.deb-version.outputs.debVersion }}
       - name: Patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
@@ -127,8 +131,9 @@ jobs:
           envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM} ${DISABLE_UPDATE_CHECK}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${{ steps.deb-version.outputs.debVersion }}
+          mv pkgdir "cryptomator_${DEB_VERSION}"
         env:
+          DEB_VERSION: ${{ steps.deb-version.outputs.debVersion }}
           SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
           VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
@@ -174,4 +179,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
         run: |
           artifacts=$(ls | grep cryptomator*.deb)
-          gh release upload ${{ github.ref_name }} $artifacts
+          gh release upload "${GITHUB_REF_NAME}" $artifacts

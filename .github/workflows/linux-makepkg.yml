@@ -117,6 +117,7 @@ jobs:
         with:
           repository: 'cryptomator/aur'
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+          persist-credentials: true # needed for git push below
       - name: Create build user
         run: |
           useradd -m builder
