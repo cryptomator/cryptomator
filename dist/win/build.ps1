@@ -30,6 +30,19 @@ function Invoke-CommandWithExitCheck {
 	}
 }
 
+function New-LicenseTemplate {
+	param (
+		[string]$Destination,
+		[bool]$WithWinFsp
+	)
+
+	(Get-Content -Raw "$PSScriptRoot\..\common\licenseTemplate.template.ftl") `
+		-replace '###FONT_NAME###', 'Segoe UI' `
+		-replace '###FONT_SIZE###', '16' `
+		-replace '###WITH_WINFSP###', $WithWinFsp.ToString().ToLower() `
+		| Set-Content -NoNewline -Encoding ascii $Destination
+}
+
 function Main {
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -201,6 +214,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 #Create RTF license for msi
+New-LicenseTemplate -Destination "$buildDir\resources\licenseTemplate.ftl" -WithWinFsp $false
 Invoke-CommandWithExitCheck -Command `
     "../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
     "-Dlicense.thirdPartyFilename=license.rtf", `
@@ -247,6 +261,7 @@ Invoke-CommandWithExitCheck -Command `
     )
 
 #Create RTF license for bundle
+New-LicenseTemplate -Destination "$buildDir\bundle\resources\licenseTemplate.ftl" -WithWinFsp $true
 Invoke-CommandWithExitCheck -Command `
 	"../../mvnw.cmd" -Arguments @("-B", "-f", "$buildDir/../../pom.xml", "license:add-third-party", `
 	"-Dlicense.thirdPartyFilename=license.rtf", `

@@ -234,6 +234,10 @@ jobs:
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NUM}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NUM}|g" Cryptomator.app/Contents/Info.plist
           cp $RUNNER_TEMP/app.provisionprofile Cryptomator.app/Contents/embedded.provisionprofile
+      - name: Create license template for dmg
+        run: >
+          sed -e 's|###FONT_NAME###|Helvetica|g' -e 's|###FONT_SIZE###|24|g' -e 's|###WITH_WINFSP###|false|g'
+          dist/common/licenseTemplate.template.ftl > dist/mac/dmg/resources/licenseTemplate.ftl
       - name: Generate license for dmg
         run: >
           ./mvnw -B license:add-third-party

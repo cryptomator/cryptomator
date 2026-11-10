@@ -146,6 +146,8 @@ sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Inf
 cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
 # generate license
+sed -e 's|###FONT_NAME###|Helvetica|g' -e 's|###FONT_SIZE###|24|g' -e 's|###WITH_WINFSP###|false|g' \
+    ../../common/licenseTemplate.template.ftl > resources/licenseTemplate.ftl
 ../../../mvnw -B -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
     -Dlicense.outputDirectory=dist/mac/dmg/resources \

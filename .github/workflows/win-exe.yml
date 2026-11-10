@@ -287,6 +287,14 @@ jobs:
                   jar --file="$jarFile" --update $(Resolve-Path -Relative -Path $_)
               }
           }
+      - name: Create license template for MSI
+        run: |
+          (Get-Content -Raw dist/common/licenseTemplate.template.ftl) `
+            -replace '###FONT_NAME###', 'Segoe UI' `
+            -replace '###FONT_SIZE###', '16' `
+            -replace '###WITH_WINFSP###', 'false' `
+            | Set-Content -NoNewline -Encoding ascii dist/win/resources/licenseTemplate.ftl
+        shell: pwsh
       - name: Generate license for MSI
         run: >
           ./mvnw -B license:add-third-party
@@ -403,6 +411,14 @@ jobs:
           java-package: ${{ matrix.java-package }}
           check-latest: true
           cache: 'maven'
+      - name: Create license template for exe
+        run: |
+          (Get-Content -Raw dist/common/licenseTemplate.template.ftl) `
+            -replace '###FONT_NAME###', 'Segoe UI' `
+            -replace '###FONT_SIZE###', '16' `
+            -replace '###WITH_WINFSP###', 'true' `
+            | Set-Content -NoNewline -Encoding ascii dist/win/bundle/resources/licenseTemplate.ftl
+        shell: pwsh
       - name: Generate license for exe
         run: >
           ./mvnw -B license:add-third-party
