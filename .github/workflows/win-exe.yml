@@ -102,7 +102,7 @@ jobs:
           - arch: x64
             os: windows-latest
             java-dist: 'temurin'
-            java-version: '27.0.0+35'
+            java-version: '27.0.1+0'
             java-package: 'jdk'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -371,7 +371,7 @@ jobs:
             os: windows-latest
             executable-suffix: x64
             java-dist: 'temurin'
-            java-version: '27.0.0+35'
+            java-version: '27.0.1+0'
             java-package: 'jdk'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
