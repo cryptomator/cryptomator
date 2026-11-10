@@ -41,7 +41,7 @@
 		<cryptomator.integrations.linux.version>1.8.0</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>7.0.0</cryptomator.fuse.version>
 		<!-- on every bump, check the entitlements and provisioning profiles in dist/mac against the README of fskit-nio-adapter at that tag. Also run MounterTest on a Mac, because CI never runs its check that the adapter class Mounter matches by name still exists -->
-		<cryptomator.fskit.version>0.4.0</cryptomator.fskit.version>
+		<cryptomator.fskit.version>0.5.1</cryptomator.fskit.version>
 
 		<cryptomator.webdav.version>3.0.3</cryptomator.webdav.version>
 		<cryptomator.webdav-servlet.version>1.2.15</cryptomator.webdav-servlet.version>
