@@ -181,6 +181,8 @@ jobs:
           JMOD_PATHS: ${{ steps.jep-493-check.outputs.jmod_paths }}
       - name: Remove distrusted CA certificates from runtime
         run: ${JAVA_HOME}/bin/java dist/common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
+      - name: Add missing UTF-8.zh font sequences to runtime
+        run: ${JAVA_HOME}/bin/java dist/win/AddChineseFontConfigSequences.java runtime
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
