@@ -74,7 +74,8 @@ jobs:
         # using envsubst instead of yq to keep linebreaks
         run: |
           cp -r -f build-scripts/dist/linux/flatpak/* .
-          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
+          export COPYRIGHT_END_YEAR=$(date +%Y)
+          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE $COPYRIGHT_END_YEAR' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
         env:
           FLATPAK_VERSION: ${{ needs.get-version.outputs.semVerNum }}
           FLATPAK_REVISION: 1
@@ -234,7 +235,8 @@ jobs:
           cp -r -f cryptomator/dist/linux/flatpak/* .
           cp -r -f mvn-src-x64/* .
           cp -r -f mvn-src-aarch64/* .
-          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
+          export COPYRIGHT_END_YEAR=$(date +%Y)
+          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE $COPYRIGHT_END_YEAR' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
           yq -i 'del(.modules[] | select(.name == "cryptomator") | .build-options.build-args)' org.cryptomator.Cryptomator.yaml
           yq -i '(.modules[] | select(.name == "cryptomator") | .sources) += ["maven-dependencies.yaml", "javafx-maven-dependencies-x86_64.yaml", "javafx-maven-dependencies-aarch64.yaml"]' org.cryptomator.Cryptomator.yaml
         env:

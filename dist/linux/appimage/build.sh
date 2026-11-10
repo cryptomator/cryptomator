@@ -84,7 +84,7 @@ ${JAVA_HOME}/bin/jpackage \
     --vendor "Skymatic GmbH" \
     --java-options "--enable-preview" \
     --java-options "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator" \
-    --copyright "(C) 2016 - 2026 Skymatic GmbH" \
+    --copyright "(C) 2016 - $(date +%Y) Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \
@@ -99,6 +99,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.integrationsLinux.trayIconsDir=\"@{appdir}/usr/share/icons/hicolor/symbolic/apps\"" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
+    --java-options "-Dcryptomator.buildTimestamp=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"" \
     --java-options "-Dcryptomator.networking.truststore.p12Path=\"/etc/cryptomator/certs.p12\"" \
     --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log" \
     --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \

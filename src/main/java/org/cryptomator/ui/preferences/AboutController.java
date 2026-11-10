@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Instant;
+import java.time.ZoneOffset;
 
 @PreferencesScoped
 public class AboutController implements FxController {
@@ -19,6 +21,7 @@ public class AboutController implements FxController {
 
 	private final String thirdPartyLicenseText;
 	private final String fullApplicationVersion;
+	private final int copyrightEndYear;
 
 	@Inject
 	AboutController(UpdateChecker updateChecker, Environment environment) {
@@ -26,6 +29,8 @@ public class AboutController implements FxController {
 		StringBuilder sb = new StringBuilder(environment.getAppVersion());
 		environment.getBuildNumber().ifPresent(s -> sb.append(" (").append(s).append(')'));
 		this.fullApplicationVersion = sb.toString();
+		// builds without timestamp (e.g. run from the IDE) are considered to be built just now
+		this.copyrightEndYear = environment.getBuildTimestamp().orElseGet(Instant::now).atZone(ZoneOffset.UTC).getYear();
 	}
 
 	private static String loadThirdPartyLicenseFile() {
@@ -45,5 +50,9 @@ public class AboutController implements FxController {
 
 	public String getFullApplicationVersion() {
 		return fullApplicationVersion;
+	}
+
+	public int getCopyrightEndYear() {
+		return copyrightEndYear;
 	}
 }
