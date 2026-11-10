@@ -124,7 +124,7 @@ modules:
         --java-options '-Djava.net.useSystemProxies=true'
         --java-options "-Dcryptomator.appVersion='${VERSION}'"
         --java-options "-Dcryptomator.buildNumber='flatpak-${REVISION_NO}'"
-        --java-options "-Dcryptomator.buildTimestamp='$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+        --java-options "-Dcryptomator.buildTimestamp='$BUILD_TIMESTAMP'"
         --java-options '-Dcryptomator.ipcSocketPath='@{userhome}/.config/Cryptomator/ipc.socket''
         --java-options '-Dcryptomator.adminConfigPath='/run/host/etc/cryptomator/config.properties''
         --java-options '-Dcryptomator.logDir='@{userhome}/.local/share/Cryptomator/logs''

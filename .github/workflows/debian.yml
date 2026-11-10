@@ -129,7 +129,8 @@ jobs:
           export RFC2822_TIMESTAMP=`date --rfc-2822`
           export DISABLE_UPDATE_CHECK=${{ inputs.dput }}
           export COPYRIGHT_END_YEAR=`date +%Y`
-          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM} ${DISABLE_UPDATE_CHECK} ${COPYRIGHT_END_YEAR}' < dist/linux/debian/rules > pkgdir/debian/rules
+          export BUILD_TIMESTAMP=`date -u +%Y-%m-%dT%H:%M:%SZ`
+          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM} ${DISABLE_UPDATE_CHECK} ${COPYRIGHT_END_YEAR} ${BUILD_TIMESTAMP}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           envsubst '${COPYRIGHT_END_YEAR}' < dist/linux/debian/copyright > pkgdir/debian/copyright
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries

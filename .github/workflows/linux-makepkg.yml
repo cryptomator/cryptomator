@@ -63,7 +63,8 @@ jobs:
         run: |
           export SOURCES="${SOURCES_1}${GITHUB_WORKSPACE}${SOURCES_2}"
           export COPYRIGHT_END_YEAR=$(date +%Y)
-          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA $COPYRIGHT_END_YEAR' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
+          export BUILD_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA $COPYRIGHT_END_YEAR $BUILD_TIMESTAMP' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
         env:
           PKG_VERSION: ${{ needs.get-version.outputs.semVerNum }}
           PKG_RELEASE: 1
@@ -159,7 +160,8 @@ jobs:
       - name: Prepare PKGBUILD
         run: |
           export COPYRIGHT_END_YEAR=$(date +%Y)
-          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA $COPYRIGHT_END_YEAR' < PKGBUILD.template > PKGBUILD
+          export BUILD_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA $COPYRIGHT_END_YEAR $BUILD_TIMESTAMP' < PKGBUILD.template > PKGBUILD
           sudo -u builder makepkg --printsrcinfo > .SRCINFO
         env:
           PKG_VERSION: ${{ needs.get-version.outputs.semVerNum }}
