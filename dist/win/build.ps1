@@ -86,7 +86,7 @@ Write-Host "`$buildDir=$buildDir"
 Write-Host "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
-$publishTimestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
+$publishTimestamp = [DateTime]::UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", [Globalization.CultureInfo]::InvariantCulture)
 
 # compile
 Invoke-CommandWithExitCheck -Command `
