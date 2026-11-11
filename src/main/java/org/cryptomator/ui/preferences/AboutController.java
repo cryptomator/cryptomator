@@ -29,8 +29,8 @@ public class AboutController implements FxController {
 		StringBuilder sb = new StringBuilder(environment.getAppVersion());
 		environment.getBuildNumber().ifPresent(s -> sb.append(" (").append(s).append(')'));
 		this.fullApplicationVersion = sb.toString();
-		// builds without timestamp (e.g. run from the IDE) are considered to be built just now
-		this.copyrightEndYear = environment.getBuildTimestamp().orElseGet(Instant::now).atZone(ZoneOffset.UTC).getYear();
+		// versions without timestamp (e.g. run from the IDE) are considered to be published just now
+		this.copyrightEndYear = environment.getPublishTimestamp().orElseGet(Instant::now).atZone(ZoneOffset.UTC).getYear();
 	}
 
 	private static String loadThirdPartyLicenseFile() {

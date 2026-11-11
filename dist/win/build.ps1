@@ -86,7 +86,7 @@ Write-Host "`$buildDir=$buildDir"
 Write-Host "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
 $copyright = "(C) $CopyrightStartYear - $((Get-Date).Year) $Vendor"
-$buildTimestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
+$publishTimestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
 # compile
 Invoke-CommandWithExitCheck -Command `
@@ -187,7 +187,7 @@ $javaOptions = @(
 "--java-options", "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=`"@{appdata}/$AppName/windowsHelloKeychain.json`""
 "--java-options", "-Dcryptomator.showTrayIcon=true"
 "--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
-"--java-options", "-Dcryptomator.buildTimestamp=`"$buildTimestamp`""
+"--java-options", "-Dcryptomator.publishTimestamp=`"$publishTimestamp`""
 "--java-options", "-Dcryptomator.disableUpdateCheck=false"
 "--java-options", "-Dcryptomator.hub.enableTrustOnFirstUse=true"
 )

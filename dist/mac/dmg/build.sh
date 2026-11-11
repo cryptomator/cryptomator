@@ -134,7 +134,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
-    --java-options "-Dcryptomator.buildTimestamp=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"" \
+    --java-options "-Dcryptomator.publishTimestamp=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"" \
     --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \
     --resource-dir ../resources

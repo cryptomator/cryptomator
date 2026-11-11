@@ -86,7 +86,7 @@ build() {
     --java-options "-Dcryptomator.adminConfigPath=\"/etc/cryptomator/config.properties\"" \
     --java-options "-Dcryptomator.appVersion=\"${pkgver//_/-}\"" \
     --java-options "-Dcryptomator.buildNumber=\"aur-${pkgrel}\"" \
-    --java-options "-Dcryptomator.buildTimestamp=\"$BUILD_TIMESTAMP\"" \
+    --java-options "-Dcryptomator.publishTimestamp=\"$PUBLISH_TIMESTAMP\"" \
     --java-options "-Dcryptomator.disableUpdateCheck=true" \
     --java-options "-Dcryptomator.integrationsLinux.autoStartCmd=\"cryptomator\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \

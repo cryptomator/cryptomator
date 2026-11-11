@@ -34,7 +34,7 @@ public class Environment {
 	private static final String MIN_PW_LENGTH_PROP_NAME = "cryptomator.minPwLength";
 	private static final String APP_VERSION_PROP_NAME = "cryptomator.appVersion";
 	private static final String BUILD_NUMBER_PROP_NAME = "cryptomator.buildNumber";
-	private static final String BUILD_TIMESTAMP_PROP_NAME = "cryptomator.buildTimestamp";
+	private static final String PUBLISH_TIMESTAMP_PROP_NAME = "cryptomator.publishTimestamp";
 	private static final String PLUGIN_DIR_PROP_NAME = "cryptomator.pluginDir";
 	private static final String TRAY_ICON_PROP_NAME = "cryptomator.showTrayIcon";
 	private static final String DISABLE_UPDATE_CHECK_PROP_NAME = "cryptomator.disableUpdateCheck";
@@ -136,12 +136,12 @@ public class Environment {
 	}
 
 	/**
-	 * Returns the time this app was built, as defined in the {@value BUILD_TIMESTAMP_PROP_NAME} property in ISO-8601 format (e.g. {@code 2026-11-10T20:33:00Z}).
+	 * Returns the time this app version was published, as defined in the {@value PUBLISH_TIMESTAMP_PROP_NAME} property in ISO-8601 format (e.g. {@code 2026-11-10T20:33:00Z}).
 	 *
-	 * @return Build timestamp or empty, if undefined
+	 * @return Publish timestamp or empty, if undefined
 	 */
-	public Optional<Instant> getBuildTimestamp() {
-		return Optional.ofNullable(System.getProperty(BUILD_TIMESTAMP_PROP_NAME)).map(Instant::parse);
+	public Optional<Instant> getPublishTimestamp() {
+		return Optional.ofNullable(System.getProperty(PUBLISH_TIMESTAMP_PROP_NAME)).map(Instant::parse);
 	}
 
 	/**
