@@ -60,6 +60,11 @@
        IncludeMinimum="$(var.JpUpgradeVersionOnlyDetectDowngrade)" />
     </ns0:Upgrade>
 
+    <!-- Overwrite all files regardless of version (default is "omus"). Component GUIDs are stable across releases, so during an upgrade, costing (which runs before RemoveExistingProducts)
+         would skip every component whose installed keyfile has a higher version (e.g. JDK DLLs after a JDK downgrade), and the subsequent removal of the old product then deletes those files.
+         Caution: "a" also overwrites newer files with older ones. This is only safe as long as all files are private to INSTALLDIR; never ship shared files (e.g. into System32 or via merge modules) with this setting. -->
+    <ns0:Property Id="REINSTALLMODE" Value="amus" />
+
     <?ifndef JpAllowUpgrades ?>
     <ns0:CustomAction Id="JpDisallowUpgrade" Error="!(loc.DisallowUpgradeErrorMessage)" />
     <?endif?>
@@ -97,6 +102,10 @@
             <ns0:Extension Id="c9u" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
           </ns0:ProgId>
         </ns0:Component>
+        <!-- Install type marker for the in-app updater, see INSTALLTYPE property -->
+        <ns0:Component Bitness="always64" Id="InstallTypeMarker">
+          <ns0:RegistryValue Root="HKLM" Key="SOFTWARE\Skymatic GmbH\Cryptomator" Name="InstallType" Type="string" Value="[INSTALLTYPE]" KeyPath="yes" />
+        </ns0:Component>
     </ns0:DirectoryRef>
 
     <!-- Owner and ACLs of the admin config dir are set by the SecureAdminConfig custom action before InstallFiles, because the dir may already exist (e.g. planted by a standard user).
@@ -122,6 +131,7 @@
       <ns0:ComponentRef Id="nonStartingProgID"/>
       <ns0:ComponentRef Id="AdminConfigDir"/>
       <ns0:ComponentRef Id="AdminConfigFile"/>
+      <ns0:ComponentRef Id="InstallTypeMarker"/>
     </ns0:Feature>
 
     <ns0:CustomAction Id="JpSetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
@@ -146,6 +156,16 @@
 
     <!-- Property for controlling update check behavior (can be set via command line) -->
     <ns0:Property Id="DISABLEUPDATECHECK" Secure="yes" />
+
+    <!-- Install type, read by the in-app updater: Only "EXE" and "MSI" enable self-updates. Package managers opt out by passing e.g. INSTALLTYPE=winget via command line.
+         Resolution order: 1. INSTALLTYPE from command line, 2. value of a previous installation, unless it is EXE or MSI, 3. DEFAULTINSTALLTYPE (overwritten by the bundle) -->
+    <ns0:Property Id="INSTALLTYPE" Secure="yes" />
+    <ns0:Property Id="DEFAULTINSTALLTYPE" Value="MSI" Secure="yes" />
+    <ns0:Property Id="PREVIOUSINSTALLTYPE" Secure="yes">
+      <ns0:RegistrySearch Id="PreviousInstallTypeSearch" Root="HKLM" Key="SOFTWARE\Skymatic GmbH\Cryptomator" Name="InstallType" Type="raw" Bitness="always64" />
+    </ns0:Property>
+    <ns0:SetProperty Id="INSTALLTYPE" Action="KeepPreviousInstallType" Value="[PREVIOUSINSTALLTYPE]" After="AppSearch" Sequence="both" Condition="NOT INSTALLTYPE AND PREVIOUSINSTALLTYPE AND NOT (PREVIOUSINSTALLTYPE ~= &quot;EXE&quot; OR PREVIOUSINSTALLTYPE ~= &quot;MSI&quot;)" />
+    <ns0:SetProperty Id="INSTALLTYPE" Action="SetDefaultInstallType" Value="[DEFAULTINSTALLTYPE]" After="KeepPreviousInstallType" Sequence="both" Condition="NOT INSTALLTYPE" />
 
     <!-- Disable user config -->
     <ns0:SetProperty Id="DisableUserConfig" Value="&quot;[INSTALLDIR]disableUserConfig.bat&quot;" Sequence="execute" Before="DisableUserConfig" />

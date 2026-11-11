@@ -173,6 +173,9 @@ $javaOptions = @(
 "--java-options", "-Dcryptomator.showTrayIcon=true"
 "--java-options", "-Dcryptomator.buildNumber=`"msi-$revisionNo`""
 "--java-options", "-Dcryptomator.disableUpdateCheck=false"
+"--java-options", "-Dcryptomator.updateMechanism=org.cryptomator.windows.update.InstallerUpdateMechanism"
+"--java-options", "-Dcryptomator.integrationsWin.updateDurableIdentityEku=1.3.6.1.4.1.311.97.986645502.209118791.449271898.355477593"
+"--java-options", "-Dcryptomator.integrationsWin.updateRootCaThumbprint=F40042E2E5F7E8EF8189FED15519AECE42C3BFA2"
 "--java-options", "-Dcryptomator.hub.enableTrustOnFirstUse=true"
 )
 
