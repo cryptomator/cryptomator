@@ -76,7 +76,7 @@ build() {
     --dest . \
     --name cryptomator \
     --vendor "Skymatic GmbH" \
-    --copyright "(C) 2016 - 2026 Skymatic GmbH" \
+    --copyright "(C) 2016 - $COPYRIGHT_END_YEAR Skymatic GmbH" \
     --java-options "--enable-preview" \
     --java-options '--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator' \
     --java-options "-Xss5m" \
@@ -86,6 +86,7 @@ build() {
     --java-options "-Dcryptomator.adminConfigPath=\"/etc/cryptomator/config.properties\"" \
     --java-options "-Dcryptomator.appVersion=\"${pkgver//_/-}\"" \
     --java-options "-Dcryptomator.buildNumber=\"aur-${pkgrel}\"" \
+    --java-options "-Dcryptomator.publishTimestamp=\"$PUBLISH_TIMESTAMP\"" \
     --java-options "-Dcryptomator.disableUpdateCheck=true" \
     --java-options "-Dcryptomator.integrationsLinux.autoStartCmd=\"cryptomator\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"@{userhome}/.config/Cryptomator/ipc.socket\"" \

@@ -195,7 +195,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --copyright "(C) 2016 - $(date +%Y) Skymatic GmbH"
           --app-version "${VERSION_NUM}.${REVISION_NUM}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.win,org.cryptomator.integrations.win,org.cryptomator.desktop"
@@ -213,6 +213,7 @@ jobs:
           --java-options "-Dcryptomator.loopbackAlias=\"cryptomator-vault\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"msi-${REVISION_NUM}\""
+          --java-options "-Dcryptomator.publishTimestamp=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"@{appdata}/Cryptomator/keychain.json;@{userhome}/AppData/Roaming/Cryptomator/keychain.json\""
           --java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=\"@{appdata}/Cryptomator/windowsHelloKeychain.json\""
@@ -287,6 +288,15 @@ jobs:
                   jar --file="$jarFile" --update $(Resolve-Path -Relative -Path $_)
               }
           }
+      - name: Create license template for MSI
+        run: |
+          (Get-Content -Raw dist/common/licenseTemplate.template.ftl) `
+            -replace '###FONT_NAME###', 'Segoe UI' `
+            -replace '###FONT_SIZE###', '16' `
+            -replace '###WITH_WINFSP###', 'false' `
+            -replace '###COPYRIGHT_END_YEAR###', (Get-Date).Year `
+            | Set-Content -NoNewline -Encoding ascii dist/win/resources/licenseTemplate.ftl
+        shell: pwsh
       - name: Generate license for MSI
         run: >
           ./mvnw -B license:add-third-party
@@ -317,7 +327,7 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --copyright "(C) 2016 - $(date +%Y) Skymatic GmbH"
           --app-version "${VERSION_NUM}.${REVISION_NUM}"
           --win-menu
           --win-dir-chooser
@@ -403,6 +413,15 @@ jobs:
           java-package: ${{ matrix.java-package }}
           check-latest: true
           cache: 'maven'
+      - name: Create license template for exe
+        run: |
+          (Get-Content -Raw dist/common/licenseTemplate.template.ftl) `
+            -replace '###FONT_NAME###', 'Segoe UI' `
+            -replace '###FONT_SIZE###', '16' `
+            -replace '###WITH_WINFSP###', 'true' `
+            -replace '###COPYRIGHT_END_YEAR###', (Get-Date).Year `
+            | Set-Content -NoNewline -Encoding ascii dist/win/bundle/resources/licenseTemplate.ftl
+        shell: pwsh
       - name: Generate license for exe
         run: >
           ./mvnw -B license:add-third-party
@@ -434,7 +453,7 @@ jobs:
           -define BundleName="Cryptomator"
           -define BundleVersion="${VERSION_NUM}.${REVISION_NUM}"
           -define BundleVendor="Skymatic GmbH"
-          -define BundleCopyright="(C) 2016 - 2026 Skymatic GmbH"
+          -define BundleCopyright="(C) 2016 - $(date +%Y) Skymatic GmbH"
           -define AboutUrl="https://cryptomator.org"
           -define HelpUrl="https://cryptomator.org/contact"
           -define UpdateUrl="https://cryptomator.org/downloads/"

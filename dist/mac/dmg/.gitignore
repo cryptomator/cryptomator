@@ -4,6 +4,7 @@ runtime/
 dmg/
 *.dmg
 license.rtf
+licenseTemplate.ftl
 openjfx-jmods.zip
 *.jmod
 Cryptomator.entitlements
