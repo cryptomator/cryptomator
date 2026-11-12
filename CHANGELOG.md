@@ -12,11 +12,19 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Added
 * Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later
 
+### Changed
+* macOS: The tray menu is now a native menu bar item instead of being rendered via AWT
+* Touch ID: Fall back to the device password when biometrics are unavailable
+* Updated dependencies:
+  - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
+  - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.0
+
 ### Fixed
 * Fixed background threads piling up with every unlock and lock of a vault
 * Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
 * Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
 * Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu
+* macOS: Fixed clicking a vault entry in the tray menu closing the menu instead of opening its submenu ([#1977](https://github.com/cryptomator/cryptomator/issues/1977))
 
 
 ## [1.19.6](https://github.com/cryptomator/cryptomator/releases/1.19.6) - 2026-10-31
