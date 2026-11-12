@@ -16,6 +16,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * macOS: The tray menu is now a native menu bar item instead of being rendered via AWT
 * Touch ID: Fall back to the device password when biometrics are unavailable
 * Updated dependencies:
+  - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
   - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.0
 
 ### Fixed

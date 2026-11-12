@@ -35,7 +35,7 @@
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.11.1</cryptomator.cryptofs.version>
 		<cryptomator.cryptolib.version>2.4.0</cryptomator.cryptolib.version>
-		<cryptomator.integrations.version>1.10.0</cryptomator.integrations.version>
+		<cryptomator.integrations.version>1.10.1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.6.2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.7.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.8.0</cryptomator.integrations.linux.version>
