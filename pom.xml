@@ -36,7 +36,7 @@
 		<cryptomator.cryptofs.version>2.12.0</cryptomator.cryptofs.version>
 		<cryptomator.cryptolib.version>2.4.0</cryptomator.cryptolib.version>
 		<cryptomator.integrations.version>1.10.1</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.6.2</cryptomator.integrations.win.version>
+		<cryptomator.integrations.win.version>1.7.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.7.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.8.0</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>7.0.1</cryptomator.fuse.version>
@@ -48,14 +48,14 @@
 
 		<!-- 3rd party dependencies -->
 		<caffeine.version>3.3.1</caffeine.version>
-		<commons-lang3.version>3.21.0</commons-lang3.version>
+		<commons-lang3.version>3.22.0</commons-lang3.version>
 		<dagger.version>2.60.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.21.8</jackson.version>
 		<javafx.version>25.0.5</javafx.version>
 		<jwt.version>4.6.2</jwt.version>
-		<nimbus-jose.version>10.5</nimbus-jose.version>
-		<logback.version>1.6.5</logback.version>
+		<nimbus-jose.version>10.10</nimbus-jose.version>
+		<logback.version>1.6.6</logback.version>
 		<slf4j.version>2.0.20</slf4j.version>
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
@@ -68,14 +68,14 @@
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
 		<dependency-check.version>13.0.0</dependency-check.version>
-		<jacoco.version>0.8.15</jacoco.version>
-		<license-generator.version>2.7.1</license-generator.version>
+		<jacoco.version>0.8.16</jacoco.version>
+		<license-generator.version>2.9.0</license-generator.version>
 		<mvn-compiler.version>3.16.0</mvn-compiler.version>
 		<mvn-resources.version>3.5.0</mvn-resources.version>
 		<mvn-dependency.version>3.11.0</mvn-dependency.version>
 		<mvn-surefire.version>3.6.1</mvn-surefire.version>
 		<mvn-jar.version>3.5.1</mvn-jar.version>
-		<mvn-exec.version>3.6.4</mvn-exec.version>
+		<mvn-exec.version>3.7.0</mvn-exec.version>
 
 		<!-- Property used by surefire to determine jacoco engine -->
 		<surefire.jacoco.args></surefire.jacoco.args>
