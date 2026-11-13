@@ -40,6 +40,7 @@ public class SimpleDialog {
 				builder.sceneFactory, builder.resourceBundle);
 
 		dialogStage.setScene(loaderFactory.createScene(FxmlFile.SIMPLE_DIALOG));
+		dialogStage.sizeToScene();
 	}
 
 	public void showAndWait() {
