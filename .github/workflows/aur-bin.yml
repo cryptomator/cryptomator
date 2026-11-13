@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-version]
     container:
-      image: archlinux:base-devel
+      image: archlinux:base-devel@sha256:624bdc7fc6615155d67bc34cf7146c0c9fd0e3c92943977da63a630e4ca49c30
     env:
       SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
       PKGDEST: ${{ github.workspace }}/pkgdest
@@ -40,6 +40,7 @@ jobs:
         with:
           repository: 'cryptomator/aur-bin'
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+          persist-credentials: true # needed for git push below
       - name: Create build user
         run: |
           useradd -m builder
@@ -105,7 +106,7 @@ jobs:
           DIST_VERSION: ${{ steps.pkgrel.outputs.dist-version }}
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        uses: rtCamp/action-slack-notify@06cc13f74fa8d4d2296c09455d91e9453e4025f4 # v2.4.1
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'

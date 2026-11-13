@@ -26,8 +26,8 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '26.0.1+8'
-  DEB_BUILD_DEPENDS: 'debhelper (>=10), coffeelibs-jdk-26 (>= 26.0.1+8-0ppa1), libgtk-3-0 (>= 3.20.0), libxxf86vm1, libgl1'
+  JAVA_VERSION: '27.0.1+0'
+  DEB_BUILD_DEPENDS: 'debhelper (>=10), coffeelibs-jdk-27 (>= 27.0.1.0.3+1-0ppa1), libgtk-3-0 (>= 3.20.0), libxxf86vm1, libgl1'
   OPENJFX_JMODS_AMD64: 'https://download2.gluonhq.com/openjfx/25.0.5/openjfx-25.0.5_linux-x64_bin-jmods.zip'
   OPENJFX_JMODS_AMD64_HASH: 'fbb768a16c23a453c420ba55bbc2a689c708bc6456ef77c1e4f69823b95f9e9f'
   OPENJFX_JMODS_AARCH64: 'https://download2.gluonhq.com/openjfx/25.0.5/openjfx-25.0.5_linux-aarch64_bin-jmods.zip'
@@ -50,14 +50,18 @@ jobs:
       INPUT_PPAVER: ${{ inputs.ppaver }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - id: deb-version
         name: Determine deb-version
         run: |
           if [ -n "${INPUT_PPAVER}" ]; then
             echo "debVersion=${INPUT_PPAVER}" >> "$GITHUB_OUTPUT"
           else
-            echo "debVersion=${{needs.get-version.outputs.semVerStr}}" >> "$GITHUB_OUTPUT"
+            echo "debVersion=${SEMVER_STR}" >> "$GITHUB_OUTPUT"
           fi
+        env:
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
       - name: Install build tools
         run: |
           sudo add-apt-repository -y ppa:coffeelibs/openjdk
@@ -67,7 +71,7 @@ jobs:
         env:
           DEB_BUILD_DEPENDS: ${{ env.DEB_BUILD_DEPENDS }}
       - name: Setup Java
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -116,17 +120,23 @@ jobs:
           cp -r dist/linux/common/ pkgdir
           cp dist/common/RemoveDistrustedCaCerts.java pkgdir/common
           cp target/cryptomator-*.jar pkgdir/mods
-          tar -cJf cryptomator_${{ steps.deb-version.outputs.debVersion }}.orig.tar.xz -C pkgdir .
+          tar -cJf "cryptomator_${DEB_VERSION}.orig.tar.xz" -C pkgdir .
+        env:
+          DEB_VERSION: ${{ steps.deb-version.outputs.debVersion }}
       - name: Patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
           export RFC2822_TIMESTAMP=`date --rfc-2822`
           export DISABLE_UPDATE_CHECK=${{ inputs.dput }}
-          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM} ${DISABLE_UPDATE_CHECK}' < dist/linux/debian/rules > pkgdir/debian/rules
+          export COPYRIGHT_END_YEAR=`date +%Y`
+          export PUBLISH_TIMESTAMP=`date -u +%Y-%m-%dT%H:%M:%SZ`
+          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM} ${DISABLE_UPDATE_CHECK} ${COPYRIGHT_END_YEAR} ${PUBLISH_TIMESTAMP}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
+          envsubst '${COPYRIGHT_END_YEAR}' < dist/linux/debian/copyright > pkgdir/debian/copyright
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${{ steps.deb-version.outputs.debVersion }}
+          mv pkgdir "cryptomator_${DEB_VERSION}"
         env:
+          DEB_VERSION: ${{ steps.deb-version.outputs.debVersion }}
           SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
           VERSION_NUM: ${{ needs.get-version.outputs.semVerNum }}
           REVISION_NUM: ${{ needs.get-version.outputs.revNum }}
@@ -151,7 +161,7 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: linux-deb-package
           path: |
@@ -172,4 +182,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
         run: |
           artifacts=$(ls | grep cryptomator*.deb)
-          gh release upload ${{ github.ref_name }} $artifacts
+          gh release upload "${GITHUB_REF_NAME}" $artifacts

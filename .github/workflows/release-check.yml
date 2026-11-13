@@ -12,7 +12,7 @@ defaults:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: 26
+  JAVA_VERSION: 27
 
 permissions:
   contents: read
@@ -23,8 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Setup Java
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -48,7 +50,12 @@ jobs:
       - name: Validate release in org.cryptomator.Cryptomator.metainfo.xml file
         if: ${{ ! (contains(github.event.head_commit.message, '[skip metadata check]') || contains(github.event.head_commit.message, '[metadata check skip]')) }}
         run: |
-          if ! grep -q "<release date=\".*\" version=\"${{ steps.validate-pom-version.outputs.semVerStr }}\">" dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml; then
+          if ! grep -q "<release date=\".*\" version=\"${SEM_VER_STR}\">" dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml; then
             echo "Release not set in dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml"
             exit 1
           fi
+        env:
+          SEM_VER_STR: ${{ steps.validate-pom-version.outputs.semVerStr }}
+
+  check-urls:
+    uses: ./.github/workflows/check-urls.yml

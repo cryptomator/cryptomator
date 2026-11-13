@@ -24,7 +24,7 @@ rm -rf runtime dmg *.app *.dmg
 # set variables
 APP_NAME="Cryptomator"
 VENDOR="Skymatic GmbH"
-COPYRIGHT_YEARS="2016 - 2026"
+COPYRIGHT_YEARS="2016 - $(date +%Y)"
 PACKAGE_IDENTIFIER="org.cryptomator"
 MAIN_JAR_GLOB="cryptomator-*.jar"
 MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
@@ -120,7 +120,6 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Djava.net.useSystemProxies=true" \
-    --java-options "-Dapple.awt.enableTemplateImages=true" \
     --java-options "-Dsun.java2d.metal=true" \
     --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
     --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\"" \
@@ -134,6 +133,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
+    --java-options "-Dcryptomator.publishTimestamp=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"" \
     --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true" \
     --mac-package-identifier ${PACKAGE_IDENTIFIER} \
     --resource-dir ../resources
@@ -146,6 +146,8 @@ sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" ${APP_NAME}.app/Contents/Inf
 cp ../embedded.provisionprofile ${APP_NAME}.app/Contents/
 
 # generate license
+sed -e 's|###FONT_NAME###|Helvetica|g' -e 's|###FONT_SIZE###|24|g' -e 's|###WITH_WINFSP###|false|g' -e "s|###COPYRIGHT_END_YEAR###|$(date +%Y)|g" \
+    ../../common/licenseTemplate.template.ftl > resources/licenseTemplate.ftl
 ../../../mvnw -B -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
     -Dlicense.outputDirectory=dist/mac/dmg/resources \

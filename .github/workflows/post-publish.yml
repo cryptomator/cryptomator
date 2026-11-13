@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify about DEB build
-        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        uses: rtCamp/action-slack-notify@06cc13f74fa8d4d2296c09455d91e9453e4025f4 # v2.4.1
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'
@@ -23,7 +23,7 @@ jobs:
           SLACK_FOOTER: ''
           MSG_MINIMAL: true
       - name: Notify about latest-version update
-        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        uses: rtCamp/action-slack-notify@06cc13f74fa8d4d2296c09455d91e9453e4025f4 # v2.4.1
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'
@@ -64,7 +64,11 @@ jobs:
     uses: ./.github/workflows/av-whitelist.yml
     with:
       url: ${{ needs.get-asset-urls.outputs.msi-url }}
-    secrets: inherit
+    secrets:
+      ALLOWLIST_KASPERSKY_USERNAME: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
+      ALLOWLIST_KASPERSKY_PASSWORD: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+      ALLOWLIST_AVAST_USERNAME: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
+      ALLOWLIST_AVAST_PASSWORD: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
 
   allowlist-exe-x64:
     needs: [get-asset-urls, allowlist-msi-x64]
@@ -72,7 +76,11 @@ jobs:
     uses: ./.github/workflows/av-whitelist.yml
     with:
       url: ${{ needs.get-asset-urls.outputs.exe-url }}
-    secrets: inherit
+    secrets:
+      ALLOWLIST_KASPERSKY_USERNAME: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
+      ALLOWLIST_KASPERSKY_PASSWORD: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+      ALLOWLIST_AVAST_USERNAME: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
+      ALLOWLIST_AVAST_PASSWORD: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
 
   check-release:
     name: Analyzes the release for certain properties
@@ -107,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        uses: rtCamp/action-slack-notify@06cc13f74fa8d4d2296c09455d91e9453e4025f4 # v2.4.1
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'

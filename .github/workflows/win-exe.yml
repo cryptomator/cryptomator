@@ -31,6 +31,21 @@ on:
       sha256-exe:
         description: "SHA256 sum of the x64 exe"
         value: ${{ jobs.build-exe.outputs.sha256sum}}
+    secrets:
+      # What this workflow reads when called. Direct runs read the repository secrets of the same names.
+      AZURE_TENANT_ID:
+        required: false
+      AZURE_CLIENT_ID:
+        required: false
+      AZURE_CLIENT_SECRET:
+        required: false
+      RELEASES_GPG_PRIVATE_KEY:
+        required: false
+      RELEASES_GPG_PASSPHRASE:
+        required: false
+      CRYPTOBOT_RELEASE_TOKEN:
+        required: false
+
   workflow_dispatch:
     inputs:
       semVerNum:
@@ -87,12 +102,14 @@ jobs:
           - arch: x64
             os: windows-latest
             java-dist: 'temurin'
-            java-version: '26.0.1+8'
+            java-version: '27.0.1+0'
             java-package: 'jdk'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Setup Java
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: ${{ matrix.java-dist }}
           java-version: ${{ matrix.java-version }}
@@ -153,15 +170,19 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
+          --module-path "${JMOD_PATHS}"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.crypto.mscapi,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
           --strip-debug
           --compress zip-0
+        env:
+          JMOD_PATHS: ${{ steps.jep-493-check.outputs.jmod_paths }}
       - name: Remove distrusted CA certificates from runtime
         run: ${JAVA_HOME}/bin/java dist/common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
+      - name: Add missing UTF-8.zh font sequences to runtime
+        run: ${JAVA_HOME}/bin/java dist/win/AddChineseFontConfigSequences.java runtime
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -174,7 +195,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --copyright "(C) 2016 - $(date +%Y) Skymatic GmbH"
           --app-version "${VERSION_NUM}.${REVISION_NUM}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.win,org.cryptomator.integrations.win,org.cryptomator.desktop"
@@ -192,6 +213,7 @@ jobs:
           --java-options "-Dcryptomator.loopbackAlias=\"cryptomator-vault\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"msi-${REVISION_NUM}\""
+          --java-options "-Dcryptomator.publishTimestamp=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
           --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --java-options "-Dcryptomator.integrationsWin.keychainPaths=\"@{appdata}/Cryptomator/keychain.json;@{userhome}/AppData/Roaming/Cryptomator/keychain.json\""
           --java-options "-Dcryptomator.integrationsWin.windowsHelloKeychainPaths=\"@{appdata}/Cryptomator/windowsHelloKeychain.json\""
@@ -266,6 +288,15 @@ jobs:
                   jar --file="$jarFile" --update $(Resolve-Path -Relative -Path $_)
               }
           }
+      - name: Create license template for MSI
+        run: |
+          (Get-Content -Raw dist/common/licenseTemplate.template.ftl) `
+            -replace '###FONT_NAME###', 'Segoe UI' `
+            -replace '###FONT_SIZE###', '16' `
+            -replace '###WITH_WINFSP###', 'false' `
+            -replace '###COPYRIGHT_END_YEAR###', (Get-Date).Year `
+            | Set-Content -NoNewline -Encoding ascii dist/win/resources/licenseTemplate.ftl
+        shell: pwsh
       - name: Generate license for MSI
         run: >
           ./mvnw -B license:add-third-party
@@ -296,7 +327,7 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --copyright "(C) 2016 - $(date +%Y) Skymatic GmbH"
           --app-version "${VERSION_NUM}.${REVISION_NUM}"
           --win-menu
           --win-dir-chooser
@@ -333,7 +364,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: msi-${{ matrix.arch }}
           path: |
@@ -354,10 +385,12 @@ jobs:
             os: windows-latest
             executable-suffix: x64
             java-dist: 'temurin'
-            java-version: '26.0.1+8'
+            java-version: '27.0.1+0'
             java-package: 'jdk'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Install wix and extensions
         run: |
           dotnet tool install --global wix --version ${WIX_VERSION}
@@ -366,20 +399,29 @@ jobs:
         env:
           WIX_VERSION: ${{ env.WIX_VERSION }}
       - name: Download .msi
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: msi-${{ matrix.arch }}
           path: dist/win/bundle/resources
       - name: Strip version info from msi file name
         run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
       - name: Setup Java
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: ${{ matrix.java-dist }}
           java-version: ${{ matrix.java-version }}
           java-package: ${{ matrix.java-package }}
           check-latest: true
           cache: 'maven'
+      - name: Create license template for exe
+        run: |
+          (Get-Content -Raw dist/common/licenseTemplate.template.ftl) `
+            -replace '###FONT_NAME###', 'Segoe UI' `
+            -replace '###FONT_SIZE###', '16' `
+            -replace '###WITH_WINFSP###', 'true' `
+            -replace '###COPYRIGHT_END_YEAR###', (Get-Date).Year `
+            | Set-Content -NoNewline -Encoding ascii dist/win/bundle/resources/licenseTemplate.ftl
+        shell: pwsh
       - name: Generate license for exe
         run: >
           ./mvnw -B license:add-third-party
@@ -411,7 +453,7 @@ jobs:
           -define BundleName="Cryptomator"
           -define BundleVersion="${VERSION_NUM}.${REVISION_NUM}"
           -define BundleVendor="Skymatic GmbH"
-          -define BundleCopyright="(C) 2016 - 2026 Skymatic GmbH"
+          -define BundleCopyright="(C) 2016 - $(date +%Y) Skymatic GmbH"
           -define AboutUrl="https://cryptomator.org"
           -define HelpUrl="https://cryptomator.org/contact"
           -define UpdateUrl="https://cryptomator.org/downloads/"
@@ -465,7 +507,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: exe-${{ matrix.executable-suffix }}
           path: |
@@ -480,12 +522,12 @@ jobs:
     needs: [ build-msi, build-exe ]
     steps:
       - name: Download installers
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           merge-multiple: true
       - name: Publish installers on GitHub Releases
         id: publish
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           draft: true
           fail_on_unmatched_files: true

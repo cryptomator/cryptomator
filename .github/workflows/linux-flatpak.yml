@@ -37,7 +37,7 @@ jobs:
     name: "Build flatpak"
     needs: [get-version]
     container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08@sha256:6ed6921bb5a9e1a916989971844f159b854b7b225880c381fa34f7a158863039
       options: --privileged
     strategy:
       fail-fast: false
@@ -55,15 +55,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           repository: flathub/org.cryptomator.Cryptomator
           submodules: true
       - name: Checkout build script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           path: build-scripts
       - name: Checkout app source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           path: cryptomator
           ref: ${{ env.SRC_GIT_SHA }}
           fetch-depth: 0
@@ -71,7 +74,9 @@ jobs:
         # using envsubst instead of yq to keep linebreaks
         run: |
           cp -r -f build-scripts/dist/linux/flatpak/* .
-          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
+          export COPYRIGHT_END_YEAR=$(date +%Y)
+          export PUBLISH_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE $COPYRIGHT_END_YEAR $PUBLISH_TIMESTAMP' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
         env:
           FLATPAK_VERSION: ${{ needs.get-version.outputs.semVerNum }}
           FLATPAK_REVISION: 1
@@ -81,7 +86,7 @@ jobs:
                     commit: ${{ env.SRC_GIT_SHA }}
       - name: Copy build script for upload
         run: cp org.cryptomator.Cryptomator.yaml org.cryptomator.Cryptomator.${{matrix.variant.arch}}.yaml
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           archive: false
           if-no-files-found: error
@@ -133,7 +138,7 @@ jobs:
           EOF
             done < maven-dependency-files-javafx.txt
           ) > javafx-maven-dependencies-${{ matrix.variant.arch }}.yaml
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: maven-sources-${{ matrix.variant.arch }}
           if-no-files-found: error
@@ -149,12 +154,12 @@ jobs:
       contents: none
     steps:
       - name: Download updated maven aarch64 dependencies
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: maven-sources-aarch64
           path: mvn-src-aarch64
       - name: Download updated maven x86_64 dependencies
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: maven-sources-x86_64
           path: mvn-src-x64
@@ -185,11 +190,15 @@ jobs:
           repository: flathub/org.cryptomator.Cryptomator
           submodules: true #TODO: Update submodule!
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+          persist-credentials: true # needed for git push below
       - name: Checkout release branch
         run: |
-          git checkout -b release/${{ needs.get-version.outputs.semVerStr }}
+          git checkout -b "release/${SEMVER_STR}"
+        env:
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           path: cryptomator
       - name: Download source tarball and compute checksum
         id: sha512
@@ -198,12 +207,12 @@ jobs:
           TARBALL_SHA512=$(sha512sum cryptomator.tar.gz | cut -d ' ' -f1)
           echo "value=${TARBALL_SHA512}" >> "$GITHUB_OUTPUT"
       - name: Download updated maven aarch64 dependencies
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: maven-sources-aarch64
           path: mvn-src-aarch64
       - name: Download updated maven x86_64 dependencies
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: maven-sources-x86_64
           path: mvn-src-x64
@@ -227,7 +236,9 @@ jobs:
           cp -r -f cryptomator/dist/linux/flatpak/* .
           cp -r -f mvn-src-x64/* .
           cp -r -f mvn-src-aarch64/* .
-          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
+          export COPYRIGHT_END_YEAR=$(date +%Y)
+          export PUBLISH_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          envsubst '$FLATPAK_VERSION $FLATPAK_REVISION $CRYPTOMATOR_SOURCE $COPYRIGHT_END_YEAR $PUBLISH_TIMESTAMP' < org.cryptomator.Cryptomator.TEMPLATE.yaml > org.cryptomator.Cryptomator.yaml
           yq -i 'del(.modules[] | select(.name == "cryptomator") | .build-options.build-args)' org.cryptomator.Cryptomator.yaml
           yq -i '(.modules[] | select(.name == "cryptomator") | .sources) += ["maven-dependencies.yaml", "javafx-maven-dependencies-x86_64.yaml", "javafx-maven-dependencies-aarch64.yaml"]' org.cryptomator.Cryptomator.yaml
         env:
@@ -243,18 +254,21 @@ jobs:
           git config user.email "cryptobot@users.noreply.github.com"
           git config push.autoSetupRemote true
           git stage org.cryptomator.Cryptomator.yaml maven-dependencies.yaml javafx-maven-dependencies-aarch64.yaml javafx-maven-dependencies-x86_64.yaml
-          git commit -m "Prepare release ${{needs.get-version.outputs.semVerStr}}"
+          git commit -m "Prepare release ${SEMVER_STR}"
           git push
+        env:
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
       - name: Create pull request
         id: create-pr
         run: |
           printf "Created by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > pr_body.md
-          PR_URL=$(gh pr create --title "Release ${{ needs.get-version.outputs.semVerStr }}" --body-file pr_body.md)
+          PR_URL=$(gh pr create --title "Release ${SEMVER_STR}" --body-file pr_body.md)
           echo "FLATHUB_PR_URL=$PR_URL" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+          SEMVER_STR: ${{ needs.get-version.outputs.semVerStr }}
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        uses: rtCamp/action-slack-notify@06cc13f74fa8d4d2296c09455d91e9453e4025f4 # v2.4.1
         if: github.event_name == 'release'
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}

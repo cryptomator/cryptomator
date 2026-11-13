@@ -38,7 +38,7 @@ jobs:
     needs: [get-version]
     runs-on: ubuntu-latest
     container:
-      image: archlinux:base-devel
+      image: archlinux:base-devel@sha256:624bdc7fc6615155d67bc34cf7146c0c9fd0e3c92943977da63a630e4ca49c30
     env:
       PKGDEST: ${{ github.workspace }}/pkgdest
       SRCDEST: ${{ github.workspace }}/srcdest
@@ -50,6 +50,7 @@ jobs:
           pacman -Syu --noconfirm --needed git base-devel sudo gnupg maven unzip
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           path: cryptomator
       - name: Create build user
         run: |
@@ -61,7 +62,9 @@ jobs:
         # cannot use github.workspace due to https://github.com/actions/runner/issues/2058
         run: |
           export SOURCES="${SOURCES_1}${GITHUB_WORKSPACE}${SOURCES_2}"
-          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
+          export COPYRIGHT_END_YEAR=$(date +%Y)
+          export PUBLISH_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA $COPYRIGHT_END_YEAR $PUBLISH_TIMESTAMP' < cryptomator/dist/linux/makepkg/PKGBUILD.template > PKGBUILD
         env:
           PKG_VERSION: ${{ needs.get-version.outputs.semVerNum }}
           PKG_RELEASE: 1
@@ -73,13 +76,13 @@ jobs:
           sudo -u builder
           env PKGDEST="$PKGDEST" SRCDEST="$SRCDEST"
           makepkg --syncdeps --cleanbuild --noconfirm --log
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: arch-package
           if-no-files-found: error
           path: |
             ${{ env.PKGDEST }}/*.pkg.tar.zst
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pkgbuild-file
           if-no-files-found: error
@@ -92,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-version, makepkg]
     container:
-      image: archlinux:base-devel
+      image: archlinux:base-devel@sha256:624bdc7fc6615155d67bc34cf7146c0c9fd0e3c92943977da63a630e4ca49c30
     env:
       PKGDEST: ${{ github.workspace }}/pkgdest
       SRCDEST: ${{ github.workspace }}/srcdest
@@ -116,6 +119,7 @@ jobs:
         with:
           repository: 'cryptomator/aur'
           token: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
+          persist-credentials: true # needed for git push below
       - name: Create build user
         run: |
           useradd -m builder
@@ -150,12 +154,14 @@ jobs:
         env:
           TARGET_VERSION: ${{ needs.get-version.outputs.semVerStr }}
       - name: Download PKGBUILD template
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: pkgbuild-file
       - name: Prepare PKGBUILD
         run: |
-          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA' < PKGBUILD.template > PKGBUILD
+          export COPYRIGHT_END_YEAR=$(date +%Y)
+          export PUBLISH_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          envsubst '$PKG_VERSION $PKG_RELEASE $SOURCES $SOURCES_SHA $COPYRIGHT_END_YEAR $PUBLISH_TIMESTAMP' < PKGBUILD.template > PKGBUILD
           sudo -u builder makepkg --printsrcinfo > .SRCINFO
         env:
           PKG_VERSION: ${{ needs.get-version.outputs.semVerNum }}
@@ -192,7 +198,7 @@ jobs:
           GH_TOKEN: ${{ secrets.CRYPTOBOT_PR_TOKEN }}
       - name: Slack Notification
         if: github.event_name == 'release'
-        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        uses: rtCamp/action-slack-notify@06cc13f74fa8d4d2296c09455d91e9453e4025f4 # v2.4.1
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_CRYPTOMATOR_DESKTOP }}
           SLACK_USERNAME: 'Cryptobot'

@@ -7,7 +7,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '26.0.1+8'
+  JAVA_VERSION: '27.0.1+0'
 
 defaults:
   run:
@@ -32,12 +32,13 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Check the git tag is signed
         run: git cat-file -p "${GITHUB_REF_NAME}" | grep "BEGIN SSH SIGNATURE"
       - name: Check the git tag is on release or main branch
         run: git branch -r --contains "${GITHUB_REF_NAME}" | grep -E '^\s*origin/(main|release/.*)\s*$'
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -47,7 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
       - name: Draft a release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           draft: true
           discussion_category_name: releases
@@ -56,7 +57,7 @@ jobs:
           body_path: .github/release-body.md.template
       - name: Download source tarball
         run: |
-          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/${{ github.ref }}.tar.gz --output cryptomator-${{ github.ref_name }}.tar.gz
+          curl --silent --fail-with-body --proto "=https" -L -H "Accept: application/vnd.github+json" https://github.com/cryptomator/cryptomator/archive/${GITHUB_REF}.tar.gz --output "cryptomator-${GITHUB_REF_NAME}.tar.gz"
       - name: Sign source tarball with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -65,7 +66,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Publish asc on GitHub Releases
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           draft: true
           fail_on_unmatched_files: true
@@ -82,7 +83,13 @@ jobs:
       semVerNum: ${{needs.get-version.outputs.semVerNum}}
       revisionNum: ${{needs.get-version.outputs.revNum}}
       semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
-    secrets: inherit
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   build-dmg-arm64:
     needs: [get-version, create-release-draft]
@@ -93,7 +100,20 @@ jobs:
       semVerNum: ${{needs.get-version.outputs.semVerNum}}
       revisionNum: ${{needs.get-version.outputs.revNum}}
       semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
-    secrets: inherit
+    secrets:
+      MACOS_TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
+      MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+      MACOS_FSKIT_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
+      MACOS_CODESIGN_P12_BASE64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
+      MACOS_CODESIGN_P12_PW: ${{ secrets.MACOS_CODESIGN_P12_PW }}
+      MACOS_CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
+      MACOS_CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+      MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+      MACOS_NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
+      MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   build-dmg-x64:
     needs: [get-version, create-release-draft]
@@ -104,7 +124,20 @@ jobs:
       semVerNum: ${{needs.get-version.outputs.semVerNum}}
       revisionNum: ${{needs.get-version.outputs.revNum}}
       semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
-    secrets: inherit
+    secrets:
+      MACOS_TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
+      MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+      MACOS_FSKIT_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
+      MACOS_CODESIGN_P12_BASE64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
+      MACOS_CODESIGN_P12_PW: ${{ secrets.MACOS_CODESIGN_P12_PW }}
+      MACOS_CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
+      MACOS_CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+      MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+      MACOS_NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
+      MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   build-appimages:
     needs: [get-version, create-release-draft]
@@ -115,7 +148,10 @@ jobs:
       semVerNum: ${{needs.get-version.outputs.semVerNum}}
       revisionNum: ${{needs.get-version.outputs.revNum}}
       semVerSuffix: ${{needs.get-version.outputs.semVerSuffix}}
-    secrets: inherit
+    secrets:
+      RELEASES_GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+      RELEASES_GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      CRYPTOBOT_RELEASE_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
 
   update-sha256sums:
     runs-on: ubuntu-latest
@@ -128,6 +164,8 @@ jobs:
       GH_TOKEN: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Compute source tarball SHA256
         id: src-sha256
         run: |

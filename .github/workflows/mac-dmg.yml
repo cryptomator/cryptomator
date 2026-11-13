@@ -28,6 +28,35 @@ on:
       sha256-dmg:
         description: "SHA256 sum of the arm64 dmg"
         value: ${{ jobs.build.outputs.sha256sum}}
+    secrets:
+      # What this workflow reads when called. Direct runs read the repository secrets of the same names.
+      MACOS_TEAM_IDENTIFIER:
+        required: false
+      MACOS_PROVISIONING_PROFILE_BASE64:
+        required: false
+      MACOS_FSKIT_PROVISIONING_PROFILE_BASE64:
+        required: false
+      MACOS_CODESIGN_P12_BASE64:
+        required: false
+      MACOS_CODESIGN_P12_PW:
+        required: false
+      MACOS_CODESIGN_TMP_KEYCHAIN_PW:
+        required: false
+      MACOS_CODESIGN_IDENTITY:
+        required: false
+      MACOS_NOTARIZATION_APPLE_ID:
+        required: false
+      MACOS_NOTARIZATION_PW:
+        required: false
+      MACOS_NOTARIZATION_TEAM_ID:
+        required: false
+      RELEASES_GPG_PRIVATE_KEY:
+        required: false
+      RELEASES_GPG_PASSPHRASE:
+        required: false
+      CRYPTOBOT_RELEASE_TOKEN:
+        required: false
+
   workflow_dispatch:
     inputs:
       semVerNum:
@@ -55,7 +84,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '26.0.1+8'
+  JAVA_VERSION: '27.0.1+1'
   VERSION_NUM: ${{ inputs.semVerNum || '99.99.99'}}
   REVISION_NUM: ${{ inputs.revisionNum || '0' }}
   VERSION_SUFFIX: ${{ inputs.semVerSuffix || ''}}
@@ -82,6 +111,8 @@ jobs:
           openjfx-sha: '2a05b5d236c10eb74a366638cf908ddebfa36795695c8b1f2734f2169d54b128'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Verify provisioning profile
         run: |
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output $RUNNER_TEMP/app.provisionprofile
@@ -98,7 +129,7 @@ jobs:
           TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
       - name: Setup Java
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -147,13 +178,15 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${{ steps.jep-493-check.outputs.jmod_paths }}"
+          --module-path "${JMOD_PATHS}"
           --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,javafx.base,javafx.graphics,javafx.controls,javafx.fxml,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.unsupported,jdk.accessibility,jdk.management.jfr,java.compiler
           --strip-native-commands
           --no-header-files
           --no-man-pages
           --strip-debug
           --compress zip-0
+        env:
+          JMOD_PATHS: ${{ steps.jep-493-check.outputs.jmod_paths }}
       - name: Remove distrusted CA certificates from runtime
         run: ${JAVA_HOME}/bin/java dist/common/RemoveDistrustedCaCerts.java runtime/lib/security/cacerts
       - name: Run jpackage
@@ -168,7 +201,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --copyright "(C) 2016 - $(date +%Y) Skymatic GmbH"
           --app-version "${VERSION_NUM}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.mac,org.cryptomator.frontend.fskit"
@@ -176,7 +209,6 @@ jobs:
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Djava.net.useSystemProxies=true"
-          --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
           --java-options "-Dcryptomator.appVersion=\"${VERSION_NUM}${VERSION_SUFFIX}\""
           --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\""
@@ -189,6 +221,7 @@ jobs:
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NUM}\""
+          --java-options "-Dcryptomator.publishTimestamp=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
           --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
           --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true"
           --mac-package-identifier org.cryptomator
@@ -201,6 +234,10 @@ jobs:
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NUM}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NUM}|g" Cryptomator.app/Contents/Info.plist
           cp $RUNNER_TEMP/app.provisionprofile Cryptomator.app/Contents/embedded.provisionprofile
+      - name: Create license template for dmg
+        run: >
+          sed -e 's|###FONT_NAME###|Helvetica|g' -e 's|###FONT_SIZE###|24|g' -e 's|###WITH_WINFSP###|false|g' -e "s|###COPYRIGHT_END_YEAR###|$(date +%Y)|g"
+          dist/common/licenseTemplate.template.ftl > dist/mac/dmg/resources/licenseTemplate.ftl
       - name: Generate license for dmg
         run: >
           ./mvnw -B license:add-third-party
@@ -342,7 +379,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dmg-${{ matrix.output-suffix }}
           path: |
@@ -351,7 +388,7 @@ jobs:
           if-no-files-found: error
       - name: Publish dmg on GitHub Releases
         if: inputs.upload-to-draft
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           draft: true
           fail_on_unmatched_files: true

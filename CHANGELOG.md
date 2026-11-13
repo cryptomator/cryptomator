@@ -9,19 +9,47 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 
 ## [1.20.0](https://github.com/cryptomator/cryptomator/releases/1.20.0) - tbd
+### Security
+* Fixed words of an entered recovery key being written to the log file and shown in the details of the error window when the recovery key was malformed ([#4373](https://github.com/cryptomator/cryptomator/pull/4373))
+* Fixed potential write of hub keys to the log file when Cryptomator Hub returned a key in an unexpected format ([#4373](https://github.com/cryptomator/cryptomator/pull/4373))
+
 ### Added
-* Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later
+* Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
+
+### Changed
+* macOS: The tray menu is now a native menu bar item instead of being rendered via AWT ([#4393](https://github.com/cryptomator/cryptomator/pull/4393))
+* Touch ID: Fall back to the device password when biometrics are unavailable
+* Improved write performance ([cryptomator/cryptofs#370](https://github.com/cryptomator/cryptofs/pull/370))
+* Updated to JDK 27 ([#4379](https://github.com/cryptomator/cryptomator/pull/4379))
+* Updated dependencies:
+  - `org.cryptomator:cryptofs` from 2.11.1 to 2.12.0
+  - `org.cryptomator:fuse-nio-adapter` from 7.0.0 to 7.0.1
+  - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
+  - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.0
+  - `org.cryptomator:integrations-win` from 1.6.2 to 1.7.0
+  - `ch.qos.logback:logback-core` from 1.6.5 to 1.6.6
+  - `ch.qos.logback:logback-classic` from 1.6.5 to 1.6.6
+  - `com.nimbusds:nimbus-jose-jwt` from 10.5 to 10.10
+  - `org.apache.commons:commons-lang3` from 3.21.0 to 3.22.0
 
 ### Fixed
-* Fixed background threads piling up with every unlock and lock of a vault
-* Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
-* Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
-* Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu
+* Fixed files with long names becoming undecryptable when moved while open, or when replacing an open file ([cryptomator/cryptofs#374](https://github.com/cryptomator/cryptofs/pull/374))
+* Fixed an open file still showing its old content after it was overwritten by a copy ([cryptomator/cryptofs#374](https://github.com/cryptomator/cryptofs/pull/374))
+* Fixed an incomplete write to disk going unnoticed and leaving a corrupted file chunk behind ([cryptomator/cryptofs#370](https://github.com/cryptomator/cryptofs/pull/370))
+* Fixed background threads piling up with every unlock and lock of a vault ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
+* Fixed vaults showing as unlocked while still locking when locking several vaults at once and one of them failed to lock ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
+* Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
+* Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
+* Fixed a custom mount point not being restored when closing the vault's volume failed during lock ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
+* macOS: Fixed clicking a vault entry in the tray menu closing the menu instead of opening its submenu ([#1977](https://github.com/cryptomator/cryptomator/issues/1977))
+* Windows: Fixed possible app crash when locking a vault mounted with WinFsp ([cryptomator/jfuse#176](https://github.com/cryptomator/jfuse/issues/176))
+* Windows: Fixed Chinese text in the tray menu being shown as squares ([#4384](https://github.com/cryptomator/cryptomator/pull/4384))
 
 
 ## [1.19.6](https://github.com/cryptomator/cryptomator/releases/1.19.6) - 2026-10-31
 ### Fixed
 * Fixed supporter certificates being rejected once the certificate that signed them was rotated out: the certificate chain is now required to be valid at the certificate's issue date instead of at verification time
+
 
 ## [1.19.5](https://github.com/cryptomator/cryptomator/releases/1.19.5) - 2026-10-28
 ### Security

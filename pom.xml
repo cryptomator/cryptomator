@@ -26,36 +26,36 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>26</project.jdk.version>
+		<project.jdk.version>27</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<!-- remove them, as soon they got modularized or support is dropped (i.e., WebDAV) -->
 		<nonModularGroupIds>org.ow2.asm,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.11.1</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.12.0</cryptomator.cryptofs.version>
 		<cryptomator.cryptolib.version>2.4.0</cryptomator.cryptolib.version>
-		<cryptomator.integrations.version>1.10.0</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>1.6.2</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>1.5.1</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.version>1.10.1</cryptomator.integrations.version>
+		<cryptomator.integrations.win.version>1.7.0</cryptomator.integrations.win.version>
+		<cryptomator.integrations.mac.version>1.7.0</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.8.0</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>7.0.0</cryptomator.fuse.version>
+		<cryptomator.fuse.version>7.0.1</cryptomator.fuse.version>
 		<!-- on every bump, check the entitlements and provisioning profiles in dist/mac against the README of fskit-nio-adapter at that tag. Also run MounterTest on a Mac, because CI never runs its check that the adapter class Mounter matches by name still exists -->
-		<cryptomator.fskit.version>0.4.0</cryptomator.fskit.version>
+		<cryptomator.fskit.version>0.5.1</cryptomator.fskit.version>
 
 		<cryptomator.webdav.version>3.0.3</cryptomator.webdav.version>
 		<cryptomator.webdav-servlet.version>1.2.15</cryptomator.webdav-servlet.version>
 
 		<!-- 3rd party dependencies -->
 		<caffeine.version>3.3.1</caffeine.version>
-		<commons-lang3.version>3.21.0</commons-lang3.version>
+		<commons-lang3.version>3.22.0</commons-lang3.version>
 		<dagger.version>2.60.1</dagger.version>
 		<easybind.version>2.2</easybind.version>
 		<jackson.version>2.21.8</jackson.version>
 		<javafx.version>25.0.5</javafx.version>
 		<jwt.version>4.6.2</jwt.version>
-		<nimbus-jose.version>10.5</nimbus-jose.version>
-		<logback.version>1.6.5</logback.version>
+		<nimbus-jose.version>10.10</nimbus-jose.version>
+		<logback.version>1.6.6</logback.version>
 		<slf4j.version>2.0.20</slf4j.version>
 		<tinyoauth2.version>0.8.1</tinyoauth2.version>
 		<zxcvbn.version>1.9.0</zxcvbn.version>
@@ -68,14 +68,14 @@
 		<!-- build-time dependencies -->
 		<jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
 		<dependency-check.version>13.0.0</dependency-check.version>
-		<jacoco.version>0.8.15</jacoco.version>
-		<license-generator.version>2.7.1</license-generator.version>
+		<jacoco.version>0.8.16</jacoco.version>
+		<license-generator.version>2.9.0</license-generator.version>
 		<mvn-compiler.version>3.16.0</mvn-compiler.version>
 		<mvn-resources.version>3.5.0</mvn-resources.version>
 		<mvn-dependency.version>3.11.0</mvn-dependency.version>
 		<mvn-surefire.version>3.6.1</mvn-surefire.version>
 		<mvn-jar.version>3.5.1</mvn-jar.version>
-		<mvn-exec.version>3.6.4</mvn-exec.version>
+		<mvn-exec.version>3.7.0</mvn-exec.version>
 
 		<!-- Property used by surefire to determine jacoco engine -->
 		<surefire.jacoco.args></surefire.jacoco.args>
@@ -730,7 +730,7 @@
 				</os>
 			</activation>
 			<properties>
-				<run.jvmArgs>-Dapple.awt.enableTemplateImages=true -Dcryptomator.settingsPath="@{userhome}/Library/Application Support/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/Library/Application Support/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/Library/Application Support/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/Library/Logs/${run.appDir}" -Dcryptomator.pluginDir="@{userhome}/Library/Application Support/${run.appDir}/Plugins" -Dcryptomator.mountPointsDir="${run.macMountPointsDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.integrationsMac.keychainServiceName=Cryptomator ${run.macUpdateArgs} -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m -ea --enable-preview --enable-native-access=org.cryptomator.frontend.fuse,org.cryptomator.jfuse.mac,org.cryptomator.frontend.fskit,javafx.graphics</run.jvmArgs>
+				<run.jvmArgs>-Dcryptomator.settingsPath="@{userhome}/Library/Application Support/${run.appDir}/settings.json" -Dcryptomator.p12Path="@{userhome}/Library/Application Support/${run.appDir}/key.p12" -Dcryptomator.ipcSocketPath="@{userhome}/Library/Application Support/${run.appDir}/ipc.socket" -Dcryptomator.logDir="@{userhome}/Library/Logs/${run.appDir}" -Dcryptomator.pluginDir="@{userhome}/Library/Application Support/${run.appDir}/Plugins" -Dcryptomator.mountPointsDir="${run.macMountPointsDir}" -Dcryptomator.showTrayIcon=true -Dcryptomator.integrationsMac.keychainServiceName=Cryptomator ${run.macUpdateArgs} -Dcryptomator.hub.enableTrustOnFirstUse=true -Xss2m -Xmx512m -ea --enable-preview --enable-native-access=org.cryptomator.frontend.fuse,org.cryptomator.jfuse.mac,org.cryptomator.frontend.fskit,javafx.graphics</run.jvmArgs>
 			</properties>
 		</profile>
 

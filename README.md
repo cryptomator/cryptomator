@@ -12,7 +12,7 @@
 
 Cryptomator is provided free of charge as an open-source project despite the high development effort and is therefore dependent on donations. If you are also interested in further development, we offer you the opportunity to support us:
 
-- [One-time or recurring donation via Cryptomator's website.](https://cryptomator.org/#donate)
+- [One-time or recurring donation via Cryptomator's website.](https://cryptomator.org/donate/)
 - [Become a sponsor via Cryptomator's sponsors website.](https://cryptomator.org/sponsors/)
 
 ### Gold Sponsors
@@ -79,7 +79,7 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ### Dependencies
 
-* JDK 26 (e.g. temurin, zulu)
+* JDK 27 (e.g. temurin, zulu)
 
 ### Run Maven
 

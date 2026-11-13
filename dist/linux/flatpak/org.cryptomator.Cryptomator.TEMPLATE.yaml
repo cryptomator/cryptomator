@@ -115,7 +115,7 @@ modules:
         --dest .
         --name Cryptomator
         --vendor 'Skymatic GmbH'
-        --copyright '(C) 2016 - 2026 Skymatic GmbH'
+        --copyright '(C) 2016 - $COPYRIGHT_END_YEAR Skymatic GmbH'
         --java-options '--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.linux.amd64,org.cryptomator.jfuse.linux.aarch64,org.purejava.appindicator'
         --java-options "--sun-misc-unsafe-memory-access=allow"
         --java-options '-Xss5m'
@@ -124,6 +124,7 @@ modules:
         --java-options '-Djava.net.useSystemProxies=true'
         --java-options "-Dcryptomator.appVersion='${VERSION}'"
         --java-options "-Dcryptomator.buildNumber='flatpak-${REVISION_NO}'"
+        --java-options "-Dcryptomator.publishTimestamp='$PUBLISH_TIMESTAMP'"
         --java-options '-Dcryptomator.ipcSocketPath='@{userhome}/.config/Cryptomator/ipc.socket''
         --java-options '-Dcryptomator.adminConfigPath='/run/host/etc/cryptomator/config.properties''
         --java-options '-Dcryptomator.logDir='@{userhome}/.local/share/Cryptomator/logs''
@@ -151,14 +152,14 @@ modules:
         dest-filename: jdk.tar.gz
         only-arches:
           - x86_64
-        url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.1%2B8/OpenJDK26U-jdk_x64_linux_hotspot_26.0.1_8.tar.gz
-        sha512: eb46cda97ffd46e2e0c1f6f977dc204d9cc969b958946287b7e7d0bfe859fd92faccb2f6ef79995421a963c6de140c436af559403e0a2cd27c90b06c20260d5c
+        url: https://github.com/adoptium/temurin27-binaries/releases/download/jdk-27.0.1.0.2%2B1/OpenJDK27U-jdk_x64_linux_hotspot_27.0.1.0.2_1.tar.gz
+        sha512: 01092f1982745a34447811e20e5dcb4cb164d5509c09c985406038727dfb1639b372e8160e48570fd759cf931d0e0cba5b41d93df951e979c6b94d915e1ef6ef
       - type: file
         dest-filename: jdk.tar.gz
         only-arches:
           - aarch64
-        url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.1%2B8/OpenJDK26U-jdk_aarch64_linux_hotspot_26.0.1_8.tar.gz
-        sha512: 3c31671552712a8f0df96df2eeae7e9ad5156c0e98ebd5bf4fa04c14bba58bd5e19ff567ddcdc7aa478f6f4b0a852762a09bd88d3132acb121e667cfe0397034
+        url: https://github.com/adoptium/temurin27-binaries/releases/download/jdk-27.0.1.0.2%2B1/OpenJDK27U-jdk_aarch64_linux_hotspot_27.0.1.0.2_1.tar.gz
+        sha512: 374ba5e900992a8aad575171767eca503063906668ca88aca46ab25d82a588447b9075639e21efc9225f9d286750bd5ebcd000b98e5286d2a60bf437e37c8988
       - type: file
         dest-filename: openjfx.zip
         only-arches:
