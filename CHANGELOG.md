@@ -18,6 +18,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Improved write performance ([cryptomator/cryptofs#370](https://github.com/cryptomator/cryptofs/pull/370))
 * Updated dependencies:
   - `org.cryptomator:cryptofs` from 2.11.1 to 2.12.0
+  - `org.cryptomator:fuse-nio-adapter` from 7.0.0 to 7.0.1
   - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
   - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.0
 
@@ -30,6 +31,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
 * Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu
 * macOS: Fixed clicking a vault entry in the tray menu closing the menu instead of opening its submenu ([#1977](https://github.com/cryptomator/cryptomator/issues/1977))
+* Windows: Fixed possible app crash when locking a vault mounted with WinFsp ([cryptomator/jfuse#176](https://github.com/cryptomator/jfuse/issues/176))
 
 
 ## [1.19.6](https://github.com/cryptomator/cryptomator/releases/1.19.6) - 2026-10-31
