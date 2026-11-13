@@ -15,11 +15,16 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Changed
 * macOS: The tray menu is now a native menu bar item instead of being rendered via AWT
 * Touch ID: Fall back to the device password when biometrics are unavailable
+* Improved write performance ([cryptomator/cryptofs#370](https://github.com/cryptomator/cryptofs/pull/370))
 * Updated dependencies:
+  - `org.cryptomator:cryptofs` from 2.11.1 to 2.12.0
   - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
   - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.0
 
 ### Fixed
+* Fixed files with long names becoming undecryptable when moved while open, or when replacing an open file ([cryptomator/cryptofs#374](https://github.com/cryptomator/cryptofs/pull/374))
+* Fixed an open file still showing its old content after it was overwritten by a copy ([cryptomator/cryptofs#374](https://github.com/cryptomator/cryptofs/pull/374))
+* Fixed an incomplete write to disk going unnoticed and leaving a corrupted file chunk behind ([cryptomator/cryptofs#370](https://github.com/cryptomator/cryptofs/pull/370))
 * Fixed background threads piling up with every unlock and lock of a vault
 * Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
 * Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock
