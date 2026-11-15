@@ -33,6 +33,7 @@ import java.util.ResourceBundle;
 public class TrayMenuBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuBuilder.class);
+	// macOS draws the whole image at 16 pt height, so these assets stay cropped to the glyph without padding
 	private static final String TRAY_ICON_MAC = "/img/tray_icon_mac@2x.png";
 	private static final String TRAY_ICON_UNLOCKED_MAC = "/img/tray_icon_unlocked_mac@2x.png";
 	private static final String TRAY_ICON = "/img/tray_icon.png";

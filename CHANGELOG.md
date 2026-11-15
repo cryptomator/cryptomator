@@ -25,7 +25,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
   - `org.cryptomator:cryptofs` from 2.11.1 to 2.12.0
   - `org.cryptomator:fuse-nio-adapter` from 7.0.0 to 7.0.1
   - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
-  - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.0
+  - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.1
   - `org.cryptomator:integrations-win` from 1.6.2 to 1.7.0
   - `ch.qos.logback:logback-core` from 1.6.5 to 1.6.6
   - `ch.qos.logback:logback-classic` from 1.6.5 to 1.6.6
