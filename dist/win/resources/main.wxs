@@ -27,6 +27,7 @@
   <?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
   <?define CloseApplicationTarget= "cryptomator.exe" ?>
   <?define LoopbackAlias= "cryptomator-vault" ?>
+  <?define UpdateHelperName= "$(var.JpAppName)-updater.exe" ?> <!-- must match the JVM property cryptomator.integrationsWin.updateHelperName and differ from CloseApplicationTarget -->
 
   <?include $(var.JpConfigDir)/overrides.wxi ?>
 
@@ -90,8 +91,8 @@
     </ns0:Property>
     <ns0:Launch Message="This application requires Windows 10 version 1803 (build 17134) or newer." Condition="Installed OR (WINDOWSBUILDNUMBER >= 17134)" />
 
-    <!-- Non-Opening ProgID -->
     <ns0:DirectoryRef Id="INSTALLDIR">
+        <!-- Non-Opening ProgID -->
         <ns0:Component Bitness="always64" Id="nonStartingProgID">
           <ns0:File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileEncryptedData)" Name="$(var.IconFileEncryptedData)"/>
           <ns0:ProgId Id="$(var.JpAppName).Encrypted.1" Description="$(var.JpAppName) Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
@@ -105,6 +106,10 @@
         <!-- Install type marker for the in-app updater, see INSTALLTYPE property -->
         <ns0:Component Bitness="always64" Id="InstallTypeMarker">
           <ns0:RegistryValue Root="HKLM" Key="SOFTWARE\Skymatic GmbH\Cryptomator" Name="InstallType" Type="string" Value="[INSTALLTYPE]" KeyPath="yes" />
+        </ns0:Component>
+        <!-- Update helper for the in-app updater (a release of https://github.com/cryptomator/win-updater), installed next to the app executable. Signed together with the app image's binaries, but kept out of the app image itself. -->
+        <ns0:Component Bitness="always64" Id="UpdateHelper">
+          <ns0:File Id="UpdateHelperExe" Source="$(env.JP_UPDATE_HELPER)" Name="$(var.UpdateHelperName)" KeyPath="yes"/>
         </ns0:Component>
     </ns0:DirectoryRef>
 
@@ -132,6 +137,7 @@
       <ns0:ComponentRef Id="AdminConfigDir"/>
       <ns0:ComponentRef Id="AdminConfigFile"/>
       <ns0:ComponentRef Id="InstallTypeMarker"/>
+      <ns0:ComponentRef Id="UpdateHelper"/>
     </ns0:Feature>
 
     <ns0:CustomAction Id="JpSetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />

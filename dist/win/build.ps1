@@ -172,6 +172,7 @@ $javaOptions = @(
 "--java-options", "-Dcryptomator.updateMechanism=org.cryptomator.windows.update.InstallerUpdateMechanism"
 "--java-options", "-Dcryptomator.integrationsWin.updateDurableIdentityEku=1.3.6.1.4.1.311.97.986645502.209118791.449271898.355477593"
 "--java-options", "-Dcryptomator.integrationsWin.updateRootCaThumbprint=F40042E2E5F7E8EF8189FED15519AECE42C3BFA2"
+"--java-options", "-Dcryptomator.integrationsWin.updateHelperName=`"$AppName-updater.exe`""
 "--java-options", "-Dcryptomator.hub.enableTrustOnFirstUse=true"
 )
 
@@ -214,7 +215,29 @@ Copy-Item "contrib\*" -Destination "$AppName"
 attrib -r "$AppName\$AppName.exe"
 attrib -r "$AppName\${AppName} (Debug).exe"
 
+# download update helper (installed by resources/main.wxs as "$AppName-updater.exe")
+$updateHelperVersion = '0.2.0'
+$updateHelperArch = if ($Arm64) { 'arm64' } else { 'x64' }
+$updateHelperHashes = @{
+	'x64'   = '4fb5dcf649e25b221b4a55d59a84be216e6cda84a3afa1d0f11c592ae788c664' 
+	'arm64' = '07e0a899b9ca5a38522c17235aeee823704147f1e5253d10c1c9e95483e6c989'
+}
+$updateHelperUrl = "https://github.com/cryptomator/win-updater/releases/download/${updateHelperVersion}/win-updater-${updateHelperArch}.exe"
+$updateHelperPath = "$buildDir\resources\win-updater-${updateHelperArch}.exe"
+Write-Host "Downloading ${updateHelperUrl}..."
+Invoke-WebRequest $updateHelperUrl -OutFile $updateHelperPath # redirects are followed by default
+$computedHash = $(Get-FileHash -Path $updateHelperPath -Algorithm SHA256).Hash.ToLower()
+if ($computedHash -ne $updateHelperHashes[$updateHelperArch]) {
+	Write-Error -Category InvalidData -CategoryActivity "Data integrity check failed" -Message @"
+	Downloaded update helper does not match stored SHA256 checksum.
+	Expected: $($updateHelperHashes[$updateHelperArch])
+	Actual:   $computedHash
+"@
+	exit 1
+}
+
 # create .msi
+$Env:JP_UPDATE_HELPER = $updateHelperPath
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources\"
 $Env:JP_WIXWIZARD_RESOURCES_PROPERTIES_FORMAT = "${Env:JP_WIXWIZARD_RESOURCES}".Replace('\', '\\');
 $Env:JP_WIXHELPER_DIR = ""

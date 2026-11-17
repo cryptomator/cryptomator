@@ -82,6 +82,7 @@ env:
   WINFSP_MSI_HASH: '073a70e00f77423e34bed98b86e600def93393ba5822204fac57a29324db9f7a'
   WINFSP_UNINSTALLER: 'https://github.com/cryptomator/winfsp-uninstaller/releases/latest/download/winfsp-uninstaller.exe'
   WIX_VERSION: '6.0.2'
+  UPDATE_HELPER_VERSION: '0.2.0'
 
 defaults:
   run:
@@ -104,6 +105,7 @@ jobs:
             java-dist: 'temurin'
             java-version: '26.0.1+8'
             java-package: 'jdk'
+            update-helper-hash: '4fb5dcf649e25b221b4a55d59a84be216e6cda84a3afa1d0f11c592ae788c664'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -218,6 +220,7 @@ jobs:
           --java-options "-Dcryptomator.updateMechanism=org.cryptomator.windows.update.InstallerUpdateMechanism"
           --java-options "-Dcryptomator.integrationsWin.updateDurableIdentityEku=1.3.6.1.4.1.311.97.986645502.209118791.449271898.355477593"
           --java-options "-Dcryptomator.integrationsWin.updateRootCaThumbprint=F40042E2E5F7E8EF8189FED15519AECE42C3BFA2"
+          --java-options "-Dcryptomator.integrationsWin.updateHelperName=\"Cryptomator-updater.exe\""
           --java-options "-XX:ErrorFile=C:/cryptomator/cryptomator_crash.log"
           --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true"
           --resource-dir dist/win/resources
@@ -252,6 +255,16 @@ jobs:
         run: |
           ${JAVA_HOME}/bin/jpackage --type msi --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775 --app-image appdir/Cryptomator --dest /tmp/ --name Test --vendor Test --copyright "None" --app-version "1.0" --temp msi-helper
           find ./msi-helper/ -type f -name msica.dll -exec mv {} ./appdir \;
+      - name: Download update helper
+        # placed in appdir to be signed in the next step, but outside the app image (appdir/Cryptomator): it is installed by dist/win/resources/main.wxs
+        run: |
+          mkdir appdir/update-helper
+          curl --silent --fail-with-body --proto "=https" -L "https://github.com/cryptomator/win-updater/releases/download/${UPDATE_HELPER_VERSION}/win-updater-${ARCH}.exe" --output "appdir/update-helper/win-updater-${ARCH}.exe"
+          echo "${UPDATE_HELPER_HASH}  appdir/update-helper/win-updater-${ARCH}.exe" | sha256sum --check
+        env:
+          UPDATE_HELPER_VERSION: ${{ env.UPDATE_HELPER_VERSION }}
+          UPDATE_HELPER_HASH: ${{ matrix.update-helper-hash }}
+          ARCH: ${{ matrix.arch }}
       - name: Sign DLLs with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'schedule'
         uses: ./.github/actions/win-sign-action
@@ -331,6 +344,7 @@ jobs:
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources/ # requires abs path, used in resources/main.wxs
           JP_WIXHELPER_DIR: ${{ github.workspace }}\appdir\
+          JP_UPDATE_HELPER: ${{ github.workspace }}\appdir\update-helper\win-updater-${{ matrix.arch }}.exe # requires abs path, used in resources/main.wxs
       - name: Sign MSI with Azure Trusted Signing
         if: inputs.sign || github.event_name == 'schedule'
         uses: ./.github/actions/win-sign-action
