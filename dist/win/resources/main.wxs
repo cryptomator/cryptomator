@@ -63,8 +63,10 @@
 
     <!-- Overwrite all files regardless of version (default is "omus"). Component GUIDs are stable across releases, so during an upgrade, costing (which runs before RemoveExistingProducts)
          would skip every component whose installed keyfile has a higher version (e.g. JDK DLLs after a JDK downgrade), and the subsequent removal of the old product then deletes those files.
-         Caution: "a" also overwrites newer files with older ones. This is only safe as long as all files are private to INSTALLDIR; never ship shared files (e.g. into System32 or via merge modules) with this setting. -->
-    <ns0:Property Id="REINSTALLMODE" Value="amus" />
+         Caution: "a" also overwrites newer files with older ones. This is only safe as long as all files are private to INSTALLDIR; never ship shared files (e.g. into System32 or via merge modules) with this setting.
+         Set by a custom action instead of the Property table, because the WiX Burn bundle (the .exe installer) always passes REINSTALLMODE="muso" on the command line, which takes precedence over the Property table.
+         This also overrides a REINSTALLMODE passed to msiexec. -->
+    <ns0:SetProperty Id="REINSTALLMODE" Value="amus" Before="CostInitialize" Sequence="both" />
 
     <?ifndef JpAllowUpgrades ?>
     <ns0:CustomAction Id="JpDisallowUpgrade" Error="!(loc.DisallowUpgradeErrorMessage)" />
