@@ -8,7 +8,10 @@ The changelog starts with version 1.19.0.
 Changes to prior versions can be found on the [Github release page](https://github.com/cryptomator/cryptomator/releases).
 
 
-## [Unreleased](https://github.com/cryptomator/cryptomator/compare/1.19.6...HEAD)
+## [1.19.7](https://github.com/cryptomator/cryptomator/releases/1.19.7) - 2026-11-18
+### Security
+* Disabled the JVM's Base64 intrinsics (`-XX:-UseBASE64Intrinsics`), removing the attack surface for CVE-2026-114938 (Java4Shell)
+
 
 ## [1.19.6](https://github.com/cryptomator/cryptomator/releases/1.19.6) - 2026-10-31
 ### Fixed
