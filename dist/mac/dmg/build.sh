@@ -117,6 +117,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "--enable-preview" \
     --java-options "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.mac,org.cryptomator.frontend.fskit" \
     --java-options "-Xss5m" \
+    --java-options "-XX:-UseBASE64Intrinsics" \
     --java-options "-Xmx256m" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Djava.net.useSystemProxies=true" \

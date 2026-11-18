@@ -46,6 +46,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Windows: Fixed Chinese text in the tray menu being shown as squares ([#4384](https://github.com/cryptomator/cryptomator/pull/4384))
 
 
+## [1.19.7](https://github.com/cryptomator/cryptomator/releases/1.19.7) - 2026-11-18
+### Security
+* Disabled the JVM's Base64 intrinsics (`-XX:-UseBASE64Intrinsics`), removing the attack surface for CVE-2026-114938 (Java4Shell)
+
+
 ## [1.19.6](https://github.com/cryptomator/cryptomator/releases/1.19.6) - 2026-10-31
 ### Fixed
 * Fixed supporter certificates being rejected once the certificate that signed them was rotated out: the certificate chain is now required to be valid at the certificate's issue date instead of at verification time
