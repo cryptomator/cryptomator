@@ -84,7 +84,7 @@ on:
 
 env:
   JAVA_DIST: 'temurin'
-  JAVA_VERSION: '26.0.1+8'
+  JAVA_VERSION: '27.0.1+1'
   VERSION_NUM: ${{ inputs.semVerNum || '99.99.99'}}
   REVISION_NUM: ${{ inputs.revisionNum || '0' }}
   VERSION_SUFFIX: ${{ inputs.semVerSuffix || ''}}
@@ -129,7 +129,7 @@ jobs:
           TEAM_IDENTIFIER: ${{ secrets.MACOS_TEAM_IDENTIFIER }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_FSKIT_PROVISIONING_PROFILE_BASE64 }}
       - name: Setup Java
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: ${{ env.JAVA_DIST }}
           java-version: ${{ env.JAVA_VERSION }}
@@ -201,15 +201,15 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2026 Skymatic GmbH"
+          --copyright "(C) 2016 - $(date +%Y) Skymatic GmbH"
           --app-version "${VERSION_NUM}"
           --java-options "--enable-preview"
           --java-options "--enable-native-access=javafx.graphics,org.cryptomator.frontend.fuse,org.cryptomator.jfuse.mac,org.cryptomator.frontend.fskit"
           --java-options "-Xss5m"
+          --java-options "-XX:-UseBASE64Intrinsics"
           --java-options "-Xmx256m"
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Djava.net.useSystemProxies=true"
-          --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dsun.java2d.metal=true"
           --java-options "-Dcryptomator.appVersion=\"${VERSION_NUM}${VERSION_SUFFIX}\""
           --java-options "-Dcryptomator.adminConfigPath=\"/Library/Application Support/Cryptomator/config.properties\""
@@ -222,6 +222,7 @@ jobs:
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.updateMechanism=org.cryptomator.macos.update.DmgUpdateMechanism"
           --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NUM}\""
+          --java-options "-Dcryptomator.publishTimestamp=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
           --java-options "-XX:ErrorFile=/cryptomator/cryptomator_crash.log"
           --java-options "-Dcryptomator.hub.enableTrustOnFirstUse=true"
           --mac-package-identifier org.cryptomator
@@ -234,6 +235,10 @@ jobs:
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NUM}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NUM}|g" Cryptomator.app/Contents/Info.plist
           cp $RUNNER_TEMP/app.provisionprofile Cryptomator.app/Contents/embedded.provisionprofile
+      - name: Create license template for dmg
+        run: >
+          sed -e 's|###FONT_NAME###|Helvetica|g' -e 's|###FONT_SIZE###|24|g' -e 's|###WITH_WINFSP###|false|g' -e "s|###COPYRIGHT_END_YEAR###|$(date +%Y)|g"
+          dist/common/licenseTemplate.template.ftl > dist/mac/dmg/resources/licenseTemplate.ftl
       - name: Generate license for dmg
         run: >
           ./mvnw -B license:add-third-party
@@ -375,7 +380,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dmg-${{ matrix.output-suffix }}
           path: |
@@ -384,7 +389,7 @@ jobs:
           if-no-files-found: error
       - name: Publish dmg on GitHub Releases
         if: inputs.upload-to-draft
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           draft: true
           fail_on_unmatched_files: true
