@@ -13,6 +13,11 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later
 * Built-in updater on Windows. Installations managed by package managers can opt out by passing the installer property `INSTALLTYPE` (e.g. `INSTALLTYPE=winget`)
 
+### Changed
+* Updated dependencies:
+  - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
+  - `org.cryptomator:integrations-win` from 1.6.2 to 1.8.0
+
 ### Fixed
 * Fixed background threads piling up with every unlock and lock of a vault
 * Fixed vaults showing as unlocked while still locking when locking several vaults at once, for example on quit, and one of them failed to lock
