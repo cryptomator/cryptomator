@@ -27,6 +27,7 @@
   <?define ProgIdContentType= "application/vnd.cryptomator.encrypted" ?>
   <?define CloseApplicationTarget= "cryptomator.exe" ?>
   <?define LoopbackAlias= "cryptomator-vault" ?>
+  <?define UpdateHelperName= "$(var.JpAppName)-updater.exe" ?> <!-- must match the JVM property cryptomator.integrationsWin.updateHelperName and differ from CloseApplicationTarget -->
 
   <?include $(var.JpConfigDir)/overrides.wxi ?>
 
@@ -60,6 +61,13 @@
        IncludeMinimum="$(var.JpUpgradeVersionOnlyDetectDowngrade)" />
     </ns0:Upgrade>
 
+    <!-- Overwrite all files regardless of version (default is "omus"). Component GUIDs are stable across releases, so during an upgrade, costing (which runs before RemoveExistingProducts)
+         would skip every component whose installed keyfile has a higher version (e.g. JDK DLLs after a JDK downgrade), and the subsequent removal of the old product then deletes those files.
+         Caution: "a" also overwrites newer files with older ones. This is only safe as long as all files are private to INSTALLDIR; never ship shared files (e.g. into System32 or via merge modules) with this setting.
+         Set by a custom action instead of the Property table, because the WiX Burn bundle (the .exe installer) always passes REINSTALLMODE="muso" on the command line, which takes precedence over the Property table.
+         This also overrides a REINSTALLMODE passed to msiexec. -->
+    <ns0:SetProperty Id="REINSTALLMODE" Value="amus" Before="CostInitialize" Sequence="both" />
+
     <?ifndef JpAllowUpgrades ?>
     <ns0:CustomAction Id="JpDisallowUpgrade" Error="!(loc.DisallowUpgradeErrorMessage)" />
     <?endif?>
@@ -85,8 +93,8 @@
     </ns0:Property>
     <ns0:Launch Message="This application requires Windows 10 version 1803 (build 17134) or newer." Condition="Installed OR (WINDOWSBUILDNUMBER >= 17134)" />
 
-    <!-- Non-Opening ProgID -->
     <ns0:DirectoryRef Id="INSTALLDIR">
+        <!-- Non-Opening ProgID -->
         <ns0:Component Bitness="always64" Id="nonStartingProgID">
           <ns0:File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\$(var.IconFileEncryptedData)" Name="$(var.IconFileEncryptedData)"/>
           <ns0:ProgId Id="$(var.JpAppName).Encrypted.1" Description="$(var.JpAppName) Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
@@ -96,6 +104,14 @@
             <ns0:Extension Id="c9s" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
             <ns0:Extension Id="c9u" Advertise="no" ContentType="$(var.ProgIdContentType)"/>
           </ns0:ProgId>
+        </ns0:Component>
+        <!-- Install type marker for the in-app updater, see INSTALLTYPE property -->
+        <ns0:Component Bitness="always64" Id="InstallTypeMarker">
+          <ns0:RegistryValue Root="HKLM" Key="SOFTWARE\Skymatic GmbH\Cryptomator" Name="InstallType" Type="string" Value="[INSTALLTYPE]" KeyPath="yes" />
+        </ns0:Component>
+        <!-- Update helper for the in-app updater (a release of https://github.com/cryptomator/win-updater), installed next to the app executable. Signed together with the app image's binaries, but kept out of the app image itself. -->
+        <ns0:Component Bitness="always64" Id="UpdateHelper">
+          <ns0:File Id="UpdateHelperExe" Source="$(env.JP_UPDATE_HELPER)" Name="$(var.UpdateHelperName)" KeyPath="yes"/>
         </ns0:Component>
     </ns0:DirectoryRef>
 
@@ -122,6 +138,8 @@
       <ns0:ComponentRef Id="nonStartingProgID"/>
       <ns0:ComponentRef Id="AdminConfigDir"/>
       <ns0:ComponentRef Id="AdminConfigFile"/>
+      <ns0:ComponentRef Id="InstallTypeMarker"/>
+      <ns0:ComponentRef Id="UpdateHelper"/>
     </ns0:Feature>
 
     <ns0:CustomAction Id="JpSetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
@@ -146,6 +164,16 @@
 
     <!-- Property for controlling update check behavior (can be set via command line) -->
     <ns0:Property Id="DISABLEUPDATECHECK" Secure="yes" />
+
+    <!-- Install type, read by the in-app updater: Only "EXE" and "MSI" enable self-updates. Package managers opt out by passing e.g. INSTALLTYPE=winget via command line.
+         Resolution order: 1. INSTALLTYPE from command line, 2. value of a previous installation, unless it is EXE or MSI, 3. DEFAULTINSTALLTYPE (overwritten by the bundle) -->
+    <ns0:Property Id="INSTALLTYPE" Secure="yes" />
+    <ns0:Property Id="DEFAULTINSTALLTYPE" Value="MSI" Secure="yes" />
+    <ns0:Property Id="PREVIOUSINSTALLTYPE" Secure="yes">
+      <ns0:RegistrySearch Id="PreviousInstallTypeSearch" Root="HKLM" Key="SOFTWARE\Skymatic GmbH\Cryptomator" Name="InstallType" Type="raw" Bitness="always64" />
+    </ns0:Property>
+    <ns0:SetProperty Id="INSTALLTYPE" Action="KeepPreviousInstallType" Value="[PREVIOUSINSTALLTYPE]" After="AppSearch" Sequence="both" Condition="NOT INSTALLTYPE AND PREVIOUSINSTALLTYPE AND NOT (PREVIOUSINSTALLTYPE ~= &quot;EXE&quot; OR PREVIOUSINSTALLTYPE ~= &quot;MSI&quot;)" />
+    <ns0:SetProperty Id="INSTALLTYPE" Action="SetDefaultInstallType" Value="[DEFAULTINSTALLTYPE]" After="KeepPreviousInstallType" Sequence="both" Condition="NOT INSTALLTYPE" />
 
     <!-- Disable user config -->
     <ns0:SetProperty Id="DisableUserConfig" Value="&quot;[INSTALLDIR]disableUserConfig.bat&quot;" Sequence="execute" Before="DisableUserConfig" />

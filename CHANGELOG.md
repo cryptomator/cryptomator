@@ -15,6 +15,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 
 ### Added
 * Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
+* Built-in updater on Windows. Installations managed by package managers can opt out by passing the installer property `INSTALLTYPE` (e.g. `INSTALLTYPE=winget`)
 
 ### Changed
 * macOS: The tray menu is now a native menu bar item instead of being rendered via AWT ([#4393](https://github.com/cryptomator/cryptomator/pull/4393))
@@ -26,7 +27,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
   - `org.cryptomator:fuse-nio-adapter` from 7.0.0 to 7.0.1
   - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
   - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.1
-  - `org.cryptomator:integrations-win` from 1.6.2 to 1.7.0
+  - `org.cryptomator:integrations-win` from 1.6.2 to 1.8.0
   - `ch.qos.logback:logback-core` from 1.6.5 to 1.6.6
   - `ch.qos.logback:logback-classic` from 1.6.5 to 1.6.6
   - `com.nimbusds:nimbus-jose-jwt` from 10.5 to 10.10

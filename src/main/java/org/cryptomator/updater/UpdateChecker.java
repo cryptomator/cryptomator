@@ -61,6 +61,7 @@ public class UpdateChecker extends ScheduledService<UpdateInfo<?>> {
 		var currentVersion = env.getAppVersionWithBuildNumber();
 		var lastAttemptedBy = settings.lastUpdateAttemptedByVersion.get();
 		if (currentVersion != null && currentVersion.equals(lastAttemptedBy)) {
+			LOG.info("Previous update attempt by this version ({}) did not succeed. Using fallback update mechanism.", currentVersion);
 			this.updateMechanism = fallbackUpdateMechanism; // immediately use fallback mechanism
 		} else {
 			this.updateMechanism = UpdateMechanism.get().orElse(fallbackUpdateMechanism);
