@@ -42,6 +42,7 @@ public class FxApplicationStyle {
 		}
 		applyTheme(uiTheme);
 		settings.theme.addListener(this::appThemeChanged);
+		licenseHolder.validLicenseProperty().addListener((observable, oldValue, newValue) -> applyTheme(settings.theme.get()));
 	}
 
 	private void appThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, UiTheme oldValue, UiTheme newValue) {
@@ -96,6 +97,14 @@ public class FxApplicationStyle {
 	}
 
 	private void systemInterfaceThemeChanged(Theme osTheme) {
+		// A notification may already be queued when automatic mode is disabled.
+		if (settings.theme.get() != UiTheme.AUTOMATIC) {
+			return;
+		}
+		if (!licenseHolder.isValidLicense()) {
+			loadAndApplyLightTheme();
+			return;
+		}
 		switch (osTheme) {
 			case LIGHT -> loadAndApplyLightTheme();
 			case DARK -> loadAndApplyDarkTheme();
