@@ -75,6 +75,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
 	private final IntegerProperty shorteningThreshold;
+	private final IntegerProperty scryptCostParam;
 
 	/* FXML */
 	public ToggleGroup recoveryKeyChoice;
@@ -97,6 +98,7 @@ public class CreateNewVaultPasswordController implements FxController {
 									 VaultListManager vaultListManager, //
 									 ResourceBundle resourceBundle, //
 									 @Named("shorteningThreshold") IntegerProperty shorteningThreshold, //
+									 @Named("scryptCostParam") IntegerProperty scryptCostParam, //
 									 ReadmeGenerator readmeGenerator, //
 									 SecureRandom csprng, //
 									 MasterkeyFileAccess masterkeyFileAccess) {
@@ -120,6 +122,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.readyToCreateVault = new SimpleBooleanProperty();
 		this.createVaultButtonState = Bindings.when(processing).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.shorteningThreshold = shorteningThreshold;
+		this.scryptCostParam = scryptCostParam;
 	}
 
 	@FXML
@@ -188,7 +191,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		// 1. write masterkey:
 		Path masterkeyFilePath = path.resolve(MASTERKEY_FILENAME);
 		try (Masterkey masterkey = Masterkey.generate(csprng)) {
-			masterkeyFileAccess.persist(masterkey, masterkeyFilePath, newPasswordSceneController.passwordField.getCharacters());
+			masterkeyFileAccess.persistWithScryptCost(masterkey, masterkeyFilePath, newPasswordSceneController.passwordField.getCharacters(), scryptCostParam.get());
 
 			// 2. initialize vault:
 			try {
