@@ -22,6 +22,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Touch ID: Fall back to the device password when biometrics are unavailable
 * Improved write performance ([cryptomator/cryptofs#370](https://github.com/cryptomator/cryptofs/pull/370))
 * Updated to JDK 27 ([#4379](https://github.com/cryptomator/cryptomator/pull/4379))
+* Windows: Updated bundled WinFsp to version 2.2
 * Updated dependencies:
   - `org.cryptomator:cryptofs` from 2.11.1 to 2.12.0
   - `org.cryptomator:fuse-nio-adapter` from 7.0.0 to 7.0.1

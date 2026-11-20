@@ -302,8 +302,8 @@ Invoke-CommandWithExitCheck -Command `
 	"-Dlicense.failOnMissing=true")
 
 # download Winfsp
-$winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.1/winfsp-2.1.25156.msi'
-$winfspMsiHash = '073A70E00F77423E34BED98B86E600DEF93393BA5822204FAC57A29324DB9F7A'
+$winfspMsiUrl= 'https://github.com/winfsp/winfsp/releases/download/v2.2/winfsp-2.2.26323.msi'
+$winfspMsiHash = '36CE01F9EEDBBE6842B7FB4BEDC79D7D4F71983E8ACEB6877B46A07B331C7E19'
 Write-Host "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 $computedHash = $(Get-FileHash -Path '.\bundle\resources\winfsp.msi' -Algorithm SHA256).Hash
