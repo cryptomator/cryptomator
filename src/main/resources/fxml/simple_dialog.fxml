@@ -15,7 +15,6 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.dialogs.SimpleDialogController"
 	  minWidth="400"
-	  maxWidth="400"
 	  minHeight="145"
 	  spacing="12"
 	  accessibleRole="DIALOG">
