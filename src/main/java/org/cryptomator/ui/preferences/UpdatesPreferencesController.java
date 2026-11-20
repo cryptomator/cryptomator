@@ -121,7 +121,7 @@ public class UpdatesPreferencesController implements FxController {
 	public void startWork() {
 		if (worker.get().equals(updateChecker)) {
 			updateChecker.checkForUpdatesNow();
-		} else if (!unlockedVaults.isEmpty()) {
+		} else if (isProhibitUpdateWhileUnlocked()) {
 			LOG.warn("Cannot start update due to unlocked vaults.");
 		} else if (worker.get().equals(updateService)) {
 			LOG.info("User started update to version {}", updateChecker.getUpdate().version());
