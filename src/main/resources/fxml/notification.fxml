@@ -69,7 +69,7 @@
 				<Label text="${controller.description}" styleClass="label" wrapText="true" maxWidth="370"/>
 			</ScrollPane>
 			<Region VBox.vgrow="ALWAYS"/>
-			<Button text="${controller.actionText}" onAction="#processSelectedEvent"
+			<Button fx:id="actionButton" text="${controller.actionText}" onAction="#processSelectedEvent"
 					visible="${!controller.actionText.empty}" managed="${!controller.actionText.empty}"/>
 		</VBox>
 	</center>

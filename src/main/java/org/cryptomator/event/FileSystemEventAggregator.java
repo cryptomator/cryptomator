@@ -7,6 +7,7 @@ import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
 import org.cryptomator.cryptofs.event.FileIsInUseEvent;
+import org.cryptomator.cryptofs.event.FileWriteConflictEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
 
 import javax.inject.Inject;
@@ -103,6 +104,7 @@ public class FileSystemEventAggregator {
 			case BrokenDirFileEvent(_, Path ciphertext) -> ciphertext;
 			case BrokenFileNodeEvent(_, _, Path ciphertext) -> ciphertext;
 			case FileIsInUseEvent(_, _, Path ciphertext, _, _, _) -> ciphertext;
+			case FileWriteConflictEvent(_, _, Path ciphertext) -> ciphertext;
 		};
 		return new FSEventBucket(v, p, event.getClass());
 	}

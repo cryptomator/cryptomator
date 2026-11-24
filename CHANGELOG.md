@@ -16,6 +16,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 ### Added
 * Added FSKit as a volume type on Apple silicon Macs running macOS 27 or later ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
 * Built-in updater on Windows. Installations managed by package managers can opt out by passing the installer property `INSTALLTYPE` (e.g. `INSTALLTYPE=winget`)
+* Warning when changes to an open file could not be saved because the file was changed elsewhere, for example through sync or on another device. It appears as a notification and in the event view ([cryptomator/cryptofs#385](https://github.com/cryptomator/cryptofs/pull/385))
 
 ### Changed
 * macOS: The tray menu is now a native menu bar item instead of being rendered via AWT ([#4393](https://github.com/cryptomator/cryptomator/pull/4393))
@@ -24,7 +25,7 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Updated to JDK 27 ([#4379](https://github.com/cryptomator/cryptomator/pull/4379))
 * Windows: Updated bundled WinFsp to version 2.2
 * Updated dependencies:
-  - `org.cryptomator:cryptofs` from 2.11.1 to 2.12.0
+  - `org.cryptomator:cryptofs` from 2.11.1 to 2.13.0
   - `org.cryptomator:fuse-nio-adapter` from 7.0.0 to 7.0.1
   - `org.cryptomator:integrations-api` from 1.10.0 to 1.10.1
   - `org.cryptomator:integrations-mac` from 1.5.1 to 1.7.1
@@ -43,6 +44,9 @@ Changes to prior versions can be found on the [Github release page](https://gith
 * Fixed a vault showing as locked while unlocked when the tray menu was opened during its unlock ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
 * Fixed an error window ("Vault not locked." or "Vault not unlocked.") appearing when a vault was unlocked or locked twice in quick succession, for example from a stale tray menu ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
 * Fixed a custom mount point not being restored when closing the vault's volume failed during lock ([#4339](https://github.com/cryptomator/cryptomator/pull/4339))
+* Fixed a notification showing the text and button of an earlier, already dismissed notification
+* Fixed the "file in use" notification still showing the file name and the other user after the vault was locked
+* Fixed the event view naming files with long names or symbolic links "contents.c9r" or "symlink.c9r" when they failed to decrypt
 * Fixed the "Visit Download Page" button in the update preferences doing nothing while a vault was unlocked ([#4400](https://github.com/cryptomator/cryptomator/issues/4400))
 * macOS: Fixed clicking a vault entry in the tray menu closing the menu instead of opening its submenu ([#1977](https://github.com/cryptomator/cryptomator/issues/1977))
 * Windows: Fixed possible app crash when locking a vault mounted with WinFsp ([cryptomator/jfuse#176](https://github.com/cryptomator/jfuse/issues/176))

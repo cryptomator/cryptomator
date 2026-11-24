@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.event.FileIsInUseEvent;
+import org.cryptomator.cryptofs.event.FileWriteConflictEvent;
 import org.cryptomator.cryptofs.event.FilesystemEvent;
 
 import javax.inject.Inject;
@@ -50,6 +51,7 @@ public class NotificationManager {
 	public boolean offer(Vault v, FilesystemEvent e) {
 		return switch (e) {
 			case FileIsInUseEvent fiiue -> addEvent(v, fiiue.ciphertextPath(), fiiue);
+			case FileWriteConflictEvent fwce -> addEvent(v, fwce.ciphertextPath(), fwce);
 			default -> false;
 		};
 	}

@@ -10,6 +10,8 @@ import org.cryptomator.cryptofs.event.ConflictResolutionFailedEvent;
 import org.cryptomator.cryptofs.event.ConflictResolvedEvent;
 import org.cryptomator.cryptofs.event.DecryptionFailedEvent;
 import org.cryptomator.cryptofs.event.FileIsInUseEvent;
+import org.cryptomator.cryptofs.event.FileWriteConflictEvent;
+import org.cryptomator.event.EventFileName;
 import org.cryptomator.event.FSEventBucket;
 import org.cryptomator.event.FSEventBucketContent;
 import org.cryptomator.event.FileSystemEventAggregator;
@@ -93,9 +95,9 @@ public class EventListCellController implements FxController {
 		this.vaultUnlocked = ObservableUtil.mapWithDefault(eventEntry.flatMap(e -> e.getKey().vault().unlockedProperty()), Function.identity(), false);
 		this.readableTime = ObservableUtil.mapWithDefault(eventEntry, e -> LOCAL_TIME_FORMATTER.format(e.getValue().mostRecentEvent().getTimestamp()), "");
 		this.readableDate = ObservableUtil.mapWithDefault(eventEntry, e -> LOCAL_DATE_FORMATTER.format(e.getValue().mostRecentEvent().getTimestamp()), "");
-		this.message = Bindings.createStringBinding(this::selectMessage, vaultUnlocked, eventMessage);
+		this.message = Bindings.createStringBinding(this::selectMessage, vaultUnlocked, eventMessage, eventEntry);
 		this.description = Bindings.createStringBinding(this::selectDescription, vaultUnlocked, eventDescription);
-		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon);
+		this.icon = Bindings.createObjectBinding(this::selectIcon, vaultUnlocked, eventIcon, eventEntry);
 		this.actionsButtonVisible = new SimpleBooleanProperty();
 		this.eventTooltip = new Tooltip();
 		eventTooltip.setShowDelay(Duration.millis(500.0));
@@ -127,6 +129,7 @@ public class EventListCellController implements FxController {
 			case BrokenDirFileEvent fse -> this.adjustToBrokenDirFileEvent(fse);
 			case BrokenFileNodeEvent fse -> this.adjustToBrokenFileNodeEvent(fse);
 			case FileIsInUseEvent fse -> this.adjustToFileInUseEvent(fse);
+			case FileWriteConflictEvent fse -> this.adjustToFileWriteConflictEvent(fse);
 		}
 	}
 
@@ -143,6 +146,16 @@ public class EventListCellController implements FxController {
 		var device = userAndDevice.length == 1 ? userAndDevice[0] : userAndDevice[1];
 		addLocalizedAction("eventView.entry.inUse.copyUserAndDevice", () -> copyToClipboard(user + ", " + device));
 		addLocalizedAction("eventView.entry.inUse.ignoreLock", fiiue.ignoreMethod());
+	}
+
+	private void adjustToFileWriteConflictEvent(FileWriteConflictEvent fwce) {
+		eventIcon.setValue(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
+		eventMessage.setValue(resourceBundle.getString("eventView.entry.writeConflict.message"));
+		eventDescription.setValue(EventFileName.of(fwce));
+		if (fwce.cleartextPath() != null) {
+			addLocalizedAction("eventView.entry.writeConflict.showDecrypted", () -> reveal(revealService, convertVaultPathToSystemPath(fwce.cleartextPath())));
+		}
+		addLocalizedAction("eventView.entry.writeConflict.showEncrypted", () -> reveal(revealService, fwce.ciphertextPath()));
 	}
 
 
@@ -172,7 +185,7 @@ public class EventListCellController implements FxController {
 	private void adjustToDecryptionFailedEvent(DecryptionFailedEvent dfe) {
 		eventIcon.setValue(FontAwesome5Icon.BAN);
 		eventMessage.setValue(resourceBundle.getString("eventView.entry.decryptionFailed.message"));
-		eventDescription.setValue(dfe.ciphertextPath().getFileName().toString());
+		eventDescription.setValue(EventFileName.ofCiphertext(dfe.ciphertextPath()));
 		addLocalizedAction("eventView.entry.decryptionFailed.showEncrypted", () -> reveal(revealService, dfe.ciphertextPath()));
 	}
 
@@ -197,7 +210,7 @@ public class EventListCellController implements FxController {
 
 
 	private FontAwesome5Icon selectIcon() {
-		if (vaultUnlocked.getValue()) {
+		if (vaultUnlocked.getValue() || isWarningKeptWhileLocked()) {
 			return eventIcon.getValue();
 		} else {
 			return FontAwesome5Icon.LOCK;
@@ -205,7 +218,7 @@ public class EventListCellController implements FxController {
 	}
 
 	private String selectMessage() {
-		if (vaultUnlocked.getValue()) {
+		if (vaultUnlocked.getValue() || isWarningKeptWhileLocked()) {
 			return eventMessage.getValue();
 		} else {
 			return "***********";
@@ -221,6 +234,11 @@ public class EventListCellController implements FxController {
 		} else {
 			return "";
 		}
+	}
+
+	private boolean isWarningKeptWhileLocked() {
+		var e = eventEntry.getValue();
+		return e != null && e.getValue().mostRecentEvent() instanceof FileWriteConflictEvent;
 	}
 
 
